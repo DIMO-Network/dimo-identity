@@ -1,0 +1,62 @@
+{
+  "name": "dimo-web3-identity",
+  "version": "1.0.0",
+  "description": "Dimo web3 identity",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx hardhat clean && npx hardhat compile",
+    "test": "npx hardhat test",
+    "lint": "npm run lint:ts && npm run lint:sol",
+    "lint:ts": "npx eslint . --ext .ts",
+    "lint:ts:fix": "npx eslint . --fix --ext .ts",
+    "lint:sol": "npx solhint 'contracts/**/*.sol'",
+    "lint:sol:fix": "npx solhint 'contracts/**/*.sol' --fix",
+    "coverage": "npm run build && npx hardhat coverage",
+    "gas-report": "REPORT_GAS=true npx hardhat test",
+    "contract-sizer": "CONTRACT_SIZER=true npm run build",
+    "prepare": "npx husky install"
+  },
+  "keywords": [
+    "DIMO",
+    "solidity",
+    "web3",
+    "DID"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@typechain/ethers-v5": "^7.2.0",
+    "@typechain/hardhat": "^2.3.1",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^12.20.47",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "chai": "^4.3.6",
+    "dotenv": "^10.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.4.1",
+    "eslint-plugin-promise": "^5.2.0",
+    "ethereum-waffle": "^3.4.4",
+    "ethers": "^5.6.2",
+    "hardhat": "^2.9.2",
+    "hardhat-gas-reporter": "^1.0.8",
+    "prettier": "^2.6.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.13",
+    "solhint": "^1.0.10",
+    "solidity-coverage": "^0.7.20",
+    "ts-node": "^10.7.0",
+    "typechain": "^5.2.0",
+    "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.5.0"
+  }
+}

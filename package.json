@@ -13,8 +13,7 @@
     "lint:sol:fix": "npx solhint 'contracts/**/*.sol' --fix",
     "coverage": "npm run build && npx hardhat coverage",
     "gas-report": "REPORT_GAS=true npx hardhat test",
-    "contract-sizer": "CONTRACT_SIZER=true npm run build",
-    "prepare": "npx husky install"
+    "contract-sizer": "CONTRACT_SIZER=true npm run build"
   },
   "keywords": [
     "DIMO",

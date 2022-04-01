@@ -15,6 +15,11 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 12
   },
+  settings: {
+    node: {
+      tryExtensions: ['.js', '.json', '.node', '.ts', '.d.ts']
+    }
+  },
   rules: {
     'node/no-unsupported-features/es-syntax': [
       'error',

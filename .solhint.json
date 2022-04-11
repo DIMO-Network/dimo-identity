@@ -10,6 +10,9 @@
       {
         "ignoreConstructors": true
       }
+    ],
+    "separate-by-one-line-in-contract": [
+      "warn"
     ]
   }
 }

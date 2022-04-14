@@ -1,6 +1,6 @@
 import { ethers } from 'hardhat';
 
-export default function nodeHash(inputName: string) {
+export function nodeHash(inputName: string) {
   let node = '00'.repeat(32);
 
   if (inputName) {

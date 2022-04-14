@@ -2,7 +2,8 @@ import chai, { expect } from 'chai';
 import { ethers, waffle } from 'hardhat';
 
 import { DIMORegistry } from '../typechain';
-import nodeHash from './utils/nodeHash';
+import { nodeHash } from './utils';
+import { Controller } from './types';
 
 const { solidity } = waffle;
 const provider = waffle.provider;
@@ -13,24 +14,26 @@ describe('NodeRegistry', () => {
   let dimoRegistry: DIMORegistry;
 
   const [admin, user1, user2, controller1] = provider.getWallets();
-  const rootLabel = 'dimo';
-  const mockSubrootLabel = 'mockSubroot';
-  const mockNode = ethers.utils.formatBytes32String(
-    'mockNode.mockSubroot.dimo'
-  );
-  const mockLabel = 'mockLabel';
+  const mockRootLabel = 'mockRootLabel';
+  const mockRootHash = nodeHash(mockRootLabel);
+  const mockNodeLabel = 'mockNodeLabel';
+  const mockNodeHash = nodeHash(mockNodeLabel);
   const newAttribute = ethers.utils.formatBytes32String('new attribute');
 
   beforeEach(async () => {
     const DimoRegistryFactory = await ethers.getContractFactory('DIMORegistry');
     dimoRegistry = await DimoRegistryFactory.connect(admin).deploy();
     await dimoRegistry.deployed();
-
-    // TODO add list of attributes
   });
 
-  describe.skip('constructor', () => {
-    it('Should', async () => {});
+  describe('constructor', () => {
+    it('Should set owner as controller', async () => {
+      const controllerInfo: Controller = await dimoRegistry.controllers(
+        admin.address
+      );
+      // eslint-disable-next-line no-unused-expressions
+      expect(controllerInfo.isController).to.be.true;
+    });
   });
 
   describe('addAttribute', () => {
@@ -49,73 +52,68 @@ describe('NodeRegistry', () => {
     });
   });
 
-  describe('mintSubroot', () => {
+  describe('mintRootByOwner', () => {
     it('Should revert if caller is not a controller', async () => {
       await expect(
-        dimoRegistry.connect(user1).mintSubroot(mockNode, user1.address)
-      ).to.be.revertedWith('Only controller');
+        dimoRegistry.connect(user1).mintRootByOwner(mockNodeHash, user1.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
   });
 
-  describe('mintVehicle', () => {
-    it('Should revert if the parent node is the ROOT', async () => {
-      const rootNode = ethers.utils.namehash(rootLabel);
+  describe('mintRoot', () => {
+    it('Should revert if caller is not a controller', async () => {
+      await expect(
+        dimoRegistry.connect(user1).mintRoot(mockNodeHash)
+      ).to.be.revertedWith('Invalid request');
+    });
+    it('Should revert if controller has already minted a root', async () => {
+      await dimoRegistry.connect(admin).setController(controller1.address);
+      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
 
       await expect(
-        dimoRegistry.connect(user1).mintVehicle(rootNode, mockLabel)
-      ).to.be.revertedWith('Invalid node');
+        dimoRegistry.connect(controller1).mintRoot(mockRootLabel)
+      ).to.be.revertedWith('Invalid request');
     });
+  });
+
+  describe('mintDevice', () => {
     it('Should revert if the parent node does not exist', async () => {
       await expect(
-        dimoRegistry.connect(user1).mintVehicle(mockNode, mockLabel)
+        dimoRegistry.connect(user1).mintDevice(mockRootHash, mockNodeLabel)
       ).to.be.revertedWith('Invalid node');
     });
-    it('Should revert if the parent node is not a subroot', async () => {
-      const subrootNodeHash = nodeHash(`${mockSubrootLabel}.${rootLabel}`);
-      const wrongNodeHash = nodeHash(
-        `${mockLabel}.${mockSubrootLabel}.${rootLabel}`
-      );
+    it('Should revert if the parent node is not a root', async () => {
+      const wrongNodeHash = nodeHash(`${mockNodeLabel}.${mockRootLabel}`);
 
       await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry
-        .connect(admin)
-        .mintSubroot(mockSubrootLabel, controller1.address);
-      await dimoRegistry.connect(user1).mintVehicle(subrootNodeHash, mockLabel);
+      await dimoRegistry.connect(admin).mintRoot(mockRootLabel);
+      await dimoRegistry.connect(user1).mintDevice(mockRootHash, mockNodeLabel);
 
       await expect(
-        dimoRegistry.connect(user1).mintVehicle(wrongNodeHash, mockLabel)
+        dimoRegistry.connect(user1).mintDevice(wrongNodeHash, mockNodeLabel)
       ).to.be.revertedWith('Invalid node');
     });
   });
 
   describe('setNode', () => {
     it('Should revert if caller is not the owner of the parent node', async () => {
-      const subrootNodeHash = nodeHash(`${mockSubrootLabel}.${rootLabel}`);
-      const wrongNodeHash = nodeHash(
-        `${mockLabel}.${mockSubrootLabel}.${rootLabel}`
-      );
+      const wrongNodeHash = nodeHash(`${mockNodeLabel}.${mockRootLabel}`);
 
       await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry
-        .connect(admin)
-        .mintSubroot(mockSubrootLabel, controller1.address);
-      await dimoRegistry.connect(user1).mintVehicle(subrootNodeHash, mockLabel);
+      await dimoRegistry.connect(admin).mintRoot(mockRootLabel);
+      await dimoRegistry.connect(user1).mintDevice(mockRootHash, mockNodeLabel);
 
       await expect(
-        dimoRegistry.connect(user2).setNode(wrongNodeHash, mockLabel)
-      ).to.be.revertedWith('Only node owner');
+        dimoRegistry.connect(user2).setNode(wrongNodeHash, mockNodeLabel)
+      ).to.be.revertedWith('Invalid request');
     });
-    it('Should revert if the parent node is a subroot', async () => {
-      const subrootNodeHash = nodeHash(`${mockSubrootLabel}.${rootLabel}`);
-
+    it('Should revert if the parent node is a root', async () => {
       await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry
-        .connect(admin)
-        .mintSubroot(mockSubrootLabel, controller1.address);
+      await dimoRegistry.connect(admin).mintRoot(mockRootLabel);
 
       await expect(
-        dimoRegistry.connect(controller1).setNode(subrootNodeHash, mockLabel)
-      ).to.be.revertedWith('Parent cannot be subroot');
+        dimoRegistry.connect(controller1).setNode(mockRootHash, mockNodeLabel)
+      ).to.be.revertedWith('Invalid request');
     });
   });
 });

@@ -13,8 +13,7 @@
     "lint:sol:fix": "npx solhint 'contracts/**/*.sol' --fix",
     "coverage": "npm run build && npx hardhat coverage",
     "gas-report": "REPORT_GAS=true npx hardhat test",
-    "contract-sizer": "CONTRACT_SIZER=true npm run build",
-    "prepare": "npx husky install"
+    "contract-sizer": "CONTRACT_SIZER=true npm run build"
   },
   "keywords": [
     "DIMO",
@@ -50,7 +49,7 @@
     "hardhat-gas-reporter": "^1.0.8",
     "prettier": "^2.6.1",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
-    "solhint": "^1.0.10",
+    "solhint": "^1.5.1",
     "solidity-coverage": "^0.7.20",
     "ts-node": "^10.7.0",
     "typechain": "^5.2.0",

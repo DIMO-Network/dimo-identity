@@ -14,6 +14,7 @@ describe.only('DIMORegistry', () => {
   const [admin, user] = provider.getWallets();
   const mockNode = ethers.utils.formatBytes32String('node');
   const mockLabel = ethers.utils.formatBytes32String('label');
+  const mockValue = 'Value';
 
   beforeEach(async () => {
     const DIMORegistryFactory = await ethers.getContractFactory('DIMORegistry');
@@ -23,10 +24,14 @@ describe.only('DIMORegistry', () => {
 
   describe('newRecord', () => {
     it('Should revert if record already exists', async () => {
-      await dimoRegistry.connect(user).newRecord(mockNode, user.address);
+      await dimoRegistry
+        .connect(user)
+        .newRecord(mockNode, user.address, mockNode, mockValue);
 
       await expect(
-        dimoRegistry.connect(user).newRecord(mockNode, user.address)
+        dimoRegistry
+          .connect(user)
+          .newRecord(mockNode, user.address, mockNode, mockValue)
       ).to.be.revertedWith('Node already exists');
     });
   });
@@ -34,7 +39,9 @@ describe.only('DIMORegistry', () => {
   describe('setRecord', () => {
     it('Should revert if caller is not an authorized user', async () => {
       await expect(
-        dimoRegistry.connect(user).setRecord(mockNode, user.address)
+        dimoRegistry
+          .connect(user)
+          .setRecord(mockNode, user.address, mockNode, mockValue)
       ).to.be.revertedWith('Not authorized');
     });
   });

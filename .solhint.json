@@ -13,6 +13,9 @@
     ],
     "separate-by-one-line-in-contract": [
       "warn"
+    ],
+    "two-lines-top-level-separator": [
+      "warn"
     ]
   }
 }

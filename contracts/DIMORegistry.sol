@@ -129,7 +129,7 @@ contract DIMORegistry is Ownable, ERC721 {
 
         for (uint256 i = 0; i < attributes.length; i++) {
             require(
-                !_whitelistedAttributes.contains(attributes[i]),
+                _whitelistedAttributes.contains(attributes[i]),
                 "Not whitelisted"
             );
             records[node].info[attributes[i]] = infos[i];

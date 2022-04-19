@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-
 contract DIMORegistry is Ownable, ERC721 {
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -59,7 +58,7 @@ contract DIMORegistry is Ownable, ERC721 {
         external
         onlyOwner
     {
-        require(!controllers[_owner].rootMinted, "One root per owner");
+        require(!controllers[_owner].rootMinted, "Invalid request");
 
         _mintRoot(label, _owner);
     }
@@ -111,6 +110,30 @@ contract DIMORegistry is Ownable, ERC721 {
         bytes32 node = _verifyNewNode(parentNode, label);
 
         records[node].owner = msg.sender;
+    }
+
+    /// @notice Add infos to node
+    /// @dev Only node owner can call this function
+    /// @dev attributes and infos arrays length must match
+    /// @dev attributes must be whitelisted
+    /// @param node Node where the info will be added
+    /// @param attributes List of attributes to be added
+    /// @param infos List of infos matching the attributes param
+    function setInfo(
+        bytes32 node,
+        bytes32[] calldata attributes,
+        string[] calldata infos
+    ) external {
+        require(records[node].owner == msg.sender, "Only node owner");
+        require(attributes.length == infos.length, "Same length");
+
+        for (uint256 i = 0; i < attributes.length; i++) {
+            require(
+                _whitelistedAttributes.contains(attributes[i]),
+                "Not whitelisted"
+            );
+            records[node].info[attributes[i]] = infos[i];
+        }
     }
 
     //***** PRIVATE FUNCTIONS *****//

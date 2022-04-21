@@ -3,18 +3,15 @@ pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract DIMORegistry is Ownable, ERC721 {
-    using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    Counters.Counter private _tokenIds; // Token id tracker
     EnumerableSet.Bytes32Set private _whitelistedAttributes; // Allowed node attributes
 
     struct Record {
-        address owner;
+        uint256 originNode;
         bool root;
         mapping(bytes32 => string) info;
     }
@@ -24,7 +21,7 @@ contract DIMORegistry is Ownable, ERC721 {
         bool rootMinted;
     }
 
-    mapping(bytes32 => Record) public records; // [Node hash] => Node info
+    mapping(uint256 => Record) public records; // [Node id] => Node info
     mapping(address => Controller) public controllers; // [Controller address] => is controller, has minted root
 
     constructor() ERC721("DIMO Node", "DN") {
@@ -82,17 +79,14 @@ contract DIMORegistry is Ownable, ERC721 {
     /// @dev Parent node must exist and must be a root
     /// @param parentNode The corresponding root
     /// @param label The label specifying the vehicle
-    function mintDevice(bytes32 parentNode, string calldata label) external {
-        require(
-            records[parentNode].owner != address(0) && records[parentNode].root,
-            "Invalid node"
-        );
+    function mintDevice(uint256 parentNode, string calldata label) external {
+        require(records[parentNode].root, "Invalid node");
 
-        bytes32 node = _verifyNewNode(parentNode, label);
+        uint256 node = _verifyNewNode(parentNode, label);
 
-        records[node].owner = msg.sender;
+        records[node].originNode = node;
 
-        _internalMint(msg.sender);
+        _safeMint(msg.sender, uint256(node));
     }
 
     /// @notice Sets a node under a vehicle or other node
@@ -100,16 +94,16 @@ contract DIMORegistry is Ownable, ERC721 {
     /// @dev Cannot be set under roots
     /// @param parentNode The corresponding vehicle or node
     /// @param label The label specifying the node
-    function setNode(bytes32 parentNode, string calldata label) external {
+    function setNode(uint256 parentNode, string calldata label) external {
         require(
-            records[parentNode].owner == msg.sender &&
+            ownerOf(records[parentNode].originNode) == msg.sender &&
                 !records[parentNode].root,
-            "Invalid request"
+            "Invalid node"
         );
 
-        bytes32 node = _verifyNewNode(parentNode, label);
+        uint256 node = _verifyNewNode(parentNode, label);
 
-        records[node].owner = msg.sender;
+        records[node].originNode = records[parentNode].originNode;
     }
 
     /// @notice Add infos to node
@@ -120,11 +114,14 @@ contract DIMORegistry is Ownable, ERC721 {
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     function setInfo(
-        bytes32 node,
+        uint256 node,
         bytes32[] calldata attributes,
         string[] calldata infos
     ) external {
-        require(records[node].owner == msg.sender, "Only node owner");
+        require(
+            ownerOf(records[node].originNode) == msg.sender,
+            "Only node owner"
+        );
         require(attributes.length == infos.length, "Same length");
 
         for (uint256 i = 0; i < attributes.length; i++) {
@@ -136,43 +133,55 @@ contract DIMORegistry is Ownable, ERC721 {
         }
     }
 
+    //***** INTERNAL FUNCTIONS *****//
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override {
+        if (records[tokenId].root) {
+            require(
+                controllers[to].isController && !controllers[to].rootMinted,
+                "Invalid transfer"
+            );
+            controllers[from].rootMinted = false;
+            controllers[to].rootMinted = true;
+        }
+    }
+
     //***** PRIVATE FUNCTIONS *****//
 
     /// @dev Internal function to mint a root
     /// @param label The label specifying the root
     /// @param _owner The address of the new owner
     function _mintRoot(string memory label, address _owner) private {
-        bytes32 root = _verifyNewNode(0x0, label);
+        uint256 root = _verifyNewNode(0, label);
 
-        records[root].owner = _owner;
+        _safeMint(_owner, root);
+
         records[root].root = true;
+        records[root].originNode = root;
         controllers[_owner].rootMinted = true;
-
-        _internalMint(_owner);
     }
 
     /// @dev Calculates and verifies if the new node already exists
     /// @param parentNode The corresponding parent node
     /// @param label The label specifying the node
     /// @return The new hashed node
-    function _verifyNewNode(bytes32 parentNode, string memory label)
+    function _verifyNewNode(uint256 parentNode, string memory label)
         private
         view
-        returns (bytes32)
+        returns (uint256)
     {
-        bytes32 newNode = keccak256(
-            abi.encodePacked(parentNode, keccak256(abi.encodePacked(label)))
+        uint256 newNode = uint256(
+            keccak256(
+                abi.encodePacked(parentNode, keccak256(abi.encodePacked(label)))
+            )
         );
 
-        require(records[newNode].owner == address(0), "Node already exists");
+        require(records[newNode].originNode == 0, "Node already exists");
 
         return newNode;
-    }
-
-    /// @dev Mints a token and increments token ID counter
-    /// @param _owner The owner of the minted token
-    function _internalMint(address _owner) private {
-        _safeMint(_owner, _tokenIds.current());
-        _tokenIds.increment();
     }
 }

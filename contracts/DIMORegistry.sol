@@ -56,6 +56,7 @@ contract DIMORegistry is Ownable, ERC721 {
         onlyOwner
     {
         require(!controllers[_owner].rootMinted, "Invalid request");
+        controllers[_owner].isController = true;
 
         _mintRoot(label, _owner);
     }

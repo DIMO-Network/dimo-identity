@@ -3,7 +3,7 @@ import { ethers, waffle } from 'hardhat';
 
 import { DIMORegistry } from '../typechain';
 import { nodeHash } from './utils';
-import { Controller } from './types';
+import { Controller, Record } from './types';
 
 const { solidity } = waffle;
 const provider = waffle.provider;
@@ -20,8 +20,12 @@ describe('DIMORegistry', () => {
   const mockNodeLabel = 'mockNodeLabel';
   const mockRootHash = nodeHash(mockRootLabel);
   const mockDeviceHash = nodeHash(`${mockDeviceLabel}.${mockRootLabel}`);
+  const mockNodeHash = nodeHash(
+    `${mockNodeLabel}.${mockDeviceLabel}.${mockRootLabel}`
+  );
   const mockRootId = ethers.BigNumber.from(mockRootHash);
   const mockDeviceId = ethers.BigNumber.from(mockDeviceHash);
+  const mockNodeId = ethers.BigNumber.from(mockNodeHash);
 
   const attribute1 = ethers.utils.formatBytes32String('attribute1');
   const attribute2 = ethers.utils.formatBytes32String('attribute2');
@@ -89,6 +93,51 @@ describe('DIMORegistry', () => {
           .mintRootByOwner(mockRootLabel, controller2.address)
       ).to.be.revertedWith('Node already exists');
     });
+    it('Should correctly set owner as controller', async () => {
+      const controllerInfoBefore: Controller = await dimoRegistry.controllers(
+        controller1.address
+      );
+      // eslint-disable-next-line no-unused-expressions
+      expect(controllerInfoBefore.isController).to.be.false;
+
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
+
+      const controllerInfoAfter: Controller = await dimoRegistry.controllers(
+        controller1.address
+      );
+      // eslint-disable-next-line no-unused-expressions
+      expect(controllerInfoAfter.isController).to.be.true;
+    });
+    it('Should correctly set node as root', async () => {
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
+
+      const recordInfo: Record = await dimoRegistry.records(mockRootId);
+      // eslint-disable-next-line no-unused-expressions
+      expect(recordInfo.root).to.be.true;
+    });
+    it('Should correctly set originNode', async () => {
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
+
+      const recordInfo: Record = await dimoRegistry.records(mockRootId);
+      expect(recordInfo.originNode).to.be.equal(mockRootId);
+    });
+    it('Should correctly set rootMinted', async () => {
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
+
+      const controllerInfo: Controller = await dimoRegistry.controllers(
+        controller1.address
+      );
+      // eslint-disable-next-line no-unused-expressions
+      expect(controllerInfo.rootMinted).to.be.true;
+    });
   });
 
   describe('mintRoot', () => {
@@ -114,6 +163,32 @@ describe('DIMORegistry', () => {
         dimoRegistry.connect(controller2).mintRoot(mockRootLabel)
       ).to.be.revertedWith('Node already exists');
     });
+    it.only('Should correctly set node as root', async () => {
+      await dimoRegistry.connect(admin).setController(controller1.address);
+      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+
+      const recordInfo = await dimoRegistry.records(mockRootId);
+      console.log(recordInfo);
+      // eslint-disable-next-line no-unused-expressions
+      expect(recordInfo.root).to.be.true;
+    });
+    it('Should correctly set originNode', async () => {
+      await dimoRegistry.connect(admin).setController(controller1.address);
+      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+
+      const recordInfo: Record = await dimoRegistry.records(mockRootId);
+      expect(recordInfo.originNode).to.be.equal(mockRootId);
+    });
+    it('Should correctly set rootMinted', async () => {
+      await dimoRegistry.connect(admin).setController(controller1.address);
+      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+
+      const controllerInfo: Controller = await dimoRegistry.controllers(
+        controller1.address
+      );
+      // eslint-disable-next-line no-unused-expressions
+      expect(controllerInfo.rootMinted).to.be.true;
+    });
   });
 
   describe('mintDevice', () => {
@@ -123,8 +198,9 @@ describe('DIMORegistry', () => {
       ).to.be.revertedWith('Invalid node');
     });
     it('Should revert if the parent node is not a root', async () => {
-      await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry.connect(user1).mintDevice(mockRootId, mockDeviceLabel);
 
       await expect(
@@ -132,13 +208,23 @@ describe('DIMORegistry', () => {
       ).to.be.revertedWith('Invalid node');
     });
     it('Should revert if device already exists', async () => {
-      await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry.connect(user1).mintDevice(mockRootId, mockDeviceLabel);
 
       await expect(
         dimoRegistry.connect(user1).mintDevice(mockRootId, mockDeviceLabel)
       ).to.be.revertedWith('Node already exists');
+    });
+    it('Should correctly set originNode', async () => {
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
+      await dimoRegistry.connect(user1).mintDevice(mockRootId, mockDeviceLabel);
+
+      const recordInfo: Record = await dimoRegistry.records(mockDeviceId);
+      expect(recordInfo.originNode).to.be.equal(mockDeviceId);
     });
   });
 
@@ -149,8 +235,9 @@ describe('DIMORegistry', () => {
       ).to.be.revertedWith('ERC721: owner query for nonexistent token');
     });
     it('Should revert if caller is not the owner of the parent node', async () => {
-      await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry.connect(user1).mintDevice(mockRootId, mockDeviceLabel);
 
       await expect(
@@ -158,22 +245,34 @@ describe('DIMORegistry', () => {
       ).to.be.revertedWith('Invalid node');
     });
     it('Should revert if the parent node is a root', async () => {
-      await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
 
       await expect(
         dimoRegistry.connect(controller1).setNode(mockRootId, mockNodeLabel)
       ).to.be.revertedWith('Invalid node');
     });
     it('Should revert if node already exists', async () => {
-      await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry.connect(user1).mintDevice(mockRootId, mockDeviceLabel);
       await dimoRegistry.connect(user1).setNode(mockDeviceId, mockNodeLabel);
 
       await expect(
         dimoRegistry.connect(user1).setNode(mockDeviceId, mockNodeLabel)
       ).to.be.revertedWith('Node already exists');
+    });
+    it('Should correctly set originNode', async () => {
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
+      await dimoRegistry.connect(user1).mintDevice(mockRootId, mockDeviceLabel);
+      await dimoRegistry.connect(user1).setNode(mockDeviceId, mockNodeLabel);
+
+      const recordInfo: Record = await dimoRegistry.records(mockNodeId);
+      expect(recordInfo.originNode).to.be.equal(mockDeviceId);
     });
   });
 
@@ -186,8 +285,9 @@ describe('DIMORegistry', () => {
     beforeEach(async () => {
       await dimoRegistry.connect(admin).addAttribute(attribute1);
       await dimoRegistry.connect(admin).addAttribute(attribute2);
-      await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry.connect(user1).mintDevice(mockRootId, mockDeviceLabel);
     });
 
@@ -214,8 +314,9 @@ describe('DIMORegistry', () => {
 
   describe('controller transfer', () => {
     it('Should revert if receiver is not a controller', async () => {
-      await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
 
       await expect(
         dimoRegistry
@@ -230,10 +331,12 @@ describe('DIMORegistry', () => {
     it('Should revert if receiver has already minted a root', async () => {
       const mockRootLabel2 = 'mockRootLabel2';
 
-      await dimoRegistry.connect(admin).setController(controller1.address);
-      await dimoRegistry.connect(admin).setController(controller2.address);
-      await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
-      await dimoRegistry.connect(controller2).mintRoot(mockRootLabel2);
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel, controller1.address);
+      await dimoRegistry
+        .connect(admin)
+        .mintRootByOwner(mockRootLabel2, controller2.address);
 
       await expect(
         dimoRegistry

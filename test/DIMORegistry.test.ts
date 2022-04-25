@@ -10,26 +10,26 @@ const provider = waffle.provider;
 
 chai.use(solidity);
 
+const mockRootLabel = 'mockRootLabel';
+const mockDeviceLabel = 'mockDeviceLabel';
+const mockNodeLabel = 'mockNodeLabel';
+const mockRootHash = nodeHash(mockRootLabel);
+const mockDeviceHash = nodeHash(`${mockDeviceLabel}.${mockRootLabel}`);
+const mockNodeHash = nodeHash(
+  `${mockNodeLabel}.${mockDeviceLabel}.${mockRootLabel}`
+);
+const mockRootId = ethers.BigNumber.from(mockRootHash);
+const mockDeviceId = ethers.BigNumber.from(mockDeviceHash);
+const mockNodeId = ethers.BigNumber.from(mockNodeHash);
+
+const mockAttribute1 = ethers.utils.formatBytes32String('mockAttribute1');
+const mockAttribute2 = ethers.utils.formatBytes32String('mockAttribute2');
+const mockAttribute3 = ethers.utils.formatBytes32String('mockAttribute3');
+
 describe('DIMORegistry', () => {
   let dimoRegistry: DIMORegistry;
 
   const [admin, user1, user2, controller1, controller2] = provider.getWallets();
-
-  const mockRootLabel = 'mockRootLabel';
-  const mockDeviceLabel = 'mockDeviceLabel';
-  const mockNodeLabel = 'mockNodeLabel';
-  const mockRootHash = nodeHash(mockRootLabel);
-  const mockDeviceHash = nodeHash(`${mockDeviceLabel}.${mockRootLabel}`);
-  const mockNodeHash = nodeHash(
-    `${mockNodeLabel}.${mockDeviceLabel}.${mockRootLabel}`
-  );
-  const mockRootId = ethers.BigNumber.from(mockRootHash);
-  const mockDeviceId = ethers.BigNumber.from(mockDeviceHash);
-  const mockNodeId = ethers.BigNumber.from(mockNodeHash);
-
-  const attribute1 = ethers.utils.formatBytes32String('attribute1');
-  const attribute2 = ethers.utils.formatBytes32String('attribute2');
-  const attribute3 = ethers.utils.formatBytes32String('attribute3');
 
   beforeEach(async () => {
     const DimoRegistryFactory = await ethers.getContractFactory('DIMORegistry');
@@ -50,7 +50,7 @@ describe('DIMORegistry', () => {
   describe('addAttribute', () => {
     it('Should revert if caller is not the owner', async () => {
       await expect(
-        dimoRegistry.connect(user1).addAttribute(attribute1)
+        dimoRegistry.connect(user1).addAttribute(mockAttribute1)
       ).to.be.revertedWith('Ownable: caller is not the owner');
     });
   });
@@ -163,12 +163,11 @@ describe('DIMORegistry', () => {
         dimoRegistry.connect(controller2).mintRoot(mockRootLabel)
       ).to.be.revertedWith('Node already exists');
     });
-    it.only('Should correctly set node as root', async () => {
+    it('Should correctly set node as root', async () => {
       await dimoRegistry.connect(admin).setController(controller1.address);
       await dimoRegistry.connect(controller1).mintRoot(mockRootLabel);
 
       const recordInfo = await dimoRegistry.records(mockRootId);
-      console.log(recordInfo);
       // eslint-disable-next-line no-unused-expressions
       expect(recordInfo.root).to.be.true;
     });
@@ -277,14 +276,16 @@ describe('DIMORegistry', () => {
   });
 
   describe('setInfo', () => {
-    const attributes = [attribute1, attribute2];
-    const attributesNotWhitelisted = [attribute1, attribute3];
-    const infos = ['info1', 'info2'];
-    const infosWrongSize = ['info1'];
+    const attributes = [mockAttribute1, mockAttribute2];
+    const attributesNotWhitelisted = [mockAttribute1, mockAttribute3];
+    const mockInfo1 = 'mockInfo1';
+    const mockInfo2 = 'mockInfo2';
+    const mockInfos = [mockInfo1, mockInfo2];
+    const mockInfosWrongSize = [mockInfo1];
 
     beforeEach(async () => {
-      await dimoRegistry.connect(admin).addAttribute(attribute1);
-      await dimoRegistry.connect(admin).addAttribute(attribute2);
+      await dimoRegistry.connect(admin).addAttribute(mockAttribute1);
+      await dimoRegistry.connect(admin).addAttribute(mockAttribute2);
       await dimoRegistry
         .connect(admin)
         .mintRootByOwner(mockRootLabel, controller1.address);
@@ -293,22 +294,34 @@ describe('DIMORegistry', () => {
 
     it('Should revert if caller is not the owner', async () => {
       await expect(
-        dimoRegistry.connect(user2).setInfo(mockDeviceId, attributes, infos)
+        dimoRegistry.connect(user2).setInfo(mockDeviceId, attributes, mockInfos)
       ).to.be.revertedWith('Only node owner');
     });
     it('Should revert if attributes and infos array length does not match', async () => {
       await expect(
         dimoRegistry
           .connect(user1)
-          .setInfo(mockDeviceId, attributes, infosWrongSize)
+          .setInfo(mockDeviceId, attributes, mockInfosWrongSize)
       ).to.be.revertedWith('Same length');
     });
     it('Should revert if attribute is not whitelisted', async () => {
       await expect(
         dimoRegistry
           .connect(user1)
-          .setInfo(mockDeviceId, attributesNotWhitelisted, infos)
+          .setInfo(mockDeviceId, attributesNotWhitelisted, mockInfos)
       ).to.be.revertedWith('Not whitelisted');
+    });
+    it('Should correctly set infos', async () => {
+      await dimoRegistry
+        .connect(user1)
+        .setInfo(mockDeviceId, attributes, mockInfos);
+
+      expect(
+        await dimoRegistry.getInfo(mockDeviceId, mockAttribute1)
+      ).to.be.equal(mockInfo1);
+      expect(
+        await dimoRegistry.getInfo(mockDeviceId, mockAttribute2)
+      ).to.be.equal(mockInfo2);
     });
   });
 

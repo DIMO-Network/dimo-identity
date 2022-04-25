@@ -75,11 +75,11 @@ contract DIMORegistry is Ownable, ERC721 {
         _mintRoot(label, msg.sender);
     }
 
-    /// @notice Mints a vehicle
-    /// @dev Vehicle owner will be msg.sender
+    /// @notice Mints a device
+    /// @dev Device owner will be msg.sender
     /// @dev Parent node must exist and must be a root
     /// @param parentNode The corresponding root
-    /// @param label The label specifying the vehicle
+    /// @param label The label specifying the device
     function mintDevice(uint256 parentNode, string calldata label) external {
         require(records[parentNode].root, "Invalid node");
 
@@ -87,13 +87,13 @@ contract DIMORegistry is Ownable, ERC721 {
 
         records[node].originNode = node;
 
-        _safeMint(msg.sender, uint256(node));
+        _safeMint(msg.sender, node);
     }
 
-    /// @notice Sets a node under a vehicle or other node
+    /// @notice Sets a node under a device or other node
     /// @dev Caller must be parent node owner
     /// @dev Cannot be set under roots
-    /// @param parentNode The corresponding vehicle or node
+    /// @param parentNode The corresponding device or node
     /// @param label The label specifying the node
     function setNode(uint256 parentNode, string calldata label) external {
         require(
@@ -132,6 +132,19 @@ contract DIMORegistry is Ownable, ERC721 {
             );
             records[node].info[attributes[i]] = infos[i];
         }
+    }
+
+    /// @notice Gets information stored in an attribute of a given node
+    /// @dev Returns empty string if does or attribute does not exists
+    /// @param node Node from which info will be obtained
+    /// @param attribute Key attribute
+    /// @return info Info obtained
+    function getInfo(uint256 node, bytes32 attribute)
+        external
+        view
+        returns (string memory info)
+    {
+        info = records[node].info[attribute];
     }
 
     //***** INTERNAL FUNCTIONS *****//

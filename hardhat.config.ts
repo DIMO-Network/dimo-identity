@@ -6,6 +6,7 @@ import '@nomiclabs/hardhat-waffle';
 import '@typechain/hardhat';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
+import 'hardhat-contract-sizer';
 
 dotenv.config();
 
@@ -29,6 +30,11 @@ const config: HardhatUserConfig = {
       url: process.env.ROPSTEN_URL || '',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: process.env.CONTRACT_SIZER !== undefined,
+    disambiguatePaths: false
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

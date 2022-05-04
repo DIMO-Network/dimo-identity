@@ -80,7 +80,14 @@ contract DIMORegistry is Ownable, ERC721 {
     /// @dev Parent node must exist and must be a root
     /// @param parentNode The corresponding root
     /// @param label The label specifying the device
-    function mintDevice(uint256 parentNode, string calldata label) external {
+    /// @param attributes List of attributes to be added
+    /// @param infos List of infos matching the attributes param
+    function mintDevice(
+        uint256 parentNode,
+        string calldata label,
+        bytes32[] calldata attributes,
+        string[] calldata infos
+    ) external {
         require(records[parentNode].root, "Invalid node");
 
         uint256 node = _verifyNewNode(parentNode, label);
@@ -88,6 +95,7 @@ contract DIMORegistry is Ownable, ERC721 {
         records[node].originNode = node;
 
         _safeMint(msg.sender, node);
+        _setInfo(node, attributes, infos);
     }
 
     /// @notice Sets a node under a device or other node
@@ -95,7 +103,14 @@ contract DIMORegistry is Ownable, ERC721 {
     /// @dev Cannot be set under roots
     /// @param parentNode The corresponding device or node
     /// @param label The label specifying the node
-    function setNode(uint256 parentNode, string calldata label) external {
+    /// @param attributes List of attributes to be added
+    /// @param infos List of infos matching the attributes param
+    function setNode(
+        uint256 parentNode,
+        string calldata label,
+        bytes32[] calldata attributes,
+        string[] calldata infos
+    ) external {
         require(
             ownerOf(records[parentNode].originNode) == msg.sender &&
                 !records[parentNode].root,
@@ -105,6 +120,7 @@ contract DIMORegistry is Ownable, ERC721 {
         uint256 node = _verifyNewNode(parentNode, label);
 
         records[node].originNode = records[parentNode].originNode;
+        _setInfo(node, attributes, infos);
     }
 
     /// @notice Add infos to node
@@ -119,19 +135,7 @@ contract DIMORegistry is Ownable, ERC721 {
         bytes32[] calldata attributes,
         string[] calldata infos
     ) external {
-        require(
-            ownerOf(records[node].originNode) == msg.sender,
-            "Only node owner"
-        );
-        require(attributes.length == infos.length, "Same length");
-
-        for (uint256 i = 0; i < attributes.length; i++) {
-            require(
-                _whitelistedAttributes.contains(attributes[i]),
-                "Not whitelisted"
-            );
-            records[node].info[attributes[i]] = infos[i];
-        }
+        _setInfo(node, attributes, infos);
     }
 
     /// @notice Gets information stored in an attribute of a given node
@@ -197,5 +201,32 @@ contract DIMORegistry is Ownable, ERC721 {
         require(records[newNode].originNode == 0, "Node already exists");
 
         return newNode;
+    }
+
+    /// @dev Internal function to add infos to node
+    /// @dev Only node owner can call this function
+    /// @dev attributes and infos arrays length must match
+    /// @dev attributes must be whitelisted
+    /// @param node Node where the info will be added
+    /// @param attributes List of attributes to be added
+    /// @param infos List of infos matching the attributes param
+    function _setInfo(
+        uint256 node,
+        bytes32[] calldata attributes,
+        string[] calldata infos
+    ) private {
+        require(
+            ownerOf(records[node].originNode) == msg.sender,
+            "Only node owner"
+        );
+        require(attributes.length == infos.length, "Same length");
+
+        for (uint256 i = 0; i < attributes.length; i++) {
+            require(
+                _whitelistedAttributes.contains(attributes[i]),
+                "Not whitelisted"
+            );
+            records[node].info[attributes[i]] = infos[i];
+        }
     }
 }

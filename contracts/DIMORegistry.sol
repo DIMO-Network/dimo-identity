@@ -68,6 +68,7 @@ contract DIMORegistry is Ownable, ERC721URIStorage {
         controllers[_controller].isController = true;
     }
 
+    //TODO: Discuss if we should keep this function, or leave it for a subsequent upgrade of the contract.
     function setTokenURI(uint256 node, string memory _tokenURI) external {
         require(
             ownerOf(records[node].originNode) == msg.sender,
@@ -196,20 +197,15 @@ contract DIMORegistry is Ownable, ERC721URIStorage {
             _exists(node),
             "ERC721URIStorage: URI query for nonexistent token"
         );
-
         string memory _tokenURI = _tokenURIs[node];
         string memory base = _baseURI();
 
-        // If there is no base URI, return the token URI.
-        if (bytes(base).length == 0) {
+        // If there is only a defined _tokenUri, return that.
+        if (bytes(_tokenURI).length > 0) {
             return _tokenURI;
         }
-        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
-        if (bytes(_tokenURI).length > 0) {
-            return string(abi.encodePacked(base, _tokenURI));
-        }
-
-        // If tokenUri is not set, use the NFT id as the tokenUri
+        // Otherwise return the baseUri + hexString(node)
+        // ex. https://devices-api.dimo.zone/nft/0xa8de0f674a8913538451b7b624906208700c6312dd3106c7e1ead990f4c5a51a
         return string(abi.encodePacked(base, Strings.toHexString(node)));
     }
 

@@ -286,7 +286,7 @@ describe('DIMORegistry', () => {
 
       await dimoRegistry
         .connect(user1)
-        .setTokenURI(mockDeviceId, mockTokenURI2);
+        .setTokenURI(mockDeviceId, fullTokenURI2);
       expect(
         await dimoRegistry.connect(user1).tokenURI(mockDeviceId)
       ).to.be.equals(fullTokenURI2);

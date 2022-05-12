@@ -181,7 +181,7 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
         view
         returns (string memory info)
     {
-        return records[node].info[attribute];
+        info = records[node].info[attribute];
     }
 
     /// @dev Public function to get NFT metadata URL

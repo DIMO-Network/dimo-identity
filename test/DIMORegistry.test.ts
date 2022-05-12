@@ -26,10 +26,10 @@ const mockAttribute1 = ethers.utils.formatBytes32String('mockAttribute1');
 const mockAttribute2 = ethers.utils.formatBytes32String('mockAttribute2');
 const mockAttribute3 = ethers.utils.formatBytes32String('mockAttribute3');
 
-const mockBaseUri = 'https://tokenuri.dimo.ngrok.io/';
+const mockBaseUri = 'https://tokenuri.dimo.ngrok.io/nft/';
 const mockTokenUri = mockNodeId.toString();
 const fullTokenUri = `${mockBaseUri}${mockTokenUri}`;
-
+const contractMetadataUri = 'https://tokenuri.dimo.ngrok.io/nft/metadata.json';
 describe('DIMORegistry', () => {
   let dimoRegistry: DIMORegistry;
 
@@ -544,6 +544,18 @@ describe('DIMORegistry', () => {
       expect(controller1InfoAfter.rootMinted).to.be.false;
       // eslint-disable-next-line no-unused-expressions
       expect(controller2InfoAfter.rootMinted).to.be.true;
+    });
+  });
+
+  describe('Contract Metadata URI', () => {
+    it('Admin should be able to set', async () => {
+      await dimoRegistry
+        .connect(admin)
+        .setContractMetadataUri(contractMetadataUri);
+
+      expect(await dimoRegistry.connect(user1).contractURI()).to.be.equals(
+        contractMetadataUri
+      );
     });
   });
 });

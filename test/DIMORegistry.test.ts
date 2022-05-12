@@ -28,7 +28,9 @@ const mockAttribute3 = ethers.utils.formatBytes32String('mockAttribute3');
 
 const mockBaseURI = 'https://tokenURI.dimo.ngrok.io/nft/';
 const mockTokenURI = mockNodeId.toString();
+const mockTokenURI2 = mockTokenURI + 'TEST';
 const fullTokenURI = `${mockBaseURI}${mockTokenURI}`;
+const fullTokenURI2 = `${mockBaseURI}${mockTokenURI2}`;
 const contractMetadataURI = 'https://tokenURI.dimo.ngrok.io/nft/metadata.json';
 describe('DIMORegistry', () => {
   let dimoRegistry: DIMORegistry;
@@ -319,6 +321,17 @@ describe('DIMORegistry', () => {
       expect(
         await dimoRegistry.connect(user1).tokenURI(mockDeviceId)
       ).to.be.equals(fullTokenURI);
+
+      await expect(
+        dimoRegistry.connect(user2).setTokenURI(mockDeviceId, mockTokenURI)
+      ).to.be.revertedWith('Only node owner');
+
+      await dimoRegistry
+        .connect(user1)
+        .setTokenURI(mockDeviceId, mockTokenURI2);
+      expect(
+        await dimoRegistry.connect(user1).tokenURI(mockDeviceId)
+      ).to.be.equals(fullTokenURI2);
     });
   });
 
@@ -548,6 +561,14 @@ describe('DIMORegistry', () => {
   });
 
   describe('Contract Metadata URI', () => {
+    it('Non-admin should not be able to set', async () => {
+      await expect(
+        dimoRegistry
+          .connect(user1)
+          .setContractMetadataURI(contractMetadataURI + 'TEST')
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+
     it('Admin should be able to set', async () => {
       await dimoRegistry
         .connect(admin)

@@ -23,10 +23,11 @@ contract DIMORegistry is Ownable, ERC721 {
         bool rootMinted;
     }
 
-    // TokenUri Stuff
+    // Metadata Stuff
     string private _baseURIextended;
+    string private _contractMetadataURI;
     mapping(uint256 => string) private _tokenURIs;
-    // End TokenUri Stuff
+    // End Metadata Stuff
 
     mapping(uint256 => Record) public records; // [Node id] => Node info
     mapping(address => Controller) public controllers; // [Controller address] => is controller, has minted root
@@ -37,10 +38,19 @@ contract DIMORegistry is Ownable, ERC721 {
 
     //***** Owner management *****//
 
+    /// @notice Sets contract metadata URI
+    /// @dev Only the owner can set the contract metadata URI
+    /// @param contractURI_ The base uri to be set
+    function setContractMetadataUri(string memory contractURI_)
+        external
+        onlyOwner
+    {
+        _contractMetadataURI = contractURI_;
+    }
+
     /// @notice Sets base token URI
     /// @dev Only the owner can set the base token URI
     /// @param baseURI_ The base uri to be set
-
     function setBaseURI(string memory baseURI_) external onlyOwner {
         _baseURIextended = baseURI_;
     }
@@ -192,6 +202,11 @@ contract DIMORegistry is Ownable, ERC721 {
         }
         // If there is a baseURI but no tokenURI, concatenate the tokenID to the baseURI.
         return string(abi.encodePacked(base, node));
+    }
+
+    /// @dev Public function to get contract metadata URL
+    function contractURI() public view returns (string memory) {
+        return _contractMetadataURI;
     }
 
     //***** INTERNAL FUNCTIONS *****//

@@ -198,7 +198,7 @@ contract DIMORegistry is Ownable, ERC721URIStorage {
             "ERC721URIStorage: URI query for nonexistent token"
         );
         string memory _tokenURI = _tokenURIs[node];
-        string memory base = _baseURI();
+       
 
         // If there is only a defined _tokenUri, return that.
         if (bytes(_tokenURI).length > 0) {
@@ -206,6 +206,7 @@ contract DIMORegistry is Ownable, ERC721URIStorage {
         }
         // Otherwise return the baseUri + hexString(node)
         // ex. https://devices-api.dimo.zone/nft/0xa8de0f674a8913538451b7b624906208700c6312dd3106c7e1ead990f4c5a51a
+        string memory base = _baseURI();
         return string(abi.encodePacked(base, Strings.toHexString(node)));
     }
 

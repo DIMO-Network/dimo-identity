@@ -206,8 +206,8 @@ contract DIMORegistry is Ownable, ERC721URIStorage {
         }
         // Otherwise return the baseUri + hexString(node)
         // ex. https://devices-api.dimo.zone/nft/0xa8de0f674a8913538451b7b624906208700c6312dd3106c7e1ead990f4c5a51a
-        string memory base = _baseURI();
-        return string(abi.encodePacked(base, Strings.toHexString(node)));
+        
+        return string(abi.encodePacked(_baseURI(), Strings.toHexString(node)));
     }
 
     /// @dev Public function to get contract metadata URL

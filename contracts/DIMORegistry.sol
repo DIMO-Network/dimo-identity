@@ -67,6 +67,14 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
         controllers[_controller].isController = true;
     }
 
+    function setTokenURI(uint256 node, string memory _tokenURI) external {
+        require(
+            ownerOf(records[node].originNode) == msg.sender,
+            "Only node owner"
+        );
+        _setTokenURI(node, _tokenURI);
+    }
+
     //***** Interaction with nodes *****//
 
     /// @notice Mints a root

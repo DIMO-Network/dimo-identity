@@ -25,7 +25,6 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
     // Metadata Stuff
     string private _baseURIextended;
     string private _contractMetadataURI;
-    // mapping(uint256 => string) private _tokenURIs;
     // End Metadata Stuff
 
     mapping(uint256 => Record) public records; // [Node id] => Node info
@@ -186,7 +185,6 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
         override(ERC721, ERC721URIStorage)
         returns (string memory)
     {
-        require(_exists(node), "NFT does not exist");
         return super.tokenURI(node);
     }
 
@@ -196,6 +194,17 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
     }
 
     //***** INTERNAL FUNCTIONS *****//
+
+    /// @dev Public function to get contract metadata URL
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _baseURIextended;
+    }
+
+    /// @dev Internal function to burn an NFT
+    /// @param node the Node to burn
+    function _burn(uint256 node) internal override(ERC721, ERC721URIStorage) {
+        super._burn(node);
+    }
 
     function _beforeTokenTransfer(
         address from,
@@ -210,10 +219,6 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
             controllers[from].rootMinted = false;
             controllers[to].rootMinted = true;
         }
-    }
-
-    function _burn(uint256 node) internal override(ERC721, ERC721URIStorage) {
-        super._burn(node);
     }
 
     //***** PRIVATE FUNCTIONS *****//

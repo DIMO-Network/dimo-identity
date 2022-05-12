@@ -3,9 +3,10 @@ pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract DIMORegistry is Ownable, ERC721 {
+contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     EnumerableSet.Bytes32Set private _whitelistedAttributes; // Allowed node attributes
@@ -24,7 +25,7 @@ contract DIMORegistry is Ownable, ERC721 {
     // Metadata Stuff
     string private _baseURIextended;
     string private _contractMetadataURI;
-    mapping(uint256 => string) private _tokenURIs;
+    // mapping(uint256 => string) private _tokenURIs;
     // End Metadata Stuff
 
     mapping(uint256 => Record) public records; // [Node id] => Node info
@@ -173,7 +174,7 @@ contract DIMORegistry is Ownable, ERC721 {
         view
         returns (string memory info)
     {
-        info = records[node].info[attribute];
+        return records[node].info[attribute];
     }
 
     /// @dev Public function to get NFT metadata URL
@@ -182,24 +183,11 @@ contract DIMORegistry is Ownable, ERC721 {
         public
         view
         virtual
-        override
+        override(ERC721, ERC721URIStorage)
         returns (string memory)
     {
         require(_exists(node), "NFT does not exist");
-
-        string memory _tokenURI = _tokenURIs[node];
-        string memory base = _baseURI();
-
-        // If there is no base URI, return the token URI.
-        if (bytes(base).length == 0) {
-            return _tokenURI;
-        }
-        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
-        if (bytes(_tokenURI).length > 0) {
-            return string(abi.encodePacked(base, _tokenURI));
-        }
-        // If there is a baseURI but no tokenURI, concatenate the tokenID to the baseURI.
-        return string(abi.encodePacked(base, node));
+        return super.tokenURI(node);
     }
 
     /// @dev Public function to get contract metadata URL
@@ -224,25 +212,8 @@ contract DIMORegistry is Ownable, ERC721 {
         }
     }
 
-    /// @dev Internal function to set NFT token URI
-    /// @dev Only node owner can call this function
-    /// @param node Node where the info will be added
-    /// @param _tokenURI String to use as token URI
-    function _setTokenURI(uint256 node, string memory _tokenURI)
-        internal
-        virtual
-    {
-        require(_exists(node), "NFT does not exist");
-        require(
-            ownerOf(records[node].originNode) == msg.sender,
-            "Only node owner"
-        );
-        _tokenURIs[node] = _tokenURI;
-    }
-
-    /// @dev Internal function to get baseURI for metadata
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseURIextended;
+    function _burn(uint256 node) internal override(ERC721, ERC721URIStorage) {
+        super._burn(node);
     }
 
     //***** PRIVATE FUNCTIONS *****//

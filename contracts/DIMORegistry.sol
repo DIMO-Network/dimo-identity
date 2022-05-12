@@ -191,21 +191,27 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
         view
         virtual
         override(ERC721, ERC721URIStorage)
-        returns (string memory)
+        returns (string memory tokenURI_)
     {
-        return super.tokenURI(node);
+        tokenURI_ = super.tokenURI(node);
     }
 
     /// @dev Public function to get contract metadata URL
-    function contractURI() public view returns (string memory) {
-        return _contractMetadataURI;
+    function contractURI() public view returns (string memory contractURI_) {
+        contractURI_ = _contractMetadataURI;
     }
 
     //***** INTERNAL FUNCTIONS *****//
 
     /// @dev Public function to get contract metadata URL
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseURIextended;
+    function _baseURI()
+        internal
+        view
+        virtual
+        override
+        returns (string memory baseURI_)
+    {
+        baseURI_ = _baseURIextended;
     }
 
     /// @dev Internal function to burn an NFT

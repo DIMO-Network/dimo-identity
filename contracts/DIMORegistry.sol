@@ -5,8 +5,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-// import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-
 contract DIMORegistry is Ownable, ERC721 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 

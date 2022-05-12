@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
+// import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+
 contract DIMORegistry is Ownable, ERC721 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -21,6 +23,11 @@ contract DIMORegistry is Ownable, ERC721 {
         bool rootMinted;
     }
 
+    // TokenUri Stuff
+    string private _baseURIextended;
+    mapping(uint256 => string) private _tokenURIs;
+    // End TokenUri Stuff
+
     mapping(uint256 => Record) public records; // [Node id] => Node info
     mapping(address => Controller) public controllers; // [Controller address] => is controller, has minted root
 
@@ -29,6 +36,14 @@ contract DIMORegistry is Ownable, ERC721 {
     }
 
     //***** Owner management *****//
+
+    /// @notice Sets base token URI
+    /// @dev Only the owner can set the base token URI
+    /// @param baseURI_ The base uri to be set
+
+    function setBaseURI(string memory baseURI_) external onlyOwner {
+        _baseURIextended = baseURI_;
+    }
 
     /// @notice Adds an attribute to the whielist
     /// @dev Only the owner can set new controllers
@@ -86,7 +101,8 @@ contract DIMORegistry is Ownable, ERC721 {
         uint256 parentNode,
         string calldata label,
         bytes32[] calldata attributes,
-        string[] calldata infos
+        string[] calldata infos,
+        string memory tokenURI_
     ) external {
         require(records[parentNode].root, "Invalid node");
 
@@ -96,6 +112,7 @@ contract DIMORegistry is Ownable, ERC721 {
 
         _safeMint(msg.sender, node);
         _setInfo(node, attributes, infos);
+        _setTokenURI(node, tokenURI_);
     }
 
     /// @notice Sets a node under a device or other node
@@ -151,6 +168,32 @@ contract DIMORegistry is Ownable, ERC721 {
         info = records[node].info[attribute];
     }
 
+    /// @dev Public function to get NFT metadata URL
+    /// @param node Which node to get the URL from
+    function tokenURI(uint256 node)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        require(_exists(node), "NFT does not exist");
+
+        string memory _tokenURI = _tokenURIs[node];
+        string memory base = _baseURI();
+
+        // If there is no base URI, return the token URI.
+        if (bytes(base).length == 0) {
+            return _tokenURI;
+        }
+        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
+        if (bytes(_tokenURI).length > 0) {
+            return string(abi.encodePacked(base, _tokenURI));
+        }
+        // If there is a baseURI but no tokenURI, concatenate the tokenID to the baseURI.
+        return string(abi.encodePacked(base, node));
+    }
+
     //***** INTERNAL FUNCTIONS *****//
 
     function _beforeTokenTransfer(
@@ -166,6 +209,27 @@ contract DIMORegistry is Ownable, ERC721 {
             controllers[from].rootMinted = false;
             controllers[to].rootMinted = true;
         }
+    }
+
+    /// @dev Internal function to set NFT token URI
+    /// @dev Only node owner can call this function
+    /// @param node Node where the info will be added
+    /// @param _tokenURI String to use as token URI
+    function _setTokenURI(uint256 node, string memory _tokenURI)
+        internal
+        virtual
+    {
+        require(_exists(node), "NFT does not exist");
+        require(
+            ownerOf(records[node].originNode) == msg.sender,
+            "Only node owner"
+        );
+        _tokenURIs[node] = _tokenURI;
+    }
+
+    /// @dev Internal function to get baseURI for metadata
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _baseURIextended;
     }
 
     //***** PRIVATE FUNCTIONS *****//

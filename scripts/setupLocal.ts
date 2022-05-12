@@ -15,9 +15,16 @@ async function deploy(admin: SignerWithAddress) {
   dimoRegistry = await DimoRegistryFactory.connect(admin).deploy();
 
   await dimoRegistry.deployed();
+  console.log('DIMORegistry deployed to:', dimoRegistry.address);
+
+  console.log('\n----- Setting DIMORegistry Metadata URIs -----');
   await dimoRegistry.setBaseURI(baseUri);
   await dimoRegistry.setContractMetadataURI(contractMetadataUri);
-  console.log('DIMORegistry deployed to:', dimoRegistry.address);
+  console.log('DIMORegistry base URI set to:', baseUri);
+  console.log(
+    'DIMORegistry contract metadata URI set to:',
+    contractMetadataUri
+  );
 }
 
 async function mintRoots(

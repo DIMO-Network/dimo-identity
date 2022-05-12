@@ -40,8 +40,8 @@ contract DIMORegistry is Ownable, ERC721 {
 
     /// @notice Sets contract metadata URI
     /// @dev Only the owner can set the contract metadata URI
-    /// @param contractURI_ The base uri to be set
-    function setContractMetadataUri(string memory contractURI_)
+    /// @param contractURI_ The base URI to be set
+    function setContractMetadataURI(string memory contractURI_)
         external
         onlyOwner
     {
@@ -50,7 +50,7 @@ contract DIMORegistry is Ownable, ERC721 {
 
     /// @notice Sets base token URI
     /// @dev Only the owner can set the base token URI
-    /// @param baseURI_ The base uri to be set
+    /// @param baseURI_ The base URI to be set
     function setBaseURI(string memory baseURI_) external onlyOwner {
         _baseURIextended = baseURI_;
     }

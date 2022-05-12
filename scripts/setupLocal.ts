@@ -8,11 +8,15 @@ let dimoRegistry: DIMORegistry;
 
 async function deploy(admin: SignerWithAddress) {
   console.log('\n----- Deploying DIMORegistry -----');
+  const baseUri = 'https://tokenuri.dimo.ngrok.io/nft/';
+  const contractMetadataUri =
+    'https://tokenuri.dimo.ngrok.io/nft/metadata.json';
   const DimoRegistryFactory = await ethers.getContractFactory('DIMORegistry');
   dimoRegistry = await DimoRegistryFactory.connect(admin).deploy();
 
   await dimoRegistry.deployed();
-
+  await dimoRegistry.setBaseURI(baseUri);
+  await dimoRegistry.setContractMetadataURI(contractMetadataUri);
   console.log('DIMORegistry deployed to:', dimoRegistry.address);
 }
 

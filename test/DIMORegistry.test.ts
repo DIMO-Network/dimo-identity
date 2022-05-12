@@ -26,10 +26,10 @@ const mockAttribute1 = ethers.utils.formatBytes32String('mockAttribute1');
 const mockAttribute2 = ethers.utils.formatBytes32String('mockAttribute2');
 const mockAttribute3 = ethers.utils.formatBytes32String('mockAttribute3');
 
-const mockBaseUri = 'https://tokenuri.dimo.ngrok.io/nft/';
-const mockTokenUri = mockNodeId.toString();
-const fullTokenUri = `${mockBaseUri}${mockTokenUri}`;
-const contractMetadataUri = 'https://tokenuri.dimo.ngrok.io/nft/metadata.json';
+const mockBaseURI = 'https://tokenURI.dimo.ngrok.io/nft/';
+const mockTokenURI = mockNodeId.toString();
+const fullTokenURI = `${mockBaseURI}${mockTokenURI}`;
+const contractMetadataURI = 'https://tokenURI.dimo.ngrok.io/nft/metadata.json';
 describe('DIMORegistry', () => {
   let dimoRegistry: DIMORegistry;
 
@@ -50,14 +50,14 @@ describe('DIMORegistry', () => {
       expect(controllerInfo.isController).to.be.true;
     });
   });
-  describe('addBaseUri', () => {
+  describe('addBaseURI', () => {
     it('Should revert if caller is not the owner', async () => {
       await expect(
-        dimoRegistry.connect(user1).setBaseURI(mockBaseUri)
+        dimoRegistry.connect(user1).setBaseURI(mockBaseURI)
       ).to.be.revertedWith('Ownable: caller is not the owner');
     });
     it('Should be successful', async () => {
-      await expect(dimoRegistry.connect(admin).setBaseURI(mockBaseUri));
+      await expect(dimoRegistry.connect(admin).setBaseURI(mockBaseURI));
     });
   });
 
@@ -224,7 +224,7 @@ describe('DIMORegistry', () => {
             mockDeviceLabel,
             attributes,
             mockInfos,
-            mockTokenUri
+            mockTokenURI
           )
       ).to.be.revertedWith('Invalid node');
     });
@@ -239,7 +239,7 @@ describe('DIMORegistry', () => {
           mockDeviceLabel,
           attributes,
           mockInfos,
-          mockTokenUri
+          mockTokenURI
         );
 
       await expect(
@@ -250,7 +250,7 @@ describe('DIMORegistry', () => {
             mockDeviceLabel,
             attributes,
             mockInfos,
-            mockTokenUri
+            mockTokenURI
           )
       ).to.be.revertedWith('Invalid node');
     });
@@ -265,7 +265,7 @@ describe('DIMORegistry', () => {
           mockDeviceLabel,
           attributes,
           mockInfos,
-          mockTokenUri
+          mockTokenURI
         );
 
       await expect(
@@ -276,7 +276,7 @@ describe('DIMORegistry', () => {
             mockDeviceLabel,
             attributes,
             mockInfos,
-            mockTokenUri
+            mockTokenURI
           )
       ).to.be.revertedWith('Node already exists');
     });
@@ -291,14 +291,14 @@ describe('DIMORegistry', () => {
           mockDeviceLabel,
           attributes,
           mockInfos,
-          mockTokenUri
+          mockTokenURI
         );
 
       const recordInfo: Record = await dimoRegistry.records(mockDeviceId);
       expect(recordInfo.originNode).to.be.equal(mockDeviceId);
     });
 
-    it('TokenURI should be baseUri + nodeId', async () => {
+    it('TokenURI should be baseURI + nodeId', async () => {
       await dimoRegistry
         .connect(admin)
         .mintRootByOwner(mockRootLabel, controller1.address);
@@ -309,16 +309,16 @@ describe('DIMORegistry', () => {
           mockDeviceLabel,
           attributes,
           mockInfos,
-          mockTokenUri
+          mockTokenURI
         );
       await dimoRegistry
         .connect(user1)
         .setNode(mockDeviceId, mockNodeLabel, attributes, mockInfos);
 
-      await dimoRegistry.connect(admin).setBaseURI(mockBaseUri);
+      await dimoRegistry.connect(admin).setBaseURI(mockBaseURI);
       expect(
         await dimoRegistry.connect(user1).tokenURI(mockDeviceId)
-      ).to.be.equals(fullTokenUri);
+      ).to.be.equals(fullTokenURI);
     });
   });
 
@@ -351,7 +351,7 @@ describe('DIMORegistry', () => {
           mockDeviceLabel,
           attributes,
           mockInfos,
-          mockTokenUri
+          mockTokenURI
         );
 
       await expect(
@@ -382,7 +382,7 @@ describe('DIMORegistry', () => {
           mockDeviceLabel,
           attributes,
           mockInfos,
-          mockTokenUri
+          mockTokenURI
         );
       await dimoRegistry
         .connect(user1)
@@ -405,7 +405,7 @@ describe('DIMORegistry', () => {
           mockDeviceLabel,
           attributes,
           mockInfos,
-          mockTokenUri
+          mockTokenURI
         );
       await dimoRegistry
         .connect(user1)
@@ -437,7 +437,7 @@ describe('DIMORegistry', () => {
           mockDeviceLabel,
           attributes,
           mockInfos,
-          mockTokenUri
+          mockTokenURI
         );
     });
 
@@ -551,10 +551,10 @@ describe('DIMORegistry', () => {
     it('Admin should be able to set', async () => {
       await dimoRegistry
         .connect(admin)
-        .setContractMetadataUri(contractMetadataUri);
+        .setContractMetadataURI(contractMetadataURI);
 
       expect(await dimoRegistry.connect(user1).contractURI()).to.be.equals(
-        contractMetadataUri
+        contractMetadataURI
       );
     });
   });

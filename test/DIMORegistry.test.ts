@@ -27,7 +27,7 @@ const mockAttribute2 = ethers.utils.formatBytes32String('mockAttribute2');
 const mockAttribute3 = ethers.utils.formatBytes32String('mockAttribute3');
 
 const mockBaseURI = 'https://tokenURI.dimo.ngrok.io/nft/';
-const mockTokenURI = mockNodeId.toString();
+const mockTokenURI = ethers.utils.hexlify(mockDeviceId);
 const mockTokenURI2 = mockTokenURI + 'TEST';
 const fullTokenURI = `${mockBaseURI}${mockTokenURI}`;
 const fullTokenURI2 = `${mockBaseURI}${mockTokenURI2}`;
@@ -221,13 +221,7 @@ describe('DIMORegistry', () => {
       await expect(
         dimoRegistry
           .connect(user1)
-          .mintDevice(
-            mockRootId,
-            mockDeviceLabel,
-            attributes,
-            mockInfos,
-            mockTokenURI
-          )
+          .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos)
       ).to.be.revertedWith('Invalid node');
     });
     it('Should revert if the parent node is not a root', async () => {
@@ -236,24 +230,12 @@ describe('DIMORegistry', () => {
         .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry
         .connect(user1)
-        .mintDevice(
-          mockRootId,
-          mockDeviceLabel,
-          attributes,
-          mockInfos,
-          mockTokenURI
-        );
+        .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos);
 
       await expect(
         dimoRegistry
           .connect(user1)
-          .mintDevice(
-            mockDeviceId,
-            mockDeviceLabel,
-            attributes,
-            mockInfos,
-            mockTokenURI
-          )
+          .mintDevice(mockDeviceId, mockDeviceLabel, attributes, mockInfos)
       ).to.be.revertedWith('Invalid node');
     });
     it('Should revert if device already exists', async () => {
@@ -262,24 +244,12 @@ describe('DIMORegistry', () => {
         .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry
         .connect(user1)
-        .mintDevice(
-          mockRootId,
-          mockDeviceLabel,
-          attributes,
-          mockInfos,
-          mockTokenURI
-        );
+        .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos);
 
       await expect(
         dimoRegistry
           .connect(user1)
-          .mintDevice(
-            mockRootId,
-            mockDeviceLabel,
-            attributes,
-            mockInfos,
-            mockTokenURI
-          )
+          .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos)
       ).to.be.revertedWith('Node already exists');
     });
     it('Should correctly set originNode', async () => {
@@ -288,13 +258,7 @@ describe('DIMORegistry', () => {
         .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry
         .connect(user1)
-        .mintDevice(
-          mockRootId,
-          mockDeviceLabel,
-          attributes,
-          mockInfos,
-          mockTokenURI
-        );
+        .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos);
 
       const recordInfo: Record = await dimoRegistry.records(mockDeviceId);
       expect(recordInfo.originNode).to.be.equal(mockDeviceId);
@@ -306,13 +270,7 @@ describe('DIMORegistry', () => {
         .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry
         .connect(user1)
-        .mintDevice(
-          mockRootId,
-          mockDeviceLabel,
-          attributes,
-          mockInfos,
-          mockTokenURI
-        );
+        .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos);
       await dimoRegistry
         .connect(user1)
         .setNode(mockDeviceId, mockNodeLabel, attributes, mockInfos);
@@ -359,13 +317,7 @@ describe('DIMORegistry', () => {
         .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry
         .connect(user1)
-        .mintDevice(
-          mockRootId,
-          mockDeviceLabel,
-          attributes,
-          mockInfos,
-          mockTokenURI
-        );
+        .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos);
 
       await expect(
         dimoRegistry
@@ -390,13 +342,7 @@ describe('DIMORegistry', () => {
         .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry
         .connect(user1)
-        .mintDevice(
-          mockRootId,
-          mockDeviceLabel,
-          attributes,
-          mockInfos,
-          mockTokenURI
-        );
+        .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos);
       await dimoRegistry
         .connect(user1)
         .setNode(mockDeviceId, mockNodeLabel, attributes, mockInfos);
@@ -413,13 +359,7 @@ describe('DIMORegistry', () => {
         .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry
         .connect(user1)
-        .mintDevice(
-          mockRootId,
-          mockDeviceLabel,
-          attributes,
-          mockInfos,
-          mockTokenURI
-        );
+        .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos);
       await dimoRegistry
         .connect(user1)
         .setNode(mockDeviceId, mockNodeLabel, attributes, mockInfos);
@@ -445,13 +385,7 @@ describe('DIMORegistry', () => {
         .mintRootByOwner(mockRootLabel, controller1.address);
       await dimoRegistry
         .connect(user1)
-        .mintDevice(
-          mockRootId,
-          mockDeviceLabel,
-          attributes,
-          mockInfos,
-          mockTokenURI
-        );
+        .mintDevice(mockRootId, mockDeviceLabel, attributes, mockInfos);
     });
 
     it('Should revert if caller is not the owner', async () => {

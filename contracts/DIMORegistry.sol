@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
+contract DIMORegistry is Ownable, ERC721URIStorage {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     EnumerableSet.Bytes32Set private _whitelistedAttributes; // Allowed node attributes
@@ -25,6 +25,7 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
     // Metadata Stuff
     string private _baseURIextended;
     string private _contractMetadataURI;
+    mapping(uint256 => string) private _tokenURIs;
     // End Metadata Stuff
 
     mapping(uint256 => Record) public records; // [Node id] => Node info
@@ -117,8 +118,7 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
         uint256 parentNode,
         string calldata label,
         bytes32[] calldata attributes,
-        string[] calldata infos,
-        string memory tokenURI_
+        string[] calldata infos
     ) external {
         require(records[parentNode].root, "Invalid node");
 
@@ -128,7 +128,6 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
 
         _safeMint(msg.sender, node);
         _setInfo(node, attributes, infos);
-        _setTokenURI(node, tokenURI_);
     }
 
     /// @notice Sets a node under a device or other node
@@ -190,10 +189,28 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
         public
         view
         virtual
-        override(ERC721, ERC721URIStorage)
-        returns (string memory tokenURI_)
+        override
+        returns (string memory)
     {
-        tokenURI_ = super.tokenURI(node);
+        require(
+            _exists(node),
+            "ERC721URIStorage: URI query for nonexistent token"
+        );
+
+        string memory _tokenURI = _tokenURIs[node];
+        string memory base = _baseURI();
+
+        // If there is no base URI, return the token URI.
+        if (bytes(base).length == 0) {
+            return _tokenURI;
+        }
+        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
+        if (bytes(_tokenURI).length > 0) {
+            return string(abi.encodePacked(base, _tokenURI));
+        }
+
+        // If tokenUri is not set, use the NFT id as the tokenUri
+        return string(abi.encodePacked(base, Strings.toHexString(node)));
     }
 
     /// @dev Public function to get contract metadata URL
@@ -214,9 +231,21 @@ contract DIMORegistry is Ownable, ERC721, ERC721URIStorage {
         baseURI_ = _baseURIextended;
     }
 
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
+        internal
+        virtual
+        override
+    {
+        require(
+            _exists(tokenId),
+            "ERC721URIStorage: URI set of nonexistent token"
+        );
+        _tokenURIs[tokenId] = _tokenURI;
+    }
+
     /// @dev Internal function to burn an NFT
     /// @param node the Node to burn
-    function _burn(uint256 node) internal override(ERC721, ERC721URIStorage) {
+    function _burn(uint256 node) internal override(ERC721URIStorage) {
         super._burn(node);
     }
 

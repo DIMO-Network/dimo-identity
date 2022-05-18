@@ -17,3 +17,7 @@ export function nodeHash(inputName: string) {
 
   return node;
 }
+
+export function getSelectors(intf: any): Array<string> {
+  return Object.keys(intf.functions).map((item) => intf.getSighash(item));
+}

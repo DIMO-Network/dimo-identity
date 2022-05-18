@@ -1,232 +1,146 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {DIMOStorage} from "./libraries/DIMOStorage.sol";
 
-contract DIMORegistry is Ownable, ERC721 {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
+contract DIMORegistry {
+    event AdminRoleTransferred(
+        address indexed previousAdmin,
+        address indexed newAdmin
+    );
+    event ModuleAdded(address indexed moduleAddr, bytes4[] selectors);
+    event ModuleRemoved(address indexed moduleAddr, bytes4[] selectors);
+    event ModuleUpdated(
+        address indexed newImplementation,
+        address indexed oldImplementation,
+        bytes4[] newSelectors,
+        bytes4[] oldSelectors
+    );
 
-    EnumerableSet.Bytes32Set private _whitelistedAttributes; // Allowed node attributes
-
-    struct Record {
-        uint256 originNode;
-        bool root;
-        mapping(bytes32 => string) info;
+    constructor() {
+        _setAdmin(msg.sender);
     }
 
-    struct Controller {
-        bool isController;
-        bool rootMinted;
+    modifier onlyOwner() {
+        require(
+            DIMOStorage.getStorage().admin == msg.sender,
+            "Caller is not the owner"
+        );
+        _;
     }
 
-    mapping(uint256 => Record) public records; // [Node id] => Node info
-    mapping(address => Controller) public controllers; // [Controller address] => is controller, has minted root
-
-    constructor() ERC721("DIMO Node", "DN") {
-        controllers[msg.sender].isController = true;
+    /// @notice pass a call to a module
+    /* solhint-disable no-complex-fallback, payable-fallback, no-inline-assembly */
+    fallback() external {
+        address implementation = DIMOStorage.getStorage().implementations[
+            msg.sig
+        ];
+        assembly {
+            calldatacopy(0, 0, calldatasize())
+            let result := delegatecall(
+                gas(),
+                implementation,
+                0,
+                calldatasize(),
+                0,
+                0
+            )
+            returndatacopy(0, 0, returndatasize())
+            switch result
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
+        }
     }
 
-    //***** Owner management *****//
+    /* solhint-enable no-complex-fallback, payable-fallback, no-inline-assembly */
 
-    /// @notice Adds an attribute to the whielist
-    /// @dev Only the owner can set new controllers
-    /// @param attribute The attribute to be added
-    function addAttribute(bytes32 attribute) external onlyOwner {
-        _whitelistedAttributes.add(attribute);
+    function getRecord(uint256 _id) external view returns (uint256 originNode) {
+        originNode = DIMOStorage.getStorage().records[_id].originNode;
     }
 
-    /// @notice Sets a address controller
-    /// @dev Only the owner can set new controllers
-    /// @param _controller The address of the controller
-    function setController(address _controller) external onlyOwner {
-        controllers[_controller].isController = true;
+    /// @notice Transfers admin role of the contract to a new account (`newAdmin`)
+    /// @param newAdmin new admin
+    function transferAdminRole(address newAdmin) external onlyOwner {
+        require(newAdmin != address(0), "newAdmin cannot be zero address");
+        _setAdmin(newAdmin);
     }
 
-    //***** Interaction with nodes *****//
+    /// @notice update module
+    /// @dev oldImplementation should be registered
+    /// @param newImplementation address of the module to register
+    /// @param oldImplementation address of the module to remove
+    /// @param newSelectors new function signatures list
+    /// @param oldSelectors old function signatures list
+    function updateModule(
+        address newImplementation,
+        address oldImplementation,
+        bytes4[] calldata newSelectors,
+        bytes4[] calldata oldSelectors
+    ) external onlyOwner {
+        removeModule(oldImplementation, oldSelectors);
+        addModule(newImplementation, newSelectors);
+        emit ModuleUpdated(
+            newImplementation,
+            oldImplementation,
+            newSelectors,
+            oldSelectors
+        );
+    }
 
-    /// @notice Mints a root
-    /// @dev Caller must be the owner
-    /// @dev Owner cannot mint more than one root
-    /// @param label The label specifying the root
-    /// @param _owner The address of the new owner
-    function mintRootByOwner(string calldata label, address _owner)
-        external
+    /// @notice Adds a new module
+    /// @dev function selector should not have been registered.
+    /// @param implementation address of the implementation
+    /// @param selectors selectors of the implementation contract
+    function addModule(address implementation, bytes4[] calldata selectors)
+        public
         onlyOwner
     {
-        require(!controllers[_owner].rootMinted, "Invalid request");
-        controllers[_owner].isController = true;
-
-        _mintRoot(label, _owner);
-    }
-
-    /// @notice Mints a root
-    /// @dev Caller must be a controller
-    /// @dev Owner cannot mint more than one root
-    /// @param label The label specifying the root
-    function mintRoot(string calldata label) external {
-        require(
-            controllers[msg.sender].isController &&
-                !controllers[msg.sender].rootMinted,
-            "Invalid request"
-        );
-
-        _mintRoot(label, msg.sender);
-    }
-
-    /// @notice Mints a device
-    /// @dev Device owner will be msg.sender
-    /// @dev Parent node must exist and must be a root
-    /// @param parentNode The corresponding root
-    /// @param label The label specifying the device
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
-    function mintDevice(
-        uint256 parentNode,
-        string calldata label,
-        bytes32[] calldata attributes,
-        string[] calldata infos
-    ) external {
-        require(records[parentNode].root, "Invalid node");
-
-        uint256 node = _verifyNewNode(parentNode, label);
-
-        records[node].originNode = node;
-
-        _safeMint(msg.sender, node);
-        _setInfo(node, attributes, infos);
-    }
-
-    /// @notice Sets a node under a device or other node
-    /// @dev Caller must be parent node owner
-    /// @dev Cannot be set under roots
-    /// @param parentNode The corresponding device or node
-    /// @param label The label specifying the node
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
-    function setNode(
-        uint256 parentNode,
-        string calldata label,
-        bytes32[] calldata attributes,
-        string[] calldata infos
-    ) external {
-        require(
-            ownerOf(records[parentNode].originNode) == msg.sender &&
-                !records[parentNode].root,
-            "Invalid node"
-        );
-
-        uint256 node = _verifyNewNode(parentNode, label);
-
-        records[node].originNode = records[parentNode].originNode;
-        _setInfo(node, attributes, infos);
-    }
-
-    /// @notice Add infos to node
-    /// @dev Only node owner can call this function
-    /// @dev attributes and infos arrays length must match
-    /// @dev attributes must be whitelisted
-    /// @param node Node where the info will be added
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
-    function setInfo(
-        uint256 node,
-        bytes32[] calldata attributes,
-        string[] calldata infos
-    ) external {
-        _setInfo(node, attributes, infos);
-    }
-
-    /// @notice Gets information stored in an attribute of a given node
-    /// @dev Returns empty string if does or attribute does not exists
-    /// @param node Node from which info will be obtained
-    /// @param attribute Key attribute
-    /// @return info Info obtained
-    function getInfo(uint256 node, bytes32 attribute)
-        external
-        view
-        returns (string memory info)
-    {
-        info = records[node].info[attribute];
-    }
-
-    //***** INTERNAL FUNCTIONS *****//
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal override {
-        if (records[tokenId].root) {
+        DIMOStorage.Storage storage s = DIMOStorage.getStorage();
+        for (uint256 i = 0; i < selectors.length; i++) {
             require(
-                controllers[to].isController && !controllers[to].rootMinted,
-                "Invalid transfer"
+                s.implementations[selectors[i]] == address(0),
+                "Selector already registered"
             );
-            controllers[from].rootMinted = false;
-            controllers[to].rootMinted = true;
+            s.implementations[selectors[i]] = implementation;
         }
+        bytes32 hash = keccak256(abi.encode(selectors));
+        s.selectorsHash[implementation] = hash;
+        emit ModuleAdded(implementation, selectors);
     }
 
-    //***** PRIVATE FUNCTIONS *****//
-
-    /// @dev Internal function to mint a root
-    /// @param label The label specifying the root
-    /// @param _owner The address of the new owner
-    function _mintRoot(string memory label, address _owner) private {
-        uint256 root = _verifyNewNode(0, label);
-
-        _safeMint(_owner, root);
-
-        records[root].root = true;
-        records[root].originNode = root;
-        controllers[_owner].rootMinted = true;
-    }
-
-    /// @dev Calculates and verifies if the new node already exists
-    /// @param parentNode The corresponding parent node
-    /// @param label The label specifying the node
-    /// @return The new hashed node
-    function _verifyNewNode(uint256 parentNode, string memory label)
-        private
-        view
-        returns (uint256)
+    /// @notice Adds a new module and supported functions
+    /// @dev function selector should not exist.
+    /// @param implementation implementation address
+    /// @param selectors function signatures
+    function removeModule(address implementation, bytes4[] calldata selectors)
+        public
+        onlyOwner
     {
-        uint256 newNode = uint256(
-            keccak256(
-                abi.encodePacked(parentNode, keccak256(abi.encodePacked(label)))
-            )
+        DIMOStorage.Storage storage s = DIMOStorage.getStorage();
+        bytes32 hash = keccak256(abi.encode(selectors));
+        require(
+            s.selectorsHash[implementation] == hash,
+            "Invalid selector list"
         );
 
-        require(records[newNode].originNode == 0, "Node already exists");
-
-        return newNode;
+        for (uint256 i = 0; i < selectors.length; i++) {
+            require(
+                s.implementations[selectors[i]] == implementation,
+                "Unregistered selector"
+            );
+            s.implementations[selectors[i]] = address(0);
+        }
+        emit ModuleRemoved(implementation, selectors);
     }
 
-    /// @dev Internal function to add infos to node
-    /// @dev Only node owner can call this function
-    /// @dev attributes and infos arrays length must match
-    /// @dev attributes must be whitelisted
-    /// @param node Node where the info will be added
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
-    function _setInfo(
-        uint256 node,
-        bytes32[] calldata attributes,
-        string[] calldata infos
-    ) private {
-        require(
-            ownerOf(records[node].originNode) == msg.sender,
-            "Only node owner"
-        );
-        require(attributes.length == infos.length, "Same length");
-
-        for (uint256 i = 0; i < attributes.length; i++) {
-            require(
-                _whitelistedAttributes.contains(attributes[i]),
-                "Not whitelisted"
-            );
-            records[node].info[attributes[i]] = infos[i];
-        }
+    /// @notice sets a new admin
+    /// @param newAdmin new admin
+    function _setAdmin(address newAdmin) private {
+        DIMOStorage.getStorage().admin = newAdmin;
+        emit AdminRoleTransferred(address(0), newAdmin);
     }
 }

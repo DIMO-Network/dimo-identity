@@ -6,7 +6,7 @@ library DIMOStorage {
         keccak256("DIMORegistry.storage");
 
     struct Record {
-        uint256 originNode;
+        uint256 parentNode;
         mapping(bytes32 => string) info;
     }
 
@@ -19,6 +19,7 @@ library DIMOStorage {
         mapping(address => bytes32) selectorsHash;
         // [Node id] => Node info
         mapping(uint256 => Record) records;
+        uint256 currentIndex;
     }
 
     /* solhint-disable no-inline-assembly */

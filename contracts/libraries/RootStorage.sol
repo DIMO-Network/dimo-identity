@@ -1,7 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
+import "./AttributeSet.sol";
+
 library RootStorage {
+    using AttributeSet for AttributeSet.Set;
+
     bytes32 private constant ROOT_STORAGE_SLOT =
         keccak256("DIMORegistry.root.storage");
 
@@ -13,6 +17,8 @@ library RootStorage {
     struct Storage {
         // [Controller address] => is controller, has minted root
         mapping(address => Controller) controllers;
+        // Allowed node attribute
+        AttributeSet.Set whitelistedAttributes;
     }
 
     /* solhint-disable no-inline-assembly */

@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import {DIMOStorage} from "./libraries/DIMOStorage.sol";
+import "./libraries/DIMOStorage.sol";
 
 contract DIMORegistry {
     event AdminRoleTransferred(
@@ -57,10 +57,6 @@ contract DIMORegistry {
     }
 
     /* solhint-enable no-complex-fallback, payable-fallback, no-inline-assembly */
-
-    function getRecord(uint256 _id) external view returns (uint256 originNode) {
-        originNode = DIMOStorage.getStorage().records[_id].originNode;
-    }
 
     /// @notice Transfers admin role of the contract to a new account (`newAdmin`)
     /// @param newAdmin new admin
@@ -135,6 +131,14 @@ contract DIMORegistry {
             s.implementations[selectors[i]] = address(0);
         }
         emit ModuleRemoved(implementation, selectors);
+    }
+
+    function getParentNode(uint256 id)
+        external
+        view
+        returns (uint256 parentNode)
+    {
+        parentNode = DIMOStorage.getStorage().records[id].parentNode;
     }
 
     /// @notice sets a new admin

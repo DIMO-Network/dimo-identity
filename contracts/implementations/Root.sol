@@ -41,30 +41,34 @@ contract Root is ERC721BaseInternal {
     /// @dev Caller must be an admin
     /// @dev Owner cannot mint more than one root
     /// @param _owner The address of the new owner
-    function mintRoot(address _owner)
-        external
-        onlyAdmin
-    {
+    /// @param attributes List of attributes to be added
+    /// @param infos List of infos matching the attributes param
+    function mintRoot(
+        address _owner,
+        bytes32[] calldata attributes,
+        string[] calldata infos
+    ) external onlyAdmin {
         RootStorage.Storage storage s = RootStorage.getStorage();
         require(!s.controllers[_owner].rootMinted, "Invalid request");
         s.controllers[_owner].isController = true;
 
-        _mintRoot(_owner);
+        uint256 newNodeId =  _mintRoot(_owner);
+        _setInfo(newNodeId, attributes, infos);
     }
 
     /// @notice Add infos to node
     /// @dev Only node owner can call this function
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param node Node where the info will be added
+    /// @param nodeId Node id where the info will be added
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     function setInfo(
-        uint256 node,
+        uint256 nodeId,
         bytes32[] calldata attributes,
         string[] calldata infos
     ) external {
-        _setInfo(node, attributes, infos);
+        _setInfo(nodeId, attributes, infos);
     }
 
     // TODO Documentation
@@ -86,15 +90,15 @@ contract Root is ERC721BaseInternal {
 
     /// @notice Gets information stored in an attribute of a given node
     /// @dev Returns empty string if does or attribute does not exists
-    /// @param node Node from which info will be obtained
+    /// @param nodeId Node id from which info will be obtained
     /// @param attribute Key attribute
     /// @return info Info obtained
-    function getInfo(uint256 node, bytes32 attribute)
+    function getInfo(uint256 nodeId, bytes32 attribute)
         external
         view
         returns (string memory info)
     {
-        info = DIMOStorage.getStorage().records[node].info[attribute];
+        info = DIMOStorage.getStorage().records[nodeId].info[attribute];
     }
 
     // TODO Documentation
@@ -103,12 +107,20 @@ contract Root is ERC721BaseInternal {
     }
 
     // TODO Documentation
-    function isController(address addr) external view returns (bool _isController) {
+    function isController(address addr)
+        external
+        view
+        returns (bool _isController)
+    {
         _isController = RootStorage.getStorage().controllers[addr].isController;
     }
 
     // TODO Documentation
-    function isRootMinted(address addr) external view returns (bool _isRootMinted) {
+    function isRootMinted(address addr)
+        external
+        view
+        returns (bool _isRootMinted)
+    {
         _isRootMinted = RootStorage.getStorage().controllers[addr].rootMinted;
     }
 
@@ -116,11 +128,13 @@ contract Root is ERC721BaseInternal {
 
     /// @dev Internal function to mint a root
     /// @param _owner The address of the new owner
-    function _mintRoot(address _owner) private {
+    /// @return newNodeId The new node id generated
+    function _mintRoot(address _owner) private returns(uint256 newNodeId) {
         DIMOStorage.Storage storage s = DIMOStorage.getStorage();
         s.currentIndex++;
+        newNodeId = s.currentIndex;
 
-        _safeMint(_owner, s.currentIndex);
+        _safeMint(_owner, newNodeId);
 
         RootStorage.getStorage().controllers[_owner].rootMinted = true;
     }
@@ -152,11 +166,11 @@ contract Root is ERC721BaseInternal {
     /// @dev Only node owner can call this function
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param node Node where the info will be added
+    /// @param nodeId Node id where the info will be added
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     function _setInfo(
-        uint256 node,
+        uint256 nodeId,
         bytes32[] calldata attributes,
         string[] calldata infos
     ) private {
@@ -166,7 +180,7 @@ contract Root is ERC721BaseInternal {
         //     "Only node owner"
         // );
         require(attributes.length == infos.length, "Same length");
-        
+
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         RootStorage.Storage storage s = RootStorage.getStorage();
 
@@ -175,7 +189,7 @@ contract Root is ERC721BaseInternal {
                 AttributeSet.exists(s.whitelistedAttributes, attributes[i]),
                 "Not whitelisted"
             );
-            ds.records[node].info[attributes[i]] = infos[i];
+            ds.records[nodeId].info[attributes[i]] = infos[i];
         }
     }
 }

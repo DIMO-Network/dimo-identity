@@ -2,7 +2,7 @@ import chai from 'chai';
 import { ethers, waffle } from 'hardhat';
 
 import { DIMORegistry, Root } from '../typechain';
-import { getSelectors } from './utils';
+import { getSelectors, createSnapshot, revertToSnapshot } from './utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -24,6 +24,7 @@ const mockInfos = [mockInfo1, mockInfo2];
 const mockInfosWrongSize = [mockInfo1];
 
 describe('DIMORegistry', function () {
+  let snapshot: string;
   let dimoRegistry: DIMORegistry;
   let rootInstance: Root;
 
@@ -35,7 +36,7 @@ describe('DIMORegistry', function () {
     nonController
   ] = provider.getWallets();
 
-  beforeEach(async () => {
+  before(async () => {
     // Deploy DIMORegistry Implementation        
     const DIMORegistry = await ethers.getContractFactory('DIMORegistry');
     // eslint-disable-next-line prettier/prettier
@@ -59,6 +60,14 @@ describe('DIMORegistry', function () {
     // Whitelist attributes
     await rootInstance.connect(admin).addAttribute(mockAttribute1);
     await rootInstance.connect(admin).addAttribute(mockAttribute2);
+  });
+
+  beforeEach(async () => {
+    snapshot = await createSnapshot();
+  });
+
+  afterEach(async () => {
+    await revertToSnapshot(snapshot);
   });
 
   describe('addAttribute', () => {

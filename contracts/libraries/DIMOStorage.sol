@@ -7,7 +7,7 @@ library DIMOStorage {
 
     struct Record {
         uint256 parentNode;
-        mapping(bytes32 => string) info;
+        mapping(string => string) info;
     }
 
     struct Storage {

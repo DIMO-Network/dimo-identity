@@ -11,9 +11,9 @@ const provider = waffle.provider;
 chai.use(solidity);
 
 // Mock attributes
-const mockAttribute1 = ethers.utils.formatBytes32String('mockAttribute1');
-const mockAttribute2 = ethers.utils.formatBytes32String('mockAttribute2');
-const mockAttribute3 = ethers.utils.formatBytes32String('mockAttribute3');
+const mockAttribute1 = 'mockAttribute1';
+const mockAttribute2 = 'mockAttribute2';
+const mockAttribute3 = 'mockAttribute3';
 const mockAttributes = [mockAttribute1, mockAttribute2];
 const attributesNotWhitelisted = [mockAttribute1, mockAttribute3];
 
@@ -32,7 +32,6 @@ describe('DIMORegistry', function () {
     admin,
     nonAdmin,
     controller1,
-    controller2,
     nonController
   ] = provider.getWallets();
 
@@ -204,76 +203,6 @@ describe('DIMORegistry', function () {
       expect(
         await rootInstance.getInfo(1, mockAttribute2)
       ).to.be.equal(mockInfo2);
-    });
-  });
-
-  describe('controller transfer', () => {
-    it('Should revert if receiver is not a controller', async () => {
-      await rootInstance
-        .connect(admin)
-        .mintRoot(controller1.address, mockAttributes, mockInfos);
-
-      await expect(
-        rootInstance
-          .connect(controller1)
-          .safeTransferFrom(
-            controller1.address,
-            controller2.address,
-            1
-          )
-      ).to.be.revertedWith('Invalid transfer');
-    });
-    it('Should revert if receiver has already minted a root', async () => {
-      await rootInstance
-        .connect(admin)
-        .mintRoot(controller1.address, mockAttributes, mockInfos);
-      await rootInstance
-        .connect(admin)
-        .mintRoot(controller2.address, mockAttributes, mockInfos);
-
-      await expect(
-        rootInstance
-          .connect(controller1)
-          .safeTransferFrom(
-            controller1.address,
-            controller2.address,
-            1
-          )
-      ).to.be.revertedWith('Invalid transfer');
-    });
-    it('Should correctly update rootMinted status', async () => {
-      await rootInstance.connect(admin).setController(controller2.address);
-      await rootInstance.connect(admin).mintRoot(controller1.address, mockAttributes, mockInfos);
-
-      const isRootMinted1Before = await rootInstance.isRootMinted(
-        controller1.address
-      );
-      const isRootMinted2Before = await rootInstance.isRootMinted(
-        controller2.address
-      );
-      // eslint-disable-next-line no-unused-expressions
-      expect(isRootMinted1Before).to.be.true;
-      // eslint-disable-next-line no-unused-expressions
-      expect(isRootMinted2Before).to.be.false;
-
-      await rootInstance
-        .connect(controller1)
-        .safeTransferFrom(
-          controller1.address,
-          controller2.address,
-          1
-        );
-
-      const isRootMinted1After = await rootInstance.isRootMinted(
-        controller1.address
-      );
-      const isRootMinted2After = await rootInstance.isRootMinted(
-        controller2.address
-      );
-      // eslint-disable-next-line no-unused-expressions
-      expect(isRootMinted1After).to.be.false;
-      // eslint-disable-next-line no-unused-expressions
-      expect(isRootMinted2After).to.be.true;
     });
   });
 });

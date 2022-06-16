@@ -4,13 +4,12 @@ pragma solidity ^0.8.13;
 /// @dev derived from https://github.com/OpenZeppelin/openzeppelin-contracts (MIT license)
 
 library AttributeSet {
-
     struct Set {
-        bytes32[] _values;
-        mapping(bytes32 => uint256) _indexes;
+        string[] _values;
+        mapping(string => uint256) _indexes;
     }
 
-    function add(Set storage set, bytes32 key) internal returns (bool) {
+    function add(Set storage set, string memory key) internal returns (bool) {
         if (!exists(set, key)) {
             set._values.push(key);
             set._indexes[key] = set._values.length;
@@ -20,16 +19,18 @@ library AttributeSet {
         }
     }
 
-    function remove(Set storage set, bytes32 key) internal returns (bool) {
+    function remove(Set storage set, string memory key)
+        internal
+        returns (bool)
+    {
         uint256 valueIndex = set._indexes[key];
 
         if (valueIndex != 0) {
-
             uint256 toDeleteIndex = valueIndex - 1;
             uint256 lastIndex = set._values.length - 1;
 
             if (lastIndex != toDeleteIndex) {
-                bytes32 lastvalue = set._values[lastIndex];
+                string memory lastvalue = set._values[lastIndex];
 
                 // Move the last value to the index where the value to delete is
                 set._values[toDeleteIndex] = lastvalue;
@@ -49,11 +50,15 @@ library AttributeSet {
         }
     }
 
-    function count(Set storage set) internal view returns(uint) {
-        return(set._values.length);
+    function count(Set storage set) internal view returns (uint256) {
+        return (set._values.length);
     }
 
-    function exists(Set storage set, bytes32 key) internal view returns(bool) {
+    function exists(Set storage set, string memory key)
+        internal
+        view
+        returns (bool)
+    {
         return set._indexes[key] != 0;
     }
 }

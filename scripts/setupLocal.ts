@@ -37,10 +37,7 @@ async function mintRoots(
 async function addAttributes(admin: SignerWithAddress) {
   console.log('\n----- Adding attributes -----');
   for (const attribute of attributes) {
-    const attributeBytes32 = ethers.utils.formatBytes32String(attribute);
-    await (
-      await dimoRegistry.connect(admin).addAttribute(attributeBytes32)
-    ).wait();
+    await (await dimoRegistry.connect(admin).addAttribute(attribute)).wait();
 
     console.log(`Attribute ${attribute} added`);
   }

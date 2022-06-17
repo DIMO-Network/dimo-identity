@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { ethers, waffle } from 'hardhat';
 
-import { DIMORegistry, Root } from '../typechain';
+import { DIMORegistry, Getter, Root } from '../typechain';
 import { getSelectors, createSnapshot, revertToSnapshot } from './utils';
 
 const { expect } = chai;
@@ -26,6 +26,7 @@ const mockInfosWrongSize = [mockInfo1];
 describe('DIMORegistry', function () {
   let snapshot: string;
   let dimoRegistry: DIMORegistry;
+  let getterInstance: Getter;
   let rootInstance: Root;
 
   const [
@@ -42,23 +43,31 @@ describe('DIMORegistry', function () {
     const dimoRegistryImplementation = await DIMORegistry.connect(admin).deploy() as DIMORegistry;
     await dimoRegistryImplementation.deployed();
 
-    // Deploy Root module
+    // Deploy Getter module
+    const Getter = await ethers.getContractFactory('Getter');
+    const getterImplementation = await Getter.connect(admin).deploy() as Getter;
+    await getterImplementation.deployed();
+
+    // Deploy Root node
     const Root = await ethers.getContractFactory('Root');
     const rootImplementation = await Root.connect(admin).deploy() as Root;
     await rootImplementation.deployed();
 
-    // Get Root selectors
+    // Get selectors
+    const getterSelectors = getSelectors(Getter.interface);
     const rootSelectors = getSelectors(Root.interface);
 
     dimoRegistry = await ethers.getContractAt('DIMORegistry', dimoRegistryImplementation.address) as DIMORegistry;
+    getterInstance = await ethers.getContractAt('Getter', dimoRegistry.address) as Getter;
     rootInstance = await ethers.getContractAt('Root', dimoRegistry.address) as Root;
 
-    // Register Root module
+    // Register modules
+    await dimoRegistry.connect(admin).addModule(getterImplementation.address, getterSelectors);
     await dimoRegistry.connect(admin).addModule(rootImplementation.address, rootSelectors);
 
     // Whitelist attributes
-    await rootInstance.connect(admin).addAttribute(mockAttribute1);
-    await rootInstance.connect(admin).addAttribute(mockAttribute2);
+    await rootInstance.connect(admin).addRootAttribute(mockAttribute1);
+    await rootInstance.connect(admin).addRootAttribute(mockAttribute2);
   });
 
   beforeEach(async () => {
@@ -69,10 +78,10 @@ describe('DIMORegistry', function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('addAttribute', () => {
+  describe('addRootAttribute', () => {
     it('Should revert if caller is an admin', async () => {
       await expect(
-        rootInstance.connect(nonAdmin).addAttribute(mockAttribute1)
+        rootInstance.connect(nonAdmin).addRootAttribute(mockAttribute1)
       ).to.be.revertedWith('Caller is not an admin');
     });
   });
@@ -118,12 +127,12 @@ describe('DIMORegistry', function () {
     it('Should correctly set node as root', async () => {
       await rootInstance.connect(admin).mintRoot(controller1.address, mockAttributes, mockInfos);
 
-      const parentNode = await dimoRegistry.getParentNode(1);
+      const parentNode = await getterInstance.getParentNode(1);
 
       // Assure it does not have parent
       expect(parentNode).to.be.equal(0);
       // Assure if has an owner although there is no parent
-      expect(await rootInstance.ownerOf(1)).to.be.equal(controller1.address);
+      expect(await getterInstance.ownerOf(1)).to.be.equal(controller1.address);
     });
     it('Should correctly set rootMinted', async () => {
       const isRootMintedBefore = await rootInstance.isRootMinted(controller1.address);
@@ -158,50 +167,50 @@ describe('DIMORegistry', function () {
         .mintRoot(controller1.address, mockAttributes, mockInfos);
 
       expect(
-        await rootInstance.getInfo(1, mockAttribute1)
+        await getterInstance.getInfo(1, mockAttribute1)
       ).to.be.equal(mockInfo1);
       expect(
-        await rootInstance.getInfo(1, mockAttribute2)
+        await getterInstance.getInfo(1, mockAttribute2)
       ).to.be.equal(mockInfo2);
     });
   });
 
-  describe('setInfo', () => {
+  describe('setRootInfo', () => {
     beforeEach(async () => {
       await rootInstance
         .connect(admin)
         .mintRoot(controller1.address, mockAttributes, mockInfos);
     });
 
-    // it('Should revert if caller is not the owner', async () => {
-    //   await expect(
-    //     dimoRegistry.connect(user2).setInfo(mockRootId, attributes, mockInfos)
-    //   ).to.be.revertedWith('Only node owner');
-    // });
+    it('Should revert if caller is not the owner', async () => {
+      await expect(
+        rootInstance.connect(controller1).setRootInfo(1, mockAttributes, mockInfos)
+      ).to.be.revertedWith('Caller is not an admin');
+    });
     it('Should revert if attributes and infos array length does not match', async () => {
       await expect(
         rootInstance
-          .connect(controller1)
-          .setInfo(1, mockAttributes, mockInfosWrongSize)
+          .connect(admin)
+          .setRootInfo(1, mockAttributes, mockInfosWrongSize)
       ).to.be.revertedWith('Same length');
     });
     it('Should revert if attribute is not whitelisted', async () => {
       await expect(
         rootInstance
-          .connect(controller1)
-          .setInfo(1, attributesNotWhitelisted, mockInfos)
+          .connect(admin)
+          .setRootInfo(1, attributesNotWhitelisted, mockInfos)
       ).to.be.revertedWith('Not whitelisted');
     });
     it('Should correctly set infos', async () => {
       await rootInstance
-        .connect(controller1)
-        .setInfo(1, mockAttributes, mockInfos);
+        .connect(admin)
+        .setRootInfo(1, mockAttributes, mockInfos);
 
       expect(
-        await rootInstance.getInfo(1, mockAttribute1)
+        await getterInstance.getInfo(1, mockAttribute1)
       ).to.be.equal(mockInfo1);
       expect(
-        await rootInstance.getInfo(1, mockAttribute2)
+        await getterInstance.getInfo(1, mockAttribute2)
       ).to.be.equal(mockInfo2);
     });
   });

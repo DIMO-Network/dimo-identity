@@ -19,7 +19,7 @@ contract Root is ERC721BaseInternal {
     /// @notice Adds an attribute to the whitelist
     /// @dev Only the owner can set new controllers
     /// @param attribute The attribute to be added
-    function addAttribute(string calldata attribute) external onlyAdmin {
+    function addRootAttribute(string calldata attribute) external onlyAdmin {
         RootStorage.Storage storage s = RootStorage.getStorage();
         AttributeSet.add(s.whitelistedAttributes, attribute);
     }
@@ -48,7 +48,14 @@ contract Root is ERC721BaseInternal {
         require(!s.controllers[_owner].rootMinted, "Invalid request");
         s.controllers[_owner].isController = true;
 
-        uint256 newNodeId = _mintRoot(_owner);
+        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+        ds.currentIndex++;
+        uint256 newNodeId = ds.currentIndex;
+
+        _safeMint(_owner, newNodeId);
+
+        RootStorage.getStorage().controllers[_owner].rootMinted = true;
+
         _setInfo(newNodeId, attributes, infos);
     }
 
@@ -59,31 +66,12 @@ contract Root is ERC721BaseInternal {
     /// @param nodeId Node id where the info will be added
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
-    function setInfo(
+    function setRootInfo(
         uint256 nodeId,
         string[] calldata attributes,
         string[] calldata infos
-    ) external {
+    ) external onlyAdmin {
         _setInfo(nodeId, attributes, infos);
-    }
-
-    /// @notice Gets information stored in an attribute of a given node
-    /// @dev Returns empty string if does or attribute does not exists
-    /// @param nodeId Node id from which info will be obtained
-    /// @param attribute Key attribute
-    /// @return info Info obtained
-    function getInfo(uint256 nodeId, string calldata attribute)
-        external
-        view
-        returns (string memory info)
-    {
-        info = DIMOStorage.getStorage().records[nodeId].info[attribute];
-    }
-
-    /// @notice Gets the owner of a root node
-    /// @param tokenId the id associated to the root node
-    function ownerOf(uint256 tokenId) external view returns (address) {
-        return _ownerOf(tokenId);
     }
 
     /// @notice Verify if an address is a controller
@@ -107,19 +95,6 @@ contract Root is ERC721BaseInternal {
     }
 
     // ***** PRIVATE FUNCTIONS *****//
-
-    /// @dev Internal function to mint a root
-    /// @param _owner The address of the new owner
-    /// @return newNodeId The new node id generated
-    function _mintRoot(address _owner) private returns (uint256 newNodeId) {
-        DIMOStorage.Storage storage s = DIMOStorage.getStorage();
-        s.currentIndex++;
-        newNodeId = s.currentIndex;
-
-        _safeMint(_owner, newNodeId);
-
-        RootStorage.getStorage().controllers[_owner].rootMinted = true;
-    }
 
     // /// @dev Calculates and verifies if the new node already exists
     // /// @param parentNode The corresponding parent node

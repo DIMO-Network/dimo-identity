@@ -133,14 +133,6 @@ contract DIMORegistry {
         emit ModuleRemoved(implementation, selectors);
     }
 
-    function getParentNode(uint256 id)
-        external
-        view
-        returns (uint256 parentNode)
-    {
-        parentNode = DIMOStorage.getStorage().records[id].parentNode;
-    }
-
     /// @notice sets a new admin
     /// @param newAdmin new admin
     function _setAdmin(address newAdmin) private {

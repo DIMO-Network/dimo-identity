@@ -19,7 +19,7 @@ contract Root is ERC721BaseInternal {
     /// @notice Adds an attribute to the whitelist
     /// @dev Only the owner can set new controllers
     /// @param attribute The attribute to be added
-    function addAttribute(string memory attribute) external onlyAdmin {
+    function addAttribute(string calldata attribute) external onlyAdmin {
         RootStorage.Storage storage s = RootStorage.getStorage();
         AttributeSet.add(s.whitelistedAttributes, attribute);
     }
@@ -72,7 +72,7 @@ contract Root is ERC721BaseInternal {
     /// @param nodeId Node id from which info will be obtained
     /// @param attribute Key attribute
     /// @return info Info obtained
-    function getInfo(uint256 nodeId, string memory attribute)
+    function getInfo(uint256 nodeId, string calldata attribute)
         external
         view
         returns (string memory info)

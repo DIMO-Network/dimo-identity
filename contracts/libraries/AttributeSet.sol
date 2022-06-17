@@ -9,7 +9,7 @@ library AttributeSet {
         mapping(string => uint256) _indexes;
     }
 
-    function add(Set storage set, string memory key) internal returns (bool) {
+    function add(Set storage set, string calldata key) internal returns (bool) {
         if (!exists(set, key)) {
             set._values.push(key);
             set._indexes[key] = set._values.length;
@@ -19,7 +19,7 @@ library AttributeSet {
         }
     }
 
-    function remove(Set storage set, string memory key)
+    function remove(Set storage set, string calldata key)
         internal
         returns (bool)
     {
@@ -54,7 +54,7 @@ library AttributeSet {
         return (set._values.length);
     }
 
-    function exists(Set storage set, string memory key)
+    function exists(Set storage set, string calldata key)
         internal
         view
         returns (bool)

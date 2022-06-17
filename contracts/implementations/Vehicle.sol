@@ -40,7 +40,7 @@ contract Vehicle is ERC721BaseInternal {
     ) external onlyAdmin {
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
 
-        require(ds.records[rootNode].nodeType == 0, "Invalid node");
+        require(ds.records[rootNode].parentNode == 0, "Invalid node");
 
         ds.currentIndex++;
         uint256 newNodeId = ds.currentIndex;

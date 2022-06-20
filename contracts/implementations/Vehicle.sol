@@ -6,6 +6,8 @@ import "../libraries/VehicleStorage.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
 
 contract Vehicle is ERC721BaseInternal {
+    event AttributeAdded(string attribute);
+
     modifier onlyAdmin() {
         require(
             DIMOStorage.getStorage().admin == msg.sender,
@@ -22,6 +24,8 @@ contract Vehicle is ERC721BaseInternal {
     function addVehicleAttribute(string calldata attribute) external onlyAdmin {
         VehicleStorage.Storage storage s = VehicleStorage.getStorage();
         AttributeSet.add(s.whitelistedAttributes, attribute);
+
+        emit AttributeAdded(attribute);
     }
 
     // ***** Interaction with nodes *****//

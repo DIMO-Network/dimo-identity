@@ -6,6 +6,9 @@ import "../libraries/RootStorage.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
 
 contract Root is ERC721BaseInternal {
+    event AttributeAdded(string attribute);
+    event ControllerSet(address indexed controller);
+
     modifier onlyAdmin() {
         require(
             DIMOStorage.getStorage().admin == msg.sender,
@@ -22,6 +25,8 @@ contract Root is ERC721BaseInternal {
     function addRootAttribute(string calldata attribute) external onlyAdmin {
         RootStorage.Storage storage s = RootStorage.getStorage();
         AttributeSet.add(s.whitelistedAttributes, attribute);
+
+        emit AttributeAdded(attribute);
     }
 
     /// @notice Sets a address controller
@@ -29,6 +34,8 @@ contract Root is ERC721BaseInternal {
     /// @param _controller The address of the controller
     function setController(address _controller) external onlyAdmin {
         RootStorage.getStorage().controllers[_controller].isController = true;
+
+        emit ControllerSet(_controller);
     }
 
     // ***** Interaction with nodes *****//

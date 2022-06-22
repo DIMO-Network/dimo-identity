@@ -15,6 +15,7 @@ library RootStorage {
     }
 
     struct Storage {
+        uint256 nodeType;
         // [Controller address] => is controller, has minted root
         mapping(address => Controller) controllers;
         // Allowed node attribute

@@ -6,6 +6,7 @@ library DIMOStorage {
         keccak256("DIMORegistry.storage");
 
     struct Record {
+        uint256 nodeType;
         uint256 parentNode;
         mapping(string => string) info;
     }

@@ -10,6 +10,7 @@ library VehicleStorage {
         keccak256("DIMORegistry.vehicle.storage");
 
     struct Storage {
+        uint256 nodeType;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
     }

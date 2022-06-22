@@ -1,26 +1,30 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
+import "../Modifiers.sol";
 import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/RootStorage.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
 
-contract Root is ERC721BaseInternal {
+contract Root is ERC721BaseInternal, Modifiers {
     event AttributeAdded(string attribute);
     event ControllerSet(address indexed controller);
 
-    modifier onlyAdmin() {
-        require(
-            DIMOStorage.getStorage().admin == msg.sender,
-            "Caller is not an admin"
-        );
-        _;
+    // ***** Admin management ***** //
+
+    /// @notice Sets contract node type
+    /// @dev Only an admin can set the node type
+    /// @dev The node type can only be set once
+    /// @param label The label of the node type
+    function setRootNodeType(bytes calldata label) external onlyAdmin {
+        RootStorage.Storage storage s = RootStorage.getStorage();
+        require(s.nodeType == 0, "Node type already set");
+
+        s.nodeType = uint256(keccak256(label));
     }
 
-    // ***** Owner management *****//
-
     /// @notice Adds an attribute to the whitelist
-    /// @dev Only the owner can set new controllers
+    /// @dev Only an admin can set new controllers
     /// @param attribute The attribute to be added
     function addRootAttribute(string calldata attribute) external onlyAdmin {
         RootStorage.Storage storage s = RootStorage.getStorage();
@@ -30,7 +34,7 @@ contract Root is ERC721BaseInternal {
     }
 
     /// @notice Sets a address controller
-    /// @dev Only the owner can set new controllers
+    /// @dev Only an admin can set new controllers
     /// @param _controller The address of the controller
     function setController(address _controller) external onlyAdmin {
         RootStorage.getStorage().controllers[_controller].isController = true;
@@ -38,11 +42,10 @@ contract Root is ERC721BaseInternal {
         emit ControllerSet(_controller);
     }
 
-    // ***** Interaction with nodes *****//
+    // ***** Interaction with nodes ***** //
 
     /// @notice Mints a root
     /// @dev Caller must be an admin
-    /// @dev Owner cannot mint more than one root
     /// @param _owner The address of the new owner
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
@@ -61,13 +64,13 @@ contract Root is ERC721BaseInternal {
 
         _safeMint(_owner, newNodeId);
 
-        RootStorage.getStorage().controllers[_owner].rootMinted = true;
+        s.controllers[_owner].rootMinted = true;
+        ds.records[newNodeId].nodeType = s.nodeType;
 
         _setInfo(newNodeId, attributes, infos);
     }
 
     /// @notice Add infos to node
-    /// @dev Only node owner can call this function
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param nodeId Node id where the info will be added
@@ -101,33 +104,9 @@ contract Root is ERC721BaseInternal {
         _isRootMinted = RootStorage.getStorage().controllers[addr].rootMinted;
     }
 
-    // ***** PRIVATE FUNCTIONS *****//
-
-    // /// @dev Calculates and verifies if the new node already exists
-    // /// @param parentNode The corresponding parent node
-    // /// @param label The label specifying the node
-    // /// @return The new hashed node
-    // function _verifyNewNode(uint256 parentNode, string memory label)
-    //     private
-    //     view
-    //     returns (uint256)
-    // {
-    //     uint256 newNode = uint256(
-    //         keccak256(
-    //             abi.encodePacked(parentNode, keccak256(abi.encodePacked(label)))
-    //         )
-    //     );
-
-    //     require(
-    //         DIMOStorage.getStorage().records[newNode].originNode == 0,
-    //         "Node already exists"
-    //     );
-
-    //     return newNode;
-    // }
+    // ***** PRIVATE FUNCTIONS ***** //
 
     /// @dev Internal function to add infos to node
-    /// @dev Only node owner can call this function
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param nodeId Node id where the info will be added
@@ -138,11 +117,6 @@ contract Root is ERC721BaseInternal {
         string[] calldata attributes,
         string[] calldata infos
     ) private {
-        // TODO Needed?
-        // require(
-        //     ownerOf(node) == msg.sender,
-        //     "Only node owner"
-        // );
         require(attributes.length == infos.length, "Same length");
 
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();

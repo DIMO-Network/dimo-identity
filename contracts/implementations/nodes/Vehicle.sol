@@ -1,25 +1,30 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
+import "../Modifiers.sol";
 import "../../libraries/DIMOStorage.sol";
+import "../../libraries/nodes/RootStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
 
-contract Vehicle is ERC721BaseInternal {
+contract Vehicle is ERC721BaseInternal, Modifiers {
     event AttributeAdded(string attribute);
 
-    modifier onlyAdmin() {
-        require(
-            DIMOStorage.getStorage().admin == msg.sender,
-            "Caller is not an admin"
-        );
-        _;
+    // ***** Admin management ***** //
+
+    /// @notice Sets contract node type
+    /// @dev Only an admin can set the node type
+    /// @dev The node type can only be set once
+    /// @param label The label of the node type
+    function setVehicleNodeType(bytes calldata label) external onlyAdmin {
+        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+        require(s.nodeType == 0, "Node type already set");
+
+        s.nodeType = uint256(keccak256(label));
     }
 
-    // ***** Owner management *****//
-
     /// @notice Adds an attribute to the whielist
-    /// @dev Only the owner can set new controllers
+    /// @dev Only an admin can set new controllers
     /// @param attribute The attribute to be added
     function addVehicleAttribute(string calldata attribute) external onlyAdmin {
         VehicleStorage.Storage storage s = VehicleStorage.getStorage();
@@ -43,20 +48,25 @@ contract Vehicle is ERC721BaseInternal {
         string[] calldata infos
     ) external onlyAdmin {
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+        RootStorage.Storage storage rs = RootStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
-        require(ds.records[rootNode].parentNode == 0, "Invalid parent node");
+        require(
+            ds.records[rootNode].nodeType == rs.nodeType,
+            "Invalid parent node"
+        );
 
         ds.currentIndex++;
         uint256 newNodeId = ds.currentIndex;
 
         ds.records[newNodeId].parentNode = rootNode;
+        ds.records[newNodeId].nodeType = vs.nodeType;
 
         _safeMint(_owner, newNodeId);
         _setInfo(newNodeId, attributes, infos);
     }
 
     /// @notice Add infos to node
-    /// @dev Only node owner can call this function
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param node Node where the info will be added
@@ -70,10 +80,9 @@ contract Vehicle is ERC721BaseInternal {
         _setInfo(node, attributes, infos);
     }
 
-    // ***** PRIVATE FUNCTIONS *****//
+    // ***** PRIVATE FUNCTIONS ***** //
 
     /// @dev Internal function to add infos to node
-    /// @dev Only node owner can call this function
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param node Node where the info will be added

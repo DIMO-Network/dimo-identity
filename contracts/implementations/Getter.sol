@@ -5,6 +5,16 @@ import "../libraries/DIMOStorage.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
 
 contract Getter is ERC721BaseInternal {
+    /// @notice Gets the node type of a node
+    /// @param tokenId the id associated to the node
+    function getNodeType(uint256 tokenId)
+        external
+        view
+        returns (uint256 nodeType)
+    {
+        nodeType = DIMOStorage.getStorage().records[tokenId].nodeType;
+    }
+
     /// @notice Gets the parent node of a node
     /// @param tokenId the id associated to the node
     function getParentNode(uint256 tokenId)

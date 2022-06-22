@@ -20,6 +20,9 @@ describe('Root', async function () {
   before(async () => {
     [, getterInstance, rootInstance] = await initialize(['Getter', 'Root']);
 
+    // Set root node type
+    await rootInstance.connect(admin).setRootNodeType(C.rootNodeType);
+
     // Whitelist Root attributes
     await rootInstance.connect(admin).addRootAttribute(C.mockAttribute1);
     await rootInstance.connect(admin).addRootAttribute(C.mockAttribute2);
@@ -33,8 +36,25 @@ describe('Root', async function () {
     await revertToSnapshot(snapshot);
   });
 
+  describe('setNodeType', () => {
+    it('Should revert if caller is not an admin', async () => {
+      await expect(
+        rootInstance.connect(nonAdmin).setRootNodeType(C.rootNodeType)
+      ).to.be.revertedWith('Caller is not an admin');
+    });
+    it('Should revert if node type is already set', async () => {
+      const [, localRootInstance] = await initialize(['Root']);
+
+      await localRootInstance.connect(admin).setRootNodeType(C.rootNodeType);
+
+      await expect(
+        localRootInstance.connect(admin).setRootNodeType(C.rootNodeType)
+      ).to.be.revertedWith('Node type already set');
+    });
+  });
+
   describe('addRootAttribute', () => {
-    it('Should revert if caller is an admin', async () => {
+    it('Should revert if caller is not an admin', async () => {
       await expect(
         rootInstance.connect(nonAdmin).addRootAttribute(C.mockAttribute1)
       ).to.be.revertedWith('Caller is not an admin');
@@ -49,7 +69,7 @@ describe('Root', async function () {
   });
 
   describe('setController', () => {
-    it('Should revert if caller is not the owner', async () => {
+    it('Should revert if caller is not an admin', async () => {
       await expect(
         rootInstance.connect(nonAdmin).setController(controller1.address)
       ).to.be.revertedWith('Caller is not an admin');
@@ -64,7 +84,7 @@ describe('Root', async function () {
   });
 
   describe('mintRoot', () => {
-    it('Should revert if caller is not the admin', async () => {
+    it('Should revert if caller is not an admin', async () => {
       await expect(
         rootInstance
           .connect(nonAdmin)
@@ -99,7 +119,16 @@ describe('Root', async function () {
       // eslint-disable-next-line no-unused-expressions
       expect(isControllerAfter).to.be.true;
     });
-    it('Should correctly set node as root', async () => {
+    it('Should correctly set node type', async () => {
+      await rootInstance
+        .connect(admin)
+        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+
+      const nodeType = await getterInstance.getNodeType(1);
+
+      expect(nodeType).to.equal(C.rootNodeTypeId);
+    });
+    it('Should correctly set parent node', async () => {
       await rootInstance
         .connect(admin)
         .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
@@ -108,7 +137,12 @@ describe('Root', async function () {
 
       // Assure it does not have parent
       expect(parentNode).to.be.equal(0);
-      // Assure if has an owner although there is no parent
+    });
+    it('Should correctly set node owner', async () => {
+      await rootInstance
+        .connect(admin)
+        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+
       expect(await getterInstance.ownerOf(1)).to.be.equal(controller1.address);
     });
     it('Should correctly set rootMinted', async () => {

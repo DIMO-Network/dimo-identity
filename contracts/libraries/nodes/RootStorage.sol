@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "./AttributeSet.sol";
+import "../AttributeSet.sol";
 
 library RootStorage {
     using AttributeSet for AttributeSet.Set;

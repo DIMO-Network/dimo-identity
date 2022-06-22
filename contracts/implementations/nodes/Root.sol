@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "../libraries/DIMOStorage.sol";
-import "../libraries/RootStorage.sol";
+import "../../libraries/DIMOStorage.sol";
+import "../../libraries/nodes/RootStorage.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
 
 contract Root is ERC721BaseInternal {

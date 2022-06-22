@@ -16,6 +16,7 @@
     ],
     "two-lines-top-level-separator": [
       "warn"
-    ]
+    ],
+    "indent": "warn"
   }
 }

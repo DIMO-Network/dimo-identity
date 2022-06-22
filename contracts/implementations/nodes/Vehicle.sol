@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "../libraries/DIMOStorage.sol";
-import "../libraries/VehicleStorage.sol";
+import "../../libraries/DIMOStorage.sol";
+import "../../libraries/nodes/VehicleStorage.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
 
 contract Vehicle is ERC721BaseInternal {
@@ -44,7 +44,7 @@ contract Vehicle is ERC721BaseInternal {
     ) external onlyAdmin {
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
 
-        require(ds.records[rootNode].parentNode == 0, "Invalid node");
+        require(ds.records[rootNode].parentNode == 0, "Invalid parent node");
 
         ds.currentIndex++;
         uint256 newNodeId = ds.currentIndex;

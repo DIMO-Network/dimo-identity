@@ -1,8 +1,8 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { waffle } from 'hardhat';
 
-import { DIMORegistry, Getter, Root } from '../typechain';
-import { getSelectors, createSnapshot, revertToSnapshot } from './utils';
+import { Getter, Root } from '../typechain';
+import { initialize, createSnapshot, revertToSnapshot, C } from './utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -10,64 +10,19 @@ const provider = waffle.provider;
 
 chai.use(solidity);
 
-// Mock attributes
-const mockAttribute1 = 'mockAttribute1';
-const mockAttribute2 = 'mockAttribute2';
-const mockAttribute3 = 'mockAttribute3';
-const mockAttributes = [mockAttribute1, mockAttribute2];
-const attributesNotWhitelisted = [mockAttribute1, mockAttribute3];
-
-// Infos associated with attributes
-const mockInfo1 = 'mockInfo1';
-const mockInfo2 = 'mockInfo2';
-const mockInfos = [mockInfo1, mockInfo2];
-const mockInfosWrongSize = [mockInfo1];
-
-describe('DIMORegistry', function () {
+describe('Root', async function () {
   let snapshot: string;
-  let dimoRegistry: DIMORegistry;
   let getterInstance: Getter;
   let rootInstance: Root;
 
-  const [
-    admin,
-    nonAdmin,
-    controller1,
-    nonController
-  ] = provider.getWallets();
+  const [admin, nonAdmin, controller1, nonController] = provider.getWallets();
 
   before(async () => {
-    // Deploy DIMORegistry Implementation        
-    const DIMORegistry = await ethers.getContractFactory('DIMORegistry');
-    // eslint-disable-next-line prettier/prettier
-    const dimoRegistryImplementation = await DIMORegistry.connect(admin).deploy() as DIMORegistry;
-    await dimoRegistryImplementation.deployed();
+    [, getterInstance, rootInstance] = await initialize(['Getter', 'Root']);
 
-    // Deploy Getter module
-    const Getter = await ethers.getContractFactory('Getter');
-    const getterImplementation = await Getter.connect(admin).deploy() as Getter;
-    await getterImplementation.deployed();
-
-    // Deploy Root node
-    const Root = await ethers.getContractFactory('Root');
-    const rootImplementation = await Root.connect(admin).deploy() as Root;
-    await rootImplementation.deployed();
-
-    // Get selectors
-    const getterSelectors = getSelectors(Getter.interface);
-    const rootSelectors = getSelectors(Root.interface);
-
-    dimoRegistry = await ethers.getContractAt('DIMORegistry', dimoRegistryImplementation.address) as DIMORegistry;
-    getterInstance = await ethers.getContractAt('Getter', dimoRegistry.address) as Getter;
-    rootInstance = await ethers.getContractAt('Root', dimoRegistry.address) as Root;
-
-    // Register modules
-    await dimoRegistry.connect(admin).addModule(getterImplementation.address, getterSelectors);
-    await dimoRegistry.connect(admin).addModule(rootImplementation.address, rootSelectors);
-
-    // Whitelist attributes
-    await rootInstance.connect(admin).addRootAttribute(mockAttribute1);
-    await rootInstance.connect(admin).addRootAttribute(mockAttribute2);
+    // Whitelist Root attributes
+    await rootInstance.connect(admin).addRootAttribute(C.mockAttribute1);
+    await rootInstance.connect(admin).addRootAttribute(C.mockAttribute2);
   });
 
   beforeEach(async () => {
@@ -81,8 +36,15 @@ describe('DIMORegistry', function () {
   describe('addRootAttribute', () => {
     it('Should revert if caller is an admin', async () => {
       await expect(
-        rootInstance.connect(nonAdmin).addRootAttribute(mockAttribute1)
+        rootInstance.connect(nonAdmin).addRootAttribute(C.mockAttribute1)
       ).to.be.revertedWith('Caller is not an admin');
+    });
+    it('Should emit AttributeAdded event with correct params', async () => {
+      await expect(
+        rootInstance.connect(admin).addRootAttribute(C.mockAttribute1)
+      )
+        .to.emit(rootInstance, 'AttributeAdded')
+        .withArgs(C.mockAttribute1);
     });
   });
 
@@ -92,6 +54,13 @@ describe('DIMORegistry', function () {
         rootInstance.connect(nonAdmin).setController(controller1.address)
       ).to.be.revertedWith('Caller is not an admin');
     });
+    it('Should emit ControllerSet event with correct params', async () => {
+      await expect(
+        rootInstance.connect(admin).setController(controller1.address)
+      )
+        .to.emit(rootInstance, 'ControllerSet')
+        .withArgs(controller1.address);
+    });
   });
 
   describe('mintRoot', () => {
@@ -99,14 +68,18 @@ describe('DIMORegistry', function () {
       await expect(
         rootInstance
           .connect(nonAdmin)
-          .mintRoot(nonController.address, mockAttributes, mockInfos)
+          .mintRoot(nonController.address, C.mockAttributes, C.mockInfos)
       ).to.be.revertedWith('Caller is not an admin');
     });
     it('Should revert if controller has already minted a root', async () => {
-      await rootInstance.connect(admin).mintRoot(controller1.address, mockAttributes, mockInfos);
+      await rootInstance
+        .connect(admin)
+        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
 
       await expect(
-        rootInstance.connect(admin).mintRoot(controller1.address, mockAttributes, mockInfos)
+        rootInstance
+          .connect(admin)
+          .mintRoot(controller1.address, C.mockAttributes, C.mockInfos)
       ).to.be.revertedWith('Invalid request');
     });
     it('Should correctly set owner as controller', async () => {
@@ -116,7 +89,9 @@ describe('DIMORegistry', function () {
       // eslint-disable-next-line no-unused-expressions
       expect(isControllerBefore).to.be.false;
 
-      await rootInstance.connect(admin).mintRoot(controller1.address, mockAttributes, mockInfos);
+      await rootInstance
+        .connect(admin)
+        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
 
       const isControllerAfter: boolean = await rootInstance.isController(
         controller1.address
@@ -125,7 +100,9 @@ describe('DIMORegistry', function () {
       expect(isControllerAfter).to.be.true;
     });
     it('Should correctly set node as root', async () => {
-      await rootInstance.connect(admin).mintRoot(controller1.address, mockAttributes, mockInfos);
+      await rootInstance
+        .connect(admin)
+        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
 
       const parentNode = await getterInstance.getParentNode(1);
 
@@ -135,14 +112,20 @@ describe('DIMORegistry', function () {
       expect(await getterInstance.ownerOf(1)).to.be.equal(controller1.address);
     });
     it('Should correctly set rootMinted', async () => {
-      const isRootMintedBefore = await rootInstance.isRootMinted(controller1.address);
+      const isRootMintedBefore = await rootInstance.isRootMinted(
+        controller1.address
+      );
 
       // eslint-disable-next-line no-unused-expressions
       expect(isRootMintedBefore).to.be.false;
 
-      await rootInstance.connect(admin).mintRoot(controller1.address, mockAttributes, mockInfos);
+      await rootInstance
+        .connect(admin)
+        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
 
-      const isRootMintedAfter = await rootInstance.isRootMinted(controller1.address);
+      const isRootMintedAfter = await rootInstance.isRootMinted(
+        controller1.address
+      );
 
       // eslint-disable-next-line no-unused-expressions
       expect(isRootMintedAfter).to.be.true;
@@ -151,27 +134,31 @@ describe('DIMORegistry', function () {
       await expect(
         rootInstance
           .connect(admin)
-          .mintRoot(controller1.address, mockAttributes, mockInfosWrongSize)
+          .mintRoot(controller1.address, C.mockAttributes, C.mockInfosWrongSize)
       ).to.be.revertedWith('Same length');
     });
     it('Should revert if attribute is not whitelisted', async () => {
       await expect(
         rootInstance
           .connect(admin)
-          .mintRoot(controller1.address, attributesNotWhitelisted, mockInfos)
+          .mintRoot(
+            controller1.address,
+            C.attributesNotWhitelisted,
+            C.mockInfos
+          )
       ).to.be.revertedWith('Not whitelisted');
     });
     it('Should correctly set infos', async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, mockAttributes, mockInfos);
+        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
 
-      expect(
-        await getterInstance.getInfo(1, mockAttribute1)
-      ).to.be.equal(mockInfo1);
-      expect(
-        await getterInstance.getInfo(1, mockAttribute2)
-      ).to.be.equal(mockInfo2);
+      expect(await getterInstance.getInfo(1, C.mockAttribute1)).to.be.equal(
+        C.mockInfo1
+      );
+      expect(await getterInstance.getInfo(1, C.mockAttribute2)).to.be.equal(
+        C.mockInfo2
+      );
     });
   });
 
@@ -179,39 +166,41 @@ describe('DIMORegistry', function () {
     beforeEach(async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, mockAttributes, mockInfos);
+        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
     });
 
-    it('Should revert if caller is not the owner', async () => {
+    it('Should revert if caller is not an admin', async () => {
       await expect(
-        rootInstance.connect(controller1).setRootInfo(1, mockAttributes, mockInfos)
+        rootInstance
+          .connect(nonAdmin)
+          .setRootInfo(1, C.mockAttributes, C.mockInfos)
       ).to.be.revertedWith('Caller is not an admin');
     });
     it('Should revert if attributes and infos array length does not match', async () => {
       await expect(
         rootInstance
           .connect(admin)
-          .setRootInfo(1, mockAttributes, mockInfosWrongSize)
+          .setRootInfo(1, C.mockAttributes, C.mockInfosWrongSize)
       ).to.be.revertedWith('Same length');
     });
     it('Should revert if attribute is not whitelisted', async () => {
       await expect(
         rootInstance
           .connect(admin)
-          .setRootInfo(1, attributesNotWhitelisted, mockInfos)
+          .setRootInfo(1, C.attributesNotWhitelisted, C.mockInfos)
       ).to.be.revertedWith('Not whitelisted');
     });
     it('Should correctly set infos', async () => {
       await rootInstance
         .connect(admin)
-        .setRootInfo(1, mockAttributes, mockInfos);
+        .setRootInfo(1, C.mockAttributes, C.mockInfos);
 
-      expect(
-        await getterInstance.getInfo(1, mockAttribute1)
-      ).to.be.equal(mockInfo1);
-      expect(
-        await getterInstance.getInfo(1, mockAttribute2)
-      ).to.be.equal(mockInfo2);
+      expect(await getterInstance.getInfo(1, C.mockAttribute1)).to.be.equal(
+        C.mockInfo1
+      );
+      expect(await getterInstance.getInfo(1, C.mockAttribute2)).to.be.equal(
+        C.mockInfo2
+      );
     });
   });
 });

@@ -5,7 +5,7 @@ library DIMOStorage {
     bytes32 internal constant DIMO_REGISTRY_STORAGE_SLOT =
         keccak256("DIMORegistry.storage");
 
-    struct Record {
+    struct Node {
         uint256 nodeType;
         uint256 parentNode;
         mapping(string => string) info;
@@ -19,7 +19,7 @@ library DIMOStorage {
         // implementation => keccak256(abi.encode(selectors))
         mapping(address => bytes32) selectorsHash;
         // [Node id] => Node info
-        mapping(uint256 => Record) records;
+        mapping(uint256 => Node) nodes;
         uint256 currentIndex;
     }
 

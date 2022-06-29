@@ -1,15 +1,14 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "../Modifiers.sol";
+import "../shared/Events.sol";
+import "../shared/Modifiers.sol";
 import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/RootStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
 
-contract Vehicle is ERC721BaseInternal, Modifiers {
-    event AttributeAdded(string attribute);
-
+contract Vehicle is ERC721BaseInternal, Events, Modifiers {
     // ***** Admin management ***** //
 
     /// @notice Sets contract node type
@@ -30,7 +29,7 @@ contract Vehicle is ERC721BaseInternal, Modifiers {
         VehicleStorage.Storage storage s = VehicleStorage.getStorage();
         AttributeSet.add(s.whitelistedAttributes, attribute);
 
-        emit AttributeAdded(attribute);
+        emit AttributeAdded(s.nodeType, attribute);
     }
 
     // ***** Interaction with nodes *****//
@@ -52,15 +51,15 @@ contract Vehicle is ERC721BaseInternal, Modifiers {
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
         require(
-            ds.records[rootNode].nodeType == rs.nodeType,
+            ds.nodes[rootNode].nodeType == rs.nodeType,
             "Invalid parent node"
         );
 
         ds.currentIndex++;
         uint256 newNodeId = ds.currentIndex;
 
-        ds.records[newNodeId].parentNode = rootNode;
-        ds.records[newNodeId].nodeType = vs.nodeType;
+        ds.nodes[newNodeId].parentNode = rootNode;
+        ds.nodes[newNodeId].nodeType = vs.nodeType;
 
         _safeMint(_owner, newNodeId);
         _setInfo(newNodeId, attributes, infos);
@@ -69,15 +68,22 @@ contract Vehicle is ERC721BaseInternal, Modifiers {
     /// @notice Add infos to node
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param node Node where the info will be added
+    /// @param nodeId Node where the info will be added
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     function setVehicleInfo(
-        uint256 node,
+        uint256 nodeId,
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyAdmin {
-        _setInfo(node, attributes, infos);
+        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+        require(
+            ds.nodes[nodeId].nodeType == s.nodeType,
+            "Node must be a vehicle"
+        );
+
+        _setInfo(nodeId, attributes, infos);
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
@@ -85,11 +91,11 @@ contract Vehicle is ERC721BaseInternal, Modifiers {
     /// @dev Internal function to add infos to node
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param node Node where the info will be added
+    /// @param nodeId Node where the info will be added
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     function _setInfo(
-        uint256 node,
+        uint256 nodeId,
         string[] calldata attributes,
         string[] calldata infos
     ) private {
@@ -103,7 +109,7 @@ contract Vehicle is ERC721BaseInternal, Modifiers {
                 AttributeSet.exists(s.whitelistedAttributes, attributes[i]),
                 "Not whitelisted"
             );
-            ds.records[node].info[attributes[i]] = infos[i];
+            ds.nodes[nodeId].info[attributes[i]] = infos[i];
         }
     }
 }

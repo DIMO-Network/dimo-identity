@@ -12,7 +12,7 @@ contract Getter is ERC721BaseInternal {
         view
         returns (uint256 nodeType)
     {
-        nodeType = DIMOStorage.getStorage().records[tokenId].nodeType;
+        nodeType = DIMOStorage.getStorage().nodes[tokenId].nodeType;
     }
 
     /// @notice Gets the parent node of a node
@@ -22,7 +22,7 @@ contract Getter is ERC721BaseInternal {
         view
         returns (uint256 parentNode)
     {
-        parentNode = DIMOStorage.getStorage().records[tokenId].parentNode;
+        parentNode = DIMOStorage.getStorage().nodes[tokenId].parentNode;
     }
 
     /// @notice Gets information stored in an attribute of a given node
@@ -35,7 +35,7 @@ contract Getter is ERC721BaseInternal {
         view
         returns (string memory info)
     {
-        info = DIMOStorage.getStorage().records[nodeId].info[attribute];
+        info = DIMOStorage.getStorage().nodes[nodeId].info[attribute];
     }
 
     /// @notice Gets the owner of a node

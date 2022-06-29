@@ -24,8 +24,8 @@ describe('Root', async function () {
     await rootInstance.connect(admin).setRootNodeType(C.rootNodeType);
 
     // Whitelist Root attributes
-    await rootInstance.connect(admin).addRootAttribute(C.mockAttribute1);
-    await rootInstance.connect(admin).addRootAttribute(C.mockAttribute2);
+    await rootInstance.connect(admin).addRootAttribute(C.mockRootAttribute1);
+    await rootInstance.connect(admin).addRootAttribute(C.mockRootAttribute2);
   });
 
   beforeEach(async () => {
@@ -56,15 +56,15 @@ describe('Root', async function () {
   describe('addRootAttribute', () => {
     it('Should revert if caller is not an admin', async () => {
       await expect(
-        rootInstance.connect(nonAdmin).addRootAttribute(C.mockAttribute1)
+        rootInstance.connect(nonAdmin).addRootAttribute(C.mockRootAttribute1)
       ).to.be.revertedWith('Caller is not an admin');
     });
     it('Should emit AttributeAdded event with correct params', async () => {
       await expect(
-        rootInstance.connect(admin).addRootAttribute(C.mockAttribute1)
+        rootInstance.connect(admin).addRootAttribute(C.mockRootAttribute3)
       )
         .to.emit(rootInstance, 'AttributeAdded')
-        .withArgs(C.mockAttribute1);
+        .withArgs(C.rootNodeTypeId, C.mockRootAttribute3);
     });
   });
 
@@ -73,6 +73,13 @@ describe('Root', async function () {
       await expect(
         rootInstance.connect(nonAdmin).setController(controller1.address)
       ).to.be.revertedWith('Caller is not an admin');
+    });
+    it('Should revert if address is already a controller', async () => {
+      await rootInstance.connect(admin).setController(controller1.address);
+
+      await expect(
+        rootInstance.connect(admin).setController(controller1.address)
+      ).to.be.revertedWith('Already a controller');
     });
     it('Should emit ControllerSet event with correct params', async () => {
       await expect(
@@ -88,18 +95,22 @@ describe('Root', async function () {
       await expect(
         rootInstance
           .connect(nonAdmin)
-          .mintRoot(nonController.address, C.mockAttributes, C.mockInfos)
+          .mintRoot(
+            nonController.address,
+            C.mockRootAttributes,
+            C.mockRootInfos
+          )
       ).to.be.revertedWith('Caller is not an admin');
     });
     it('Should revert if controller has already minted a root', async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
 
       await expect(
         rootInstance
           .connect(admin)
-          .mintRoot(controller1.address, C.mockAttributes, C.mockInfos)
+          .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos)
       ).to.be.revertedWith('Invalid request');
     });
     it('Should correctly set owner as controller', async () => {
@@ -111,7 +122,7 @@ describe('Root', async function () {
 
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
 
       const isControllerAfter: boolean = await rootInstance.isController(
         controller1.address
@@ -122,7 +133,7 @@ describe('Root', async function () {
     it('Should correctly set node type', async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
 
       const nodeType = await getterInstance.getNodeType(1);
 
@@ -131,7 +142,7 @@ describe('Root', async function () {
     it('Should correctly set parent node', async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
 
       const parentNode = await getterInstance.getParentNode(1);
 
@@ -141,7 +152,7 @@ describe('Root', async function () {
     it('Should correctly set node owner', async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
 
       expect(await getterInstance.ownerOf(1)).to.be.equal(controller1.address);
     });
@@ -155,7 +166,7 @@ describe('Root', async function () {
 
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
 
       const isRootMintedAfter = await rootInstance.isRootMinted(
         controller1.address
@@ -168,7 +179,11 @@ describe('Root', async function () {
       await expect(
         rootInstance
           .connect(admin)
-          .mintRoot(controller1.address, C.mockAttributes, C.mockInfosWrongSize)
+          .mintRoot(
+            controller1.address,
+            C.mockRootAttributes,
+            C.mockRootInfosWrongSize
+          )
       ).to.be.revertedWith('Same length');
     });
     it('Should revert if attribute is not whitelisted', async () => {
@@ -177,21 +192,21 @@ describe('Root', async function () {
           .connect(admin)
           .mintRoot(
             controller1.address,
-            C.attributesNotWhitelisted,
-            C.mockInfos
+            C.rootAttributesNotWhitelisted,
+            C.mockRootInfos
           )
       ).to.be.revertedWith('Not whitelisted');
     });
     it('Should correctly set infos', async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
 
-      expect(await getterInstance.getInfo(1, C.mockAttribute1)).to.be.equal(
-        C.mockInfo1
+      expect(await getterInstance.getInfo(1, C.mockRootAttribute1)).to.be.equal(
+        C.mockRootInfo1
       );
-      expect(await getterInstance.getInfo(1, C.mockAttribute2)).to.be.equal(
-        C.mockInfo2
+      expect(await getterInstance.getInfo(1, C.mockRootAttribute2)).to.be.equal(
+        C.mockRootInfo2
       );
     });
   });
@@ -200,40 +215,47 @@ describe('Root', async function () {
     beforeEach(async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
     });
 
     it('Should revert if caller is not an admin', async () => {
       await expect(
         rootInstance
           .connect(nonAdmin)
-          .setRootInfo(1, C.mockAttributes, C.mockInfos)
+          .setRootInfo(1, C.mockRootAttributes, C.mockRootInfos)
       ).to.be.revertedWith('Caller is not an admin');
+    });
+    it('Should revert if node is not a root', async () => {
+      await expect(
+        rootInstance
+          .connect(admin)
+          .setRootInfo(99, C.mockRootAttributes, C.mockRootInfos)
+      ).to.be.revertedWith('Node must be a root');
     });
     it('Should revert if attributes and infos array length does not match', async () => {
       await expect(
         rootInstance
           .connect(admin)
-          .setRootInfo(1, C.mockAttributes, C.mockInfosWrongSize)
+          .setRootInfo(1, C.mockRootAttributes, C.mockRootInfosWrongSize)
       ).to.be.revertedWith('Same length');
     });
     it('Should revert if attribute is not whitelisted', async () => {
       await expect(
         rootInstance
           .connect(admin)
-          .setRootInfo(1, C.attributesNotWhitelisted, C.mockInfos)
+          .setRootInfo(1, C.rootAttributesNotWhitelisted, C.mockRootInfos)
       ).to.be.revertedWith('Not whitelisted');
     });
     it('Should correctly set infos', async () => {
       await rootInstance
         .connect(admin)
-        .setRootInfo(1, C.mockAttributes, C.mockInfos);
+        .setRootInfo(1, C.mockRootAttributes, C.mockRootInfos);
 
-      expect(await getterInstance.getInfo(1, C.mockAttribute1)).to.be.equal(
-        C.mockInfo1
+      expect(await getterInstance.getInfo(1, C.mockRootAttribute1)).to.be.equal(
+        C.mockRootInfo1
       );
-      expect(await getterInstance.getInfo(1, C.mockAttribute2)).to.be.equal(
-        C.mockInfo2
+      expect(await getterInstance.getInfo(1, C.mockRootAttribute2)).to.be.equal(
+        C.mockRootInfo2
       );
     });
   });

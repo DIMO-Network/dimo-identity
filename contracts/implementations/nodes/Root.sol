@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "../Modifiers.sol";
+import "../shared/Events.sol";
+import "../shared/Modifiers.sol";
 import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/RootStorage.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
 
-contract Root is ERC721BaseInternal, Modifiers {
-    event AttributeAdded(string attribute);
+contract Root is ERC721BaseInternal, Events, Modifiers {
     event ControllerSet(address indexed controller);
 
     // ***** Admin management ***** //
@@ -28,16 +28,24 @@ contract Root is ERC721BaseInternal, Modifiers {
     /// @param attribute The attribute to be added
     function addRootAttribute(string calldata attribute) external onlyAdmin {
         RootStorage.Storage storage s = RootStorage.getStorage();
-        AttributeSet.add(s.whitelistedAttributes, attribute);
+        bool success = AttributeSet.add(s.whitelistedAttributes, attribute);
 
-        emit AttributeAdded(attribute);
+        require(success, "Attribute already exists");
+
+        emit AttributeAdded(s.nodeType, attribute);
     }
 
     /// @notice Sets a address controller
     /// @dev Only an admin can set new controllers
     /// @param _controller The address of the controller
     function setController(address _controller) external onlyAdmin {
-        RootStorage.getStorage().controllers[_controller].isController = true;
+        RootStorage.Storage storage s = RootStorage.getStorage();
+        require(
+            !s.controllers[_controller].isController,
+            "Already a controller"
+        );
+
+        s.controllers[_controller].isController = true;
 
         emit ControllerSet(_controller);
     }
@@ -65,9 +73,11 @@ contract Root is ERC721BaseInternal, Modifiers {
         _safeMint(_owner, newNodeId);
 
         s.controllers[_owner].rootMinted = true;
-        ds.records[newNodeId].nodeType = s.nodeType;
+        ds.nodes[newNodeId].nodeType = s.nodeType;
 
         _setInfo(newNodeId, attributes, infos);
+
+        emit NodeMinted(s.nodeType, newNodeId);
     }
 
     /// @notice Add infos to node
@@ -81,6 +91,10 @@ contract Root is ERC721BaseInternal, Modifiers {
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyAdmin {
+        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+        RootStorage.Storage storage s = RootStorage.getStorage();
+        require(ds.nodes[nodeId].nodeType == s.nodeType, "Node must be a root");
+
         _setInfo(nodeId, attributes, infos);
     }
 
@@ -127,7 +141,7 @@ contract Root is ERC721BaseInternal, Modifiers {
                 AttributeSet.exists(s.whitelistedAttributes, attributes[i]),
                 "Not whitelisted"
             );
-            ds.records[nodeId].info[attributes[i]] = infos[i];
+            ds.nodes[nodeId].info[attributes[i]] = infos[i];
         }
     }
 }

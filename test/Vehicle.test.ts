@@ -32,12 +32,16 @@ describe('Vehicle', function () {
     await vehicleInstance.connect(admin).setVehicleNodeType(C.vehicleNodeType);
 
     // Whitelist Root attributes
-    await rootInstance.connect(admin).addRootAttribute(C.mockAttribute1);
-    await rootInstance.connect(admin).addRootAttribute(C.mockAttribute2);
+    await rootInstance.connect(admin).addRootAttribute(C.mockRootAttribute1);
+    await rootInstance.connect(admin).addRootAttribute(C.mockRootAttribute2);
 
     // Whitelist Vehicle attributes
-    await vehicleInstance.connect(admin).addVehicleAttribute(C.mockAttribute1);
-    await vehicleInstance.connect(admin).addVehicleAttribute(C.mockAttribute2);
+    await vehicleInstance
+      .connect(admin)
+      .addVehicleAttribute(C.mockVehicleAttribute1);
+    await vehicleInstance
+      .connect(admin)
+      .addVehicleAttribute(C.mockVehicleAttribute2);
   });
 
   beforeEach(async () => {
@@ -72,15 +76,19 @@ describe('Vehicle', function () {
   describe('addVehicleAttribute', () => {
     it('Should revert if caller is not an admin', async () => {
       await expect(
-        vehicleInstance.connect(nonAdmin).addVehicleAttribute(C.mockAttribute1)
+        vehicleInstance
+          .connect(nonAdmin)
+          .addVehicleAttribute(C.mockVehicleAttribute1)
       ).to.be.revertedWith('Caller is not an admin');
     });
     it('Should emit AttributeAdded event with correct params', async () => {
       await expect(
-        vehicleInstance.connect(admin).addVehicleAttribute(C.mockAttribute1)
+        vehicleInstance
+          .connect(admin)
+          .addVehicleAttribute(C.mockVehicleAttribute3)
       )
         .to.emit(vehicleInstance, 'AttributeAdded')
-        .withArgs(C.mockAttribute1);
+        .withArgs(C.vehicleNodeTypeId, C.mockVehicleAttribute3);
     });
   });
 
@@ -88,27 +96,42 @@ describe('Vehicle', function () {
     beforeEach(async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
     });
 
     it('Should revert if caller is not an admin', async () => {
       await expect(
         vehicleInstance
           .connect(nonAdmin)
-          .mintVehicle(1, user1.address, C.mockAttributes, C.mockInfos)
+          .mintVehicle(
+            1,
+            user1.address,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfos
+          )
       ).to.be.revertedWith('Caller is not an admin');
     });
     it('Should revert if parent node is not a root node', async () => {
       await expect(
         vehicleInstance
           .connect(admin)
-          .mintVehicle(99, user1.address, C.mockAttributes, C.mockInfos)
+          .mintVehicle(
+            99,
+            user1.address,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfos
+          )
       ).to.be.revertedWith('Invalid parent node');
     });
     it('Should correctly set node type', async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockAttributes, C.mockInfos);
+        .mintVehicle(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos
+        );
 
       const nodeType = await getterInstance.getNodeType(2);
 
@@ -117,7 +140,12 @@ describe('Vehicle', function () {
     it('Should correctly set parent node', async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockAttributes, C.mockInfos);
+        .mintVehicle(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos
+        );
 
       const parentNode = await getterInstance.getParentNode(2);
       expect(parentNode).to.be.equal(1);
@@ -125,7 +153,12 @@ describe('Vehicle', function () {
     it('Should correctly set node owner', async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockAttributes, C.mockInfos);
+        .mintVehicle(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos
+        );
 
       expect(await getterInstance.ownerOf(2)).to.be.equal(user1.address);
     });
@@ -133,7 +166,12 @@ describe('Vehicle', function () {
       await expect(
         vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockAttributes, C.mockInfosWrongSize)
+          .mintVehicle(
+            1,
+            user1.address,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfosWrongSize
+          )
       ).to.be.revertedWith('Same length');
     });
     it('Should revert if attribute is not whitelisted', async () => {
@@ -143,22 +181,27 @@ describe('Vehicle', function () {
           .mintVehicle(
             1,
             user1.address,
-            C.attributesNotWhitelisted,
-            C.mockInfos
+            C.vehicleAttributesNotWhitelisted,
+            C.mockVehicleInfos
           )
       ).to.be.revertedWith('Not whitelisted');
     });
     it('Should correctly set infos', async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockAttributes, C.mockInfos);
+        .mintVehicle(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos
+        );
 
-      expect(await getterInstance.getInfo(2, C.mockAttribute1)).to.be.equal(
-        C.mockInfo1
-      );
-      expect(await getterInstance.getInfo(2, C.mockAttribute2)).to.be.equal(
-        C.mockInfo2
-      );
+      expect(
+        await getterInstance.getInfo(2, C.mockVehicleAttribute1)
+      ).to.be.equal(C.mockVehicleInfo1);
+      expect(
+        await getterInstance.getInfo(2, C.mockVehicleAttribute2)
+      ).to.be.equal(C.mockVehicleInfo2);
     });
   });
 
@@ -166,44 +209,64 @@ describe('Vehicle', function () {
     beforeEach(async () => {
       await rootInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockAttributes, C.mockInfos);
+        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockAttributes, C.mockInfos);
+        .mintVehicle(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos
+        );
     });
 
     it('Should revert if caller is not an admin', async () => {
       await expect(
         vehicleInstance
           .connect(nonAdmin)
-          .setVehicleInfo(2, C.mockAttributes, C.mockInfos)
+          .setVehicleInfo(2, C.mockVehicleAttributes, C.mockVehicleInfos)
       ).to.be.revertedWith('Caller is not an admin');
+    });
+    it('Should revert if node is not a vehicle', async () => {
+      await expect(
+        vehicleInstance
+          .connect(admin)
+          .setVehicleInfo(99, C.mockVehicleAttributes, C.mockVehicleInfos)
+      ).to.be.revertedWith('Node must be a vehicle');
     });
     it('Should revert if attributes and infos array length does not match', async () => {
       await expect(
         vehicleInstance
           .connect(admin)
-          .setVehicleInfo(2, C.mockAttributes, C.mockInfosWrongSize)
+          .setVehicleInfo(
+            2,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfosWrongSize
+          )
       ).to.be.revertedWith('Same length');
     });
     it('Should revert if attribute is not whitelisted', async () => {
       await expect(
         vehicleInstance
           .connect(admin)
-          .setVehicleInfo(2, C.attributesNotWhitelisted, C.mockInfos)
+          .setVehicleInfo(
+            2,
+            C.vehicleAttributesNotWhitelisted,
+            C.mockVehicleInfos
+          )
       ).to.be.revertedWith('Not whitelisted');
     });
     it('Should correctly set infos', async () => {
       await vehicleInstance
         .connect(admin)
-        .setVehicleInfo(1, C.mockAttributes, C.mockInfos);
+        .setVehicleInfo(2, C.mockVehicleAttributes, C.mockVehicleInfos);
 
-      expect(await getterInstance.getInfo(2, C.mockAttribute1)).to.be.equal(
-        C.mockInfo1
-      );
-      expect(await getterInstance.getInfo(2, C.mockAttribute2)).to.be.equal(
-        C.mockInfo2
-      );
+      expect(
+        await getterInstance.getInfo(2, C.mockVehicleAttribute1)
+      ).to.be.equal(C.mockVehicleInfo1);
+      expect(
+        await getterInstance.getInfo(2, C.mockVehicleAttribute2)
+      ).to.be.equal(C.mockVehicleInfo2);
     });
   });
 });

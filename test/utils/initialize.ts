@@ -1,6 +1,6 @@
 import { ethers, waffle } from 'hardhat';
 
-import { getSelectors } from './';
+import { C, getSelectors } from './';
 
 const provider = waffle.provider;
 
@@ -11,7 +11,11 @@ async function initialize(contracts: string[]): Promise<any[]> {
 
   // Deploy DIMORegistry Implementation
   const DIMORegistry = await ethers.getContractFactory('DIMORegistry');
-  const dimoRegistryImplementation = await DIMORegistry.connect(admin).deploy();
+  const dimoRegistryImplementation = await DIMORegistry.connect(admin).deploy(
+    C.name,
+    C.symbol,
+    C.baseURI
+  );
   await dimoRegistryImplementation.deployed();
 
   const dimoRegistry = await ethers.getContractAt(

@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "../shared/Events.sol";
+import "../shared/IEvents.sol";
 import "../shared/Modifiers.sol";
 import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/RootStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-contract Root is ERC721MetadataInternal, Events, Modifiers {
+contract Root is ERC721MetadataInternal, IEvents, Modifiers {
     event ControllerSet(address indexed controller);
 
     // ***** Admin management ***** //

@@ -2,8 +2,14 @@
 pragma solidity ^0.8.13;
 
 import "./libraries/DIMOStorage.sol";
+import "@solidstate/contracts/introspection/ERC165.sol";
+import "@solidstate/contracts/token/ERC721/IERC721.sol";
+import "@solidstate/contracts/token/ERC721/ERC721.sol";
+import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataStorage.sol";
 
-contract DIMORegistry {
+contract DIMORegistry is ERC721 {
+    using ERC165Storage for ERC165Storage.Layout;
+
     event AdminRoleTransferred(
         address indexed previousAdmin,
         address indexed newAdmin
@@ -17,8 +23,26 @@ contract DIMORegistry {
         bytes4[] newSelectors
     );
 
-    constructor() {
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        string memory __baseURI
+    ) {
         _setAdmin(msg.sender);
+
+        ERC721MetadataStorage.Layout storage s = ERC721MetadataStorage.layout();
+        s.name = _name;
+        s.symbol = _symbol;
+        s.baseURI = __baseURI;
+
+        ERC165Storage.layout().setSupportedInterface(
+            type(IERC165).interfaceId,
+            true
+        );
+        ERC165Storage.layout().setSupportedInterface(
+            type(IERC721).interfaceId,
+            true
+        );
     }
 
     modifier onlyAdmin() {

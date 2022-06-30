@@ -1,14 +1,14 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "../shared/Events.sol";
+import "../shared/IEvents.sol";
 import "../shared/Modifiers.sol";
 import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/RootStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-contract Vehicle is ERC721MetadataInternal, Events, Modifiers {
+contract Vehicle is ERC721MetadataInternal, IEvents, Modifiers {
     // ***** Admin management ***** //
 
     /// @notice Sets contract node type

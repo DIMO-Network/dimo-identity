@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { Getter, Root } from '../typechain';
+import { Getter, Metadata, Root } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from './utils';
 
 const { expect } = chai;
@@ -13,12 +13,22 @@ chai.use(solidity);
 describe('Root', async function () {
   let snapshot: string;
   let getterInstance: Getter;
+  let metadataInstance: Metadata;
   let rootInstance: Root;
 
   const [admin, nonAdmin, controller1, nonController] = provider.getWallets();
 
   before(async () => {
-    [, getterInstance, rootInstance] = await initialize(['Getter', 'Root']);
+    [, getterInstance, metadataInstance, rootInstance] = await initialize([
+      'Getter',
+      'Metadata',
+      'Root'
+    ]);
+
+    // Initialize metadata
+    await metadataInstance
+      .connect(admin)
+      .initialize(C.name, C.symbol, C.baseURI);
 
     // Set root node type
     await rootInstance.connect(admin).setRootNodeType(C.rootNodeType);
@@ -58,6 +68,11 @@ describe('Root', async function () {
       await expect(
         rootInstance.connect(nonAdmin).addRootAttribute(C.mockRootAttribute1)
       ).to.be.revertedWith('Caller is not an admin');
+    });
+    it('Should revert if attribute already exists', async () => {
+      await expect(
+        rootInstance.connect(admin).addRootAttribute(C.mockRootAttribute1)
+      ).to.be.revertedWith('Attribute already exists');
     });
     it('Should emit AttributeAdded event with correct params', async () => {
       await expect(

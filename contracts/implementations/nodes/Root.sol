@@ -5,9 +5,9 @@ import "../shared/Events.sol";
 import "../shared/Modifiers.sol";
 import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/RootStorage.sol";
-import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
+import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-contract Root is ERC721BaseInternal, Events, Modifiers {
+contract Root is ERC721MetadataInternal, Events, Modifiers {
     event ControllerSet(address indexed controller);
 
     // ***** Admin management ***** //

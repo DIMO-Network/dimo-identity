@@ -6,9 +6,9 @@ import "../shared/Modifiers.sol";
 import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/RootStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
-import "@solidstate/contracts/token/ERC721/base/ERC721BaseInternal.sol";
+import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-contract Vehicle is ERC721BaseInternal, Events, Modifiers {
+contract Vehicle is ERC721MetadataInternal, Events, Modifiers {
     // ***** Admin management ***** //
 
     /// @notice Sets contract node type

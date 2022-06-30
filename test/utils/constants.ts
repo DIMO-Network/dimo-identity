@@ -1,5 +1,11 @@
 import { ethers } from 'hardhat';
 
+// Metadata
+export const name = 'DIMO web3 identity';
+export const symbol = 'DIMO';
+export const baseURI = 'https://dimo.zone/';
+export const mockTokenURI = 'mockTokenURI';
+
 // Node types
 export const rootNodeType = ethers.utils.toUtf8Bytes('Root');
 export const vehicleNodeType = ethers.utils.toUtf8Bytes('Vehicle');

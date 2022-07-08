@@ -1,5 +1,12 @@
 import { ethers } from 'hardhat';
 
+// Roles
+export const DEFAULT_ADMIN_ROLE =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+export const MOCK_ROLE = ethers.utils.keccak256(
+  ethers.utils.toUtf8Bytes('MOCK')
+);
+
 // Metadata
 export const name = 'DIMO web3 identity';
 export const symbol = 'DIMO';
@@ -13,6 +20,7 @@ export const rootNodeTypeId = ethers.utils.keccak256(rootNodeType);
 export const vehicleNodeTypeId = ethers.utils.keccak256(vehicleNodeType);
 
 // Mock Root attributes
+export const mockRootAttributeName = 'name';
 export const mockRootAttribute1 = 'mockRootAttribute1';
 export const mockRootAttribute2 = 'mockRootAttribute2';
 export const mockRootAttribute3 = 'mockRootAttribute3';
@@ -36,6 +44,7 @@ export const vehicleAttributesNotWhitelisted = [
 ];
 
 // Root Infos associated with attributes
+export const mockRootNames = ['Root1', 'Root2', 'Root3'];
 export const mockRootInfo1 = 'mockRootInfo1';
 export const mockRootInfo2 = 'mockRootInfo2';
 export const mockRootInfos = [mockRootInfo1, mockRootInfo2];

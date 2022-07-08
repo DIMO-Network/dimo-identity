@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { Getter, Root, Vehicle } from '../typechain';
+import { Eip712Checker, Getter, Root, Vehicle } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from './utils';
 
 const { expect } = chai;
@@ -12,6 +12,7 @@ chai.use(solidity);
 
 describe('Vehicle', function () {
   let snapshot: string;
+  let eip712CheckerInstance: Eip712Checker;
   let getterInstance: Getter;
   let rootInstance: Root;
   let vehicleInstance: Vehicle;
@@ -19,11 +20,16 @@ describe('Vehicle', function () {
   const [admin, nonAdmin, controller1, user1] = provider.getWallets();
 
   before(async () => {
-    [, getterInstance, rootInstance, vehicleInstance] = await initialize([
-      'Getter',
-      'Root',
-      'Vehicle'
-    ]);
+    [, eip712CheckerInstance, getterInstance, rootInstance, vehicleInstance] =
+      await initialize(
+        [C.name, C.symbol, C.baseURI],
+        'Eip712Checker',
+        'Getter',
+        'Root',
+        'Vehicle'
+      );
+
+    await eip712CheckerInstance.initialize('DIMO', '1');
 
     // Set root node type
     await rootInstance.connect(admin).setRootNodeType(C.rootNodeType);
@@ -53,13 +59,21 @@ describe('Vehicle', function () {
   });
 
   describe('setNodeType', () => {
-    it('Should revert if caller is not an admin', async () => {
+    it('Should revert if caller does not have admin role', async () => {
       await expect(
         vehicleInstance.connect(nonAdmin).setVehicleNodeType(C.vehicleNodeType)
-      ).to.be.revertedWith('Caller is not an admin');
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
     });
     it('Should revert if node type is already set', async () => {
-      const [, , localVehicleInstance] = await initialize(['Root', 'Vehicle']);
+      const [, , localVehicleInstance] = await initialize(
+        [C.name, C.symbol, C.baseURI],
+        'Root',
+        'Vehicle'
+      );
 
       await localVehicleInstance
         .connect(admin)
@@ -74,12 +88,16 @@ describe('Vehicle', function () {
   });
 
   describe('addVehicleAttribute', () => {
-    it('Should revert if caller is not an admin', async () => {
+    it('Should revert if caller does not have admin role', async () => {
       await expect(
         vehicleInstance
           .connect(nonAdmin)
           .addVehicleAttribute(C.mockVehicleAttribute1)
-      ).to.be.revertedWith('Caller is not an admin');
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
     });
     it('Should emit AttributeAdded event with correct params', async () => {
       await expect(
@@ -99,7 +117,7 @@ describe('Vehicle', function () {
         .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
     });
 
-    it('Should revert if caller is not an admin', async () => {
+    it('Should revert if caller does not have admin role', async () => {
       await expect(
         vehicleInstance
           .connect(nonAdmin)
@@ -109,7 +127,11 @@ describe('Vehicle', function () {
             C.mockVehicleAttributes,
             C.mockVehicleInfos
           )
-      ).to.be.revertedWith('Caller is not an admin');
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
     });
     it('Should revert if parent node is not a root node', async () => {
       await expect(
@@ -122,6 +144,30 @@ describe('Vehicle', function () {
             C.mockVehicleInfos
           )
       ).to.be.revertedWith('Invalid parent node');
+    });
+    it('Should revert if attributes and infos array length does not match', async () => {
+      await expect(
+        vehicleInstance
+          .connect(admin)
+          .mintVehicle(
+            1,
+            user1.address,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfosWrongSize
+          )
+      ).to.be.revertedWith('Same length');
+    });
+    it('Should revert if attribute is not whitelisted', async () => {
+      await expect(
+        vehicleInstance
+          .connect(admin)
+          .mintVehicle(
+            1,
+            user1.address,
+            C.vehicleAttributesNotWhitelisted,
+            C.mockVehicleInfos
+          )
+      ).to.be.revertedWith('Not whitelisted');
     });
     it('Should correctly set node type', async () => {
       await vehicleInstance
@@ -162,30 +208,6 @@ describe('Vehicle', function () {
 
       expect(await getterInstance.ownerOf(2)).to.be.equal(user1.address);
     });
-    it('Should revert if attributes and infos array length does not match', async () => {
-      await expect(
-        vehicleInstance
-          .connect(admin)
-          .mintVehicle(
-            1,
-            user1.address,
-            C.mockVehicleAttributes,
-            C.mockVehicleInfosWrongSize
-          )
-      ).to.be.revertedWith('Same length');
-    });
-    it('Should revert if attribute is not whitelisted', async () => {
-      await expect(
-        vehicleInstance
-          .connect(admin)
-          .mintVehicle(
-            1,
-            user1.address,
-            C.vehicleAttributesNotWhitelisted,
-            C.mockVehicleInfos
-          )
-      ).to.be.revertedWith('Not whitelisted');
-    });
     it('Should correctly set infos', async () => {
       await vehicleInstance
         .connect(admin)
@@ -202,6 +224,20 @@ describe('Vehicle', function () {
       expect(
         await getterInstance.getInfo(2, C.mockVehicleAttribute2)
       ).to.be.equal(C.mockVehicleInfo2);
+    });
+    it('Should emit NodeMinted event with correct params', async () => {
+      await expect(
+        vehicleInstance
+          .connect(admin)
+          .mintVehicle(
+            1,
+            user1.address,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfos
+          )
+      )
+        .to.emit(rootInstance, 'NodeMinted')
+        .withArgs(C.vehicleNodeTypeId, 2);
     });
   });
 
@@ -220,12 +256,16 @@ describe('Vehicle', function () {
         );
     });
 
-    it('Should revert if caller is not an admin', async () => {
+    it('Should revert if caller does not have admin role', async () => {
       await expect(
         vehicleInstance
           .connect(nonAdmin)
           .setVehicleInfo(2, C.mockVehicleAttributes, C.mockVehicleInfos)
-      ).to.be.revertedWith('Caller is not an admin');
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
     });
     it('Should revert if node is not a vehicle', async () => {
       await expect(

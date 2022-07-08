@@ -1,20 +1,21 @@
 import { ethers, waffle } from 'hardhat';
 
-import { C, getSelectors } from './';
+import { getSelectors } from './';
 
 const provider = waffle.provider;
 
 const [admin] = provider.getWallets();
 
-async function initialize(contracts: string[]): Promise<any[]> {
+async function initialize(
+  constructorArgs: [string, string, string],
+  ...contracts: string[]
+): Promise<any[]> {
   const instances: any[] = [];
 
   // Deploy DIMORegistry Implementation
   const DIMORegistry = await ethers.getContractFactory('DIMORegistry');
   const dimoRegistryImplementation = await DIMORegistry.connect(admin).deploy(
-    C.name,
-    C.symbol,
-    C.baseURI
+    ...constructorArgs
   );
   await dimoRegistryImplementation.deployed();
 

@@ -2,18 +2,15 @@
 pragma solidity ^0.8.13;
 
 import "./libraries/DIMOStorage.sol";
+import "./access/AccessControlInternal.sol";
 import "@solidstate/contracts/introspection/ERC165.sol";
-import "@solidstate/contracts/token/ERC721/IERC721.sol";
-import "@solidstate/contracts/token/ERC721/ERC721.sol";
+import "@solidstate/contracts/token/ERC721/metadata/ERC721Metadata.sol";
+import "@solidstate/contracts/token/ERC721/metadata/IERC721Metadata.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataStorage.sol";
 
-contract DIMORegistry is ERC721 {
+contract DIMORegistry is ERC721Metadata, AccessControlInternal {
     using ERC165Storage for ERC165Storage.Layout;
 
-    event AdminRoleTransferred(
-        address indexed previousAdmin,
-        address indexed newAdmin
-    );
     event ModuleAdded(address indexed moduleAddr, bytes4[] selectors);
     event ModuleRemoved(address indexed moduleAddr, bytes4[] selectors);
     event ModuleUpdated(
@@ -28,7 +25,7 @@ contract DIMORegistry is ERC721 {
         string memory _symbol,
         string memory __baseURI
     ) {
-        _setAdmin(msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         ERC721MetadataStorage.Layout storage s = ERC721MetadataStorage.layout();
         s.name = _name;
@@ -40,17 +37,9 @@ contract DIMORegistry is ERC721 {
             true
         );
         ERC165Storage.layout().setSupportedInterface(
-            type(IERC721).interfaceId,
+            type(IERC721Metadata).interfaceId,
             true
         );
-    }
-
-    modifier onlyAdmin() {
-        require(
-            DIMOStorage.getStorage().admin == msg.sender,
-            "Caller is not an admin"
-        );
-        _;
     }
 
     /// @notice pass a call to a module
@@ -82,13 +71,6 @@ contract DIMORegistry is ERC721 {
 
     /* solhint-enable no-complex-fallback, payable-fallback, no-inline-assembly */
 
-    /// @notice Transfers admin role of the contract to a new account (`newAdmin`)
-    /// @param newAdmin new admin
-    function transferAdminRole(address newAdmin) external onlyAdmin {
-        require(newAdmin != address(0), "newAdmin cannot be zero address");
-        _setAdmin(newAdmin);
-    }
-
     /// @notice update module
     /// @dev oldImplementation should be registered
     /// @param oldImplementation address of the module to remove
@@ -100,7 +82,7 @@ contract DIMORegistry is ERC721 {
         address newImplementation,
         bytes4[] calldata oldSelectors,
         bytes4[] calldata newSelectors
-    ) external onlyAdmin {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _removeModule(oldImplementation, oldSelectors);
         _addModule(newImplementation, newSelectors);
         emit ModuleUpdated(
@@ -117,7 +99,7 @@ contract DIMORegistry is ERC721 {
     /// @param selectors selectors of the implementation contract
     function addModule(address implementation, bytes4[] calldata selectors)
         external
-        onlyAdmin
+        onlyRole(DEFAULT_ADMIN_ROLE)
     {
         _addModule(implementation, selectors);
         emit ModuleAdded(implementation, selectors);
@@ -129,7 +111,7 @@ contract DIMORegistry is ERC721 {
     /// @param selectors function signatures
     function removeModule(address implementation, bytes4[] calldata selectors)
         external
-        onlyAdmin
+        onlyRole(DEFAULT_ADMIN_ROLE)
     {
         _removeModule(implementation, selectors);
         emit ModuleRemoved(implementation, selectors);
@@ -180,12 +162,5 @@ contract DIMORegistry is ERC721 {
             );
             s.implementations[selectors[i]] = address(0);
         }
-    }
-
-    /// @notice sets a new admin
-    /// @param newAdmin new admin
-    function _setAdmin(address newAdmin) private {
-        DIMOStorage.getStorage().admin = newAdmin;
-        emit AdminRoleTransferred(address(0), newAdmin);
     }
 }

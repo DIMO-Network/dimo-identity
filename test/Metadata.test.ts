@@ -19,11 +19,12 @@ describe('Metadata', async function () {
   const [admin, nonAdmin] = provider.getWallets();
 
   before(async () => {
-    [, getterInstance, metadataInstance, rootInstance] = await initialize([
+    [, getterInstance, metadataInstance, rootInstance] = await initialize(
+      [C.name, C.symbol, ''],
       'Getter',
       'Metadata',
       'Root'
-    ]);
+    );
   });
 
   beforeEach(async () => {
@@ -34,35 +35,15 @@ describe('Metadata', async function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('initialize', () => {
-    it('Should revert if caller is not an admin', async () => {
-      await expect(
-        metadataInstance
-          .connect(nonAdmin)
-          .initialize(C.name, C.symbol, C.baseURI)
-      ).to.be.revertedWith('Caller is not an admin');
-    });
-    it('Should correctly set name', async () => {
-      await metadataInstance
-        .connect(admin)
-        .initialize(C.name, C.symbol, C.baseURI);
-
-      expect(await getterInstance.name()).to.be.equal(C.name);
-    });
-    it('Should correctly set symbol', async () => {
-      await metadataInstance
-        .connect(admin)
-        .initialize(C.name, C.symbol, C.baseURI);
-
-      expect(await getterInstance.symbol()).to.be.equal(C.symbol);
-    });
-  });
-
   describe('setBaseURI', async () => {
-    it('Should revert if caller is not an admin', async () => {
+    it('Should revert if caller does not have admin role', async () => {
       await expect(
         metadataInstance.connect(nonAdmin).setBaseURI(C.baseURI)
-      ).to.be.revertedWith('Caller is not an admin');
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
     });
     it('Should correctly set baseURI', async () => {
       await metadataInstance.connect(admin).setBaseURI(C.baseURI);
@@ -72,10 +53,14 @@ describe('Metadata', async function () {
   });
 
   describe('setTokenURI', async () => {
-    it('Should revert if caller is not an admin', async () => {
+    it('Should revert if caller does not have admin role', async () => {
       await expect(
         metadataInstance.connect(nonAdmin).setTokenURI(1, C.mockTokenURI)
-      ).to.be.revertedWith('Caller is not an admin');
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
     });
     it('Should revert if tokenId does not exist', async () => {
       await expect(
@@ -109,7 +94,7 @@ describe('Metadata', async function () {
       expect(await getterInstance.tokenURI(1)).to.equal(C.mockTokenURI);
     });
     it('Should return baseURI + tokenIdURI if set', async () => {
-      await metadataInstance.initialize(C.name, C.symbol, C.baseURI);
+      await metadataInstance.setBaseURI(C.baseURI);
       await metadataInstance.connect(admin).setTokenURI(1, C.mockTokenURI);
 
       expect(await getterInstance.tokenURI(1)).to.equal(
@@ -117,7 +102,7 @@ describe('Metadata', async function () {
       );
     });
     it('Should return baseURI + tokenId if tokenIdURI is not set', async () => {
-      await metadataInstance.initialize(C.name, C.symbol, C.baseURI);
+      await metadataInstance.setBaseURI(C.baseURI);
 
       expect(await getterInstance.tokenURI(1)).to.equal(C.baseURI + '1');
     });

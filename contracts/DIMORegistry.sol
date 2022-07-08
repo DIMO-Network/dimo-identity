@@ -4,11 +4,11 @@ pragma solidity ^0.8.13;
 import "./libraries/DIMOStorage.sol";
 import "./access/AccessControlInternal.sol";
 import "@solidstate/contracts/introspection/ERC165.sol";
-import "@solidstate/contracts/token/ERC721/metadata/ERC721Metadata.sol";
+import "@solidstate/contracts/token/ERC721/ERC721.sol";
 import "@solidstate/contracts/token/ERC721/metadata/IERC721Metadata.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataStorage.sol";
 
-contract DIMORegistry is ERC721Metadata, AccessControlInternal {
+contract DIMORegistryBetaV1 is ERC721, AccessControlInternal {
     using ERC165Storage for ERC165Storage.Layout;
 
     event ModuleAdded(address indexed moduleAddr, bytes4[] selectors);

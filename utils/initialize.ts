@@ -1,26 +1,25 @@
-import { ethers, waffle } from 'hardhat';
+import { Wallet } from 'ethers';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import { getSelectors } from './';
-
-const provider = waffle.provider;
-
-const [admin] = provider.getWallets();
+import { getSelectors } from '.';
 
 async function initialize(
+  deployer: Wallet | SignerWithAddress,
   constructorArgs: [string, string, string],
   ...contracts: string[]
 ): Promise<any[]> {
   const instances: any[] = [];
 
   // Deploy DIMORegistry Implementation
-  const DIMORegistry = await ethers.getContractFactory('DIMORegistry');
-  const dimoRegistryImplementation = await DIMORegistry.connect(admin).deploy(
-    ...constructorArgs
-  );
+  const DIMORegistry = await ethers.getContractFactory('DIMORegistryBetaV1');
+  const dimoRegistryImplementation = await DIMORegistry.connect(
+    deployer
+  ).deploy(...constructorArgs);
   await dimoRegistryImplementation.deployed();
 
   const dimoRegistry = await ethers.getContractAt(
-    'DIMORegistry',
+    'DIMORegistryBetaV1',
     dimoRegistryImplementation.address
   );
 
@@ -29,14 +28,14 @@ async function initialize(
   for (const contractName of contracts) {
     const ContractFactory = await ethers.getContractFactory(contractName);
     const contractImplementation = await ContractFactory.connect(
-      admin
+      deployer
     ).deploy();
     await contractImplementation.deployed();
 
     const contractSelectors = getSelectors(ContractFactory.interface);
 
     await dimoRegistry
-      .connect(admin)
+      .connect(deployer)
       .addModule(contractImplementation.address, contractSelectors);
 
     instances.push(

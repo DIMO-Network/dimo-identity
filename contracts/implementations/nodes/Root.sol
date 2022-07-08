@@ -7,7 +7,7 @@ import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/RootStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
+contract RootBetaV1 is ERC721MetadataInternal, IEvents, AccessControlInternal {
     event ControllerSet(address indexed controller);
 
     // ***** Admin management ***** //
@@ -84,7 +84,7 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
             _safeMint(_owner, newNodeId);
 
             ds.nodes[newNodeId].nodeType = nodeType;
-            ds.nodes[newNodeId].info["name"] = names[i];
+            ds.nodes[newNodeId].info["Name"] = names[i];
 
             emit NodeMinted(nodeType, newNodeId);
         }

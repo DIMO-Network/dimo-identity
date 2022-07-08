@@ -1,0 +1,59 @@
+describe('controller transfer', () => {
+  it('Should revert if receiver is not a controller', async () => {
+    await rootInstance
+      .connect(admin)
+      .mintRoot(controller1.address, mockAttributes, mockInfos);
+
+    await expect(
+      rootInstance
+        .connect(controller1)
+        .safeTransferFrom(controller1.address, controller2.address, 1)
+    ).to.be.revertedWith('Invalid transfer');
+  });
+  it('Should revert if receiver has already minted a root', async () => {
+    await rootInstance
+      .connect(admin)
+      .mintRoot(controller1.address, mockAttributes, mockInfos);
+    await rootInstance
+      .connect(admin)
+      .mintRoot(controller2.address, mockAttributes, mockInfos);
+
+    await expect(
+      rootInstance
+        .connect(controller1)
+        .safeTransferFrom(controller1.address, controller2.address, 1)
+    ).to.be.revertedWith('Invalid transfer');
+  });
+  it('Should correctly update rootMinted status', async () => {
+    await rootInstance.connect(admin).setController(controller2.address);
+    await rootInstance
+      .connect(admin)
+      .mintRoot(controller1.address, mockAttributes, mockInfos);
+
+    const isRootMinted1Before = await rootInstance.isRootMinted(
+      controller1.address
+    );
+    const isRootMinted2Before = await rootInstance.isRootMinted(
+      controller2.address
+    );
+    // eslint-disable-next-line no-unused-expressions
+    expect(isRootMinted1Before).to.be.true;
+    // eslint-disable-next-line no-unused-expressions
+    expect(isRootMinted2Before).to.be.false;
+
+    await rootInstance
+      .connect(controller1)
+      .safeTransferFrom(controller1.address, controller2.address, 1);
+
+    const isRootMinted1After = await rootInstance.isRootMinted(
+      controller1.address
+    );
+    const isRootMinted2After = await rootInstance.isRootMinted(
+      controller2.address
+    );
+    // eslint-disable-next-line no-unused-expressions
+    expect(isRootMinted1After).to.be.false;
+    // eslint-disable-next-line no-unused-expressions
+    expect(isRootMinted2After).to.be.true;
+  });
+});

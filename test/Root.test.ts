@@ -1,8 +1,8 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { Getter, Root } from '../typechain';
-import { initialize, createSnapshot, revertToSnapshot, C } from './utils';
+import { GetterBetaV1, RootBetaV1 } from '../typechain';
+import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -12,17 +12,18 @@ chai.use(solidity);
 
 describe('Root', async function () {
   let snapshot: string;
-  let getterInstance: Getter;
-  let rootInstance: Root;
+  let getterInstance: GetterBetaV1;
+  let rootInstance: RootBetaV1;
 
   const [admin, nonAdmin, controller1, nonController] = provider.getWallets();
 
   before(async () => {
     [, getterInstance, , rootInstance] = await initialize(
+      admin,
       [C.name, C.symbol, C.baseURI],
-      'Getter',
-      'Metadata',
-      'Root'
+      'GetterBetaV1',
+      'MetadataBetaV1',
+      'RootBetaV1'
     );
 
     // Set root node type
@@ -54,8 +55,9 @@ describe('Root', async function () {
     });
     it('Should revert if node type is already set', async () => {
       const [, localRootInstance] = await initialize(
+        admin,
         [C.name, C.symbol, C.baseURI],
-        'Root'
+        'RootBetaV1'
       );
 
       await localRootInstance.connect(admin).setRootNodeType(C.rootNodeType);
@@ -191,6 +193,16 @@ describe('Root', async function () {
       );
     });
     it('Should emit NodeMinted event with correct params', async () => {
+      const receipt = await (
+        await rootInstance
+          .connect(admin)
+          .mintRootBatch(admin.address, C.mockRootNames)
+      ).wait();
+      console.log(
+        receipt.events
+          ?.filter((e: any) => e.event === 'NodeMinted')
+          .map((e: any) => e.args.nodeId)
+      );
       await expect(
         rootInstance
           .connect(admin)

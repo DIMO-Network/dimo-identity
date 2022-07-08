@@ -20,7 +20,7 @@ export const rootNodeTypeId = ethers.utils.keccak256(rootNodeType);
 export const vehicleNodeTypeId = ethers.utils.keccak256(vehicleNodeType);
 
 // Mock Root attributes
-export const mockRootAttributeName = 'name';
+export const mockRootAttributeName = 'Name';
 export const mockRootAttribute1 = 'mockRootAttribute1';
 export const mockRootAttribute2 = 'mockRootAttribute2';
 export const mockRootAttribute3 = 'mockRootAttribute3';

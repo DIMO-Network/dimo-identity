@@ -1,8 +1,13 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { Eip712Checker, Getter, Root, Vehicle } from '../typechain';
-import { initialize, createSnapshot, revertToSnapshot, C } from './utils';
+import {
+  Eip712CheckerBetaV1,
+  GetterBetaV1,
+  RootBetaV1,
+  VehicleBetaV1
+} from '../typechain';
+import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -12,21 +17,22 @@ chai.use(solidity);
 
 describe('Vehicle', function () {
   let snapshot: string;
-  let eip712CheckerInstance: Eip712Checker;
-  let getterInstance: Getter;
-  let rootInstance: Root;
-  let vehicleInstance: Vehicle;
+  let eip712CheckerInstance: Eip712CheckerBetaV1;
+  let getterInstance: GetterBetaV1;
+  let rootInstance: RootBetaV1;
+  let vehicleInstance: VehicleBetaV1;
 
   const [admin, nonAdmin, controller1, user1] = provider.getWallets();
 
   before(async () => {
     [, eip712CheckerInstance, getterInstance, rootInstance, vehicleInstance] =
       await initialize(
+        admin,
         [C.name, C.symbol, C.baseURI],
-        'Eip712Checker',
-        'Getter',
-        'Root',
-        'Vehicle'
+        'Eip712CheckerBetaV1',
+        'GetterBetaV1',
+        'RootBetaV1',
+        'VehicleBetaV1'
       );
 
     await eip712CheckerInstance.initialize('DIMO', '1');
@@ -70,9 +76,10 @@ describe('Vehicle', function () {
     });
     it('Should revert if node type is already set', async () => {
       const [, , localVehicleInstance] = await initialize(
+        admin,
         [C.name, C.symbol, C.baseURI],
-        'Root',
-        'Vehicle'
+        'RootBetaV1',
+        'VehicleBetaV1'
       );
 
       await localVehicleInstance

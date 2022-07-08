@@ -117,6 +117,8 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         );
 
         _safeMint(_owner, newNodeId);
+
+        emit NodeMinted(vs.nodeType, newNodeId);
     }
 
     /// @notice Add infos to node

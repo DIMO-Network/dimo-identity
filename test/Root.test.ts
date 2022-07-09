@@ -193,16 +193,6 @@ describe('Root', async function () {
       );
     });
     it('Should emit NodeMinted event with correct params', async () => {
-      const receipt = await (
-        await rootInstance
-          .connect(admin)
-          .mintRootBatch(admin.address, C.mockRootNames)
-      ).wait();
-      console.log(
-        receipt.events
-          ?.filter((e: any) => e.event === 'NodeMinted')
-          .map((e: any) => e.args.nodeId)
-      );
       await expect(
         rootInstance
           .connect(admin)

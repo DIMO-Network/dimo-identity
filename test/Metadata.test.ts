@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { GetterBetaV1, MetadataBetaV1, RootBetaV1 } from '../typechain';
+import { Getter, Metadata, Root } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -12,9 +12,9 @@ chai.use(solidity);
 
 describe('Metadata', async function () {
   let snapshot: string;
-  let getterInstance: GetterBetaV1;
-  let metadataInstance: MetadataBetaV1;
-  let rootInstance: RootBetaV1;
+  let getterInstance: Getter;
+  let metadataInstance: Metadata;
+  let rootInstance: Root;
 
   const [admin, nonAdmin] = provider.getWallets();
 
@@ -22,9 +22,9 @@ describe('Metadata', async function () {
     [, getterInstance, metadataInstance, rootInstance] = await initialize(
       admin,
       [C.name, C.symbol, ''],
-      'GetterBetaV1',
-      'MetadataBetaV1',
-      'RootBetaV1'
+      'Getter',
+      'Metadata',
+      'Root'
     );
   });
 

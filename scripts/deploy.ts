@@ -4,11 +4,11 @@ import { ethers, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import {
-  DIMORegistryBetaV1,
-  AccessControlBetaV1,
-  Eip712CheckerBetaV1,
-  RootBetaV1,
-  VehicleBetaV1
+  DIMORegistry,
+  AccessControl,
+  Eip712Checker,
+  Root,
+  Vehicle
 } from '../typechain';
 import { C, getSelectors } from '../utils';
 import addressesJSON from './data/addresses.json';
@@ -24,11 +24,6 @@ interface KMSAddress {
   [index: string]: string;
 }
 
-type Contract = {
-  name: string,
-  implementation: string
-};
-
 const contractAddresses: ContractAddressesByNetwork = addressesJSON;
 
 const networkName = network.name;
@@ -38,13 +33,13 @@ const KmsAddress: KMSAddress = {
   hardhat: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'
 };
 
-const dimoRegistryName = 'DIMORegistryBetaV1';
+const dimoRegistryName = 'DIMORegistry';
 
-const eip712Name = 'DIMOBetaV1';
+const eip712Name = 'DIMO';
 const eip712Version = '1';
 
 const name = 'DIMO identity Beta V1';
-const symbol = 'DIMOBetaV1';
+const symbol = 'DIMO';
 const baseUriDev = 'https://devices-api.dev.dimo.zone/v1/nfts/';
 const baseUri = 'https://devices-api.dimo.zone/v1/nfts/';
 
@@ -77,12 +72,12 @@ async function deploy(
   console.log('\n----- Deploying contracts -----\n');
 
   const contractNames = [
-    'AccessControlBetaV1',
-    'Eip712CheckerBetaV1',
-    'GetterBetaV1',
-    'MetadataBetaV1',
-    'RootBetaV1',
-    'VehicleBetaV1'
+    'AccessControl',
+    'Eip712Checker',
+    'Getter',
+    'Metadata',
+    'Root',
+    'Vehicle'
   ];
 
   const instances: ContractAddressesByNetwork = { [networkName]: {} };
@@ -120,13 +115,13 @@ async function deploy(
 }
 
 async function addModules(deployer: SignerWithAddress) {
-  const dimoRegistryInstance: DIMORegistryBetaV1 = await ethers.getContractAt(
-    'DIMORegistryBetaV1',
-    contractAddresses[networkName].DIMORegistryBetaV1
+  const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
+    'DIMORegistry',
+    contractAddresses[networkName].DIMORegistry
   );
 
   const instances = Object.keys(contractAddresses[networkName])
-    .filter((contractName) => contractName !== 'DIMORegistryBetaV1')
+    .filter((contractName) => contractName !== 'DIMORegistry')
     .map((contractName) => {
       return {
         name: contractName,
@@ -154,17 +149,17 @@ async function addModules(deployer: SignerWithAddress) {
 }
 
 async function setup(deployer: SignerWithAddress) {
-  const eip712CheckerInstance: Eip712CheckerBetaV1 = await ethers.getContractAt(
-    'Eip712CheckerBetaV1',
-    contractAddresses[networkName].DIMORegistryBetaV1
+  const eip712CheckerInstance: Eip712Checker = await ethers.getContractAt(
+    'Eip712Checker',
+    contractAddresses[networkName].DIMORegistry
   );
-  const rootInstance: RootBetaV1 = await ethers.getContractAt(
-    'RootBetaV1',
-    contractAddresses[networkName].DIMORegistryBetaV1
+  const rootInstance: Root = await ethers.getContractAt(
+    'Root',
+    contractAddresses[networkName].DIMORegistry
   );
-  const vehicleInstance: VehicleBetaV1 = await ethers.getContractAt(
-    'VehicleBetaV1',
-    contractAddresses[networkName].DIMORegistryBetaV1
+  const vehicleInstance: Vehicle = await ethers.getContractAt(
+    'Vehicle',
+    contractAddresses[networkName].DIMORegistry
   );
 
   console.log('\n----- Initializing EIP712 -----\n');
@@ -212,9 +207,9 @@ async function setup(deployer: SignerWithAddress) {
 async function grant(deployer: SignerWithAddress) {
   const kms: string = KmsAddress[networkName];
 
-  const accessControlInstance: AccessControlBetaV1 = await ethers.getContractAt(
-    'AccessControlBetaV1',
-    contractAddresses[networkName].DIMORegistryBetaV1
+  const accessControlInstance: AccessControl = await ethers.getContractAt(
+    'AccessControl',
+    contractAddresses[networkName].DIMORegistry
   );
 
   console.log(`\n----- Granting admin role to ${kms} -----\n`);
@@ -229,9 +224,9 @@ async function grant(deployer: SignerWithAddress) {
 }
 
 async function mintBatch(deployer: SignerWithAddress) {
-  const rootInstance: RootBetaV1 = await ethers.getContractAt(
-    'RootBetaV1',
-    contractAddresses[networkName].DIMORegistryBetaV1
+  const rootInstance: Root = await ethers.getContractAt(
+    'Root',
+    contractAddresses[networkName].DIMORegistry
   );
 
   console.log(`\n----- Minting roots -----\n`);

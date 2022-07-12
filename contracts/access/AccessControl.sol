@@ -7,7 +7,7 @@ import "./AccessControlInternal.sol";
 /**
  * @title Role based access control based
  */
-contract AccessControlBetaV1 is IAccessControl, AccessControlInternal {
+contract AccessControl is IAccessControl, AccessControlInternal {
     /**
      * @notice Grants `role` to `account`.
      *

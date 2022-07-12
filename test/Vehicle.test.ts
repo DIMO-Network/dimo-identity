@@ -1,12 +1,7 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import {
-  Eip712CheckerBetaV1,
-  GetterBetaV1,
-  RootBetaV1,
-  VehicleBetaV1
-} from '../typechain';
+import { Eip712Checker, Getter, Root, Vehicle } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -17,10 +12,10 @@ chai.use(solidity);
 
 describe('Vehicle', function () {
   let snapshot: string;
-  let eip712CheckerInstance: Eip712CheckerBetaV1;
-  let getterInstance: GetterBetaV1;
-  let rootInstance: RootBetaV1;
-  let vehicleInstance: VehicleBetaV1;
+  let eip712CheckerInstance: Eip712Checker;
+  let getterInstance: Getter;
+  let rootInstance: Root;
+  let vehicleInstance: Vehicle;
 
   const [admin, nonAdmin, controller1, user1] = provider.getWallets();
 
@@ -29,10 +24,10 @@ describe('Vehicle', function () {
       await initialize(
         admin,
         [C.name, C.symbol, C.baseURI],
-        'Eip712CheckerBetaV1',
-        'GetterBetaV1',
-        'RootBetaV1',
-        'VehicleBetaV1'
+        'Eip712Checker',
+        'Getter',
+        'Root',
+        'Vehicle'
       );
 
     await eip712CheckerInstance.initialize('DIMO', '1');
@@ -78,8 +73,8 @@ describe('Vehicle', function () {
       const [, , localVehicleInstance] = await initialize(
         admin,
         [C.name, C.symbol, C.baseURI],
-        'RootBetaV1',
-        'VehicleBetaV1'
+        'Root',
+        'Vehicle'
       );
 
       await localVehicleInstance

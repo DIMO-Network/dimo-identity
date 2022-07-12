@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { AccessControlBetaV1 } from '../typechain';
+import { AccessControl } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -12,7 +12,7 @@ chai.use(solidity);
 
 describe('AccessControl', async function () {
   let snapshot: string;
-  let accessControlInstance: AccessControlBetaV1;
+  let accessControlInstance: AccessControl;
 
   const [admin1, admin2, nonAdmin] = provider.getWallets();
 
@@ -20,7 +20,7 @@ describe('AccessControl', async function () {
     [, accessControlInstance] = await initialize(
       admin1,
       [C.name, C.symbol, C.baseURI],
-      'AccessControlBetaV1'
+      'AccessControl'
     );
   });
 

@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "./Eip712CheckerStorage.sol";
 import "../access/AccessControlInternal.sol";
 
-contract Eip712CheckerBetaV1 is AccessControlInternal {
+contract Eip712Checker is AccessControlInternal {
     function initialize(string calldata name, string calldata version)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)

@@ -8,7 +8,7 @@ import "@solidstate/contracts/token/ERC721/ERC721.sol";
 import "@solidstate/contracts/token/ERC721/metadata/IERC721Metadata.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataStorage.sol";
 
-contract DIMORegistryBetaV1 is ERC721, AccessControlInternal {
+contract DIMORegistry is ERC721, AccessControlInternal {
     using ERC165Storage for ERC165Storage.Layout;
 
     event ModuleAdded(address indexed moduleAddr, bytes4[] selectors);

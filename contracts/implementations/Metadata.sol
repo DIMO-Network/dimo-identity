@@ -5,7 +5,7 @@ import "../access/AccessControlInternal.sol";
 import "@solidstate/contracts/token/ERC721/base/ERC721BaseStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataStorage.sol";
 
-contract MetadataBetaV1 is AccessControlInternal {
+contract Metadata is AccessControlInternal {
     using ERC721BaseStorage for ERC721BaseStorage.Layout;
 
     function setBaseURI(string calldata _baseURI)

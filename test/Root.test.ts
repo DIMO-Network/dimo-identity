@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { GetterBetaV1, RootBetaV1 } from '../typechain';
+import { Getter, Root } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -12,8 +12,8 @@ chai.use(solidity);
 
 describe('Root', async function () {
   let snapshot: string;
-  let getterInstance: GetterBetaV1;
-  let rootInstance: RootBetaV1;
+  let getterInstance: Getter;
+  let rootInstance: Root;
 
   const [admin, nonAdmin, controller1, nonController] = provider.getWallets();
 
@@ -21,9 +21,9 @@ describe('Root', async function () {
     [, getterInstance, , rootInstance] = await initialize(
       admin,
       [C.name, C.symbol, C.baseURI],
-      'GetterBetaV1',
-      'MetadataBetaV1',
-      'RootBetaV1'
+      'Getter',
+      'Metadata',
+      'Root'
     );
 
     // Set root node type
@@ -57,7 +57,7 @@ describe('Root', async function () {
       const [, localRootInstance] = await initialize(
         admin,
         [C.name, C.symbol, C.baseURI],
-        'RootBetaV1'
+        'Root'
       );
 
       await localRootInstance.connect(admin).setRootNodeType(C.rootNodeType);

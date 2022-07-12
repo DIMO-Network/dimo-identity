@@ -7,7 +7,7 @@ import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/RootStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-contract RootBetaV1 is ERC721MetadataInternal, IEvents, AccessControlInternal {
+contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
     event ControllerSet(address indexed controller);
 
     // ***** Admin management ***** //

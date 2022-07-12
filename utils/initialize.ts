@@ -12,14 +12,14 @@ async function initialize(
   const instances: any[] = [];
 
   // Deploy DIMORegistry Implementation
-  const DIMORegistry = await ethers.getContractFactory('DIMORegistryBetaV1');
+  const DIMORegistry = await ethers.getContractFactory('DIMORegistry');
   const dimoRegistryImplementation = await DIMORegistry.connect(
     deployer
   ).deploy(...constructorArgs);
   await dimoRegistryImplementation.deployed();
 
   const dimoRegistry = await ethers.getContractAt(
-    'DIMORegistryBetaV1',
+    'DIMORegistry',
     dimoRegistryImplementation.address
   );
 

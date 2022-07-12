@@ -9,7 +9,7 @@ import "../../libraries/nodes/RootStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-contract VehicleBetaV1 is ERC721MetadataInternal, IEvents, AccessControlInternal {
+contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
             "MintVehicleSign(uint256 rootNode,address _owner,string[] attributes,string[] infos)"

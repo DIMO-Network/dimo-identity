@@ -7,6 +7,7 @@ import '@typechain/hardhat';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
+import 'hardhat-tracer';
 
 dotenv.config();
 
@@ -47,7 +48,7 @@ const config: HardhatUserConfig = {
     currency: 'USD'
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY
+    apiKey: process.env.POLYGONSCAN_API_KEY
   }
 };
 

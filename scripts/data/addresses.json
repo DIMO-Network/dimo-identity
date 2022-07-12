@@ -1,0 +1,29 @@
+{
+    "polygon": {
+        "DIMORegistryBetaV1": "0xD7519fFbFb1f15Ef320F5bf7A325Aa1020e31988",
+        "AccessControlBetaV1": "0x2808D309b28840210DF1DC0A3105203d83cBD5c3",
+        "Eip712CheckerBetaV1": "0xe4F49e22e224757964e8f1a87E3d0eCDe266B6fF",
+        "GetterBetaV1": "0xEC28bC1a3666dB802c6aA218aE1654657a160b41",
+        "MetadataBetaV1": "0x2127f72EDD50CF6A73026736B3CA9320E357be3D",
+        "RootBetaV1": "0xf9Cd476D583Cc221caA244e7Db1e439A39083682",
+        "VehicleBetaV1": "0xF14eee399E9537E8640D5475B96b5eba2E2915a4"
+    },
+    "mumbai": {
+        "DIMORegistryBetaV1": "0x2808D309b28840210DF1DC0A3105203d83cBD5c3",
+        "AccessControlBetaV1": "0xe4F49e22e224757964e8f1a87E3d0eCDe266B6fF",
+        "Eip712CheckerBetaV1": "0xEC28bC1a3666dB802c6aA218aE1654657a160b41",
+        "GetterBetaV1": "0x2127f72EDD50CF6A73026736B3CA9320E357be3D",
+        "MetadataBetaV1": "0xf9Cd476D583Cc221caA244e7Db1e439A39083682",
+        "RootBetaV1": "0xF14eee399E9537E8640D5475B96b5eba2E2915a4",
+        "VehicleBetaV1": "0xb0f7D025F4c20C2E92EE41C39568E24365284A6C"
+    },
+    "hardhat": {
+        "DIMORegistryBetaV1": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        "AccessControlBetaV1": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        "Eip712CheckerBetaV1": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+        "GetterBetaV1": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+        "MetadataBetaV1": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+        "RootBetaV1": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+        "VehicleBetaV1": "0x0165878A594ca255338adfa4d48449f69242Eb8F"
+    }
+}

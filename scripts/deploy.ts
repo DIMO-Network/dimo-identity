@@ -20,14 +20,14 @@ interface ContractAddressesByNetwork {
   };
 }
 
-interface KMSAddress {
+interface NetworkValue {
   [index: string]: string;
 }
 
 const contractAddresses: ContractAddressesByNetwork = addressesJSON;
 
 const networkName = network.name;
-const KmsAddress: KMSAddress = {
+const KmsAddress: NetworkValue = {
   mumbai: '0x74cb2b8ed0c1789d84ef701921d1152e592c330c',
   polygon: '0xcce4ef41a67e28c3cf3dbc51a6cd3d004f53acbd',
   hardhat: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'
@@ -40,8 +40,11 @@ const eip712Version = '1';
 
 const name = 'DIMO identity Beta V1';
 const symbol = 'DIMO';
-const baseUriDev = 'https://devices-api.dev.dimo.zone/v1/nfts/';
-const baseUri = 'https://devices-api.dimo.zone/v1/nfts/';
+const baseUri: NetworkValue = {
+  mumbai: 'https://devices-api.dev.dimo.zone/v1/nfts/',
+  polygon: 'https://devices-api.dimo.zone/v1/nfts/',
+  hardhat: C.baseURI
+};
 
 const rootNodeType = ethers.utils.toUtf8Bytes('Root');
 const vehicleNodeType = ethers.utils.toUtf8Bytes('Vehicle');
@@ -86,7 +89,7 @@ async function deploy(
   const DIMORegistry = await ethers.getContractFactory(dimoRegistryName);
   const dimoRegistryImplementation = await DIMORegistry.connect(
     deployer
-  ).deploy(name, symbol, baseUri);
+  ).deploy(name, symbol, baseUri[networkName]);
   await dimoRegistryImplementation.deployed();
 
   console.log(

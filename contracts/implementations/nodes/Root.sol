@@ -27,7 +27,7 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
     }
 
     /// @notice Adds an attribute to the whitelist
-    /// @dev Only an admin can set new controllers
+    /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
     function addRootAttribute(string calldata attribute)
         external

@@ -59,7 +59,7 @@ describe('Vehicle', function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('setNodeType', () => {
+  describe('setVehicleNodeType', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
         vehicleInstance.connect(nonAdmin).setVehicleNodeType(C.vehicleNodeType)
@@ -238,7 +238,7 @@ describe('Vehicle', function () {
             C.mockVehicleInfos
           )
       )
-        .to.emit(rootInstance, 'NodeMinted')
+        .to.emit(vehicleInstance, 'NodeMinted')
         .withArgs(C.vehicleNodeTypeId, 2);
     });
   });

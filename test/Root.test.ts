@@ -43,7 +43,7 @@ describe('Root', async function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('setNodeType', () => {
+  describe('setRootNodeType', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
         rootInstance.connect(nonAdmin).setRootNodeType(C.rootNodeType)

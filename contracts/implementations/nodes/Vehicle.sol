@@ -32,7 +32,7 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     }
 
     /// @notice Adds an attribute to the whielist
-    /// @dev Only an admin can set new controllers
+    /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
     function addVehicleAttribute(string calldata attribute)
         external
@@ -108,7 +108,13 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         );
 
         bytes32 message = keccak256(
-            abi.encode(MINT_TYPEHASH, rootNode, _owner, attributesHash, infosHash)
+            abi.encode(
+                MINT_TYPEHASH,
+                rootNode,
+                _owner,
+                attributesHash,
+                infosHash
+            )
         );
 
         require(

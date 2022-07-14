@@ -80,6 +80,7 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         emit NodeMinted(nodeType, newNodeId);
     }
 
+    // TODO Documentation
     function mintVehicleSign(
         uint256 rootNode,
         address _owner,

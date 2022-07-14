@@ -16,8 +16,10 @@ export const mockTokenURI = 'mockTokenURI';
 // Node types
 export const rootNodeType = ethers.utils.toUtf8Bytes('Root');
 export const vehicleNodeType = ethers.utils.toUtf8Bytes('Vehicle');
+export const autoPiNodeType = ethers.utils.toUtf8Bytes('AutoPi');
 export const rootNodeTypeId = ethers.utils.keccak256(rootNodeType);
 export const vehicleNodeTypeId = ethers.utils.keccak256(vehicleNodeType);
+export const autoPiNodeTypeId = ethers.utils.keccak256(autoPiNodeType);
 
 // Mock Root attributes
 export const mockRootAttributeName = 'Name';
@@ -43,6 +45,19 @@ export const vehicleAttributesNotWhitelisted = [
   mockVehicleAttribute3
 ];
 
+// Mock AutoPi attributes
+export const mockAutoPiAttribute1 = 'mockAutoPiAttribute1';
+export const mockAutoPiAttribute2 = 'mockAutoPiAttribute2';
+export const mockAutoPiAttribute3 = 'mockAutoPiAttribute3';
+export const mockAutoPiAttributes = [
+  mockAutoPiAttribute1,
+  mockAutoPiAttribute2
+];
+export const autoPiAttributesNotWhitelisted = [
+  mockAutoPiAttribute1,
+  mockAutoPiAttribute3
+];
+
 // Root Infos associated with attributes
 export const mockRootNames = ['Root1', 'Root2', 'Root3'];
 export const mockRootInfo1 = 'mockRootInfo1';
@@ -55,3 +70,11 @@ export const mockVehicleInfo1 = 'mockVehicleInfo1';
 export const mockVehicleInfo2 = 'mockVehicleInfo2';
 export const mockVehicleInfos = [mockVehicleInfo1, mockVehicleInfo2];
 export const mockVehicleInfosWrongSize = [mockVehicleInfo1];
+
+// AutoPi Infos associated with attributes
+export const mockAutoPiInfo1 = 'mockAutoPiInfo1';
+export const mockAutoPiInfo2 = 'mockAutoPiInfo2';
+export const mockAutoPiInfos = [mockAutoPiInfo1, mockAutoPiInfo2];
+export const mockAutoPiMultipleInfos = [mockAutoPiInfos, mockAutoPiInfos];
+export const mockAutoPiInfosWrongSize = [mockAutoPiInfo1];
+export const mockAutoPiMultipleInfosWrongSize = [mockAutoPiInfosWrongSize];

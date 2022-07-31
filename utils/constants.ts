@@ -6,6 +6,9 @@ export const DEFAULT_ADMIN_ROLE =
 export const MOCK_ROLE = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes('MOCK')
 );
+export const MINTER_ROLE = ethers.utils.keccak256(
+  ethers.utils.toUtf8Bytes('Minter')
+);
 
 // Metadata
 export const name = 'DIMO web3 identity';
@@ -14,22 +17,29 @@ export const baseURI = 'https://dimo.zone/';
 export const mockTokenURI = 'mockTokenURI';
 
 // Node types
-export const rootNodeType = ethers.utils.toUtf8Bytes('Root');
+export const manufacturerNodeType = ethers.utils.toUtf8Bytes('Manufacturer');
 export const vehicleNodeType = ethers.utils.toUtf8Bytes('Vehicle');
-export const autoPiNodeType = ethers.utils.toUtf8Bytes('AutoPi');
-export const rootNodeTypeId = ethers.utils.keccak256(rootNodeType);
+export const aftermarketDeviceNodeType =
+  ethers.utils.toUtf8Bytes('AftermarketDevice');
+export const manufacturerNodeTypeId =
+  ethers.utils.keccak256(manufacturerNodeType);
 export const vehicleNodeTypeId = ethers.utils.keccak256(vehicleNodeType);
-export const autoPiNodeTypeId = ethers.utils.keccak256(autoPiNodeType);
+export const aftermarketDeviceNodeTypeId = ethers.utils.keccak256(
+  aftermarketDeviceNodeType
+);
 
-// Mock Root attributes
-export const mockRootAttributeName = 'Name';
-export const mockRootAttribute1 = 'mockRootAttribute1';
-export const mockRootAttribute2 = 'mockRootAttribute2';
-export const mockRootAttribute3 = 'mockRootAttribute3';
-export const mockRootAttributes = [mockRootAttribute1, mockRootAttribute2];
-export const rootAttributesNotWhitelisted = [
-  mockRootAttribute1,
-  mockRootAttribute3
+// Mock Manufacturer attributes
+export const mockManufacturerAttributeName = 'Name';
+export const mockManufacturerAttribute1 = 'mockManufacturerAttribute1';
+export const mockManufacturerAttribute2 = 'mockManufacturerAttribute2';
+export const mockManufacturerAttribute3 = 'mockManufacturerAttribute3';
+export const mockManufacturerAttributes = [
+  mockManufacturerAttribute1,
+  mockManufacturerAttribute2
+];
+export const manufacturerAttributesNotWhitelisted = [
+  mockManufacturerAttribute1,
+  mockManufacturerAttribute3
 ];
 
 // Mock Vehicle attributes
@@ -45,25 +55,35 @@ export const vehicleAttributesNotWhitelisted = [
   mockVehicleAttribute3
 ];
 
-// Mock AutoPi attributes
-export const mockAutoPiAttribute1 = 'mockAutoPiAttribute1';
-export const mockAutoPiAttribute2 = 'mockAutoPiAttribute2';
-export const mockAutoPiAttribute3 = 'mockAutoPiAttribute3';
-export const mockAutoPiAttributes = [
-  mockAutoPiAttribute1,
-  mockAutoPiAttribute2
+// Mock AftermarketDevice attributes
+export const mockAftermarketDeviceAttribute1 =
+  'mockAftermarketDeviceAttribute1';
+export const mockAftermarketDeviceAttribute2 =
+  'mockAftermarketDeviceAttribute2';
+export const mockAftermarketDeviceAttribute3 =
+  'mockAftermarketDeviceAttribute3';
+export const mockAftermarketDeviceAttributes = [
+  mockAftermarketDeviceAttribute1,
+  mockAftermarketDeviceAttribute2
 ];
-export const autoPiAttributesNotWhitelisted = [
-  mockAutoPiAttribute1,
-  mockAutoPiAttribute3
+export const aftermarketDeviceAttributesNotWhitelisted = [
+  mockAftermarketDeviceAttribute1,
+  mockAftermarketDeviceAttribute3
 ];
 
-// Root Infos associated with attributes
-export const mockRootNames = ['Root1', 'Root2', 'Root3'];
-export const mockRootInfo1 = 'mockRootInfo1';
-export const mockRootInfo2 = 'mockRootInfo2';
-export const mockRootInfos = [mockRootInfo1, mockRootInfo2];
-export const mockRootInfosWrongSize = [mockRootInfo1];
+// Manufacturer Infos associated with attributes
+export const mockManufacturerNames = [
+  'Manufacturer1',
+  'Manufacturer2',
+  'Manufacturer3'
+];
+export const mockManufacturerInfo1 = 'mockManufacturerInfo1';
+export const mockManufacturerInfo2 = 'mockManufacturerInfo2';
+export const mockManufacturerInfos = [
+  mockManufacturerInfo1,
+  mockManufacturerInfo2
+];
+export const mockManufacturerInfosWrongSize = [mockManufacturerInfo1];
 
 // Vehicle Infos associated with attributes
 export const mockVehicleInfo1 = 'mockVehicleInfo1';
@@ -71,10 +91,18 @@ export const mockVehicleInfo2 = 'mockVehicleInfo2';
 export const mockVehicleInfos = [mockVehicleInfo1, mockVehicleInfo2];
 export const mockVehicleInfosWrongSize = [mockVehicleInfo1];
 
-// AutoPi Infos associated with attributes
-export const mockAutoPiInfo1 = 'mockAutoPiInfo1';
-export const mockAutoPiInfo2 = 'mockAutoPiInfo2';
-export const mockAutoPiInfos = [mockAutoPiInfo1, mockAutoPiInfo2];
-export const mockAutoPiMultipleInfos = [mockAutoPiInfos, mockAutoPiInfos];
-export const mockAutoPiInfosWrongSize = [mockAutoPiInfo1];
-export const mockAutoPiMultipleInfosWrongSize = [mockAutoPiInfosWrongSize];
+// AftermarketDevice Infos associated with attributes
+export const mockAftermarketDeviceInfo1 = 'mockAftermarketDeviceInfo1';
+export const mockAftermarketDeviceInfo2 = 'mockAftermarketDeviceInfo2';
+export const mockAftermarketDeviceInfos = [
+  mockAftermarketDeviceInfo1,
+  mockAftermarketDeviceInfo2
+];
+export const mockAftermarketDeviceMultipleInfos = [
+  mockAftermarketDeviceInfos,
+  mockAftermarketDeviceInfos
+];
+export const mockAftermarketDeviceInfosWrongSize = [mockAftermarketDeviceInfo1];
+export const mockAftermarketDeviceMultipleInfosWrongSize = [
+  mockAftermarketDeviceInfosWrongSize
+];

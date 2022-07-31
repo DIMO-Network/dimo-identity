@@ -3,21 +3,28 @@ pragma solidity ^0.8.13;
 
 import "../AttributeSet.sol";
 
-library AutoPiStorage {
+library ManufacturerStorage {
     using AttributeSet for AttributeSet.Set;
 
-    bytes32 private constant AUTOPI_STORAGE_SLOT =
-        keccak256("DIMORegistry.autopi.storage");
+    bytes32 private constant MANUFACTURER_STORAGE_SLOT =
+        keccak256("DIMORegistry.Manufacturer.storage");
+
+    struct Controller {
+        bool isController;
+        bool manufacturerMinted;
+    }
 
     struct Storage {
         uint256 nodeType;
+        // [Controller address] => is controller, has minted manufacturer
+        mapping(address => Controller) controllers;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
     }
 
     /* solhint-disable no-inline-assembly */
     function getStorage() internal pure returns (Storage storage s) {
-        bytes32 slot = AUTOPI_STORAGE_SLOT;
+        bytes32 slot = MANUFACTURER_STORAGE_SLOT;
         assembly {
             s.slot := slot
         }

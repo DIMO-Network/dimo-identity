@@ -4,10 +4,10 @@ pragma solidity ^0.8.13;
 import "../../access/AccessControlInternal.sol";
 import "../shared/IEvents.sol";
 import "../../libraries/DIMOStorage.sol";
-import "../../libraries/nodes/RootStorage.sol";
+import "../../libraries/nodes/ManufacturerStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
+contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal {
     event ControllerSet(address indexed controller);
 
     // ***** Admin management ***** //
@@ -16,11 +16,11 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
     /// @dev Only an admin can set the node type
     /// @dev The node type can only be set once
     /// @param label The label of the node type
-    function setRootNodeType(bytes calldata label)
+    function setManufacturerNodeType(bytes calldata label)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        RootStorage.Storage storage s = RootStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
         require(s.nodeType == 0, "Node type already set");
 
         s.nodeType = uint256(keccak256(label));
@@ -29,11 +29,11 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
     /// @notice Adds an attribute to the whitelist
     /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
-    function addRootAttribute(string calldata attribute)
+    function addManufacturerAttribute(string calldata attribute)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        RootStorage.Storage storage s = RootStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
         bool success = AttributeSet.add(s.whitelistedAttributes, attribute);
 
         require(success, "Attribute already exists");
@@ -48,7 +48,7 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        RootStorage.Storage storage s = RootStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
         require(
             !s.controllers[_controller].isController,
             "Already a controller"
@@ -61,18 +61,18 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
 
     // ***** Interaction with nodes ***** //
 
-    /// @notice Mints roots in batch
+    /// @notice Mints manufacturers in batch
     /// @dev Caller must be an admin
     /// @dev It is assumed the 'name' attribute is whitelisted in advance
     /// @param _owner The address of the new owner
-    /// @param names List of root names
-    function mintRootBatch(address _owner, string[] calldata names)
+    /// @param names List of manufacturer names
+    function mintManufacturerBatch(address _owner, string[] calldata names)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         require(_hasRole(DEFAULT_ADMIN_ROLE, _owner), "Owner must be an admin");
 
-        RootStorage.Storage storage s = RootStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         uint256 nodeType = s.nodeType;
         uint256 newNodeId;
@@ -90,18 +90,18 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
         }
     }
 
-    /// @notice Mints a root
+    /// @notice Mints a manufacturer
     /// @dev Caller must be an admin
     /// @param _owner The address of the new owner
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
-    function mintRoot(
+    function mintManufacturer(
         address _owner,
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        RootStorage.Storage storage s = RootStorage.getStorage();
-        require(!s.controllers[_owner].rootMinted, "Invalid request");
+        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
+        require(!s.controllers[_owner].manufacturerMinted, "Invalid request");
         s.controllers[_owner].isController = true;
 
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
@@ -111,7 +111,7 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
 
         _safeMint(_owner, newNodeId);
 
-        s.controllers[_owner].rootMinted = true;
+        s.controllers[_owner].manufacturerMinted = true;
         ds.nodes[newNodeId].nodeType = nodeType;
 
         _setInfo(newNodeId, attributes, infos);
@@ -125,14 +125,14 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
     /// @param nodeId Node id where the info will be added
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
-    function setRootInfo(
+    function setManufacturerInfo(
         uint256 nodeId,
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        RootStorage.Storage storage s = RootStorage.getStorage();
-        require(ds.nodes[nodeId].nodeType == s.nodeType, "Node must be a root");
+        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
+        require(ds.nodes[nodeId].nodeType == s.nodeType, "Node must be a manufacturer");
 
         _setInfo(nodeId, attributes, infos);
     }
@@ -144,17 +144,17 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
         view
         returns (bool _isController)
     {
-        _isController = RootStorage.getStorage().controllers[addr].isController;
+        _isController = ManufacturerStorage.getStorage().controllers[addr].isController;
     }
 
-    /// @notice Verify if an address has minted a root
+    /// @notice Verify if an address has minted a manufacturer
     /// @param addr the address to be verified
-    function isRootMinted(address addr)
+    function isManufacturerMinted(address addr)
         external
         view
-        returns (bool _isRootMinted)
+        returns (bool _isManufacturerMinted)
     {
-        _isRootMinted = RootStorage.getStorage().controllers[addr].rootMinted;
+        _isManufacturerMinted = ManufacturerStorage.getStorage().controllers[addr].manufacturerMinted;
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
@@ -173,7 +173,7 @@ contract Root is ERC721MetadataInternal, IEvents, AccessControlInternal {
         require(attributes.length == infos.length, "Same length");
 
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        RootStorage.Storage storage s = RootStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
 
         for (uint256 i = 0; i < attributes.length; i++) {
             require(

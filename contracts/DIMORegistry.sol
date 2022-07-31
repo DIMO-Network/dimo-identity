@@ -1,10 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
+import "./ERC721/ERC721.sol";
 import "./libraries/DIMOStorage.sol";
 import "./access/AccessControlInternal.sol";
 import "@solidstate/contracts/introspection/ERC165.sol";
-import "@solidstate/contracts/token/ERC721/ERC721.sol";
+// import "@solidstate/contracts/token/ERC721/ERC721.sol";
 import "@solidstate/contracts/token/ERC721/metadata/IERC721Metadata.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataStorage.sol";
 

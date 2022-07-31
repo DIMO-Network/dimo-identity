@@ -2,7 +2,7 @@ import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import { DIMORegistry } from '../typechain';
-import { attributes, rootLabels } from './data';
+import { attributes, manufacturerLabels } from './data';
 
 let dimoRegistry: DIMORegistry;
 
@@ -16,20 +16,20 @@ async function deploy(admin: SignerWithAddress) {
   console.log('DIMORegistry deployed to:', dimoRegistry.address);
 }
 
-async function mintRoots(
+async function mintManufacturers(
   admin: SignerWithAddress,
   controllers: SignerWithAddress[]
 ) {
-  console.log('\n----- Minting roots -----');
+  console.log('\n----- Minting manufacturers -----');
   for (let i = 0; i < controllers.length; i++) {
     await (
       await dimoRegistry
         .connect(admin)
-        .mintRootByOwner(rootLabels[i], controllers[i].address)
+        .mintManufacturerByOwner(manufacturerLabels[i], controllers[i].address)
     ).wait();
 
     console.log(
-      `Root ${rootLabels[i]} minted with controller ${controllers[i].address}`
+      `Manufacturer ${manufacturerLabels[i]} minted with controller ${controllers[i].address}`
     );
   }
 }
@@ -50,7 +50,7 @@ async function main() {
   const controllers = signers.slice(1, 4);
 
   await deploy(admin);
-  await mintRoots(admin, controllers);
+  await mintManufacturers(admin, controllers);
   await addAttributes(admin);
 }
 

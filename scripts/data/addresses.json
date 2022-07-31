@@ -5,7 +5,7 @@
         "Eip712Checker": "",
         "Getter": "",
         "Metadata": "",
-        "Root": "",
+        "Manufacturer": "",
         "Vehicle": ""
     },
     "mumbai": {
@@ -14,7 +14,7 @@
         "Eip712Checker": "",
         "Getter": "",
         "Metadata": "",
-        "Root": "",
+        "Manufacturer": "",
         "Vehicle": ""
     },
     "hardhat": {
@@ -23,7 +23,7 @@
         "Eip712Checker": "",
         "Getter": "",
         "Metadata": "",
-        "Root": "",
+        "Manufacturer": "",
         "Vehicle": ""
     }
 }

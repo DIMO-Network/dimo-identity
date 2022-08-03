@@ -1,0 +1,29 @@
+{
+    "polygon": {
+        "DIMORegistry": "",
+        "AccessControl": "",
+        "Eip712Checker": "",
+        "Getter": "",
+        "Metadata": "",
+        "Root": "",
+        "Vehicle": ""
+    },
+    "mumbai": {
+        "DIMORegistry": "",
+        "AccessControl": "",
+        "Eip712Checker": "",
+        "Getter": "",
+        "Metadata": "",
+        "Root": "",
+        "Vehicle": ""
+    },
+    "hardhat": {
+        "DIMORegistry": "",
+        "AccessControl": "",
+        "Eip712Checker": "",
+        "Getter": "",
+        "Metadata": "",
+        "Root": "",
+        "Vehicle": ""
+    }
+}

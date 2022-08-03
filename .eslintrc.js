@@ -32,6 +32,21 @@ module.exports = {
         parser: 'flow',
         trailingComma: 'none'
       }
+    ],
+    'node/no-unpublished-import': [
+      'error',
+      {
+        allowModules: [
+          'hardhat',
+          'ethers',
+          'hardhat-tracer',
+          'hardhat-contract-sizer',
+          'hardhat-gas-reporter',
+          'solidity-coverage',
+          '@nomiclabs/hardhat-waffle',
+          '@nomiclabs/hardhat-ethers'
+        ]
+      }
     ]
   }
 };

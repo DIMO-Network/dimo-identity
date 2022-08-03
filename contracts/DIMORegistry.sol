@@ -1,158 +1,166 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "./interfaces/IDIMORegistry.sol";
+import "./libraries/DIMOStorage.sol";
+import "./access/AccessControlInternal.sol";
+import "@solidstate/contracts/introspection/ERC165.sol";
+import "@solidstate/contracts/token/ERC721/ERC721.sol";
+import "@solidstate/contracts/token/ERC721/metadata/IERC721Metadata.sol";
+import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataStorage.sol";
 
+contract DIMORegistry is ERC721, AccessControlInternal {
+    using ERC165Storage for ERC165Storage.Layout;
 
-contract DIMORegistry is IDIMORegistry {
-    struct Record {
-        address owner;
-        mapping(bytes32 => string) info;
-    }
+    event ModuleAdded(address indexed moduleAddr, bytes4[] selectors);
+    event ModuleRemoved(address indexed moduleAddr, bytes4[] selectors);
+    event ModuleUpdated(
+        address indexed oldImplementation,
+        address indexed newImplementation,
+        bytes4[] oldSelectors,
+        bytes4[] newSelectors
+    );
 
-    mapping(bytes32 => Record) public records;
-    mapping(address => mapping(address => bool)) public operators;
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        string memory __baseURI
+    ) {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
-    // Permits modifications only by the owner or operator of the specified node
-    modifier authorized(bytes32 node) {
-        address _owner = records[node].owner;
-        require(
-            _owner == msg.sender || operators[_owner][msg.sender],
-            "Not authorized"
+        ERC721MetadataStorage.Layout storage s = ERC721MetadataStorage.layout();
+        s.name = _name;
+        s.symbol = _symbol;
+        s.baseURI = __baseURI;
+
+        ERC165Storage.layout().setSupportedInterface(
+            type(IERC165).interfaceId,
+            true
         );
-        _;
+        ERC165Storage.layout().setSupportedInterface(
+            type(IERC721Metadata).interfaceId,
+            true
+        );
     }
 
-    constructor() {
-        records[0x0].owner = msg.sender;
-    }
-
-    function newRecord(
-        bytes32 node,
-        address _owner,
-        bytes32 key,
-        string calldata value
-    ) external override {
-        require(records[node].owner == address(0), "Node already exists");
-        _setOwner(node, _owner);
-        _setInfo(node, key, value);
-    }
-
-    /// @dev Sets the record for a node
-    /// @param node The node to update
-    /// @param _owner The address of the new owner
-    function setRecord(
-        bytes32 node,
-        address _owner,
-        bytes32 key,
-        string calldata value
-    ) external override {
-        setOwner(node, _owner);
-        _setInfo(node, key, value);
-    }
-
-    /// @dev Sets the record for a subnode
-    /// @param node The parent node
-    /// @param label The hash of the label specifying the subnode
-    /// @param _owner The address of the new owner
-    function setSubnodeRecord(
-        bytes32 node,
-        bytes32 label,
-        address _owner
-    ) external override authorized(node) {
-        setSubnodeOwner(node, label, _owner);
-    }
-
-    /// @dev Enable or disable approval for a third party ("operator") to manage
-    ///  all of `msg.sender`'s records. Emits the ApprovalForAll event
-    /// @param operator Address to add to the set of authorized operators
-    /// @param approved True if the operator is approved, false to revoke approval
-    function setApprovalForAll(address operator, bool approved)
-        external
-        override
-    {
-        operators[msg.sender][operator] = approved;
-        emit ApprovalForAll(msg.sender, operator, approved);
-    }
-
-    /// @dev Query if an address is an authorized operator for another address
-    /// @param _owner The address that owns the records
-    /// @param operator The address that acts on behalf of the owner
-    /// @return True if `operator` is an approved operator for `owner`, false otherwise
-    function isApprovedForAll(address _owner, address operator)
-        external
-        view
-        override
-        returns (bool)
-    {
-        return operators[_owner][operator];
-    }
-
-    /// @dev Transfers ownership of a node to a new address
-    /// @param node The node to transfer ownership of
-    /// @param _owner The address of the new owner
-    function setOwner(bytes32 node, address _owner)
-        public
-        override
-        authorized(node)
-    {
-        _setOwner(node, _owner);
-    }
-
-    /// @dev Transfers ownership of a subnode keccak256(node, label) to a new address
-    /// @param node The parent node
-    /// @param label The hash of the label specifying the subnode
-    /// @param _owner The address of the new owner
-    function setSubnodeOwner(
-        bytes32 node,
-        bytes32 label,
-        address _owner
-    ) public override authorized(node) returns (bytes32) {
-        bytes32 subnode = keccak256(abi.encodePacked(node, label));
-        _setOwner(subnode, _owner);
-
-        return subnode;
-    }
-
-    /// @dev Returns the address that owns the specified node
-    /// @param node The specified node
-    /// @return address of the owner
-    function owner(bytes32 node) public view override returns (address) {
-        address addr = records[node].owner;
-
-        // TODO Do we need this condition?
-        if (addr == address(this)) {
-            return address(0x0);
+    /// @notice pass a call to a module
+    /* solhint-disable no-complex-fallback, payable-fallback, no-inline-assembly */
+    fallback() external {
+        address implementation = DIMOStorage.getStorage().implementations[
+            msg.sig
+        ];
+        assembly {
+            calldatacopy(0, 0, calldatasize())
+            let result := delegatecall(
+                gas(),
+                implementation,
+                0,
+                calldatasize(),
+                0,
+                0
+            )
+            returndatacopy(0, 0, returndatasize())
+            switch result
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
         }
-
-        return addr;
     }
 
-    /// @dev Returns the info of a key of a node
-    /// @param node The specified node
-    /// @return info of the key
-    function info(bytes32 node, bytes32 key) public view override returns (string memory) {
-        return records[node].info[key];
+    /* solhint-enable no-complex-fallback, payable-fallback, no-inline-assembly */
+
+    /// @notice update module
+    /// @dev oldImplementation should be registered
+    /// @param oldImplementation address of the module to remove
+    /// @param newImplementation address of the module to register
+    /// @param oldSelectors old function signatures list
+    /// @param newSelectors new function signatures list
+    function updateModule(
+        address oldImplementation,
+        address newImplementation,
+        bytes4[] calldata oldSelectors,
+        bytes4[] calldata newSelectors
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _removeModule(oldImplementation, oldSelectors);
+        _addModule(newImplementation, newSelectors);
+        emit ModuleUpdated(
+            oldImplementation,
+            newImplementation,
+            oldSelectors,
+            newSelectors
+        );
     }
 
-    /// @dev Returns whether a record has been imported to the registry
-    /// @param node The specified node
-    /// @return Bool if record exist
-    function recordExists(bytes32 node) public view override returns (bool) {
-        return records[node].owner != address(0x0);
+    /// @notice Adds a new module
+    /// @dev function selector should not have been registered
+    /// @param implementation address of the implementation
+    /// @param selectors selectors of the implementation contract
+    function addModule(address implementation, bytes4[] calldata selectors)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        _addModule(implementation, selectors);
+        emit ModuleAdded(implementation, selectors);
     }
 
-    function _setOwner(bytes32 node, address _owner) internal {
-        records[node].owner = _owner;
-        emit Transfer(node, _owner);
+    /// @notice Adds a new module and supported functions
+    /// @dev function selector should not exist
+    /// @param implementation implementation address
+    /// @param selectors function signatures
+    function removeModule(address implementation, bytes4[] calldata selectors)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        _removeModule(implementation, selectors);
+        emit ModuleRemoved(implementation, selectors);
     }
 
-    function _setInfo(
-        bytes32 node,
-        bytes32 key,
-        string memory value
-    ) internal {
-        records[node].info[key] = value;
-        emit NewInfo(node, key, value);
+    /// @notice Adds a new module
+    /// @dev function selector should not have been registered.
+    /// @param implementation address of the implementation
+    /// @param selectors selectors of the implementation contract
+    function _addModule(address implementation, bytes4[] calldata selectors)
+        private
+    {
+        DIMOStorage.Storage storage s = DIMOStorage.getStorage();
+        require(
+            s.selectorsHash[implementation] == 0x0,
+            "Implementation already exists"
+        );
+
+        for (uint256 i = 0; i < selectors.length; i++) {
+            require(
+                s.implementations[selectors[i]] == address(0),
+                "Selector already registered"
+            );
+            s.implementations[selectors[i]] = implementation;
+        }
+        bytes32 hash = keccak256(abi.encode(selectors));
+        s.selectorsHash[implementation] = hash;
+    }
+
+    /// @notice Adds a new module and supported functions
+    /// @dev function selector should not exist
+    /// @param implementation implementation address
+    /// @param selectors function signatures
+    function _removeModule(address implementation, bytes4[] calldata selectors)
+        private
+    {
+        DIMOStorage.Storage storage s = DIMOStorage.getStorage();
+        bytes32 hash = keccak256(abi.encode(selectors));
+        require(
+            s.selectorsHash[implementation] == hash,
+            "Invalid selector list"
+        );
+
+        for (uint256 i = 0; i < selectors.length; i++) {
+            require(
+                s.implementations[selectors[i]] == implementation,
+                "Unregistered selector"
+            );
+            s.implementations[selectors[i]] = address(0);
+        }
     }
 }

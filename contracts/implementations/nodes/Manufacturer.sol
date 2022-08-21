@@ -7,7 +7,11 @@ import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal {
+contract Manufacturer is
+    ERC721MetadataInternal,
+    IEvents,
+    AccessControlInternal
+{
     event ControllerSet(address indexed controller);
 
     // ***** Admin management ***** //
@@ -20,7 +24,8 @@ contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal 
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage
+            .getStorage();
         require(s.nodeType == 0, "Node type already set");
 
         s.nodeType = uint256(keccak256(label));
@@ -33,7 +38,8 @@ contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal 
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage
+            .getStorage();
         bool success = AttributeSet.add(s.whitelistedAttributes, attribute);
 
         require(success, "Attribute already exists");
@@ -48,7 +54,8 @@ contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal 
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage
+            .getStorage();
         require(
             !s.controllers[_controller].isController,
             "Already a controller"
@@ -72,7 +79,8 @@ contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal 
     {
         require(_hasRole(DEFAULT_ADMIN_ROLE, _owner), "Owner must be an admin");
 
-        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage
+            .getStorage();
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         uint256 nodeType = s.nodeType;
         uint256 newNodeId;
@@ -100,7 +108,8 @@ contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal 
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage
+            .getStorage();
         require(!s.controllers[_owner].manufacturerMinted, "Invalid request");
         s.controllers[_owner].isController = true;
 
@@ -131,8 +140,12 @@ contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal 
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
-        require(ds.nodes[nodeId].nodeType == s.nodeType, "Node must be a manufacturer");
+        ManufacturerStorage.Storage storage s = ManufacturerStorage
+            .getStorage();
+        require(
+            ds.nodes[nodeId].nodeType == s.nodeType,
+            "Node must be a manufacturer"
+        );
 
         _setInfo(nodeId, attributes, infos);
     }
@@ -144,7 +157,10 @@ contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal 
         view
         returns (bool _isController)
     {
-        _isController = ManufacturerStorage.getStorage().controllers[addr].isController;
+        _isController = ManufacturerStorage
+            .getStorage()
+            .controllers[addr]
+            .isController;
     }
 
     /// @notice Verify if an address has minted a manufacturer
@@ -154,7 +170,10 @@ contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal 
         view
         returns (bool _isManufacturerMinted)
     {
-        _isManufacturerMinted = ManufacturerStorage.getStorage().controllers[addr].manufacturerMinted;
+        _isManufacturerMinted = ManufacturerStorage
+            .getStorage()
+            .controllers[addr]
+            .manufacturerMinted;
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
@@ -173,7 +192,8 @@ contract Manufacturer is ERC721MetadataInternal, IEvents, AccessControlInternal 
         require(attributes.length == infos.length, "Same length");
 
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        ManufacturerStorage.Storage storage s = ManufacturerStorage.getStorage();
+        ManufacturerStorage.Storage storage s = ManufacturerStorage
+            .getStorage();
 
         for (uint256 i = 0; i < attributes.length; i++) {
             require(

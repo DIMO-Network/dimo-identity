@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
-import { ERC721Base, ERC721BaseInternal } from "./ERC721Base.sol";
-import { ERC721Metadata } from "@solidstate/contracts/token/ERC721/metadata/ERC721Metadata.sol";
-import { ERC165 } from "@solidstate/contracts/introspection/ERC165.sol";
+import {ERC721Base, ERC721BaseInternal} from "./ERC721Base.sol";
+import {ERC721Metadata} from "@solidstate/contracts/token/ERC721/metadata/ERC721Metadata.sol";
+import {ERC165} from "@solidstate/contracts/introspection/ERC165.sol";
 
 /**
  * @title SolidState ERC721 implementation, including recommended extensions

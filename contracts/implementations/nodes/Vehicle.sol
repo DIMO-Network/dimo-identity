@@ -59,7 +59,8 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        ManufacturerStorage.Storage storage ms = ManufacturerStorage.getStorage();
+        ManufacturerStorage.Storage storage ms = ManufacturerStorage
+            .getStorage();
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
         require(
@@ -92,7 +93,8 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
         require(
-            ds.nodes[manufacturerNode].nodeType == ManufacturerStorage.getStorage().nodeType,
+            ds.nodes[manufacturerNode].nodeType ==
+                ManufacturerStorage.getStorage().nodeType,
             "Invalid parent node"
         );
 

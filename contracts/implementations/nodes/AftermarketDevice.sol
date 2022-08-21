@@ -2,7 +2,9 @@
 pragma solidity ^0.8.13;
 
 import "../../access/AccessControlInternal.sol";
+import "../AMLicenseValidator/AMLicenseValidatorInternal.sol";
 import "../shared/IEvents.sol";
+import "../shared/Roles.sol";
 import "../../libraries/DIMOStorage.sol";
 import "../../libraries/ResolverStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
@@ -10,12 +12,11 @@ import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/AftermarketDeviceStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-import "hardhat/console.sol";
-
 contract AftermarketDevice is
     ERC721MetadataInternal,
     IEvents,
-    AccessControlInternal
+    AccessControlInternal,
+    AMLicenseValidatorInternal
 {
     // ***** Admin management ***** //
 
@@ -50,25 +51,29 @@ contract AftermarketDevice is
 
     // ***** Interaction with nodes *****//
 
-    // TODO Documentation
+    /// @notice Mints aftermarket devices in batch
+    /// @dev Caller must have the manufacturer role
+    /// @dev The number of devices is defined by the size of 'infos'
+    /// @param manufacturerNode Parent manufacturer node
+    /// @param attributes List of attributes to be added
+    /// @param infos List of infos matching the attributes param
     function mintAftermarketDeviceByManufacturerBatch(
         uint256 manufacturerNode,
-        address _owner,
         string[] calldata attributes,
         string[][] calldata infos
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO onlyRole(MANUFACTURER_ROLE)
+    ) external onlyRole(Roles.MANUFACTURER_ROLE) {
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         ManufacturerStorage.Storage storage ms = ManufacturerStorage
             .getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
 
-        // TODO require(_hasRole(MANUFACTURER_ROLE, _owner), "Owner must be a manufacturer");
         require(
             ds.nodes[manufacturerNode].nodeType == ms.nodeType,
             "Invalid parent node"
         );
+        require(attributes.length == infos.length, "Same length");
+        _validateMintRequest(msg.sender, infos.length);
 
         uint256 newNodeId;
         uint256 nodeType;
@@ -81,68 +86,11 @@ contract AftermarketDevice is
             ds.nodes[newNodeId].parentNode = manufacturerNode;
             ds.nodes[newNodeId].nodeType = nodeType;
 
-            _safeMint(_owner, newNodeId);
+            _safeMint(msg.sender, newNodeId);
             _setInfo(newNodeId, attributes, infos[i]);
 
             emit NodeMinted(nodeType, newNodeId);
         }
-    }
-
-    // TODO Documentation
-    function claimAftermarketDevice(
-        uint256 vehicleNode,
-        uint256 aftermarketDeviceNode
-    ) external {
-        // TODO onlyRole or require by vehicle owner ?
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
-
-        require(
-            ds.nodes[aftermarketDeviceNode].parentNode == 0,
-            "Aftermarket Device already claimed"
-        );
-        require(
-            ds.nodes[vehicleNode].nodeType == vs.nodeType,
-            "Invalid parent node"
-        );
-
-        ds.nodes[aftermarketDeviceNode].parentNode = vehicleNode;
-
-        _transfer(
-            _ownerOf(aftermarketDeviceNode),
-            _ownerOf(vehicleNode),
-            aftermarketDeviceNode
-        );
-    }
-
-    // TODO Documentation
-    function claimAftermarketDevice2(
-        uint256 vehicleNode,
-        uint256 aftermarketDeviceNode
-    ) external {
-        // TODO onlyRole or require by vehicle owner ?
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
-        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-            .getStorage();
-        ResolverStorage.Storage storage rs = ResolverStorage.getStorage();
-
-        require(
-            ds.nodes[vehicleNode].nodeType == vs.nodeType,
-            "Invalid parent node"
-        );
-        require(
-            ds.nodes[aftermarketDeviceNode].nodeType == ads.nodeType,
-            "Node must be an Aftermarket Device"
-        );
-
-        rs.childs[vehicleNode] = aftermarketDeviceNode;
-
-        _transfer(
-            _ownerOf(aftermarketDeviceNode),
-            _ownerOf(vehicleNode),
-            aftermarketDeviceNode
-        );
     }
 
     /// @notice Add infos to node

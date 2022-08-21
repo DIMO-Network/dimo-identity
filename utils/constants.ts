@@ -1,5 +1,9 @@
 import { ethers } from 'hardhat';
 
+export const oneBillionE18 = ethers.utils.parseEther('1000000000');
+export const manufacturerDimoTokensAmount = ethers.utils.parseEther('1000');
+export const amDeviceMintCost = ethers.utils.parseEther('50');
+
 // Roles
 export const DEFAULT_ADMIN_ROLE =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -8,6 +12,9 @@ export const MOCK_ROLE = ethers.utils.keccak256(
 );
 export const MINTER_ROLE = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes('Minter')
+);
+export const MANUFACTURER_ROLE = ethers.utils.keccak256(
+  ethers.utils.toUtf8Bytes('Manufacturer')
 );
 
 // Metadata

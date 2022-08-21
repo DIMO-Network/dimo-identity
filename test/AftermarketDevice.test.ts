@@ -1,12 +1,16 @@
 import chai from 'chai';
-import { waffle } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
+  AccessControl,
   Getter,
   Manufacturer,
   Vehicle,
-  AftermarketDevice
+  AftermarketDevice,
+  AMLicenseValidator,
+  MockDimoToken,
+  MockLicense
 } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
@@ -19,29 +23,74 @@ chai.use(solidity);
 describe('AftermarketDevice', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
+  let accessControlInstance: AccessControl;
   let getterInstance: Getter;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
+  let amLicenseValidatorInstance: AMLicenseValidator;
+  let mockDimoTokenInstance: MockDimoToken;
+  let mockLicenseInstance: MockLicense;
 
-  const [admin, nonAdmin, controller1, manufacturer1, user1] =
-    provider.getWallets();
+  const [
+    admin,
+    nonAdmin,
+    foundation,
+    controller1,
+    manufacturer1,
+    nonManufacturer,
+    user1
+  ] = provider.getWallets();
 
   before(async () => {
     [
       dimoRegistryInstance,
+      accessControlInstance,
       getterInstance,
       manufacturerInstance,
       vehicleInstance,
-      aftermarketDeviceInstance
+      aftermarketDeviceInstance,
+      amLicenseValidatorInstance
     ] = await initialize(
       admin,
       [C.name, C.symbol, C.baseURI],
+      'AccessControl',
       'Getter',
       'Manufacturer',
       'Vehicle',
-      'AftermarketDevice'
+      'AftermarketDevice',
+      'AMLicenseValidator'
     );
+
+    // Deploy MockDimoToken contract
+    const MockDimoTokenFactory = await ethers.getContractFactory(
+      'MockDimoToken'
+    );
+    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
+      C.oneBillionE18
+    );
+    await mockDimoTokenInstance.deployed();
+
+    // Deploy MockLicense contract
+    const MockLicenseFactory = await ethers.getContractFactory('MockLicense');
+    mockLicenseInstance = await MockLicenseFactory.connect(admin).deploy();
+    await mockLicenseInstance.deployed();
+
+    // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
+    await mockDimoTokenInstance
+      .connect(admin)
+      .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
+    await mockDimoTokenInstance
+      .connect(manufacturer1)
+      .approve(dimoRegistryInstance.address, C.manufacturerDimoTokensAmount);
+
+    // Setup AMLicenseValidator variables
+    await amLicenseValidatorInstance.setFoundationAddress(foundation.address);
+    await amLicenseValidatorInstance.setDimoToken(
+      mockDimoTokenInstance.address
+    );
+    await amLicenseValidatorInstance.setLicense(mockLicenseInstance.address);
+    await amLicenseValidatorInstance.setAmDeviceMintCost(C.amDeviceMintCost);
 
     // Set node types
     await manufacturerInstance
@@ -51,6 +100,11 @@ describe('AftermarketDevice', function () {
     await aftermarketDeviceInstance
       .connect(admin)
       .setAftermarketDeviceNodeType(C.aftermarketDeviceNodeType);
+
+    // Grant MANUFACTURER_ROLE to manufacturer
+    await accessControlInstance
+      .connect(admin)
+      .grantRole(C.MANUFACTURER_ROLE, manufacturer1.address);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -161,44 +215,84 @@ describe('AftermarketDevice', function () {
           C.mockVehicleAttributes,
           C.mockVehicleInfos
         );
+      await mockLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
     });
 
-    // TODO Manufactuerer role test
-    it.skip('Should revert if caller does not have admin role', async () => {
+    it('Should revert if caller does not have manufacturer role', async () => {
       await expect(
         aftermarketDeviceInstance
-          .connect(admin)
+          .connect(nonManufacturer)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
-            manufacturer1.address,
             C.mockAftermarketDeviceAttributes,
             C.mockAftermarketDeviceMultipleInfos
           )
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
+        `AccessControl: account ${nonManufacturer.address.toLowerCase()} is missing role ${
+          C.MANUFACTURER_ROLE
         }`
       );
     });
     it('Should revert if attributes and infos array length does not match', async () => {
       await expect(
         aftermarketDeviceInstance
-          .connect(admin)
+          .connect(manufacturer1)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
-            manufacturer1.address,
             C.mockAftermarketDeviceAttributes,
             C.mockAftermarketDeviceMultipleInfosWrongSize
           )
       ).to.be.revertedWith('Same length');
     });
+    it('Should revert if manufacturer does not have a license', async () => {
+      await mockLicenseInstance.setLicenseBalance(manufacturer1.address, 0);
+
+      await expect(
+        aftermarketDeviceInstance
+          .connect(manufacturer1)
+          .mintAftermarketDeviceByManufacturerBatch(
+            1,
+            C.mockAftermarketDeviceAttributes,
+            C.mockAftermarketDeviceMultipleInfos
+          )
+      ).to.be.revertedWith('Invalid license');
+    });
+    it('Should revert if manufacturer does not have a enougth DIMO tokens', async () => {
+      await mockDimoTokenInstance
+        .connect(manufacturer1)
+        .burn(C.manufacturerDimoTokensAmount);
+
+      await expect(
+        aftermarketDeviceInstance
+          .connect(manufacturer1)
+          .mintAftermarketDeviceByManufacturerBatch(
+            1,
+            C.mockAftermarketDeviceAttributes,
+            C.mockAftermarketDeviceMultipleInfos
+          )
+      ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
+    });
+    it('Should revert if manufacturer has not approve DIMORegistry', async () => {
+      await mockDimoTokenInstance
+        .connect(manufacturer1)
+        .approve(dimoRegistryInstance.address, 0);
+
+      await expect(
+        aftermarketDeviceInstance
+          .connect(manufacturer1)
+          .mintAftermarketDeviceByManufacturerBatch(
+            1,
+            C.mockAftermarketDeviceAttributes,
+            C.mockAftermarketDeviceMultipleInfos
+          )
+      ).to.be.revertedWith('ERC20: insufficient allowance');
+    });
     it('Should revert if attribute is not whitelisted', async () => {
       await expect(
         aftermarketDeviceInstance
-          .connect(admin)
+          .connect(manufacturer1)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
-            manufacturer1.address,
             C.aftermarketDeviceAttributesNotWhitelisted,
             C.mockAftermarketDeviceMultipleInfos
           )
@@ -206,10 +300,9 @@ describe('AftermarketDevice', function () {
     });
     it('Should correctly set node type', async () => {
       await aftermarketDeviceInstance
-        .connect(admin)
+        .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
-          manufacturer1.address,
           C.mockAftermarketDeviceAttributes,
           C.mockAftermarketDeviceMultipleInfos
         );
@@ -222,10 +315,9 @@ describe('AftermarketDevice', function () {
     });
     it('Should correctly set parent node', async () => {
       await aftermarketDeviceInstance
-        .connect(admin)
+        .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
-          manufacturer1.address,
           C.mockAftermarketDeviceAttributes,
           C.mockAftermarketDeviceMultipleInfos
         );
@@ -238,10 +330,9 @@ describe('AftermarketDevice', function () {
     });
     it('Should correctly set nodes owner', async () => {
       await aftermarketDeviceInstance
-        .connect(admin)
+        .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
-          manufacturer1.address,
           C.mockAftermarketDeviceAttributes,
           C.mockAftermarketDeviceMultipleInfos
         );
@@ -255,10 +346,9 @@ describe('AftermarketDevice', function () {
     });
     it('Should correctly set infos', async () => {
       await aftermarketDeviceInstance
-        .connect(admin)
+        .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
-          manufacturer1.address,
           C.mockAftermarketDeviceAttributes,
           C.mockAftermarketDeviceMultipleInfos
         );
@@ -276,13 +366,42 @@ describe('AftermarketDevice', function () {
         await getterInstance.getInfo(4, C.mockAftermarketDeviceAttribute2)
       ).to.be.equal(C.mockAftermarketDeviceInfo2);
     });
+    it('Should correctly decrease the DIMO balance of the manufacturer', async () => {
+      const balanceChange = C.amDeviceMintCost
+        .mul(C.mockAftermarketDeviceMultipleInfos.length)
+        .mul(-1);
+
+      await expect(() =>
+        aftermarketDeviceInstance
+          .connect(manufacturer1)
+          .mintAftermarketDeviceByManufacturerBatch(
+            1,
+            C.mockAftermarketDeviceAttributes,
+            C.mockAftermarketDeviceMultipleInfos
+          )
+      ).changeTokenBalance(mockDimoTokenInstance, manufacturer1, balanceChange);
+    });
+    it('Should correctly transfer the DIMO tokens to the foundation', async () => {
+      const balanceChange = C.amDeviceMintCost.mul(
+        C.mockAftermarketDeviceMultipleInfos.length
+      );
+
+      await expect(() =>
+        aftermarketDeviceInstance
+          .connect(manufacturer1)
+          .mintAftermarketDeviceByManufacturerBatch(
+            1,
+            C.mockAftermarketDeviceAttributes,
+            C.mockAftermarketDeviceMultipleInfos
+          )
+      ).changeTokenBalance(mockDimoTokenInstance, foundation, balanceChange);
+    });
     it('Should emit NodeMinted event with correct params', async () => {
       await expect(
         aftermarketDeviceInstance
-          .connect(admin)
+          .connect(manufacturer1)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
-            manufacturer1.address,
             C.mockAftermarketDeviceAttributes,
             C.mockAftermarketDeviceMultipleInfos
           )
@@ -291,89 +410,6 @@ describe('AftermarketDevice', function () {
         .withArgs(C.aftermarketDeviceNodeTypeId, 3)
         .to.emit(aftermarketDeviceInstance, 'NodeMinted')
         .withArgs(C.aftermarketDeviceNodeTypeId, 4);
-    });
-  });
-
-  describe.skip('claimAftermarketDevice', () => {
-    beforeEach(async () => {
-      await manufacturerInstance
-        .connect(admin)
-        .mintManufacturer(
-          controller1.address,
-          C.mockManufacturerAttributes,
-          C.mockManufacturerInfos
-        );
-      await vehicleInstance
-        .connect(admin)
-        .mintVehicle(
-          1,
-          user1.address,
-          C.mockVehicleAttributes,
-          C.mockVehicleInfos
-        );
-      await aftermarketDeviceInstance
-        .connect(admin)
-        .mintAftermarketDeviceByManufacturerBatch(
-          1,
-          manufacturer1.address,
-          C.mockAftermarketDeviceAttributes,
-          C.mockAftermarketDeviceMultipleInfos
-        );
-    });
-
-    // TODO Role test
-    it.skip('Should revert if caller does not have admin role', async () => {
-      await expect(
-        aftermarketDeviceInstance
-          .connect(admin)
-          .mintAftermarketDeviceByManufacturerBatch(
-            1,
-            manufacturer1.address,
-            C.mockAftermarketDeviceAttributes,
-            C.mockAftermarketDeviceMultipleInfos
-          )
-      ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
-        }`
-      );
-    });
-    it('Should revert if AftermarketDevice is already claimed', async () => {
-      await aftermarketDeviceInstance
-        .connect(admin)
-        .claimAftermarketDevice(2, 3);
-
-      await expect(
-        aftermarketDeviceInstance.connect(admin).claimAftermarketDevice(2, 3)
-      ).to.be.revertedWith('AftermarketDevice already claimed');
-    });
-    it('Should revert if parent node is not a vehicle node', async () => {
-      await expect(
-        aftermarketDeviceInstance.connect(admin).claimAftermarketDevice(99, 3)
-      ).to.be.revertedWith('Invalid parent node');
-    });
-    it('Should correctly set parent node', async () => {
-      await aftermarketDeviceInstance
-        .connect(admin)
-        .claimAftermarketDevice(2, 3);
-
-      const parentNode = await getterInstance.getParentNode(3);
-      expect(parentNode).to.be.equal(2);
-    });
-    it('Should correctly set node owner', async () => {
-      await aftermarketDeviceInstance
-        .connect(admin)
-        .claimAftermarketDevice(2, 3);
-
-      expect(await dimoRegistryInstance.ownerOf(3)).to.be.equal(user1.address);
-    });
-    // TODO Event test
-    it.skip('Should emit AftermarketDeviceClaimed event with correct params', async () => {
-      await expect(
-        aftermarketDeviceInstance.connect(admin).claimAftermarketDevice(2, 3)
-      )
-        .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
-        .withArgs(C.aftermarketDeviceNodeTypeId, 3);
     });
   });
 
@@ -394,11 +430,11 @@ describe('AftermarketDevice', function () {
           C.mockVehicleAttributes,
           C.mockVehicleInfos
         );
+      await mockLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
       await aftermarketDeviceInstance
-        .connect(admin)
+        .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
-          manufacturer1.address,
           C.mockAftermarketDeviceAttributes,
           C.mockAftermarketDeviceMultipleInfos
         );

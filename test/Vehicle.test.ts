@@ -78,17 +78,6 @@ describe('Vehicle', function () {
   });
 
   describe('setVehicleNodeType', () => {
-    it.skip('testSign', async () => {
-      // bytes memory signature = hex"80a4fe4fb13de1ecd13eb218da32638f0faa60006807d3186306c0f99b232b62adb10d6c5f5790f7246286c03fcd914e3521804b91b115c1f93db7955f351c041b";
-      await vehicleInstance
-        .connect(admin)
-        .testSign(
-          admin.address,
-          '0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8',
-          '0x80a4fe4fb13de1ecd13eb218da32638f0faa60006807d3186306c0f99b232b62adb10d6c5f5790f7246286c03fcd914e3521804b91b115c1f93db7955f351c041b'
-        );
-    });
-
     it('Should revert if caller does not have admin role', async () => {
       await expect(
         vehicleInstance.connect(nonAdmin).setVehicleNodeType(C.vehicleNodeType)

@@ -81,7 +81,14 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         emit NodeMinted(nodeType, newNodeId);
     }
 
-    // TODO Documentation
+    /// @notice Mints a vehicle through a metatransaction
+    /// The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
+    /// @dev Caller must be an admin
+    /// @param manufacturerNode Parent manufacturer node
+    /// @param _owner The address of the new owner
+    /// @param attributes List of attributes to be added
+    /// @param infos List of infos matching the attributes param
+    /// @param signature User's signature hash
     function mintVehicleSign(
         uint256 manufacturerNode,
         address _owner,

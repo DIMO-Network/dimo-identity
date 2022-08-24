@@ -7,7 +7,7 @@ import {
   DIMORegistry,
   AccessControl,
   Eip712Checker,
-  Root,
+  Manufacturer,
   Vehicle
 } from '../typechain';
 import { C, getSelectors } from '../utils';
@@ -46,9 +46,9 @@ const baseUri: NetworkValue = {
   hardhat: C.baseURI
 };
 
-const rootNodeType = ethers.utils.toUtf8Bytes('Root');
+const manufacturerNodeType = ethers.utils.toUtf8Bytes('Manufacturer');
 const vehicleNodeType = ethers.utils.toUtf8Bytes('Vehicle');
-const rootAttribute1 = 'Name';
+const manufacturerAttribute1 = 'Name';
 const vehicleAttribute1 = 'Make';
 const vehicleAttribute2 = 'Model';
 const vehicleAttribute3 = 'Year';
@@ -79,7 +79,7 @@ async function deploy(
     'Eip712Checker',
     'Getter',
     'Metadata',
-    'Root',
+    'Manufacturer',
     'Vehicle'
   ];
 
@@ -156,8 +156,8 @@ async function setup(deployer: SignerWithAddress) {
     'Eip712Checker',
     contractAddresses[networkName].DIMORegistry
   );
-  const rootInstance: Root = await ethers.getContractAt(
-    'Root',
+  const manufacturerInstance: Manufacturer = await ethers.getContractAt(
+    'Manufacturer',
     contractAddresses[networkName].DIMORegistry
   );
   const vehicleInstance: Vehicle = await ethers.getContractAt(
@@ -176,21 +176,25 @@ async function setup(deployer: SignerWithAddress) {
 
   console.log('\n----- Setting node types -----\n');
   await (
-    await rootInstance.connect(deployer).setRootNodeType(rootNodeType)
+    await manufacturerInstance
+      .connect(deployer)
+      .setManufacturerNodeType(manufacturerNodeType)
   ).wait();
-  console.log(`${rootNodeType} set to Root`);
+  console.log(`${manufacturerNodeType} set to Manufacturer`);
   await (
     await vehicleInstance.connect(deployer).setVehicleNodeType(vehicleNodeType)
   ).wait();
   console.log(`${vehicleNodeType} set to Vehicle`);
   console.log('\n----- Node types set -----');
 
-  // Whitelist Root attributes
-  console.log('\n----- Adding Root Attributes -----\n');
+  // Whitelist Manufacturer attributes
+  console.log('\n----- Adding Manufacturer Attributes -----\n');
   await (
-    await rootInstance.connect(deployer).addRootAttribute(rootAttribute1)
+    await manufacturerInstance
+      .connect(deployer)
+      .addManufacturerAttribute(manufacturerAttribute1)
   ).wait();
-  console.log(`${rootAttribute1} attribute set to Root`);
+  console.log(`${manufacturerAttribute1} attribute set to Manufacturer`);
   console.log('\n----- Attributes added -----');
 
   console.log('\n----- Adding Vehicle Attributes -----\n');
@@ -227,17 +231,17 @@ async function grant(deployer: SignerWithAddress) {
 }
 
 async function mintBatch(deployer: SignerWithAddress) {
-  const rootInstance: Root = await ethers.getContractAt(
-    'Root',
+  const manufacturerInstance: Manufacturer = await ethers.getContractAt(
+    'Manufacturer',
     contractAddresses[networkName].DIMORegistry
   );
 
-  console.log(`\n----- Minting roots -----\n`);
+  console.log(`\n----- Minting manufacturers -----\n`);
 
   const receipt = await (
-    await rootInstance
+    await manufacturerInstance
       .connect(deployer)
-      .mintRootBatch(deployer.address, makes.slice(0))
+      .mintManufacturerBatch(deployer.address, makes.slice(0))
   ).wait();
 
   receipt.events
@@ -247,7 +251,7 @@ async function mintBatch(deployer: SignerWithAddress) {
       console.log(e);
     });
 
-  console.log(`\n----- Roots Minted -----\n`);
+  console.log(`\n----- Manufacturers Minted -----\n`);
 }
 
 async function main() {

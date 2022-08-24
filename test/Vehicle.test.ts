@@ -1,7 +1,13 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { Eip712Checker, Getter, Root, Vehicle } from '../typechain';
+import {
+  DIMORegistry,
+  Eip712Checker,
+  Getter,
+  Manufacturer,
+  Vehicle
+} from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -12,35 +18,47 @@ chai.use(solidity);
 
 describe('Vehicle', function () {
   let snapshot: string;
+  let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
   let getterInstance: Getter;
-  let rootInstance: Root;
+  let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
 
   const [admin, nonAdmin, controller1, user1] = provider.getWallets();
 
   before(async () => {
-    [, eip712CheckerInstance, getterInstance, rootInstance, vehicleInstance] =
-      await initialize(
-        admin,
-        [C.name, C.symbol, C.baseURI],
-        'Eip712Checker',
-        'Getter',
-        'Root',
-        'Vehicle'
-      );
+    [
+      dimoRegistryInstance,
+      eip712CheckerInstance,
+      getterInstance,
+      manufacturerInstance,
+      vehicleInstance
+    ] = await initialize(
+      admin,
+      [C.name, C.symbol, C.baseURI],
+      'Eip712Checker',
+      'Getter',
+      'Manufacturer',
+      'Vehicle'
+    );
 
     await eip712CheckerInstance.initialize('DIMO', '1');
 
-    // Set root node type
-    await rootInstance.connect(admin).setRootNodeType(C.rootNodeType);
+    // Set manufacturer node type
+    await manufacturerInstance
+      .connect(admin)
+      .setManufacturerNodeType(C.manufacturerNodeType);
 
     // Set vehicle node type
     await vehicleInstance.connect(admin).setVehicleNodeType(C.vehicleNodeType);
 
-    // Whitelist Root attributes
-    await rootInstance.connect(admin).addRootAttribute(C.mockRootAttribute1);
-    await rootInstance.connect(admin).addRootAttribute(C.mockRootAttribute2);
+    // Whitelist Manufacturer attributes
+    await manufacturerInstance
+      .connect(admin)
+      .addManufacturerAttribute(C.mockManufacturerAttribute1);
+    await manufacturerInstance
+      .connect(admin)
+      .addManufacturerAttribute(C.mockManufacturerAttribute2);
 
     // Whitelist Vehicle attributes
     await vehicleInstance
@@ -59,7 +77,7 @@ describe('Vehicle', function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('setNodeType', () => {
+  describe('setVehicleNodeType', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
         vehicleInstance.connect(nonAdmin).setVehicleNodeType(C.vehicleNodeType)
@@ -73,7 +91,7 @@ describe('Vehicle', function () {
       const [, , localVehicleInstance] = await initialize(
         admin,
         [C.name, C.symbol, C.baseURI],
-        'Root',
+        'Manufacturer',
         'Vehicle'
       );
 
@@ -114,9 +132,13 @@ describe('Vehicle', function () {
 
   describe('mintVehicle', () => {
     beforeEach(async () => {
-      await rootInstance
+      await manufacturerInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
+        .mintManufacturer(
+          controller1.address,
+          C.mockManufacturerAttributes,
+          C.mockManufacturerInfos
+        );
     });
 
     it('Should revert if caller does not have admin role', async () => {
@@ -135,7 +157,7 @@ describe('Vehicle', function () {
         }`
       );
     });
-    it('Should revert if parent node is not a root node', async () => {
+    it('Should revert if parent node is not a manufacturer node', async () => {
       await expect(
         vehicleInstance
           .connect(admin)
@@ -208,7 +230,7 @@ describe('Vehicle', function () {
           C.mockVehicleInfos
         );
 
-      expect(await getterInstance.ownerOf(2)).to.be.equal(user1.address);
+      expect(await dimoRegistryInstance.ownerOf(2)).to.be.equal(user1.address);
     });
     it('Should correctly set infos', async () => {
       await vehicleInstance
@@ -238,16 +260,20 @@ describe('Vehicle', function () {
             C.mockVehicleInfos
           )
       )
-        .to.emit(rootInstance, 'NodeMinted')
+        .to.emit(vehicleInstance, 'NodeMinted')
         .withArgs(C.vehicleNodeTypeId, 2);
     });
   });
 
   describe('setVehicleInfo', () => {
     beforeEach(async () => {
-      await rootInstance
+      await manufacturerInstance
         .connect(admin)
-        .mintRoot(controller1.address, C.mockRootAttributes, C.mockRootInfos);
+        .mintManufacturer(
+          controller1.address,
+          C.mockManufacturerAttributes,
+          C.mockManufacturerInfos
+        );
       await vehicleInstance
         .connect(admin)
         .mintVehicle(

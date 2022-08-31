@@ -68,8 +68,7 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
             "Invalid parent node"
         );
 
-        ds.currentIndex++;
-        uint256 newNodeId = ds.currentIndex;
+        uint256 newNodeId = ++ds.currentIndex;
         uint256 nodeType = vs.nodeType;
 
         ds.nodes[newNodeId].parentNode = manufacturerNode;
@@ -105,8 +104,7 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
             "Invalid parent node"
         );
 
-        ds.currentIndex++;
-        uint256 newNodeId = ds.currentIndex;
+        uint256 newNodeId = ++ds.currentIndex;
 
         ds.nodes[newNodeId].parentNode = manufacturerNode;
         ds.nodes[newNodeId].nodeType = vs.nodeType;

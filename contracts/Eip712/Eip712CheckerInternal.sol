@@ -11,6 +11,7 @@ library Eip712CheckerInternal {
             "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
         );
 
+    /// @dev Returns the EIP-712 domain separator
     function _eip712Domain() internal view returns (bytes32) {
         Eip712CheckerStorage.Storage storage s = Eip712CheckerStorage
             .getStorage();
@@ -27,6 +28,10 @@ library Eip712CheckerInternal {
             );
     }
 
+    /// @dev Recovers message signer and verifies if metches signatory
+    /// @param signatory The signer to be verified
+    /// @param message Hashed data payload
+    /// @param signature Signed data payload
     function _verifySignature(
         address signatory,
         bytes32 message,
@@ -41,6 +46,12 @@ library Eip712CheckerInternal {
         return signatory == ECDSA.recover(msgHash, signature);
     }
 
+    /// @dev Recovers message signer and verifies if metches signatory
+    /// @param signatory The signer to be verified
+    /// @param message Hashed data payload
+    /// @param v Signature "v" value
+    /// @param r Signature "r" value
+    /// @param s Signature "s" value
     function _verifySignature(
         address signatory,
         bytes32 message,

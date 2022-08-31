@@ -79,8 +79,7 @@ contract AftermarketDevice is
         uint256 nodeType;
 
         for (uint256 i = 0; i < infos.length; i++) {
-            ds.currentIndex++;
-            newNodeId = ds.currentIndex;
+            newNodeId = ++ds.currentIndex;
             nodeType = ads.nodeType;
 
             ds.nodes[newNodeId].parentNode = manufacturerNode;

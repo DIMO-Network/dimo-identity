@@ -86,8 +86,7 @@ contract Manufacturer is
         uint256 newNodeId;
 
         for (uint256 i = 0; i < names.length; i++) {
-            ds.currentIndex++;
-            newNodeId = ds.currentIndex;
+            newNodeId = ++ds.currentIndex;
 
             _safeMint(_owner, newNodeId);
 
@@ -114,8 +113,7 @@ contract Manufacturer is
         s.controllers[_owner].isController = true;
 
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        ds.currentIndex++;
-        uint256 newNodeId = ds.currentIndex;
+        uint256 newNodeId = ++ds.currentIndex;
         uint256 nodeType = s.nodeType;
 
         _safeMint(_owner, newNodeId);

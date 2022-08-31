@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { waffle } from 'hardhat';
+import { waffle, network } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -8,7 +8,13 @@ import {
   Manufacturer,
   Vehicle
 } from '../typechain';
-import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
+import {
+  initialize,
+  createSnapshot,
+  revertToSnapshot,
+  signMessage,
+  C
+} from '../utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -24,7 +30,7 @@ describe('Vehicle', function () {
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
 
-  const [admin, nonAdmin, controller1, user1] = provider.getWallets();
+  const [admin, nonAdmin, controller1, user1, user2] = provider.getWallets();
 
   before(async () => {
     [
@@ -42,7 +48,10 @@ describe('Vehicle', function () {
       'Vehicle'
     );
 
-    await eip712CheckerInstance.initialize('DIMO', '1');
+    await eip712CheckerInstance.initialize(
+      C.defaultDomainName,
+      C.defaultDomainVersion
+    );
 
     // Set manufacturer node type
     await manufacturerInstance
@@ -258,6 +267,368 @@ describe('Vehicle', function () {
             user1.address,
             C.mockVehicleAttributes,
             C.mockVehicleInfos
+          )
+      )
+        .to.emit(vehicleInstance, 'NodeMinted')
+        .withArgs(C.vehicleNodeTypeId, 2);
+    });
+  });
+
+  describe('mintVehicleSign', () => {
+    let signature: string;
+    before(async () => {
+      signature = await signMessage(
+        user1,
+        C.defaultDomainName,
+        C.defaultDomainVersion,
+        network.config.chainId || 31337,
+        'MintVehicleSign',
+        vehicleInstance.address,
+        {
+          manufacturerNode: '1',
+          _owner: user1.address,
+          attributes: C.mockVehicleAttributes,
+          infos: C.mockVehicleInfos
+        }
+      );
+    });
+
+    beforeEach(async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .mintManufacturer(
+          controller1.address,
+          C.mockManufacturerAttributes,
+          C.mockManufacturerInfos
+        );
+    });
+
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        vehicleInstance
+          .connect(nonAdmin)
+          .mintVehicleSign(
+            1,
+            user1.address,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfos,
+            signature
+          )
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
+    });
+    it('Should revert if parent node is not a manufacturer node', async () => {
+      await expect(
+        vehicleInstance
+          .connect(admin)
+          .mintVehicleSign(
+            99,
+            user1.address,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfos,
+            signature
+          )
+      ).to.be.revertedWith('Invalid parent node');
+    });
+    it('Should revert if attributes and infos array length does not match', async () => {
+      await expect(
+        vehicleInstance
+          .connect(admin)
+          .mintVehicleSign(
+            1,
+            user1.address,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfosWrongSize,
+            signature
+          )
+      ).to.be.revertedWith('Same length');
+    });
+    it('Should revert if attribute is not whitelisted', async () => {
+      await expect(
+        vehicleInstance
+          .connect(admin)
+          .mintVehicleSign(
+            1,
+            user1.address,
+            C.vehicleAttributesNotWhitelisted,
+            C.mockVehicleInfos,
+            signature
+          )
+      ).to.be.revertedWith('Not whitelisted');
+    });
+
+    context('Wrong signature', () => {
+      it('Should revert if domain name is incorrect', async () => {
+        const invalidSignature = await signMessage(
+          user1,
+          'Wrong domain',
+          C.defaultDomainVersion,
+          network.config.chainId || 31337,
+          'MintVehicleSign',
+          vehicleInstance.address,
+          {
+            manufacturerNode: '1',
+            _owner: user1.address,
+            attributes: C.mockVehicleAttributes,
+            infos: C.mockVehicleInfos
+          }
+        );
+
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleSign(
+              1,
+              user1.address,
+              C.mockVehicleAttributes,
+              C.mockVehicleInfos,
+              invalidSignature
+            )
+        ).to.be.revertedWith('Invalid signature');
+      });
+      it('Should revert if domain version is incorrect', async () => {
+        const invalidSignature = await signMessage(
+          user1,
+          C.defaultDomainName,
+          '99',
+          network.config.chainId || 31337,
+          'MintVehicleSign',
+          vehicleInstance.address,
+          {
+            manufacturerNode: '1',
+            _owner: user1.address,
+            attributes: C.mockVehicleAttributes,
+            infos: C.mockVehicleInfos
+          }
+        );
+
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleSign(
+              1,
+              user1.address,
+              C.mockVehicleAttributes,
+              C.mockVehicleInfos,
+              invalidSignature
+            )
+        ).to.be.revertedWith('Invalid signature');
+      });
+      it('Should revert if domain chain ID is incorrect', async () => {
+        const invalidSignature = await signMessage(
+          user1,
+          C.defaultDomainName,
+          C.defaultDomainVersion,
+          99,
+          'MintVehicleSign',
+          vehicleInstance.address,
+          {
+            manufacturerNode: '1',
+            _owner: user1.address,
+            attributes: C.mockVehicleAttributes,
+            infos: C.mockVehicleInfos
+          }
+        );
+
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleSign(
+              1,
+              user1.address,
+              C.mockVehicleAttributes,
+              C.mockVehicleInfos,
+              invalidSignature
+            )
+        ).to.be.revertedWith('Invalid signature');
+      });
+      it('Should revert if manufactuer node is incorrect', async () => {
+        const invalidSignature = await signMessage(
+          user1,
+          C.defaultDomainName,
+          C.defaultDomainVersion,
+          network.config.chainId || 31337,
+          'MintVehicleSign',
+          vehicleInstance.address,
+          {
+            manufacturerNode: '99',
+            _owner: user1.address,
+            attributes: C.mockVehicleAttributes,
+            infos: C.mockVehicleInfos
+          }
+        );
+
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleSign(
+              1,
+              user1.address,
+              C.mockVehicleAttributes,
+              C.mockVehicleInfos,
+              invalidSignature
+            )
+        ).to.be.revertedWith('Invalid signature');
+      });
+      it('Should revert if attributes are incorrect', async () => {
+        const invalidSignature = await signMessage(
+          user1,
+          C.defaultDomainName,
+          C.defaultDomainVersion,
+          network.config.chainId || 31337,
+          'MintVehicleSign',
+          vehicleInstance.address,
+          {
+            manufacturerNode: '1',
+            _owner: user1.address,
+            attributes: C.mockVehicleAttributes.slice(1),
+            infos: C.mockVehicleInfos
+          }
+        );
+
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleSign(
+              1,
+              user1.address,
+              C.mockVehicleAttributes,
+              C.mockVehicleInfos,
+              invalidSignature
+            )
+        ).to.be.revertedWith('Invalid signature');
+      });
+      it('Should revert if infos are incorrect', async () => {
+        const invalidSignature = await signMessage(
+          user1,
+          C.defaultDomainName,
+          C.defaultDomainVersion,
+          network.config.chainId || 31337,
+          'MintVehicleSign',
+          vehicleInstance.address,
+          {
+            manufacturerNode: '1',
+            _owner: user1.address,
+            attributes: C.mockVehicleAttributes,
+            infos: C.mockVehicleInfosWrongSize
+          }
+        );
+
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleSign(
+              1,
+              user1.address,
+              C.mockVehicleAttributes,
+              C.mockVehicleInfos,
+              invalidSignature
+            )
+        ).to.be.revertedWith('Invalid signature');
+      });
+      it('Should revert if owner does not match signer', async () => {
+        const invalidSignature = await signMessage(
+          user1,
+          C.defaultDomainName,
+          C.defaultDomainVersion,
+          network.config.chainId || 31337,
+          'MintVehicleSign',
+          vehicleInstance.address,
+          {
+            manufacturerNode: '1',
+            _owner: user2.address,
+            attributes: C.mockVehicleAttributes,
+            infos: C.mockVehicleInfos
+          }
+        );
+
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleSign(
+              1,
+              user1.address,
+              C.mockVehicleAttributes,
+              C.mockVehicleInfos,
+              invalidSignature
+            )
+        ).to.be.revertedWith('Invalid signature');
+      });
+    });
+
+    it('Should correctly set node type', async () => {
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicleSign(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos,
+          signature
+        );
+
+      const nodeType = await getterInstance.getNodeType(2);
+
+      expect(nodeType).to.equal(C.vehicleNodeTypeId);
+    });
+    it('Should correctly set parent node', async () => {
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicleSign(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos,
+          signature
+        );
+
+      const parentNode = await getterInstance.getParentNode(2);
+      expect(parentNode).to.be.equal(1);
+    });
+    it('Should correctly set node owner', async () => {
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicleSign(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos,
+          signature
+        );
+
+      expect(await dimoRegistryInstance.ownerOf(2)).to.be.equal(user1.address);
+    });
+    it('Should correctly set infos', async () => {
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicleSign(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos,
+          signature
+        );
+
+      expect(
+        await getterInstance.getInfo(2, C.mockVehicleAttribute1)
+      ).to.be.equal(C.mockVehicleInfo1);
+      expect(
+        await getterInstance.getInfo(2, C.mockVehicleAttribute2)
+      ).to.be.equal(C.mockVehicleInfo2);
+    });
+    it('Should emit NodeMinted event with correct params', async () => {
+      await expect(
+        vehicleInstance
+          .connect(admin)
+          .mintVehicleSign(
+            1,
+            user1.address,
+            C.mockVehicleAttributes,
+            C.mockVehicleInfos,
+            signature
           )
       )
         .to.emit(vehicleInstance, 'NodeMinted')

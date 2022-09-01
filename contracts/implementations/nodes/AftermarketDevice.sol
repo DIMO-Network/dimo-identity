@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../../access/AccessControlInternal.sol";
+import "../../Eip712/Eip712CheckerInternal.sol";
 import "../AMLicenseValidator/AMLicenseValidatorInternal.sol";
 import "../shared/IEvents.sol";
 import "../shared/Roles.sol";
@@ -10,6 +11,7 @@ import "../../libraries/ResolverStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/AftermarketDeviceStorage.sol";
+import "../../libraries/ResolverStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
 contract AftermarketDevice is
@@ -18,6 +20,25 @@ contract AftermarketDevice is
     AccessControlInternal,
     AMLicenseValidatorInternal
 {
+    bytes32 private constant CLAIM_TYPEHASH =
+        keccak256(
+            "ClaimAftermarketDeviceSign(uint256 aftermarketDeviceNode,address _owner)"
+        );
+    bytes32 private constant PAIR_TYPEHASH =
+        keccak256(
+            "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode,address _owner)"
+        );
+
+    event AftermarketDeviceClaimed(
+        uint256 indexed aftermarketDeviceNode,
+        address indexed _owner
+    );
+    event AftermarketDevicePaired(
+        uint256 indexed aftermarketDeviceNode,
+        uint256 indexed vehicleNode,
+        address indexed _owner
+    );
+
     // ***** Admin management ***** //
 
     /// @notice Sets contract node type
@@ -90,6 +111,96 @@ contract AftermarketDevice is
 
             emit NodeMinted(nodeType, newNodeId);
         }
+    }
+
+    /// @notice Claims the ownership of an aftermarket device through a metatransaction
+    /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
+    /// @dev Caller must have the admin role
+    /// @param aftermarketDeviceNode Aftermarket device node id
+    /// @param _owner The address of the new owner
+    /// @param signature User's signature hash
+    function claimAftermarketDeviceSign(
+        uint256 aftermarketDeviceNode,
+        address _owner,
+        bytes calldata signature
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+
+        require(
+            ds.nodes[aftermarketDeviceNode].nodeType ==
+                AftermarketDeviceStorage.getStorage().nodeType,
+            "Invalid aftermarket device node"
+        );
+
+        bytes32 message = keccak256(
+            abi.encode(CLAIM_TYPEHASH, aftermarketDeviceNode, _owner)
+        );
+
+        require(
+            Eip712CheckerInternal._verifySignature(_owner, message, signature),
+            "Invalid signature"
+        );
+
+        _safeTransfer(
+            _ownerOf(aftermarketDeviceNode),
+            _owner,
+            aftermarketDeviceNode,
+            ""
+        );
+
+        emit AftermarketDeviceClaimed(aftermarketDeviceNode, _owner);
+    }
+
+    /// @notice Pairs an aftermarket device with a vehicle through a metatransaction
+    /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
+    /// @dev Caller must have the admin role
+    /// @param aftermarketDeviceNode Aftermarket device node id
+    /// @param vehicleNode Vehicle node id
+    /// @param _owner The address of the new owner
+    /// @param signature User's signature hash
+    function pairAftermarketDeviceSign(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
+        address _owner,
+        bytes calldata signature
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+
+        require(
+            ds.nodes[aftermarketDeviceNode].nodeType ==
+                AftermarketDeviceStorage.getStorage().nodeType,
+            "Invalid aftermarket device node"
+        );
+        require(
+            ds.nodes[vehicleNode].nodeType ==
+                VehicleStorage.getStorage().nodeType,
+            "Invalid vehicle node"
+        );
+        require(_ownerOf(vehicleNode) == _owner, "Invalid vehicleNode owner");
+
+        bytes32 message = keccak256(
+            abi.encode(
+                PAIR_TYPEHASH,
+                aftermarketDeviceNode,
+                vehicleNode,
+                _owner
+            )
+        );
+
+        require(
+            Eip712CheckerInternal._verifySignature(_owner, message, signature),
+            "Invalid signature"
+        );
+
+        ResolverStorage.getStorage().childs[
+            vehicleNode
+        ] = aftermarketDeviceNode;
+
+        emit AftermarketDevicePaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            _owner
+        );
     }
 
     /// @notice Add infos to node

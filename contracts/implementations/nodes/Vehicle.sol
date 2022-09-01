@@ -47,8 +47,8 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     // ***** Interaction with nodes *****//
 
     /// @notice Mints a vehicle
-    /// @dev Caller must be an admin
-    /// @param manufacturerNode Parent manufacturer node
+    /// @dev Caller must have the admin role
+    /// @param manufacturerNode Parent manufacturer node id
     /// @param _owner The address of the new owner
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
@@ -82,8 +82,8 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
 
     /// @notice Mints a vehicle through a metatransaction
     /// The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-    /// @dev Caller must be an admin
-    /// @param manufacturerNode Parent manufacturer node
+    /// @dev Caller must have the admin role
+    /// @param manufacturerNode Parent manufacturer node id
     /// @param _owner The address of the new owner
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
@@ -138,6 +138,7 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     /// @notice Add infos to node
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
+    /// @dev Caller must have the admin role
     /// @param nodeId Node where the info will be added
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param

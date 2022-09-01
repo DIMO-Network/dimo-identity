@@ -21,6 +21,15 @@ export const schemaBase: TypedData = {
       { name: '_owner', type: 'address' },
       { name: 'attributes', type: 'string[]' },
       { name: 'infos', type: 'string[]' }
+    ],
+    ClaimAftermarketDeviceSign: [
+      { name: 'aftermarketDeviceNode', type: 'uint256' },
+      { name: '_owner', type: 'address' }
+    ],
+    PairAftermarketDeviceSign: [
+      { name: 'aftermarketDeviceNode', type: 'uint256' },
+      { name: 'vehicleNode', type: 'uint256' },
+      { name: '_owner', type: 'address' }
     ]
   },
   primaryType: '',

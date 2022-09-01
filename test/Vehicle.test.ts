@@ -48,6 +48,7 @@ describe('Vehicle', function () {
       'Vehicle'
     );
 
+    // Initialize EIP-712
     await eip712CheckerInstance.initialize(
       C.defaultDomainName,
       C.defaultDomainVersion

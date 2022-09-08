@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { waffle, network } from 'hardhat';
+import { waffle } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -278,20 +278,17 @@ describe('Vehicle', function () {
   describe('mintVehicleSign', () => {
     let signature: string;
     before(async () => {
-      signature = await signMessage(
-        user1,
-        C.defaultDomainName,
-        C.defaultDomainVersion,
-        network.config.chainId || 31337,
-        'MintVehicleSign',
-        vehicleInstance.address,
-        {
+      signature = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVehicleSign',
+        _verifyingContract: vehicleInstance.address,
+        message: {
           manufacturerNode: '1',
           owner: user1.address,
           attributes: C.mockVehicleAttributes,
           infos: C.mockVehicleInfos
         }
-      );
+      });
     });
 
     beforeEach(async () => {
@@ -363,20 +360,18 @@ describe('Vehicle', function () {
 
     context('Wrong signature', () => {
       it('Should revert if domain name is incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          'Wrong domain',
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'MintVehicleSign',
-          vehicleInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _domainName: 'Wrong domain',
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: vehicleInstance.address,
+          message: {
             manufacturerNode: '1',
             owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }
-        );
+        });
 
         await expect(
           vehicleInstance
@@ -391,20 +386,18 @@ describe('Vehicle', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if domain version is incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          '99',
-          network.config.chainId || 31337,
-          'MintVehicleSign',
-          vehicleInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _domainVersion: '99',
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: vehicleInstance.address,
+          message: {
             manufacturerNode: '1',
             owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }
-        );
+        });
 
         await expect(
           vehicleInstance
@@ -419,20 +412,18 @@ describe('Vehicle', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if domain chain ID is incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          99,
-          'MintVehicleSign',
-          vehicleInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _chainId: 99,
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: vehicleInstance.address,
+          message: {
             manufacturerNode: '1',
             owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }
-        );
+        });
 
         await expect(
           vehicleInstance
@@ -447,20 +438,17 @@ describe('Vehicle', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if manufactuer node is incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'MintVehicleSign',
-          vehicleInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: vehicleInstance.address,
+          message: {
             manufacturerNode: '99',
             owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }
-        );
+        });
 
         await expect(
           vehicleInstance
@@ -475,20 +463,17 @@ describe('Vehicle', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if attributes are incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'MintVehicleSign',
-          vehicleInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: vehicleInstance.address,
+          message: {
             manufacturerNode: '1',
             owner: user1.address,
             attributes: C.mockVehicleAttributes.slice(1),
             infos: C.mockVehicleInfos
           }
-        );
+        });
 
         await expect(
           vehicleInstance
@@ -503,20 +488,17 @@ describe('Vehicle', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if infos are incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'MintVehicleSign',
-          vehicleInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: vehicleInstance.address,
+          message: {
             manufacturerNode: '1',
             owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfosWrongSize
           }
-        );
+        });
 
         await expect(
           vehicleInstance
@@ -531,20 +513,17 @@ describe('Vehicle', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if owner does not match signer', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'MintVehicleSign',
-          vehicleInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: vehicleInstance.address,
+          message: {
             manufacturerNode: '1',
             owner: user2.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }
-        );
+        });
 
         await expect(
           vehicleInstance

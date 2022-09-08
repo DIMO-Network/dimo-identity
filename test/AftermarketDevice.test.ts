@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle, network } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -453,30 +453,24 @@ describe('AftermarketDevice', function () {
     let ownerSig: string;
     let adSig: string;
     before(async () => {
-      ownerSig = await signMessage(
-        user1,
-        C.defaultDomainName,
-        C.defaultDomainVersion,
-        network.config.chainId || 31337,
-        'ClaimAftermarketDeviceOwnerSign',
-        aftermarketDeviceInstance.address,
-        {
+      ownerSig = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
           aftermarketDeviceNode: '2',
           owner: user1.address
         }
-      );
-      adSig = await signMessage(
-        adAddress1,
-        C.defaultDomainName,
-        C.defaultDomainVersion,
-        network.config.chainId || 31337,
-        'ClaimAftermarketDeviceAdSign',
-        aftermarketDeviceInstance.address,
-        {
+      });
+      adSig = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceAdSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
           aftermarketDeviceNode: '2',
           signer: adAddress1.address
         }
-      );
+      });
     });
 
     beforeEach(async () => {
@@ -524,19 +518,16 @@ describe('AftermarketDevice', function () {
           C.mockVehicleInfos
         );
 
-      const pairingSignature = await signMessage(
-        user1,
-        C.defaultDomainName,
-        C.defaultDomainVersion,
-        network.config.chainId || 31337,
-        'PairAftermarketDeviceSign',
-        aftermarketDeviceInstance.address,
-        {
+      const pairingSignature = await signMessage({
+        _signer: user1,
+        _primaryType: 'PairAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
           aftermarketDeviceNode: '2',
           vehicleNode: '4',
           owner: user1.address
         }
-      );
+      });
 
       await aftermarketDeviceInstance
         .connect(admin)
@@ -551,18 +542,16 @@ describe('AftermarketDevice', function () {
 
     context('Wrong owner signature', () => {
       it('Should revert if domain name is incorrect', async () => {
-        const invalidOwnerSig = await signMessage(
-          user1,
-          'Wrong domain',
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'ClaimAftermarketDeviceOwnerSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidOwnerSig = await signMessage({
+          _signer: user1,
+          _domainName: 'Wrong domain',
+          _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             owner: user1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -576,18 +565,16 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if domain version is incorrect', async () => {
-        const invalidOwnerSig = await signMessage(
-          user1,
-          C.defaultDomainName,
-          '99',
-          network.config.chainId || 31337,
-          'ClaimAftermarketDeviceOwnerSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidOwnerSig = await signMessage({
+          _signer: user1,
+          _domainVersion: '99',
+          _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             owner: user1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -601,18 +588,16 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if domain chain ID is incorrect', async () => {
-        const invalidOwnerSig = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          99,
-          'ClaimAftermarketDeviceOwnerSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidOwnerSig = await signMessage({
+          _signer: user1,
+          _chainId: 99,
+          _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             owner: user1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -626,18 +611,15 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if aftermarket device node is incorrect', async () => {
-        const invalidOwnerSig = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'ClaimAftermarketDeviceOwnerSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidOwnerSig = await signMessage({
+          _signer: user1,
+          _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '99',
             owner: user1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -651,18 +633,15 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if owner does not match signer', async () => {
-        const invalidOwnerSig = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'ClaimAftermarketDeviceOwnerSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidOwnerSig = await signMessage({
+          _signer: user1,
+          _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             owner: user2.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -679,18 +658,16 @@ describe('AftermarketDevice', function () {
 
     context('Wrong aftermarket device signature', () => {
       it('Should revert if domain name is incorrect', async () => {
-        const invalidAdSig = await signMessage(
-          adAddress1,
-          'Wrong domain',
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'ClaimAftermarketDeviceAdSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidAdSig = await signMessage({
+          _signer: adAddress1,
+          _domainName: 'Wrong domain',
+          _primaryType: 'ClaimAftermarketDeviceAdSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             signer: adAddress1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -704,18 +681,16 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if domain version is incorrect', async () => {
-        const invalidAdSig = await signMessage(
-          adAddress1,
-          C.defaultDomainName,
-          '99',
-          network.config.chainId || 31337,
-          'ClaimAftermarketDeviceAdSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidAdSig = await signMessage({
+          _signer: adAddress1,
+          _domainVersion: '99',
+          _primaryType: 'ClaimAftermarketDeviceAdSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             signer: adAddress1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -729,18 +704,16 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if domain chain ID is incorrect', async () => {
-        const invalidAdSig = await signMessage(
-          adAddress1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          99,
-          'ClaimAftermarketDeviceAdSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidAdSig = await signMessage({
+          _signer: adAddress1,
+          _chainId: 99,
+          _primaryType: 'ClaimAftermarketDeviceAdSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             signer: adAddress1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -754,18 +727,15 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if aftermarket device node is incorrect', async () => {
-        const invalidAdSig = await signMessage(
-          adAddress1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'ClaimAftermarketDeviceAdSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidAdSig = await signMessage({
+          _signer: adAddress1,
+          _primaryType: 'ClaimAftermarketDeviceAdSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '99',
             signer: adAddress1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -779,18 +749,15 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if signer does not match signer parameter', async () => {
-        const invalidAdSig = await signMessage(
-          adAddress1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'ClaimAftermarketDeviceAdSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidAdSig = await signMessage({
+          _signer: adAddress1,
+          _primaryType: 'ClaimAftermarketDeviceAdSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             signer: adAddress2.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -804,18 +771,15 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if signer does not match address associated with aftermarket device ID', async () => {
-        const invalidAdSig = await signMessage(
-          adAddress1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'ClaimAftermarketDeviceAdSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidAdSig = await signMessage({
+          _signer: adAddress1,
+          _primaryType: 'ClaimAftermarketDeviceAdSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '3',
             signer: adAddress1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -853,43 +817,34 @@ describe('AftermarketDevice', function () {
     let claimAdSig: string;
     let signature: string;
     before(async () => {
-      claimOwnerSig = await signMessage(
-        user1,
-        C.defaultDomainName,
-        C.defaultDomainVersion,
-        network.config.chainId || 31337,
-        'ClaimAftermarketDeviceOwnerSign',
-        aftermarketDeviceInstance.address,
-        {
+      claimOwnerSig = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
           aftermarketDeviceNode: '2',
           owner: user1.address
         }
-      );
-      claimAdSig = await signMessage(
-        adAddress1,
-        C.defaultDomainName,
-        C.defaultDomainVersion,
-        network.config.chainId || 31337,
-        'ClaimAftermarketDeviceAdSign',
-        aftermarketDeviceInstance.address,
-        {
+      });
+      claimAdSig = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceAdSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
           aftermarketDeviceNode: '2',
           signer: adAddress1.address
         }
-      );
-      signature = await signMessage(
-        user1,
-        C.defaultDomainName,
-        C.defaultDomainVersion,
-        network.config.chainId || 31337,
-        'PairAftermarketDeviceSign',
-        aftermarketDeviceInstance.address,
-        {
+      });
+      signature = await signMessage({
+        _signer: user1,
+        _primaryType: 'PairAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
           aftermarketDeviceNode: '2',
           vehicleNode: '4',
           owner: user1.address
         }
-      );
+      });
     });
 
     beforeEach(async () => {
@@ -995,19 +950,17 @@ describe('AftermarketDevice', function () {
 
     context('Wrong signature', () => {
       it('Should revert if domain name is incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          'Wrong domain',
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'PairAftermarketDeviceSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _domainName: 'Wrong domain',
+          _primaryType: 'PairAftermarketDeviceSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             vehicleNode: '4',
             owner: user1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -1016,19 +969,17 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if domain version is incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          '99',
-          network.config.chainId || 31337,
-          'PairAftermarketDeviceSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _domainVersion: '99',
+          _primaryType: 'PairAftermarketDeviceSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             vehicleNode: '4',
             owner: user1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -1037,19 +988,17 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if domain chain ID is incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          99,
-          'PairAftermarketDeviceSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _chainId: 99,
+          _primaryType: 'PairAftermarketDeviceSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             vehicleNode: '4',
             owner: user1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -1058,19 +1007,16 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if aftermarket device node is incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'PairAftermarketDeviceSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'PairAftermarketDeviceSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '99',
             vehicleNode: '4',
             owner: user1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -1079,19 +1025,16 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if aftermarket vehicle node is incorrect', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'PairAftermarketDeviceSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'PairAftermarketDeviceSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             vehicleNode: '99',
             owner: user1.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -1100,19 +1043,16 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Invalid signature');
       });
       it('Should revert if owner does not match signer', async () => {
-        const invalidSignature = await signMessage(
-          user1,
-          C.defaultDomainName,
-          C.defaultDomainVersion,
-          network.config.chainId || 31337,
-          'PairAftermarketDeviceSign',
-          aftermarketDeviceInstance.address,
-          {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'PairAftermarketDeviceSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
             aftermarketDeviceNode: '2',
             vehicleNode: '4',
             owner: user2.address
           }
-        );
+        });
 
         await expect(
           aftermarketDeviceInstance

@@ -10,7 +10,7 @@ const provider = waffle.provider;
 
 chai.use(solidity);
 
-describe('AftermarketDevice', function () {
+describe('ADLicenseValidator', function () {
   let snapshot: string;
   let adLicenseValidatorInstance: ADLicenseValidator;
   let mockDimoTokenInstance: MockDimoToken;

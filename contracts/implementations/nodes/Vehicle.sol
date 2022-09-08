@@ -12,7 +12,7 @@ import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
-            "MintVehicleSign(uint256 manufacturerNode,address _owner,string[] attributes,string[] infos)"
+            "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"
         );
 
     // ***** Admin management ***** //
@@ -49,12 +49,12 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     /// @notice Mints a vehicle
     /// @dev Caller must have the admin role
     /// @param manufacturerNode Parent manufacturer node id
-    /// @param _owner The address of the new owner
+    /// @param owner The address of the new owner
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     function mintVehicle(
         uint256 manufacturerNode,
-        address _owner,
+        address owner,
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -74,7 +74,7 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         ds.nodes[newNodeId].parentNode = manufacturerNode;
         ds.nodes[newNodeId].nodeType = nodeType;
 
-        _safeMint(_owner, newNodeId);
+        _safeMint(owner, newNodeId);
         _setInfo(newNodeId, attributes, infos);
 
         emit NodeMinted(nodeType, newNodeId);
@@ -84,13 +84,13 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     /// The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role
     /// @param manufacturerNode Parent manufacturer node id
-    /// @param _owner The address of the new owner
+    /// @param owner The address of the new owner
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     /// @param signature User's signature hash
     function mintVehicleSign(
         uint256 manufacturerNode,
-        address _owner,
+        address owner,
         string[] calldata attributes,
         string[] calldata infos,
         bytes calldata signature
@@ -119,18 +119,18 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
             abi.encode(
                 MINT_TYPEHASH,
                 manufacturerNode,
-                _owner,
+                owner,
                 attributesHash,
                 infosHash
             )
         );
 
         require(
-            Eip712CheckerInternal._verifySignature(_owner, message, signature),
+            Eip712CheckerInternal._verifySignature(owner, message, signature),
             "Invalid signature"
         );
 
-        _safeMint(_owner, newNodeId);
+        _safeMint(owner, newNodeId);
 
         emit NodeMinted(vs.nodeType, newNodeId);
     }

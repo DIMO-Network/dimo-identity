@@ -2,9 +2,9 @@
 pragma solidity ^0.8.13;
 
 import "../../access/AccessControlInternal.sol";
-import "../../libraries/AMLicenseValidatorStorage.sol";
+import "../../libraries/ADLicenseValidatorStorage.sol";
 
-contract AMLicenseValidator is AccessControlInternal {
+contract ADLicenseValidator is AccessControlInternal {
     /// @notice Sets the foundation address
     /// @dev Only an admin can set the address
     /// @param _foundation The foundation address
@@ -12,7 +12,7 @@ contract AMLicenseValidator is AccessControlInternal {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        AMLicenseValidatorStorage.getStorage().foundation = _foundation;
+        ADLicenseValidatorStorage.getStorage().foundation = _foundation;
     }
 
     /// @notice Sets the DIMO token address
@@ -22,7 +22,7 @@ contract AMLicenseValidator is AccessControlInternal {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        AMLicenseValidatorStorage.getStorage().dimoToken = IDimo(_dimoToken);
+        ADLicenseValidatorStorage.getStorage().dimoToken = IDimo(_dimoToken);
     }
 
     /// @notice Sets the License contract address
@@ -32,18 +32,16 @@ contract AMLicenseValidator is AccessControlInternal {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        AMLicenseValidatorStorage.getStorage().license = ILicense(_license);
+        ADLicenseValidatorStorage.getStorage().license = ILicense(_license);
     }
 
     /// @notice Sets the Aftermarket Device mint cost
     /// @dev Only an admin can set the license contract address
-    /// @param _amDeviceMintCost The new cost per mint
-    function setAmDeviceMintCost(uint256 _amDeviceMintCost)
+    /// @param _adMintCost The new cost per mint
+    function setAdMintCost(uint256 _adMintCost)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        AMLicenseValidatorStorage
-            .getStorage()
-            .amDeviceMintCost = _amDeviceMintCost;
+        ADLicenseValidatorStorage.getStorage().adMintCost = _adMintCost;
     }
 }

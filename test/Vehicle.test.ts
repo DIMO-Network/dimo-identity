@@ -287,7 +287,7 @@ describe('Vehicle', function () {
         vehicleInstance.address,
         {
           manufacturerNode: '1',
-          _owner: user1.address,
+          owner: user1.address,
           attributes: C.mockVehicleAttributes,
           infos: C.mockVehicleInfos
         }
@@ -372,7 +372,7 @@ describe('Vehicle', function () {
           vehicleInstance.address,
           {
             manufacturerNode: '1',
-            _owner: user1.address,
+            owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }
@@ -400,7 +400,7 @@ describe('Vehicle', function () {
           vehicleInstance.address,
           {
             manufacturerNode: '1',
-            _owner: user1.address,
+            owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }
@@ -428,7 +428,7 @@ describe('Vehicle', function () {
           vehicleInstance.address,
           {
             manufacturerNode: '1',
-            _owner: user1.address,
+            owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }
@@ -456,7 +456,7 @@ describe('Vehicle', function () {
           vehicleInstance.address,
           {
             manufacturerNode: '99',
-            _owner: user1.address,
+            owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }
@@ -484,7 +484,7 @@ describe('Vehicle', function () {
           vehicleInstance.address,
           {
             manufacturerNode: '1',
-            _owner: user1.address,
+            owner: user1.address,
             attributes: C.mockVehicleAttributes.slice(1),
             infos: C.mockVehicleInfos
           }
@@ -512,7 +512,7 @@ describe('Vehicle', function () {
           vehicleInstance.address,
           {
             manufacturerNode: '1',
-            _owner: user1.address,
+            owner: user1.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfosWrongSize
           }
@@ -540,7 +540,7 @@ describe('Vehicle', function () {
           vehicleInstance.address,
           {
             manufacturerNode: '1',
-            _owner: user2.address,
+            owner: user2.address,
             attributes: C.mockVehicleAttributes,
             infos: C.mockVehicleInfos
           }

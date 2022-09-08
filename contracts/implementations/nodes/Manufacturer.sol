@@ -71,13 +71,13 @@ contract Manufacturer is
     /// @notice Mints manufacturers in batch
     /// @dev Caller must be an admin
     /// @dev It is assumed the 'name' attribute is whitelisted in advance
-    /// @param _owner The address of the new owner
+    /// @param owner The address of the new owner
     /// @param names List of manufacturer names
-    function mintManufacturerBatch(address _owner, string[] calldata names)
+    function mintManufacturerBatch(address owner, string[] calldata names)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(_hasRole(DEFAULT_ADMIN_ROLE, _owner), "Owner must be an admin");
+        require(_hasRole(DEFAULT_ADMIN_ROLE, owner), "Owner must be an admin");
 
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
@@ -88,7 +88,7 @@ contract Manufacturer is
         for (uint256 i = 0; i < names.length; i++) {
             newNodeId = ++ds.currentIndex;
 
-            _safeMint(_owner, newNodeId);
+            _safeMint(owner, newNodeId);
 
             ds.nodes[newNodeId].nodeType = nodeType;
             ds.nodes[newNodeId].info["Name"] = names[i];
@@ -99,26 +99,26 @@ contract Manufacturer is
 
     /// @notice Mints a manufacturer
     /// @dev Caller must be an admin
-    /// @param _owner The address of the new owner
+    /// @param owner The address of the new owner
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     function mintManufacturer(
-        address _owner,
+        address owner,
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
-        require(!s.controllers[_owner].manufacturerMinted, "Invalid request");
-        s.controllers[_owner].isController = true;
+        require(!s.controllers[owner].manufacturerMinted, "Invalid request");
+        s.controllers[owner].isController = true;
 
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         uint256 newNodeId = ++ds.currentIndex;
         uint256 nodeType = s.nodeType;
 
-        _safeMint(_owner, newNodeId);
+        _safeMint(owner, newNodeId);
 
-        s.controllers[_owner].manufacturerMinted = true;
+        s.controllers[owner].manufacturerMinted = true;
         ds.nodes[newNodeId].nodeType = nodeType;
 
         _setInfo(newNodeId, attributes, infos);

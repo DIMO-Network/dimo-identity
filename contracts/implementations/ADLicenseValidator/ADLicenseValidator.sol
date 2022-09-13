@@ -2,9 +2,10 @@
 pragma solidity ^0.8.13;
 
 import "../../access/AccessControlInternal.sol";
-import "../../libraries/ADLicenseValidatorStorage.sol";
+import "../../libraries/AdLicenseValidatorStorage.sol";
 
-contract ADLicenseValidator is AccessControlInternal {
+// TODO Documentation
+contract AdLicenseValidator is AccessControlInternal {
     /// @notice Sets the foundation address
     /// @dev Only an admin can set the address
     /// @param _foundation The foundation address
@@ -12,7 +13,7 @@ contract ADLicenseValidator is AccessControlInternal {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ADLicenseValidatorStorage.getStorage().foundation = _foundation;
+        AdLicenseValidatorStorage.getStorage().foundation = _foundation;
     }
 
     /// @notice Sets the DIMO token address
@@ -22,7 +23,7 @@ contract ADLicenseValidator is AccessControlInternal {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ADLicenseValidatorStorage.getStorage().dimoToken = IDimo(_dimoToken);
+        AdLicenseValidatorStorage.getStorage().dimoToken = IDimo(_dimoToken);
     }
 
     /// @notice Sets the License contract address
@@ -32,7 +33,7 @@ contract ADLicenseValidator is AccessControlInternal {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ADLicenseValidatorStorage.getStorage().license = ILicense(_license);
+        AdLicenseValidatorStorage.getStorage().license = ILicense(_license);
     }
 
     /// @notice Sets the Aftermarket Device mint cost
@@ -42,6 +43,6 @@ contract ADLicenseValidator is AccessControlInternal {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ADLicenseValidatorStorage.getStorage().adMintCost = _adMintCost;
+        AdLicenseValidatorStorage.getStorage().adMintCost = _adMintCost;
     }
 }

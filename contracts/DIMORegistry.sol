@@ -5,10 +5,10 @@ import "./ERC721/ERC721.sol";
 import "./libraries/DIMOStorage.sol";
 import "./access/AccessControlInternal.sol";
 import "@solidstate/contracts/introspection/ERC165.sol";
-// import "@solidstate/contracts/token/ERC721/ERC721.sol";
 import "@solidstate/contracts/token/ERC721/metadata/IERC721Metadata.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataStorage.sol";
 
+// TODO Documentation
 contract DIMORegistry is ERC721, AccessControlInternal {
     using ERC165Storage for ERC165Storage.Layout;
 

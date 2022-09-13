@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "../../access/AccessControlInternal.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
-import "../ADLicenseValidator/ADLicenseValidatorInternal.sol";
+import "../AdLicenseValidator/AdLicenseValidatorInternal.sol";
 import "../shared/IEvents.sol";
 import "../shared/Roles.sol";
 import "../../libraries/DIMOStorage.sol";
@@ -13,19 +13,19 @@ import "../../libraries/nodes/AftermarketDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
+/**
+ * TODO Documentation
+ * It uses the Mapper contract to link Aftermarket Devices to Vehicles
+ */
 contract AftermarketDevice is
     ERC721MetadataInternal,
     IEvents,
     AccessControlInternal,
-    ADLicenseValidatorInternal
+    AdLicenseValidatorInternal
 {
-    bytes32 private constant CLAIM_OWNER_TYPEHASH =
+    bytes32 private constant CLAIM_TYPEHASH =
         keccak256(
-            "ClaimAftermarketDeviceOwnerSign(uint256 aftermarketDeviceNode,address owner)"
-        );
-    bytes32 private constant CLAIM_AD_TYPEHASH =
-        keccak256(
-            "ClaimAftermarketDeviceAdSign(uint256 aftermarketDeviceNode,address signer)"
+            "ClaimAftermarketDeviceSign(uint256 aftermarketDeviceNode,address owner)"
         );
     bytes32 private constant PAIR_TYPEHASH =
         keccak256(
@@ -79,10 +79,12 @@ contract AftermarketDevice is
     /// @dev Caller must have the manufacturer role
     /// @dev The number of devices is defined by the size of 'infos'
     /// @param manufacturerNode Parent manufacturer node
+    /// @param addresses List of addresses associated with the aftermarket devices
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     function mintAftermarketDeviceByManufacturerBatch(
         uint256 manufacturerNode,
+        address[] calldata addresses,
         string[] calldata attributes,
         string[][] calldata infos
     ) external onlyRole(Roles.MANUFACTURER_ROLE) {
@@ -96,15 +98,14 @@ contract AftermarketDevice is
             ds.nodes[manufacturerNode].nodeType == ms.nodeType,
             "Invalid parent node"
         );
-        _validateMintRequest(msg.sender, infos.length);
+        require(addresses.length == infos.length, "Same length");
 
         uint256 newNodeId;
-        uint256 nodeType;
+        uint256 nodeType = ads.nodeType;
         address deviceAddress;
 
-        for (uint256 i = 0; i < infos.length; i++) {
+        for (uint256 i = 0; i < addresses.length; i++) {
             newNodeId = ++ds.currentIndex;
-            nodeType = ads.nodeType;
 
             ds.nodes[newNodeId].parentNode = manufacturerNode;
             ds.nodes[newNodeId].nodeType = nodeType;
@@ -112,7 +113,7 @@ contract AftermarketDevice is
             _safeMint(msg.sender, newNodeId);
             _setInfo(newNodeId, attributes, infos[i]);
 
-            deviceAddress = parseAddr(ds.nodes[newNodeId].info["Address"]);
+            deviceAddress = addresses[i];
             require(
                 ads.deviceAddressToNodeId[deviceAddress] == 0,
                 "Device address already registered"
@@ -123,9 +124,12 @@ contract AftermarketDevice is
 
             emit NodeMinted(nodeType, newNodeId);
         }
+
+        // Validate request and transfer funds to foundation
+        // This transfer is at the end of the function to prevent reentrancy
+        _validateMintRequest(msg.sender, infos.length);
     }
 
-    /* solhint-disable function-max-lines */
     /// @notice Claims the ownership of an aftermarket device through a metatransaction
     /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role
@@ -142,6 +146,12 @@ contract AftermarketDevice is
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
+        bytes32 message = keccak256(
+            abi.encode(CLAIM_TYPEHASH, aftermarketDeviceNode, owner)
+        );
+        address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
+            aftermarketDeviceNode
+        ];
 
         require(
             ds.nodes[aftermarketDeviceNode].nodeType ==
@@ -152,27 +162,10 @@ contract AftermarketDevice is
             MapperStorage.getStorage().links[aftermarketDeviceNode] == 0,
             "Device already paired"
         );
-
-        bytes32 message = keccak256(
-            abi.encode(CLAIM_OWNER_TYPEHASH, aftermarketDeviceNode, owner)
-        );
-
         require(
             Eip712CheckerInternal._verifySignature(owner, message, ownerSig),
             "Invalid signature"
         );
-
-        address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
-            aftermarketDeviceNode
-        ];
-        message = keccak256(
-            abi.encode(
-                CLAIM_AD_TYPEHASH,
-                aftermarketDeviceNode,
-                aftermarketDeviceAddress
-            )
-        );
-
         require(
             Eip712CheckerInternal._verifySignature(
                 aftermarketDeviceAddress,
@@ -207,6 +200,9 @@ contract AftermarketDevice is
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        bytes32 message = keccak256(
+            abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode, owner)
+        );
 
         require(
             ds.nodes[aftermarketDeviceNode].nodeType ==
@@ -225,11 +221,6 @@ contract AftermarketDevice is
         );
         require(ms.links[vehicleNode] == 0, "Vehicle already paired");
         require(ms.links[aftermarketDeviceNode] == 0, "AD already paired");
-
-        bytes32 message = keccak256(
-            abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode, owner)
-        );
-
         require(
             Eip712CheckerInternal._verifySignature(owner, message, signature),
             "Invalid signature"
@@ -286,39 +277,5 @@ contract AftermarketDevice is
             );
             ds.nodes[node].info[attributes[i]] = infos[i];
         }
-    }
-
-    // TODO Remove it
-    /* solhint-disable code-complexity */
-    function parseAddr(string memory _a)
-        private
-        pure
-        returns (address _parsedAddress)
-    {
-        bytes memory tmp = bytes(_a);
-        uint160 iaddr = 0;
-        uint160 b1;
-        uint160 b2;
-        for (uint256 i = 2; i < 2 + 2 * 20; i += 2) {
-            iaddr *= 256;
-            b1 = uint160(uint8(tmp[i]));
-            b2 = uint160(uint8(tmp[i + 1]));
-            if ((b1 >= 97) && (b1 <= 102)) {
-                b1 -= 87;
-            } else if ((b1 >= 65) && (b1 <= 70)) {
-                b1 -= 55;
-            } else if ((b1 >= 48) && (b1 <= 57)) {
-                b1 -= 48;
-            }
-            if ((b2 >= 97) && (b2 <= 102)) {
-                b2 -= 87;
-            } else if ((b2 >= 65) && (b2 <= 70)) {
-                b2 -= 55;
-            } else if ((b2 >= 48) && (b2 <= 57)) {
-                b2 -= 48;
-            }
-            iaddr += (b1 * 16 + b2);
-        }
-        return address(iaddr);
     }
 }

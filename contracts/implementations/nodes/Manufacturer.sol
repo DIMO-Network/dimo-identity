@@ -7,6 +7,7 @@ import "../../libraries/DIMOStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
+// TODO Documentation
 contract Manufacturer is
     ERC721MetadataInternal,
     IEvents,

@@ -3,8 +3,8 @@ pragma solidity ^0.8.13;
 
 import "../libraries/MapperStorage.sol";
 
+// TODO Documentation
 contract Mapper {
-    // TODO Documentation
     function getLink(uint256 sourceNode)
         external
         view

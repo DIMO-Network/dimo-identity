@@ -169,6 +169,13 @@ describe('Manufacturer', async function () {
           }`
         );
       });
+      it('Should revert if owner does not have admin role', async () => {
+        await expect(
+          manufacturerInstance
+            .connect(admin)
+            .mintManufacturerBatch(nonAdmin.address, C.mockManufacturerNames)
+        ).to.be.revertedWith('Owner must be an admin');
+      });
     });
 
     context('State change', () => {

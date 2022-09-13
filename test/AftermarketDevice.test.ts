@@ -9,7 +9,7 @@ import {
   Manufacturer,
   Vehicle,
   AftermarketDevice,
-  ADLicenseValidator,
+  AdLicenseValidator,
   Mapper,
   MockDimoToken,
   MockLicense
@@ -37,7 +37,7 @@ describe('AftermarketDevice', function () {
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
-  let adLicenseValidatorInstance: ADLicenseValidator;
+  let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
   let mockLicenseInstance: MockLicense;
@@ -75,7 +75,7 @@ describe('AftermarketDevice', function () {
       'Manufacturer',
       'Vehicle',
       'AftermarketDevice',
-      'ADLicenseValidator',
+      'AdLicenseValidator',
       'Mapper'
     );
 
@@ -107,7 +107,7 @@ describe('AftermarketDevice', function () {
       .connect(manufacturer1)
       .approve(dimoRegistryInstance.address, C.manufacturerDimoTokensAmount);
 
-    // Setup ADLicenseValidator variables
+    // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
     await adLicenseValidatorInstance.setDimoToken(
       mockDimoTokenInstance.address
@@ -146,9 +146,6 @@ describe('AftermarketDevice', function () {
       .addVehicleAttribute(C.mockVehicleAttribute2);
 
     // Whitelist AftermarketDevice attributes
-    await aftermarketDeviceInstance
-      .connect(admin)
-      .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttributeAddress);
     await aftermarketDeviceInstance
       .connect(admin)
       .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute1);
@@ -244,6 +241,7 @@ describe('AftermarketDevice', function () {
             .connect(nonManufacturer)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress2.address],
               C.mockAftermarketDeviceAttributes,
               C.mockAftermarketDeviceMultipleInfos
             )
@@ -253,12 +251,37 @@ describe('AftermarketDevice', function () {
           }`
         );
       });
+      it('Should revert if parent node is not a Manufacturer', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(manufacturer1)
+            .mintAftermarketDeviceByManufacturerBatch(
+              99,
+              [adAddress1.address, adAddress2.address],
+              C.mockAftermarketDeviceAttributes,
+              C.mockAftermarketDeviceMultipleInfos
+            )
+        ).to.be.revertedWith('Invalid parent node');
+      });
+      it('Should revert if addresses and infos array length does not match', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(manufacturer1)
+            .mintAftermarketDeviceByManufacturerBatch(
+              1,
+              [adAddress1.address],
+              C.mockAftermarketDeviceAttributes,
+              C.mockAftermarketDeviceMultipleInfos
+            )
+        ).to.be.revertedWith('Same length');
+      });
       it('Should revert if attributes and infos array length does not match', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress2.address],
               C.mockAftermarketDeviceAttributes,
               C.mockAftermarketDeviceMultipleInfosWrongSize
             )
@@ -272,6 +295,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress2.address],
               C.mockAftermarketDeviceAttributes,
               C.mockAftermarketDeviceMultipleInfos
             )
@@ -287,6 +311,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress2.address],
               C.mockAftermarketDeviceAttributes,
               C.mockAftermarketDeviceMultipleInfos
             )
@@ -302,6 +327,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress2.address],
               C.mockAftermarketDeviceAttributes,
               C.mockAftermarketDeviceMultipleInfos
             )
@@ -313,25 +339,21 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress2.address],
               C.aftermarketDeviceAttributesNotWhitelisted,
               C.mockAftermarketDeviceMultipleInfos
             )
         ).to.be.revertedWith('Not whitelisted');
       });
       it('Should revert if device address is already registered', async () => {
-        const infos = JSON.parse(
-          JSON.stringify(C.mockAftermarketDeviceMultipleInfos)
-        );
-        infos[0][0] = adAddress1.address;
-        infos[1][0] = adAddress1.address;
-
         await expect(
           aftermarketDeviceInstance
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress1.address],
               C.mockAftermarketDeviceAttributes,
-              infos
+              C.mockAftermarketDeviceMultipleInfos
             )
         ).to.be.revertedWith('Device address already registered');
       });
@@ -343,6 +365,7 @@ describe('AftermarketDevice', function () {
           .connect(manufacturer1)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
+            [adAddress1.address, adAddress2.address],
             C.mockAftermarketDeviceAttributes,
             C.mockAftermarketDeviceMultipleInfos
           );
@@ -358,6 +381,7 @@ describe('AftermarketDevice', function () {
           .connect(manufacturer1)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
+            [adAddress1.address, adAddress2.address],
             C.mockAftermarketDeviceAttributes,
             C.mockAftermarketDeviceMultipleInfos
           );
@@ -373,6 +397,7 @@ describe('AftermarketDevice', function () {
           .connect(manufacturer1)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
+            [adAddress1.address, adAddress2.address],
             C.mockAftermarketDeviceAttributes,
             C.mockAftermarketDeviceMultipleInfos
           );
@@ -389,6 +414,7 @@ describe('AftermarketDevice', function () {
           .connect(manufacturer1)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
+            [adAddress1.address, adAddress2.address],
             C.mockAftermarketDeviceAttributes,
             C.mockAftermarketDeviceMultipleInfos
           );
@@ -418,6 +444,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress2.address],
               C.mockAftermarketDeviceAttributes,
               C.mockAftermarketDeviceMultipleInfos
             )
@@ -437,6 +464,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress2.address],
               C.mockAftermarketDeviceAttributes,
               C.mockAftermarketDeviceMultipleInfos
             )
@@ -451,6 +479,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
+              [adAddress1.address, adAddress2.address],
               C.mockAftermarketDeviceAttributes,
               C.mockAftermarketDeviceMultipleInfos
             )
@@ -469,7 +498,7 @@ describe('AftermarketDevice', function () {
     before(async () => {
       ownerSig = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
           aftermarketDeviceNode: '2',
@@ -478,26 +507,23 @@ describe('AftermarketDevice', function () {
       });
       adSig = await signMessage({
         _signer: adAddress1,
-        _primaryType: 'ClaimAftermarketDeviceAdSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
           aftermarketDeviceNode: '2',
-          signer: adAddress1.address
+          owner: user1.address
         }
       });
     });
 
     beforeEach(async () => {
-      const infos = C.mockAftermarketDeviceMultipleInfos;
-      infos[0][0] = adAddress1.address;
-      infos[1][0] = adAddress2.address;
-
       await aftermarketDeviceInstance
         .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
+          [adAddress1.address, adAddress2.address],
           C.mockAftermarketDeviceAttributes,
-          infos
+          C.mockAftermarketDeviceMultipleInfos
         );
     });
 
@@ -560,7 +586,7 @@ describe('AftermarketDevice', function () {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
             _domainName: 'Wrong domain',
-            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '2',
@@ -583,7 +609,7 @@ describe('AftermarketDevice', function () {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
             _domainVersion: '99',
-            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '2',
@@ -606,7 +632,7 @@ describe('AftermarketDevice', function () {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
             _chainId: 99,
-            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '2',
@@ -628,7 +654,7 @@ describe('AftermarketDevice', function () {
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
-            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '99',
@@ -650,7 +676,7 @@ describe('AftermarketDevice', function () {
         it('Should revert if owner does not match signer', async () => {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
-            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '2',
@@ -676,11 +702,11 @@ describe('AftermarketDevice', function () {
           const invalidAdSig = await signMessage({
             _signer: adAddress1,
             _domainName: 'Wrong domain',
-            _primaryType: 'ClaimAftermarketDeviceAdSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '2',
-              signer: adAddress1.address
+              owner: user1.address
             }
           });
 
@@ -699,11 +725,11 @@ describe('AftermarketDevice', function () {
           const invalidAdSig = await signMessage({
             _signer: adAddress1,
             _domainVersion: '99',
-            _primaryType: 'ClaimAftermarketDeviceAdSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '2',
-              signer: adAddress1.address
+              owner: user1.address
             }
           });
 
@@ -722,11 +748,11 @@ describe('AftermarketDevice', function () {
           const invalidAdSig = await signMessage({
             _signer: adAddress1,
             _chainId: 99,
-            _primaryType: 'ClaimAftermarketDeviceAdSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '2',
-              signer: adAddress1.address
+              owner: user1.address
             }
           });
 
@@ -744,11 +770,11 @@ describe('AftermarketDevice', function () {
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidAdSig = await signMessage({
             _signer: adAddress1,
-            _primaryType: 'ClaimAftermarketDeviceAdSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '99',
-              signer: adAddress1.address
+              owner: user1.address
             }
           });
 
@@ -763,14 +789,14 @@ describe('AftermarketDevice', function () {
               )
           ).to.be.revertedWith('Invalid signature');
         });
-        it('Should revert if signer does not match signer parameter', async () => {
+        it('Should revert if owner does not match owner parameter', async () => {
           const invalidAdSig = await signMessage({
             _signer: adAddress1,
-            _primaryType: 'ClaimAftermarketDeviceAdSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '2',
-              signer: adAddress2.address
+              owner: user2.address
             }
           });
 
@@ -788,11 +814,11 @@ describe('AftermarketDevice', function () {
         it('Should revert if signer does not match address associated with aftermarket device ID', async () => {
           const invalidAdSig = await signMessage({
             _signer: adAddress1,
-            _primaryType: 'ClaimAftermarketDeviceAdSign',
+            _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '3',
-              signer: adAddress1.address
+              owner: user1.address
             }
           });
 
@@ -842,7 +868,7 @@ describe('AftermarketDevice', function () {
     before(async () => {
       claimOwnerSig = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
           aftermarketDeviceNode: '2',
@@ -851,11 +877,11 @@ describe('AftermarketDevice', function () {
       });
       claimAdSig = await signMessage({
         _signer: adAddress1,
-        _primaryType: 'ClaimAftermarketDeviceAdSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
           aftermarketDeviceNode: '2',
-          signer: adAddress1.address
+          owner: user1.address
         }
       });
       signature = await signMessage({
@@ -871,16 +897,13 @@ describe('AftermarketDevice', function () {
     });
 
     beforeEach(async () => {
-      const infos = C.mockAftermarketDeviceMultipleInfos;
-      infos[0][0] = adAddress1.address;
-      infos[1][0] = adAddress2.address;
-
       await aftermarketDeviceInstance
         .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
+          [adAddress1.address, adAddress2.address],
           C.mockAftermarketDeviceAttributes,
-          infos
+          C.mockAftermarketDeviceMultipleInfos
         );
       await vehicleInstance
         .connect(admin)
@@ -1123,6 +1146,7 @@ describe('AftermarketDevice', function () {
         .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
+          [adAddress1.address, adAddress2.address],
           C.mockAftermarketDeviceAttributes,
           C.mockAftermarketDeviceMultipleInfos
         );

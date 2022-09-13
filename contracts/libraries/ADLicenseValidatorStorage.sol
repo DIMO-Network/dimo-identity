@@ -4,9 +4,9 @@ pragma solidity ^0.8.13;
 import "../interfaces/IDimo.sol";
 import "../interfaces/ILicense.sol";
 
-library ADLicenseValidatorStorage {
+library AdLicenseValidatorStorage {
     bytes32 internal constant AD_LICENSE_VALIDATOR_STORAGE_SLOT =
-        keccak256("DIMORegistry.adLincenseValidator.storage");
+        keccak256("DIMORegistry.adLicenseValidator.storage");
 
     struct Storage {
         address foundation;

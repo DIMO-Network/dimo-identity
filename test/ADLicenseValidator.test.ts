@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { ethers, waffle } from 'hardhat';
 
-import { ADLicenseValidator, MockDimoToken, MockLicense } from '../typechain';
+import { AdLicenseValidator, MockDimoToken, MockLicense } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -10,9 +10,9 @@ const provider = waffle.provider;
 
 chai.use(solidity);
 
-describe('ADLicenseValidator', function () {
+describe('AdLicenseValidator', function () {
   let snapshot: string;
-  let adLicenseValidatorInstance: ADLicenseValidator;
+  let adLicenseValidatorInstance: AdLicenseValidator;
   let mockDimoTokenInstance: MockDimoToken;
   let mockLicenseInstance: MockLicense;
 
@@ -22,7 +22,7 @@ describe('ADLicenseValidator', function () {
     [, adLicenseValidatorInstance] = await initialize(
       admin,
       [C.name, C.symbol, C.baseURI],
-      'ADLicenseValidator'
+      'AdLicenseValidator'
     );
 
     // Deploy MockDimoToken contract

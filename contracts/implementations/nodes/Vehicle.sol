@@ -9,6 +9,7 @@ import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
+// TODO Documentation
 contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(

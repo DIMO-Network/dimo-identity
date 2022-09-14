@@ -473,7 +473,7 @@ describe('AftermarketDevice', function () {
     });
 
     context('Events', () => {
-      it('Should emit NodeMinted event with correct params', async () => {
+      it('Should emit AftermarkedDeviceNodeMinted event with correct params', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(manufacturer1)
@@ -484,10 +484,10 @@ describe('AftermarketDevice', function () {
               C.mockAftermarketDeviceMultipleInfos
             )
         )
-          .to.emit(aftermarketDeviceInstance, 'NodeMinted')
-          .withArgs(C.aftermarketDeviceNodeTypeId, 2)
-          .to.emit(aftermarketDeviceInstance, 'NodeMinted')
-          .withArgs(C.aftermarketDeviceNodeTypeId, 3);
+          .to.emit(aftermarketDeviceInstance, 'AftermarkedDeviceNodeMinted')
+          .withArgs(C.aftermarketDeviceNodeTypeId, 2, adAddress1.address)
+          .to.emit(aftermarketDeviceInstance, 'AftermarkedDeviceNodeMinted')
+          .withArgs(C.aftermarketDeviceNodeTypeId, 3, adAddress2.address);
       });
     });
   });

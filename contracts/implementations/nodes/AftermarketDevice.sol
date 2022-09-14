@@ -32,6 +32,11 @@ contract AftermarketDevice is
             "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode,address owner)"
         );
 
+    event AftermarkedDeviceNodeMinted(
+        uint256 indexed nodeType,
+        uint256 indexed nodeId,
+        address indexed aftermarketDeviceAddress
+    );
     event AftermarketDeviceClaimed(
         uint256 indexed aftermarketDeviceNode,
         address indexed owner
@@ -122,7 +127,11 @@ contract AftermarketDevice is
             ads.deviceAddressToNodeId[deviceAddress] = newNodeId;
             ads.nodeIdToDeviceAddress[newNodeId] = deviceAddress;
 
-            emit NodeMinted(nodeType, newNodeId);
+            emit AftermarkedDeviceNodeMinted(
+                nodeType,
+                newNodeId,
+                deviceAddress
+            );
         }
 
         // Validate request and transfer funds to foundation

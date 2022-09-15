@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { ethers, waffle } from 'hardhat';
 
-import { AMLicenseValidator, MockDimoToken, MockLicense } from '../typechain';
+import { AdLicenseValidator, MockDimoToken, MockLicense } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -10,19 +10,19 @@ const provider = waffle.provider;
 
 chai.use(solidity);
 
-describe('AftermarketDevice', function () {
+describe('AdLicenseValidator', function () {
   let snapshot: string;
-  let amLicenseValidatorInstance: AMLicenseValidator;
+  let adLicenseValidatorInstance: AdLicenseValidator;
   let mockDimoTokenInstance: MockDimoToken;
   let mockLicenseInstance: MockLicense;
 
   const [admin, nonAdmin, foundation] = provider.getWallets();
 
   before(async () => {
-    [, amLicenseValidatorInstance] = await initialize(
+    [, adLicenseValidatorInstance] = await initialize(
       admin,
       [C.name, C.symbol, C.baseURI],
-      'AMLicenseValidator'
+      'AdLicenseValidator'
     );
 
     // Deploy MockDimoToken contract
@@ -51,7 +51,7 @@ describe('AftermarketDevice', function () {
   describe('setFoundationAddress', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
-        amLicenseValidatorInstance
+        adLicenseValidatorInstance
           .connect(nonAdmin)
           .setFoundationAddress(foundation.address)
       ).to.be.revertedWith(
@@ -65,7 +65,7 @@ describe('AftermarketDevice', function () {
   describe('setDimoToken', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
-        amLicenseValidatorInstance
+        adLicenseValidatorInstance
           .connect(nonAdmin)
           .setDimoToken(mockDimoTokenInstance.address)
       ).to.be.revertedWith(
@@ -79,7 +79,7 @@ describe('AftermarketDevice', function () {
   describe('setLicense', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
-        amLicenseValidatorInstance
+        adLicenseValidatorInstance
           .connect(nonAdmin)
           .setLicense(mockLicenseInstance.address)
       ).to.be.revertedWith(
@@ -90,12 +90,10 @@ describe('AftermarketDevice', function () {
     });
   });
 
-  describe('setAmDeviceMintCost', () => {
+  describe('setAdMintCost', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
-        amLicenseValidatorInstance
-          .connect(nonAdmin)
-          .setAmDeviceMintCost(C.amDeviceMintCost)
+        adLicenseValidatorInstance.connect(nonAdmin).setAdMintCost(C.adMintCost)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
           C.DEFAULT_ADMIN_ROLE

@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "../../libraries/AMLicenseValidatorStorage.sol";
+import "../../libraries/AdLicenseValidatorStorage.sol";
 
-contract AMLicenseValidatorInternal {
+// TODO Documentation
+contract AdLicenseValidatorInternal {
     /// @notice Validates if the manufacturer has a License
     /// Calculates the total cost to mint the desired amount of aftermarket devices
     /// Transfers the calculated amount to the foundation
@@ -14,19 +15,19 @@ contract AMLicenseValidatorInternal {
         internal
     {
         require(
-            AMLicenseValidatorStorage.getStorage().license.balanceOf(
+            AdLicenseValidatorStorage.getStorage().license.balanceOf(
                 manufacturer
             ) == 1,
             "Invalid license"
         );
 
-        AMLicenseValidatorStorage.Storage storage s = AMLicenseValidatorStorage
+        AdLicenseValidatorStorage.Storage storage s = AdLicenseValidatorStorage
             .getStorage();
 
         s.dimoToken.transferFrom(
             manufacturer,
             s.foundation,
-            s.amDeviceMintCost * amount
+            s.adMintCost * amount
         );
     }
 }

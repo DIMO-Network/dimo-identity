@@ -13,6 +13,8 @@ library AftermarketDeviceStorage {
         uint256 nodeType;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
+        mapping(address => uint256) deviceAddressToNodeId;
+        mapping(uint256 => address) nodeIdToDeviceAddress;
     }
 
     /* solhint-disable no-inline-assembly */

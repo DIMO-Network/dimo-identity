@@ -12,7 +12,6 @@ library DIMOStorage {
     }
 
     struct Storage {
-        address admin;
         // Maps function selectors to the implementations that execute the functions
         mapping(bytes4 => address) implementations;
         // Maps the implementation to the hash of all its selectors

@@ -5,14 +5,15 @@ import "../../access/AccessControlInternal.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../shared/IEvents.sol";
 import "../../libraries/DIMOStorage.sol";
-import "../../libraries/nodes/RootStorage.sol";
+import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
+// TODO Documentation
 contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
-            "MintVehicleSign(uint256 rootNode,address _owner,string[] attributes,string[] infos)"
+            "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"
         );
 
     // ***** Admin management ***** //
@@ -32,7 +33,7 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     }
 
     /// @notice Adds an attribute to the whielist
-    /// @dev Only an admin can set new controllers
+    /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
     function addVehicleAttribute(string calldata attribute)
         external
@@ -47,42 +48,50 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     // ***** Interaction with nodes *****//
 
     /// @notice Mints a vehicle
-    /// @dev Caller must be an admin
-    /// @param rootNode Parent root node
-    /// @param _owner The address of the new owner
+    /// @dev Caller must have the admin role
+    /// @param manufacturerNode Parent manufacturer node id
+    /// @param owner The address of the new owner
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param
     function mintVehicle(
-        uint256 rootNode,
-        address _owner,
+        uint256 manufacturerNode,
+        address owner,
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        RootStorage.Storage storage rs = RootStorage.getStorage();
+        ManufacturerStorage.Storage storage ms = ManufacturerStorage
+            .getStorage();
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
         require(
-            ds.nodes[rootNode].nodeType == rs.nodeType,
+            ds.nodes[manufacturerNode].nodeType == ms.nodeType,
             "Invalid parent node"
         );
 
-        ds.currentIndex++;
-        uint256 newNodeId = ds.currentIndex;
+        uint256 newNodeId = ++ds.currentIndex;
         uint256 nodeType = vs.nodeType;
 
-        ds.nodes[newNodeId].parentNode = rootNode;
+        ds.nodes[newNodeId].parentNode = manufacturerNode;
         ds.nodes[newNodeId].nodeType = nodeType;
 
-        _safeMint(_owner, newNodeId);
+        _safeMint(owner, newNodeId);
         _setInfo(newNodeId, attributes, infos);
 
         emit NodeMinted(nodeType, newNodeId);
     }
 
+    /// @notice Mints a vehicle through a metatransaction
+    /// The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
+    /// @dev Caller must have the admin role
+    /// @param manufacturerNode Parent manufacturer node id
+    /// @param owner The address of the new owner
+    /// @param attributes List of attributes to be added
+    /// @param infos List of infos matching the attributes param
+    /// @param signature User's signature hash
     function mintVehicleSign(
-        uint256 rootNode,
-        address _owner,
+        uint256 manufacturerNode,
+        address owner,
         string[] calldata attributes,
         string[] calldata infos,
         bytes calldata signature
@@ -91,14 +100,14 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
         require(
-            ds.nodes[rootNode].nodeType == RootStorage.getStorage().nodeType,
+            ds.nodes[manufacturerNode].nodeType ==
+                ManufacturerStorage.getStorage().nodeType,
             "Invalid parent node"
         );
 
-        ds.currentIndex++;
-        uint256 newNodeId = ds.currentIndex;
+        uint256 newNodeId = ++ds.currentIndex;
 
-        ds.nodes[newNodeId].parentNode = rootNode;
+        ds.nodes[newNodeId].parentNode = manufacturerNode;
         ds.nodes[newNodeId].nodeType = vs.nodeType;
 
         (bytes32 attributesHash, bytes32 infosHash) = _setInfoHash(
@@ -108,15 +117,21 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         );
 
         bytes32 message = keccak256(
-            abi.encode(MINT_TYPEHASH, rootNode, _owner, attributesHash, infosHash)
+            abi.encode(
+                MINT_TYPEHASH,
+                manufacturerNode,
+                owner,
+                attributesHash,
+                infosHash
+            )
         );
 
         require(
-            Eip712CheckerInternal._verifySignature(_owner, message, signature),
+            Eip712CheckerInternal._verifySignature(owner, message, signature),
             "Invalid signature"
         );
 
-        _safeMint(_owner, newNodeId);
+        _safeMint(owner, newNodeId);
 
         emit NodeMinted(vs.nodeType, newNodeId);
     }
@@ -124,6 +139,7 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     /// @notice Add infos to node
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
+    /// @dev Caller must have the admin role
     /// @param nodeId Node where the info will be added
     /// @param attributes List of attributes to be added
     /// @param infos List of infos matching the attributes param

@@ -1,46 +1,61 @@
-# Advanced Sample Hardhat Project
+# DIMO Identity
 
-This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
 
-The project comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts. It also comes with a variety of other tools, preconfigured to work with the project code.
+## How to run
 
-Try running some of the following tasks:
+You can execute the following commands to build the project and run additional scripts:
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
-npx eslint '**/*.{js,ts}'
-npx eslint '**/*.{js,ts}' --fix
-npx prettier '**/*.{json,sol,md}' --check
-npx prettier '**/*.{json,sol,md}' --write
-npx solhint 'contracts/**/*.sol'
-npx solhint 'contracts/**/*.sol' --fix
+```sh
+# Installs dependencies
+npm i
+
+# Clears cache, compiles contracts and generates typechain files
+npm run build
+
+# Outputs contract sizes
+npm run contract-sizer
+
+# Commands to check and fix linting errors in typescript and solidity files
+npm run lint
+npm run lint:ts
+npm run lint:ts:fix
+npm run lint:sol
+npm run lint:sol:fix
 ```
 
-# Etherscan verification
+You can deploy the whole system running the following script, where `network_name` is one of the networks available in [hardhat.config.ts](./hardhat.config.ts). Deployed contract addresses will be written in [scripts/data/addresses.json](./scripts/data/addresses.json):
 
-To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
-
-In this project, copy the .env.example file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
-
-```shell
-hardhat run --network ropsten scripts/deploy.ts
+```sh
+npx hardhat run scripts/deploy.ts --network '<network_name>'
 ```
 
-Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
+You can also verify contracts in etherscan/polygonscan/etc running the following command. Remove `<constructor_arguments>` if there isn't any.
 
-```shell
-npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
+```sh
+npx hardhat verify '<deployed_contract_address>' '<constructor_arguments>' --network '<network_name>'
+
+# Use this flag to specify the contract implementation if needed
+npx hardhat verify '<deployed_contract_address>' '<constructor_arguments>' --network '<network_name>' --contract '<contract_path>:<contract_name>'
 ```
 
-# Performance optimizations
+## Testing
 
-For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
+The test suite is organized in different files according to the contract name `<ContractName>.test.ts`. Each file groups the tests by function name, covering, respectively, reverts, state modification and events. You can run the test suite with the following commands:
+
+```sh
+# Runs test suite
+npm run test
+
+# Runs solidity coverage
+npm run coverage
+```
+
+## ABI generator
+
+The DIMO identity architecture uses the `DIMORegistry` contract as an entry point to any module of the system. To interact with DIMO identity, then, a massive ABI containing all available functions is needed. You can generated this ABI running the follwing command:
+
+```sh
+npx hardhat run scripts/abiGenerator.ts
+```
+
+The output file will be saved in `scripts/data/fullAbi.json`.

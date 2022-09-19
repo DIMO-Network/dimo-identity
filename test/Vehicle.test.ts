@@ -4,7 +4,7 @@ import { waffle } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
-  Getter,
+  Nodes,
   Manufacturer,
   Vehicle
 } from '../typechain';
@@ -26,7 +26,7 @@ describe('Vehicle', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
-  let getterInstance: Getter;
+  let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
 
@@ -36,14 +36,14 @@ describe('Vehicle', function () {
     [
       dimoRegistryInstance,
       eip712CheckerInstance,
-      getterInstance,
+      nodesInstance,
       manufacturerInstance,
       vehicleInstance
     ] = await initialize(
       admin,
       [C.name, C.symbol, C.baseURI],
       'Eip712Checker',
-      'Getter',
+      'Nodes',
       'Manufacturer',
       'Vehicle'
     );
@@ -226,7 +226,7 @@ describe('Vehicle', function () {
             C.mockVehicleInfos
           );
 
-        const nodeType = await getterInstance.getNodeType(2);
+        const nodeType = await nodesInstance.getNodeType(2);
 
         expect(nodeType).to.equal(C.vehicleNodeTypeId);
       });
@@ -240,7 +240,7 @@ describe('Vehicle', function () {
             C.mockVehicleInfos
           );
 
-        const parentNode = await getterInstance.getParentNode(2);
+        const parentNode = await nodesInstance.getParentNode(2);
         expect(parentNode).to.be.equal(1);
       });
       it('Should correctly set node owner', async () => {
@@ -268,10 +268,10 @@ describe('Vehicle', function () {
           );
 
         expect(
-          await getterInstance.getInfo(2, C.mockVehicleAttribute1)
+          await nodesInstance.getInfo(2, C.mockVehicleAttribute1)
         ).to.be.equal(C.mockVehicleInfo1);
         expect(
-          await getterInstance.getInfo(2, C.mockVehicleAttribute2)
+          await nodesInstance.getInfo(2, C.mockVehicleAttribute2)
         ).to.be.equal(C.mockVehicleInfo2);
       });
     });
@@ -572,7 +572,7 @@ describe('Vehicle', function () {
             signature
           );
 
-        const nodeType = await getterInstance.getNodeType(2);
+        const nodeType = await nodesInstance.getNodeType(2);
 
         expect(nodeType).to.equal(C.vehicleNodeTypeId);
       });
@@ -587,7 +587,7 @@ describe('Vehicle', function () {
             signature
           );
 
-        const parentNode = await getterInstance.getParentNode(2);
+        const parentNode = await nodesInstance.getParentNode(2);
         expect(parentNode).to.be.equal(1);
       });
       it('Should correctly set node owner', async () => {
@@ -617,10 +617,10 @@ describe('Vehicle', function () {
           );
 
         expect(
-          await getterInstance.getInfo(2, C.mockVehicleAttribute1)
+          await nodesInstance.getInfo(2, C.mockVehicleAttribute1)
         ).to.be.equal(C.mockVehicleInfo1);
         expect(
-          await getterInstance.getInfo(2, C.mockVehicleAttribute2)
+          await nodesInstance.getInfo(2, C.mockVehicleAttribute2)
         ).to.be.equal(C.mockVehicleInfo2);
       });
     });
@@ -713,10 +713,10 @@ describe('Vehicle', function () {
           .setVehicleInfo(2, C.mockVehicleAttributes, C.mockVehicleInfos);
 
         expect(
-          await getterInstance.getInfo(2, C.mockVehicleAttribute1)
+          await nodesInstance.getInfo(2, C.mockVehicleAttribute1)
         ).to.be.equal(C.mockVehicleInfo1);
         expect(
-          await getterInstance.getInfo(2, C.mockVehicleAttribute2)
+          await nodesInstance.getInfo(2, C.mockVehicleAttribute2)
         ).to.be.equal(C.mockVehicleInfo2);
       });
     });

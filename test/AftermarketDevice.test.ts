@@ -5,7 +5,7 @@ import {
   DIMORegistry,
   Eip712Checker,
   AccessControl,
-  Getter,
+  Nodes,
   Manufacturer,
   Vehicle,
   AftermarketDevice,
@@ -33,7 +33,7 @@ describe('AftermarketDevice', function () {
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
   let accessControlInstance: AccessControl;
-  let getterInstance: Getter;
+  let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
@@ -60,7 +60,7 @@ describe('AftermarketDevice', function () {
       dimoRegistryInstance,
       eip712CheckerInstance,
       accessControlInstance,
-      getterInstance,
+      nodesInstance,
       manufacturerInstance,
       vehicleInstance,
       aftermarketDeviceInstance,
@@ -71,7 +71,7 @@ describe('AftermarketDevice', function () {
       [C.name, C.symbol, C.baseURI],
       'Eip712Checker',
       'AccessControl',
-      'Getter',
+      'Nodes',
       'Manufacturer',
       'Vehicle',
       'AftermarketDevice',
@@ -370,8 +370,8 @@ describe('AftermarketDevice', function () {
             C.mockAftermarketDeviceMultipleInfos
           );
 
-        const nodeType1 = await getterInstance.getNodeType(2);
-        const nodeType2 = await getterInstance.getNodeType(3);
+        const nodeType1 = await nodesInstance.getNodeType(2);
+        const nodeType2 = await nodesInstance.getNodeType(3);
 
         expect(nodeType1).to.equal(C.aftermarketDeviceNodeTypeId);
         expect(nodeType2).to.equal(C.aftermarketDeviceNodeTypeId);
@@ -386,8 +386,8 @@ describe('AftermarketDevice', function () {
             C.mockAftermarketDeviceMultipleInfos
           );
 
-        const parentNode1 = await getterInstance.getParentNode(2);
-        const parentNode2 = await getterInstance.getParentNode(3);
+        const parentNode1 = await nodesInstance.getParentNode(2);
+        const parentNode2 = await nodesInstance.getParentNode(3);
 
         expect(parentNode1).to.be.equal(1);
         expect(parentNode2).to.be.equal(1);
@@ -420,16 +420,16 @@ describe('AftermarketDevice', function () {
           );
 
         expect(
-          await getterInstance.getInfo(2, C.mockAftermarketDeviceAttribute1)
+          await nodesInstance.getInfo(2, C.mockAftermarketDeviceAttribute1)
         ).to.be.equal(C.mockAftermarketDeviceInfo1);
         expect(
-          await getterInstance.getInfo(2, C.mockAftermarketDeviceAttribute2)
+          await nodesInstance.getInfo(2, C.mockAftermarketDeviceAttribute2)
         ).to.be.equal(C.mockAftermarketDeviceInfo2);
         expect(
-          await getterInstance.getInfo(3, C.mockAftermarketDeviceAttribute1)
+          await nodesInstance.getInfo(3, C.mockAftermarketDeviceAttribute1)
         ).to.be.equal(C.mockAftermarketDeviceInfo1);
         expect(
-          await getterInstance.getInfo(3, C.mockAftermarketDeviceAttribute2)
+          await nodesInstance.getInfo(3, C.mockAftermarketDeviceAttribute2)
         ).to.be.equal(C.mockAftermarketDeviceInfo2);
       });
       // TODO
@@ -1214,10 +1214,10 @@ describe('AftermarketDevice', function () {
           );
 
         expect(
-          await getterInstance.getInfo(3, C.mockAftermarketDeviceAttribute1)
+          await nodesInstance.getInfo(3, C.mockAftermarketDeviceAttribute1)
         ).to.be.equal(C.mockAftermarketDeviceInfo1);
         expect(
-          await getterInstance.getInfo(3, C.mockAftermarketDeviceAttribute2)
+          await nodesInstance.getInfo(3, C.mockAftermarketDeviceAttribute2)
         ).to.be.equal(C.mockAftermarketDeviceInfo2);
       });
     });

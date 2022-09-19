@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./ERC721/ERC721.sol";
-import "./libraries/DIMOStorage.sol";
+import "./libraries/RegistryStorage.sol";
 import "./access/AccessControlInternal.sol";
 import "@solidstate/contracts/introspection/ERC165.sol";
 import "@solidstate/contracts/token/ERC721/metadata/IERC721Metadata.sol";
@@ -46,7 +46,7 @@ contract DIMORegistry is ERC721, AccessControlInternal {
     /// @notice pass a call to a module
     /* solhint-disable no-complex-fallback, payable-fallback, no-inline-assembly */
     fallback() external {
-        address implementation = DIMOStorage.getStorage().implementations[
+        address implementation = RegistryStorage.getStorage().implementations[
             msg.sig
         ];
         assembly {
@@ -125,7 +125,7 @@ contract DIMORegistry is ERC721, AccessControlInternal {
     function _addModule(address implementation, bytes4[] calldata selectors)
         private
     {
-        DIMOStorage.Storage storage s = DIMOStorage.getStorage();
+        RegistryStorage.Storage storage s = RegistryStorage.getStorage();
         require(
             s.selectorsHash[implementation] == 0x0,
             "Implementation already exists"
@@ -149,7 +149,7 @@ contract DIMORegistry is ERC721, AccessControlInternal {
     function _removeModule(address implementation, bytes4[] calldata selectors)
         private
     {
-        DIMOStorage.Storage storage s = DIMOStorage.getStorage();
+        RegistryStorage.Storage storage s = RegistryStorage.getStorage();
         bytes32 hash = keccak256(abi.encode(selectors));
         require(
             s.selectorsHash[implementation] == hash,

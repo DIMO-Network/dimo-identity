@@ -42,7 +42,7 @@ async function deploy(
   const contractNames = [
     'Eip712Checker',
     'AccessControl',
-    'Getter',
+    'Nodes',
     'Metadata',
     'Manufacturer',
     'Vehicle',

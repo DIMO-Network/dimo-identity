@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { DIMORegistry, Getter, Manufacturer } from '../typechain';
+import { DIMORegistry, Nodes, Manufacturer } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -13,18 +13,17 @@ chai.use(solidity);
 describe('Manufacturer', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
-  let getterInstance: Getter;
+  let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
 
   const [admin, nonAdmin, controller1, nonController] = provider.getWallets();
 
   before(async () => {
-    [dimoRegistryInstance, getterInstance, , manufacturerInstance] =
+    [dimoRegistryInstance, nodesInstance, manufacturerInstance] =
       await initialize(
         admin,
         [C.name, C.symbol, C.baseURI],
-        'Getter',
-        'Metadata',
+        'Nodes',
         'Manufacturer'
       );
 
@@ -184,9 +183,9 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
 
-        const nodeType1 = await getterInstance.getNodeType(1);
-        const nodeType2 = await getterInstance.getNodeType(2);
-        const nodeType3 = await getterInstance.getNodeType(3);
+        const nodeType1 = await nodesInstance.getNodeType(1);
+        const nodeType2 = await nodesInstance.getNodeType(2);
+        const nodeType3 = await nodesInstance.getNodeType(3);
 
         expect(nodeType1).to.equal(C.manufacturerNodeTypeId);
         expect(nodeType2).to.equal(C.manufacturerNodeTypeId);
@@ -197,9 +196,9 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
 
-        const parentNode1 = await getterInstance.getParentNode(1);
-        const parentNode2 = await getterInstance.getParentNode(2);
-        const parentNode3 = await getterInstance.getParentNode(3);
+        const parentNode1 = await nodesInstance.getParentNode(1);
+        const parentNode2 = await nodesInstance.getParentNode(2);
+        const parentNode3 = await nodesInstance.getParentNode(3);
 
         // Assure it does not have parent
         expect(parentNode1).to.be.equal(0);
@@ -224,15 +223,15 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
 
-        const nameAttribute1 = await getterInstance.getInfo(
+        const nameAttribute1 = await nodesInstance.getInfo(
           1,
           C.mockManufacturerAttributeName
         );
-        const nameAttribute2 = await getterInstance.getInfo(
+        const nameAttribute2 = await nodesInstance.getInfo(
           2,
           C.mockManufacturerAttributeName
         );
-        const nameAttribute3 = await getterInstance.getInfo(
+        const nameAttribute3 = await nodesInstance.getInfo(
           3,
           C.mockManufacturerAttributeName
         );
@@ -349,7 +348,7 @@ describe('Manufacturer', async function () {
             C.mockManufacturerInfos
           );
 
-        const nodeType = await getterInstance.getNodeType(1);
+        const nodeType = await nodesInstance.getNodeType(1);
 
         expect(nodeType).to.equal(C.manufacturerNodeTypeId);
       });
@@ -362,7 +361,7 @@ describe('Manufacturer', async function () {
             C.mockManufacturerInfos
           );
 
-        const parentNode = await getterInstance.getParentNode(1);
+        const parentNode = await nodesInstance.getParentNode(1);
 
         // Assure it does not have parent
         expect(parentNode).to.be.equal(0);
@@ -411,10 +410,10 @@ describe('Manufacturer', async function () {
           );
 
         expect(
-          await getterInstance.getInfo(1, C.mockManufacturerAttribute1)
+          await nodesInstance.getInfo(1, C.mockManufacturerAttribute1)
         ).to.be.equal(C.mockManufacturerInfo1);
         expect(
-          await getterInstance.getInfo(1, C.mockManufacturerAttribute2)
+          await nodesInstance.getInfo(1, C.mockManufacturerAttribute2)
         ).to.be.equal(C.mockManufacturerInfo2);
       });
     });
@@ -509,10 +508,10 @@ describe('Manufacturer', async function () {
           );
 
         expect(
-          await getterInstance.getInfo(1, C.mockManufacturerAttribute1)
+          await nodesInstance.getInfo(1, C.mockManufacturerAttribute1)
         ).to.be.equal(C.mockManufacturerInfo1);
         expect(
-          await getterInstance.getInfo(1, C.mockManufacturerAttribute2)
+          await nodesInstance.getInfo(1, C.mockManufacturerAttribute2)
         ).to.be.equal(C.mockManufacturerInfo2);
       });
     });

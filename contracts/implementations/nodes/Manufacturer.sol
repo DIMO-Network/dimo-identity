@@ -72,7 +72,7 @@ contract Manufacturer is
 
     /// @notice Mints manufacturers in batch
     /// @dev Caller must be an admin
-    /// @dev It is assumed the 'name' attribute is whitelisted in advance
+    /// @dev It is assumed the 'Name' attribute is whitelisted in advance
     /// @param owner The address of the new owner
     /// @param names List of manufacturer names
     function mintManufacturerBatch(address owner, string[] calldata names)

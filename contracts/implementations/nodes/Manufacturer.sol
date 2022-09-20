@@ -57,6 +57,7 @@ contract Manufacturer is
     {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
+        require(_controller != address(0), "Non zero address");
         require(
             !s.controllers[_controller].isController,
             "Already a controller"

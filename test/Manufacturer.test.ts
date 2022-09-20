@@ -133,6 +133,11 @@ describe('Manufacturer', async function () {
           }`
         );
       });
+      it('Should revert if address is the zero address', async () => {
+        await expect(
+          manufacturerInstance.connect(admin).setController(C.ZERO_ADDRESS)
+        ).to.be.revertedWith('Non zero address');
+      });
       it('Should revert if address is already a controller', async () => {
         await manufacturerInstance
           .connect(admin)

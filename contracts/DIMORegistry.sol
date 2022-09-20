@@ -163,5 +163,6 @@ contract DIMORegistry is ERC721, AccessControlInternal {
             );
             s.implementations[selectors[i]] = address(0);
         }
+        s.selectorsHash[implementation] = 0x0;
     }
 }

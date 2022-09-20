@@ -90,10 +90,10 @@ contract Manufacturer is
         for (uint256 i = 0; i < names.length; i++) {
             newNodeId = ++ns.currentIndex;
 
-            _safeMint(owner, newNodeId);
-
             ns.nodes[newNodeId].nodeType = nodeType;
             ns.nodes[newNodeId].info["Name"] = names[i];
+
+            _safeMint(owner, newNodeId);
 
             emit NodeMinted(nodeType, newNodeId);
         }
@@ -118,11 +118,10 @@ contract Manufacturer is
         uint256 newNodeId = ++ns.currentIndex;
         uint256 nodeType = s.nodeType;
 
-        _safeMint(owner, newNodeId);
-
         s.controllers[owner].manufacturerMinted = true;
         ns.nodes[newNodeId].nodeType = nodeType;
 
+        _safeMint(owner, newNodeId);
         _setInfo(newNodeId, attributes, infos);
 
         emit NodeMinted(nodeType, newNodeId);

@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "../../access/AccessControlInternal.sol";
 import "../shared/IEvents.sol";
-import "../../libraries/DIMOStorage.sol";
+import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
@@ -82,17 +82,17 @@ contract Manufacturer is
 
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         uint256 nodeType = s.nodeType;
         uint256 newNodeId;
 
         for (uint256 i = 0; i < names.length; i++) {
-            newNodeId = ++ds.currentIndex;
+            newNodeId = ++ns.currentIndex;
 
             _safeMint(owner, newNodeId);
 
-            ds.nodes[newNodeId].nodeType = nodeType;
-            ds.nodes[newNodeId].info["Name"] = names[i];
+            ns.nodes[newNodeId].nodeType = nodeType;
+            ns.nodes[newNodeId].info["Name"] = names[i];
 
             emit NodeMinted(nodeType, newNodeId);
         }
@@ -113,14 +113,14 @@ contract Manufacturer is
         require(!s.controllers[owner].manufacturerMinted, "Invalid request");
         s.controllers[owner].isController = true;
 
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
-        uint256 newNodeId = ++ds.currentIndex;
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        uint256 newNodeId = ++ns.currentIndex;
         uint256 nodeType = s.nodeType;
 
         _safeMint(owner, newNodeId);
 
         s.controllers[owner].manufacturerMinted = true;
-        ds.nodes[newNodeId].nodeType = nodeType;
+        ns.nodes[newNodeId].nodeType = nodeType;
 
         _setInfo(newNodeId, attributes, infos);
 
@@ -138,11 +138,10 @@ contract Manufacturer is
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         require(
-            ds.nodes[nodeId].nodeType == s.nodeType,
+            NodesStorage.getStorage().nodes[nodeId].nodeType == s.nodeType,
             "Node must be a manufacturer"
         );
 
@@ -190,7 +189,7 @@ contract Manufacturer is
     ) private {
         require(attributes.length == infos.length, "Same length");
 
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
 
@@ -199,7 +198,7 @@ contract Manufacturer is
                 AttributeSet.exists(s.whitelistedAttributes, attributes[i]),
                 "Not whitelisted"
             );
-            ds.nodes[nodeId].info[attributes[i]] = infos[i];
+            ns.nodes[nodeId].info[attributes[i]] = infos[i];
         }
     }
 }

@@ -6,7 +6,7 @@ import "../../Eip712/Eip712CheckerInternal.sol";
 import "../AdLicenseValidator/AdLicenseValidatorInternal.sol";
 import "../shared/IEvents.sol";
 import "../shared/Roles.sol";
-import "../../libraries/DIMOStorage.sol";
+import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/AftermarketDeviceStorage.sol";
@@ -93,14 +93,14 @@ contract AftermarketDevice is
         string[] calldata attributes,
         string[][] calldata infos
     ) external onlyRole(Roles.MANUFACTURER_ROLE) {
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         ManufacturerStorage.Storage storage ms = ManufacturerStorage
             .getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
 
         require(
-            ds.nodes[manufacturerNode].nodeType == ms.nodeType,
+            ns.nodes[manufacturerNode].nodeType == ms.nodeType,
             "Invalid parent node"
         );
         require(addresses.length == infos.length, "Same length");
@@ -110,10 +110,10 @@ contract AftermarketDevice is
         address deviceAddress;
 
         for (uint256 i = 0; i < addresses.length; i++) {
-            newNodeId = ++ds.currentIndex;
+            newNodeId = ++ns.currentIndex;
 
-            ds.nodes[newNodeId].parentNode = manufacturerNode;
-            ds.nodes[newNodeId].nodeType = nodeType;
+            ns.nodes[newNodeId].parentNode = manufacturerNode;
+            ns.nodes[newNodeId].nodeType = nodeType;
 
             _safeMint(msg.sender, newNodeId);
             _setInfo(newNodeId, attributes, infos[i]);
@@ -152,7 +152,6 @@ contract AftermarketDevice is
         bytes calldata ownerSig,
         bytes calldata aftermarketDeviceSig
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         bytes32 message = keccak256(
@@ -163,7 +162,7 @@ contract AftermarketDevice is
         ];
 
         require(
-            ds.nodes[aftermarketDeviceNode].nodeType ==
+            NodesStorage.getStorage().nodes[aftermarketDeviceNode].nodeType ==
                 AftermarketDeviceStorage.getStorage().nodeType,
             "Invalid AD node"
         );
@@ -207,19 +206,19 @@ contract AftermarketDevice is
         address owner,
         bytes calldata signature
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode, owner)
         );
 
         require(
-            ds.nodes[aftermarketDeviceNode].nodeType ==
+            ns.nodes[aftermarketDeviceNode].nodeType ==
                 AftermarketDeviceStorage.getStorage().nodeType,
             "Invalid AD node"
         );
         require(
-            ds.nodes[vehicleNode].nodeType ==
+            ns.nodes[vehicleNode].nodeType ==
                 VehicleStorage.getStorage().nodeType,
             "Invalid vehicle node"
         );
@@ -252,10 +251,12 @@ contract AftermarketDevice is
         string[] calldata attributes,
         string[] calldata infos
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
         AftermarketDeviceStorage.Storage storage s = AftermarketDeviceStorage
             .getStorage();
-        require(ds.nodes[nodeId].nodeType == s.nodeType, "Node must be an AD");
+        require(
+            NodesStorage.getStorage().nodes[nodeId].nodeType == s.nodeType,
+            "Node must be an AD"
+        );
 
         _setInfo(nodeId, attributes, infos);
     }
@@ -275,7 +276,7 @@ contract AftermarketDevice is
     ) private {
         require(attributes.length == infos.length, "Same length");
 
-        DIMOStorage.Storage storage ds = DIMOStorage.getStorage();
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
 
@@ -284,7 +285,7 @@ contract AftermarketDevice is
                 AttributeSet.exists(ads.whitelistedAttributes, attributes[i]),
                 "Not whitelisted"
             );
-            ds.nodes[node].info[attributes[i]] = infos[i];
+            ns.nodes[node].info[attributes[i]] = infos[i];
         }
     }
 }

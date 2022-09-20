@@ -37,7 +37,7 @@ main([
   'contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice',
   'contracts/implementations/nodes/Manufacturer.sol:Manufacturer',
   'contracts/implementations/nodes/Vehicle.sol:Vehicle',
-  'contracts/implementations/Getter.sol:Getter',
+  'contracts/implementations/Nodes.sol:Nodes',
   'contracts/implementations/Mapper.sol:Mapper',
   'contracts/implementations/Metadata.sol:Metadata'
 ]).catch((error) => {

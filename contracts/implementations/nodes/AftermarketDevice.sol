@@ -32,7 +32,7 @@ contract AftermarketDevice is
             "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode,address owner)"
         );
 
-    event AftermarkedDeviceNodeMinted(
+    event AftermarketDeviceNodeMinted(
         uint256 indexed nodeType,
         uint256 indexed nodeId,
         address indexed aftermarketDeviceAddress
@@ -127,7 +127,7 @@ contract AftermarketDevice is
             ads.deviceAddressToNodeId[deviceAddress] = newNodeId;
             ads.nodeIdToDeviceAddress[newNodeId] = deviceAddress;
 
-            emit AftermarkedDeviceNodeMinted(
+            emit AftermarketDeviceNodeMinted(
                 nodeType,
                 newNodeId,
                 deviceAddress

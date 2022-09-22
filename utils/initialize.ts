@@ -23,6 +23,12 @@ async function initialize(
     dimoRegistryImplementation.address
   );
 
+  const contractSelectors = getSelectors(DIMORegistry.interface);
+
+  await dimoRegistry
+    .connect(deployer)
+    .addModule(dimoRegistryImplementation.address, contractSelectors);
+
   instances.push(dimoRegistry);
 
   for (const contractName of contracts) {

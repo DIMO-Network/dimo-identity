@@ -159,7 +159,7 @@ contract DIMORegistry is ERC721, AccessControlInternal {
         for (uint256 i = 0; i < selectors.length; i++) {
             require(
                 s.implementations[selectors[i]] == implementation,
-                "Unregistered selector"
+                "Selector registered in another module"
             );
             s.implementations[selectors[i]] = address(0);
         }

@@ -29,7 +29,7 @@ contract AftermarketDevice is
         );
     bytes32 private constant PAIR_TYPEHASH =
         keccak256(
-            "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode,address owner)"
+            "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
         );
 
     event AftermarketDeviceNodeMinted(
@@ -198,18 +198,16 @@ contract AftermarketDevice is
     /// @dev Caller must have the admin role
     /// @param aftermarketDeviceNode Aftermarket device node id
     /// @param vehicleNode Vehicle node id
-    /// @param owner The address of the new owner
     /// @param signature User's signature hash
     function pairAftermarketDeviceSign(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
-        address owner,
         bytes calldata signature
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
-            abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode, owner)
+            abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
         );
 
         require(
@@ -222,10 +220,12 @@ contract AftermarketDevice is
                 VehicleStorage.getStorage().nodeType,
             "Invalid vehicle node"
         );
-        require(_ownerOf(vehicleNode) == owner, "Invalid vehicleNode owner");
+
+        address owner = _ownerOf(vehicleNode);
+
         require(
-            _ownerOf(aftermarketDeviceNode) == owner,
-            "Invalid AD node owner"
+            owner == _ownerOf(aftermarketDeviceNode),
+            "Owner of the nodes does not match"
         );
         require(ms.links[vehicleNode] == 0, "Vehicle already paired");
         require(ms.links[aftermarketDeviceNode] == 0, "AD already paired");

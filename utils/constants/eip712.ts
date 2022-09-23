@@ -22,8 +22,7 @@ export const schemaBase: TypedData = {
     ],
     PairAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
-      { name: 'vehicleNode', type: 'uint256' },
-      { name: 'owner', type: 'address' }
+      { name: 'vehicleNode', type: 'uint256' }
     ]
   },
   primaryType: '',

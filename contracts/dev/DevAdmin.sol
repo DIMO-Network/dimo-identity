@@ -46,97 +46,69 @@ contract DevAdmin is AccessControlInternal, ERC721MetadataInternal {
         );
     }
 
-    /// @dev Unpairs an aftermarket device from a vehicle
+    /// @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
     /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNode Aftermarket device node id
-    /// @param vehicleNode Vehicle node id
-    function unpairAftermarketDevice(
-        uint256 aftermarketDeviceNode,
-        uint256 vehicleNode
+    /// @param aftermarketDeviceNodes Array of aftermarket device node ids
+    function unpairAftermarketDeviceByDeviceNode(
+        uint256[] calldata aftermarketDeviceNodes
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
 
-        require(
-            ns.nodes[aftermarketDeviceNode].nodeType ==
-                AftermarketDeviceStorage.getStorage().nodeType,
-            "Invalid AD node"
-        );
-        require(
-            ns.nodes[vehicleNode].nodeType ==
-                VehicleStorage.getStorage().nodeType,
-            "Invalid vehicle node"
-        );
+        uint256 _adNode;
+        uint256 _vehicleNode;
+        for (uint256 i = 0; i < aftermarketDeviceNodes.length; i++) {
+            _adNode = aftermarketDeviceNodes[i];
 
-        ms.links[vehicleNode] = 0;
-        ms.links[aftermarketDeviceNode] = 0;
+            require(
+                ns.nodes[_adNode].nodeType ==
+                    AftermarketDeviceStorage.getStorage().nodeType,
+                "Invalid AD node"
+            );
 
-        address owner = _ownerOf(vehicleNode);
+            _vehicleNode = ms.links[_adNode];
 
-        emit AftermarketDeviceUnpaired(
-            aftermarketDeviceNode,
-            vehicleNode,
-            owner
-        );
+            ms.links[_vehicleNode] = 0;
+            ms.links[_adNode] = 0;
+
+            emit AftermarketDeviceUnpaired(
+                _adNode,
+                _vehicleNode,
+                _ownerOf(_adNode)
+            );
+        }
     }
 
-    /// @dev Unpairs an aftermarket device from a vehicle by the device node
+    /// @dev Unpairs a list of aftermarket devices from their respective vehicles by the vehicle node ids
     /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNode Aftermarket device node id
-    function unpairAftermarketDeviceByDeviceNode(uint256 aftermarketDeviceNode)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    /// @param vehicleNodes Array of vehicle node id
+    function unpairAftermarketDeviceByVehicleNode(
+        uint256[] calldata vehicleNodes
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
 
-        require(
-            ns.nodes[aftermarketDeviceNode].nodeType ==
-                AftermarketDeviceStorage.getStorage().nodeType,
-            "Invalid AD node"
-        );
+        uint256 _adNode;
+        uint256 _vehicleNode;
+        for (uint256 i = 0; i < vehicleNodes.length; i++) {
+            _vehicleNode = vehicleNodes[i];
 
-        uint256 vehicleNode = ms.links[aftermarketDeviceNode];
+            require(
+                ns.nodes[_vehicleNode].nodeType ==
+                    VehicleStorage.getStorage().nodeType,
+                "Invalid vehicle node"
+            );
 
-        ms.links[vehicleNode] = 0;
-        ms.links[aftermarketDeviceNode] = 0;
+            _adNode = ms.links[_vehicleNode];
 
-        address owner = _ownerOf(aftermarketDeviceNode);
+            ms.links[_vehicleNode] = 0;
+            ms.links[_adNode] = 0;
 
-        emit AftermarketDeviceUnpaired(
-            aftermarketDeviceNode,
-            vehicleNode,
-            owner
-        );
-    }
-
-    /// @dev Unpairs an aftermarket device from a vehicle by the vehicle node
-    /// @dev Caller must have the admin role
-    /// @param vehicleNode Vehicle node id
-    function unpairAftermarketDeviceByVehicleNode(uint256 vehicleNode)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        MapperStorage.Storage storage ms = MapperStorage.getStorage();
-
-        require(
-            ns.nodes[vehicleNode].nodeType ==
-                VehicleStorage.getStorage().nodeType,
-            "Invalid vehicle node"
-        );
-
-        uint256 aftermarketDeviceNode = ms.links[vehicleNode];
-
-        ms.links[vehicleNode] = 0;
-        ms.links[aftermarketDeviceNode] = 0;
-
-        address owner = _ownerOf(vehicleNode);
-
-        emit AftermarketDeviceUnpaired(
-            aftermarketDeviceNode,
-            vehicleNode,
-            owner
-        );
+            emit AftermarketDeviceUnpaired(
+                _adNode,
+                _vehicleNode,
+                _ownerOf(_vehicleNode)
+            );
+        }
     }
 }

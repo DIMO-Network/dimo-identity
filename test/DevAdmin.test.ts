@@ -259,126 +259,15 @@ describe('DevAdmin', function () {
     });
   });
 
-  describe('unpairAftermarketDevice', () => {
-    let claimOwnerSig: string;
-    let claimAdSig: string;
-    let signature: string;
-    before(async () => {
-      claimOwnerSig = await signMessage({
-        _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '2',
-          owner: user1.address
-        }
-      });
-      claimAdSig = await signMessage({
-        _signer: adAddress1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '2',
-          owner: user1.address
-        }
-      });
-      signature = await signMessage({
-        _signer: user1,
-        _primaryType: 'PairAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '2',
-          vehicleNode: '4'
-        }
-      });
-    });
-
-    beforeEach(async () => {
-      await aftermarketDeviceInstance
-        .connect(manufacturer1)
-        .mintAftermarketDeviceByManufacturerBatch(
-          1,
-          [adAddress1.address, adAddress2.address],
-          C.mockAftermarketDeviceAttributes,
-          C.mockAftermarketDeviceMultipleInfos
-        );
-      await vehicleInstance
-        .connect(admin)
-        .mintVehicle(
-          1,
-          user1.address,
-          C.mockVehicleAttributes,
-          C.mockVehicleInfos
-        );
-      await aftermarketDeviceInstance
-        .connect(admin)
-        .claimAftermarketDeviceSign(
-          2,
-          user1.address,
-          claimOwnerSig,
-          claimAdSig
-        );
-      await aftermarketDeviceInstance
-        .connect(admin)
-        .pairAftermarketDeviceSign(2, 4, signature);
-    });
-
-    context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
-        await expect(
-          devAdminInstance.connect(nonAdmin).unpairAftermarketDevice(2, 4)
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
-          }`
-        );
-      });
-      it('Should revert if node is not an Aftermarket Device', async () => {
-        await expect(
-          devAdminInstance.connect(admin).unpairAftermarketDevice(99, 4)
-        ).to.be.revertedWith('Invalid AD node');
-      });
-      it('Should revert if node is not a Vehicle', async () => {
-        await expect(
-          devAdminInstance.connect(admin).unpairAftermarketDevice(2, 99)
-        ).to.be.revertedWith('Invalid vehicle node');
-      });
-    });
-
-    context('State change', () => {
-      it('Should correctly map the aftermarket device to the vehicle', async () => {
-        expect(await mapperInstance.getLink(4)).to.be.equal(2);
-
-        await devAdminInstance.connect(admin).unpairAftermarketDevice(2, 4);
-
-        expect(await mapperInstance.getLink(4)).to.be.equal(0);
-      });
-      it('Should correctly map the vehicle to the aftermarket device', async () => {
-        expect(await mapperInstance.getLink(2)).to.be.equal(4);
-
-        await devAdminInstance.connect(admin).unpairAftermarketDevice(2, 4);
-
-        expect(await mapperInstance.getLink(2)).to.be.equal(0);
-      });
-    });
-
-    context('Events', () => {
-      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
-        await expect(
-          devAdminInstance.connect(admin).unpairAftermarketDevice(2, 4)
-        )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
-          .withArgs(2, 4, user1.address);
-      });
-    });
-  });
-
   describe('unpairAftermarketDeviceByDeviceNode', () => {
-    let claimOwnerSig: string;
-    let claimAdSig: string;
-    let signature: string;
+    let claimOwnerSig1: string;
+    let claimOwnerSig2: string;
+    let claimAdSig1: string;
+    let claimAdSig2: string;
+    let pairSig1: string;
+    let pairSig2: string;
     before(async () => {
-      claimOwnerSig = await signMessage({
+      claimOwnerSig1 = await signMessage({
         _signer: user1,
         _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
@@ -387,7 +276,16 @@ describe('DevAdmin', function () {
           owner: user1.address
         }
       });
-      claimAdSig = await signMessage({
+      claimOwnerSig2 = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '3',
+          owner: user1.address
+        }
+      });
+      claimAdSig1 = await signMessage({
         _signer: adAddress1,
         _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
@@ -396,13 +294,31 @@ describe('DevAdmin', function () {
           owner: user1.address
         }
       });
-      signature = await signMessage({
+      claimAdSig2 = await signMessage({
+        _signer: adAddress2,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '3',
+          owner: user1.address
+        }
+      });
+      pairSig1 = await signMessage({
         _signer: user1,
         _primaryType: 'PairAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
           aftermarketDeviceNode: '2',
           vehicleNode: '4'
+        }
+      });
+      pairSig2 = await signMessage({
+        _signer: user1,
+        _primaryType: 'PairAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '3',
+          vehicleNode: '5'
         }
       });
     });
@@ -424,17 +340,36 @@ describe('DevAdmin', function () {
           C.mockVehicleAttributes,
           C.mockVehicleInfos
         );
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos
+        );
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
           2,
           user1.address,
-          claimOwnerSig,
-          claimAdSig
+          claimOwnerSig1,
+          claimAdSig1
         );
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(2, 4, signature);
+        .claimAftermarketDeviceSign(
+          3,
+          user1.address,
+          claimOwnerSig2,
+          claimAdSig2
+        );
+      await aftermarketDeviceInstance
+        .connect(admin)
+        .pairAftermarketDeviceSign(2, 4, pairSig1);
+      await aftermarketDeviceInstance
+        .connect(admin)
+        .pairAftermarketDeviceSign(3, 5, pairSig2);
     });
 
     context('Error handling', () => {
@@ -442,7 +377,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
-            .unpairAftermarketDeviceByDeviceNode(2)
+            .unpairAftermarketDeviceByDeviceNode([2])
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
             C.DEFAULT_ADMIN_ROLE
@@ -453,7 +388,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance
             .connect(admin)
-            .unpairAftermarketDeviceByDeviceNode(99)
+            .unpairAftermarketDeviceByDeviceNode([2, 99])
         ).to.be.revertedWith('Invalid AD node');
       });
     });
@@ -461,41 +396,52 @@ describe('DevAdmin', function () {
     context('State change', () => {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         expect(await mapperInstance.getLink(4)).to.be.equal(2);
+        expect(await mapperInstance.getLink(5)).to.be.equal(3);
 
         await devAdminInstance
           .connect(admin)
-          .unpairAftermarketDeviceByDeviceNode(2);
+          .unpairAftermarketDeviceByDeviceNode([2, 3]);
 
         expect(await mapperInstance.getLink(4)).to.be.equal(0);
+        expect(await mapperInstance.getLink(5)).to.be.equal(0);
       });
       it('Should correctly map the vehicle to the aftermarket device', async () => {
         expect(await mapperInstance.getLink(2)).to.be.equal(4);
+        expect(await mapperInstance.getLink(3)).to.be.equal(5);
 
         await devAdminInstance
           .connect(admin)
-          .unpairAftermarketDeviceByDeviceNode(2);
+          .unpairAftermarketDeviceByDeviceNode([2, 3]);
 
         expect(await mapperInstance.getLink(2)).to.be.equal(0);
+        expect(await mapperInstance.getLink(3)).to.be.equal(0);
       });
     });
 
     context('Events', () => {
       it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
         await expect(
-          devAdminInstance.connect(admin).unpairAftermarketDeviceByDeviceNode(2)
+          devAdminInstance
+            .connect(admin)
+            .unpairAftermarketDeviceByDeviceNode([2, 3])
         )
           .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
-          .withArgs(2, 4, user1.address);
+          .withArgs(2, 4, user1.address)
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
+          .withArgs(3, 5, user1.address);
       });
     });
   });
 
   describe('unpairAftermarketDeviceByVehicleNode', () => {
-    let claimOwnerSig: string;
-    let claimAdSig: string;
-    let signature: string;
+    let claimOwnerSig1: string;
+    let claimOwnerSig2: string;
+    let claimAdSig1: string;
+    let claimAdSig2: string;
+    let pairSig1: string;
+    let pairSig2: string;
     before(async () => {
-      claimOwnerSig = await signMessage({
+      claimOwnerSig1 = await signMessage({
         _signer: user1,
         _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
@@ -504,7 +450,16 @@ describe('DevAdmin', function () {
           owner: user1.address
         }
       });
-      claimAdSig = await signMessage({
+      claimOwnerSig2 = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '3',
+          owner: user1.address
+        }
+      });
+      claimAdSig1 = await signMessage({
         _signer: adAddress1,
         _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
@@ -513,13 +468,31 @@ describe('DevAdmin', function () {
           owner: user1.address
         }
       });
-      signature = await signMessage({
+      claimAdSig2 = await signMessage({
+        _signer: adAddress2,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '3',
+          owner: user1.address
+        }
+      });
+      pairSig1 = await signMessage({
         _signer: user1,
         _primaryType: 'PairAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
           aftermarketDeviceNode: '2',
           vehicleNode: '4'
+        }
+      });
+      pairSig2 = await signMessage({
+        _signer: user1,
+        _primaryType: 'PairAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '3',
+          vehicleNode: '5'
         }
       });
     });
@@ -541,17 +514,36 @@ describe('DevAdmin', function () {
           C.mockVehicleAttributes,
           C.mockVehicleInfos
         );
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(
+          1,
+          user1.address,
+          C.mockVehicleAttributes,
+          C.mockVehicleInfos
+        );
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
           2,
           user1.address,
-          claimOwnerSig,
-          claimAdSig
+          claimOwnerSig1,
+          claimAdSig1
         );
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(2, 4, signature);
+        .claimAftermarketDeviceSign(
+          3,
+          user1.address,
+          claimOwnerSig2,
+          claimAdSig2
+        );
+      await aftermarketDeviceInstance
+        .connect(admin)
+        .pairAftermarketDeviceSign(2, 4, pairSig1);
+      await aftermarketDeviceInstance
+        .connect(admin)
+        .pairAftermarketDeviceSign(3, 5, pairSig2);
     });
 
     context('Error handling', () => {
@@ -559,7 +551,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
-            .unpairAftermarketDeviceByVehicleNode(4)
+            .unpairAftermarketDeviceByVehicleNode([4, 5])
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
             C.DEFAULT_ADMIN_ROLE
@@ -570,7 +562,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance
             .connect(admin)
-            .unpairAftermarketDeviceByVehicleNode(99)
+            .unpairAftermarketDeviceByVehicleNode([4, 99])
         ).to.be.revertedWith('Invalid vehicle node');
       });
     });
@@ -578,21 +570,25 @@ describe('DevAdmin', function () {
     context('State change', () => {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         expect(await mapperInstance.getLink(4)).to.be.equal(2);
+        expect(await mapperInstance.getLink(5)).to.be.equal(3);
 
         await devAdminInstance
           .connect(admin)
-          .unpairAftermarketDeviceByVehicleNode(4);
+          .unpairAftermarketDeviceByVehicleNode([4, 5]);
 
         expect(await mapperInstance.getLink(4)).to.be.equal(0);
+        expect(await mapperInstance.getLink(5)).to.be.equal(0);
       });
       it('Should correctly map the vehicle to the aftermarket device', async () => {
         expect(await mapperInstance.getLink(2)).to.be.equal(4);
+        expect(await mapperInstance.getLink(3)).to.be.equal(5);
 
         await devAdminInstance
           .connect(admin)
-          .unpairAftermarketDeviceByVehicleNode(4);
+          .unpairAftermarketDeviceByVehicleNode([4, 5]);
 
         expect(await mapperInstance.getLink(2)).to.be.equal(0);
+        expect(await mapperInstance.getLink(3)).to.be.equal(0);
       });
     });
 
@@ -601,10 +597,12 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance
             .connect(admin)
-            .unpairAftermarketDeviceByVehicleNode(4)
+            .unpairAftermarketDeviceByVehicleNode([4, 5])
         )
           .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
-          .withArgs(2, 4, user1.address);
+          .withArgs(2, 4, user1.address)
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
+          .withArgs(3, 5, user1.address);
       });
     });
   });

@@ -19,7 +19,7 @@
         "AftermarketDevice": "0x9B9f1eD8272bb92398e13d8550E02F08DDe435f2",
         "AdLicenseValidator": "0x539606a26FB425C10Aa7B9101E7800A1423CA192",
         "Mapper": "0x946c22477cba1dBde3908Ca335EEa59Ab8C4603f",
-        "DevAdmin": "0xAcF0965F5140fDD0DDf1DD3248De3b81a5bab04c"
+        "DevAdmin": "0x510fB346960c4991FFb493ecdDeF11b1D4fD0Da9"
     },
     "hardhat": {
         "DIMORegistry": "0x5FbDB2315678afecb367f032d93F642f64180aa3",

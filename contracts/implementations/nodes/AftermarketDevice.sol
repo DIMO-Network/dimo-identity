@@ -115,9 +115,6 @@ contract AftermarketDevice is
             ns.nodes[newNodeId].parentNode = manufacturerNode;
             ns.nodes[newNodeId].nodeType = nodeType;
 
-            _safeMint(msg.sender, newNodeId);
-            _setInfo(newNodeId, attributes, infos[i]);
-
             deviceAddress = addresses[i];
             require(
                 ads.deviceAddressToNodeId[deviceAddress] == 0,
@@ -126,6 +123,9 @@ contract AftermarketDevice is
 
             ads.deviceAddressToNodeId[deviceAddress] = newNodeId;
             ads.nodeIdToDeviceAddress[newNodeId] = deviceAddress;
+
+            _safeMint(msg.sender, newNodeId);
+            _setInfo(newNodeId, attributes, infos[i]);
 
             emit AftermarketDeviceNodeMinted(
                 nodeType,

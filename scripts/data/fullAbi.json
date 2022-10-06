@@ -595,6 +595,25 @@
             {
                 "indexed": true,
                 "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "AftermarketDeviceClaimed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
                 "name": "nodeType",
                 "type": "uint256"
             },
@@ -611,26 +630,7 @@
                 "type": "address"
             }
         ],
-        "name": "AftermarkedDeviceNodeMinted",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "aftermarketDeviceNode",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            }
-        ],
-        "name": "AftermarketDeviceClaimed",
+        "name": "AftermarketDeviceNodeMinted",
         "type": "event"
     },
     {

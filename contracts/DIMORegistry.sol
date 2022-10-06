@@ -106,7 +106,7 @@ contract DIMORegistry is ERC721, AccessControlInternal {
         emit ModuleAdded(implementation, selectors);
     }
 
-    /// @notice Adds a new module and supported functions
+    /// @notice Removes a new module and supported functions
     /// @dev function selector should not exist
     /// @param implementation implementation address
     /// @param selectors function signatures
@@ -142,7 +142,7 @@ contract DIMORegistry is ERC721, AccessControlInternal {
         s.selectorsHash[implementation] = hash;
     }
 
-    /// @notice Adds a new module and supported functions
+    /// @notice Removes a new module and supported functions
     /// @dev function selector should not exist
     /// @param implementation implementation address
     /// @param selectors function signatures
@@ -159,9 +159,10 @@ contract DIMORegistry is ERC721, AccessControlInternal {
         for (uint256 i = 0; i < selectors.length; i++) {
             require(
                 s.implementations[selectors[i]] == implementation,
-                "Unregistered selector"
+                "Selector registered in another module"
             );
             s.implementations[selectors[i]] = address(0);
         }
+        s.selectorsHash[implementation] = 0x0;
     }
 }

@@ -57,6 +57,7 @@ contract Manufacturer is
     {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
+        require(_controller != address(0), "Non zero address");
         require(
             !s.controllers[_controller].isController,
             "Already a controller"
@@ -71,7 +72,7 @@ contract Manufacturer is
 
     /// @notice Mints manufacturers in batch
     /// @dev Caller must be an admin
-    /// @dev It is assumed the 'name' attribute is whitelisted in advance
+    /// @dev It is assumed the 'Name' attribute is whitelisted in advance
     /// @param owner The address of the new owner
     /// @param names List of manufacturer names
     function mintManufacturerBatch(address owner, string[] calldata names)
@@ -89,10 +90,10 @@ contract Manufacturer is
         for (uint256 i = 0; i < names.length; i++) {
             newNodeId = ++ns.currentIndex;
 
-            _safeMint(owner, newNodeId);
-
             ns.nodes[newNodeId].nodeType = nodeType;
             ns.nodes[newNodeId].info["Name"] = names[i];
+
+            _safeMint(owner, newNodeId);
 
             emit NodeMinted(nodeType, newNodeId);
         }
@@ -117,11 +118,10 @@ contract Manufacturer is
         uint256 newNodeId = ++ns.currentIndex;
         uint256 nodeType = s.nodeType;
 
-        _safeMint(owner, newNodeId);
-
         s.controllers[owner].manufacturerMinted = true;
         ns.nodes[newNodeId].nodeType = nodeType;
 
+        _safeMint(owner, newNodeId);
         _setInfo(newNodeId, attributes, infos);
 
         emit NodeMinted(nodeType, newNodeId);

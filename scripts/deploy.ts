@@ -94,14 +94,14 @@ async function addModules(deployer: SignerWithAddress) {
     contractAddresses[C.networkName].DIMORegistry
   );
 
-  const instances = Object.keys(contractAddresses[C.networkName])
-    .filter((contractName) => contractName !== 'DIMORegistry')
-    .map((contractName) => {
+  const instances = Object.keys(contractAddresses[C.networkName]).map(
+    (contractName) => {
       return {
         name: contractName,
         implementation: contractAddresses[C.networkName][contractName]
       };
-    });
+    }
+  );
 
   console.log('\n----- Adding modules -----\n');
 

@@ -52,7 +52,8 @@ describe('AftermarketDevice', function () {
     user1,
     user2,
     adAddress1,
-    adAddress2
+    adAddress2,
+    notMintedAd
   ] = provider.getWallets();
 
   before(async () => {
@@ -1204,6 +1205,36 @@ describe('AftermarketDevice', function () {
           await nodesInstance.getInfo(3, C.mockAftermarketDeviceAttribute2)
         ).to.be.equal(C.mockAftermarketDeviceInfo2);
       });
+    });
+  });
+
+  describe('getAftermarketDeviceIdByAddress', () => {
+    beforeEach(async () => {
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          [adAddress1.address, adAddress2.address],
+          C.mockAftermarketDeviceAttributes,
+          C.mockAftermarketDeviceMultipleInfos
+        );
+    });
+
+    it('Should return 0 if the queried address is not associated with any minted device', async () => {
+      const tokenId =
+        await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+          notMintedAd.address
+        );
+
+      expect(tokenId).to.equal(0);
+    });
+    it('Should return the correct token Id', async () => {
+      const tokenId =
+        await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+          adAddress1.address
+        );
+
+      expect(tokenId).to.equal(2);
     });
   });
 });

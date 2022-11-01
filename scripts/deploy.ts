@@ -244,23 +244,23 @@ async function setup(deployer: SignerWithAddress) {
   console.log('\n----- Attributes added -----');
 }
 
-async function grant(deployer: SignerWithAddress) {
-  const kms: string = C.KmsAddress[C.networkName];
-
+async function grantRole(
+  deployer: SignerWithAddress,
+  role: string,
+  address: string
+) {
   const accessControlInstance: AccessControl = await ethers.getContractAt(
     'AccessControl',
     contractAddresses[C.networkName].DIMORegistry
   );
 
-  console.log(`\n----- Granting admin role to ${kms} -----\n`);
+  console.log(`\n----- Granting ${role} role to ${address} -----\n`);
 
   await (
-    await accessControlInstance
-      .connect(deployer)
-      .grantRole(C.DEFAULT_ADMIN_ROLE, kms)
+    await accessControlInstance.connect(deployer).grantRole(role, address)
   ).wait();
 
-  console.log(`\n----- Admin role granted to ${kms} -----\n`);
+  console.log(`\n----- ${role} role granted to ${address} -----\n`);
 }
 
 async function mintBatch(deployer: SignerWithAddress) {
@@ -289,6 +289,7 @@ async function mintBatch(deployer: SignerWithAddress) {
 
 async function main() {
   const [deployer] = await ethers.getSigners();
+  const kms: string = C.KmsAddress[C.networkName];
 
   const instances = await deploy(deployer);
 
@@ -296,7 +297,7 @@ async function main() {
 
   await addModules(deployer);
   await setup(deployer);
-  await grant(deployer);
+  await grantRole(deployer, C.DEFAULT_ADMIN_ROLE, kms);
   await mintBatch(deployer);
 }
 

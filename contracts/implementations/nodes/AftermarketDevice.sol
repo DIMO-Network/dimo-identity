@@ -261,6 +261,19 @@ contract AftermarketDevice is
         _setInfo(nodeId, attributes, infos);
     }
 
+    /// @notice Gets the AD Id by the device address
+    /// @dev If the device is not minted it will return 0
+    /// @param addr Address associated with the aftermarket device
+    function getAftermarketDeviceIdByAddress(address addr)
+        external
+        view
+        returns (uint256 nodeId)
+    {
+        nodeId = AftermarketDeviceStorage.getStorage().deviceAddressToNodeId[
+            addr
+        ];
+    }
+
     // ***** PRIVATE FUNCTIONS ***** //
 
     /// @dev Internal function to add infos to node

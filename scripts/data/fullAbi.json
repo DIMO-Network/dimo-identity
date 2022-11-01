@@ -740,6 +740,25 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "getAftermarketDeviceIdByAddress",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "nodeId",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256",
                 "name": "manufacturerNode",
                 "type": "uint256"
@@ -776,11 +795,6 @@
                 "internalType": "uint256",
                 "name": "vehicleNode",
                 "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
             },
             {
                 "internalType": "bytes",

@@ -45,4 +45,10 @@ contract AdLicenseValidator is AccessControlInternal {
     {
         AdLicenseValidatorStorage.getStorage().adMintCost = _adMintCost;
     }
+
+    /// @notice Gets the Aftermarket Device mint cost
+    /// @return adMintCost The cost to mint an Aftermarket Device
+    function getAdMintCost() external view returns (uint256 adMintCost) {
+        adMintCost = AdLicenseValidatorStorage.getStorage().adMintCost;
+    }
 }

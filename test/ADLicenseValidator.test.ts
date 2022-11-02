@@ -101,4 +101,16 @@ describe('AdLicenseValidator', function () {
       );
     });
   });
+
+  describe('getAdMintCost', () => {
+    it('Should correctly return the Aftermarket Device mint cost', async () => {
+      await adLicenseValidatorInstance
+        .connect(admin)
+        .setAdMintCost(C.adMintCost);
+
+      const adMintCost = await adLicenseValidatorInstance.getAdMintCost();
+
+      expect(adMintCost).to.equal(C.adMintCost);
+    });
+  });
 });

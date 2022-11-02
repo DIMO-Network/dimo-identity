@@ -538,6 +538,19 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "getAdMintCost",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "adMintCost",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint256",

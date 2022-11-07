@@ -22,9 +22,14 @@ contract ERC721nftBase is ERC721, ERC721Burnable, AccessControl {
         _grantRole(BURNER_ROLE, msg.sender);
     }
 
-    function safeMint(address to) public virtual onlyRole(MINTER_ROLE) {
-        uint256 tokenId = _tokenIdCounter.current();
+    function safeMint(address to)
+        public
+        virtual
+        onlyRole(MINTER_ROLE)
+        returns (uint256 tokenId)
+    {
         _tokenIdCounter.increment();
+        tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
     }
 

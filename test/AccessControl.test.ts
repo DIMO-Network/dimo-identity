@@ -20,7 +20,7 @@ describe('AccessControl', async function () {
     [, accessControlInstance] = await initialize(
       admin1,
       [C.name, C.symbol, C.baseURI],
-      'AccessControl'
+      './contracts/access/AccessControl.sol:AccessControl'
     );
   });
 

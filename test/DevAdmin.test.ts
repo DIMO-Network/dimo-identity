@@ -69,7 +69,7 @@ describe('DevAdmin', function () {
       admin,
       [C.name, C.symbol, C.baseURI],
       'Eip712Checker',
-      'AccessControl',
+      './contracts/access/AccessControl.sol:AccessControl',
       'Manufacturer',
       'Vehicle',
       'AftermarketDevice',

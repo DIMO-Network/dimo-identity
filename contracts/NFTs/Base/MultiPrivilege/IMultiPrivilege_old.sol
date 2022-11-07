@@ -1,14 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-interface IMultiPrivilege {
-    event PrivilegeCreated(
-        uint256 privilegeId,
-        bool enabled,
-        string decription
-    );
-    event PrivilegeEnabled(uint256 privilegeId);
-    event PrivilegeDisabled(uint256 privilegeId);
+interface IMultiPrivilegeOld {
     event PrivilegeAssigned(
         uint256 tokenId,
         uint256 privId,
@@ -16,27 +9,33 @@ interface IMultiPrivilege {
         uint256 expires
     );
     event PrivilegeRevoked(
-        uint256 tokenId,
-        uint256 privId,
+        uint256 indexed tokenId,
+        uint256 indexed privId,
         address indexed user
     );
+    event PrivilegeTransfer(
+        uint256 tokenId,
+        uint256 privId,
+        address indexed from,
+        address indexed to
+    );
+    event PrivilegeTotalChanged(uint256 newTotal, uint256 oldTotal);
 
-    function assignPrivilege(
+    function setPrivilege(
         uint256 tokenId,
         uint256 privId,
         address user,
         uint256 expires
     ) external;
 
+    function privilegeExpires(uint256 tokenId, uint256 privId)
+        external
+        view
+        returns (uint256);
+
     function hasPrivilege(
         uint256 tokenId,
         uint256 privId,
         address user
     ) external view returns (bool);
-
-    function privilegeExpiresAt(
-        uint256 tokenId,
-        uint256 privId,
-        address user
-    ) external view returns (uint256);
 }

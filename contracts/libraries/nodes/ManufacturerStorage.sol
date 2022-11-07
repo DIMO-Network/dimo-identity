@@ -15,7 +15,8 @@ library ManufacturerStorage {
     }
 
     struct Storage {
-        uint256 nodeType;
+        uint256 nodeType; // TODO To be removed when is working
+        address nftProxyAddress;
         // [Controller address] => is controller, has minted manufacturer
         mapping(address => Controller) controllers;
         // Allowed node attribute

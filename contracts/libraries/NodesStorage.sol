@@ -6,14 +6,17 @@ library NodesStorage {
         keccak256("DIMORegistry.nodes.storage");
 
     struct Node {
-        uint256 nodeType;
+        uint256 nodeType; // TODO To be removed when everything is working
         uint256 parentNode;
         mapping(string => string) info;
     }
 
     struct Storage {
         // [Node id] => Node info
-        mapping(uint256 => Node) nodes;
+        // mapping(uint256 => Node) nodes;
+        // // [Nft proxy address] => [Token id] => Node info
+        mapping(address => mapping(uint256 => Node)) nodes2;
+        mapping(uint256 => Node) nodes; // TODO To be removed when everything is working
         uint256 currentIndex;
     }
 

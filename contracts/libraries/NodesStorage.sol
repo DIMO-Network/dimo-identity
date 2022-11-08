@@ -6,7 +6,9 @@ library NodesStorage {
         keccak256("DIMORegistry.nodes.storage");
 
     struct Node {
+        // TODO add info to the parent node type
         uint256 nodeType; // TODO To be removed when everything is working
+        address nftProxyAddress; // TODO Redundant ?
         uint256 parentNode;
         mapping(string => string) info;
     }
@@ -17,7 +19,7 @@ library NodesStorage {
         // // [Nft proxy address] => [Token id] => Node info
         mapping(address => mapping(uint256 => Node)) nodes2;
         mapping(uint256 => Node) nodes; // TODO To be removed when everything is working
-        uint256 currentIndex;
+        uint256 currentIndex; // TODO To be removed when everything is working
     }
 
     /* solhint-disable no-inline-assembly */

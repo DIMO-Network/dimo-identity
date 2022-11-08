@@ -1,4 +1,5 @@
 import { ethers } from 'hardhat';
+import { AttributeInfoPair } from '../types';
 
 // Node type
 export const manufacturerNodeType = ethers.utils.toUtf8Bytes('Manufacturer');
@@ -27,8 +28,20 @@ export const mockManufacturerNames = [
 ];
 export const mockManufacturerInfo1 = 'mockManufacturerInfo1';
 export const mockManufacturerInfo2 = 'mockManufacturerInfo2';
+export const mockManufacturerInfo3 = 'mockManufacturerInfo3';
 export const mockManufacturerInfos = [
   mockManufacturerInfo1,
   mockManufacturerInfo2
 ];
 export const mockManufacturerInfosWrongSize = [mockManufacturerInfo1];
+
+// TODO New stuff here. Remove unecessary constants above
+export const mockManufacturerAttributeInfoPairs: AttributeInfoPair[] = [
+  { attribute: mockManufacturerAttribute1, info: mockManufacturerInfo1 },
+  { attribute: mockManufacturerAttribute2, info: mockManufacturerInfo2 }
+];
+export const mockManufacturerAttributeInfoPairsNotWhitelisted: AttributeInfoPair[] =
+  [
+    { attribute: mockManufacturerAttribute1, info: mockManufacturerInfo1 },
+    { attribute: mockManufacturerAttribute3, info: mockManufacturerInfo3 }
+  ];

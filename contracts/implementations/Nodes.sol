@@ -4,6 +4,9 @@ pragma solidity ^0.8.13;
 import "../libraries/NodesStorage.sol";
 
 contract Nodes {
+    // TODO Do we need this?
+    // function registerNode() external {}
+
     // TODO To be removed when everything is working
     /// @notice Gets the node type of a node
     /// @param tokenId the id associated to the node

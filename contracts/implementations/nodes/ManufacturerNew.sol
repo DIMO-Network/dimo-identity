@@ -15,16 +15,21 @@ contract ManufacturerNew is AccessControlInternal {
     event ControllerSet(address indexed controller);
     event ManufacturerNodeMinted(uint256 tokenId);
 
+    // TODO Move struct to a shared contract
+    struct AttributeInfoPair {
+        string attribute;
+        string info;
+    }
+
     // ***** Admin management ***** //
 
+    // TODO Documentation
     function setManufacturerNftProxyAddress(address addr)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         require(addr != address(0), "Non zero address");
-        ManufacturerStorage.Storage storage s = ManufacturerStorage
-            .getStorage();
-        s.nftProxyAddress = addr;
+        ManufacturerStorage.getStorage().nftProxyAddress = addr;
 
         emit ManufacturerNftProxySet(addr);
     }
@@ -98,12 +103,10 @@ contract ManufacturerNew is AccessControlInternal {
     /// @notice Mints a manufacturer
     /// @dev Caller must be an admin
     /// @param owner The address of the new owner
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param attrInfoPairList List of attribute-info pairs to be added
     function mintManufacturer(
         address owner,
-        string[] calldata attributes,
-        string[] calldata infos
+        AttributeInfoPair[] calldata attrInfoPairList
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
@@ -111,30 +114,28 @@ contract ManufacturerNew is AccessControlInternal {
         s.controllers[owner].isController = true;
 
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        uint256 newNodeId = ++ns.currentIndex;
+        uint256 newTokenId = ++ns.currentIndex;
         address nftProxyAddress = s.nftProxyAddress;
 
         s.controllers[owner].manufacturerMinted = true;
 
-        newNodeId = INFT(nftProxyAddress).safeMint(owner);
-        _setInfo(newNodeId, attributes, infos);
+        newTokenId = INFT(nftProxyAddress).safeMint(owner);
+        _setInfo(newTokenId, attrInfoPairList);
 
-        emit ManufacturerNodeMinted(newNodeId);
+        emit ManufacturerNodeMinted(newTokenId);
     }
 
     /// @notice Add infos to node
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param nodeId Node id where the info will be added
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param tokenId Node id where the info will be added
+    /// @param attrInfoList List of attribute-info pairs to be added
     function setManufacturerInfo(
-        uint256 nodeId,
-        string[] calldata attributes,
-        string[] calldata infos
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfoList
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // TODO Check nft id ?
-        _setInfo(nodeId, attributes, infos);
+        _setInfo(tokenId, attrInfoList);
     }
 
     /// @notice Verify if an address is a controller
@@ -168,27 +169,28 @@ contract ManufacturerNew is AccessControlInternal {
     /// @dev Internal function to add infos to node
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param nodeId Node id where the info will be added
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param tokenId Node id where the info will be added
+    /// @param attrInfoPairList List of attribute-info pairs to be added
     function _setInfo(
-        uint256 nodeId,
-        string[] calldata attributes,
-        string[] calldata infos
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfoPairList
     ) private {
-        require(attributes.length == infos.length, "Same length");
-
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         address nftProxyAddress = s.nftProxyAddress;
 
-        for (uint256 i = 0; i < attributes.length; i++) {
+        for (uint256 i = 0; i < attrInfoPairList.length; i++) {
             require(
-                AttributeSet.exists(s.whitelistedAttributes, attributes[i]),
+                AttributeSet.exists(
+                    s.whitelistedAttributes,
+                    attrInfoPairList[i].attribute
+                ),
                 "Not whitelisted"
             );
-            ns.nodes2[nftProxyAddress][nodeId].info[attributes[i]] = infos[i];
+            ns.nodes2[nftProxyAddress][tokenId].info[
+                attrInfoPairList[i].attribute
+            ] = attrInfoPairList[i].info;
         }
     }
 }

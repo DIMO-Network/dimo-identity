@@ -11,6 +11,11 @@ export type TypedData = {
   message: Record<string, unknown>
 };
 
+export type AttributeInfoPair = {
+  attribute: string,
+  info: string
+};
+
 export interface ContractAddressesByNetwork {
   [index: string]: {
     [index: string]: string

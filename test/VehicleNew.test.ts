@@ -628,7 +628,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(nonAdmin)
-            .setVehicleInfo(2, C.mockVehicleAttributeInfoPairs)
+            .setVehicleInfo(1, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
             C.DEFAULT_ADMIN_ROLE
@@ -647,16 +647,18 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .setVehicleInfo(2, C.mockVehicleAttributeInfoPairsNotWhitelisted)
+            .setVehicleInfo(1, C.mockVehicleAttributeInfoPairsNotWhitelisted)
         ).to.be.revertedWith('Not whitelisted');
       });
     });
 
     context('State change', () => {
       it('Should correctly set infos', async () => {
-        await vehicleInstance
-          .connect(admin)
-          .setVehicleInfo(2, C.mockVehicleAttributeInfoPairs);
+        const localNewAttributeInfoPairs = JSON.parse(
+          JSON.stringify(C.mockVehicleAttributeInfoPairs)
+        );
+        localNewAttributeInfoPairs[0].info = 'New Info 0';
+        localNewAttributeInfoPairs[1].info = 'New Info 1';
 
         expect(
           await nodesInstance.getInfo2(
@@ -672,6 +674,25 @@ describe('Vehicle', function () {
             C.mockVehicleAttribute2
           )
         ).to.be.equal(C.mockVehicleInfo2);
+
+        await vehicleInstance
+          .connect(admin)
+          .setVehicleInfo(1, localNewAttributeInfoPairs);
+
+        expect(
+          await nodesInstance.getInfo2(
+            vehicleNftInstance.address,
+            1,
+            C.mockVehicleAttribute1
+          )
+        ).to.be.equal(localNewAttributeInfoPairs[0].info);
+        expect(
+          await nodesInstance.getInfo2(
+            vehicleNftInstance.address,
+            1,
+            C.mockVehicleAttribute2
+          )
+        ).to.be.equal(localNewAttributeInfoPairs[1].info);
       });
     });
   });

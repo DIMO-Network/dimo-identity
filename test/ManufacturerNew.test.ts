@@ -487,28 +487,49 @@ describe('ManufacturerNew', async function () {
         ).to.be.revertedWith('Not whitelisted');
       });
     });
-  });
 
-  context('State change', () => {
-    it('Should correctly set infos', async () => {
-      await manufacturerInstance
-        .connect(admin)
-        .setManufacturerInfo(1, C.mockManufacturerAttributeInfoPairs);
+    context('State change', () => {
+      it('Should correctly set infos', async () => {
+        const localNewAttributeInfoPairs = JSON.parse(
+          JSON.stringify(C.mockManufacturerAttributeInfoPairs)
+        );
+        localNewAttributeInfoPairs[0].info = 'New Info 0';
+        localNewAttributeInfoPairs[1].info = 'New Info 1';
 
-      expect(
-        await nodesInstance.getInfo2(
-          manufacturerNftInstance.address,
-          1,
-          C.mockManufacturerAttribute1
-        )
-      ).to.be.equal(C.mockManufacturerInfo1);
-      expect(
-        await nodesInstance.getInfo2(
-          manufacturerNftInstance.address,
-          1,
-          C.mockManufacturerAttribute2
-        )
-      ).to.be.equal(C.mockManufacturerInfo2);
+        expect(
+          await nodesInstance.getInfo2(
+            manufacturerNftInstance.address,
+            1,
+            C.mockManufacturerAttribute1
+          )
+        ).to.be.equal(C.mockManufacturerInfo1);
+        expect(
+          await nodesInstance.getInfo2(
+            manufacturerNftInstance.address,
+            1,
+            C.mockManufacturerAttribute2
+          )
+        ).to.be.equal(C.mockManufacturerInfo2);
+
+        await manufacturerInstance
+          .connect(admin)
+          .setManufacturerInfo(1, localNewAttributeInfoPairs);
+
+        expect(
+          await nodesInstance.getInfo2(
+            manufacturerNftInstance.address,
+            1,
+            C.mockManufacturerAttribute1
+          )
+        ).to.be.equal(localNewAttributeInfoPairs[0].info);
+        expect(
+          await nodesInstance.getInfo2(
+            manufacturerNftInstance.address,
+            1,
+            C.mockManufacturerAttribute2
+          )
+        ).to.be.equal(localNewAttributeInfoPairs[1].info);
+      });
     });
   });
 });

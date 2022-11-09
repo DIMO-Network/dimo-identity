@@ -109,7 +109,7 @@ contract VehicleNew is ERC721MetadataInternal, AccessControlInternal {
         bytes calldata signature
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        // VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
         // TODO Check if manufacturerNode is a manufacturer ?
         // require(

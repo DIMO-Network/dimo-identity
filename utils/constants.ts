@@ -7,4 +7,5 @@ export * from './constants/ManufacturerNft';
 export * from './constants/Vehicle';
 export * from './constants/VehicleNft';
 export * from './constants/AftermarketDevice';
+export * from './constants/AftermarketDeviceNft';
 export * from './constants/MultiPrivilege';

@@ -16,6 +16,11 @@ export type AttributeInfoPair = {
   info: string
 };
 
+export type AftermarketDeviceInfos = {
+  addr: string,
+  attrInfoPairs: AttributeInfoPair[]
+};
+
 export interface ContractAddressesByNetwork {
   [index: string]: {
     [index: string]: string

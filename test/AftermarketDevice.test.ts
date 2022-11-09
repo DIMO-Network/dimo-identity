@@ -209,28 +209,33 @@ describe('AftermarketDevice', function () {
   });
 
   describe('addAftermarketDeviceAttribute', () => {
-    it('Should revert if caller does not have admin role', async () => {
-      await expect(
-        aftermarketDeviceInstance
-          .connect(nonAdmin)
-          .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute1)
-      ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
-        }`
-      );
-    });
-    it('Should emit AttributeAdded event with correct params', async () => {
-      await expect(
-        aftermarketDeviceInstance
-          .connect(admin)
-          .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute3)
-      )
-        .to.emit(aftermarketDeviceInstance, 'AttributeAdded')
-        .withArgs(
-          C.aftermarketDeviceNodeTypeId,
-          C.mockAftermarketDeviceAttribute3
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(nonAdmin)
+            .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute1)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
+          }`
         );
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AttributeAdded event with correct params', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute3)
+        )
+          .to.emit(aftermarketDeviceInstance, 'AttributeAdded')
+          .withArgs(
+            C.aftermarketDeviceNodeTypeId,
+            C.mockAftermarketDeviceAttribute3
+          );
+      });
     });
   });
 

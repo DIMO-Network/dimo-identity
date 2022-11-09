@@ -12,6 +12,7 @@ contract ERC721nftBase is ERC721, ERC721Burnable, AccessControl {
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+    bytes32 public constant TRANSFERER_ROLE = keccak256("TRANSFERER_ROLE");
     Counters.Counter private _tokenIdCounter;
 
     constructor(string memory name_, string memory symbol_)
@@ -20,6 +21,7 @@ contract ERC721nftBase is ERC721, ERC721Burnable, AccessControl {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(BURNER_ROLE, msg.sender);
+        _grantRole(TRANSFERER_ROLE, msg.sender);
     }
 
     function safeMint(address to)
@@ -42,29 +44,11 @@ contract ERC721nftBase is ERC721, ERC721Burnable, AccessControl {
         super.burn(tokenId);
     }
 
-    function approve(address to, uint256 tokenId)
-        public
-        virtual
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        super.approve(to, tokenId);
-    }
-
-    function setApprovalForAll(address operator, bool approved)
-        public
-        virtual
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        super.setApprovalForAll(operator, approved);
-    }
-
     function transferFrom(
         address from,
         address to,
         uint256 tokenId
-    ) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) public virtual override onlyRole(TRANSFERER_ROLE) {
         super.transferFrom(from, to, tokenId);
     }
 
@@ -72,7 +56,7 @@ contract ERC721nftBase is ERC721, ERC721Burnable, AccessControl {
         address from,
         address to,
         uint256 tokenId
-    ) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) public virtual override onlyRole(TRANSFERER_ROLE) {
         super.safeTransferFrom(from, to, tokenId);
     }
 
@@ -81,7 +65,7 @@ contract ERC721nftBase is ERC721, ERC721Burnable, AccessControl {
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) public virtual override onlyRole(TRANSFERER_ROLE) {
         super.safeTransferFrom(from, to, tokenId, _data);
     }
 

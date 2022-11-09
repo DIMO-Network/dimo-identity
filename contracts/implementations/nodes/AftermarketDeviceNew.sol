@@ -90,65 +90,6 @@ contract AftermarketDeviceNew is
 
     // ***** Interaction with nodes *****//
 
-    // /// @notice Mints aftermarket devices in batch
-    // /// @dev Caller must have the manufacturer role
-    // /// @dev The number of devices is defined by the size of 'infos'
-    // /// @param manufacturerNode Parent manufacturer node
-    // /// @param addresses List of addresses associated with the aftermarket devices
-    // /// @param attributes List of attributes to be added
-    // /// @param infos List of infos matching the attributes param
-    // function mintAftermarketDeviceByManufacturerBatch(
-    //     uint256 manufacturerNode,
-    //     address[] calldata addresses,
-    //     string[] calldata attributes,
-    //     string[][] calldata infos
-    // ) external onlyRole(Roles.MANUFACTURER_ROLE) {
-    //     NodesStorage.Storage storage ns = NodesStorage.getStorage();
-    //     ManufacturerStorage.Storage storage ms = ManufacturerStorage
-    //         .getStorage();
-    //     AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-    //         .getStorage();
-
-    //     require(
-    //         ns.nodes[manufacturerNode].nodeType == ms.nodeType,
-    //         "Invalid parent node"
-    //     );
-    //     require(addresses.length == infos.length, "Same length");
-
-    //     uint256 newNodeId;
-    //     uint256 nodeType = ads.nodeType;
-    //     address deviceAddress;
-
-    //     for (uint256 i = 0; i < addresses.length; i++) {
-    //         newNodeId = ++ns.currentIndex;
-
-    //         ns.nodes[newNodeId].parentNode = manufacturerNode;
-    //         ns.nodes[newNodeId].nodeType = nodeType;
-
-    //         deviceAddress = addresses[i];
-    //         require(
-    //             ads.deviceAddressToNodeId[deviceAddress] == 0,
-    //             "Device address already registered"
-    //         );
-
-    //         ads.deviceAddressToNodeId[deviceAddress] = newNodeId;
-    //         ads.nodeIdToDeviceAddress[newNodeId] = deviceAddress;
-
-    //         _safeMint(msg.sender, newNodeId);
-    //         _setInfo(newNodeId, attributes, infos[i]);
-
-    //         emit AftermarketDeviceNodeMinted(
-    //             nodeType,
-    //             newNodeId,
-    //             deviceAddress
-    //         );
-    //     }
-
-    //     // Validate request and transfer funds to foundation
-    //     // This transfer is at the end of the function to prevent reentrancy
-    //     _validateMintRequest(msg.sender, infos.length);
-    // }
-
     /// @notice Mints aftermarket devices in batch
     /// @dev Caller must have the manufacturer role
     /// @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
@@ -157,11 +98,15 @@ contract AftermarketDeviceNew is
         AftermarketDeviceInfos[] calldata adInfos
     ) external onlyRole(Roles.MANUFACTURER_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        ManufacturerStorage.Storage storage ms = ManufacturerStorage
-            .getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         uint256 devicesAmount = adInfos.length;
+        INFT adNftProxy = INFT(ads.nftProxyAddress);
+
+        require(
+            adNftProxy.isApprovedForAll(msg.sender, address(this)),
+            "Registry must be approved for all"
+        );
 
         // TODO Check if manufacturerNode is a manufacturer ?
         // require(
@@ -173,7 +118,7 @@ contract AftermarketDeviceNew is
         address deviceAddress;
 
         for (uint256 i = 0; i < devicesAmount; i++) {
-            newTokenId = INFT(ads.nftProxyAddress).safeMint(msg.sender);
+            newTokenId = adNftProxy.safeMint(msg.sender);
 
             ns.nodes[newTokenId].parentNode = manufacturerNode;
 
@@ -196,107 +141,123 @@ contract AftermarketDeviceNew is
         _validateMintRequest(msg.sender, devicesAmount);
     }
 
-    // /// @notice Claims the ownership of an aftermarket device through a metatransaction
-    // /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
-    // /// @dev Caller must have the admin role
-    // /// @param aftermarketDeviceNode Aftermarket device node id
-    // /// @param owner The address of the new owner
-    // /// @param ownerSig User's signature hash
-    // /// @param aftermarketDeviceSig Aftermarket Device's signature hash
-    // function claimAftermarketDeviceSign(
-    //     uint256 aftermarketDeviceNode,
-    //     address owner,
-    //     bytes calldata ownerSig,
-    //     bytes calldata aftermarketDeviceSig
-    // ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    //     AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-    //         .getStorage();
-    //     bytes32 message = keccak256(
-    //         abi.encode(CLAIM_TYPEHASH, aftermarketDeviceNode, owner)
-    //     );
-    //     address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
-    //         aftermarketDeviceNode
-    //     ];
+    /// @notice Claims the ownership of an aftermarket device through a metatransaction
+    /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
+    /// @dev Caller must have the admin role
+    /// @dev This contract must be approved to spend the tokens in advance
+    /// @param aftermarketDeviceNode Aftermarket device node id
+    /// @param owner The address of the new owner
+    /// @param ownerSig User's signature hash
+    /// @param aftermarketDeviceSig Aftermarket Device's signature hash
+    function claimAftermarketDeviceSign(
+        uint256 aftermarketDeviceNode,
+        address owner,
+        bytes calldata ownerSig,
+        bytes calldata aftermarketDeviceSig
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        bytes32 message = keccak256(
+            abi.encode(CLAIM_TYPEHASH, aftermarketDeviceNode, owner)
+        );
+        address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
+            aftermarketDeviceNode
+        ];
+        INFT adNftProxy = INFT(ads.nftProxyAddress);
 
-    //     // TODO Check if aftermarketDeviceNode is valid ?
-    //     // require(
-    //     //     NodesStorage.getStorage().nodes[aftermarketDeviceNode].nodeType ==
-    //     //         AftermarketDeviceStorage.getStorage().nodeType,
-    //     //     "Invalid AD node"
-    //     // );
-    //     require(
-    //         MapperStorage.getStorage().links[aftermarketDeviceNode] == 0,
-    //         "Device already paired"
-    //     );
-    //     require(
-    //         Eip712CheckerInternal._verifySignature(owner, message, ownerSig),
-    //         "Invalid signature"
-    //     );
-    //     require(
-    //         Eip712CheckerInternal._verifySignature(
-    //             aftermarketDeviceAddress,
-    //             message,
-    //             aftermarketDeviceSig
-    //         ),
-    //         "Invalid signature"
-    //     );
+        // TODO Check if aftermarketDeviceNode is valid ?
+        // require(
+        //     NodesStorage.getStorage().nodes[aftermarketDeviceNode].nodeType ==
+        //         AftermarketDeviceStorage.getStorage().nodeType,
+        //     "Invalid AD node"
+        // );
+        require(
+            MapperStorage.getStorage().links2[ads.nftProxyAddress][
+                aftermarketDeviceNode
+            ] == 0,
+            "Device already paired"
+        );
+        require(
+            Eip712CheckerInternal._verifySignature(owner, message, ownerSig),
+            "Invalid signature"
+        );
+        require(
+            Eip712CheckerInternal._verifySignature(
+                aftermarketDeviceAddress,
+                message,
+                aftermarketDeviceSig
+            ),
+            "Invalid signature"
+        );
 
-    //     _safeTransfer(
-    //         _ownerOf(aftermarketDeviceNode),
-    //         owner,
-    //         aftermarketDeviceNode,
-    //         ""
-    //     );
+        adNftProxy.safeTransferFrom(
+            adNftProxy.ownerOf(aftermarketDeviceNode),
+            owner,
+            aftermarketDeviceNode
+        );
 
-    //     emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
-    // }
+        emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
+    }
 
-    // /// @notice Pairs an aftermarket device with a vehicle through a metatransaction
-    // /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
-    // /// @dev Caller must have the admin role
-    // /// @param aftermarketDeviceNode Aftermarket device node id
-    // /// @param vehicleNode Vehicle node id
-    // /// @param signature User's signature hash
-    // function pairAftermarketDeviceSign(
-    //     uint256 aftermarketDeviceNode,
-    //     uint256 vehicleNode,
-    //     bytes calldata signature
-    // ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    //     NodesStorage.Storage storage ns = NodesStorage.getStorage();
-    //     MapperStorage.Storage storage ms = MapperStorage.getStorage();
-    //     bytes32 message = keccak256(
-    //         abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
-    //     );
+    /// @notice Pairs an aftermarket device with a vehicle through a metatransaction
+    /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
+    /// @dev Caller must have the admin role
+    /// @param aftermarketDeviceNode Aftermarket device node id
+    /// @param vehicleNode Vehicle node id
+    /// @param signature User's signature hash
+    function pairAftermarketDeviceSign(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
+        bytes calldata signature
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        bytes32 message = keccak256(
+            abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
+        );
+        address vehicleNftProxyAddress = VehicleStorage
+            .getStorage()
+            .nftProxyAddress;
+        address adNftProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .nftProxyAddress;
 
-    //     require(
-    //         ns.nodes[aftermarketDeviceNode].nodeType ==
-    //             AftermarketDeviceStorage.getStorage().nodeType,
-    //         "Invalid AD node"
-    //     );
-    //     require(
-    //         ns.nodes[vehicleNode].nodeType ==
-    //             VehicleStorage.getStorage().nodeType,
-    //         "Invalid vehicle node"
-    //     );
+        // TODO Check node type?
+        // require(
+        //     ns.nodes[aftermarketDeviceNode].nodeType ==
+        //         AftermarketDeviceStorage.getStorage().nodeType,
+        //     "Invalid AD node"
+        // );
+        // require(
+        //     ns.nodes[vehicleNode].nodeType ==
+        //         VehicleStorage.getStorage().nodeType,
+        //     "Invalid vehicle node"
+        // );
 
-    //     address owner = _ownerOf(vehicleNode);
+        address owner = INFT(vehicleNftProxyAddress).ownerOf(vehicleNode);
 
-    //     require(
-    //         owner == _ownerOf(aftermarketDeviceNode),
-    //         "Owner of the nodes does not match"
-    //     );
-    //     require(ms.links[vehicleNode] == 0, "Vehicle already paired");
-    //     require(ms.links[aftermarketDeviceNode] == 0, "AD already paired");
-    //     require(
-    //         Eip712CheckerInternal._verifySignature(owner, message, signature),
-    //         "Invalid signature"
-    //     );
+        require(
+            owner == INFT(adNftProxyAddress).ownerOf(aftermarketDeviceNode),
+            "Owner of the nodes does not match"
+        );
+        require(
+            ms.links2[vehicleNftProxyAddress][vehicleNode] == 0,
+            "Vehicle already paired"
+        );
+        require(
+            ms.links2[adNftProxyAddress][aftermarketDeviceNode] == 0,
+            "AD already paired"
+        );
+        require(
+            Eip712CheckerInternal._verifySignature(owner, message, signature),
+            "Invalid signature"
+        );
 
-    //     ms.links[vehicleNode] = aftermarketDeviceNode;
-    //     ms.links[aftermarketDeviceNode] = vehicleNode;
+        ms.links2[vehicleNftProxyAddress][vehicleNode] = aftermarketDeviceNode;
+        ms.links2[adNftProxyAddress][aftermarketDeviceNode] = vehicleNode;
 
-    //     emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
-    // }
+        emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
+    }
 
     /// @notice Add infos to node
     /// @dev attributes and infos arrays length must match

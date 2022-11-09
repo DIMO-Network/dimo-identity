@@ -1,4 +1,5 @@
 export * from './constants/Misc';
+export * from './constants/BaseNft';
 export * from './constants/AccessControl';
 export * from './constants/Metadata';
 export * from './constants/eip712';

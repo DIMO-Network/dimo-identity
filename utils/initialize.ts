@@ -6,7 +6,6 @@ import { getSelectors } from '.';
 
 async function initialize(
   deployer: Wallet | SignerWithAddress,
-  constructorArgs: [string, string, string],
   ...contracts: string[]
 ): Promise<any[]> {
   const instances: any[] = [];
@@ -15,7 +14,7 @@ async function initialize(
   const DIMORegistry = await ethers.getContractFactory('DIMORegistry');
   const dimoRegistryImplementation = await DIMORegistry.connect(
     deployer
-  ).deploy(...constructorArgs);
+  ).deploy();
   await dimoRegistryImplementation.deployed();
 
   const dimoRegistry = await ethers.getContractAt(

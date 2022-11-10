@@ -21,7 +21,6 @@ describe('AdLicenseValidator', function () {
   before(async () => {
     [, adLicenseValidatorInstance] = await initialize(
       admin,
-      [C.name, C.symbol, C.baseURI],
       'AdLicenseValidator'
     );
 

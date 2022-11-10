@@ -7,8 +7,11 @@ import {
   AccessControl,
   Nodes,
   Manufacturer,
+  ManufacturerNft,
   Vehicle,
+  VehicleNft,
   AftermarketDevice,
+  AftermarketDeviceNft,
   AdLicenseValidator,
   Mapper,
   MockDimoToken,
@@ -41,6 +44,9 @@ describe('AftermarketDevice', function () {
   let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
   let mockLicenseInstance: MockLicense;
+  let manufacturerNftInstance: ManufacturerNft;
+  let vehicleNftInstance: VehicleNft;
+  let adNftInstance: AftermarketDeviceNft;
 
   const [
     admin,
@@ -56,6 +62,17 @@ describe('AftermarketDevice', function () {
     notMintedAd
   ] = provider.getWallets();
 
+  const mockAftermarketDeviceInfosList = JSON.parse(
+    JSON.stringify(C.mockAftermarketDeviceInfosList)
+  );
+  const mockAftermarketDeviceInfosListNotWhitelisted = JSON.parse(
+    JSON.stringify(C.mockAftermarketDeviceInfosListNotWhitelisted)
+  );
+  mockAftermarketDeviceInfosList[0].addr = adAddress1.address;
+  mockAftermarketDeviceInfosList[1].addr = adAddress2.address;
+  mockAftermarketDeviceInfosListNotWhitelisted[0].addr = adAddress1.address;
+  mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
+
   before(async () => {
     [
       dimoRegistryInstance,
@@ -69,7 +86,6 @@ describe('AftermarketDevice', function () {
       mapperInstance
     ] = await initialize(
       admin,
-      [C.name, C.symbol, C.baseURI],
       'Eip712Checker',
       './contracts/access/AccessControl.sol:AccessControl',
       'Nodes',
@@ -79,6 +95,58 @@ describe('AftermarketDevice', function () {
       'AdLicenseValidator',
       'Mapper'
     );
+
+    const ManufacturerNftFactory = await ethers.getContractFactory(
+      'ManufacturerNft'
+    );
+    const VehicleNftFactory = await ethers.getContractFactory('VehicleNft');
+    const AftermarketDeviceNftFactory = await ethers.getContractFactory(
+      'AftermarketDeviceNft'
+    );
+
+    manufacturerNftInstance = await ManufacturerNftFactory.connect(
+      admin
+    ).deploy(C.MANUFACTURER_NFT_NAME, C.MANUFACTURER_NFT_SYMBOL);
+    await manufacturerNftInstance.deployed();
+
+    vehicleNftInstance = await VehicleNftFactory.connect(admin).deploy(
+      C.VEHICLE_NFT_NAME,
+      C.VEHICLE_NFT_SYMBOL
+    );
+    await vehicleNftInstance.deployed();
+
+    adNftInstance = await AftermarketDeviceNftFactory.connect(admin).deploy(
+      C.AD_NFT_NAME,
+      C.AD_NFT_SYMBOL
+    );
+    await adNftInstance.deployed();
+
+    const MANUFACTURER_MINTER_ROLE =
+      await manufacturerNftInstance.MINTER_ROLE();
+    await manufacturerNftInstance
+      .connect(admin)
+      .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
+
+    const VEHICLE_MINTER_ROLE = await vehicleNftInstance.MINTER_ROLE();
+    await vehicleNftInstance
+      .connect(admin)
+      .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
+
+    const AD_MINTER_ROLE = await adNftInstance.MINTER_ROLE();
+    await adNftInstance
+      .connect(admin)
+      .grantRole(AD_MINTER_ROLE, dimoRegistryInstance.address);
+
+    // Set NFT Proxies
+    await manufacturerInstance
+      .connect(admin)
+      .setManufacturerNftProxyAddress(manufacturerNftInstance.address);
+    await vehicleInstance
+      .connect(admin)
+      .setVehicleNftProxyAddress(vehicleNftInstance.address);
+    await aftermarketDeviceInstance
+      .connect(admin)
+      .setAftermarketDeviceNftProxyAddress(adNftInstance.address);
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -116,15 +184,6 @@ describe('AftermarketDevice', function () {
     await adLicenseValidatorInstance.setLicense(mockLicenseInstance.address);
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
-    // Set node types
-    await manufacturerInstance
-      .connect(admin)
-      .setManufacturerNodeType(C.manufacturerNodeType);
-    await vehicleInstance.connect(admin).setVehicleNodeType(C.vehicleNodeType);
-    await aftermarketDeviceInstance
-      .connect(admin)
-      .setAftermarketDeviceNodeType(C.aftermarketDeviceNodeType);
-
     // Grant MANUFACTURER_ROLE to manufacturer
     await accessControlInstance
       .connect(admin)
@@ -154,15 +213,20 @@ describe('AftermarketDevice', function () {
       .connect(admin)
       .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute2);
 
+    // Mint Manufacturer Node
     await manufacturerInstance
       .connect(admin)
       .mintManufacturer(
         controller1.address,
-        C.mockManufacturerAttributes,
-        C.mockManufacturerInfos
+        C.mockManufacturerAttributeInfoPairs
       );
 
     await mockLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
+
+    // Grant Transferer role to DIMO Registry
+    await adNftInstance
+      .connect(admin)
+      .grantRole(C.NFT_TRANSFERER_ROLE, dimoRegistryInstance.address);
   });
 
   beforeEach(async () => {
@@ -171,41 +235,6 @@ describe('AftermarketDevice', function () {
 
   afterEach(async () => {
     await revertToSnapshot(snapshot);
-  });
-
-  describe('setAftermarketDeviceNodeType', () => {
-    context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(nonAdmin)
-            .setAftermarketDeviceNodeType(C.aftermarketDeviceNodeType)
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
-          }`
-        );
-      });
-      it('Should revert if node type is already set', async () => {
-        const [, , , localAftermarketDeviceInstance] = await initialize(
-          admin,
-          [C.name, C.symbol, C.baseURI],
-          'Manufacturer',
-          'Vehicle',
-          'AftermarketDevice'
-        );
-
-        await localAftermarketDeviceInstance
-          .connect(admin)
-          .setAftermarketDeviceNodeType(C.aftermarketDeviceNodeType);
-
-        await expect(
-          localAftermarketDeviceInstance
-            .connect(admin)
-            .setAftermarketDeviceNodeType(C.aftermarketDeviceNodeType)
-        ).to.be.revertedWith('Node type already set');
-      });
-    });
   });
 
   describe('addAftermarketDeviceAttribute', () => {
@@ -221,25 +250,35 @@ describe('AftermarketDevice', function () {
           }`
         );
       });
+      it('Should revert if attribute already exists', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute1)
+        ).to.be.revertedWith('Attribute already exists');
+      });
     });
 
     context('Events', () => {
-      it('Should emit AttributeAdded event with correct params', async () => {
+      it('Should emit AftermarketDeviceAttributeAdded event with correct params', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
             .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute3)
         )
-          .to.emit(aftermarketDeviceInstance, 'AttributeAdded')
-          .withArgs(
-            C.aftermarketDeviceNodeTypeId,
-            C.mockAftermarketDeviceAttribute3
-          );
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeAdded')
+          .withArgs(C.mockAftermarketDeviceAttribute3);
       });
     });
   });
 
   describe('mintAftermarketDeviceByManufacturerBatch', () => {
+    beforeEach(async () => {
+      await adNftInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
+    });
+
     context('Error handling', () => {
       it('Should revert if caller does not have manufacturer role', async () => {
         await expect(
@@ -247,9 +286,7 @@ describe('AftermarketDevice', function () {
             .connect(nonManufacturer)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
-              [adAddress1.address, adAddress2.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosList
             )
         ).to.be.revertedWith(
           `AccessControl: account ${nonManufacturer.address.toLowerCase()} is missing role ${
@@ -257,41 +294,30 @@ describe('AftermarketDevice', function () {
           }`
         );
       });
-      it('Should revert if parent node is not a Manufacturer', async () => {
+      // TODO Check manufacturer ID ?
+      it.skip('Should revert if parent node is not a Manufacturer', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               99,
-              [adAddress1.address, adAddress2.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosList
             )
         ).to.be.revertedWith('Invalid parent node');
       });
-      it('Should revert if addresses and infos array length does not match', async () => {
+      it('Should revert if DIMO Registry is not approved for all', async () => {
+        await adNftInstance
+          .connect(manufacturer1)
+          .setApprovalForAll(aftermarketDeviceInstance.address, false);
+
         await expect(
           aftermarketDeviceInstance
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
-              [adAddress1.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosList
             )
-        ).to.be.revertedWith('Same length');
-      });
-      it('Should revert if attributes and infos array length does not match', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              [adAddress1.address, adAddress2.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfosWrongSize
-            )
-        ).to.be.revertedWith('Same length');
+        ).to.be.revertedWith('Registry must be approved for all');
       });
       it('Should revert if manufacturer does not have a license', async () => {
         await mockLicenseInstance.setLicenseBalance(manufacturer1.address, 0);
@@ -301,13 +327,11 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
-              [adAddress1.address, adAddress2.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosList
             )
         ).to.be.revertedWith('Invalid license');
       });
-      it('Should revert if manufacturer does not have a enougth DIMO tokens', async () => {
+      it('Should revert if manufacturer does not have a enough DIMO tokens', async () => {
         await mockDimoTokenInstance
           .connect(manufacturer1)
           .burn(C.manufacturerDimoTokensAmount);
@@ -317,9 +341,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
-              [adAddress1.address, adAddress2.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosList
             )
         ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
       });
@@ -333,9 +355,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
-              [adAddress1.address, adAddress2.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosList
             )
         ).to.be.revertedWith('ERC20: insufficient allowance');
       });
@@ -345,73 +365,52 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
-              [adAddress1.address, adAddress2.address],
-              C.aftermarketDeviceAttributesNotWhitelisted,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosListNotWhitelisted
             )
         ).to.be.revertedWith('Not whitelisted');
       });
       it('Should revert if device address is already registered', async () => {
+        const localInfos = JSON.parse(
+          JSON.stringify(mockAftermarketDeviceInfosList)
+        );
+        localInfos[1].addr = adAddress1.address;
+
         await expect(
           aftermarketDeviceInstance
             .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              [adAddress1.address, adAddress1.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
-            )
+            .mintAftermarketDeviceByManufacturerBatch(1, localInfos)
         ).to.be.revertedWith('Device address already registered');
       });
     });
 
     context('State change', () => {
-      it('Should correctly set node type', async () => {
-        await aftermarketDeviceInstance
-          .connect(manufacturer1)
-          .mintAftermarketDeviceByManufacturerBatch(
-            1,
-            [adAddress1.address, adAddress2.address],
-            C.mockAftermarketDeviceAttributes,
-            C.mockAftermarketDeviceMultipleInfos
-          );
+      // TODO Fix parent node type
+      // it('Should correctly set parent node', async () => {
+      //   await aftermarketDeviceInstance
+      //     .connect(manufacturer1)
+      //     .mintAftermarketDeviceByManufacturerBatch(
+      //       1,
+      //       mockAftermarketDeviceInfosList
+      //     );
 
-        const nodeType1 = await nodesInstance.getNodeType(2);
-        const nodeType2 = await nodesInstance.getNodeType(3);
+      //   const parentNode1 = await nodesInstance.getParentNode(2);
+      //   const parentNode2 = await nodesInstance.getParentNode(3);
 
-        expect(nodeType1).to.equal(C.aftermarketDeviceNodeTypeId);
-        expect(nodeType2).to.equal(C.aftermarketDeviceNodeTypeId);
-      });
-      it('Should correctly set parent node', async () => {
-        await aftermarketDeviceInstance
-          .connect(manufacturer1)
-          .mintAftermarketDeviceByManufacturerBatch(
-            1,
-            [adAddress1.address, adAddress2.address],
-            C.mockAftermarketDeviceAttributes,
-            C.mockAftermarketDeviceMultipleInfos
-          );
-
-        const parentNode1 = await nodesInstance.getParentNode(2);
-        const parentNode2 = await nodesInstance.getParentNode(3);
-
-        expect(parentNode1).to.be.equal(1);
-        expect(parentNode2).to.be.equal(1);
-      });
+      //   expect(parentNode1).to.be.equal(1);
+      //   expect(parentNode2).to.be.equal(1);
+      // });
       it('Should correctly set nodes owner', async () => {
         await aftermarketDeviceInstance
           .connect(manufacturer1)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
-            [adAddress1.address, adAddress2.address],
-            C.mockAftermarketDeviceAttributes,
-            C.mockAftermarketDeviceMultipleInfos
+            mockAftermarketDeviceInfosList
           );
 
-        expect(await dimoRegistryInstance.ownerOf(2)).to.be.equal(
+        expect(await adNftInstance.ownerOf(1)).to.be.equal(
           manufacturer1.address
         );
-        expect(await dimoRegistryInstance.ownerOf(3)).to.be.equal(
+        expect(await adNftInstance.ownerOf(2)).to.be.equal(
           manufacturer1.address
         );
       });
@@ -420,29 +419,43 @@ describe('AftermarketDevice', function () {
           .connect(manufacturer1)
           .mintAftermarketDeviceByManufacturerBatch(
             1,
-            [adAddress1.address, adAddress2.address],
-            C.mockAftermarketDeviceAttributes,
-            C.mockAftermarketDeviceMultipleInfos
+            mockAftermarketDeviceInfosList
           );
 
         expect(
-          await nodesInstance.getInfo(2, C.mockAftermarketDeviceAttribute1)
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            1,
+            C.mockAftermarketDeviceAttribute1
+          )
         ).to.be.equal(C.mockAftermarketDeviceInfo1);
         expect(
-          await nodesInstance.getInfo(2, C.mockAftermarketDeviceAttribute2)
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            1,
+            C.mockAftermarketDeviceAttribute2
+          )
         ).to.be.equal(C.mockAftermarketDeviceInfo2);
         expect(
-          await nodesInstance.getInfo(3, C.mockAftermarketDeviceAttribute1)
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            2,
+            C.mockAftermarketDeviceAttribute1
+          )
         ).to.be.equal(C.mockAftermarketDeviceInfo1);
         expect(
-          await nodesInstance.getInfo(3, C.mockAftermarketDeviceAttribute2)
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            2,
+            C.mockAftermarketDeviceAttribute2
+          )
         ).to.be.equal(C.mockAftermarketDeviceInfo2);
       });
       // TODO
       it('Should correctly set device address', async () => {});
       it('Should correctly decrease the DIMO balance of the manufacturer', async () => {
         const balanceChange = C.adMintCost
-          .mul(C.mockAftermarketDeviceMultipleInfos.length)
+          .mul(C.mockAdAttributeInfoPairs.length)
           .mul(-1);
 
         await expect(() =>
@@ -450,9 +463,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
-              [adAddress1.address, adAddress2.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosList
             )
         ).changeTokenBalance(
           mockDimoTokenInstance,
@@ -462,7 +473,7 @@ describe('AftermarketDevice', function () {
       });
       it('Should correctly transfer the DIMO tokens to the foundation', async () => {
         const balanceChange = C.adMintCost.mul(
-          C.mockAftermarketDeviceMultipleInfos.length
+          C.mockAdAttributeInfoPairs.length
         );
 
         await expect(() =>
@@ -470,9 +481,7 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
-              [adAddress1.address, adAddress2.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosList
             )
         ).changeTokenBalance(mockDimoTokenInstance, foundation, balanceChange);
       });
@@ -485,15 +494,13 @@ describe('AftermarketDevice', function () {
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
-              [adAddress1.address, adAddress2.address],
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceMultipleInfos
+              mockAftermarketDeviceInfosList
             )
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-          .withArgs(C.aftermarketDeviceNodeTypeId, 2, adAddress1.address)
+          .withArgs(1, adAddress1.address)
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-          .withArgs(C.aftermarketDeviceNodeTypeId, 3, adAddress2.address);
+          .withArgs(2, adAddress2.address);
       });
     });
   });
@@ -507,7 +514,7 @@ describe('AftermarketDevice', function () {
         _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
-          aftermarketDeviceNode: '2',
+          aftermarketDeviceNode: '1',
           owner: user1.address
         }
       });
@@ -516,20 +523,21 @@ describe('AftermarketDevice', function () {
         _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
-          aftermarketDeviceNode: '2',
+          aftermarketDeviceNode: '1',
           owner: user1.address
         }
       });
     });
 
     beforeEach(async () => {
+      await adNftInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
       await aftermarketDeviceInstance
         .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
-          [adAddress1.address, adAddress2.address],
-          C.mockAftermarketDeviceAttributes,
-          C.mockAftermarketDeviceMultipleInfos
+          mockAftermarketDeviceInfosList
         );
     });
 
@@ -538,14 +546,15 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
-            .claimAftermarketDeviceSign(2, user1.address, ownerSig, adSig)
+            .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
             C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
-      it('Should revert if node is not an Aftermarket Device', async () => {
+      // TODO Check node type ?
+      it.skip('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
@@ -555,34 +564,29 @@ describe('AftermarketDevice', function () {
       it('Should revert if device is already paired', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceSign(2, user1.address, ownerSig, adSig);
+          .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(
-            1,
-            user1.address,
-            C.mockVehicleAttributes,
-            C.mockVehicleInfos
-          );
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
 
         const pairingSignature = await signMessage({
           _signer: user1,
           _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: aftermarketDeviceInstance.address,
           message: {
-            aftermarketDeviceNode: '2',
-            vehicleNode: '4'
+            aftermarketDeviceNode: '1',
+            vehicleNode: '1'
           }
         });
 
         await aftermarketDeviceInstance
           .connect(admin)
-          .pairAftermarketDeviceSign(2, 4, pairingSignature);
+          .pairAftermarketDeviceSign(1, 1, pairingSignature);
 
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceSign(2, user1.address, ownerSig, adSig)
+            .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig)
         ).to.be.revertedWith('Device already paired');
       });
 
@@ -594,7 +598,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
+              aftermarketDeviceNode: '1',
               owner: user1.address
             }
           });
@@ -603,7 +607,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 invalidOwnerSig,
                 adSig
@@ -617,7 +621,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
+              aftermarketDeviceNode: '1',
               owner: user1.address
             }
           });
@@ -626,7 +630,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 invalidOwnerSig,
                 adSig
@@ -640,7 +644,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
+              aftermarketDeviceNode: '1',
               owner: user1.address
             }
           });
@@ -649,7 +653,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 invalidOwnerSig,
                 adSig
@@ -671,7 +675,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 invalidOwnerSig,
                 adSig
@@ -684,7 +688,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
+              aftermarketDeviceNode: '1',
               owner: user2.address
             }
           });
@@ -693,7 +697,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 invalidOwnerSig,
                 adSig
@@ -710,7 +714,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
+              aftermarketDeviceNode: '1',
               owner: user1.address
             }
           });
@@ -719,7 +723,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 ownerSig,
                 invalidAdSig
@@ -733,7 +737,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
+              aftermarketDeviceNode: '1',
               owner: user1.address
             }
           });
@@ -742,7 +746,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 ownerSig,
                 invalidAdSig
@@ -756,7 +760,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
+              aftermarketDeviceNode: '1',
               owner: user1.address
             }
           });
@@ -765,7 +769,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 ownerSig,
                 invalidAdSig
@@ -787,7 +791,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 ownerSig,
                 invalidAdSig
@@ -800,7 +804,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
+              aftermarketDeviceNode: '1',
               owner: user2.address
             }
           });
@@ -809,7 +813,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 ownerSig,
                 invalidAdSig
@@ -822,7 +826,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '3',
+              aftermarketDeviceNode: '2',
               owner: user1.address
             }
           });
@@ -831,7 +835,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .claimAftermarketDeviceSign(
-                2,
+                1,
                 user1.address,
                 ownerSig,
                 invalidAdSig
@@ -841,15 +845,13 @@ describe('AftermarketDevice', function () {
       });
     });
 
-    context('State change', () => {
+    context('State change', async () => {
       it('Should correctly set node owner', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceSign(2, user1.address, ownerSig, adSig);
+          .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
 
-        expect(await dimoRegistryInstance.ownerOf(2)).to.be.equal(
-          user1.address
-        );
+        expect(await adNftInstance.ownerOf(1)).to.be.equal(user1.address);
       });
     });
 
@@ -858,10 +860,10 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceSign(2, user1.address, ownerSig, adSig)
+            .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig)
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
-          .withArgs(2, user1.address);
+          .withArgs(1, user1.address);
       });
     });
   });
@@ -876,7 +878,7 @@ describe('AftermarketDevice', function () {
         _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
-          aftermarketDeviceNode: '2',
+          aftermarketDeviceNode: '1',
           owner: user1.address
         }
       });
@@ -885,7 +887,7 @@ describe('AftermarketDevice', function () {
         _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
-          aftermarketDeviceNode: '2',
+          aftermarketDeviceNode: '1',
           owner: user1.address
         }
       });
@@ -894,33 +896,29 @@ describe('AftermarketDevice', function () {
         _primaryType: 'PairAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
-          aftermarketDeviceNode: '2',
-          vehicleNode: '4'
+          aftermarketDeviceNode: '1',
+          vehicleNode: '1'
         }
       });
     });
 
     beforeEach(async () => {
+      await adNftInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
       await aftermarketDeviceInstance
         .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
-          [adAddress1.address, adAddress2.address],
-          C.mockAftermarketDeviceAttributes,
-          C.mockAftermarketDeviceMultipleInfos
+          mockAftermarketDeviceInfosList
         );
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(
-          1,
-          user1.address,
-          C.mockVehicleAttributes,
-          C.mockVehicleInfos
-        );
+        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
-          2,
+          1,
           user1.address,
           claimOwnerSig,
           claimAdSig
@@ -932,21 +930,23 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
-            .pairAftermarketDeviceSign(2, 4, signature)
+            .pairAftermarketDeviceSign(1, 1, signature)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
             C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
-      it('Should revert if node is not an Aftermarket Device', async () => {
+      // TODO check node type?
+      it.skip('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
             .pairAftermarketDeviceSign(99, 4, signature)
         ).to.be.revertedWith('Invalid AD node');
       });
-      it('Should revert if node is not a Vehicle', async () => {
+      // TODO check node type?
+      it.skip('Should revert if node is not a Vehicle', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
@@ -956,55 +956,45 @@ describe('AftermarketDevice', function () {
       it('Should revert if owner is not the vehicle node owner', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(
-            1,
-            user2.address,
-            C.mockVehicleAttributes,
-            C.mockVehicleInfos
-          );
+          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-            .pairAftermarketDeviceSign(2, 5, signature)
+            .pairAftermarketDeviceSign(1, 2, signature)
         ).to.be.revertedWith('Owner of the nodes does not match');
       });
       it('Should revert if owner is not the aftermarket device node owner', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-            .pairAftermarketDeviceSign(3, 4, signature)
+            .pairAftermarketDeviceSign(2, 1, signature)
         ).to.be.revertedWith('Owner of the nodes does not match');
       });
       it('Should revert if vehicle is already paired', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-          .pairAftermarketDeviceSign(2, 4, signature);
+          .pairAftermarketDeviceSign(1, 1, signature);
 
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-            .pairAftermarketDeviceSign(2, 4, signature)
+            .pairAftermarketDeviceSign(1, 1, signature)
         ).to.be.revertedWith('Vehicle already paired');
       });
       it('Should revert if aftermarket device is already paired', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-          .pairAftermarketDeviceSign(2, 4, signature);
+          .pairAftermarketDeviceSign(1, 1, signature);
 
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(
-            1,
-            user1.address,
-            C.mockVehicleAttributes,
-            C.mockVehicleInfos
-          );
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-            .pairAftermarketDeviceSign(2, 5, signature)
+            .pairAftermarketDeviceSign(1, 2, signature)
         ).to.be.revertedWith('AD already paired');
       });
 
@@ -1016,15 +1006,15 @@ describe('AftermarketDevice', function () {
             _primaryType: 'PairAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
-              vehicleNode: '4'
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1'
             }
           });
 
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-              .pairAftermarketDeviceSign(2, 4, invalidSignature)
+              .pairAftermarketDeviceSign(1, 1, invalidSignature)
           ).to.be.revertedWith('Invalid signature');
         });
         it('Should revert if domain version is incorrect', async () => {
@@ -1034,15 +1024,15 @@ describe('AftermarketDevice', function () {
             _primaryType: 'PairAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
-              vehicleNode: '4'
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1'
             }
           });
 
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-              .pairAftermarketDeviceSign(2, 4, invalidSignature)
+              .pairAftermarketDeviceSign(1, 1, invalidSignature)
           ).to.be.revertedWith('Invalid signature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
@@ -1052,15 +1042,15 @@ describe('AftermarketDevice', function () {
             _primaryType: 'PairAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
-              vehicleNode: '4'
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1'
             }
           });
 
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-              .pairAftermarketDeviceSign(2, 4, invalidSignature)
+              .pairAftermarketDeviceSign(1, 1, invalidSignature)
           ).to.be.revertedWith('Invalid signature');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
@@ -1070,14 +1060,14 @@ describe('AftermarketDevice', function () {
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
               aftermarketDeviceNode: '99',
-              vehicleNode: '4'
+              vehicleNode: '1'
             }
           });
 
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-              .pairAftermarketDeviceSign(2, 4, invalidSignature)
+              .pairAftermarketDeviceSign(1, 1, invalidSignature)
           ).to.be.revertedWith('Invalid signature');
         });
         it('Should revert if aftermarket vehicle node is incorrect', async () => {
@@ -1086,7 +1076,7 @@ describe('AftermarketDevice', function () {
             _primaryType: 'PairAftermarketDeviceSign',
             _verifyingContract: aftermarketDeviceInstance.address,
             message: {
-              aftermarketDeviceNode: '2',
+              aftermarketDeviceNode: '1',
               vehicleNode: '99'
             }
           });
@@ -1094,7 +1084,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-              .pairAftermarketDeviceSign(2, 4, invalidSignature)
+              .pairAftermarketDeviceSign(1, 1, invalidSignature)
           ).to.be.revertedWith('Invalid signature');
         });
       });
@@ -1104,16 +1094,20 @@ describe('AftermarketDevice', function () {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-          .pairAftermarketDeviceSign(2, 4, signature);
+          .pairAftermarketDeviceSign(1, 1, signature);
 
-        expect(await mapperInstance.getLink(4)).to.be.equal(2);
+        expect(
+          await mapperInstance.getLink(adNftInstance.address, 1)
+        ).to.be.equal(1);
       });
       it('Should correctly map the vehicle to the aftermarket device', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-          .pairAftermarketDeviceSign(2, 4, signature);
+          .pairAftermarketDeviceSign(1, 1, signature);
 
-        expect(await mapperInstance.getLink(2)).to.be.equal(4);
+        expect(
+          await mapperInstance.getLink(vehicleNftInstance.address, 1)
+        ).to.be.equal(1);
       });
     });
 
@@ -1122,23 +1116,24 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-            .pairAftermarketDeviceSign(2, 4, signature)
+            .pairAftermarketDeviceSign(1, 1, signature)
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDevicePaired')
-          .withArgs(2, 4, user1.address);
+          .withArgs(1, 1, user1.address);
       });
     });
   });
 
   describe('setAftermarketDeviceInfo', () => {
     beforeEach(async () => {
+      await adNftInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
       await aftermarketDeviceInstance
         .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
-          [adAddress1.address, adAddress2.address],
-          C.mockAftermarketDeviceAttributes,
-          C.mockAftermarketDeviceMultipleInfos
+          mockAftermarketDeviceInfosList
         );
     });
 
@@ -1147,47 +1142,28 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
-            .setAftermarketDeviceInfo(
-              3,
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceInfos
-            )
+            .setAftermarketDeviceInfo(1, C.mockAdAttributeInfoPairs)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
             C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
-      it('Should revert if node is not an Aftermarket Device', async () => {
+      // TODO Check node type?
+      it.skip('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-            .setAftermarketDeviceInfo(
-              99,
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceInfos
-            )
+            .setAftermarketDeviceInfo(99, C.mockAdAttributeInfoPairs)
         ).to.be.revertedWith('Node must be an AD');
-      });
-      it('Should revert if attributes and infos array length does not match', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(admin)
-            .setAftermarketDeviceInfo(
-              3,
-              C.mockAftermarketDeviceAttributes,
-              C.mockAftermarketDeviceInfosWrongSize
-            )
-        ).to.be.revertedWith('Same length');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
             .setAftermarketDeviceInfo(
-              3,
-              C.aftermarketDeviceAttributesNotWhitelisted,
-              C.mockAftermarketDeviceInfos
+              1,
+              C.mockAdAttributeInfoPairsNotWhitelisted
             )
         ).to.be.revertedWith('Not whitelisted');
       });
@@ -1195,33 +1171,59 @@ describe('AftermarketDevice', function () {
 
     context('State change', () => {
       it('Should correctly set infos', async () => {
-        await aftermarketDeviceInstance
-          .connect(admin)
-          .setAftermarketDeviceInfo(
-            3,
-            C.mockAftermarketDeviceAttributes,
-            C.mockAftermarketDeviceInfos
-          );
+        const localNewAttributeInfoPairs = JSON.parse(
+          JSON.stringify(C.mockAdAttributeInfoPairs)
+        );
+        localNewAttributeInfoPairs[0].info = 'New Info 0';
+        localNewAttributeInfoPairs[1].info = 'New Info 1';
 
         expect(
-          await nodesInstance.getInfo(3, C.mockAftermarketDeviceAttribute1)
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            1,
+            C.mockAftermarketDeviceAttribute1
+          )
         ).to.be.equal(C.mockAftermarketDeviceInfo1);
         expect(
-          await nodesInstance.getInfo(3, C.mockAftermarketDeviceAttribute2)
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            1,
+            C.mockAftermarketDeviceAttribute2
+          )
         ).to.be.equal(C.mockAftermarketDeviceInfo2);
+
+        await aftermarketDeviceInstance
+          .connect(admin)
+          .setAftermarketDeviceInfo(1, localNewAttributeInfoPairs);
+
+        expect(
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            1,
+            C.mockAftermarketDeviceAttribute1
+          )
+        ).to.be.equal(localNewAttributeInfoPairs[0].info);
+        expect(
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            1,
+            C.mockAftermarketDeviceAttribute2
+          )
+        ).to.be.equal(localNewAttributeInfoPairs[1].info);
       });
     });
   });
 
   describe('getAftermarketDeviceIdByAddress', () => {
     beforeEach(async () => {
+      await adNftInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
       await aftermarketDeviceInstance
         .connect(manufacturer1)
         .mintAftermarketDeviceByManufacturerBatch(
           1,
-          [adAddress1.address, adAddress2.address],
-          C.mockAftermarketDeviceAttributes,
-          C.mockAftermarketDeviceMultipleInfos
+          mockAftermarketDeviceInfosList
         );
     });
 
@@ -1239,7 +1241,7 @@ describe('AftermarketDevice', function () {
           adAddress1.address
         );
 
-      expect(tokenId).to.equal(2);
+      expect(tokenId).to.equal(1);
     });
   });
 });

@@ -5,21 +5,12 @@ import "../libraries/MapperStorage.sol";
 
 // TODO Documentation
 contract Mapper {
-    // TODO To be removed when everything is working
-    function getLink(uint256 sourceNode)
+    function getLink(address nftProxyAddress, uint256 sourceNode)
         external
         view
         returns (uint256 targetNode)
     {
-        targetNode = MapperStorage.getStorage().links[sourceNode];
-    }
-
-    function getLink2(address nftProxyAddress, uint256 sourceNode)
-        external
-        view
-        returns (uint256 targetNode)
-    {
-        targetNode = MapperStorage.getStorage().links2[nftProxyAddress][
+        targetNode = MapperStorage.getStorage().links[nftProxyAddress][
             sourceNode
         ];
     }

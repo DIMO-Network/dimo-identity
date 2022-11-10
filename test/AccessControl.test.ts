@@ -19,7 +19,6 @@ describe('AccessControl', async function () {
   before(async () => {
     [, accessControlInstance] = await initialize(
       admin1,
-      [C.name, C.symbol, C.baseURI],
       './contracts/access/AccessControl.sol:AccessControl'
     );
   });

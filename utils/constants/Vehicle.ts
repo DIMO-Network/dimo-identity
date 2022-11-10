@@ -13,11 +13,6 @@ export const mockVehicleAttributes = [
   mockVehicleAttribute1,
   mockVehicleAttribute2
 ];
-export const mockVehicleAttributesWrongSize = [mockVehicleAttribute1];
-export const vehicleAttributesNotWhitelisted = [
-  mockVehicleAttribute1,
-  mockVehicleAttribute3
-];
 
 // Vehicle Infos associated with attributes
 export const mockVehicleInfo1 = 'mockVehicleInfo1';

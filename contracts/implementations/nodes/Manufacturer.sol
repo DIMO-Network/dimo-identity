@@ -1,35 +1,31 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
+import "../../interfaces/INFT.sol";
 import "../../access/AccessControlInternal.sol";
-import "../shared/IEvents.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
-import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
+
+import {AttributeInfoPair} from "../shared/Types.sol";
 
 // TODO Documentation
-contract Manufacturer is
-    ERC721MetadataInternal,
-    IEvents,
-    AccessControlInternal
-{
+contract Manufacturer is AccessControlInternal {
+    event ManufacturerNftProxySet(address indexed proxy);
+    event ManufacturerAttributeAdded(string attribute);
     event ControllerSet(address indexed controller);
+    event ManufacturerNodeMinted(uint256 tokenId);
 
     // ***** Admin management ***** //
 
-    /// @notice Sets contract node type
-    /// @dev Only an admin can set the node type
-    /// @dev The node type can only be set once
-    /// @param label The label of the node type
-    function setManufacturerNodeType(bytes calldata label)
+    // TODO Documentation
+    function setManufacturerNftProxyAddress(address addr)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage
-            .getStorage();
-        require(s.nodeType == 0, "Node type already set");
+        require(addr != address(0), "Non zero address");
+        ManufacturerStorage.getStorage().nftProxyAddress = addr;
 
-        s.nodeType = uint256(keccak256(label));
+        emit ManufacturerNftProxySet(addr);
     }
 
     /// @notice Adds an attribute to the whitelist
@@ -39,13 +35,15 @@ contract Manufacturer is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage
-            .getStorage();
-        bool success = AttributeSet.add(s.whitelistedAttributes, attribute);
+        require(
+            AttributeSet.add(
+                ManufacturerStorage.getStorage().whitelistedAttributes,
+                attribute
+            ),
+            "Attribute already exists"
+        );
 
-        require(success, "Attribute already exists");
-
-        emit AttributeAdded(s.nodeType, attribute);
+        emit ManufacturerAttributeAdded(attribute);
     }
 
     /// @notice Sets a address controller
@@ -84,68 +82,51 @@ contract Manufacturer is
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        uint256 nodeType = s.nodeType;
-        uint256 newNodeId;
+        uint256 newTokenId;
+        address nftProxyAddress = s.nftProxyAddress;
 
         for (uint256 i = 0; i < names.length; i++) {
-            newNodeId = ++ns.currentIndex;
+            newTokenId = INFT(s.nftProxyAddress).safeMint(owner);
 
-            ns.nodes[newNodeId].nodeType = nodeType;
-            ns.nodes[newNodeId].info["Name"] = names[i];
+            ns.nodes[nftProxyAddress][newTokenId].info["Name"] = names[i];
 
-            _safeMint(owner, newNodeId);
-
-            emit NodeMinted(nodeType, newNodeId);
+            emit ManufacturerNodeMinted(newTokenId);
         }
     }
 
     /// @notice Mints a manufacturer
     /// @dev Caller must be an admin
     /// @param owner The address of the new owner
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param attrInfoPairList List of attribute-info pairs to be added
     function mintManufacturer(
         address owner,
-        string[] calldata attributes,
-        string[] calldata infos
+        AttributeInfoPair[] calldata attrInfoPairList
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         require(!s.controllers[owner].manufacturerMinted, "Invalid request");
+        address nftProxyAddress = s.nftProxyAddress;
+
         s.controllers[owner].isController = true;
-
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        uint256 newNodeId = ++ns.currentIndex;
-        uint256 nodeType = s.nodeType;
-
         s.controllers[owner].manufacturerMinted = true;
-        ns.nodes[newNodeId].nodeType = nodeType;
 
-        _safeMint(owner, newNodeId);
-        _setInfo(newNodeId, attributes, infos);
+        uint256 newTokenId = INFT(nftProxyAddress).safeMint(owner);
+        _setInfo(newTokenId, attrInfoPairList);
 
-        emit NodeMinted(nodeType, newNodeId);
+        emit ManufacturerNodeMinted(newTokenId);
     }
 
     /// @notice Add infos to node
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param nodeId Node id where the info will be added
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param tokenId Node id where the info will be added
+    /// @param attrInfoList List of attribute-info pairs to be added
     function setManufacturerInfo(
-        uint256 nodeId,
-        string[] calldata attributes,
-        string[] calldata infos
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfoList
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage
-            .getStorage();
-        require(
-            NodesStorage.getStorage().nodes[nodeId].nodeType == s.nodeType,
-            "Node must be a manufacturer"
-        );
-
-        _setInfo(nodeId, attributes, infos);
+        // TODO Check nft id ?
+        _setInfo(tokenId, attrInfoList);
     }
 
     /// @notice Verify if an address is a controller
@@ -179,26 +160,28 @@ contract Manufacturer is
     /// @dev Internal function to add infos to node
     /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param nodeId Node id where the info will be added
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param tokenId Node id where the info will be added
+    /// @param attrInfoPairList List of attribute-info pairs to be added
     function _setInfo(
-        uint256 nodeId,
-        string[] calldata attributes,
-        string[] calldata infos
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfoPairList
     ) private {
-        require(attributes.length == infos.length, "Same length");
-
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
+        address nftProxyAddress = s.nftProxyAddress;
 
-        for (uint256 i = 0; i < attributes.length; i++) {
+        for (uint256 i = 0; i < attrInfoPairList.length; i++) {
             require(
-                AttributeSet.exists(s.whitelistedAttributes, attributes[i]),
+                AttributeSet.exists(
+                    s.whitelistedAttributes,
+                    attrInfoPairList[i].attribute
+                ),
                 "Not whitelisted"
             );
-            ns.nodes[nodeId].info[attributes[i]] = infos[i];
+            ns.nodes[nftProxyAddress][tokenId].info[
+                attrInfoPairList[i].attribute
+            ] = attrInfoPairList[i].info;
         }
     }
 }

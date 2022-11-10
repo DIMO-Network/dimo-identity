@@ -8,52 +8,27 @@ contract Nodes {
     // function registerNode() external {}
 
     // TODO To be removed when everything is working
-    /// @notice Gets the node type of a node
-    /// @param tokenId the id associated to the node
-    function getNodeType(uint256 tokenId)
-        external
-        view
-        returns (uint256 nodeType)
-    {
-        nodeType = NodesStorage.getStorage().nodes[tokenId].nodeType;
-    }
-
-    // TODO To be removed when everything is working
-    /// @notice Gets the parent node of a node
-    /// @param tokenId the id associated to the node
-    function getParentNode(uint256 tokenId)
-        external
-        view
-        returns (uint256 parentNode)
-    {
-        parentNode = NodesStorage.getStorage().nodes[tokenId].parentNode;
-    }
+    // /// @notice Gets the node type of a node
+    // /// @param tokenId the id associated to the node
+    // function getNodeType(uint256 tokenId)
+    //     external
+    //     view
+    //     returns (uint256 nodeType)
+    // {
+    //     nodeType = NodesStorage.getStorage().nodes[tokenId].nodeType;
+    // }
 
     /// @notice Gets the parent node of a node
     /// @param nftProxyAddress The address of the proxy associated with the node Id
     /// @param tokenId the id associated to the node
-    function getParentNode2(address nftProxyAddress, uint256 tokenId)
+    function getParentNode(address nftProxyAddress, uint256 tokenId)
         external
         view
         returns (uint256 parentNode)
     {
         parentNode = NodesStorage
         .getStorage()
-        .nodes2[nftProxyAddress][tokenId].parentNode;
-    }
-
-    // TODO To be removed when everything is working
-    /// @notice Gets information stored in an attribute of a given node
-    /// @dev Returns empty string if does or attribute does not exists
-    /// @param tokenId Node id from which info will be obtained
-    /// @param attribute Key attribute
-    /// @return info Info obtained
-    function getInfo(uint256 tokenId, string calldata attribute)
-        external
-        view
-        returns (string memory info)
-    {
-        info = NodesStorage.getStorage().nodes[tokenId].info[attribute];
+        .nodes[nftProxyAddress][tokenId].parentNode;
     }
 
     /// @notice Gets information stored in an attribute of a given node
@@ -62,12 +37,12 @@ contract Nodes {
     /// @param tokenId Node id from which info will be obtained
     /// @param attribute Key attribute
     /// @return info Info obtained
-    function getInfo2(
+    function getInfo(
         address nftProxyAddress,
         uint256 tokenId,
         string calldata attribute
     ) external view returns (string memory info) {
-        info = NodesStorage.getStorage().nodes2[nftProxyAddress][tokenId].info[
+        info = NodesStorage.getStorage().nodes[nftProxyAddress][tokenId].info[
             attribute
         ];
     }

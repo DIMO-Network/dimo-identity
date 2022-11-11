@@ -2,7 +2,10 @@
 pragma solidity ^0.8.13;
 
 import "./libraries/RegistryStorage.sol";
-import "./access/AccessControlInternal.sol";
+
+import {DEFAULT_ADMIN_ROLE} from "./shared/Roles.sol";
+
+import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 // TODO Documentation
 contract DIMORegistry is AccessControlInternal {

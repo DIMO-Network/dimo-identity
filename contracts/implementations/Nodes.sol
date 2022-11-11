@@ -7,17 +7,6 @@ contract Nodes {
     // TODO Do we need this?
     // function registerNode() external {}
 
-    // TODO To be removed when everything is working
-    // /// @notice Gets the node type of a node
-    // /// @param tokenId the id associated to the node
-    // function getNodeType(uint256 tokenId)
-    //     external
-    //     view
-    //     returns (uint256 nodeType)
-    // {
-    //     nodeType = NodesStorage.getStorage().nodes[tokenId].nodeType;
-    // }
-
     /// @notice Gets the parent node of a node
     /// @param nftProxyAddress The address of the proxy associated with the node Id
     /// @param tokenId the id associated to the node

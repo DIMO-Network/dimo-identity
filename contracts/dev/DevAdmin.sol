@@ -2,11 +2,14 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/INFT.sol";
-import "../access/AccessControlInternal.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/NodesStorage.sol";
 import "../libraries/nodes/VehicleStorage.sol";
 import "../libraries/nodes/AftermarketDeviceStorage.sol";
+
+import {DEFAULT_ADMIN_ROLE} from "../shared/Roles.sol";
+
+import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 /// @dev Admin module for development and testing
 contract DevAdmin is AccessControlInternal {

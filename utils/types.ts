@@ -23,7 +23,12 @@ export type AftermarketDeviceInfos = {
 
 export interface ContractAddressesByNetwork {
   [index: string]: {
-    [index: string]: string
+    modules: {
+      [index: string]: string
+    },
+    nfts: {
+      [index: string]: string
+    }
   };
 }
 

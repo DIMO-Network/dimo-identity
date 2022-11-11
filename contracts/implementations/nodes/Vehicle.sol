@@ -2,17 +2,18 @@
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
-import "../../access/AccessControlInternal.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 
-import {AttributeInfoPair} from "../shared/Types.sol";
+import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
+import {AttributeInfoPair} from "../../shared/Types.sol";
+
+import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 // TODO Documentation
 contract Vehicle is AccessControlInternal {
-    // TODO Change signature to match AttributeInfoPair
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
             "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"
@@ -87,7 +88,6 @@ contract Vehicle is AccessControlInternal {
             .parentNode = manufacturerNode;
 
         _setInfo(newTokenId, attrInfo);
-        // _safeMint(owner, newTokenId);
 
         emit VehicleNodeMinted(newTokenId);
     }
@@ -143,8 +143,6 @@ contract Vehicle is AccessControlInternal {
             Eip712CheckerInternal._verifySignature(owner, message, signature),
             "Invalid signature"
         );
-
-        // _safeMint(owner, newTokenId);
 
         emit VehicleNodeMinted(newTokenId);
     }

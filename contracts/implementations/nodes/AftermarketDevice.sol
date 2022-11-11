@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
-import "../../access/AccessControlInternal.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
@@ -11,8 +10,10 @@ import "../../libraries/nodes/AftermarketDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 import "../AdLicenseValidator/AdLicenseValidatorInternal.sol";
 
-import {MANUFACTURER_ROLE} from "../shared/Roles.sol";
-import {AttributeInfoPair, AftermarketDeviceInfos} from "../shared/Types.sol";
+import "../../shared/Roles.sol";
+import "../../shared/Types.sol";
+
+import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 /**
  * TODO Documentation

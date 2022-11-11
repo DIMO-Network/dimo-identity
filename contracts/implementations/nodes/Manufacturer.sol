@@ -2,11 +2,13 @@
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
-import "../../access/AccessControlInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 
-import {AttributeInfoPair} from "../shared/Types.sol";
+import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
+import {AttributeInfoPair} from "../../shared/Types.sol";
+
+import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 // TODO Documentation
 contract Manufacturer is AccessControlInternal {

@@ -4,7 +4,7 @@ import { ethers, waffle } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
-  AccessControl,
+  DimoAccessControl,
   Nodes,
   Manufacturer,
   ManufacturerNft,
@@ -35,7 +35,7 @@ describe('AftermarketDevice', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
-  let accessControlInstance: AccessControl;
+  let accessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
@@ -87,7 +87,7 @@ describe('AftermarketDevice', function () {
     ] = await initialize(
       admin,
       'Eip712Checker',
-      './contracts/access/AccessControl.sol:AccessControl',
+      'DimoAccessControl',
       'Nodes',
       'Manufacturer',
       'Vehicle',

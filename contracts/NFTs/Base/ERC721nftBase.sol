@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 // TODO Documentation
+// TODO Add Base URI
 contract ERC721nftBase is ERC721, ERC721Burnable, AccessControl {
     using Counters for Counters.Counter;
 

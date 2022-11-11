@@ -31,15 +31,14 @@ async function main(paths: string[]) {
 
 main([
   'contracts/DIMORegistry.sol:DIMORegistry',
-  'contracts/access/AccessControl.sol:AccessControl',
+  'contracts/access/DimoAccessControl.sol:DimoAccessControl',
   'contracts/Eip712/Eip712Checker.sol:Eip712Checker',
   'contracts/implementations/AdLicenseValidator/AdLicenseValidator.sol:AdLicenseValidator',
   'contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice',
   'contracts/implementations/nodes/Manufacturer.sol:Manufacturer',
   'contracts/implementations/nodes/Vehicle.sol:Vehicle',
   'contracts/implementations/Nodes.sol:Nodes',
-  'contracts/implementations/Mapper.sol:Mapper',
-  'contracts/implementations/Metadata.sol:Metadata'
+  'contracts/implementations/Mapper.sol:Mapper'
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

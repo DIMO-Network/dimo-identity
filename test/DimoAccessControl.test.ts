@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { AccessControl } from '../typechain';
+import { DimoAccessControl } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -10,17 +10,14 @@ const provider = waffle.provider;
 
 chai.use(solidity);
 
-describe('AccessControl', async function () {
+describe('DimoAccessControl', async function () {
   let snapshot: string;
-  let accessControlInstance: AccessControl;
+  let accessControlInstance: DimoAccessControl;
 
   const [admin1, admin2, nonAdmin] = provider.getWallets();
 
   before(async () => {
-    [, accessControlInstance] = await initialize(
-      admin1,
-      './contracts/access/AccessControl.sol:AccessControl'
-    );
+    [, accessControlInstance] = await initialize(admin1, 'DimoAccessControl');
   });
 
   beforeEach(async () => {
@@ -120,15 +117,6 @@ describe('AccessControl', async function () {
   });
 
   describe('renounceRole', async () => {
-    context('Error handling', () => {
-      it('Should revert if caller and account argument does not match', async () => {
-        await expect(
-          accessControlInstance
-            .connect(nonAdmin)
-            .renounceRole(C.DEFAULT_ADMIN_ROLE, admin1.address)
-        ).to.be.revertedWith('AccessControl: can only renounce roles for self');
-      });
-    });
     context('State change', () => {
       it('Should correctly renounce role', async () => {
         await accessControlInstance
@@ -144,9 +132,7 @@ describe('AccessControl', async function () {
         expect(admin1RoleBefore).to.be.true;
 
         await expect(
-          accessControlInstance
-            .connect(admin1)
-            .renounceRole(C.MOCK_ROLE, admin1.address)
+          accessControlInstance.connect(admin1).renounceRole(C.MOCK_ROLE)
         ).to.not.be.reverted;
 
         const admin1RoleAfter: boolean = await accessControlInstance.hasRole(

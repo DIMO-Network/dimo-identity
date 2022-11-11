@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./Eip712CheckerStorage.sol";
 
-import "@solidstate/contracts/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 library Eip712CheckerInternal {
     bytes32 private constant EIP712_DOMAIN_TYPEHASH =

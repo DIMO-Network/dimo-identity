@@ -50,7 +50,9 @@ contract AftermarketDevice is
 
     // ***** Admin management ***** //
 
-    // TODO Documentation
+    /// @notice Sets the NFT proxy associated with the Aftermarket Device node
+    /// @dev Only an admin can set the address
+    /// @param addr The address of the proxy
     function setAftermarketDeviceNftProxyAddress(address addr)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)

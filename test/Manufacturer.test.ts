@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, waffle, upgrades } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -31,9 +31,19 @@ describe('Manufacturer', async function () {
     const ManufacturerNftFactory = await ethers.getContractFactory(
       'ManufacturerNft'
     );
-    manufacturerNftInstance = await ManufacturerNftFactory.connect(
-      admin
-    ).deploy(C.MANUFACTURER_NFT_NAME, C.MANUFACTURER_NFT_SYMBOL);
+    manufacturerNftInstance = await upgrades.deployProxy(
+      ManufacturerNftFactory,
+      [
+        C.MANUFACTURER_NFT_NAME,
+        C.MANUFACTURER_NFT_SYMBOL,
+        C.MANUFACTURER_NFT_BASE_URI
+      ],
+      {
+        initializer: 'initialize',
+        kind: 'uups'
+      }
+    // eslint-disable-next-line prettier/prettier
+    ) as ManufacturerNft;
     await manufacturerNftInstance.deployed();
 
     const MINTER_ROLE = await manufacturerNftInstance.MINTER_ROLE();
@@ -79,8 +89,7 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .setManufacturerNftProxyAddress(manufacturerNftInstance.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -114,8 +123,7 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .addManufacturerAttribute(C.mockManufacturerAttribute1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -149,8 +157,7 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .setController(controller1.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -189,8 +196,7 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .mintManufacturerBatch(nonAdmin.address, C.mockManufacturerNames)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -295,8 +301,7 @@ describe('Manufacturer', async function () {
               C.mockManufacturerAttributeInfoPairs
             )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -454,8 +459,7 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .setManufacturerInfo(1, C.mockManufacturerAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });

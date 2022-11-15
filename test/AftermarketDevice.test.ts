@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, waffle, upgrades } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -104,21 +104,49 @@ describe('AftermarketDevice', function () {
       'AftermarketDeviceNft'
     );
 
-    manufacturerNftInstance = await ManufacturerNftFactory.connect(
-      admin
-    ).deploy(C.MANUFACTURER_NFT_NAME, C.MANUFACTURER_NFT_SYMBOL);
+    manufacturerNftInstance = await upgrades.deployProxy(
+      ManufacturerNftFactory,
+      [
+        C.MANUFACTURER_NFT_NAME,
+        C.MANUFACTURER_NFT_SYMBOL,
+        C.MANUFACTURER_NFT_BASE_URI
+      ],
+      {
+        initializer: 'initialize',
+        kind: 'uups'
+      }
+      // eslint-disable-next-line prettier/prettier
+    ) as ManufacturerNft;
     await manufacturerNftInstance.deployed();
 
-    vehicleNftInstance = await VehicleNftFactory.connect(admin).deploy(
-      C.VEHICLE_NFT_NAME,
-      C.VEHICLE_NFT_SYMBOL
-    );
+    vehicleNftInstance = await upgrades.deployProxy(
+      VehicleNftFactory,
+      [
+        C.VEHICLE_NFT_NAME,
+        C.VEHICLE_NFT_SYMBOL,
+        C.VEHICLE_NFT_BASE_URI
+      ],
+      {
+        initializer: 'initialize',
+        kind: 'uups'
+      }
+      // eslint-disable-next-line prettier/prettier
+    ) as VehicleNft;
     await vehicleNftInstance.deployed();
 
-    adNftInstance = await AftermarketDeviceNftFactory.connect(admin).deploy(
-      C.AD_NFT_NAME,
-      C.AD_NFT_SYMBOL
-    );
+    adNftInstance = await upgrades.deployProxy(
+      AftermarketDeviceNftFactory,
+      [
+        C.AD_NFT_NAME,
+        C.AD_NFT_SYMBOL,
+        C.AD_NFT_BASE_URI
+      ],
+      {
+        initializer: 'initialize',
+        kind: 'uups'
+      }
+      // eslint-disable-next-line prettier/prettier
+    ) as AftermarketDeviceNft;
     await adNftInstance.deployed();
 
     const MANUFACTURER_MINTER_ROLE =
@@ -237,6 +265,45 @@ describe('AftermarketDevice', function () {
     await revertToSnapshot(snapshot);
   });
 
+  describe('setAftermarketDeviceNftProxyAddress', () => {
+    let localAdInstance: AftermarketDevice;
+    beforeEach(async () => {
+      [, localAdInstance] = await initialize(admin, 'AftermarketDevice');
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          localAdInstance
+            .connect(nonAdmin)
+            .setAftermarketDeviceNftProxyAddress(adNftInstance.address)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          }`
+        );
+      });
+      it('Should revert if proxy is zero address', async () => {
+        await expect(
+          localAdInstance
+            .connect(admin)
+            .setAftermarketDeviceNftProxyAddress(C.ZERO_ADDRESS)
+        ).to.be.revertedWith('Non zero address');
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AftermarketDeviceNftProxySet event with correct params', async () => {
+        await expect(
+          localAdInstance
+            .connect(admin)
+            .setAftermarketDeviceNftProxyAddress(adNftInstance.address)
+        )
+          .to.emit(localAdInstance, 'AftermarketDeviceNftProxySet')
+          .withArgs(adNftInstance.address);
+      });
+    });
+  });
+
   describe('addAftermarketDeviceAttribute', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
@@ -245,8 +312,7 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -289,8 +355,7 @@ describe('AftermarketDevice', function () {
               mockAftermarketDeviceInfosList
             )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonManufacturer.address.toLowerCase()} is missing role ${
-            C.MANUFACTURER_ROLE
+          `AccessControl: account ${nonManufacturer.address.toLowerCase()} is missing role ${C.MANUFACTURER_ROLE
           }`
         );
       });
@@ -452,7 +517,7 @@ describe('AftermarketDevice', function () {
         ).to.be.equal(C.mockAftermarketDeviceInfo2);
       });
       // TODO
-      it('Should correctly set device address', async () => {});
+      it('Should correctly set device address', async () => { });
       it('Should correctly decrease the DIMO balance of the manufacturer', async () => {
         const balanceChange = C.adMintCost
           .mul(C.mockAdAttributeInfoPairs.length)
@@ -548,8 +613,7 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -932,8 +996,7 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .pairAftermarketDeviceSign(1, 1, signature)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -1144,8 +1207,7 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .setAftermarketDeviceInfo(1, C.mockAdAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });

@@ -1,10 +1,19 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "./Base/ERC721nftBase.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./Base/NftBaseUpgradeable.sol";
 
-contract ManufacturerNft is ERC721nftBase {
-    constructor(string memory name_, string memory symbol_)
-        ERC721nftBase(name_, symbol_)
-    {}
+contract ManufacturerNft is Initializable, NftBaseUpgradeable {
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(
+        string calldata name_,
+        string calldata symbol_,
+        string calldata baseUri_
+    ) public initializer {
+        _baseNftInit(name_, symbol_, baseUri_);
+    }
 }

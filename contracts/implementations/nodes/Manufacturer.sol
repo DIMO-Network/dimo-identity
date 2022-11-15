@@ -19,7 +19,9 @@ contract Manufacturer is AccessControlInternal {
 
     // ***** Admin management ***** //
 
-    // TODO Documentation
+    /// @notice Sets the NFT proxy associated with the Manufacturer node
+    /// @dev Only an admin can set the address
+    /// @param addr The address of the proxy
     function setManufacturerNftProxyAddress(address addr)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)

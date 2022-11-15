@@ -43,11 +43,6 @@ contract DevAdmin is AccessControlInternal {
         );
         address oldOwner = adNftProxy.ownerOf(aftermarketDeviceNode);
 
-        require(
-            adNftProxy.isApprovedForAll(oldOwner, address(this)),
-            "Registry must be approved for all"
-        );
-
         adNftProxy.safeTransferFrom(oldOwner, newOwner, aftermarketDeviceNode);
 
         emit AftermarketDeviceTransferred(

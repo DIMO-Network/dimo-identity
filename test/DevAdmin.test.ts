@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, waffle, upgrades } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -102,21 +102,49 @@ describe('DevAdmin', function () {
       'AftermarketDeviceNft'
     );
 
-    manufacturerNftInstance = await ManufacturerNftFactory.connect(
-      admin
-    ).deploy(C.MANUFACTURER_NFT_NAME, C.MANUFACTURER_NFT_SYMBOL);
+    manufacturerNftInstance = await upgrades.deployProxy(
+      ManufacturerNftFactory,
+      [
+        C.MANUFACTURER_NFT_NAME,
+        C.MANUFACTURER_NFT_SYMBOL,
+        C.MANUFACTURER_NFT_BASE_URI
+      ],
+      {
+        initializer: 'initialize',
+        kind: 'uups'
+      }
+      // eslint-disable-next-line prettier/prettier
+    ) as ManufacturerNft;
     await manufacturerNftInstance.deployed();
 
-    vehicleNftInstance = await VehicleNftFactory.connect(admin).deploy(
-      C.VEHICLE_NFT_NAME,
-      C.VEHICLE_NFT_SYMBOL
-    );
+    vehicleNftInstance = await upgrades.deployProxy(
+      VehicleNftFactory,
+      [
+        C.VEHICLE_NFT_NAME,
+        C.VEHICLE_NFT_SYMBOL,
+        C.VEHICLE_NFT_BASE_URI
+      ],
+      {
+        initializer: 'initialize',
+        kind: 'uups'
+      }
+      // eslint-disable-next-line prettier/prettier
+    ) as VehicleNft;
     await vehicleNftInstance.deployed();
 
-    adNftInstance = await AftermarketDeviceNftFactory.connect(admin).deploy(
-      C.AD_NFT_NAME,
-      C.AD_NFT_SYMBOL
-    );
+    adNftInstance = await upgrades.deployProxy(
+      AftermarketDeviceNftFactory,
+      [
+        C.AD_NFT_NAME,
+        C.AD_NFT_SYMBOL,
+        C.AD_NFT_BASE_URI
+      ],
+      {
+        initializer: 'initialize',
+        kind: 'uups'
+      }
+      // eslint-disable-next-line prettier/prettier
+    ) as AftermarketDeviceNft;
     await adNftInstance.deployed();
 
     const MANUFACTURER_MINTER_ROLE =

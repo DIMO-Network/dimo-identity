@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-contract MyToken is
+abstract contract NftBaseUpgradeable is
     Initializable,
     ERC721Upgradeable,
     ERC721URIStorageUpgradeable,
@@ -23,50 +23,45 @@ contract MyToken is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 public constant TRANSFERER_ROLE = keccak256("TRANSFERER_ROLE");
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
+    string private baseURI;
 
-    function initialize(string calldata name_, string calldata symbol_)
-        public
-        initializer
+    function setBaseURI(string calldata baseURI_)
+        external
+        virtual
+        onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        __ERC721_init(name_, symbol_);
-        __ERC721URIStorage_init();
-        __ERC721Burnable_init();
-        __AccessControl_init();
-        __UUPSUpgradeable_init();
-
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MINTER_ROLE, msg.sender);
-        _grantRole(UPGRADER_ROLE, msg.sender);
+        baseURI = baseURI_;
     }
 
-    function safeMint(address to) public onlyRole(MINTER_ROLE) {
-        uint256 tokenId = _tokenIdCounter.current();
+    function safeMint(address to)
+        external
+        virtual
+        onlyRole(MINTER_ROLE)
+        returns (uint256 tokenId)
+    {
         _tokenIdCounter.increment();
+        tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
     }
 
     function safeMint(address to, string calldata uri)
-        public
+        external
+        virtual
         onlyRole(MINTER_ROLE)
+        returns (uint256 tokenId)
     {
-        uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
+        tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
-    }
-
-    function burn(uint256 tokenId) public override onlyRole(BURNER_ROLE) {
-        _burn(tokenId);
     }
 
     function tokenURI(uint256 tokenId)
         public
         view
+        virtual
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (string memory)
     {
@@ -76,21 +71,56 @@ contract MyToken is
     function supportsInterface(bytes4 interfaceId)
         public
         view
+        virtual
         override(ERC721Upgradeable, AccessControlUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
 
+    function _baseNftInit(
+        string calldata name_,
+        string calldata symbol_,
+        string calldata baseUri_
+    ) internal onlyInitializing {
+        __ERC721_init(name_, symbol_);
+        __ERC721URIStorage_init();
+        __ERC721Burnable_init();
+        __AccessControl_init();
+        __UUPSUpgradeable_init();
+
+        baseURI = baseUri_;
+
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(MINTER_ROLE, msg.sender);
+        _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(TRANSFERER_ROLE, msg.sender);
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
+    }
+
     function _authorizeUpgrade(address newImplementation)
         internal
+        virtual
         override
         onlyRole(UPGRADER_ROLE)
     {}
 
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override onlyRole(TRANSFERER_ROLE) {
+        super._transfer(from, to, tokenId);
+    }
+
     function _burn(uint256 tokenId)
         internal
+        virtual
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        onlyRole(BURNER_ROLE)
     {
         super._burn(tokenId);
     }

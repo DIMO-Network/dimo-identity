@@ -36,6 +36,7 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@openzeppelin/hardhat-upgrades": "^1.21.0",
     "@types/chai": "^4.3.0",
     "@types/mocha": "^9.1.0",
     "@types/node": "^12.20.47",
@@ -60,6 +61,7 @@
     "prettier": "^2.6.2",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^1.5.1",
+    "solidity-ast": "^0.4.38",
     "solidity-coverage": "^0.7.20"
   },
   "dependencies": {

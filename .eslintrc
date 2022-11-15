@@ -56,7 +56,8 @@
           "hardhat-gas-reporter",
           "solidity-coverage",
           "@nomiclabs/hardhat-waffle",
-          "@nomiclabs/hardhat-ethers"
+          "@nomiclabs/hardhat-ethers",
+          "@openzeppelin/hardhat-upgrades"
         ]
       }
     ]

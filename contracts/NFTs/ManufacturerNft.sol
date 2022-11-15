@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./Base/NftBaseUpgradeable.sol";
 
 contract ManufacturerNft is Initializable, NftBaseUpgradeable {
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
@@ -13,7 +13,7 @@ contract ManufacturerNft is Initializable, NftBaseUpgradeable {
         string calldata name_,
         string calldata symbol_,
         string calldata baseUri_
-    ) public initializer {
+    ) external initializer {
         _baseNftInit(name_, symbol_, baseUri_);
     }
 }

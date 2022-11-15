@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, waffle, upgrades } from 'hardhat';
 
 import { MultiPrivilege } from '../typechain';
 import { createSnapshot, revertToSnapshot, C } from '../utils';
@@ -27,14 +27,23 @@ describe('MultiPrivilege', function () {
     const MultiPrivilegeFactory = await ethers.getContractFactory(
       'MultiPrivilege'
     );
-    multiPrivilegeInstance = await MultiPrivilegeFactory.connect(admin).deploy(
-      C.MULTI_PRIVILEGE_NAME,
-      C.MULTI_PRIVILEGE_SYMBOL
-    );
+    multiPrivilegeInstance = await upgrades.deployProxy(
+      MultiPrivilegeFactory,
+      [
+        C.MULTI_PRIVILEGE_NAME,
+        C.MULTI_PRIVILEGE_SYMBOL,
+        C.MULTI_PRIVILEGE_URI
+      ],
+      {
+        initializer: 'initialize',
+        kind: 'uups'
+      }
+      // eslint-disable-next-line prettier/prettier
+    ) as MultiPrivilege;
     await multiPrivilegeInstance.deployed();
 
     const receipt = await (
-      await multiPrivilegeInstance.safeMint(user1.address)
+      await multiPrivilegeInstance['safeMint(address)'](user1.address)
     ).wait();
 
     user1NftTokenId = receipt.events
@@ -58,8 +67,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance.connect(nonAdmin).createPrivilege(true, '')
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -106,8 +114,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance.connect(nonAdmin).enablePrivilege(0)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -169,8 +176,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance.connect(nonAdmin).disablePrivilege(0)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });

@@ -2,17 +2,17 @@
 pragma solidity ^0.8.13;
 
 import "./IMultiPrivilege.sol";
-import "../ERC721nftBase.sol";
+import "../NftBaseUpgradeable.sol";
 
-contract MultiPrivilege is ERC721nftBase, IMultiPrivilege {
-    using Counters for Counters.Counter;
+contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
+    using CountersUpgradeable for CountersUpgradeable.Counter;
 
     struct PrivilegeData {
         bool enabled;
         string description;
     }
 
-    Counters.Counter private _privilgeCounter;
+    CountersUpgradeable.Counter private _privilgeCounter;
 
     mapping(uint256 => PrivilegeData) public privilegeRecord;
 
@@ -20,9 +20,18 @@ contract MultiPrivilege is ERC721nftBase, IMultiPrivilege {
     mapping(uint256 => mapping(uint256 => mapping(address => uint256)))
         public privilegeEntry;
 
-    constructor(string memory name_, string memory symbol_)
-        ERC721nftBase(name_, symbol_)
-    {}
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(
+        string calldata name_,
+        string calldata symbol_,
+        string calldata baseUri_
+    ) external initializer {
+        _baseNftInit(name_, symbol_, baseUri_);
+    }
 
     // TODO Documentation
     function createPrivilege(bool enabled, string calldata decription)

@@ -14,6 +14,11 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 contract Manufacturer is AccessControlInternal {
     event ManufacturerNftProxySet(address indexed proxy);
     event ManufacturerAttributeAdded(string attribute);
+    event ManufacturerAttributeUpdated(
+        uint256 indexed tokenId,
+        string indexed attribute,
+        string indexed info
+    );
     event ControllerSet(address indexed controller);
     event ManufacturerNodeMinted(uint256 tokenId);
 
@@ -187,5 +192,32 @@ contract Manufacturer is AccessControlInternal {
                 attrInfoPairList[i].attribute
             ] = attrInfoPairList[i].info;
         }
+    }
+
+    /// @dev Internal function to update a single attribute
+    /// @dev attribute must be whitelisted
+    /// @param tokenId Node where the info will be added
+    /// @param attribute Attribute to be updated
+    /// @param info Info to be set
+    function _updateAttributeInfo(
+        uint256 tokenId,
+        string calldata attribute,
+        string calldata info
+    ) private {
+        require(
+            AttributeSet.exists(m.whitelistedAttributes, attribute),
+            "Not whitelisted"
+        );
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        ManufacturerStorage.Storage storage m = ManufacturerStorage
+            .getStorage();
+        address nftProxyAddress = m.nftProxyAddress;
+
+        uint256 index = AttributeSet.getIndex(
+            m.whitelistedAttributes,
+            attribute
+        );
+        ns.nodes[nftProxyAddress][tokenId].info[index] = info;
+        emit ManufacturerAttributeUpdated(tokenId, attribute, info);
     }
 }

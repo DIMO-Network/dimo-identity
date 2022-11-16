@@ -32,8 +32,18 @@ contract AftermarketDevice is
             "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
         );
 
+    bytes32 private constant UN_PAIR_TYPEHASH =
+        keccak256(
+            "UnPairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
+        );
+
     event AftermarketDeviceNftProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
+    event AftermarketDeviceAttributeUpdated(
+        uint256 indexed tokenId,
+        string indexed attribute,
+        string indexed info
+    );
     event AftermarketDeviceNodeMinted(
         uint256 indexed tokenId,
         address indexed aftermarketDeviceAddress
@@ -42,6 +52,7 @@ contract AftermarketDevice is
         uint256 indexed aftermarketDeviceNode,
         address indexed owner
     );
+
     event AftermarketDevicePaired(
         uint256 indexed aftermarketDeviceNode,
         uint256 indexed vehicleNode,
@@ -204,7 +215,6 @@ contract AftermarketDevice is
         uint256 vehicleNode,
         bytes calldata signature
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
@@ -251,6 +261,58 @@ contract AftermarketDevice is
         ms.links[adNftProxyAddress][aftermarketDeviceNode] = vehicleNode;
 
         emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
+    }
+
+    /// @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
+    /// @dev Caller must have the admin role
+    /// @param aftermarketDeviceNodes Array of aftermarket device node ids
+    function unpairAftermarketDevice(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
+        bytes calldata signature
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        bytes32 message = keccak256(
+            abi.encode(UN_PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
+        );
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        address vehicleNftProxyAddress = VehicleStorage
+            .getStorage()
+            .nftProxyAddress;
+        address adNftProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .nftProxyAddress;
+
+        address owner = INFT(vehicleNftProxyAddress).ownerOf(vehicleNode);
+
+        require(
+            owner == INFT(adNftProxyAddress).ownerOf(aftermarketDeviceNode),
+            "Owner of the nodes does not match"
+        );
+        require(
+            ms.links[vehicleNftProxyAddress][vehicleNode] > 0,
+            "Vehicle not already paired"
+        );
+        require(
+            ms.links[adNftProxyAddress][aftermarketDeviceNode] > 0,
+            "AD is not paired to vehicle"
+        );
+
+        //We just need to verify the owners's signature is correct.
+        require(
+            Eip712CheckerInternal._verifySignature(owner, message, signature),
+            "Invalid signature"
+        );
+
+        _vehicleNode = ms.links[adNftProxyAddress][_adNode];
+
+        ms.links[vehicleNftProxyAddress][vehicleNode] = 0;
+        ms.links[adNftProxyAddress][aftermarketDeviceNode] = 0;
+
+        emit AftermarketDeviceUnpaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            INFT(adNftProxyAddress).ownerOf(_adNode)
+        );
     }
 
     /// @notice Add infos to node
@@ -307,5 +369,33 @@ contract AftermarketDevice is
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
         }
+    }
+
+    /// @dev Internal function to update a single attribute
+    /// @dev attribute must be whitelisted
+    /// @param tokenId Node where the info will be added
+    /// @param attribute Attribute to be updated
+    /// @param info Info to be set
+    function _updateAttributeInfo(
+        uint256 tokenId,
+        string calldata attribute,
+        string calldata info
+    ) private {
+        require(
+            AttributeSet.exists(ads.whitelistedAttributes, attribute),
+            "Not whitelisted"
+        );
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        address nftProxyAddress = ads.nftProxyAddress;
+
+        uint256 index = AttributeSet.getIndex(
+            ads.whitelistedAttributes,
+            attribute
+        );
+        ns.nodes[nftProxyAddress][tokenId].info[index] = info;
+
+        emit AftermarketDeviceAttributeUpdated(tokenId, attribute, info);
     }
 }

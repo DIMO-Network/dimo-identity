@@ -61,4 +61,14 @@ library AttributeSet {
     {
         return set._indexes[key] != 0;
     }
+
+    function getIndex(Set storage set, string calldata key)
+        internal
+        returns (uint256)
+    {
+        if (exists(set, key)) {
+            return set._indexes[key];
+        }
+        return false;
+    }
 }

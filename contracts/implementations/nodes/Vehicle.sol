@@ -21,6 +21,11 @@ contract Vehicle is AccessControlInternal {
 
     event VehicleNftProxySet(address indexed proxy);
     event VehicleAttributeAdded(string attribute);
+    event VehicleAttributeUpdated(
+        uint256 indexed tokenId,
+        string indexed attribute,
+        string indexed info
+    );
     event VehicleNodeMinted(uint256 tokenId);
 
     // ***** Admin management ***** //
@@ -187,6 +192,32 @@ contract Vehicle is AccessControlInternal {
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
         }
+    }
+
+    /// @dev Internal function to update a single attribute
+    /// @dev attribute must be whitelisted
+    /// @param tokenId Node where the info will be added
+    /// @param attribute Attribute to be updated
+    /// @param info Info to be set
+    function _updateAttributeInfo(
+        uint256 tokenId,
+        string calldata attribute,
+        string calldata info
+    ) private {
+        require(
+            AttributeSet.exists(ads.whitelistedAttributes, attribute),
+            "Not whitelisted"
+        );
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+        address nftProxyAddress = s.nftProxyAddress;
+
+        uint256 index = AttributeSet.getIndex(
+            s.whitelistedAttributes,
+            attribute
+        );
+        ns.nodes[nftProxyAddress][tokenId].info[index] = info;
+        emit VehicleAttributeUpdated(tokenId, attribute, info);
     }
 
     /// @dev Internal function to add infos to node and calculate attribute and info hashes

@@ -12,12 +12,21 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         string description;
     }
 
+    struct NewData {
+        address[] users;
+        mapping(address => uint256) expiresAt;
+    }
+
     CountersUpgradeable.Counter private _privilgeCounter;
 
+    // tokenId => privilegeData
     mapping(uint256 => PrivilegeData) public privilegeRecord;
 
-    // tokenId => privId => user => expires at
-    mapping(uint256 => mapping(uint256 => mapping(address => uint256)))
+    // tokenId => version
+    mapping(uint256 => uint256) public tokenIdToVersion;
+
+    // tokenId => version => privId => user => expires at
+    mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => uint256))))
         public privilegeEntry;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -86,7 +95,9 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         require(privId < _privilgeCounter.current(), "Invalid privilege id");
         require(privilegeRecord[privId].enabled, "Privilege not enabled");
 
-        privilegeEntry[tokenId][privId][user] = expires;
+        privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][
+            user
+        ] = expires;
 
         emit PrivilegeAssigned(tokenId, privId, user, expires);
     }
@@ -103,11 +114,14 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         );
         require(
             privilegeRecord[privId].enabled &&
-                privilegeEntry[tokenId][privId][user] >= block.timestamp,
+                privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][
+                    user
+                ] >=
+                block.timestamp,
             "User does not have privilege"
         );
 
-        privilegeEntry[tokenId][privId][user] = 0;
+        privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][user] = 0;
 
         emit PrivilegeRevoked(tokenId, privId, user);
     }
@@ -120,7 +134,10 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     ) external view returns (bool) {
         if (privilegeRecord[privId].enabled) {
             return
-                privilegeEntry[tokenId][privId][user] >= block.timestamp ||
+                privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][
+                    user
+                ] >=
+                block.timestamp ||
                 ownerOf(tokenId) == user;
         }
         return false;
@@ -132,18 +149,26 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         uint256 privId,
         address user
     ) external view returns (uint256) {
-        return privilegeEntry[tokenId][privId][user];
+        return privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][user];
     }
 
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        virtual
         override
         returns (bool)
     {
         return
             interfaceId == type(IMultiPrivilege).interfaceId ||
             super.supportsInterface(interfaceId);
+    }
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override {
+        tokenIdToVersion[tokenId]++;
+        super._transfer(from, to, tokenId);
     }
 }

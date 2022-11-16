@@ -21,7 +21,8 @@
             "Vehicle": "0x0d1F7e97992041B60678eE6b4F5f364D7D5c3B99",
             "AftermarketDevice": "0x96546E65bE8B3262e835ED1E49802Ed6C7d57bd5",
             "AdLicenseValidator": "0x7BB03779d74b2784D5a3630DdaeE3318b6E14CeA",
-            "Mapper": "0x4E71d73845506cEC0e5Eb10B3442692f989622B0"
+            "Mapper": "0x4E71d73845506cEC0e5Eb10B3442692f989622B0",
+            "DevAdmin": "0xB1851AE3CF2073c81a237fF9d075eC7F99c2d643"
         },
         "nfts": {
             "ManufacturerNft": "0xc5c092530989D603eB591c732EBF68AA7F5a3dBe",

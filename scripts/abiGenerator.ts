@@ -31,6 +31,7 @@ async function main(paths: string[]) {
 
 main([
   'contracts/DIMORegistry.sol:DIMORegistry',
+  'contracts/dev/DevAdmin.sol:DevAdmin',
   'contracts/access/DimoAccessControl.sol:DimoAccessControl',
   'contracts/Eip712/Eip712Checker.sol:Eip712Checker',
   'contracts/implementations/AdLicenseValidator/AdLicenseValidator.sol:AdLicenseValidator',

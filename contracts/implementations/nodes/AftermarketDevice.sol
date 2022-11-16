@@ -59,15 +59,20 @@ contract AftermarketDevice is
         address indexed owner
     );
 
+    event AftermarketDeviceUnpaired(
+        uint256 indexed aftermarketDeviceNode,
+        uint256 indexed vehicleNode,
+        address indexed owner
+    );
+
     // ***** Admin management ***** //
 
     /// @notice Sets the NFT proxy associated with the Aftermarket Device node
     /// @dev Only an admin can set the address
     /// @param addr The address of the proxy
-    function setAftermarketDeviceNftProxyAddress(address addr)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setAftermarketDeviceNftProxyAddress(
+        address addr
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(addr != address(0), "Non zero address");
         AftermarketDeviceStorage.getStorage().nftProxyAddress = addr;
 
@@ -77,10 +82,9 @@ contract AftermarketDevice is
     /// @notice Adds an attribute to the whielist
     /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
-    function addAftermarketDeviceAttribute(string calldata attribute)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function addAftermarketDeviceAttribute(
+        string calldata attribute
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(
             AttributeSet.add(
                 AftermarketDeviceStorage.getStorage().whitelistedAttributes,
@@ -265,8 +269,10 @@ contract AftermarketDevice is
 
     /// @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
     /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNodes Array of aftermarket device node ids
-    function unpairAftermarketDevice(
+    /// @param aftermarketDeviceNode Aftermarket device node id
+    /// @param vehicleNode Vehicle node id
+    /// @param signature User's signature hash
+    function unpairAftermarketDeviceSign(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         bytes calldata signature
@@ -290,7 +296,7 @@ contract AftermarketDevice is
         );
         require(
             ms.links[vehicleNftProxyAddress][vehicleNode] > 0,
-            "Vehicle not already paired"
+            "Vehicle not paired to AD"
         );
         require(
             ms.links[adNftProxyAddress][aftermarketDeviceNode] > 0,
@@ -303,15 +309,13 @@ contract AftermarketDevice is
             "Invalid signature"
         );
 
-        _vehicleNode = ms.links[adNftProxyAddress][_adNode];
-
         ms.links[vehicleNftProxyAddress][vehicleNode] = 0;
         ms.links[adNftProxyAddress][aftermarketDeviceNode] = 0;
 
         emit AftermarketDeviceUnpaired(
             aftermarketDeviceNode,
             vehicleNode,
-            INFT(adNftProxyAddress).ownerOf(_adNode)
+            owner
         );
     }
 
@@ -331,11 +335,9 @@ contract AftermarketDevice is
     /// @notice Gets the AD Id by the device address
     /// @dev If the device is not minted it will return 0
     /// @param addr Address associated with the aftermarket device
-    function getAftermarketDeviceIdByAddress(address addr)
-        external
-        view
-        returns (uint256 nodeId)
-    {
+    function getAftermarketDeviceIdByAddress(
+        address addr
+    ) external view returns (uint256 nodeId) {
         nodeId = AftermarketDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
         ];
@@ -348,9 +350,10 @@ contract AftermarketDevice is
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function _setInfo(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
-        private
-    {
+    function _setInfo(
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfo
+    ) private {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
@@ -381,20 +384,16 @@ contract AftermarketDevice is
         string calldata attribute,
         string calldata info
     ) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
         require(
             AttributeSet.exists(ads.whitelistedAttributes, attribute),
             "Not whitelisted"
         );
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-            .getStorage();
         address nftProxyAddress = ads.nftProxyAddress;
 
-        uint256 index = AttributeSet.getIndex(
-            ads.whitelistedAttributes,
-            attribute
-        );
-        ns.nodes[nftProxyAddress][tokenId].info[index] = info;
+        ns.nodes[nftProxyAddress][tokenId].info[attribute] = info;
 
         emit AftermarketDeviceAttributeUpdated(tokenId, attribute, info);
     }

@@ -1306,4 +1306,315 @@ describe('AftermarketDevice', function () {
       expect(tokenId).to.equal(1);
     });
   });
+
+  describe('unpairAftermarketDeviceSign', () => {
+    let claimOwnerSig: string;
+    let claimAdSig: string;
+    let pairSignature: string;
+    let unPairSignature: string;
+    before(async () => {
+      claimOwnerSig = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      claimAdSig = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      pairSignature = await signMessage({
+        _signer: user1,
+        _primaryType: 'PairAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          vehicleNode: '1'
+        }
+      });
+      unPairSignature = await signMessage({
+        _signer: user1,
+        _primaryType: 'UnPairAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          vehicleNode: '1'
+        }
+      });
+    });
+
+    beforeEach(async () => {
+      await adNftInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList
+        );
+    });
+
+    context('Error handling', () => {
+
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(nonAdmin)
+            .unpairAftermarketDeviceSign(1, 1, unPairSignature)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          }`
+        );
+      });
+      // it.skip('Should revert if node is not an Aftermarket Device', async () => {
+      //   await expect(
+      //     aftermarketDeviceInstance
+      //       .connect(admin)
+      //       .unpairAftermarketDeviceSign(99, 4, unPairSignature)
+      //   ).to.be.revertedWith('Invalid AD node');
+      // });
+      // it.skip('Should revert if node is not a Vehicle', async () => {
+      //   await expect(
+      //     aftermarketDeviceInstance
+      //       .connect(admin)
+      //       .unPairSignature(2, 99, pairSignature)
+      //   ).to.be.revertedWith('Invalid vehicle node');
+      // });
+      it('Should revert if owner is not the vehicle node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(2, user2.address, C.mockVehicleAttributeInfoPairs);
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .unpairAftermarketDeviceSign(2, 1, unPairSignature)
+        ).to.be.revertedWith('Owner of the nodes does not match');
+      });
+
+      it('Should revert if owner is not the aftermarket device node owner', async () => {
+
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .unpairAftermarketDeviceSign(1, 1, unPairSignature)
+        ).to.be.revertedWith('Owner of the nodes does not match');
+      });
+
+      it('Should revert if vehicle is not already paired', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+        await aftermarketDeviceInstance
+        .connect(admin)
+        .claimAftermarketDeviceSign(
+          1,
+          user1.address,
+          claimOwnerSig,
+          claimAdSig
+        );
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .unpairAftermarketDeviceSign(1, 1, unPairSignature)
+        ).to.be.revertedWith('Vehicle not paired to AD');
+      });
+
+      context('Wrong signature', () => {
+        beforeEach(async () => {
+          await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+          await aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceSign(
+            1,
+            user1.address,
+            claimOwnerSig,
+            claimAdSig
+          );
+
+          await aftermarketDeviceInstance
+          .connect(admin)
+          .pairAftermarketDeviceSign(1, 1, pairSignature)
+        });
+
+        it('Should revert if domain name is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _domainName: 'Wrong domain',
+            _primaryType: 'UnPairAftermarketDeviceSign',
+            _verifyingContract: aftermarketDeviceInstance.address,
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1'
+            }
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .unpairAftermarketDeviceSign(1, 1, invalidSignature)
+          ).to.be.revertedWith('Invalid signature');
+        });
+        it('Should revert if domain version is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _domainVersion: '99',
+            _primaryType: 'UnPairAftermarketDeviceSign',
+            _verifyingContract: aftermarketDeviceInstance.address,
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1'
+            }
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .unpairAftermarketDeviceSign(1, 1, invalidSignature)
+          ).to.be.revertedWith('Invalid signature');
+        });
+        it('Should revert if domain chain ID is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _chainId: 99,
+            _primaryType: 'UnPairAftermarketDeviceSign',
+            _verifyingContract: aftermarketDeviceInstance.address,
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1'
+            }
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .unpairAftermarketDeviceSign(1, 1, invalidSignature)
+          ).to.be.revertedWith('Invalid signature');
+        });
+
+        it('Should revert if aftermarket device node is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'UnPairAftermarketDeviceSign',
+            _verifyingContract: aftermarketDeviceInstance.address,
+            message: {
+              aftermarketDeviceNode: '99',
+              vehicleNode: '1'
+            }
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .unpairAftermarketDeviceSign(1, 1, invalidSignature)
+          ).to.be.revertedWith('Invalid signature');
+        });
+
+        it('Should revert if aftermarket vehicle node is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'UnPairAftermarketDeviceSign',
+            _verifyingContract: aftermarketDeviceInstance.address,
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '99'
+            }
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .unpairAftermarketDeviceSign(1, 1, invalidSignature)
+          ).to.be.revertedWith('Invalid signature');
+        });
+      });
+    });
+
+    context('State change', () => {
+
+      beforeEach(async () => {
+        await vehicleInstance
+        .connect(admin)
+        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+        await aftermarketDeviceInstance
+        .connect(admin)
+        .claimAftermarketDeviceSign(
+          1,
+          user1.address,
+          claimOwnerSig,
+          claimAdSig
+        );
+
+        await aftermarketDeviceInstance
+        .connect(admin)
+        .pairAftermarketDeviceSign(1, 1, pairSignature)
+      });
+
+      it('Should correctly unmap the aftermarket device from vehicle', async () => {
+        await aftermarketDeviceInstance
+          .connect(admin)
+          .unpairAftermarketDeviceSign(1, 1, unPairSignature);
+
+        expect(
+          await mapperInstance.getLink(adNftInstance.address, 1)
+        ).to.be.equal(0);
+      });
+
+      it('Should correctly unmap the vehicle from the aftermarket device', async () => {
+        await aftermarketDeviceInstance
+          .connect(admin)
+          .unpairAftermarketDeviceSign(1, 1, unPairSignature);
+
+        expect(
+          await mapperInstance.getLink(vehicleNftInstance.address, 1)
+        ).to.be.equal(0);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AftermarketDeviceUnPaired event with correct params', async () => {
+        await vehicleInstance
+        .connect(admin)
+        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+        await aftermarketDeviceInstance
+        .connect(admin)
+        .claimAftermarketDeviceSign(
+          1,
+          user1.address,
+          claimOwnerSig,
+          claimAdSig
+        );
+
+        await aftermarketDeviceInstance
+        .connect(admin)
+        .pairAftermarketDeviceSign(1, 1, pairSignature)
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .unpairAftermarketDeviceSign(1, 1, unPairSignature)
+        )
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceUnpaired')
+          .withArgs(1, 1, user1.address);
+      });
+    });
+  });
 });

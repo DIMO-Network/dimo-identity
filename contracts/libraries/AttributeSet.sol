@@ -19,10 +19,10 @@ library AttributeSet {
         }
     }
 
-    function remove(Set storage set, string calldata key)
-        internal
-        returns (bool)
-    {
+    function remove(
+        Set storage set,
+        string calldata key
+    ) internal returns (bool) {
         uint256 valueIndex = set._indexes[key];
 
         if (valueIndex != 0) {
@@ -54,21 +54,17 @@ library AttributeSet {
         return (set._values.length);
     }
 
-    function exists(Set storage set, string calldata key)
-        internal
-        view
-        returns (bool)
-    {
+    function exists(
+        Set storage set,
+        string calldata key
+    ) internal view returns (bool) {
         return set._indexes[key] != 0;
     }
 
-    function getIndex(Set storage set, string calldata key)
-        internal
-        returns (uint256)
-    {
-        if (exists(set, key)) {
-            return set._indexes[key];
-        }
-        return false;
+    function getIndex(
+        Set storage set,
+        string calldata key
+    ) internal returns (uint256) {
+        return set._indexes[key];
     }
 }

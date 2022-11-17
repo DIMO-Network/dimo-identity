@@ -295,11 +295,12 @@ contract AftermarketDevice is
             "Owner of the nodes does not match"
         );
         require(
-            ms.links[vehicleNftProxyAddress][vehicleNode] > 0,
+            ms.links[vehicleNftProxyAddress][vehicleNode] ==
+                aftermarketDeviceNode,
             "Vehicle not paired to AD"
         );
         require(
-            ms.links[adNftProxyAddress][aftermarketDeviceNode] > 0,
+            ms.links[adNftProxyAddress][aftermarketDeviceNode] == vehicleNode,
             "AD is not paired to vehicle"
         );
 

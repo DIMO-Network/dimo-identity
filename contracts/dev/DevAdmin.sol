@@ -13,6 +13,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 /// @dev Admin module for development and testing
 contract DevAdmin is AccessControlInternal {
+    event AftermarketDeviceUnclaimed(uint256 indexed aftermarketDeviceNode);
     event AftermarketDeviceTransferred(
         uint256 indexed aftermarketDeviceNode,
         address indexed oldOwner,
@@ -50,6 +51,25 @@ contract DevAdmin is AccessControlInternal {
             oldOwner,
             newOwner
         );
+    }
+
+    /// @dev Sets deviceClaimed to false for each aftermarket device
+    /// @dev Caller must have the admin role
+    /// @param aftermarketDeviceNodes Array of aftermarket device node ids
+    function unclaimAftermarketDeviceNode(
+        uint256[] calldata aftermarketDeviceNodes
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+
+        uint256 _adNode;
+        for (uint256 i = 0; i < aftermarketDeviceNodes.length; i++) {
+            _adNode = aftermarketDeviceNodes[i];
+
+            ads.deviceClaimed[_adNode] = false;
+
+            emit AftermarketDeviceUnclaimed(_adNode);
+        }
     }
 
     /// @dev Unpairs a list of aftermarket device from their respective vehicles by the device node

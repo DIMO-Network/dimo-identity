@@ -315,8 +315,7 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .transferAftermarketDeviceOwnership(1, user2.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -351,6 +350,159 @@ describe('DevAdmin', function () {
         )
           .to.emit(devAdminInstance, 'AftermarketDeviceTransferred')
           .withArgs(1, user1.address, user2.address);
+      });
+    });
+  });
+
+  describe('unclaimAftermarketDeviceNode', () => {
+    let claimOwnerSig1: string;
+    let claimOwnerSig2: string;
+    let claimAdSig1: string;
+    let claimAdSig2: string;
+    before(async () => {
+      claimOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      claimOwnerSig2 = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '2',
+          owner: user1.address
+        }
+      });
+      claimAdSig1 = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      claimAdSig2 = await signMessage({
+        _signer: adAddress2,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '2',
+          owner: user1.address
+        }
+      });
+    });
+
+    beforeEach(async () => {
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList
+        );
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      await aftermarketDeviceInstance
+        .connect(admin)
+        .claimAftermarketDeviceSign(
+          1,
+          user1.address,
+          claimOwnerSig1,
+          claimAdSig1
+        );
+      await aftermarketDeviceInstance
+        .connect(admin)
+        .claimAftermarketDeviceSign(
+          2,
+          user1.address,
+          claimOwnerSig2,
+          claimAdSig2
+        );
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .unclaimAftermarketDeviceNode([1])
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          }`
+        );
+      });
+      // TODO Check node type ?
+      it.skip('Should revert if node is not an Aftermarket Device', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .unpairAftermarketDeviceByDeviceNode([1, 99])
+        ).to.be.revertedWith('Invalid AD node');
+      });
+    });
+
+    context('State change', () => {
+      it('Should correctly unclaim aftermarket Device', async () => {
+        await expect(aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceSign(
+            1,
+            user1.address,
+            claimOwnerSig1,
+            claimAdSig1
+          )).to.be.revertedWith('Device already claimed');
+        await expect(aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceSign(
+            2,
+            user1.address,
+            claimOwnerSig2,
+            claimAdSig2
+          )).to.be.revertedWith('Device already claimed');
+
+        await devAdminInstance
+          .connect(admin)
+          .unclaimAftermarketDeviceNode([1, 2]);
+
+        await expect(aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceSign(
+            1,
+            user1.address,
+            claimOwnerSig1,
+            claimAdSig1
+          )).to.not.be.reverted;
+        await expect(aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceSign(
+            2,
+            user1.address,
+            claimOwnerSig2,
+            claimAdSig2
+          )).to.not.be.reverted;
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AftermarketDeviceUnclaimed event with correct params', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .unclaimAftermarketDeviceNode([1, 2])
+        )
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimed')
+          .withArgs(1)
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimed')
+          .withArgs(2);
       });
     });
   });
@@ -463,8 +615,7 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .unpairAftermarketDeviceByDeviceNode([2])
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -642,8 +793,7 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .unpairAftermarketDeviceByVehicleNode([4, 5])
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });

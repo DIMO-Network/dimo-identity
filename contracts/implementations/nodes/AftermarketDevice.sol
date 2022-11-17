@@ -166,10 +166,8 @@ contract AftermarketDevice is
         //     "Invalid AD node"
         // );
         require(
-            MapperStorage.getStorage().links[ads.nftProxyAddress][
-                aftermarketDeviceNode
-            ] == 0,
-            "Device already paired"
+            !ads.deviceClaimed[aftermarketDeviceNode],
+            "Device already claimed"
         );
         require(
             Eip712CheckerInternal._verifySignature(owner, message, ownerSig),
@@ -184,6 +182,7 @@ contract AftermarketDevice is
             "Invalid signature"
         );
 
+        ads.deviceClaimed[aftermarketDeviceNode] = true;
         adNftProxy.safeTransferFrom(
             adNftProxy.ownerOf(aftermarketDeviceNode),
             owner,
@@ -204,7 +203,6 @@ contract AftermarketDevice is
         uint256 vehicleNode,
         bytes calldata signature
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
@@ -217,19 +215,15 @@ contract AftermarketDevice is
             .nftProxyAddress;
 
         // TODO Check node type?
-        // require(
-        //     ns.nodes[aftermarketDeviceNode].nodeType ==
-        //         AftermarketDeviceStorage.getStorage().nodeType,
-        //     "Invalid AD node"
-        // );
-        // require(
-        //     ns.nodes[vehicleNode].nodeType ==
-        //         VehicleStorage.getStorage().nodeType,
-        //     "Invalid vehicle node"
-        // );
 
         address owner = INFT(vehicleNftProxyAddress).ownerOf(vehicleNode);
 
+        require(
+            AftermarketDeviceStorage.getStorage().deviceClaimed[
+                aftermarketDeviceNode
+            ],
+            "AD must be claimed"
+        );
         require(
             owner == INFT(adNftProxyAddress).ownerOf(aftermarketDeviceNode),
             "Owner of the nodes does not match"

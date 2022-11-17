@@ -10,11 +10,14 @@ library AftermarketDeviceStorage {
         keccak256("DIMORegistry.aftermarketDevice.storage");
 
     struct Storage {
-        uint256 nodeType; // TODO To be removed when is working
         address nftProxyAddress;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
+        // AD Id => already claimed or not
+        mapping(uint256 => bool) deviceClaimed;
+        // AD address => AD Id
         mapping(address => uint256) deviceAddressToNodeId;
+        // AD Id => AD address
         mapping(uint256 => address) nodeIdToDeviceAddress;
     }
 

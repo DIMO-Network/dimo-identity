@@ -10,7 +10,6 @@ library VehicleStorage {
         keccak256("DIMORegistry.vehicle.storage");
 
     struct Storage {
-        uint256 nodeType; // TODO To be removed when is working
         address nftProxyAddress;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;

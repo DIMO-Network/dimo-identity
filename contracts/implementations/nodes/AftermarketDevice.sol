@@ -373,6 +373,12 @@ contract AftermarketDevice is
             ns.nodes[nftProxyAddress][tokenId].info[
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
+
+            emit AftermarketDeviceAttributeUpdated(
+                tokenId,
+                attrInfo[i].attribute,
+                attrInfo[i].info
+            );
         }
     }
 

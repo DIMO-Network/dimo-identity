@@ -267,7 +267,8 @@ contract AftermarketDevice is
         emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
     }
 
-    /// @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
+    /// @dev Unpairs an aftermarket device from a vehicles through a metatransaction
+    /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role
     /// @param aftermarketDeviceNode Aftermarket device node id
     /// @param vehicleNode Vehicle node id

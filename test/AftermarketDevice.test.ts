@@ -1231,6 +1231,20 @@ describe('AftermarketDevice', function () {
       });
     });
 
+    context('Events', () => {
+      it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .setAftermarketDeviceInfo(1, C.mockAdAttributeInfoPairs)
+        )
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+          .withArgs(1, C.mockAdAttributeInfoPairs[0].attribute, C.mockAdAttributeInfoPairs[0].info)
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+          .withArgs(1, C.mockAdAttributeInfoPairs[1].attribute, C.mockAdAttributeInfoPairs[1].info);
+      });
+    });
+
     context('State change', () => {
       it('Should correctly set infos', async () => {
         const localNewAttributeInfoPairs = JSON.parse(
@@ -1272,6 +1286,97 @@ describe('AftermarketDevice', function () {
             C.mockAftermarketDeviceAttribute2
           )
         ).to.be.equal(localNewAttributeInfoPairs[1].info);
+      });
+    });
+  });
+
+
+  describe('setAftermarketDeviceAttribute', () => {
+    beforeEach(async () => {
+      await adNftInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList
+        );
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(nonAdmin)
+            .setAftermarketDeviceAttribute(1, C.mockAftermarketDeviceAttribute1, C.mockAftermarketDeviceInfo1)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          }`
+        );
+      });
+      // TODO Check node type?
+      it.skip('Should revert if node is not an Aftermarket Device', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .setAftermarketDeviceAttribute(1, C.mockAftermarketDeviceAttribute1, C.mockAftermarketDeviceInfo1)
+        ).to.be.revertedWith('Node must be an AD');
+      });
+      it('Should revert if attribute is not whitelisted', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .setAftermarketDeviceAttribute(1, C.mockAftermarketDeviceAttribute3, C.mockAftermarketDeviceInfo1)
+        ).to.be.revertedWith('Not whitelisted');
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AftermarketDeviceAttributeSet event with correct params', async () => {
+        await expect(aftermarketDeviceInstance
+          .connect(admin)
+          .setAftermarketDeviceAttribute(1, C.mockAftermarketDeviceAttribute1, C.mockAftermarketDeviceInfo3)
+        )
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+          .withArgs(1, C.mockAftermarketDeviceAttribute1, C.mockAftermarketDeviceInfo3);
+      });
+    });
+
+    context('State change', () => {
+      it('Should correctly set infos', async () => {
+        const localNewAttributeInfoPairs = JSON.parse(
+          JSON.stringify(C.mockAdAttributeInfoPairs)
+        );
+        localNewAttributeInfoPairs[0].info = 'New Info 0';
+        localNewAttributeInfoPairs[1].info = 'New Info 1';
+
+        expect(
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            1,
+            C.mockAftermarketDeviceAttribute1
+          )
+        ).to.be.equal(C.mockAftermarketDeviceInfo1);
+        expect(
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            1,
+            C.mockAftermarketDeviceAttribute2
+          )
+        ).to.be.equal(C.mockAftermarketDeviceInfo2);
+
+        await aftermarketDeviceInstance
+          .connect(admin)
+          .setAftermarketDeviceAttribute(1, C.mockAftermarketDeviceAttribute1, C.mockAftermarketDeviceInfo3)
+
+        expect(
+          await nodesInstance.getInfo(
+            adNftInstance.address,
+            1,
+            C.mockAftermarketDeviceAttribute1
+          )
+        ).to.be.equal(C.mockAftermarketDeviceInfo3);
       });
     });
   });

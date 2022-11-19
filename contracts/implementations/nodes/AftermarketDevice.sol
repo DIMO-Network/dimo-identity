@@ -39,7 +39,7 @@ contract AftermarketDevice is
 
     event AftermarketDeviceNftProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
-    event AftermarketDeviceAttributeUpdated(
+    event AftermarketDeviceAttributeSet(
         uint256 indexed tokenId,
         string indexed attribute,
         string indexed info
@@ -334,6 +334,21 @@ contract AftermarketDevice is
         _setInfo(tokenId, attrInfo);
     }
 
+    /// @notice Update single attribute infos on node
+    /// @dev attributes and infos arrays length must match
+    /// @dev attributes must be whitelisted
+    /// @param tokenId Node where the info will be added
+    /// @param attribute Attribute to be updated
+    /// @param info Info to be set
+    function setAftermarketDeviceAttribute(
+        uint256 tokenId,
+        string calldata attribute,
+        string calldata info
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // TODO Check nft id ?
+        _setAttribute(tokenId, attribute, info);
+    }
+
     /// @notice Gets the AD Id by the device address
     /// @dev If the device is not minted it will return 0
     /// @param addr Address associated with the aftermarket device
@@ -374,7 +389,7 @@ contract AftermarketDevice is
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
 
-            emit AftermarketDeviceAttributeUpdated(
+            emit AftermarketDeviceAttributeSet(
                 tokenId,
                 attrInfo[i].attribute,
                 attrInfo[i].info
@@ -382,12 +397,12 @@ contract AftermarketDevice is
         }
     }
 
-    /// @dev Internal function to update a single attribute
+    /// @dev Internal function to set a single attribute
     /// @dev attribute must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attribute Attribute to be updated
     /// @param info Info to be set
-    function _updateAttributeInfo(
+    function _setAttribute(
         uint256 tokenId,
         string calldata attribute,
         string calldata info
@@ -403,6 +418,6 @@ contract AftermarketDevice is
 
         ns.nodes[nftProxyAddress][tokenId].info[attribute] = info;
 
-        emit AftermarketDeviceAttributeUpdated(tokenId, attribute, info);
+        emit AftermarketDeviceAttributeSet(tokenId, attribute, info);
     }
 }

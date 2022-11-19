@@ -32,7 +32,7 @@ contract AftermarketDevice is
             "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
         );
 
-    bytes32 private constant UN_PAIR_TYPEHASH =
+    bytes32 private constant UNPAIR_TYPEHASH =
         keccak256(
             "UnPairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
         );
@@ -278,7 +278,7 @@ contract AftermarketDevice is
         bytes calldata signature
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         bytes32 message = keccak256(
-            abi.encode(UN_PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
+            abi.encode(UNPAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
         );
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         address vehicleNftProxyAddress = VehicleStorage

@@ -21,7 +21,7 @@ interface IMultiPrivilege {
         address indexed user
     );
 
-    function assignPrivilege(
+    function grantPrivilege(
         uint256 tokenId,
         uint256 privId,
         address user,

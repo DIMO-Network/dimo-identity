@@ -80,7 +80,7 @@ describe('MultiPrivilege', function () {
           .createPrivilege(true, C.MULTI_PRIVILEGE_DESCRIPTION);
 
         const [enabled, description] =
-          await multiPrivilegeInstance.privilegeRecord(0);
+          await multiPrivilegeInstance.privilegeRecord(1);
 
         // eslint-disable-next-line no-unused-expressions
         expect(enabled).to.be.true;
@@ -97,7 +97,7 @@ describe('MultiPrivilege', function () {
           )
         )
           .to.emit(multiPrivilegeInstance, 'PrivilegeCreated')
-          .withArgs(0, true, C.MULTI_PRIVILEGE_DESCRIPTION);
+          .withArgs(1, true, C.MULTI_PRIVILEGE_DESCRIPTION);
       });
     });
   });
@@ -112,7 +112,7 @@ describe('MultiPrivilege', function () {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
-          multiPrivilegeInstance.connect(nonAdmin).enablePrivilege(0)
+          multiPrivilegeInstance.connect(nonAdmin).enablePrivilege(1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
@@ -125,7 +125,7 @@ describe('MultiPrivilege', function () {
       });
       it('Should revert if privilege is already enabled', async () => {
         await expect(
-          multiPrivilegeInstance.connect(admin).enablePrivilege(0)
+          multiPrivilegeInstance.connect(admin).enablePrivilege(1)
         ).to.be.revertedWith('Privilege is enabled');
       });
     });
@@ -135,17 +135,17 @@ describe('MultiPrivilege', function () {
         await multiPrivilegeInstance
           .connect(admin)
           .createPrivilege(true, C.MULTI_PRIVILEGE_DESCRIPTION);
-        await multiPrivilegeInstance.connect(admin).disablePrivilege(0);
+        await multiPrivilegeInstance.connect(admin).disablePrivilege(1);
 
-        const enabledBefore = (await multiPrivilegeInstance.privilegeRecord(0))
+        const enabledBefore = (await multiPrivilegeInstance.privilegeRecord(1))
           .enabled;
 
         // eslint-disable-next-line no-unused-expressions
         expect(enabledBefore).to.be.false;
 
-        await multiPrivilegeInstance.connect(admin).enablePrivilege(0);
+        await multiPrivilegeInstance.connect(admin).enablePrivilege(1);
 
-        const enabledAfter = (await multiPrivilegeInstance.privilegeRecord(0))
+        const enabledAfter = (await multiPrivilegeInstance.privilegeRecord(1))
           .enabled;
 
         // eslint-disable-next-line no-unused-expressions
@@ -155,11 +155,11 @@ describe('MultiPrivilege', function () {
 
     context('Events', () => {
       it('Should emit PrivilegeEnabled event with correct params', async () => {
-        await multiPrivilegeInstance.connect(admin).disablePrivilege(0);
+        await multiPrivilegeInstance.connect(admin).disablePrivilege(1);
 
-        await expect(multiPrivilegeInstance.connect(admin).enablePrivilege(0))
+        await expect(multiPrivilegeInstance.connect(admin).enablePrivilege(1))
           .to.emit(multiPrivilegeInstance, 'PrivilegeEnabled')
-          .withArgs(0);
+          .withArgs(1);
       });
     });
   });
@@ -174,7 +174,7 @@ describe('MultiPrivilege', function () {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
-          multiPrivilegeInstance.connect(nonAdmin).disablePrivilege(0)
+          multiPrivilegeInstance.connect(nonAdmin).disablePrivilege(1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
@@ -187,7 +187,7 @@ describe('MultiPrivilege', function () {
       });
       it('Should revert if privilege is already disabled', async () => {
         await expect(
-          multiPrivilegeInstance.connect(admin).disablePrivilege(0)
+          multiPrivilegeInstance.connect(admin).disablePrivilege(1)
         ).to.be.revertedWith('Privilege is disabled');
       });
     });
@@ -197,17 +197,17 @@ describe('MultiPrivilege', function () {
         await multiPrivilegeInstance
           .connect(admin)
           .createPrivilege(true, C.MULTI_PRIVILEGE_DESCRIPTION);
-        await multiPrivilegeInstance.connect(admin).enablePrivilege(0);
+        await multiPrivilegeInstance.connect(admin).enablePrivilege(1);
 
-        const disabledBefore = (await multiPrivilegeInstance.privilegeRecord(0))
+        const disabledBefore = (await multiPrivilegeInstance.privilegeRecord(1))
           .enabled;
 
         // eslint-disable-next-line no-unused-expressions
         expect(disabledBefore).to.be.true;
 
-        await multiPrivilegeInstance.connect(admin).disablePrivilege(0);
+        await multiPrivilegeInstance.connect(admin).disablePrivilege(1);
 
-        const disabledAfter = (await multiPrivilegeInstance.privilegeRecord(0))
+        const disabledAfter = (await multiPrivilegeInstance.privilegeRecord(1))
           .enabled;
 
         // eslint-disable-next-line no-unused-expressions
@@ -217,24 +217,24 @@ describe('MultiPrivilege', function () {
 
     context('Events', () => {
       it('Should emit PrivilegeDisabled event with correct params', async () => {
-        await multiPrivilegeInstance.connect(admin).enablePrivilege(0);
+        await multiPrivilegeInstance.connect(admin).enablePrivilege(1);
 
-        await expect(multiPrivilegeInstance.connect(admin).disablePrivilege(0))
+        await expect(multiPrivilegeInstance.connect(admin).disablePrivilege(1))
           .to.emit(multiPrivilegeInstance, 'PrivilegeDisabled')
-          .withArgs(0);
+          .withArgs(1);
       });
     });
   });
 
-  describe('assignPrivilege', () => {
+  describe('grantPrivilege', () => {
     context('Error handling', () => {
       it('Should revert if caller is not owner or approved', async () => {
         await expect(
           multiPrivilegeInstance
             .connect(nonAdmin)
-            .assignPrivilege(
+            .grantPrivilege(
               nftTokenId,
-              0,
+              1,
               user2.address,
               expiresAtDefault
             )
@@ -244,7 +244,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(user1)
-            .assignPrivilege(
+            .grantPrivilege(
               nftTokenId,
               99,
               user2.address,
@@ -258,9 +258,9 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(user1)
-            .assignPrivilege(
+            .grantPrivilege(
               nftTokenId,
-              0,
+              1,
               user2.address,
               expiresAtDefault
             )
@@ -274,10 +274,10 @@ describe('MultiPrivilege', function () {
 
         await multiPrivilegeInstance
           .connect(user1)
-          .assignPrivilege(nftTokenId, 0, user2.address, expiresAtDefault);
+          .grantPrivilege(nftTokenId, 1, user2.address, expiresAtDefault);
         const expiresAt = await multiPrivilegeInstance.privilegeExpiresAt(
           nftTokenId,
-          0,
+          1,
           user2.address
         );
 
@@ -292,15 +292,15 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(user1)
-            .assignPrivilege(
+            .grantPrivilege(
               nftTokenId,
-              0,
+              1,
               user2.address,
               expiresAtDefault
             )
         )
           .to.emit(multiPrivilegeInstance, 'PrivilegeAssigned')
-          .withArgs(nftTokenId, 0, user2.address, expiresAtDefault);
+          .withArgs(nftTokenId, 1, user2.address, expiresAtDefault);
       });
     });
 
@@ -313,10 +313,10 @@ describe('MultiPrivilege', function () {
 
         await multiPrivilegeInstance
           .connect(newOwner)
-          .assignPrivilege(nftTokenId, 0, user2.address, expiresAtDefault);
+          .grantPrivilege(nftTokenId, 1, user2.address, expiresAtDefault);
         const expiresAt = await multiPrivilegeInstance.privilegeExpiresAt(
           nftTokenId,
-          0,
+          1,
           user2.address
         );
 
@@ -330,7 +330,7 @@ describe('MultiPrivilege', function () {
       await multiPrivilegeInstance.createPrivilege(true, '');
       await multiPrivilegeInstance
         .connect(user1)
-        .assignPrivilege(nftTokenId, 0, user2.address, expiresAtDefault);
+        .grantPrivilege(nftTokenId, 1, user2.address, expiresAtDefault);
     });
 
     context('Error handling', () => {
@@ -338,7 +338,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(nonAdmin)
-            .revokePrivilege(nftTokenId, 0, user2.address)
+            .revokePrivilege(nftTokenId, 1, user2.address)
         ).to.be.revertedWith('Caller is not owner nor approved');
       });
       it('Should revert if privilege Id is not valid', async () => {
@@ -352,20 +352,20 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(user1)
-            .revokePrivilege(nftTokenId, 0, user3.address)
+            .revokePrivilege(nftTokenId, 1, user3.address)
         ).to.be.revertedWith('User does not have privilege');
       });
     });
 
     context('State change', () => {
-      it('Should correctly set user and privilege expiration to 0', async () => {
+      it('Should correctly set user and privilege expiration to 1', async () => {
         await multiPrivilegeInstance
           .connect(user1)
-          .revokePrivilege(nftTokenId, 0, user2.address);
+          .revokePrivilege(nftTokenId, 1, user2.address);
 
         const expiresAt = await multiPrivilegeInstance.privilegeExpiresAt(
           nftTokenId,
-          0,
+          1,
           user2.address
         );
 
@@ -378,10 +378,10 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(user1)
-            .revokePrivilege(nftTokenId, 0, user2.address)
+            .revokePrivilege(nftTokenId, 1, user2.address)
         )
           .to.emit(multiPrivilegeInstance, 'PrivilegeRevoked')
-          .withArgs(nftTokenId, 0, user2.address);
+          .withArgs(nftTokenId, 1, user2.address);
       });
     });
 
@@ -395,20 +395,20 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(newOwner)
-            .revokePrivilege(nftTokenId, 0, user2.address)
+            .revokePrivilege(nftTokenId, 1, user2.address)
         ).to.be.revertedWith('User does not have privilege');
       });
-      it('Should correctly set user and privilege expiration to 0', async () => {
+      it('Should correctly set user and privilege expiration to 1', async () => {
         await multiPrivilegeInstance
           .connect(newOwner)
-          .assignPrivilege(nftTokenId, 0, user2.address, expiresAtDefault);
+          .grantPrivilege(nftTokenId, 1, user2.address, expiresAtDefault);
         await multiPrivilegeInstance
           .connect(newOwner)
-          .revokePrivilege(nftTokenId, 0, user2.address);
+          .revokePrivilege(nftTokenId, 1, user2.address);
 
         const expiresAt = await multiPrivilegeInstance.privilegeExpiresAt(
           nftTokenId,
-          0,
+          1,
           user2.address
         );
 
@@ -422,17 +422,17 @@ describe('MultiPrivilege', function () {
       await multiPrivilegeInstance.createPrivilege(true, '');
       await multiPrivilegeInstance
         .connect(user1)
-        .assignPrivilege(nftTokenId, 0, user2.address, expiresAtDefault);
+        .grantPrivilege(nftTokenId, 1, user2.address, expiresAtDefault);
     });
 
     it('Should return false if privilege is not enabled', async () => {
-      await multiPrivilegeInstance.disablePrivilege(0);
+      await multiPrivilegeInstance.disablePrivilege(1);
 
       // eslint-disable-next-line no-unused-expressions
       expect(
         await multiPrivilegeInstance.hasPrivilege(
           nftTokenId,
-          0,
+          1,
           user2.address
         )
       ).to.be.false;
@@ -442,7 +442,7 @@ describe('MultiPrivilege', function () {
       expect(
         await multiPrivilegeInstance.hasPrivilege(
           nftTokenId,
-          0,
+          1,
           user3.address
         )
       ).to.be.false;
@@ -462,7 +462,7 @@ describe('MultiPrivilege', function () {
       expect(
         await multiPrivilegeInstance.hasPrivilege(
           nftTokenId,
-          0,
+          1,
           user2.address
         )
       ).to.be.true;
@@ -472,7 +472,7 @@ describe('MultiPrivilege', function () {
       expect(
         await multiPrivilegeInstance.hasPrivilege(
           nftTokenId,
-          0,
+          1,
           user1.address
         )
       ).to.be.true;
@@ -488,7 +488,7 @@ describe('MultiPrivilege', function () {
         expect(
           await multiPrivilegeInstance.hasPrivilege(
             nftTokenId,
-            0,
+            1,
             user1.address
           )
         ).to.be.true;
@@ -499,7 +499,7 @@ describe('MultiPrivilege', function () {
         expect(
           await multiPrivilegeInstance.hasPrivilege(
             nftTokenId,
-            0,
+            1,
             user1.address
           )
         ).to.be.false;
@@ -509,7 +509,7 @@ describe('MultiPrivilege', function () {
         expect(
           await multiPrivilegeInstance.hasPrivilege(
             nftTokenId,
-            0,
+            1,
             newOwner.address
           )
         ).to.be.false;
@@ -520,7 +520,7 @@ describe('MultiPrivilege', function () {
         expect(
           await multiPrivilegeInstance.hasPrivilege(
             nftTokenId,
-            0,
+            1,
             newOwner.address
           )
         ).to.be.true;
@@ -530,7 +530,7 @@ describe('MultiPrivilege', function () {
         expect(
           await multiPrivilegeInstance.hasPrivilege(
             nftTokenId,
-            0,
+            1,
             user2.address
           )
         ).to.be.true;
@@ -541,7 +541,7 @@ describe('MultiPrivilege', function () {
         expect(
           await multiPrivilegeInstance.hasPrivilege(
             nftTokenId,
-            0,
+            1,
             user2.address
           )
         ).to.be.false;

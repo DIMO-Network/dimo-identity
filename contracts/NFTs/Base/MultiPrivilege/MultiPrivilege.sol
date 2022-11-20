@@ -12,14 +12,9 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         string description;
     }
 
-    struct NewData {
-        address[] users;
-        mapping(address => uint256) expiresAt;
-    }
+    CountersUpgradeable.Counter private _privilegeCounter;
 
-    CountersUpgradeable.Counter private _privilgeCounter;
-
-    // tokenId => privilegeData
+    // privId => privilegeData
     mapping(uint256 => PrivilegeData) public privilegeRecord;
 
     // tokenId => version
@@ -47,8 +42,8 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        uint256 privilegeId = _privilgeCounter.current();
-        _privilgeCounter.increment();
+        _privilegeCounter.increment();
+        uint256 privilegeId = _privilegeCounter.current();
 
         privilegeRecord[privilegeId] = PrivilegeData(enabled, decription);
 
@@ -60,7 +55,7 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(privId < _privilgeCounter.current(), "Invalid privilege id");
+        require(privId <= _privilegeCounter.current(), "Invalid privilege id");
         require(!privilegeRecord[privId].enabled, "Privilege is enabled");
 
         privilegeRecord[privId].enabled = true;
@@ -73,7 +68,7 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(privId < _privilgeCounter.current(), "Invalid privilege id");
+        require(privId <= _privilegeCounter.current(), "Invalid privilege id");
         require(privilegeRecord[privId].enabled, "Privilege is disabled");
 
         privilegeRecord[privId].enabled = false;
@@ -82,7 +77,7 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     }
 
     // TODO Documentation
-    function assignPrivilege(
+    function grantPrivilege(
         uint256 tokenId,
         uint256 privId,
         address user,
@@ -92,7 +87,7 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
             _isApprovedOrOwner(msg.sender, tokenId),
             "Caller is not owner nor approved"
         );
-        require(privId < _privilgeCounter.current(), "Invalid privilege id");
+        require(privId <= _privilegeCounter.current(), "Invalid privilege id");
         require(privilegeRecord[privId].enabled, "Privilege not enabled");
 
         privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][
@@ -132,15 +127,11 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         uint256 privId,
         address user
     ) external view returns (bool) {
-        if (privilegeRecord[privId].enabled) {
-            return
-                privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][
-                    user
-                ] >=
+        return
+            privilegeRecord[privId].enabled &&
+            (privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][user] >=
                 block.timestamp ||
-                ownerOf(tokenId) == user;
-        }
-        return false;
+                ownerOf(tokenId) == user);
     }
 
     // TODO Documentation

@@ -7,7 +7,6 @@ library NodesStorage {
 
     struct Node {
         // TODO add info to the parent node type
-        uint256 nodeType; // TODO To be removed when everything is working
         address nftProxyAddress; // TODO Redundant ?
         uint256 parentNode;
         mapping(string => string) info;

@@ -43,10 +43,14 @@ export const adMintCost = ethers.utils.parseEther('50');
 
 export const MANUFACTURER_NFT_NAME = 'Dimo Manufacturer NFT';
 export const MANUFACTURER_NFT_SYMBOL = 'DMNFT';
+export const MANUFACTURER_NFT_URI =
+  'https://devices-api.dev.dimo.zone/v1/nfts/';
 export const VEHICLE_NFT_NAME = 'Dimo Vehicle NFT';
 export const VEHICLE_NFT_SYMBOL = 'DVNFT';
+export const VEHICLE_NFT_URI = 'https://devices-api.dev.dimo.zone/v1/nfts/';
 export const AD_NFT_NAME = 'Dimo Aftermarket Device NFT';
 export const AD_NFT_SYMBOL = 'DADNFT';
+export const AD_NFT_URI = 'https://devices-api.dev.dimo.zone/v1/nfts/';
 export const baseUri: NetworkValue = {
   mumbai: 'https://devices-api.dev.dimo.zone/v1/nfts/',
   polygon: 'https://devices-api.dimo.zone/v1/nfts/',

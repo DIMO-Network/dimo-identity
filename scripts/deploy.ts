@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -37,27 +37,12 @@ function writeAddresses(
   );
 }
 
-async function deploy(
+async function deployModules(
   deployer: SignerWithAddress
 ): Promise<ContractAddressesByNetwork> {
   console.log('\n----- Deploying contracts -----\n');
 
   const contractNameArgs = [
-    {
-      name: 'ManufacturerNft',
-      args: [C.MANUFACTURER_NFT_NAME, C.MANUFACTURER_NFT_SYMBOL],
-      nft: true
-    },
-    {
-      name: 'VehicleNft',
-      args: [C.VEHICLE_NFT_NAME, C.VEHICLE_NFT_SYMBOL],
-      nft: true
-    },
-    {
-      name: 'AftermarketDeviceNft',
-      args: [C.AD_NFT_NAME, C.AD_NFT_SYMBOL],
-      nft: true
-    },
     { name: 'Eip712Checker', args: [] },
     { name: 'DimoAccessControl', args: [] },
     { name: 'Nodes', args: [] },
@@ -65,7 +50,8 @@ async function deploy(
     { name: 'Vehicle', args: [] },
     { name: 'AftermarketDevice', args: [] },
     { name: 'AdLicenseValidator', args: [] },
-    { name: 'Mapper', args: [] }
+    { name: 'Mapper', args: [] },
+    { name: 'DevAdmin', args: [] }
   ];
 
   const instances: ContractAddressesByNetwork = {
@@ -102,16 +88,69 @@ async function deploy(
       `Contract ${contractNameArg.name} deployed to ${contractImplementation.address}`
     );
 
-    if (contractNameArg.nft) {
-      instances[C.networkName].nfts[contractNameArg.name] =
-        contractImplementation.address;
-    } else {
-      instances[C.networkName].modules[contractNameArg.name] =
-        contractImplementation.address;
-    }
+    instances[C.networkName].modules[contractNameArg.name] =
+      contractImplementation.address;
   }
 
   console.log('\n----- Contracts deployed -----');
+
+  return instances;
+}
+
+async function deployNfts(): Promise<ContractAddressesByNetwork> {
+  console.log('\n----- Deploying NFT contracts -----\n');
+
+  const contractNameArgs = [
+    {
+      name: 'ManufacturerNft',
+      args: [
+        C.MANUFACTURER_NFT_NAME,
+        C.MANUFACTURER_NFT_SYMBOL,
+        C.MANUFACTURER_NFT_URI
+      ]
+    },
+    {
+      name: 'VehicleNft',
+      args: [C.VEHICLE_NFT_NAME, C.VEHICLE_NFT_SYMBOL, C.VEHICLE_NFT_URI]
+    },
+    {
+      name: 'AftermarketDeviceNft',
+      args: [C.AD_NFT_NAME, C.AD_NFT_SYMBOL, C.AD_NFT_URI]
+    }
+  ];
+
+  const instances: ContractAddressesByNetwork = JSON.parse(
+    JSON.stringify(contractAddresses)
+  );
+
+  for (const contractNameArg of contractNameArgs) {
+    const ContractFactory = await ethers.getContractFactory(
+      contractNameArg.name
+    );
+
+    await upgrades.validateImplementation(ContractFactory, {
+      kind: 'uups'
+    });
+
+    const contractProxy = await upgrades.deployProxy(
+      ContractFactory,
+      contractNameArg.args,
+      {
+        initializer: 'initialize',
+        kind: 'uups'
+      }
+    );
+
+    await contractProxy.deployed();
+
+    console.log(
+      `NFT contract ${contractNameArg.name} deployed to ${contractProxy.address}`
+    );
+
+    instances[C.networkName].nfts[contractNameArg.name] = contractProxy.address;
+  }
+
+  console.log('\n----- NFT contracts deployed -----');
 
   return instances;
 }
@@ -404,9 +443,10 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   const kms: string = C.KmsAddress[C.networkName];
 
-  const instances = await deploy(deployer);
-
+  const instances = await deployModules(deployer);
   writeAddresses(instances, C.networkName);
+  const nftInstances = await deployNfts();
+  writeAddresses(nftInstances, C.networkName);
 
   await addModules(deployer);
   await setup(deployer);

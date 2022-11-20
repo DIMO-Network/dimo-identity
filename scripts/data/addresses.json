@@ -13,39 +13,40 @@
     },
     "mumbai": {
         "modules": {
-            "DIMORegistry": "0x03AB8690BcA49af7F12BFF8cb7cdAa6685FA8766",
-            "Eip712Checker": "0x91b5f369ba058303D9128ab9c5725358b4ca5551",
-            "DimoAccessControl": "0xe95C323928C98d6a536436A691b124Eb0c0528Db",
-            "Nodes": "0x012BCf10fA413b18210A1324DBDFA088301dc6c0",
-            "Manufacturer": "0xc1b74aDED262a1EbDd8C90e7992b675fa6Ecd861",
-            "Vehicle": "0x0d1F7e97992041B60678eE6b4F5f364D7D5c3B99",
-            "AftermarketDevice": "0x96546E65bE8B3262e835ED1E49802Ed6C7d57bd5",
-            "AdLicenseValidator": "0x7BB03779d74b2784D5a3630DdaeE3318b6E14CeA",
-            "Mapper": "0x4E71d73845506cEC0e5Eb10B3442692f989622B0",
-            "DevAdmin": "0xB1851AE3CF2073c81a237fF9d075eC7F99c2d643"
+            "DIMORegistry": "0xCF395Cd4514490c35e1195dad50DA245b6a2333a",
+            "Eip712Checker": "0x3268dE2A019d80D53dE4C92502119C6B266a0605",
+            "DimoAccessControl": "0x0aF7F9f9cab39E4316AdF17b1b82af71bAd989c0",
+            "Nodes": "0x3ae21ee2af3A371484826E525Bce5A79bf4E1886",
+            "Manufacturer": "0x884d5809e44cCF47d2EBb87f808736649ABB7eD5",
+            "Vehicle": "0x5a91d9ED88237C3911D4C646CA0C30Cd89581410",
+            "AftermarketDevice": "0xe40B17BdD7ed644300D724BcD2591cCEe709fE74",
+            "AdLicenseValidator": "0xCF722B94cD73E71f88659c26483D41e015CcA168",
+            "Mapper": "0x075b25298431642cfb1a1B3Ef05B4cfBe2B94130",
+            "DevAdmin": "0xDa92fb8c9fa8c469c64ae6e05963853341B03399"
         },
         "nfts": {
-            "ManufacturerNft": "0xc5c092530989D603eB591c732EBF68AA7F5a3dBe",
-            "VehicleNft": "0x47e8433D952b23C1F7fA6266A98eE871ac4DF075",
-            "AftermarketDeviceNft": "0x7415F0E79fe4971F2e8142Db3bd5a82a072cBD7B"
+            "ManufacturerNft": "0xFdB5774D7aCe99226d99B58f4b293E72126cf068",
+            "VehicleNft": "0xA975E31A046AbEe2de14a041Dae5d0983C59128D",
+            "AftermarketDeviceNft": "0x283568f15Bc5025CfC054427FB9c487D620b3552"
         }
     },
     "hardhat": {
         "modules": {
             "DIMORegistry": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-            "Eip712Checker": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-            "DimoAccessControl": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-            "Nodes": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-            "Manufacturer": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
-            "Vehicle": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
-            "AftermarketDevice": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
-            "AdLicenseValidator": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
-            "Mapper": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"
+            "Eip712Checker": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+            "DimoAccessControl": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+            "Nodes": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+            "Manufacturer": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+            "Vehicle": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+            "AftermarketDevice": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+            "AdLicenseValidator": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+            "Mapper": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+            "DevAdmin": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318"
         },
         "nfts": {
-            "ManufacturerNft": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-            "VehicleNft": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-            "AftermarketDeviceNft": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+            "ManufacturerNft": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+            "VehicleNft": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+            "AftermarketDeviceNft": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
         }
     }
 }

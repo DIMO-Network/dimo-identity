@@ -31,9 +31,10 @@ contract Vehicle is AccessControlInternal {
     // ***** Admin management ***** //
 
     // TODO Documentation
-    function setVehicleNftProxyAddress(
-        address addr
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setVehicleNftProxyAddress(address addr)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         require(addr != address(0), "Non zero address");
         VehicleStorage.getStorage().nftProxyAddress = addr;
 
@@ -43,9 +44,10 @@ contract Vehicle is AccessControlInternal {
     /// @notice Adds an attribute to the whielist
     /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
-    function addVehicleAttribute(
-        string calldata attribute
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addVehicleAttribute(string calldata attribute)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         require(
             AttributeSet.add(
                 VehicleStorage.getStorage().whitelistedAttributes,
@@ -171,10 +173,9 @@ contract Vehicle is AccessControlInternal {
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function _setInfo(
-        uint256 tokenId,
-        AttributeInfoPair[] calldata attrInfo
-    ) private {
+    function _setInfo(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
+        private
+    {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         VehicleStorage.Storage storage s = VehicleStorage.getStorage();
         address nftProxyAddress = s.nftProxyAddress;

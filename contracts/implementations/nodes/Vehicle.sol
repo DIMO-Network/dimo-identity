@@ -21,15 +21,19 @@ contract Vehicle is AccessControlInternal {
 
     event VehicleNftProxySet(address indexed proxy);
     event VehicleAttributeAdded(string attribute);
+    event VehicleAttributeUpdated(
+        uint256 indexed tokenId,
+        string indexed attribute,
+        string indexed info
+    );
     event VehicleNodeMinted(uint256 tokenId);
 
     // ***** Admin management ***** //
 
     // TODO Documentation
-    function setVehicleNftProxyAddress(address addr)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setVehicleNftProxyAddress(
+        address addr
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(addr != address(0), "Non zero address");
         VehicleStorage.getStorage().nftProxyAddress = addr;
 
@@ -39,10 +43,9 @@ contract Vehicle is AccessControlInternal {
     /// @notice Adds an attribute to the whielist
     /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
-    function addVehicleAttribute(string calldata attribute)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function addVehicleAttribute(
+        string calldata attribute
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(
             AttributeSet.add(
                 VehicleStorage.getStorage().whitelistedAttributes,
@@ -168,9 +171,10 @@ contract Vehicle is AccessControlInternal {
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function _setInfo(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
-        private
-    {
+    function _setInfo(
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfo
+    ) private {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         VehicleStorage.Storage storage s = VehicleStorage.getStorage();
         address nftProxyAddress = s.nftProxyAddress;
@@ -187,6 +191,30 @@ contract Vehicle is AccessControlInternal {
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
         }
+    }
+
+    /// @dev Internal function to update a single attribute
+    /// @dev attribute must be whitelisted
+    /// @param tokenId Node where the info will be added
+    /// @param attribute Attribute to be updated
+    /// @param info Info to be set
+    function _updateAttributeInfo(
+        uint256 tokenId,
+        string calldata attribute,
+        string calldata info
+    ) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+
+        require(
+            AttributeSet.exists(s.whitelistedAttributes, attribute),
+            "Not whitelisted"
+        );
+
+        address nftProxyAddress = s.nftProxyAddress;
+
+        ns.nodes[nftProxyAddress][tokenId].info[attribute] = info;
+        emit VehicleAttributeUpdated(tokenId, attribute, info);
     }
 
     /// @dev Internal function to add infos to node and calculate attribute and info hashes

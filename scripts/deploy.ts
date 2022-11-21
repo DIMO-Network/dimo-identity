@@ -212,6 +212,11 @@ async function setup(deployer: SignerWithAddress) {
       'AftermarketDevice',
       contractAddresses[C.networkName].modules.DIMORegistry
     );
+  const aftermarketDeviceNftInstance: AftermarketDeviceNft =
+    await ethers.getContractAt(
+      'AftermarketDeviceNft',
+      contractAddresses[C.networkName].nfts.AftermarketDeviceNft
+    );
 
   console.log('\n----- Initializing EIP712 -----\n');
   await (
@@ -315,6 +320,19 @@ async function setup(deployer: SignerWithAddress) {
     console.log(`${attribute} attribute set to Aftermarket Device`);
   }
   console.log('\n----- Attributes added -----');
+
+  console.log(
+    '\n----- Aftermarket Device NFT setting approval for all to DIMO Registry -----\n'
+  );
+  await (
+    await aftermarketDeviceNftInstance
+      .connect(deployer)
+      .setApprovalForAll(
+        contractAddresses[C.networkName].modules.DIMORegistry,
+        true
+      )
+  ).wait();
+  console.log('\n----- Approval set -----\n');
 }
 
 async function grantNftRoles(deployer: SignerWithAddress) {

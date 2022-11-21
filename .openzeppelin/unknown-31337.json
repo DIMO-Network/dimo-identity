@@ -27,6 +27,26 @@
       "kind": "uups"
     },
     {
+      "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      "txHash": "0x8257abb50795a2560a17f5e93e384f326072a1d469950f5cb2da6cbeb90155e1",
+      "kind": "uups"
+    },
+    {
+      "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      "txHash": "0x34e6ab1290316a04dd70ed0966b944ced7498c1b43bee4a83d9601c5f4c9401d",
+      "kind": "uups"
+    },
+    {
+      "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+      "txHash": "0x972b2ea575b7f22f5668949259bcd95728e56648d8591222d9335def49401e62",
+      "kind": "uups"
+    },
+    {
+      "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      "txHash": "0xf9c2be0c4f8d8668227f7949b356f3aa6e9520e3be06cf55677e211a0776354a",
+      "kind": "uups"
+    },
+    {
       "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
       "txHash": "0x50ca149fd0cb54f7466cc18c0da99fb824f765608661be2c08fe7f3bcd17be54",
       "kind": "uups"
@@ -63,7 +83,7 @@
     },
     {
       "address": "0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c",
-      "txHash": "0xfdafb145a4395298e7dc2764542acf1bf57fd94e7f2e4d3654cc4503bcd58c69",
+      "txHash": "0x05db62fdce12326686dff9df8d6774059b18d83275edf6ed7a1bd945e35f0fed",
       "kind": "uups"
     },
     {
@@ -75,32 +95,12 @@
       "address": "0x5fc748f1FEb28d7b76fa1c6B07D8ba2d5535177c",
       "txHash": "0x323d2838693ca717e894ec90e61a663de3a6dad7a8e956b25b28095e593ee5da",
       "kind": "uups"
-    },
-    {
-      "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-      "txHash": "0x8257abb50795a2560a17f5e93e384f326072a1d469950f5cb2da6cbeb90155e1",
-      "kind": "uups"
-    },
-    {
-      "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
-      "txHash": "0x34e6ab1290316a04dd70ed0966b944ced7498c1b43bee4a83d9601c5f4c9401d",
-      "kind": "uups"
-    },
-    {
-      "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
-      "txHash": "0x972b2ea575b7f22f5668949259bcd95728e56648d8591222d9335def49401e62",
-      "kind": "uups"
-    },
-    {
-      "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
-      "txHash": "0xf9c2be0c4f8d8668227f7949b356f3aa6e9520e3be06cf55677e211a0776354a",
-      "kind": "uups"
     }
   ],
   "impls": {
     "59360dac3c7a8a6e429d66ed1c3cb8b2d5c39beaa69108d188b8857f1fce366d": {
-      "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
-      "txHash": "0x4ad90f72d4a53151e3f3cfd197ea0e8aafbcf8c646161885624f89405616093f",
+      "address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+      "txHash": "0xd927e3682ded37cd425f2a4e2f34407cfd447b46c64558374f1d633d19a0ab9b",
       "layout": {
         "solcVersion": "0.8.13",
         "storage": [
@@ -738,9 +738,9 @@
         }
       }
     },
-    "6a7f0c76f233109be044e3bc22490a32c1ea82467312d0a28b7f6e3eb5dd829c": {
+    "6cce3243ae998391f219b57059ec9bb5662f11648ab2b95ce3dfac746f352f51": {
       "address": "0xA7c59f010700930003b33aB25a7a0679C860f29c",
-      "txHash": "0x1bf66794d07163eb033cd75f1ebcd7bb73be11eec00f725deb445b55bde906e0",
+      "txHash": "0xd75eae423f65689046f5fc3ea91b6dc46da088d61735a682fc3a3f55fae319dd",
       "layout": {
         "solcVersion": "0.8.13",
         "storage": [
@@ -911,15 +911,15 @@
             "slot": "403",
             "type": "t_struct(Counter)2627_storage",
             "contract": "MultiPrivilege",
-            "src": "contracts/NFTs/Base/MultiPrivilege/MultiPrivilege.sol:15"
+            "src": "contracts/NFTs/Base/MultiPrivilege/MultiPrivilege.sol:19"
           },
           {
             "label": "privilegeRecord",
             "offset": 0,
             "slot": "404",
-            "type": "t_mapping(t_uint256,t_struct(PrivilegeData)3160_storage)",
+            "type": "t_mapping(t_uint256,t_struct(PrivilegeData)3154_storage)",
             "contract": "MultiPrivilege",
-            "src": "contracts/NFTs/Base/MultiPrivilege/MultiPrivilege.sol:18"
+            "src": "contracts/NFTs/Base/MultiPrivilege/MultiPrivilege.sol:22"
           },
           {
             "label": "tokenIdToVersion",
@@ -927,7 +927,7 @@
             "slot": "405",
             "type": "t_mapping(t_uint256,t_uint256)",
             "contract": "MultiPrivilege",
-            "src": "contracts/NFTs/Base/MultiPrivilege/MultiPrivilege.sol:21"
+            "src": "contracts/NFTs/Base/MultiPrivilege/MultiPrivilege.sol:25"
           },
           {
             "label": "privilegeEntry",
@@ -935,7 +935,7 @@
             "slot": "406",
             "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_uint256))))",
             "contract": "MultiPrivilege",
-            "src": "contracts/NFTs/Base/MultiPrivilege/MultiPrivilege.sol:24"
+            "src": "contracts/NFTs/Base/MultiPrivilege/MultiPrivilege.sol:28"
           }
         ],
         "types": {
@@ -999,7 +999,7 @@
             "label": "mapping(uint256 => string)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(PrivilegeData)3160_storage)": {
+          "t_mapping(t_uint256,t_struct(PrivilegeData)3154_storage)": {
             "label": "mapping(uint256 => struct MultiPrivilege.PrivilegeData)",
             "numberOfBytes": "32"
           },
@@ -1023,7 +1023,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(PrivilegeData)3160_storage": {
+          "t_struct(PrivilegeData)3154_storage": {
             "label": "struct MultiPrivilege.PrivilegeData",
             "members": [
               {

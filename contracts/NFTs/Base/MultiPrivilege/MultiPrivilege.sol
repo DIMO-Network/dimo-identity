@@ -4,7 +4,11 @@ pragma solidity ^0.8.13;
 import "./IMultiPrivilege.sol";
 import "../NftBaseUpgradeable.sol";
 
-contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
+abstract contract MultiPrivilege is
+    Initializable,
+    NftBaseUpgradeable,
+    IMultiPrivilege
+{
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     struct PrivilegeData {
@@ -23,19 +27,6 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     // tokenId => version => privId => user => expires at
     mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => uint256))))
         public privilegeEntry;
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    function initialize(
-        string calldata name_,
-        string calldata symbol_,
-        string calldata baseUri_
-    ) external initializer {
-        _baseNftInit(name_, symbol_, baseUri_);
-    }
 
     // TODO Documentation
     function createPrivilege(
@@ -75,7 +66,7 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     }
 
     // TODO Documentation
-    function grantPrivilege(
+    function setPrivilege(
         uint256 tokenId,
         uint256 privId,
         address user,
@@ -92,31 +83,13 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
             user
         ] = expires;
 
-        emit PrivilegeAssigned(tokenId, privId, user, expires);
-    }
-
-    // TODO Documentation
-    function revokePrivilege(
-        uint256 tokenId,
-        uint256 privId,
-        address user
-    ) external {
-        require(
-            _isApprovedOrOwner(msg.sender, tokenId),
-            "Caller is not owner nor approved"
+        emit PrivilegeSet(
+            tokenId,
+            tokenIdToVersion[tokenId],
+            privId,
+            user,
+            expires
         );
-        require(
-            privilegeRecord[privId].enabled &&
-                privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][
-                    user
-                ] >=
-                block.timestamp,
-            "User does not have privilege"
-        );
-
-        privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][user] = 0;
-
-        emit PrivilegeRevoked(tokenId, privId, user);
     }
 
     // TODO Documentation
@@ -147,6 +120,15 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         return
             interfaceId == type(IMultiPrivilege).interfaceId ||
             super.supportsInterface(interfaceId);
+    }
+
+    // TODO Documentation
+    function _multiPrivilegeInit(
+        string calldata name_,
+        string calldata symbol_,
+        string calldata baseUri_
+    ) internal onlyInitializing {
+        _baseNftInit(name_, symbol_, baseUri_);
     }
 
     function _transfer(

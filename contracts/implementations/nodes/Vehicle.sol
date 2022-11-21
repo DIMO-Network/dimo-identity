@@ -190,11 +190,13 @@ contract Vehicle is AccessControlInternal {
             ns.nodes[nftProxyAddress][tokenId].info[
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
+
             emit VehicleAttributeSet(
                 tokenId,
                 attrInfo[i].attribute,
                 attrInfo[i].info
             );
+
         }
     }
 

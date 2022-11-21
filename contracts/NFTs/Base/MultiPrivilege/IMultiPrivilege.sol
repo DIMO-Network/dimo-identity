@@ -9,19 +9,15 @@ interface IMultiPrivilege {
     );
     event PrivilegeEnabled(uint256 privilegeId);
     event PrivilegeDisabled(uint256 privilegeId);
-    event PrivilegeAssigned(
+    event PrivilegeSet(
         uint256 tokenId,
+        uint256 version,
         uint256 privId,
         address indexed user,
         uint256 expires
     );
-    event PrivilegeRevoked(
-        uint256 tokenId,
-        uint256 privId,
-        address indexed user
-    );
 
-    function grantPrivilege(
+    function setPrivilege(
         uint256 tokenId,
         uint256 privId,
         address user,

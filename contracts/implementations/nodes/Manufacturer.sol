@@ -194,6 +194,7 @@ contract Manufacturer is AccessControlInternal {
                 attrInfoPairList[i].info
             );
         }
+        // TODO Add event
     }
 
     /// @dev Internal function to update a single attribute

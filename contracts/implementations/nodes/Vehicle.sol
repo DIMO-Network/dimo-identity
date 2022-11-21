@@ -21,12 +21,8 @@ contract Vehicle is AccessControlInternal {
 
     event VehicleNftProxySet(address indexed proxy);
     event VehicleAttributeAdded(string attribute);
-    event VehicleAttributeUpdated(
-        uint256 indexed tokenId,
-        string indexed attribute,
-        string indexed info
-    );
-    event VehicleNodeMinted(uint256 tokenId);
+    event VehicleAttributeSet(uint256 tokenId, string attribute, string info);
+    event VehicleNodeMinted(uint256 tokenId, address owner);
 
     // ***** Admin management ***** //
 
@@ -94,7 +90,7 @@ contract Vehicle is AccessControlInternal {
 
         _setInfo(newTokenId, attrInfo);
 
-        emit VehicleNodeMinted(newTokenId);
+        emit VehicleNodeMinted(newTokenId, owner);
     }
 
     /// @notice Mints a vehicle through a metatransaction
@@ -149,7 +145,7 @@ contract Vehicle is AccessControlInternal {
             "Invalid signature"
         );
 
-        emit VehicleNodeMinted(newTokenId);
+        emit VehicleNodeMinted(newTokenId, owner);
     }
 
     /// @notice Add infos to node
@@ -191,7 +187,12 @@ contract Vehicle is AccessControlInternal {
             ns.nodes[nftProxyAddress][tokenId].info[
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
-            // TODO Add event
+
+            emit VehicleAttributeSet(
+                tokenId,
+                attrInfo[i].attribute,
+                attrInfo[i].info
+            );
         }
     }
 
@@ -216,7 +217,8 @@ contract Vehicle is AccessControlInternal {
         address nftProxyAddress = s.nftProxyAddress;
 
         ns.nodes[nftProxyAddress][tokenId].info[attribute] = info;
-        emit VehicleAttributeUpdated(tokenId, attribute, info);
+
+        emit VehicleAttributeSet(tokenId, attribute, info);
     }
 
     /// @dev Internal function to add infos to node and calculate attribute and info hashes
@@ -251,7 +253,12 @@ contract Vehicle is AccessControlInternal {
             ns.nodes[nftProxyAddress][tokenId].info[
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
-            // TODO Add event
+
+            emit VehicleAttributeSet(
+                tokenId,
+                attrInfo[i].attribute,
+                attrInfo[i].info
+            );
         }
 
         return (

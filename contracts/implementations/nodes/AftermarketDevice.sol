@@ -40,28 +40,29 @@ contract AftermarketDevice is
     event AftermarketDeviceNftProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
     event AftermarketDeviceAttributeSet(
-        uint256 indexed tokenId,
-        string indexed attribute,
-        string indexed info
+        uint256 tokenId,
+        string attribute,
+        string info
     );
     event AftermarketDeviceNodeMinted(
-        uint256 indexed tokenId,
-        address indexed aftermarketDeviceAddress
+        uint256 tokenId,
+        address indexed aftermarketDeviceAddress,
+        address indexed owner
     );
     event AftermarketDeviceClaimed(
-        uint256 indexed aftermarketDeviceNode,
+        uint256 aftermarketDeviceNode,
         address indexed owner
     );
 
     event AftermarketDevicePaired(
-        uint256 indexed aftermarketDeviceNode,
-        uint256 indexed vehicleNode,
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
         address indexed owner
     );
 
     event AftermarketDeviceUnpaired(
-        uint256 indexed aftermarketDeviceNode,
-        uint256 indexed vehicleNode,
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
         address indexed owner
     );
 
@@ -144,7 +145,11 @@ contract AftermarketDevice is
 
             _setInfo(newTokenId, adInfos[i].attrInfoPairs);
 
-            emit AftermarketDeviceNodeMinted(newTokenId, deviceAddress);
+            emit AftermarketDeviceNodeMinted(
+                newTokenId,
+                deviceAddress,
+                msg.sender
+            );
         }
 
         // Validate request and transfer funds to foundation
@@ -392,7 +397,6 @@ contract AftermarketDevice is
                 attrInfo[i].attribute,
                 attrInfo[i].info
             );
-            // TODO Add event
         }
     }
 

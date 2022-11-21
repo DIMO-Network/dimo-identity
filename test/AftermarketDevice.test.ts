@@ -563,9 +563,24 @@ describe('AftermarketDevice', function () {
             )
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-          .withArgs(1, adAddress1.address)
+          .withArgs(1, adAddress1.address, manufacturer1.address)
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-          .withArgs(2, adAddress2.address);
+          .withArgs(2, adAddress2.address, manufacturer1.address);
+      });
+      it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(manufacturer1)
+            .mintAftermarketDeviceByManufacturerBatch(1, mockAftermarketDeviceInfosList)
+        )
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+          .withArgs(1, mockAftermarketDeviceInfosList[0].attrInfoPairs[0].attribute, mockAftermarketDeviceInfosList[0].attrInfoPairs[0].info)
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+          .withArgs(1, mockAftermarketDeviceInfosList[0].attrInfoPairs[1].attribute, mockAftermarketDeviceInfosList[0].attrInfoPairs[1].info)
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+          .withArgs(2, mockAftermarketDeviceInfosList[1].attrInfoPairs[0].attribute, mockAftermarketDeviceInfosList[1].attrInfoPairs[0].info)
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+          .withArgs(2, mockAftermarketDeviceInfosList[1].attrInfoPairs[1].attribute, mockAftermarketDeviceInfosList[1].attrInfoPairs[1].info)
       });
     });
   });
@@ -1248,20 +1263,6 @@ describe('AftermarketDevice', function () {
       });
     });
 
-    context('Events', () => {
-      it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(admin)
-            .setAftermarketDeviceInfo(1, C.mockAdAttributeInfoPairs)
-        )
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(1, C.mockAdAttributeInfoPairs[0].attribute, C.mockAdAttributeInfoPairs[0].info)
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(1, C.mockAdAttributeInfoPairs[1].attribute, C.mockAdAttributeInfoPairs[1].info);
-      });
-    });
-
     context('State change', () => {
       it('Should correctly set infos', async () => {
         const localNewAttributeInfoPairs = JSON.parse(
@@ -1303,6 +1304,20 @@ describe('AftermarketDevice', function () {
             C.mockAftermarketDeviceAttribute2
           )
         ).to.be.equal(localNewAttributeInfoPairs[1].info);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .setAftermarketDeviceInfo(1, C.mockAdAttributeInfoPairs)
+        )
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+          .withArgs(1, C.mockAdAttributeInfoPairs[0].attribute, C.mockAdAttributeInfoPairs[0].info)
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+          .withArgs(1, C.mockAdAttributeInfoPairs[1].attribute, C.mockAdAttributeInfoPairs[1].info);
       });
     });
   });

@@ -301,7 +301,18 @@ describe('Vehicle', function () {
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
         )
           .to.emit(vehicleInstance, 'VehicleNodeMinted')
-          .withArgs(1);
+          .withArgs(1, user1.address);
+      });
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
+        )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, C.mockVehicleAttributeInfoPairs[0].info)
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, C.mockVehicleAttributeInfoPairs[1].info);
       });
     });
   });
@@ -619,7 +630,23 @@ describe('Vehicle', function () {
             )
         )
           .to.emit(vehicleInstance, 'VehicleNodeMinted')
-          .withArgs(1);
+          .withArgs(1, user1.address);
+      });
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleSign(
+              1,
+              user1.address,
+              C.mockVehicleAttributeInfoPairs,
+              signature
+            )
+        )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, C.mockVehicleAttributeInfoPairs[0].info)
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, C.mockVehicleAttributeInfoPairs[1].info);
       });
     });
   });
@@ -707,6 +734,26 @@ describe('Vehicle', function () {
             C.mockVehicleAttribute2
           )
         ).to.be.equal(localNewAttributeInfoPairs[1].info);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
+        const localNewAttributeInfoPairs = JSON.parse(
+          JSON.stringify(C.mockVehicleAttributeInfoPairs)
+        );
+        localNewAttributeInfoPairs[0].info = 'New Info 0';
+        localNewAttributeInfoPairs[1].info = 'New Info 1';
+
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .setVehicleInfo(1, localNewAttributeInfoPairs)
+        )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(1, localNewAttributeInfoPairs[0].attribute, localNewAttributeInfoPairs[0].info)
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(1, localNewAttributeInfoPairs[1].attribute, localNewAttributeInfoPairs[1].info);
       });
     });
   });

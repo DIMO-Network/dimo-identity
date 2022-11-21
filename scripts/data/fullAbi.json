@@ -600,6 +600,12 @@
                 "internalType": "address",
                 "name": "aftermarketDeviceAddress",
                 "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
             }
         ],
         "name": "AftermarketDeviceNodeMinted",
@@ -892,7 +898,7 @@
                 "type": "string"
             }
         ],
-        "name": "ManufacturerAttributeUpdated",
+        "name": "ManufacturerAttributeSet",
         "type": "event"
     },
     {
@@ -912,10 +918,16 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
             }
         ],
         "name": "ManufacturerNodeMinted",
@@ -1111,7 +1123,7 @@
                 "type": "string"
             }
         ],
-        "name": "VehicleAttributeUpdated",
+        "name": "VehicleAttributeSet",
         "type": "event"
     },
     {
@@ -1135,6 +1147,12 @@
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
             }
         ],
         "name": "VehicleNodeMinted",

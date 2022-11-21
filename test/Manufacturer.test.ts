@@ -42,7 +42,7 @@ describe('Manufacturer', async function () {
         initializer: 'initialize',
         kind: 'uups'
       }
-    // eslint-disable-next-line prettier/prettier
+      // eslint-disable-next-line prettier/prettier
     ) as ManufacturerNft;
     await manufacturerNftInstance.deployed();
 
@@ -281,11 +281,11 @@ describe('Manufacturer', async function () {
             .mintManufacturerBatch(admin.address, C.mockManufacturerNames)
         )
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(1)
+          .withArgs(1, admin.address)
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(2)
+          .withArgs(2, admin.address)
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(3);
+          .withArgs(3, admin.address);
       });
     });
   });
@@ -437,7 +437,18 @@ describe('Manufacturer', async function () {
             )
         )
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(1);
+          .withArgs(1, admin.address);
+      });
+      it('Should emit ManufacturerAttributeSet events with correct params', async () => {
+        await expect(
+          manufacturerInstance
+            .connect(admin)
+            .mintManufacturer(controller1.address, C.mockManufacturerAttributeInfoPairs)
+        )
+          .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
+          .withArgs(1, C.mockManufacturerAttributeInfoPairs[0].attribute, C.mockManufacturerAttributeInfoPairs[0].info)
+          .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
+          .withArgs(1, C.mockManufacturerAttributeInfoPairs[1].attribute, C.mockManufacturerAttributeInfoPairs[1].info);
       });
     });
   });
@@ -524,6 +535,26 @@ describe('Manufacturer', async function () {
             C.mockManufacturerAttribute2
           )
         ).to.be.equal(localNewAttributeInfoPairs[1].info);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit ManufacturerAttributeSet events with correct params', async () => {
+        const localNewAttributeInfoPairs = JSON.parse(
+          JSON.stringify(C.mockManufacturerAttributeInfoPairs)
+        );
+        localNewAttributeInfoPairs[0].info = 'New Info 0';
+        localNewAttributeInfoPairs[1].info = 'New Info 1';
+
+        await expect(
+          manufacturerInstance
+            .connect(admin)
+            .setManufacturerInfo(1, localNewAttributeInfoPairs)
+        )
+          .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
+          .withArgs(1, localNewAttributeInfoPairs[0].attribute, localNewAttributeInfoPairs[0].info)
+          .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
+          .withArgs(1, localNewAttributeInfoPairs[1].attribute, localNewAttributeInfoPairs[1].info);
       });
     });
   });

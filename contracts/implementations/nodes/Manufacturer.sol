@@ -14,13 +14,13 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 contract Manufacturer is AccessControlInternal {
     event ManufacturerNftProxySet(address indexed proxy);
     event ManufacturerAttributeAdded(string attribute);
-    event ManufacturerAttributeUpdated(
-        uint256 indexed tokenId,
-        string indexed attribute,
-        string indexed info
+    event ManufacturerAttributeSet(
+        uint256 tokenId,
+        string attribute,
+        string info
     );
     event ControllerSet(address indexed controller);
-    event ManufacturerNodeMinted(uint256 tokenId);
+    event ManufacturerNodeMinted(uint256 tokenId, address indexed owner);
 
     // ***** Admin management ***** //
 
@@ -99,7 +99,7 @@ contract Manufacturer is AccessControlInternal {
 
             ns.nodes[nftProxyAddress][newTokenId].info["Name"] = names[i];
 
-            emit ManufacturerNodeMinted(newTokenId);
+            emit ManufacturerNodeMinted(newTokenId, owner);
         }
     }
 
@@ -122,7 +122,7 @@ contract Manufacturer is AccessControlInternal {
         uint256 newTokenId = INFT(nftProxyAddress).safeMint(owner);
         _setInfo(newTokenId, attrInfoPairList);
 
-        emit ManufacturerNodeMinted(newTokenId);
+        emit ManufacturerNodeMinted(newTokenId, msg.sender);
     }
 
     /// @notice Add infos to node
@@ -191,8 +191,13 @@ contract Manufacturer is AccessControlInternal {
             ns.nodes[nftProxyAddress][tokenId].info[
                 attrInfoPairList[i].attribute
             ] = attrInfoPairList[i].info;
+
+            emit ManufacturerAttributeSet(
+                tokenId,
+                attrInfoPairList[i].attribute,
+                attrInfoPairList[i].info
+            );
         }
-        // TODO Add event
     }
 
     /// @dev Internal function to update a single attribute
@@ -215,6 +220,6 @@ contract Manufacturer is AccessControlInternal {
         address nftProxyAddress = m.nftProxyAddress;
 
         ns.nodes[nftProxyAddress][tokenId].info[attribute] = info;
-        emit ManufacturerAttributeUpdated(tokenId, attribute, info);
+        emit ManufacturerAttributeSet(tokenId, attribute, info);
     }
 }

@@ -533,19 +533,19 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "string",
                 "name": "attribute",
                 "type": "string"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "string",
                 "name": "info",
                 "type": "string"
@@ -558,7 +558,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "aftermarketDeviceNode",
                 "type": "uint256"
@@ -590,7 +590,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
@@ -615,13 +615,13 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "aftermarketDeviceNode",
                 "type": "uint256"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "vehicleNode",
                 "type": "uint256"
@@ -634,6 +634,31 @@
             }
         ],
         "name": "AftermarketDevicePaired",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "AftermarketDeviceUnpaired",
         "type": "event"
     },
     {
@@ -880,19 +905,19 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "string",
                 "name": "attribute",
                 "type": "string"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "string",
                 "name": "info",
                 "type": "string"
@@ -918,7 +943,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
@@ -1105,19 +1130,19 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "string",
                 "name": "attribute",
                 "type": "string"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "string",
                 "name": "info",
                 "type": "string"

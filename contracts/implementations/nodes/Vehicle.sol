@@ -191,6 +191,7 @@ contract Vehicle is AccessControlInternal {
             ns.nodes[nftProxyAddress][tokenId].info[
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
+            // TODO Add event
         }
     }
 
@@ -250,6 +251,7 @@ contract Vehicle is AccessControlInternal {
             ns.nodes[nftProxyAddress][tokenId].info[
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
+            // TODO Add event
         }
 
         return (

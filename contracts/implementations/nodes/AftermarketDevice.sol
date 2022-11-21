@@ -392,6 +392,7 @@ contract AftermarketDevice is
                 attrInfo[i].attribute,
                 attrInfo[i].info
             );
+            // TODO Add event
         }
     }
 

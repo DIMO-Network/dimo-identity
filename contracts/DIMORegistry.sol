@@ -77,10 +77,10 @@ contract DIMORegistry is AccessControlInternal {
     /// @dev function selector should not have been registered
     /// @param implementation address of the implementation
     /// @param selectors selectors of the implementation contract
-    function addModule(
-        address implementation,
-        bytes4[] calldata selectors
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addModule(address implementation, bytes4[] calldata selectors)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _addModule(implementation, selectors);
         emit ModuleAdded(implementation, selectors);
     }
@@ -89,10 +89,10 @@ contract DIMORegistry is AccessControlInternal {
     /// @dev function selector should not exist
     /// @param implementation implementation address
     /// @param selectors function signatures
-    function removeModule(
-        address implementation,
-        bytes4[] calldata selectors
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function removeModule(address implementation, bytes4[] calldata selectors)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _removeModule(implementation, selectors);
         emit ModuleRemoved(implementation, selectors);
     }
@@ -101,10 +101,9 @@ contract DIMORegistry is AccessControlInternal {
     /// @dev function selector should not have been registered.
     /// @param implementation address of the implementation
     /// @param selectors selectors of the implementation contract
-    function _addModule(
-        address implementation,
-        bytes4[] calldata selectors
-    ) private {
+    function _addModule(address implementation, bytes4[] calldata selectors)
+        private
+    {
         RegistryStorage.Storage storage s = RegistryStorage.getStorage();
         require(
             s.selectorsHash[implementation] == 0x0,
@@ -126,10 +125,9 @@ contract DIMORegistry is AccessControlInternal {
     /// @dev function selector should not exist
     /// @param implementation implementation address
     /// @param selectors function signatures
-    function _removeModule(
-        address implementation,
-        bytes4[] calldata selectors
-    ) private {
+    function _removeModule(address implementation, bytes4[] calldata selectors)
+        private
+    {
         RegistryStorage.Storage storage s = RegistryStorage.getStorage();
         bytes32 hash = keccak256(abi.encode(selectors));
         require(

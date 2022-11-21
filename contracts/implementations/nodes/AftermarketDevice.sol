@@ -40,29 +40,29 @@ contract AftermarketDevice is
     event AftermarketDeviceNftProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
     event AftermarketDeviceAttributeSet(
-        uint256 indexed tokenId,
-        string indexed attribute,
-        string indexed info
+        uint256 tokenId,
+        string attribute,
+        string info
     );
     event AftermarketDeviceNodeMinted(
-        uint256 indexed tokenId,
+        uint256 tokenId,
         address indexed aftermarketDeviceAddress,
         address indexed owner
     );
     event AftermarketDeviceClaimed(
-        uint256 indexed aftermarketDeviceNode,
+        uint256 aftermarketDeviceNode,
         address indexed owner
     );
 
     event AftermarketDevicePaired(
-        uint256 indexed aftermarketDeviceNode,
-        uint256 indexed vehicleNode,
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
         address indexed owner
     );
 
     event AftermarketDeviceUnpaired(
-        uint256 indexed aftermarketDeviceNode,
-        uint256 indexed vehicleNode,
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
         address indexed owner
     );
 
@@ -71,9 +71,10 @@ contract AftermarketDevice is
     /// @notice Sets the NFT proxy associated with the Aftermarket Device node
     /// @dev Only an admin can set the address
     /// @param addr The address of the proxy
-    function setAftermarketDeviceNftProxyAddress(
-        address addr
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setAftermarketDeviceNftProxyAddress(address addr)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         require(addr != address(0), "Non zero address");
         AftermarketDeviceStorage.getStorage().nftProxyAddress = addr;
 
@@ -83,9 +84,10 @@ contract AftermarketDevice is
     /// @notice Adds an attribute to the whielist
     /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
-    function addAftermarketDeviceAttribute(
-        string calldata attribute
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addAftermarketDeviceAttribute(string calldata attribute)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         require(
             AttributeSet.add(
                 AftermarketDeviceStorage.getStorage().whitelistedAttributes,
@@ -352,9 +354,11 @@ contract AftermarketDevice is
     /// @notice Gets the AD Id by the device address
     /// @dev If the device is not minted it will return 0
     /// @param addr Address associated with the aftermarket device
-    function getAftermarketDeviceIdByAddress(
-        address addr
-    ) external view returns (uint256 nodeId) {
+    function getAftermarketDeviceIdByAddress(address addr)
+        external
+        view
+        returns (uint256 nodeId)
+    {
         nodeId = AftermarketDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
         ];
@@ -367,10 +371,9 @@ contract AftermarketDevice is
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function _setInfo(
-        uint256 tokenId,
-        AttributeInfoPair[] calldata attrInfo
-    ) private {
+    function _setInfo(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
+        private
+    {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
@@ -394,7 +397,6 @@ contract AftermarketDevice is
                 attrInfo[i].attribute,
                 attrInfo[i].info
             );
-            // TODO Add event
         }
     }
 

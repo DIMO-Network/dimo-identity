@@ -21,7 +21,6 @@ export const mockVehicleInfo3 = 'mockVehicleInfo3';
 export const mockVehicleInfos = [mockVehicleInfo1, mockVehicleInfo2];
 export const mockVehicleInfosWrongSize = [mockVehicleInfo1];
 
-// TODO New stuff here. Remove unecessary constants above
 export const mockVehicleAttributeInfoPairs: AttributeInfoPair[] = [
   { attribute: mockVehicleAttribute1, info: mockVehicleInfo1 },
   { attribute: mockVehicleAttribute2, info: mockVehicleInfo2 }

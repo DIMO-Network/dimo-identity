@@ -301,7 +301,7 @@ describe('Vehicle', function () {
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
         )
           .to.emit(vehicleInstance, 'VehicleNodeMinted')
-          .withArgs(1);
+          .withArgs(1, user1.address);
       });
     });
   });
@@ -619,7 +619,7 @@ describe('Vehicle', function () {
             )
         )
           .to.emit(vehicleInstance, 'VehicleNodeMinted')
-          .withArgs(1);
+          .withArgs(1, user1.address);
       });
     });
   });

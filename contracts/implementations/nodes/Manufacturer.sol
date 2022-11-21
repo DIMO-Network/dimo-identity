@@ -14,23 +14,25 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 contract Manufacturer is AccessControlInternal {
     event ManufacturerNftProxySet(address indexed proxy);
     event ManufacturerAttributeAdded(string attribute);
-    event ManufacturerAttributeUpdated(
+    event ManufacturerAttributeSet(
         uint256 indexed tokenId,
         string indexed attribute,
         string indexed info
     );
     event ControllerSet(address indexed controller);
-    event ManufacturerNodeMinted(uint256 tokenId);
+    event ManufacturerNodeMinted(
+        uint256 indexed tokenId,
+        address indexed owner
+    );
 
     // ***** Admin management ***** //
 
     /// @notice Sets the NFT proxy associated with the Manufacturer node
     /// @dev Only an admin can set the address
     /// @param addr The address of the proxy
-    function setManufacturerNftProxyAddress(address addr)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setManufacturerNftProxyAddress(
+        address addr
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(addr != address(0), "Non zero address");
         ManufacturerStorage.getStorage().nftProxyAddress = addr;
 
@@ -40,10 +42,9 @@ contract Manufacturer is AccessControlInternal {
     /// @notice Adds an attribute to the whitelist
     /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
-    function addManufacturerAttribute(string calldata attribute)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function addManufacturerAttribute(
+        string calldata attribute
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(
             AttributeSet.add(
                 ManufacturerStorage.getStorage().whitelistedAttributes,
@@ -58,10 +59,9 @@ contract Manufacturer is AccessControlInternal {
     /// @notice Sets a address controller
     /// @dev Only an admin can set new controllers
     /// @param _controller The address of the controller
-    function setController(address _controller)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setController(
+        address _controller
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         require(_controller != address(0), "Non zero address");
@@ -82,10 +82,10 @@ contract Manufacturer is AccessControlInternal {
     /// @dev It is assumed the 'Name' attribute is whitelisted in advance
     /// @param owner The address of the new owner
     /// @param names List of manufacturer names
-    function mintManufacturerBatch(address owner, string[] calldata names)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function mintManufacturerBatch(
+        address owner,
+        string[] calldata names
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(_hasRole(DEFAULT_ADMIN_ROLE, owner), "Owner must be an admin");
 
         ManufacturerStorage.Storage storage s = ManufacturerStorage
@@ -99,7 +99,7 @@ contract Manufacturer is AccessControlInternal {
 
             ns.nodes[nftProxyAddress][newTokenId].info["Name"] = names[i];
 
-            emit ManufacturerNodeMinted(newTokenId);
+            emit ManufacturerNodeMinted(newTokenId, owner);
         }
     }
 
@@ -122,7 +122,7 @@ contract Manufacturer is AccessControlInternal {
         uint256 newTokenId = INFT(nftProxyAddress).safeMint(owner);
         _setInfo(newTokenId, attrInfoPairList);
 
-        emit ManufacturerNodeMinted(newTokenId);
+        emit ManufacturerNodeMinted(newTokenId, msg.sender);
     }
 
     /// @notice Add infos to node
@@ -140,11 +140,9 @@ contract Manufacturer is AccessControlInternal {
 
     /// @notice Verify if an address is a controller
     /// @param addr the address to be verified
-    function isController(address addr)
-        external
-        view
-        returns (bool _isController)
-    {
+    function isController(
+        address addr
+    ) external view returns (bool _isController) {
         _isController = ManufacturerStorage
             .getStorage()
             .controllers[addr]
@@ -153,11 +151,9 @@ contract Manufacturer is AccessControlInternal {
 
     /// @notice Verify if an address has minted a manufacturer
     /// @param addr the address to be verified
-    function isManufacturerMinted(address addr)
-        external
-        view
-        returns (bool _isManufacturerMinted)
-    {
+    function isManufacturerMinted(
+        address addr
+    ) external view returns (bool _isManufacturerMinted) {
         _isManufacturerMinted = ManufacturerStorage
             .getStorage()
             .controllers[addr]
@@ -191,6 +187,12 @@ contract Manufacturer is AccessControlInternal {
             ns.nodes[nftProxyAddress][tokenId].info[
                 attrInfoPairList[i].attribute
             ] = attrInfoPairList[i].info;
+
+            emit ManufacturerAttributeSet(
+                tokenId,
+                attrInfoPairList[i].attribute,
+                attrInfoPairList[i].info
+            );
         }
     }
 
@@ -214,6 +216,6 @@ contract Manufacturer is AccessControlInternal {
         address nftProxyAddress = m.nftProxyAddress;
 
         ns.nodes[nftProxyAddress][tokenId].info[attribute] = info;
-        emit ManufacturerAttributeUpdated(tokenId, attribute, info);
+        emit ManufacturerAttributeSet(tokenId, attribute, info);
     }
 }

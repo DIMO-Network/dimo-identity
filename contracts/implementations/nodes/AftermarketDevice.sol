@@ -46,7 +46,8 @@ contract AftermarketDevice is
     );
     event AftermarketDeviceNodeMinted(
         uint256 indexed tokenId,
-        address indexed aftermarketDeviceAddress
+        address indexed aftermarketDeviceAddress,
+        address indexed owner
     );
     event AftermarketDeviceClaimed(
         uint256 indexed aftermarketDeviceNode,
@@ -70,10 +71,9 @@ contract AftermarketDevice is
     /// @notice Sets the NFT proxy associated with the Aftermarket Device node
     /// @dev Only an admin can set the address
     /// @param addr The address of the proxy
-    function setAftermarketDeviceNftProxyAddress(address addr)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setAftermarketDeviceNftProxyAddress(
+        address addr
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(addr != address(0), "Non zero address");
         AftermarketDeviceStorage.getStorage().nftProxyAddress = addr;
 
@@ -83,10 +83,9 @@ contract AftermarketDevice is
     /// @notice Adds an attribute to the whielist
     /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
-    function addAftermarketDeviceAttribute(string calldata attribute)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function addAftermarketDeviceAttribute(
+        string calldata attribute
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(
             AttributeSet.add(
                 AftermarketDeviceStorage.getStorage().whitelistedAttributes,
@@ -144,7 +143,11 @@ contract AftermarketDevice is
 
             _setInfo(newTokenId, adInfos[i].attrInfoPairs);
 
-            emit AftermarketDeviceNodeMinted(newTokenId, deviceAddress);
+            emit AftermarketDeviceNodeMinted(
+                newTokenId,
+                deviceAddress,
+                msg.sender
+            );
         }
 
         // Validate request and transfer funds to foundation
@@ -349,11 +352,9 @@ contract AftermarketDevice is
     /// @notice Gets the AD Id by the device address
     /// @dev If the device is not minted it will return 0
     /// @param addr Address associated with the aftermarket device
-    function getAftermarketDeviceIdByAddress(address addr)
-        external
-        view
-        returns (uint256 nodeId)
-    {
+    function getAftermarketDeviceIdByAddress(
+        address addr
+    ) external view returns (uint256 nodeId) {
         nodeId = AftermarketDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
         ];
@@ -366,9 +367,10 @@ contract AftermarketDevice is
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function _setInfo(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
-        private
-    {
+    function _setInfo(
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfo
+    ) private {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();

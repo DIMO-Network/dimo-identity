@@ -6,6 +6,12 @@ export const DEFAULT_ADMIN_ROLE =
 export const MANUFACTURER_ROLE = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes('Manufacturer')
 );
+export const MINTER_ROLE = ethers.utils.keccak256(
+  ethers.utils.toUtf8Bytes('MINTER_ROLE')
+);
+export const TRANSFERER_ROLE = ethers.utils.keccak256(
+  ethers.utils.toUtf8Bytes('TRANSFERER_ROLE')
+);
 
 export const networkName = network.name;
 export const KmsAddress: NetworkValue = {
@@ -35,8 +41,16 @@ export const eip712Name = 'DIMO';
 export const eip712Version = '1';
 export const adMintCost = ethers.utils.parseEther('50');
 
-export const name = 'DIMO identity Beta V2';
-export const symbol = 'DIMOBetaV2';
+export const MANUFACTURER_NFT_NAME = 'Dimo Manufacturer NFT';
+export const MANUFACTURER_NFT_SYMBOL = 'DMNFT';
+export const MANUFACTURER_NFT_URI =
+  'https://devices-api.dev.dimo.zone/v1/nfts/';
+export const VEHICLE_NFT_NAME = 'Dimo Vehicle NFT';
+export const VEHICLE_NFT_SYMBOL = 'DVNFT';
+export const VEHICLE_NFT_URI = 'https://devices-api.dev.dimo.zone/v1/nfts/';
+export const AD_NFT_NAME = 'Dimo Aftermarket Device NFT';
+export const AD_NFT_SYMBOL = 'DADNFT';
+export const AD_NFT_URI = 'https://devices-api.dev.dimo.zone/v1/nfts/';
 export const baseUri: NetworkValue = {
   mumbai: 'https://devices-api.dev.dimo.zone/v1/nfts/',
   polygon: 'https://devices-api.dimo.zone/v1/nfts/',

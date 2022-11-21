@@ -6,15 +6,14 @@ library NodesStorage {
         keccak256("DIMORegistry.nodes.storage");
 
     struct Node {
-        uint256 nodeType;
+        // TODO add info to the parent node type
+        address nftProxyAddress; // TODO Redundant ?
         uint256 parentNode;
         mapping(string => string) info;
     }
 
     struct Storage {
-        // [Node id] => Node info
-        mapping(uint256 => Node) nodes;
-        uint256 currentIndex;
+        mapping(address => mapping(uint256 => Node)) nodes;
     }
 
     /* solhint-disable no-inline-assembly */

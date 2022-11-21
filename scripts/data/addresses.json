@@ -1,36 +1,52 @@
 {
     "polygon": {
-        "DIMORegistry": "",
-        "AccessControl": "",
-        "Eip712Checker": "",
-        "Getter": "",
-        "Metadata": "",
-        "Manufacturer": "",
-        "Vehicle": ""
+        "modules": {
+            "DIMORegistry": "",
+            "AccessControl": "",
+            "Eip712Checker": "",
+            "Getter": "",
+            "Metadata": "",
+            "Manufacturer": "",
+            "Vehicle": ""
+        },
+        "nfts": {}
     },
     "mumbai": {
-        "DIMORegistry": "0x72b7268bD15EC670BfdA1445bD380C9400F4b1A6",
-        "Eip712Checker": "0x78513c8CB4D6B6079f813850376bc9c7fc8aE67f",
-        "AccessControl": "0x07C64bd1B23b7C9B0ABf80b8613f58e5B00ED5dD",
-        "Nodes": "0xF6e0000de27E767B02221F09409c62614F0e068F",
-        "Metadata": "0x4B4f783C4DB098BD89F916d2e1B3fb21594d942a",
-        "Manufacturer": "0x82CB08b4600d4d24a801C349AA669b561119bC11",
-        "Vehicle": "0x464387c99bB59Aa8566CCb28669bA5f7cC240b4c",
-        "AftermarketDevice": "0x2FCf15AEA65Fcf1ac5EF1Ac2F1B65c77f6288B4d",
-        "AdLicenseValidator": "0xfb6dA26737385626995400804A618E4730539150",
-        "Mapper": "0x946c22477cba1dBde3908Ca335EEa59Ab8C4603f",
-        "DevAdmin": "0x510fB346960c4991FFb493ecdDeF11b1D4fD0Da9"
+        "modules": {
+            "DIMORegistry": "0xCF395Cd4514490c35e1195dad50DA245b6a2333a",
+            "Eip712Checker": "0x3268dE2A019d80D53dE4C92502119C6B266a0605",
+            "DimoAccessControl": "0x0aF7F9f9cab39E4316AdF17b1b82af71bAd989c0",
+            "Nodes": "0x3ae21ee2af3A371484826E525Bce5A79bf4E1886",
+            "Manufacturer": "0x884d5809e44cCF47d2EBb87f808736649ABB7eD5",
+            "Vehicle": "0x5a91d9ED88237C3911D4C646CA0C30Cd89581410",
+            "AftermarketDevice": "0xe40B17BdD7ed644300D724BcD2591cCEe709fE74",
+            "AdLicenseValidator": "0xCF722B94cD73E71f88659c26483D41e015CcA168",
+            "Mapper": "0x075b25298431642cfb1a1B3Ef05B4cfBe2B94130",
+            "DevAdmin": "0xDa92fb8c9fa8c469c64ae6e05963853341B03399"
+        },
+        "nfts": {
+            "ManufacturerNft": "0xFdB5774D7aCe99226d99B58f4b293E72126cf068",
+            "VehicleNft": "0xA975E31A046AbEe2de14a041Dae5d0983C59128D",
+            "AftermarketDeviceNft": "0x283568f15Bc5025CfC054427FB9c487D620b3552"
+        }
     },
     "hardhat": {
-        "DIMORegistry": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-        "Eip712Checker": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-        "AccessControl": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-        "Nodes": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-        "Metadata": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-        "Manufacturer": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-        "Vehicle": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-        "AftermarketDevice": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
-        "AdLicenseValidator": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
-        "Mapper": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318"
+        "modules": {
+            "DIMORegistry": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+            "Eip712Checker": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+            "DimoAccessControl": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+            "Nodes": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+            "Manufacturer": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+            "Vehicle": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+            "AftermarketDevice": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+            "AdLicenseValidator": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+            "Mapper": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+            "DevAdmin": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318"
+        },
+        "nfts": {
+            "ManufacturerNft": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+            "VehicleNft": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+            "AftermarketDeviceNft": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
+        }
     }
 }

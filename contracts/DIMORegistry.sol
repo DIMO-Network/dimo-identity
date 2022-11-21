@@ -1,17 +1,14 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "./ERC721/ERC721.sol";
 import "./libraries/RegistryStorage.sol";
-import "./access/AccessControlInternal.sol";
-import "@solidstate/contracts/introspection/ERC165.sol";
-import "@solidstate/contracts/token/ERC721/metadata/IERC721Metadata.sol";
-import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataStorage.sol";
+
+import {DEFAULT_ADMIN_ROLE} from "./shared/Roles.sol";
+
+import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 // TODO Documentation
-contract DIMORegistry is ERC721, AccessControlInternal {
-    using ERC165Storage for ERC165Storage.Layout;
-
+contract DIMORegistry is AccessControlInternal {
     event ModuleAdded(address indexed moduleAddr, bytes4[] selectors);
     event ModuleRemoved(address indexed moduleAddr, bytes4[] selectors);
     event ModuleUpdated(
@@ -21,26 +18,8 @@ contract DIMORegistry is ERC721, AccessControlInternal {
         bytes4[] newSelectors
     );
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        string memory __baseURI
-    ) {
+    constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-
-        ERC721MetadataStorage.Layout storage s = ERC721MetadataStorage.layout();
-        s.name = _name;
-        s.symbol = _symbol;
-        s.baseURI = __baseURI;
-
-        ERC165Storage.layout().setSupportedInterface(
-            type(IERC165).interfaceId,
-            true
-        );
-        ERC165Storage.layout().setSupportedInterface(
-            type(IERC721Metadata).interfaceId,
-            true
-        );
     }
 
     /// @notice pass a call to a module

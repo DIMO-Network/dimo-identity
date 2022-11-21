@@ -15,7 +15,7 @@ library ManufacturerStorage {
     }
 
     struct Storage {
-        uint256 nodeType;
+        address nftProxyAddress;
         // [Controller address] => is controller, has minted manufacturer
         mapping(address => Controller) controllers;
         // Allowed node attribute

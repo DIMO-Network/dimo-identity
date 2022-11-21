@@ -6,7 +6,7 @@ library MapperStorage {
         keccak256("DIMORegistry.mapper.storage");
 
     struct Storage {
-        mapping(uint256 => uint256) links;
+        mapping(address => mapping(uint256 => uint256)) links;
     }
 
     /* solhint-disable no-inline-assembly */

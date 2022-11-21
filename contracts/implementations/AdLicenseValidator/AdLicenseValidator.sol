@@ -1,8 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "../../access/AccessControlInternal.sol";
 import "../../libraries/AdLicenseValidatorStorage.sol";
+
+import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
+
+import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 // TODO Documentation
 contract AdLicenseValidator is AccessControlInternal {

@@ -10,11 +10,10 @@ contract Nodes {
     /// @notice Gets the parent node of a node
     /// @param nftProxyAddress The address of the proxy associated with the node Id
     /// @param tokenId the id associated to the node
-    function getParentNode(address nftProxyAddress, uint256 tokenId)
-        external
-        view
-        returns (uint256 parentNode)
-    {
+    function getParentNode(
+        address nftProxyAddress,
+        uint256 tokenId
+    ) external view returns (uint256 parentNode) {
         parentNode = NodesStorage
         .getStorage()
         .nodes[nftProxyAddress][tokenId].parentNode;

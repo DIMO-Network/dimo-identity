@@ -11,9 +11,10 @@ contract AdLicenseValidatorInternal {
     /// @dev This contract must be approved to spend the tokens in advance
     /// @param manufacturer The address of the manufacturer
     /// @param amount The amount of devices to be minted
-    function _validateMintRequest(address manufacturer, uint256 amount)
-        internal
-    {
+    function _validateMintRequest(
+        address manufacturer,
+        uint256 amount
+    ) internal {
         require(
             AdLicenseValidatorStorage.getStorage().license.balanceOf(
                 manufacturer

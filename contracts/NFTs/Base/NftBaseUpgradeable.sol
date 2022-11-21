@@ -27,38 +27,33 @@ abstract contract NftBaseUpgradeable is
 
     string private baseURI;
 
-    function setBaseURI(string calldata baseURI_)
-        external
-        virtual
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setBaseURI(
+        string calldata baseURI_
+    ) external virtual onlyRole(DEFAULT_ADMIN_ROLE) {
         baseURI = baseURI_;
     }
 
-    function safeMint(address to)
-        external
-        virtual
-        onlyRole(MINTER_ROLE)
-        returns (uint256 tokenId)
-    {
+    function safeMint(
+        address to
+    ) external virtual onlyRole(MINTER_ROLE) returns (uint256 tokenId) {
         _tokenIdCounter.increment();
         tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
     }
 
-    function safeMint(address to, string calldata uri)
-        external
-        virtual
-        onlyRole(MINTER_ROLE)
-        returns (uint256 tokenId)
-    {
+    function safeMint(
+        address to,
+        string calldata uri
+    ) external virtual onlyRole(MINTER_ROLE) returns (uint256 tokenId) {
         _tokenIdCounter.increment();
         tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
     }
 
-    function tokenURI(uint256 tokenId)
+    function tokenURI(
+        uint256 tokenId
+    )
         public
         view
         virtual
@@ -68,7 +63,9 @@ abstract contract NftBaseUpgradeable is
         return super.tokenURI(tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
@@ -101,12 +98,9 @@ abstract contract NftBaseUpgradeable is
         return baseURI;
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        virtual
-        override
-        onlyRole(UPGRADER_ROLE)
-    {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal virtual override onlyRole(UPGRADER_ROLE) {}
 
     function _transfer(
         address from,
@@ -116,7 +110,9 @@ abstract contract NftBaseUpgradeable is
         super._transfer(from, to, tokenId);
     }
 
-    function _burn(uint256 tokenId)
+    function _burn(
+        uint256 tokenId
+    )
         internal
         virtual
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)

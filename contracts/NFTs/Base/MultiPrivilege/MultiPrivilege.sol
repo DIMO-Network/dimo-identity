@@ -38,10 +38,10 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     }
 
     // TODO Documentation
-    function createPrivilege(bool enabled, string calldata decription)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function createPrivilege(
+        bool enabled,
+        string calldata decription
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _privilegeCounter.increment();
         uint256 privilegeId = _privilegeCounter.current();
 
@@ -51,10 +51,9 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     }
 
     // TODO Documentation
-    function enablePrivilege(uint256 privId)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function enablePrivilege(
+        uint256 privId
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(privId <= _privilegeCounter.current(), "Invalid privilege id");
         require(!privilegeRecord[privId].enabled, "Privilege is enabled");
 
@@ -64,10 +63,9 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     }
 
     // TODO Documentation
-    function disablePrivilege(uint256 privId)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function disablePrivilege(
+        uint256 privId
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(privId <= _privilegeCounter.current(), "Invalid privilege id");
         require(privilegeRecord[privId].enabled, "Privilege is disabled");
 
@@ -143,12 +141,9 @@ contract MultiPrivilege is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         return privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][user];
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override returns (bool) {
         return
             interfaceId == type(IMultiPrivilege).interfaceId ||
             super.supportsInterface(interfaceId);

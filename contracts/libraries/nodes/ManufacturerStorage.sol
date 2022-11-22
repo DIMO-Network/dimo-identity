@@ -20,6 +20,10 @@ library ManufacturerStorage {
         mapping(address => Controller) controllers;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
+        // Manufacturer name => Manufacturer Id
+        mapping(string => uint256) manufacturerNameToNodeId;
+        // Manufacturer Id => Manufacturer name
+        mapping(uint256 => string) nodeIdToManufacturerName;
     }
 
     /* solhint-disable no-inline-assembly */

@@ -31,12 +31,9 @@ async function deployModules(
 ): Promise<ContractAddressesByNetwork> {
   console.log('\n----- Deploying contracts -----\n');
 
-  const instances: ContractAddressesByNetwork = {
-    [C.networkName]: {
-      modules: {},
-      nfts: {}
-    }
-  };
+  const instances: ContractAddressesByNetwork = JSON.parse(
+    JSON.stringify(contractAddresses)
+  );
 
   for (const contractName of contractNames) {
     const ContractFactory = await ethers.getContractFactory(contractName);
@@ -49,7 +46,7 @@ async function deployModules(
       `Contract ${contractName} deployed to ${contractImplementation.address}`
     );
 
-    instances[C.networkName].modules[contractName] =
+    instances[C.networkName].modules[contractName].address =
       contractImplementation.address;
   }
 
@@ -61,24 +58,31 @@ async function deployModules(
 async function addModules(
   deployer: SignerWithAddress,
   contractNames: string[]
-) {
+): Promise<ContractAddressesByNetwork> {
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
     'DIMORegistry',
-    contractAddresses[C.networkName].modules.DIMORegistry
+    contractAddresses[C.networkName].modules.DIMORegistry.address
   );
 
-  const instances = Object.keys(contractAddresses[C.networkName].modules)
+  const instances: ContractAddressesByNetwork = JSON.parse(
+    JSON.stringify(contractAddresses)
+  );
+
+  const contractsNameImpl = Object.keys(
+    contractAddresses[C.networkName].modules
+  )
     .filter((contractName) => contractNames.includes(contractName))
     .map((contractName) => {
       return {
         name: contractName,
-        implementation: contractAddresses[C.networkName].modules[contractName]
+        implementation:
+          contractAddresses[C.networkName].modules[contractName].address
       };
     });
 
   console.log('\n----- Adding modules -----\n');
 
-  for (const contract of instances) {
+  for (const contract of contractsNameImpl) {
     const ContractFactory = await ethers.getContractFactory(contract.name);
 
     const contractSelectors = getSelectors(ContractFactory.interface);
@@ -89,10 +93,15 @@ async function addModules(
         .addModule(contract.implementation, contractSelectors)
     ).wait();
 
+    instances[C.networkName].modules[contract.name].selectors =
+      contractSelectors;
+
     console.log(`Module ${contract.name} added`);
   }
 
   console.log('\n----- Modules Added -----');
+
+  return instances;
 }
 
 async function updateModule(
@@ -104,7 +113,7 @@ async function updateModule(
 ) {
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
     'DIMORegistry',
-    contractAddresses[C.networkName].modules.DIMORegistry
+    contractAddresses[C.networkName].modules.DIMORegistry.address
   );
 
   console.log('\n----- Updating module -----\n');

@@ -7,7 +7,6 @@ export const manufacturerNodeTypeId =
   ethers.utils.keccak256(manufacturerNodeType);
 
 // Mock Manufacturer attributes
-export const mockManufacturerAttributeName = 'Name';
 export const mockManufacturerAttribute1 = 'mockManufacturerAttribute1';
 export const mockManufacturerAttribute2 = 'mockManufacturerAttribute2';
 export const mockManufacturerAttribute3 = 'mockManufacturerAttribute3';

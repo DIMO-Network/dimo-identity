@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
@@ -9,6 +9,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
+/// @title MultiPrivilege
+/// @dev Based on the EIP-5496 https://eips.ethereum.org/EIPS/eip-5496
 abstract contract NftBaseUpgradeable is
     Initializable,
     ERC721Upgradeable,
@@ -27,6 +29,9 @@ abstract contract NftBaseUpgradeable is
 
     string private baseURI;
 
+    /// @notice Sets the base URI
+    /// @dev Caller must have the admin role
+    /// @param baseURI_ Base URI to be set
     function setBaseURI(string calldata baseURI_)
         external
         virtual
@@ -35,6 +40,11 @@ abstract contract NftBaseUpgradeable is
         baseURI = baseURI_;
     }
 
+    /// @notice Mints a new token
+    /// @dev Caller must have the minter role
+    /// @dev Token Id auto increments
+    /// @param to Token owner
+    /// @return tokenId Minted token Id
     function safeMint(address to)
         external
         virtual
@@ -46,6 +56,12 @@ abstract contract NftBaseUpgradeable is
         _safeMint(to, tokenId);
     }
 
+    /// @notice Mints a new token
+    /// @dev Caller must have the minter role
+    /// @dev Token Id auto increments
+    /// @param to Token owner
+    /// @param uri Individual token URI
+    /// @return tokenId Minted token Id
     function safeMint(address to, string calldata uri)
         external
         virtual
@@ -58,6 +74,16 @@ abstract contract NftBaseUpgradeable is
         _setTokenURI(tokenId, uri);
     }
 
+    /// @notice Checks if a token was minted
+    /// @param tokenId Token Id to be checked
+    /// @return boolean
+    function exists(uint256 tokenId) external view returns (bool) {
+        return _exists(tokenId);
+    }
+
+    /// @notice Gets the token URI associated to a token
+    /// @param tokenId Token Id to be checked
+    /// @return string
     function tokenURI(uint256 tokenId)
         public
         view
@@ -78,6 +104,10 @@ abstract contract NftBaseUpgradeable is
         return super.supportsInterface(interfaceId);
     }
 
+    /// @notice Initialize function to be used by contracts that inherit from NftBaseUpgradeable
+    /// @param name_ Token name
+    /// @param symbol_ Token symbol
+    /// @param baseUri_ Token base URI
     function _baseNftInit(
         string calldata name_,
         string calldata symbol_,
@@ -97,10 +127,15 @@ abstract contract NftBaseUpgradeable is
         _grantRole(TRANSFERER_ROLE, msg.sender);
     }
 
+    /// @notice Gets the base URI
+    /// @return string
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
 
+    /// @notice Internal function to authorize contract upgrade
+    /// @dev Caller must have the upgrader role
+    /// @param newImplementation New contract implementation address
     function _authorizeUpgrade(address newImplementation)
         internal
         virtual
@@ -108,6 +143,11 @@ abstract contract NftBaseUpgradeable is
         onlyRole(UPGRADER_ROLE)
     {}
 
+    /// @notice Internal function to transfer a token
+    /// @dev Caller must have the transferer role
+    /// @param from Old owner
+    /// @param to New owner
+    /// @param tokenId Token Id to be transferred
     function _transfer(
         address from,
         address to,
@@ -116,6 +156,9 @@ abstract contract NftBaseUpgradeable is
         super._transfer(from, to, tokenId);
     }
 
+    /// @notice Internal function to burn a token
+    /// @dev Caller must have the burner role
+    /// @param tokenId Token Id to be burned
     function _burn(uint256 tokenId)
         internal
         virtual

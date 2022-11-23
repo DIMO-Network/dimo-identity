@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
@@ -12,7 +12,8 @@ import {AttributeInfoPair} from "../../shared/Types.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-// TODO Documentation
+/// @title Vehicle
+/// @notice Contract that represents the Vehicle node
 contract Vehicle is AccessControlInternal {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
@@ -26,7 +27,9 @@ contract Vehicle is AccessControlInternal {
 
     // ***** Admin management ***** //
 
-    // TODO Documentation
+    /// @notice Sets the NFT proxy associated with the Vehicle node
+    /// @dev Only an admin can set the address
+    /// @param addr The address of the proxy
     function setVehicleNftProxyAddress(address addr)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -67,19 +70,16 @@ contract Vehicle is AccessControlInternal {
         address owner,
         AttributeInfoPair[] calldata attrInfo
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        // ManufacturerStorage.Storage storage ms = ManufacturerStorage
-        //     .getStorage();
-        // VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         address vehicleNftProxyAddress = VehicleStorage
             .getStorage()
             .nftProxyAddress;
 
-        // TODO Check if manufacturerNode is a manufacturer ?
-        // require(
-        //     ns.nodes[manufacturerNode].nodeType == ms.nodeType,
-        //     "Invalid parent node"
-        // );
+        require(
+            INFT(ManufacturerStorage.getStorage().nftProxyAddress).exists(
+                manufacturerNode
+            ),
+            "Invalid parent node"
+        );
 
         uint256 newTokenId = INFT(vehicleNftProxyAddress).safeMint(owner);
 
@@ -88,7 +88,7 @@ contract Vehicle is AccessControlInternal {
         .nodes[vehicleNftProxyAddress][newTokenId]
             .parentNode = manufacturerNode;
 
-        _setInfo(newTokenId, attrInfo);
+        _setInfos(newTokenId, attrInfo);
 
         emit VehicleNodeMinted(newTokenId, owner);
     }
@@ -107,17 +107,16 @@ contract Vehicle is AccessControlInternal {
         bytes calldata signature
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        // VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         address vehicleNftProxyAddress = VehicleStorage
             .getStorage()
             .nftProxyAddress;
 
-        // TODO Check if manufacturerNode is a manufacturer ?
-        // require(
-        //     ns.nodes[manufacturerNode].nodeType ==
-        //         ManufacturerStorage.getStorage().nodeType,
-        //     "Invalid parent node"
-        // );
+        require(
+            INFT(ManufacturerStorage.getStorage().nftProxyAddress).exists(
+                manufacturerNode
+            ),
+            "Invalid parent node"
+        );
 
         uint256 newTokenId = INFT(vehicleNftProxyAddress).safeMint(owner);
 
@@ -125,7 +124,7 @@ contract Vehicle is AccessControlInternal {
         .nodes[vehicleNftProxyAddress][newTokenId]
             .parentNode = manufacturerNode;
 
-        (bytes32 attributesHash, bytes32 infosHash) = _setInfoHash(
+        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
             newTokenId,
             attrInfo
         );
@@ -149,7 +148,6 @@ contract Vehicle is AccessControlInternal {
     }
 
     /// @notice Add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @dev Caller must have the admin role
     /// @param tokenId Node where the info will be added
@@ -158,18 +156,20 @@ contract Vehicle is AccessControlInternal {
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfo
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO Check nft id ?
-        _setInfo(tokenId, attrInfo);
+        require(
+            INFT(VehicleStorage.getStorage().nftProxyAddress).exists(tokenId),
+            "Invalid vehicle node"
+        );
+        _setInfos(tokenId, attrInfo);
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
 
     /// @dev Internal function to add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function _setInfo(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
+    function _setInfos(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
         private
     {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
@@ -196,38 +196,12 @@ contract Vehicle is AccessControlInternal {
         }
     }
 
-    /// @dev Internal function to update a single attribute
-    /// @dev attribute must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attribute Attribute to be updated
-    /// @param info Info to be set
-    function _updateAttributeInfo(
-        uint256 tokenId,
-        string calldata attribute,
-        string calldata info
-    ) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
-
-        require(
-            AttributeSet.exists(s.whitelistedAttributes, attribute),
-            "Not whitelisted"
-        );
-
-        address nftProxyAddress = s.nftProxyAddress;
-
-        ns.nodes[nftProxyAddress][tokenId].info[attribute] = info;
-
-        emit VehicleAttributeSet(tokenId, attribute, info);
-    }
-
     /// @dev Internal function to add infos to node and calculate attribute and info hashes
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
     /// @return keccak256 of the list of attributes and infos
-    function _setInfoHash(
+    function _setInfosHash(
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfo
     ) private returns (bytes32, bytes32) {
@@ -265,5 +239,30 @@ contract Vehicle is AccessControlInternal {
             keccak256(abi.encodePacked(attributeHashes)),
             keccak256(abi.encodePacked(infoHashes))
         );
+    }
+
+    /// @dev Internal function to update a single attribute
+    /// @dev attribute must be whitelisted
+    /// @param tokenId Node where the info will be added
+    /// @param attribute Attribute to be updated
+    /// @param info Info to be set
+    function _setAttributeInfo(
+        uint256 tokenId,
+        string calldata attribute,
+        string calldata info
+    ) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+
+        require(
+            AttributeSet.exists(s.whitelistedAttributes, attribute),
+            "Not whitelisted"
+        );
+
+        address nftProxyAddress = s.nftProxyAddress;
+
+        ns.nodes[nftProxyAddress][tokenId].info[attribute] = info;
+
+        emit VehicleAttributeSet(tokenId, attribute, info);
     }
 }

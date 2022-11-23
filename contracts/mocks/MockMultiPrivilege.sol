@@ -1,8 +1,10 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "../NFTs/Base/MultiPrivilege/MultiPrivilege.sol";
 
+/// @title MockMultiPrivilege
+/// @dev Mocks the MultiPrivilege token to be used in tests
 contract MockMultiPrivilege is Initializable, MultiPrivilege {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

@@ -474,13 +474,12 @@ describe('Manufacturer', async function () {
           }`
         );
       });
-      // TODO
-      it.skip('Should revert if node is not a manufacturer', async () => {
+      it('Should revert if node is not a manufacturer', async () => {
         await expect(
           manufacturerInstance
             .connect(admin)
             .setManufacturerInfo(99, C.mockManufacturerAttributeInfoPairs)
-        ).to.be.revertedWith('Node must be a manufacturer');
+        ).to.be.revertedWith('Invalid manufacturer node');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(

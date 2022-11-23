@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
@@ -15,10 +15,9 @@ import "../../shared/Types.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/**
- * TODO Documentation
- * It uses the Mapper contract to link Aftermarket Devices to Vehicles
- */
+/// @title AftermarketDevice
+/// @notice Contract that represents the Aftermarket Device node
+/// @dev It uses the Mapper contract to link Aftermarket Devices to Vehicles
 contract AftermarketDevice is
     AccessControlInternal,
     AdLicenseValidatorInternal
@@ -118,12 +117,12 @@ contract AftermarketDevice is
             INFT(adNftProxyAddress).isApprovedForAll(msg.sender, address(this)),
             "Registry must be approved for all"
         );
-
-        // TODO Check if manufacturerNode is a manufacturer ?
-        // require(
-        //     ns.nodes[manufacturerNode].nodeType == ms.nodeType,
-        //     "Invalid parent node"
-        // );
+        require(
+            INFT(ManufacturerStorage.getStorage().nftProxyAddress).exists(
+                manufacturerNode
+            ),
+            "Invalid parent node"
+        );
 
         uint256 newTokenId;
         address deviceAddress;
@@ -143,7 +142,7 @@ contract AftermarketDevice is
             ads.deviceAddressToNodeId[deviceAddress] = newTokenId;
             ads.nodeIdToDeviceAddress[newTokenId] = deviceAddress;
 
-            _setInfo(newTokenId, adInfos[i].attrInfoPairs);
+            _setInfos(newTokenId, adInfos[i].attrInfoPairs);
 
             emit AftermarketDeviceNodeMinted(
                 newTokenId,
@@ -181,12 +180,7 @@ contract AftermarketDevice is
         ];
         INFT adNftProxy = INFT(ads.nftProxyAddress);
 
-        // TODO Check if aftermarketDeviceNode is valid ?
-        // require(
-        //     NodesStorage.getStorage().nodes[aftermarketDeviceNode].nodeType ==
-        //         AftermarketDeviceStorage.getStorage().nodeType,
-        //     "Invalid AD node"
-        // );
+        require(adNftProxy.exists(aftermarketDeviceNode), "Invalid AD node");
         require(
             !ads.deviceClaimed[aftermarketDeviceNode],
             "Device already claimed"
@@ -236,10 +230,17 @@ contract AftermarketDevice is
             .getStorage()
             .nftProxyAddress;
 
-        // TODO Check node type?
+        require(
+            INFT(vehicleNftProxyAddress).exists(vehicleNode),
+            "Invalid vehicle node"
+        );
 
         address owner = INFT(vehicleNftProxyAddress).ownerOf(vehicleNode);
 
+        require(
+            INFT(adNftProxyAddress).exists(aftermarketDeviceNode),
+            "Invalid AD node"
+        );
         require(
             AftermarketDeviceStorage.getStorage().deviceClaimed[
                 aftermarketDeviceNode
@@ -291,8 +292,17 @@ contract AftermarketDevice is
             .getStorage()
             .nftProxyAddress;
 
+        require(
+            INFT(vehicleNftProxyAddress).exists(vehicleNode),
+            "Invalid vehicle node"
+        );
+
         address owner = INFT(vehicleNftProxyAddress).ownerOf(vehicleNode);
 
+        require(
+            INFT(adNftProxyAddress).exists(aftermarketDeviceNode),
+            "Invalid AD node"
+        );
         require(
             owner == INFT(adNftProxyAddress).ownerOf(aftermarketDeviceNode),
             "Owner of the nodes does not match"
@@ -306,8 +316,6 @@ contract AftermarketDevice is
             ms.links[adNftProxyAddress][aftermarketDeviceNode] == vehicleNode,
             "AD is not paired to vehicle"
         );
-
-        //We just need to verify the owners's signature is correct.
         require(
             Eip712CheckerInternal._verifySignature(owner, message, signature),
             "Invalid signature"
@@ -324,7 +332,6 @@ contract AftermarketDevice is
     }
 
     /// @notice Add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param tokenId Node id where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
@@ -332,23 +339,13 @@ contract AftermarketDevice is
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfo
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO Check nft id ?
-        _setInfo(tokenId, attrInfo);
-    }
-
-    /// @notice Update single attribute infos on node
-    /// @dev attributes and infos arrays length must match
-    /// @dev attributes must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attribute Attribute to be updated
-    /// @param info Info to be set
-    function setAftermarketDeviceAttribute(
-        uint256 tokenId,
-        string calldata attribute,
-        string calldata info
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO Check nft id ?
-        _setAttribute(tokenId, attribute, info);
+        require(
+            INFT(AftermarketDeviceStorage.getStorage().nftProxyAddress).exists(
+                tokenId
+            ),
+            "Invalid AD node"
+        );
+        _setInfos(tokenId, attrInfo);
     }
 
     /// @notice Gets the AD Id by the device address
@@ -367,11 +364,10 @@ contract AftermarketDevice is
     // ***** PRIVATE FUNCTIONS ***** //
 
     /// @dev Internal function to add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function _setInfo(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
+    function _setInfos(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
         private
     {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
@@ -405,7 +401,7 @@ contract AftermarketDevice is
     /// @param tokenId Node where the info will be added
     /// @param attribute Attribute to be updated
     /// @param info Info to be set
-    function _setAttribute(
+    function _setAttributeInfo(
         uint256 tokenId,
         string calldata attribute,
         string calldata info

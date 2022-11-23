@@ -1,7 +1,8 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
-// TODO Documentation
+/// @notice File to store shared structs
+
 struct AttributeInfoPair {
     string attribute;
     string info;

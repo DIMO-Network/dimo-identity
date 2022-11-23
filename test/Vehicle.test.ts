@@ -67,7 +67,7 @@ describe('Vehicle', function () {
         initializer: 'initialize',
         kind: 'uups'
       }
-    // eslint-disable-next-line prettier/prettier
+      // eslint-disable-next-line prettier/prettier
     ) as ManufacturerNft;
     await manufacturerNftInstance.deployed();
 
@@ -82,7 +82,7 @@ describe('Vehicle', function () {
         initializer: 'initialize',
         kind: 'uups'
       }
-    // eslint-disable-next-line prettier/prettier
+      // eslint-disable-next-line prettier/prettier
     ) as VehicleNft;
     await vehicleNftInstance.deployed();
 
@@ -149,8 +149,7 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .setVehicleNftProxyAddress(localVehicleInstance.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -184,8 +183,7 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .addVehicleAttribute(C.mockVehicleAttribute1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -228,13 +226,11 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
-      // TODO Check manufacturer node type?
-      it.skip('Should revert if parent node is not a manufacturer node', async () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
@@ -255,15 +251,14 @@ describe('Vehicle', function () {
     });
 
     context('State change', () => {
-      // TODO Fix parent node type
-      // it('Should correctly set parent node', async () => {
-      //   await vehicleInstance
-      //     .connect(admin)
-      //     .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
 
-      //   const parentNode = await nodesInstance.getParentNode(2);
-      //   expect(parentNode).to.be.equal(1);
-      // });
+        const parentNode = await nodesInstance.getParentNode(vehicleNftInstance.address, 1);
+        expect(parentNode).to.be.equal(1);
+      });
       it('Should correctly set node owner', async () => {
         await vehicleInstance
           .connect(admin)
@@ -354,13 +349,11 @@ describe('Vehicle', function () {
               signature
             )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
-      // TODO investigate
-      it.skip('Should revert if parent node is not a manufacturer node', async () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
@@ -561,23 +554,22 @@ describe('Vehicle', function () {
     });
 
     context('State change', () => {
-      // TODO Fix parent node type
-      // it('Should correctly set parent node', async () => {
-      //   await vehicleInstance
-      //     .connect(admin)
-      //     .mintVehicleSign(
-      //       1,
-      //       user1.address,
-      //       C.mockVehicleAttributeInfoPairs,
-      //       signature
-      //     );
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleSign(
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          );
 
-      //   const parentNode = await nodesInstance.getParentNode(
-      //     vehicleNftInstance.address,
-      //     2
-      //   );
-      //   expect(parentNode).to.be.equal(1);
-      // });
+        const parentNode = await nodesInstance.getParentNode(
+          vehicleNftInstance.address,
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
       it('Should correctly set node owner', async () => {
         await vehicleInstance
           .connect(admin)
@@ -671,18 +663,16 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .setVehicleInfo(1, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
-      // TODO Fix
-      it.skip('Should revert if node is not a vehicle', async () => {
+      it('Should revert if node is not a vehicle', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
             .setVehicleInfo(99, C.mockVehicleAttributeInfoPairs)
-        ).to.be.revertedWith('Node must be a vehicle');
+        ).to.be.revertedWith('Invalid vehicle node');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(

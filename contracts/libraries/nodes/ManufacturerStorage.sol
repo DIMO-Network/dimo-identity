@@ -1,8 +1,10 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "../AttributeSet.sol";
 
+/// @title ManufacturerStorage
+/// @notice Storage of the Manufacturer contract
 library ManufacturerStorage {
     using AttributeSet for AttributeSet.Set;
 

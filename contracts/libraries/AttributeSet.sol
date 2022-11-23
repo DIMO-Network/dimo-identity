@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 /// @dev derived from https://github.com/OpenZeppelin/openzeppelin-contracts (MIT license)

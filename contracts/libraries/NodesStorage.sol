@@ -1,13 +1,13 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
+/// @title NodesStorage
+/// @notice Storage of the Nodes contract
 library NodesStorage {
     bytes32 internal constant NODES_STORAGE_SLOT =
         keccak256("DIMORegistry.nodes.storage");
 
     struct Node {
-        // TODO add info to the parent node type
-        address nftProxyAddress; // TODO Redundant ?
         uint256 parentNode;
         mapping(string => string) info;
     }

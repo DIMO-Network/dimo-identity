@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "../../libraries/AdLicenseValidatorStorage.sol";
@@ -7,7 +7,9 @@ import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-// TODO Documentation
+/// @title AdLicenseValidator
+/// @notice Contract with functions to assist in aftermarket device minting
+/// @dev Stake contract repository https://github.com/DIMO-Network/dimo-staking-contract-license-nft
 contract AdLicenseValidator is AccessControlInternal {
     /// @notice Sets the foundation address
     /// @dev Only an admin can set the address

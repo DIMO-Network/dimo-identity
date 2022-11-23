@@ -1,6 +1,8 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
+/// @title RegistryStorage
+/// @notice Storage of the DIMORegistry contract
 library RegistryStorage {
     bytes32 internal constant DIMO_REGISTRY_STORAGE_SLOT =
         keccak256("DIMORegistry.storage");

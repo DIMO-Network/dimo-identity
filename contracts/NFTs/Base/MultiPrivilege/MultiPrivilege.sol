@@ -1,9 +1,11 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "./IMultiPrivilege.sol";
 import "../NftBaseUpgradeable.sol";
 
+/// @title MultiPrivilege
+/// @dev Based on the EIP-5496 https://eips.ethereum.org/EIPS/eip-5496
 abstract contract MultiPrivilege is
     Initializable,
     NftBaseUpgradeable,
@@ -28,20 +30,26 @@ abstract contract MultiPrivilege is
     mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => uint256))))
         public privilegeEntry;
 
-    // TODO Documentation
-    function createPrivilege(bool enabled, string calldata decription)
+    /// @notice Creates a new privilege
+    /// @dev The caller must have the admin role
+    /// @dev The privilege Id auto increments
+    /// @param enabled Sets new privilege enabled or not
+    /// @param description Description of the new privilege
+    function createPrivilege(bool enabled, string calldata description)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         _privilegeCounter.increment();
         uint256 privilegeId = _privilegeCounter.current();
 
-        privilegeRecord[privilegeId] = PrivilegeData(enabled, decription);
+        privilegeRecord[privilegeId] = PrivilegeData(enabled, description);
 
-        emit PrivilegeCreated(privilegeId, enabled, decription);
+        emit PrivilegeCreated(privilegeId, enabled, description);
     }
 
-    // TODO Documentation
+    /// @notice Enables existing privilege
+    /// @dev The caller must have the admin role
+    /// @param privId Privilege Id to be enabled
     function enablePrivilege(uint256 privId)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -54,7 +62,9 @@ abstract contract MultiPrivilege is
         emit PrivilegeEnabled(privId);
     }
 
-    // TODO Documentation
+    /// @notice Disables existing privilege
+    /// @dev The caller must have the admin role
+    /// @param privId Privilege Id to be disabled
     function disablePrivilege(uint256 privId)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -67,7 +77,13 @@ abstract contract MultiPrivilege is
         emit PrivilegeDisabled(privId);
     }
 
-    // TODO Documentation
+    /// @notice Sets a privilege to a user with expiration
+    /// It is possible to set the expiration to 0 to revoke the privilege
+    /// @dev The caller must be the owner of the token or approved
+    /// @param tokenId Token Id associated with the privilege
+    /// @param privId Privilege Id to be set
+    /// @param user User address that will receive the privilege
+    /// @param expires Expiration of the privilege
     function setPrivilege(
         uint256 tokenId,
         uint256 privId,
@@ -94,7 +110,12 @@ abstract contract MultiPrivilege is
         );
     }
 
-    // TODO Documentation
+    /// @notice Checks if a user has or not a valid privilege
+    /// The owner of the token will always have the privilege
+    /// @param tokenId Token Id associated with the privilege
+    /// @param privId Privilege Id to be checked
+    /// @param user User address to be checked
+    /// @return boolean
     function hasPrivilege(
         uint256 tokenId,
         uint256 privId,
@@ -107,7 +128,11 @@ abstract contract MultiPrivilege is
                 ownerOf(tokenId) == user);
     }
 
-    // TODO Documentation
+    /// @notice Checks the expiration of a certain user privilege
+    /// @param tokenId Token Id associated with the privilege
+    /// @param privId Privilege Id to be checked
+    /// @param user User address to be checked
+    /// @return uint256
     function privilegeExpiresAt(
         uint256 tokenId,
         uint256 privId,
@@ -127,7 +152,10 @@ abstract contract MultiPrivilege is
             super.supportsInterface(interfaceId);
     }
 
-    // TODO Documentation
+    /// @notice Initialize function to be used by contracts that inherit from MultiPrivilege
+    /// @param name_ Token name
+    /// @param symbol_ Token symbol
+    /// @param baseUri_ Token base URI
     function _multiPrivilegeInit(
         string calldata name_,
         string calldata symbol_,
@@ -136,6 +164,8 @@ abstract contract MultiPrivilege is
         _baseNftInit(name_, symbol_, baseUri_);
     }
 
+    /// @notice When a user transfers their token to another user, the privileges must be reset
+    /// @dev Increases the version to reset the privileges
     function _transfer(
         address from,
         address to,

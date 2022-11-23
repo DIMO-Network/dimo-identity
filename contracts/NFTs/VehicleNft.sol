@@ -1,9 +1,9 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
-import "./Base/NftBaseUpgradeable.sol";
+import "./Base/MultiPrivilege/MultiPrivilege.sol";
 
-contract VehicleNft is Initializable, NftBaseUpgradeable {
+contract VehicleNft is Initializable, MultiPrivilege {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();

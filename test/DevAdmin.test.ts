@@ -14,7 +14,7 @@ import {
   AdLicenseValidator,
   Mapper,
   MockDimoToken,
-  MockLicense,
+  MockStake,
   DevAdmin
 } from '../typechain';
 import {
@@ -42,7 +42,7 @@ describe('DevAdmin', function () {
   let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
-  let mockLicenseInstance: MockLicense;
+  let mockStakeInstance: MockStake;
   let devAdminInstance: DevAdmin;
   let manufacturerNftInstance: ManufacturerNft;
   let vehicleNftInstance: VehicleNft;
@@ -189,10 +189,10 @@ describe('DevAdmin', function () {
     );
     await mockDimoTokenInstance.deployed();
 
-    // Deploy MockLicense contract
-    const MockLicenseFactory = await ethers.getContractFactory('MockLicense');
-    mockLicenseInstance = await MockLicenseFactory.connect(admin).deploy();
-    await mockLicenseInstance.deployed();
+    // Deploy MockStake contract
+    const MockStakeFactory = await ethers.getContractFactory('MockStake');
+    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+    await mockStakeInstance.deployed();
 
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
@@ -207,7 +207,7 @@ describe('DevAdmin', function () {
     await adLicenseValidatorInstance.setDimoToken(
       mockDimoTokenInstance.address
     );
-    await adLicenseValidatorInstance.setLicense(mockLicenseInstance.address);
+    await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Grant MANUFACTURER_ROLE to manufacturer
@@ -246,7 +246,7 @@ describe('DevAdmin', function () {
         C.mockManufacturerAttributeInfoPairs
       );
 
-    await mockLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
+    await mockStakeInstance.setLicenseBalance(manufacturer1.address, 1);
 
     // Grant Transferer role to DIMO Registry
     await adNftInstance
@@ -319,8 +319,7 @@ describe('DevAdmin', function () {
           }`
         );
       });
-      // TODO Check not tyep ?
-      it.skip('Should revert if node is not an Aftermarket Device', async () => {
+      it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
@@ -440,8 +439,7 @@ describe('DevAdmin', function () {
           }`
         );
       });
-      // TODO Check node type ?
-      it.skip('Should revert if node is not an Aftermarket Device', async () => {
+      it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
@@ -619,8 +617,7 @@ describe('DevAdmin', function () {
           }`
         );
       });
-      // TODO Check node type ?
-      it.skip('Should revert if node is not an Aftermarket Device', async () => {
+      it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
@@ -797,8 +794,7 @@ describe('DevAdmin', function () {
           }`
         );
       });
-      // TODO Check node type ?
-      it.skip('Should revert if node is not a Vehicle', async () => {
+      it('Should revert if node is not a Vehicle', async () => {
         await expect(
           devAdminInstance
             .connect(admin)

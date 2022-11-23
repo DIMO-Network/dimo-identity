@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
@@ -10,7 +10,8 @@ import {AttributeInfoPair} from "../../shared/Types.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-// TODO Documentation
+/// @title Vehicle
+/// @notice Contract that represents the Manufacturer node
 contract Manufacturer is AccessControlInternal {
     event ManufacturerNftProxySet(address indexed proxy);
     event ManufacturerAttributeAdded(string attribute);
@@ -120,13 +121,12 @@ contract Manufacturer is AccessControlInternal {
         s.controllers[owner].manufacturerMinted = true;
 
         uint256 newTokenId = INFT(nftProxyAddress).safeMint(owner);
-        _setInfo(newTokenId, attrInfoPairList);
+        _setInfos(newTokenId, attrInfoPairList);
 
         emit ManufacturerNodeMinted(newTokenId, msg.sender);
     }
 
     /// @notice Add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param tokenId Node id where the info will be added
     /// @param attrInfoList List of attribute-info pairs to be added
@@ -134,8 +134,13 @@ contract Manufacturer is AccessControlInternal {
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfoList
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO Check nft id ?
-        _setInfo(tokenId, attrInfoList);
+        require(
+            INFT(ManufacturerStorage.getStorage().nftProxyAddress).exists(
+                tokenId
+            ),
+            "Invalid manufacturer node"
+        );
+        _setInfos(tokenId, attrInfoList);
     }
 
     /// @notice Verify if an address is a controller
@@ -167,11 +172,10 @@ contract Manufacturer is AccessControlInternal {
     // ***** PRIVATE FUNCTIONS ***** //
 
     /// @dev Internal function to add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param tokenId Node id where the info will be added
     /// @param attrInfoPairList List of attribute-info pairs to be added
-    function _setInfo(
+    function _setInfos(
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfoPairList
     ) private {
@@ -205,7 +209,7 @@ contract Manufacturer is AccessControlInternal {
     /// @param tokenId Node where the info will be added
     /// @param attribute Attribute to be updated
     /// @param info Info to be set
-    function _updateAttributeInfo(
+    function _setAttributeInfo(
         uint256 tokenId,
         string calldata attribute,
         string calldata info

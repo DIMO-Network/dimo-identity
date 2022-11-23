@@ -1,8 +1,10 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "../AttributeSet.sol";
 
+/// @title VehicleStorage
+/// @notice Storage of the Vehicle contract
 library VehicleStorage {
     using AttributeSet for AttributeSet.Set;
 

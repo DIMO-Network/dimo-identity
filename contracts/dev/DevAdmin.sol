@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
 import "../interfaces/INFT.sol";
@@ -11,6 +11,7 @@ import {DEFAULT_ADMIN_ROLE} from "../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
+/// @title DevAdmin
 /// @dev Admin module for development and testing
 contract DevAdmin is AccessControlInternal {
     event AftermarketDeviceUnclaimed(uint256 indexed aftermarketDeviceNode);
@@ -33,15 +34,11 @@ contract DevAdmin is AccessControlInternal {
         uint256 aftermarketDeviceNode,
         address newOwner
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO check not tyep ?
-        // require(
-        //     NodesStorage.getStorage().nodes[aftermarketDeviceNode].nodeType ==
-        //         AftermarketDeviceStorage.getStorage().nodeType,
-        //     "Invalid AD node"
-        // );
         INFT adNftProxy = INFT(
             AftermarketDeviceStorage.getStorage().nftProxyAddress
         );
+        require(adNftProxy.exists(aftermarketDeviceNode), "Invalid AD node");
+
         address oldOwner = adNftProxy.ownerOf(aftermarketDeviceNode);
 
         adNftProxy.safeTransferFrom(oldOwner, newOwner, aftermarketDeviceNode);
@@ -61,9 +58,15 @@ contract DevAdmin is AccessControlInternal {
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
+        INFT adNftProxy = INFT(ads.nftProxyAddress);
 
         uint256 _adNode;
         for (uint256 i = 0; i < aftermarketDeviceNodes.length; i++) {
+            require(
+                adNftProxy.exists(aftermarketDeviceNodes[i]),
+                "Invalid AD node"
+            );
+
             _adNode = aftermarketDeviceNodes[i];
 
             ads.deviceClaimed[_adNode] = false;
@@ -78,7 +81,6 @@ contract DevAdmin is AccessControlInternal {
     function unpairAftermarketDeviceByDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         address vehicleNftProxyAddress = VehicleStorage
             .getStorage()
@@ -92,12 +94,10 @@ contract DevAdmin is AccessControlInternal {
         for (uint256 i = 0; i < aftermarketDeviceNodes.length; i++) {
             _adNode = aftermarketDeviceNodes[i];
 
-            // TODO check node type ?
-            // require(
-            //     ns.nodes[_adNode].nodeType ==
-            //         AftermarketDeviceStorage.getStorage().nodeType,
-            //     "Invalid AD node"
-            // );
+            require(
+                INFT(adNftProxyAddress).exists(aftermarketDeviceNodes[i]),
+                "Invalid AD node"
+            );
 
             _vehicleNode = ms.links[adNftProxyAddress][_adNode];
 
@@ -118,7 +118,6 @@ contract DevAdmin is AccessControlInternal {
     function unpairAftermarketDeviceByVehicleNode(
         uint256[] calldata vehicleNodes
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         address vehicleNftProxyAddress = VehicleStorage
             .getStorage()
@@ -132,12 +131,10 @@ contract DevAdmin is AccessControlInternal {
         for (uint256 i = 0; i < vehicleNodes.length; i++) {
             _vehicleNode = vehicleNodes[i];
 
-            // TODO check node type ?
-            // require(
-            //     ns.nodes[_vehicleNode].nodeType ==
-            //         VehicleStorage.getStorage().nodeType,
-            //     "Invalid vehicle node"
-            // );
+            require(
+                INFT(vehicleNftProxyAddress).exists(vehicleNodes[i]),
+                "Invalid vehicle node"
+            );
 
             _adNode = ms.links[vehicleNftProxyAddress][_vehicleNode];
 

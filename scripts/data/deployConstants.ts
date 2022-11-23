@@ -1,5 +1,5 @@
 import { ethers, network } from 'hardhat';
-import { NetworkValue, C } from '../../utils';
+import { NetworkValue } from '../../utils';
 
 export const DEFAULT_ADMIN_ROLE =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -41,21 +41,17 @@ export const eip712Name = 'DIMO';
 export const eip712Version = '1';
 export const adMintCost = ethers.utils.parseEther('50');
 
-export const MANUFACTURER_NFT_NAME = 'Dimo Manufacturer NFT';
-export const MANUFACTURER_NFT_SYMBOL = 'DMNFT';
+export const MANUFACTURER_NFT_NAME = 'Dimo Manufacturer ID';
+export const MANUFACTURER_NFT_SYMBOL = 'DIMO/MANUFACTURER';
 export const MANUFACTURER_NFT_URI =
-  'https://devices-api.dev.dimo.zone/v1/nfts/';
-export const VEHICLE_NFT_NAME = 'Dimo Vehicle NFT';
-export const VEHICLE_NFT_SYMBOL = 'DVNFT';
-export const VEHICLE_NFT_URI = 'https://devices-api.dev.dimo.zone/v1/nfts/';
-export const AD_NFT_NAME = 'Dimo Aftermarket Device NFT';
-export const AD_NFT_SYMBOL = 'DADNFT';
-export const AD_NFT_URI = 'https://devices-api.dev.dimo.zone/v1/nfts/';
-export const baseUri: NetworkValue = {
-  mumbai: 'https://devices-api.dev.dimo.zone/v1/nfts/',
-  polygon: 'https://devices-api.dimo.zone/v1/nfts/',
-  hardhat: C.baseURI
-};
+  'https://devices-api.dimo.zone/v1/manufacturer/';
+export const VEHICLE_NFT_NAME = 'Dimo Vehicle ID';
+export const VEHICLE_NFT_SYMBOL = 'DIMO/VEHICLE';
+export const VEHICLE_NFT_URI = 'https://devices-api.dimo.zone/v1/id/vehicle/';
+export const AD_NFT_NAME = 'Dimo Aftermarket Device ID';
+export const AD_NFT_SYMBOL = 'DIMO/AFTERMARKET/DEVICE';
+export const AD_NFT_URI =
+  'https://devices-api.dimo.zone/v1/aftermarket/device/';
 
 export const manufacturerNodeType = ethers.utils.toUtf8Bytes('Manufacturer');
 export const vehicleNodeType = ethers.utils.toUtf8Bytes('Vehicle');
@@ -63,4 +59,4 @@ export const adNodeType = ethers.utils.toUtf8Bytes('AftermarketDevice');
 
 export const manufacturerAttribute1 = 'Name';
 export const vehicleAttributes = ['Make', 'Model', 'Year'];
-export const adAttributes = ['UnitId', 'IMEI'];
+export const adAttributes = ['Serial#', 'IMEI'];

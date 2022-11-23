@@ -427,7 +427,7 @@ async function grantRole(
   console.log(`----- ${role} role granted to ${address} -----\n`);
 }
 
-async function mintBatch(deployer: SignerWithAddress) {
+async function mintBatch(deployer: SignerWithAddress, owner: string) {
   const batchSize = 50;
   const manufacturerInstance: Manufacturer = await ethers.getContractAt(
     'Manufacturer',
@@ -442,7 +442,7 @@ async function mintBatch(deployer: SignerWithAddress) {
     const receipt = await (
       await manufacturerInstance
         .connect(deployer)
-        .mintManufacturerBatch(deployer.address, batch)
+        .mintManufacturerBatch(owner, batch)
     ).wait();
 
     const ids = receipt.events
@@ -469,8 +469,13 @@ async function main() {
 
   await setup(deployer);
   await grantRole(deployer, C.DEFAULT_ADMIN_ROLE, kms);
+  await grantRole(
+    deployer,
+    C.DEFAULT_ADMIN_ROLE,
+    C.foundationAddress[C.networkName]
+  );
   await grantNftRoles(deployer);
-  await mintBatch(deployer);
+  await mintBatch(deployer, C.foundationAddress[C.networkName]);
 }
 
 main().catch((error) => {

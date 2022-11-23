@@ -2,47 +2,105 @@
     "polygon": {
         "modules": {
             "DIMORegistry": {
-                "address": "",
-                "selectors": []
+                "address": "0xFA8beC73cebB9D88FF88a2f75E7D7312f2Fd39EC",
+                "selectors": [
+                    "0x0df5b997",
+                    "0x9748a762",
+                    "0x06d1d2a1"
+                ]
             },
             "Eip712Checker": {
-                "address": "",
-                "selectors": []
+                "address": "0x385C31C64262904e47e20F8f614B7aF0080650F7",
+                "selectors": [
+                    "0x4cd88b76"
+                ]
             },
             "DimoAccessControl": {
-                "address": "",
-                "selectors": []
+                "address": "0x385b8Fa7A4bC0dB2149B1AB1928AfD21D551bd3d",
+                "selectors": [
+                    "0x248a9ca3",
+                    "0x2f2ff15d",
+                    "0x91d14854",
+                    "0x8bb9c5bf",
+                    "0xd547741f"
+                ]
             },
             "Nodes": {
-                "address": "",
-                "selectors": []
+                "address": "0x83974355a82925fA0F84A9dD9C8fB022485cE2Ea",
+                "selectors": [
+                    "0xdce2f860",
+                    "0x82087d24"
+                ]
             },
             "Manufacturer": {
-                "address": "",
-                "selectors": []
+                "address": "0x8053e2946864b49D83A83e12522b07B99d8FcD8E",
+                "selectors": [
+                    "0x50300a3f",
+                    "0xce55aab0",
+                    "0xb429afeb",
+                    "0x456bf169",
+                    "0x5f36da6b",
+                    "0x9abb3000",
+                    "0x92eefe9b",
+                    "0xd159f49a",
+                    "0x63545ffa"
+                ]
             },
             "Vehicle": {
-                "address": "",
-                "selectors": []
+                "address": "0x569D12e4dD3B86836E790d38cf58471d4d32Db9E",
+                "selectors": [
+                    "0xf0d1a557",
+                    "0x3da44e56",
+                    "0x1b1a82c8",
+                    "0x9bfae6da",
+                    "0xd9c3ae61"
+                ]
             },
             "AftermarketDevice": {
-                "address": "",
-                "selectors": []
+                "address": "0x6e47303457168DA4aB7b3579c8c05e636DEA6759",
+                "selectors": [
+                    "0x6111afa3",
+                    "0xab2ae229",
+                    "0x89a841bb",
+                    "0x9796cf22",
+                    "0x7ba79a39",
+                    "0xcfe642dd",
+                    "0x4d49d82a",
+                    "0x4d13b709",
+                    "0x3f65997a"
+                ]
             },
             "AdLicenseValidator": {
-                "address": "",
-                "selectors": []
+                "address": "0xEB850524cb04806673A04F01BA4068740876af3C",
+                "selectors": [
+                    "0x46946743",
+                    "0x2390baa8",
+                    "0x5b6c1979",
+                    "0xf41377ca",
+                    "0x0fd21c17"
+                ]
             },
             "Mapper": {
-                "address": "",
-                "selectors": []
+                "address": "0x85f46D3758610193629cB34a0a57EF4368A3454F",
+                "selectors": [
+                    "0x112e62a2"
+                ]
             },
             "DevAdmin": {
-                "address": "",
-                "selectors": []
+                "address": "0x1428721Bbe8e48eA9bD045959Bb93b464F8db1E3",
+                "selectors": [
+                    "0xff96b761",
+                    "0x5c129493",
+                    "0x71193956",
+                    "0x8c2ee9bb"
+                ]
             }
         },
-        "nfts": {}
+        "nfts": {
+            "ManufacturerId": "0x3b07e2A2ABdd0A9B8F7878bdE6487c502164B9dd",
+            "VehicleId": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
+            "AftermarketDeviceId": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA"
+        }
     },
     "mumbai": {
         "modules": {

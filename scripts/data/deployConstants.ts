@@ -61,6 +61,5 @@ export const manufacturerNodeType = ethers.utils.toUtf8Bytes('Manufacturer');
 export const vehicleNodeType = ethers.utils.toUtf8Bytes('Vehicle');
 export const adNodeType = ethers.utils.toUtf8Bytes('AftermarketDevice');
 
-export const manufacturerAttribute1 = 'Name';
 export const vehicleAttributes = ['Make', 'Model', 'Year'];
 export const adAttributes = ['UnitId', 'IMEI'];

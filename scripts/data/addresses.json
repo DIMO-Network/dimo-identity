@@ -1,28 +1,144 @@
 {
     "polygon": {
         "modules": {
-            "DIMORegistry": "",
-            "AccessControl": "",
-            "Eip712Checker": "",
-            "Getter": "",
-            "Metadata": "",
-            "Manufacturer": "",
-            "Vehicle": ""
+            "DIMORegistry": {
+                "address": "",
+                "selectors": []
+            },
+            "Eip712Checker": {
+                "address": "",
+                "selectors": []
+            },
+            "DimoAccessControl": {
+                "address": "",
+                "selectors": []
+            },
+            "Nodes": {
+                "address": "",
+                "selectors": []
+            },
+            "Manufacturer": {
+                "address": "",
+                "selectors": []
+            },
+            "Vehicle": {
+                "address": "",
+                "selectors": []
+            },
+            "AftermarketDevice": {
+                "address": "",
+                "selectors": []
+            },
+            "AdLicenseValidator": {
+                "address": "",
+                "selectors": []
+            },
+            "Mapper": {
+                "address": "",
+                "selectors": []
+            },
+            "DevAdmin": {
+                "address": "",
+                "selectors": []
+            }
         },
         "nfts": {}
     },
     "mumbai": {
         "modules": {
-            "DIMORegistry": "0xCF395Cd4514490c35e1195dad50DA245b6a2333a",
-            "Eip712Checker": "0x3268dE2A019d80D53dE4C92502119C6B266a0605",
-            "DimoAccessControl": "0x0aF7F9f9cab39E4316AdF17b1b82af71bAd989c0",
-            "Nodes": "0x3ae21ee2af3A371484826E525Bce5A79bf4E1886",
-            "Manufacturer": "0x9f8acFF8E4bf2B5230827C726EFdF88755eB568D",
-            "Vehicle": "0x9f8acFF8E4bf2B5230827C726EFdF88755eB568D",
-            "AftermarketDevice": "0xe40B17BdD7ed644300D724BcD2591cCEe709fE74",
-            "AdLicenseValidator": "0xCF722B94cD73E71f88659c26483D41e015CcA168",
-            "Mapper": "0x075b25298431642cfb1a1B3Ef05B4cfBe2B94130",
-            "DevAdmin": "0xDa92fb8c9fa8c469c64ae6e05963853341B03399"
+            "DIMORegistry": {
+                "address": "0xCF395Cd4514490c35e1195dad50DA245b6a2333a",
+                "selectors": [
+                    "0x0df5b997",
+                    "0x9748a762",
+                    "0x06d1d2a1"
+                ]
+            },
+            "Eip712Checker": {
+                "address": "0x3268dE2A019d80D53dE4C92502119C6B266a0605",
+                "selectors": [
+                    "0x4cd88b76"
+                ]
+            },
+            "DimoAccessControl": {
+                "address": "0x0aF7F9f9cab39E4316AdF17b1b82af71bAd989c0",
+                "selectors": [
+                    "0x248a9ca3",
+                    "0x2f2ff15d",
+                    "0x91d14854",
+                    "0x8bb9c5bf",
+                    "0xd547741f"
+                ]
+            },
+            "Nodes": {
+                "address": "0x3ae21ee2af3A371484826E525Bce5A79bf4E1886",
+                "selectors": [
+                    "0xdce2f860",
+                    "0x82087d24"
+                ]
+            },
+            "Manufacturer": {
+                "address": "0x7F7a5136db7Ba104B83EF9B8c17697575ee8F5E2",
+                "selectors": [
+                    "0x50300a3f",
+                    "0xb429afeb",
+                    "0x456bf169",
+                    "0x17efba21",
+                    "0x9abb3000",
+                    "0x92eefe9b",
+                    "0x63545ffa",
+                    "0x9db2ed9b"
+                ]
+            },
+            "Vehicle": {
+                "address": "0xFa8E43148E725005aFc324CAF3d30E6d6b417440",
+                "selectors": [
+                    "0xf0d1a557",
+                    "0x3da44e56",
+                    "0x1b1a82c8",
+                    "0xd9c3ae61",
+                    "0xda647058"
+                ]
+            },
+            "AftermarketDevice": {
+                "address": "0x9f8acFF8E4bf2B5230827C726EFdF88755eB568D",
+                "selectors": [
+                    "0x6111afa3",
+                    "0x89a841bb",
+                    "0x9796cf22",
+                    "0x7ba79a39",
+                    "0xcfe642dd",
+                    "0xa2160ba4",
+                    "0x4d13b709",
+                    "0x4e37122c",
+                    "0x3f65997a"
+                ]
+            },
+            "AdLicenseValidator": {
+                "address": "0xCF722B94cD73E71f88659c26483D41e015CcA168",
+                "selectors": [
+                    "0x46946743",
+                    "0x2390baa8",
+                    "0x5b6c1979",
+                    "0xf41377ca",
+                    "0x0fd21c17"
+                ]
+            },
+            "Mapper": {
+                "address": "0x075b25298431642cfb1a1B3Ef05B4cfBe2B94130",
+                "selectors": [
+                    "0x112e62a2"
+                ]
+            },
+            "DevAdmin": {
+                "address": "0xDa92fb8c9fa8c469c64ae6e05963853341B03399",
+                "selectors": [
+                    "0xff96b761",
+                    "0x5c129493",
+                    "0x71193956",
+                    "0x8c2ee9bb"
+                ]
+            }
         },
         "nfts": {
             "ManufacturerNft": "0xFdB5774D7aCe99226d99B58f4b293E72126cf068",
@@ -32,16 +148,100 @@
     },
     "hardhat": {
         "modules": {
-            "DIMORegistry": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-            "Eip712Checker": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-            "DimoAccessControl": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-            "Nodes": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-            "Manufacturer": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-            "Vehicle": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-            "AftermarketDevice": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-            "AdLicenseValidator": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
-            "Mapper": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
-            "DevAdmin": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318"
+            "DIMORegistry": {
+                "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                "selectors": [
+                    "0x0df5b997",
+                    "0x9748a762",
+                    "0x06d1d2a1"
+                ]
+            },
+            "Eip712Checker": {
+                "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                "selectors": [
+                    "0x4cd88b76"
+                ]
+            },
+            "DimoAccessControl": {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "selectors": [
+                    "0x248a9ca3",
+                    "0x2f2ff15d",
+                    "0x91d14854",
+                    "0x8bb9c5bf",
+                    "0xd547741f"
+                ]
+            },
+            "Nodes": {
+                "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                "selectors": [
+                    "0xdce2f860",
+                    "0x82087d24"
+                ]
+            },
+            "Manufacturer": {
+                "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+                "selectors": [
+                    "0x50300a3f",
+                    "0xce55aab0",
+                    "0xb429afeb",
+                    "0x456bf169",
+                    "0x5f36da6b",
+                    "0x9abb3000",
+                    "0x92eefe9b",
+                    "0x63545ffa",
+                    "0x9db2ed9b"
+                ]
+            },
+            "Vehicle": {
+                "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+                "selectors": [
+                    "0xf0d1a557",
+                    "0x3da44e56",
+                    "0x1b1a82c8",
+                    "0xd9c3ae61",
+                    "0xda647058"
+                ]
+            },
+            "AftermarketDevice": {
+                "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+                "selectors": [
+                    "0x6111afa3",
+                    "0x89a841bb",
+                    "0x9796cf22",
+                    "0x7ba79a39",
+                    "0xcfe642dd",
+                    "0xa2160ba4",
+                    "0x4d13b709",
+                    "0x4e37122c",
+                    "0x3f65997a"
+                ]
+            },
+            "AdLicenseValidator": {
+                "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+                "selectors": [
+                    "0x46946743",
+                    "0x2390baa8",
+                    "0x5b6c1979",
+                    "0xf41377ca",
+                    "0x0fd21c17"
+                ]
+            },
+            "Mapper": {
+                "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+                "selectors": [
+                    "0x112e62a2"
+                ]
+            },
+            "DevAdmin": {
+                "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+                "selectors": [
+                    "0xff96b761",
+                    "0x5c129493",
+                    "0x71193956",
+                    "0x8c2ee9bb"
+                ]
+            }
         },
         "nfts": {
             "ManufacturerNft": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",

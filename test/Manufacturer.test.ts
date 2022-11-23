@@ -59,9 +59,6 @@ describe('Manufacturer', async function () {
     // Whitelist Manufacturer attributes
     await manufacturerInstance
       .connect(admin)
-      .addManufacturerAttribute(C.mockManufacturerAttributeName);
-    await manufacturerInstance
-      .connect(admin)
       .addManufacturerAttribute(C.mockManufacturerAttribute1);
     await manufacturerInstance
       .connect(admin)
@@ -207,6 +204,17 @@ describe('Manufacturer', async function () {
             .mintManufacturerBatch(nonAdmin.address, C.mockManufacturerNames)
         ).to.be.revertedWith('Owner must be an admin');
       });
+      it('Should revert if manufacturer name is already registered', async () => {
+        await manufacturerInstance
+          .connect(admin)
+          .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
+
+        await expect(
+          manufacturerInstance
+            .connect(admin)
+            .mintManufacturerBatch(admin.address, C.mockManufacturerNames)
+        ).to.be.revertedWith('Manufacturer name already registered');
+      });
     });
 
     context('State change', () => {
@@ -251,24 +259,18 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
 
-        const nameAttribute1 = await nodesInstance.getInfo(
-          manufacturerNftInstance.address,
-          1,
-          C.mockManufacturerAttributeName
-        );
-        const nameAttribute2 = await nodesInstance.getInfo(
-          manufacturerNftInstance.address,
-          2,
-          C.mockManufacturerAttributeName
-        );
-        const nameAttribute3 = await nodesInstance.getInfo(
-          manufacturerNftInstance.address,
-          3,
-          C.mockManufacturerAttributeName
-        );
+        const id1 = (await manufacturerInstance.getManufacturerIdByName(
+          C.mockManufacturerNames[0]
+        )).toNumber();
+        const id2 = (await manufacturerInstance.getManufacturerIdByName(
+          C.mockManufacturerNames[1]
+        )).toNumber();
+        const id3 = (await manufacturerInstance.getManufacturerIdByName(
+          C.mockManufacturerNames[2]
+        )).toNumber();
 
-        expect([nameAttribute1, nameAttribute2, nameAttribute3]).to.eql(
-          C.mockManufacturerNames
+        expect([id1, id2, id3]).to.eql(
+          [1, 2, 3]
         );
       });
     });
@@ -298,6 +300,7 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .mintManufacturer(
               nonController.address,
+              C.mockManufacturerNames[0],
               C.mockManufacturerAttributeInfoPairs
             )
         ).to.be.revertedWith(
@@ -310,6 +313,7 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturer(
             controller1.address,
+            C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
 
@@ -318,6 +322,7 @@ describe('Manufacturer', async function () {
             .connect(admin)
             .mintManufacturer(
               controller1.address,
+              C.mockManufacturerNames[1],
               C.mockManufacturerAttributeInfoPairs
             )
         ).to.be.revertedWith('Invalid request');
@@ -328,6 +333,7 @@ describe('Manufacturer', async function () {
             .connect(admin)
             .mintManufacturer(
               controller1.address,
+              C.mockManufacturerNames[0],
               C.mockManufacturerAttributeInfoPairsNotWhitelisted
             )
         ).to.be.revertedWith('Not whitelisted');
@@ -345,6 +351,7 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturer(
             controller1.address,
+            C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
 
@@ -358,6 +365,7 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturer(
             controller1.address,
+            C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
 
@@ -374,6 +382,7 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturer(
             controller1.address,
+            C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
 
@@ -392,6 +401,7 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturer(
             controller1.address,
+            C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
 
@@ -401,11 +411,27 @@ describe('Manufacturer', async function () {
         // eslint-disable-next-line no-unused-expressions
         expect(isManufacturerMintedAfter).to.be.true;
       });
+      it('Should correctly set name', async () => {
+        await manufacturerInstance
+          .connect(admin)
+          .mintManufacturer(
+            controller1.address,
+            C.mockManufacturerNames[0],
+            C.mockManufacturerAttributeInfoPairs
+          );
+
+        const id = (await manufacturerInstance.getManufacturerIdByName(
+          C.mockManufacturerNames[0]
+        )).toNumber();
+
+        expect(id).to.be.equal(1);
+      });
       it('Should correctly set infos', async () => {
         await manufacturerInstance
           .connect(admin)
           .mintManufacturer(
             controller1.address,
+            C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
 
@@ -433,6 +459,7 @@ describe('Manufacturer', async function () {
             .connect(admin)
             .mintManufacturer(
               controller1.address,
+              C.mockManufacturerNames[0],
               C.mockManufacturerAttributeInfoPairs
             )
         )
@@ -443,7 +470,7 @@ describe('Manufacturer', async function () {
         await expect(
           manufacturerInstance
             .connect(admin)
-            .mintManufacturer(controller1.address, C.mockManufacturerAttributeInfoPairs)
+            .mintManufacturer(controller1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
         )
           .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
           .withArgs(1, C.mockManufacturerAttributeInfoPairs[0].attribute, C.mockManufacturerAttributeInfoPairs[0].info)
@@ -459,6 +486,7 @@ describe('Manufacturer', async function () {
         .connect(admin)
         .mintManufacturer(
           controller1.address,
+          C.mockManufacturerNames[0],
           C.mockManufacturerAttributeInfoPairs
         );
     });
@@ -556,6 +584,31 @@ describe('Manufacturer', async function () {
           .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
           .withArgs(1, localNewAttributeInfoPairs[1].attribute, localNewAttributeInfoPairs[1].info);
       });
+    });
+  });
+
+  describe('getManufacturerIdByName', () => {
+    beforeEach(async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .mintManufacturer(controller1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
+    });
+
+    it('Should return 0 if the queried address is not associated with any minted device', async () => {
+      const tokenId =
+        await manufacturerInstance.getManufacturerIdByName(
+          C.mockManufacturerNames[1]
+        );
+
+      expect(tokenId).to.equal(0);
+    });
+    it('Should return the correct token Id', async () => {
+      const tokenId =
+        await manufacturerInstance.getManufacturerIdByName(
+          C.mockManufacturerNames[0]
+        );
+
+      expect(tokenId).to.equal(1);
     });
   });
 });

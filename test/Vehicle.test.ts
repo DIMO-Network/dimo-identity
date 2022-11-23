@@ -217,6 +217,7 @@ describe('Vehicle', function () {
         .connect(admin)
         .mintManufacturer(
           controller1.address,
+          C.mockManufacturerNames[0],
           C.mockManufacturerAttributeInfoPairs
         );
     });
@@ -338,6 +339,7 @@ describe('Vehicle', function () {
         .connect(admin)
         .mintManufacturer(
           controller1.address,
+          C.mockManufacturerNames[0],
           C.mockManufacturerAttributeInfoPairs
         );
     });
@@ -657,6 +659,7 @@ describe('Vehicle', function () {
         .connect(admin)
         .mintManufacturer(
           controller1.address,
+          C.mockManufacturerNames[0],
           C.mockManufacturerAttributeInfoPairs
         );
       await vehicleInstance

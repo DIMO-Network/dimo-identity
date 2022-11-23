@@ -29,7 +29,10 @@ export type AftermarketDeviceOwnerPair = {
 export interface ContractAddressesByNetwork {
   [index: string]: {
     modules: {
-      [index: string]: string
+      [index: string]: {
+        address: string,
+        selectors: string[]
+      }
     },
     nfts: {
       [index: string]: string

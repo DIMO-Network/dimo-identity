@@ -90,14 +90,21 @@ contract Manufacturer is AccessControlInternal {
 
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        uint256 newTokenId;
-        address nftProxyAddress = s.nftProxyAddress;
 
+        uint256 newTokenId;
+        string memory name;
         for (uint256 i = 0; i < names.length; i++) {
+            name = names[i];
+
+            require(
+                s.manufacturerNameToNodeId[name] == 0,
+                "Manufacturer name already registered"
+            );
+
             newTokenId = INFT(s.nftProxyAddress).safeMint(owner);
 
-            ns.nodes[nftProxyAddress][newTokenId].info["Name"] = names[i];
+            s.manufacturerNameToNodeId[name] = newTokenId;
+            s.nodeIdToManufacturerName[newTokenId] = name;
 
             emit ManufacturerNodeMinted(newTokenId, owner);
         }
@@ -106,20 +113,31 @@ contract Manufacturer is AccessControlInternal {
     /// @notice Mints a manufacturer
     /// @dev Caller must be an admin
     /// @param owner The address of the new owner
+    /// @param name Name of the manufacturer
     /// @param attrInfoPairList List of attribute-info pairs to be added
     function mintManufacturer(
         address owner,
+        string calldata name,
         AttributeInfoPair[] calldata attrInfoPairList
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         require(!s.controllers[owner].manufacturerMinted, "Invalid request");
+        require(
+            s.manufacturerNameToNodeId[name] == 0,
+            "Manufacturer name already registered"
+        );
+
         address nftProxyAddress = s.nftProxyAddress;
 
         s.controllers[owner].isController = true;
         s.controllers[owner].manufacturerMinted = true;
 
         uint256 newTokenId = INFT(nftProxyAddress).safeMint(owner);
+
+        s.manufacturerNameToNodeId[name] = newTokenId;
+        s.nodeIdToManufacturerName[newTokenId] = name;
+
         _setInfo(newTokenId, attrInfoPairList);
 
         emit ManufacturerNodeMinted(newTokenId, msg.sender);
@@ -162,6 +180,19 @@ contract Manufacturer is AccessControlInternal {
             .getStorage()
             .controllers[addr]
             .manufacturerMinted;
+    }
+
+    /// @notice Gets the Manufacturer Id by name
+    /// @dev If the manufacturer is not minted it will return 0
+    /// @param name Name associated with the manufacturer
+    function getManufacturerIdByName(string calldata name)
+        external
+        view
+        returns (uint256 nodeId)
+    {
+        nodeId = ManufacturerStorage.getStorage().manufacturerNameToNodeId[
+            name
+        ];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //

@@ -583,7 +583,7 @@
                 "type": "address"
             }
         ],
-        "name": "AftermarketDeviceNftProxySet",
+        "name": "AftermarketDeviceIdProxySet",
         "type": "event"
     },
     {
@@ -814,22 +814,12 @@
     {
         "inputs": [
             {
-                "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "attribute",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "info",
-                "type": "string"
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
             }
         ],
-        "name": "setAftermarketDeviceAttribute",
+        "name": "setAftermarketDeviceIdProxyAddress",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -860,19 +850,6 @@
             }
         ],
         "name": "setAftermarketDeviceInfo",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "addr",
-                "type": "address"
-            }
-        ],
-        "name": "setAftermarketDeviceNftProxyAddress",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -961,7 +938,7 @@
                 "type": "address"
             }
         ],
-        "name": "ManufacturerNftProxySet",
+        "name": "ManufacturerIdProxySet",
         "type": "event"
     },
     {
@@ -1122,6 +1099,19 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "setManufacturerIdProxyAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
@@ -1145,19 +1135,6 @@
             }
         ],
         "name": "setManufacturerInfo",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "addr",
-                "type": "address"
-            }
-        ],
-        "name": "setManufacturerNftProxyAddress",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1210,7 +1187,7 @@
                 "type": "address"
             }
         ],
-        "name": "VehicleNftProxySet",
+        "name": "VehicleIdProxySet",
         "type": "event"
     },
     {
@@ -1323,6 +1300,19 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "setVehicleIdProxyAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
@@ -1354,20 +1344,7 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "addr",
-                "type": "address"
-            }
-        ],
-        "name": "setVehicleNftProxyAddress",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "nftProxyAddress",
+                "name": "idProxyAddress",
                 "type": "address"
             },
             {
@@ -1396,7 +1373,7 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "nftProxyAddress",
+                "name": "idProxyAddress",
                 "type": "address"
             },
             {
@@ -1420,7 +1397,7 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "nftProxyAddress",
+                "name": "idProxyAddress",
                 "type": "address"
             },
             {

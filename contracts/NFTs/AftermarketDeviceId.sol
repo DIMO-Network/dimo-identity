@@ -1,9 +1,9 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
 import "./Base/NftBaseUpgradeable.sol";
 
-contract VehicleNft is Initializable, NftBaseUpgradeable {
+contract AftermarketDeviceId is Initializable, NftBaseUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();

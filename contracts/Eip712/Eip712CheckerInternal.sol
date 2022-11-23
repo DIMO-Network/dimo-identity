@@ -1,10 +1,13 @@
-// SPDX-License-Identifier: Unlicensed
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
 import "./Eip712CheckerStorage.sol";
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
+/// @title Eip712CheckerInternal
+/// @notice Contract with internal functions to assist in verifying signatures
+/// @dev Based on the EIP-712 https://eips.ethereum.org/EIPS/eip-712
 library Eip712CheckerInternal {
     bytes32 private constant EIP712_DOMAIN_TYPEHASH =
         keccak256(

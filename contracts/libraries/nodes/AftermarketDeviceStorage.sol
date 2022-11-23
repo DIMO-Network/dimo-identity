@@ -1,8 +1,10 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
 import "../AttributeSet.sol";
 
+/// @title AftermarketDeviceStorage
+/// @notice Storage of the AftermarketDevice contract
 library AftermarketDeviceStorage {
     using AttributeSet for AttributeSet.Set;
 
@@ -10,7 +12,7 @@ library AftermarketDeviceStorage {
         keccak256("DIMORegistry.aftermarketDevice.storage");
 
     struct Storage {
-        address nftProxyAddress;
+        address idProxyAddress;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
         // AD Id => already claimed or not

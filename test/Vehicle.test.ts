@@ -6,9 +6,9 @@ import {
   Eip712Checker,
   Nodes,
   Manufacturer,
-  ManufacturerNft,
+  ManufacturerId,
   Vehicle,
-  VehicleNft
+  VehicleId
 } from '../typechain';
 import {
   initialize,
@@ -31,8 +31,8 @@ describe('Vehicle', function () {
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
-  let manufacturerNftInstance: ManufacturerNft;
-  let vehicleNftInstance: VehicleNft;
+  let manufacturerIdInstance: ManufacturerId;
+  let vehicleIdInstance: VehicleId;
 
   const [admin, nonAdmin, controller1, user1, user2] = provider.getWallets();
 
@@ -51,13 +51,13 @@ describe('Vehicle', function () {
       'Vehicle'
     );
 
-    const ManufacturerNftFactory = await ethers.getContractFactory(
-      'ManufacturerNft'
+    const ManufacturerIdFactory = await ethers.getContractFactory(
+      'ManufacturerId'
     );
-    const VehicleNftFactory = await ethers.getContractFactory('VehicleNft');
+    const vehicleIdFactory = await ethers.getContractFactory('VehicleId');
 
-    manufacturerNftInstance = await upgrades.deployProxy(
-      ManufacturerNftFactory,
+    manufacturerIdInstance = await upgrades.deployProxy(
+      ManufacturerIdFactory,
       [
         C.MANUFACTURER_NFT_NAME,
         C.MANUFACTURER_NFT_SYMBOL,
@@ -67,12 +67,12 @@ describe('Vehicle', function () {
         initializer: 'initialize',
         kind: 'uups'
       }
-    // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerNft;
-    await manufacturerNftInstance.deployed();
+      // eslint-disable-next-line prettier/prettier
+    ) as ManufacturerId;
+    await manufacturerIdInstance.deployed();
 
-    vehicleNftInstance = await upgrades.deployProxy(
-      VehicleNftFactory,
+    vehicleIdInstance = await upgrades.deployProxy(
+      vehicleIdFactory,
       [
         C.VEHICLE_NFT_NAME,
         C.VEHICLE_NFT_SYMBOL,
@@ -82,28 +82,28 @@ describe('Vehicle', function () {
         initializer: 'initialize',
         kind: 'uups'
       }
-    // eslint-disable-next-line prettier/prettier
-    ) as VehicleNft;
-    await vehicleNftInstance.deployed();
+      // eslint-disable-next-line prettier/prettier
+    ) as VehicleId;
+    await vehicleIdInstance.deployed();
 
     const MANUFACTURER_MINTER_ROLE =
-      await manufacturerNftInstance.MINTER_ROLE();
-    await manufacturerNftInstance
+      await manufacturerIdInstance.MINTER_ROLE();
+    await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
 
-    const VEHICLE_MINTER_ROLE = await vehicleNftInstance.MINTER_ROLE();
-    await vehicleNftInstance
+    const VEHICLE_MINTER_ROLE = await vehicleIdInstance.MINTER_ROLE();
+    await vehicleIdInstance
       .connect(admin)
       .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxies
     await manufacturerInstance
       .connect(admin)
-      .setManufacturerNftProxyAddress(manufacturerNftInstance.address);
+      .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
     await vehicleInstance
       .connect(admin)
-      .setVehicleNftProxyAddress(vehicleNftInstance.address);
+      .setVehicleIdProxyAddress(vehicleIdInstance.address);
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -136,7 +136,7 @@ describe('Vehicle', function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('setVehicleNftProxyAddress', () => {
+  describe('setVehicleIdProxyAddress', () => {
     let localVehicleInstance: Vehicle;
     beforeEach(async () => {
       [, localVehicleInstance] = await initialize(admin, 'Vehicle');
@@ -147,10 +147,9 @@ describe('Vehicle', function () {
         await expect(
           localVehicleInstance
             .connect(nonAdmin)
-            .setVehicleNftProxyAddress(localVehicleInstance.address)
+            .setVehicleIdProxyAddress(localVehicleInstance.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -158,19 +157,19 @@ describe('Vehicle', function () {
         await expect(
           localVehicleInstance
             .connect(admin)
-            .setVehicleNftProxyAddress(C.ZERO_ADDRESS)
+            .setVehicleIdProxyAddress(C.ZERO_ADDRESS)
         ).to.be.revertedWith('Non zero address');
       });
     });
 
     context('Events', () => {
-      it('Should emit VehicleNftProxySet event with correct params', async () => {
+      it('Should emit VehicleIdProxySet event with correct params', async () => {
         await expect(
           localVehicleInstance
             .connect(admin)
-            .setVehicleNftProxyAddress(localVehicleInstance.address)
+            .setVehicleIdProxyAddress(localVehicleInstance.address)
         )
-          .to.emit(localVehicleInstance, 'VehicleNftProxySet')
+          .to.emit(localVehicleInstance, 'VehicleIdProxySet')
           .withArgs(localVehicleInstance.address);
       });
     });
@@ -184,8 +183,7 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .addVehicleAttribute(C.mockVehicleAttribute1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -229,13 +227,11 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
-      // TODO Check manufacturer node type?
-      it.skip('Should revert if parent node is not a manufacturer node', async () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
@@ -256,21 +252,20 @@ describe('Vehicle', function () {
     });
 
     context('State change', () => {
-      // TODO Fix parent node type
-      // it('Should correctly set parent node', async () => {
-      //   await vehicleInstance
-      //     .connect(admin)
-      //     .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
 
-      //   const parentNode = await nodesInstance.getParentNode(2);
-      //   expect(parentNode).to.be.equal(1);
-      // });
+        const parentNode = await nodesInstance.getParentNode(vehicleIdInstance.address, 1);
+        expect(parentNode).to.be.equal(1);
+      });
       it('Should correctly set node owner', async () => {
         await vehicleInstance
           .connect(admin)
           .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
 
-        expect(await vehicleNftInstance.ownerOf(1)).to.be.equal(user1.address);
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should correctly set infos', async () => {
         await vehicleInstance
@@ -279,14 +274,14 @@ describe('Vehicle', function () {
 
         expect(
           await nodesInstance.getInfo(
-            vehicleNftInstance.address,
+            vehicleIdInstance.address,
             1,
             C.mockVehicleAttribute1
           )
         ).to.be.equal(C.mockVehicleInfo1);
         expect(
           await nodesInstance.getInfo(
-            vehicleNftInstance.address,
+            vehicleIdInstance.address,
             1,
             C.mockVehicleAttribute2
           )
@@ -356,13 +351,11 @@ describe('Vehicle', function () {
               signature
             )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
-      // TODO investigate
-      it.skip('Should revert if parent node is not a manufacturer node', async () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
@@ -563,23 +556,22 @@ describe('Vehicle', function () {
     });
 
     context('State change', () => {
-      // TODO Fix parent node type
-      // it('Should correctly set parent node', async () => {
-      //   await vehicleInstance
-      //     .connect(admin)
-      //     .mintVehicleSign(
-      //       1,
-      //       user1.address,
-      //       C.mockVehicleAttributeInfoPairs,
-      //       signature
-      //     );
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleSign(
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          );
 
-      //   const parentNode = await nodesInstance.getParentNode(
-      //     vehicleNftInstance.address,
-      //     2
-      //   );
-      //   expect(parentNode).to.be.equal(1);
-      // });
+        const parentNode = await nodesInstance.getParentNode(
+          vehicleIdInstance.address,
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
       it('Should correctly set node owner', async () => {
         await vehicleInstance
           .connect(admin)
@@ -590,7 +582,7 @@ describe('Vehicle', function () {
             signature
           );
 
-        expect(await vehicleNftInstance.ownerOf(1)).to.be.equal(user1.address);
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should correctly set infos', async () => {
         await vehicleInstance
@@ -604,14 +596,14 @@ describe('Vehicle', function () {
 
         expect(
           await nodesInstance.getInfo(
-            vehicleNftInstance.address,
+            vehicleIdInstance.address,
             1,
             C.mockVehicleAttribute1
           )
         ).to.be.equal(C.mockVehicleInfo1);
         expect(
           await nodesInstance.getInfo(
-            vehicleNftInstance.address,
+            vehicleIdInstance.address,
             1,
             C.mockVehicleAttribute2
           )
@@ -674,18 +666,16 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .setVehicleInfo(1, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
-      // TODO Fix
-      it.skip('Should revert if node is not a vehicle', async () => {
+      it('Should revert if node is not a vehicle', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
             .setVehicleInfo(99, C.mockVehicleAttributeInfoPairs)
-        ).to.be.revertedWith('Node must be a vehicle');
+        ).to.be.revertedWith('Invalid vehicle node');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -706,14 +696,14 @@ describe('Vehicle', function () {
 
         expect(
           await nodesInstance.getInfo(
-            vehicleNftInstance.address,
+            vehicleIdInstance.address,
             1,
             C.mockVehicleAttribute1
           )
         ).to.be.equal(C.mockVehicleInfo1);
         expect(
           await nodesInstance.getInfo(
-            vehicleNftInstance.address,
+            vehicleIdInstance.address,
             1,
             C.mockVehicleAttribute2
           )
@@ -725,14 +715,14 @@ describe('Vehicle', function () {
 
         expect(
           await nodesInstance.getInfo(
-            vehicleNftInstance.address,
+            vehicleIdInstance.address,
             1,
             C.mockVehicleAttribute1
           )
         ).to.be.equal(localNewAttributeInfoPairs[0].info);
         expect(
           await nodesInstance.getInfo(
-            vehicleNftInstance.address,
+            vehicleIdInstance.address,
             1,
             C.mockVehicleAttribute2
           )

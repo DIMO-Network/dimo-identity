@@ -141,9 +141,9 @@
             }
         },
         "nfts": {
-            "ManufacturerNft": "0xFdB5774D7aCe99226d99B58f4b293E72126cf068",
-            "VehicleNft": "0xA975E31A046AbEe2de14a041Dae5d0983C59128D",
-            "AftermarketDeviceNft": "0x283568f15Bc5025CfC054427FB9c487D620b3552"
+            "ManufacturerId": "0xFdB5774D7aCe99226d99B58f4b293E72126cf068",
+            "VehicleId": "0xA975E31A046AbEe2de14a041Dae5d0983C59128D",
+            "AftermarketDeviceId": "0x283568f15Bc5025CfC054427FB9c487D620b3552"
         }
     },
     "hardhat": {
@@ -189,8 +189,8 @@
                     "0x5f36da6b",
                     "0x9abb3000",
                     "0x92eefe9b",
-                    "0x63545ffa",
-                    "0x9db2ed9b"
+                    "0xd159f49a",
+                    "0x63545ffa"
                 ]
             },
             "Vehicle": {
@@ -199,21 +199,21 @@
                     "0xf0d1a557",
                     "0x3da44e56",
                     "0x1b1a82c8",
-                    "0xd9c3ae61",
-                    "0xda647058"
+                    "0x9bfae6da",
+                    "0xd9c3ae61"
                 ]
             },
             "AftermarketDevice": {
                 "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
                 "selectors": [
                     "0x6111afa3",
+                    "0xab2ae229",
                     "0x89a841bb",
                     "0x9796cf22",
                     "0x7ba79a39",
                     "0xcfe642dd",
-                    "0xa2160ba4",
+                    "0x4d49d82a",
                     "0x4d13b709",
-                    "0x4e37122c",
                     "0x3f65997a"
                 ]
             },
@@ -244,9 +244,9 @@
             }
         },
         "nfts": {
-            "ManufacturerNft": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
-            "VehicleNft": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
-            "AftermarketDeviceNft": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
+            "ManufacturerId": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+            "VehicleId": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+            "AftermarketDeviceId": "0x9A676e781A523b5d0C0e43731313A708CB607508"
         }
     }
 }

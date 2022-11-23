@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
 import "./libraries/RegistryStorage.sol";
@@ -7,7 +7,8 @@ import {DEFAULT_ADMIN_ROLE} from "./shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-// TODO Documentation
+/// @title DIMORegistry
+/// @notice Entry point of all calls of the DIMO system and module manager
 contract DIMORegistry is AccessControlInternal {
     event ModuleAdded(address indexed moduleAddr, bytes4[] selectors);
     event ModuleRemoved(address indexed moduleAddr, bytes4[] selectors);
@@ -51,7 +52,7 @@ contract DIMORegistry is AccessControlInternal {
 
     /* solhint-enable no-complex-fallback, payable-fallback, no-inline-assembly */
 
-    /// @notice update module
+    /// @notice Updates module
     /// @dev oldImplementation should be registered
     /// @param oldImplementation address of the module to remove
     /// @param newImplementation address of the module to register
@@ -85,10 +86,10 @@ contract DIMORegistry is AccessControlInternal {
         emit ModuleAdded(implementation, selectors);
     }
 
-    /// @notice Removes a new module and supported functions
+    /// @notice Removes a module and supported functions
     /// @dev function selector should not exist
     /// @param implementation implementation address
-    /// @param selectors function signatures
+    /// @param selectors function selectors
     function removeModule(address implementation, bytes4[] calldata selectors)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -98,7 +99,7 @@ contract DIMORegistry is AccessControlInternal {
     }
 
     /// @notice Adds a new module
-    /// @dev function selector should not have been registered.
+    /// @dev function selector should not have been registered
     /// @param implementation address of the implementation
     /// @param selectors selectors of the implementation contract
     function _addModule(address implementation, bytes4[] calldata selectors)
@@ -121,10 +122,10 @@ contract DIMORegistry is AccessControlInternal {
         s.selectorsHash[implementation] = hash;
     }
 
-    /// @notice Removes a new module and supported functions
+    /// @notice Removes a module and supported functions
     /// @dev function selector should not exist
     /// @param implementation implementation address
-    /// @param selectors function signatures
+    /// @param selectors function selectors
     function _removeModule(address implementation, bytes4[] calldata selectors)
         private
     {

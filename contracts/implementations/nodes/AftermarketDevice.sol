@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
@@ -15,10 +15,9 @@ import "../../shared/Types.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/**
- * TODO Documentation
- * It uses the Mapper contract to link Aftermarket Devices to Vehicles
- */
+/// @title AftermarketDevice
+/// @notice Contract that represents the Aftermarket Device node
+/// @dev It uses the Mapper contract to link Aftermarket Devices to Vehicles
 contract AftermarketDevice is
     AccessControlInternal,
     AdLicenseValidatorInternal
@@ -37,7 +36,7 @@ contract AftermarketDevice is
             "UnPairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
         );
 
-    event AftermarketDeviceNftProxySet(address indexed proxy);
+    event AftermarketDeviceIdProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
     event AftermarketDeviceAttributeSet(
         uint256 tokenId,
@@ -71,14 +70,14 @@ contract AftermarketDevice is
     /// @notice Sets the NFT proxy associated with the Aftermarket Device node
     /// @dev Only an admin can set the address
     /// @param addr The address of the proxy
-    function setAftermarketDeviceNftProxyAddress(address addr)
+    function setAftermarketDeviceIdProxyAddress(address addr)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         require(addr != address(0), "Non zero address");
-        AftermarketDeviceStorage.getStorage().nftProxyAddress = addr;
+        AftermarketDeviceStorage.getStorage().idProxyAddress = addr;
 
-        emit AftermarketDeviceNftProxySet(addr);
+        emit AftermarketDeviceIdProxySet(addr);
     }
 
     /// @notice Adds an attribute to the whielist
@@ -112,27 +111,27 @@ contract AftermarketDevice is
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         uint256 devicesAmount = adInfos.length;
-        address adNftProxyAddress = ads.nftProxyAddress;
+        address adIdProxyAddress = ads.idProxyAddress;
 
         require(
-            INFT(adNftProxyAddress).isApprovedForAll(msg.sender, address(this)),
+            INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)),
             "Registry must be approved for all"
         );
-
-        // TODO Check if manufacturerNode is a manufacturer ?
-        // require(
-        //     ns.nodes[manufacturerNode].nodeType == ms.nodeType,
-        //     "Invalid parent node"
-        // );
+        require(
+            INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            ),
+            "Invalid parent node"
+        );
 
         uint256 newTokenId;
         address deviceAddress;
 
         for (uint256 i = 0; i < devicesAmount; i++) {
-            newTokenId = INFT(adNftProxyAddress).safeMint(msg.sender);
+            newTokenId = INFT(adIdProxyAddress).safeMint(msg.sender);
 
             ns
-            .nodes[adNftProxyAddress][newTokenId].parentNode = manufacturerNode;
+            .nodes[adIdProxyAddress][newTokenId].parentNode = manufacturerNode;
 
             deviceAddress = adInfos[i].addr;
             require(
@@ -143,7 +142,7 @@ contract AftermarketDevice is
             ads.deviceAddressToNodeId[deviceAddress] = newTokenId;
             ads.nodeIdToDeviceAddress[newTokenId] = deviceAddress;
 
-            _setInfo(newTokenId, adInfos[i].attrInfoPairs);
+            _setInfos(newTokenId, adInfos[i].attrInfoPairs);
 
             emit AftermarketDeviceNodeMinted(
                 newTokenId,
@@ -166,14 +165,8 @@ contract AftermarketDevice is
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
-        INFT adNftProxy = INFT(ads.nftProxyAddress);
+        INFT adIdProxy = INFT(ads.idProxyAddress);
 
-        // TODO Check if aftermarketDeviceNode is valid ?
-        // require(
-        //     NodesStorage.getStorage().nodes[aftermarketDeviceNode].nodeType ==
-        //         AftermarketDeviceStorage.getStorage().nodeType,
-        //     "Invalid AD node"
-        // );
         uint256 aftermarketDeviceNode;
         address owner;
         for (uint256 i = 0; i < adOwnerPair.length; i++) {
@@ -186,8 +179,8 @@ contract AftermarketDevice is
             );
 
             ads.deviceClaimed[aftermarketDeviceNode] = true;
-            adNftProxy.safeTransferFrom(
-                adNftProxy.ownerOf(aftermarketDeviceNode),
+            adIdProxy.safeTransferFrom(
+                adIdProxy.ownerOf(aftermarketDeviceNode),
                 owner,
                 aftermarketDeviceNode
             );
@@ -218,14 +211,9 @@ contract AftermarketDevice is
         address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
             aftermarketDeviceNode
         ];
-        INFT adNftProxy = INFT(ads.nftProxyAddress);
+        INFT adIdProxy = INFT(ads.idProxyAddress);
 
-        // TODO Check if aftermarketDeviceNode is valid ?
-        // require(
-        //     NodesStorage.getStorage().nodes[aftermarketDeviceNode].nodeType ==
-        //         AftermarketDeviceStorage.getStorage().nodeType,
-        //     "Invalid AD node"
-        // );
+        require(adIdProxy.exists(aftermarketDeviceNode), "Invalid AD node");
         require(
             !ads.deviceClaimed[aftermarketDeviceNode],
             "Device already claimed"
@@ -244,8 +232,8 @@ contract AftermarketDevice is
         );
 
         ads.deviceClaimed[aftermarketDeviceNode] = true;
-        adNftProxy.safeTransferFrom(
-            adNftProxy.ownerOf(aftermarketDeviceNode),
+        adIdProxy.safeTransferFrom(
+            adIdProxy.ownerOf(aftermarketDeviceNode),
             owner,
             aftermarketDeviceNode
         );
@@ -268,17 +256,24 @@ contract AftermarketDevice is
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
         );
-        address vehicleNftProxyAddress = VehicleStorage
+        address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
-            .nftProxyAddress;
-        address adNftProxyAddress = AftermarketDeviceStorage
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
             .getStorage()
-            .nftProxyAddress;
+            .idProxyAddress;
 
-        // TODO Check node type?
+        require(
+            INFT(vehicleIdProxyAddress).exists(vehicleNode),
+            "Invalid vehicle node"
+        );
 
-        address owner = INFT(vehicleNftProxyAddress).ownerOf(vehicleNode);
+        address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
 
+        require(
+            INFT(adIdProxyAddress).exists(aftermarketDeviceNode),
+            "Invalid AD node"
+        );
         require(
             AftermarketDeviceStorage.getStorage().deviceClaimed[
                 aftermarketDeviceNode
@@ -286,15 +281,15 @@ contract AftermarketDevice is
             "AD must be claimed"
         );
         require(
-            owner == INFT(adNftProxyAddress).ownerOf(aftermarketDeviceNode),
+            owner == INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode),
             "Owner of the nodes does not match"
         );
         require(
-            ms.links[vehicleNftProxyAddress][vehicleNode] == 0,
+            ms.links[vehicleIdProxyAddress][vehicleNode] == 0,
             "Vehicle already paired"
         );
         require(
-            ms.links[adNftProxyAddress][aftermarketDeviceNode] == 0,
+            ms.links[adIdProxyAddress][aftermarketDeviceNode] == 0,
             "AD already paired"
         );
         require(
@@ -302,8 +297,8 @@ contract AftermarketDevice is
             "Invalid signature"
         );
 
-        ms.links[vehicleNftProxyAddress][vehicleNode] = aftermarketDeviceNode;
-        ms.links[adNftProxyAddress][aftermarketDeviceNode] = vehicleNode;
+        ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
 
         emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
     }
@@ -323,37 +318,44 @@ contract AftermarketDevice is
             abi.encode(UNPAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
         );
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
-        address vehicleNftProxyAddress = VehicleStorage
+        address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
-            .nftProxyAddress;
-        address adNftProxyAddress = AftermarketDeviceStorage
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
             .getStorage()
-            .nftProxyAddress;
-
-        address owner = INFT(vehicleNftProxyAddress).ownerOf(vehicleNode);
+            .idProxyAddress;
 
         require(
-            owner == INFT(adNftProxyAddress).ownerOf(aftermarketDeviceNode),
+            INFT(vehicleIdProxyAddress).exists(vehicleNode),
+            "Invalid vehicle node"
+        );
+
+        address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
+
+        require(
+            INFT(adIdProxyAddress).exists(aftermarketDeviceNode),
+            "Invalid AD node"
+        );
+        require(
+            owner == INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode),
             "Owner of the nodes does not match"
         );
         require(
-            ms.links[vehicleNftProxyAddress][vehicleNode] ==
+            ms.links[vehicleIdProxyAddress][vehicleNode] ==
                 aftermarketDeviceNode,
             "Vehicle not paired to AD"
         );
         require(
-            ms.links[adNftProxyAddress][aftermarketDeviceNode] == vehicleNode,
+            ms.links[adIdProxyAddress][aftermarketDeviceNode] == vehicleNode,
             "AD is not paired to vehicle"
         );
-
-        //We just need to verify the owners's signature is correct.
         require(
             Eip712CheckerInternal._verifySignature(owner, message, signature),
             "Invalid signature"
         );
 
-        ms.links[vehicleNftProxyAddress][vehicleNode] = 0;
-        ms.links[adNftProxyAddress][aftermarketDeviceNode] = 0;
+        ms.links[vehicleIdProxyAddress][vehicleNode] = 0;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = 0;
 
         emit AftermarketDeviceUnpaired(
             aftermarketDeviceNode,
@@ -363,7 +365,6 @@ contract AftermarketDevice is
     }
 
     /// @notice Add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param tokenId Node id where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
@@ -371,23 +372,13 @@ contract AftermarketDevice is
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfo
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO Check nft id ?
-        _setInfo(tokenId, attrInfo);
-    }
-
-    /// @notice Update single attribute infos on node
-    /// @dev attributes and infos arrays length must match
-    /// @dev attributes must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attribute Attribute to be updated
-    /// @param info Info to be set
-    function setAftermarketDeviceAttribute(
-        uint256 tokenId,
-        string calldata attribute,
-        string calldata info
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO Check nft id ?
-        _setAttribute(tokenId, attribute, info);
+        require(
+            INFT(AftermarketDeviceStorage.getStorage().idProxyAddress).exists(
+                tokenId
+            ),
+            "Invalid AD node"
+        );
+        _setInfos(tokenId, attrInfo);
     }
 
     /// @notice Gets the AD Id by the device address
@@ -406,17 +397,16 @@ contract AftermarketDevice is
     // ***** PRIVATE FUNCTIONS ***** //
 
     /// @dev Internal function to add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function _setInfo(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
+    function _setInfos(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
         private
     {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
-        address nftProxyAddress = ads.nftProxyAddress;
+        address idProxyAddress = ads.idProxyAddress;
 
         for (uint256 i = 0; i < attrInfo.length; i++) {
             require(
@@ -427,7 +417,7 @@ contract AftermarketDevice is
                 "Not whitelisted"
             );
 
-            ns.nodes[nftProxyAddress][tokenId].info[
+            ns.nodes[idProxyAddress][tokenId].info[
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
 
@@ -444,7 +434,7 @@ contract AftermarketDevice is
     /// @param tokenId Node where the info will be added
     /// @param attribute Attribute to be updated
     /// @param info Info to be set
-    function _setAttribute(
+    function _setAttributeInfo(
         uint256 tokenId,
         string calldata attribute,
         string calldata info
@@ -456,9 +446,9 @@ contract AftermarketDevice is
             AttributeSet.exists(ads.whitelistedAttributes, attribute),
             "Not whitelisted"
         );
-        address nftProxyAddress = ads.nftProxyAddress;
+        address idProxyAddress = ads.idProxyAddress;
 
-        ns.nodes[nftProxyAddress][tokenId].info[attribute] = info;
+        ns.nodes[idProxyAddress][tokenId].info[attribute] = info;
 
         emit AftermarketDeviceAttributeSet(tokenId, attribute, info);
     }

@@ -8,11 +8,11 @@ import {
   DimoAccessControl,
   Eip712Checker,
   Manufacturer,
-  ManufacturerNft,
+  ManufacturerId,
   Vehicle,
-  VehicleNft,
+  VehicleId,
   AftermarketDevice,
-  AftermarketDeviceNft,
+  AftermarketDeviceId,
   AdLicenseValidator
 } from '../typechain';
 import { getSelectors, ContractAddressesByNetwork } from '../utils';
@@ -101,7 +101,7 @@ async function deployNfts(): Promise<ContractAddressesByNetwork> {
 
   const contractNameArgs = [
     {
-      name: 'ManufacturerNft',
+      name: 'ManufacturerId',
       args: [
         C.MANUFACTURER_NFT_NAME,
         C.MANUFACTURER_NFT_SYMBOL,
@@ -109,11 +109,11 @@ async function deployNfts(): Promise<ContractAddressesByNetwork> {
       ]
     },
     {
-      name: 'VehicleNft',
+      name: 'VehicleId',
       args: [C.VEHICLE_NFT_NAME, C.VEHICLE_NFT_SYMBOL, C.VEHICLE_NFT_URI]
     },
     {
-      name: 'AftermarketDeviceNft',
+      name: 'AftermarketDeviceId',
       args: [C.AD_NFT_NAME, C.AD_NFT_SYMBOL, C.AD_NFT_URI]
     }
   ];
@@ -223,10 +223,10 @@ async function setup(deployer: SignerWithAddress) {
       'AftermarketDevice',
       contractAddresses[C.networkName].modules.DIMORegistry.address
     );
-  const aftermarketDeviceNftInstance: AftermarketDeviceNft =
+  const aftermarketDeviceIdInstance: AftermarketDeviceId =
     await ethers.getContractAt(
-      'AftermarketDeviceNft',
-      contractAddresses[C.networkName].nfts.AftermarketDeviceNft
+      'AftermarketDeviceId',
+      contractAddresses[C.networkName].nfts.AftermarketDeviceId
     );
 
   console.log('\n----- Initializing EIP712 -----\n');
@@ -267,37 +267,35 @@ async function setup(deployer: SignerWithAddress) {
   await (
     await manufacturerInstance
       .connect(deployer)
-      .setManufacturerNftProxyAddress(
-        contractAddresses[C.networkName].nfts.ManufacturerNft
+      .setManufacturerIdProxyAddress(
+        contractAddresses[C.networkName].nfts.ManufacturerId
       )
   ).wait();
   console.log(
     `${
-      contractAddresses[C.networkName].nfts.ManufacturerNft
+      contractAddresses[C.networkName].nfts.ManufacturerId
     } proxy address set to Manufacturer`
   );
   await (
     await vehicleInstance
       .connect(deployer)
-      .setVehicleNftProxyAddress(
-        contractAddresses[C.networkName].nfts.VehicleNft
-      )
+      .setVehicleIdProxyAddress(contractAddresses[C.networkName].nfts.VehicleId)
   ).wait();
   console.log(
     `${
-      contractAddresses[C.networkName].nfts.VehicleNft
+      contractAddresses[C.networkName].nfts.VehicleId
     } proxy address set to Vehicle`
   );
   await (
     await aftermarketDeviceInstance
       .connect(deployer)
-      .setAftermarketDeviceNftProxyAddress(
-        contractAddresses[C.networkName].nfts.AftermarketDeviceNft
+      .setAftermarketDeviceIdProxyAddress(
+        contractAddresses[C.networkName].nfts.AftermarketDeviceId
       )
   ).wait();
   console.log(
     `${
-      contractAddresses[C.networkName].nfts.AftermarketDeviceNft
+      contractAddresses[C.networkName].nfts.AftermarketDeviceId
     } proxy address set to Aftermarket Device`
   );
   console.log('\n----- NFT proxies set -----');
@@ -326,7 +324,7 @@ async function setup(deployer: SignerWithAddress) {
     '\n----- Aftermarket Device NFT setting approval for all to DIMO Registry -----'
   );
   await (
-    await aftermarketDeviceNftInstance
+    await aftermarketDeviceIdInstance
       .connect(deployer)
       .setApprovalForAll(
         contractAddresses[C.networkName].modules.DIMORegistry.address,
@@ -337,76 +335,76 @@ async function setup(deployer: SignerWithAddress) {
 }
 
 async function grantNftRoles(deployer: SignerWithAddress) {
-  const manufacturerNftInstance: ManufacturerNft = await ethers.getContractAt(
-    'ManufacturerNft',
-    contractAddresses[C.networkName].nfts.ManufacturerNft
+  const manufacturerIdInstance: ManufacturerId = await ethers.getContractAt(
+    'ManufacturerId',
+    contractAddresses[C.networkName].nfts.ManufacturerId
   );
-  const vehicleNftInstance: VehicleNft = await ethers.getContractAt(
-    'VehicleNft',
-    contractAddresses[C.networkName].nfts.VehicleNft
+  const vehicleIdInstance: VehicleId = await ethers.getContractAt(
+    'VehicleId',
+    contractAddresses[C.networkName].nfts.VehicleId
   );
-  const aftermarketDeviceNftInstance: AftermarketDeviceNft =
+  const aftermarketDeviceIdInstance: AftermarketDeviceId =
     await ethers.getContractAt(
-      'AftermarketDeviceNft',
-      contractAddresses[C.networkName].nfts.AftermarketDeviceNft
+      'AftermarketDeviceId',
+      contractAddresses[C.networkName].nfts.AftermarketDeviceId
     );
   const dimoRegistryAddress =
     contractAddresses[C.networkName].modules.DIMORegistry.address;
 
   console.log(
-    `\n----- Granting ${C.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the ManufacturerNft contract -----`
+    `\n----- Granting ${C.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the ManufacturerId contract -----`
   );
 
   await (
-    await manufacturerNftInstance
+    await manufacturerIdInstance
       .connect(deployer)
       .grantRole(C.MINTER_ROLE, dimoRegistryAddress)
   ).wait();
 
   console.log(
-    `----- ${C.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the ManufacturerNft contract -----\n`
+    `----- ${C.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the ManufacturerId contract -----\n`
   );
 
   console.log(
-    `\n----- Granting ${C.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the VehicleNft contract -----`
+    `\n----- Granting ${C.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the VehicleId contract -----`
   );
 
   await (
-    await vehicleNftInstance
+    await vehicleIdInstance
       .connect(deployer)
       .grantRole(C.MINTER_ROLE, dimoRegistryAddress)
   ).wait();
 
   console.log(
-    `----- ${C.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the VehicleNft contract -----\n`
+    `----- ${C.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the VehicleId contract -----\n`
   );
 
   console.log(
-    `\n----- Granting ${C.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceNft contract -----`
+    `\n----- Granting ${C.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----`
   );
 
   await (
-    await aftermarketDeviceNftInstance
+    await aftermarketDeviceIdInstance
       .connect(deployer)
       .grantRole(C.MINTER_ROLE, dimoRegistryAddress)
   ).wait();
 
   console.log(
-    `----- ${C.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceNft contract -----\n`
+    `----- ${C.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----\n`
   );
 
   console.log(
-    `\n----- Granting ${C.TRANSFERER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceNft contract -----`
+    `\n----- Granting ${C.TRANSFERER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----`
   );
 
   await (
-    await aftermarketDeviceNftInstance
+    await aftermarketDeviceIdInstance
       .connect(deployer)
       .grantRole(C.TRANSFERER_ROLE, dimoRegistryAddress)
   ).wait();
 
   console.log(
-    `----- ${C.TRANSFERER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceNft contract -----\n`
+    `----- ${C.TRANSFERER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----\n`
   );
 }
 

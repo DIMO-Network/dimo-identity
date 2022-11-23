@@ -1,7 +1,8 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-// TODO Documentation
+/// @title INFT
+/// @notice Interface of a generic NFT
 interface INFT {
     function safeMint(address to) external returns (uint256);
 
@@ -27,6 +28,8 @@ interface INFT {
     ) external;
 
     function ownerOf(uint256 tokenId) external view returns (address owner);
+
+    function exists(uint256 tokenId) external view returns (bool);
 
     function isApprovedForAll(address owner, address operator)
         external

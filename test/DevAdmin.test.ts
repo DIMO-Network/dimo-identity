@@ -6,15 +6,15 @@ import {
   Eip712Checker,
   DimoAccessControl,
   Manufacturer,
-  ManufacturerNft,
+  ManufacturerId,
   Vehicle,
-  VehicleNft,
+  VehicleId,
   AftermarketDevice,
-  AftermarketDeviceNft,
+  AftermarketDeviceId,
   AdLicenseValidator,
   Mapper,
   MockDimoToken,
-  MockLicense,
+  MockStake,
   DevAdmin
 } from '../typechain';
 import {
@@ -42,11 +42,11 @@ describe('DevAdmin', function () {
   let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
-  let mockLicenseInstance: MockLicense;
+  let mockStakeInstance: MockStake;
   let devAdminInstance: DevAdmin;
-  let manufacturerNftInstance: ManufacturerNft;
-  let vehicleNftInstance: VehicleNft;
-  let adNftInstance: AftermarketDeviceNft;
+  let manufacturerIdInstance: ManufacturerId;
+  let vehicleIdInstance: VehicleId;
+  let adIdInstance: AftermarketDeviceId;
 
   const [
     admin,
@@ -94,16 +94,16 @@ describe('DevAdmin', function () {
       'DevAdmin'
     );
 
-    const ManufacturerNftFactory = await ethers.getContractFactory(
-      'ManufacturerNft'
+    const ManufacturerIdFactory = await ethers.getContractFactory(
+      'ManufacturerId'
     );
-    const VehicleNftFactory = await ethers.getContractFactory('VehicleNft');
-    const AftermarketDeviceNftFactory = await ethers.getContractFactory(
-      'AftermarketDeviceNft'
+    const vehicleIdFactory = await ethers.getContractFactory('VehicleId');
+    const AftermarketDeviceIdFactory = await ethers.getContractFactory(
+      'AftermarketDeviceId'
     );
 
-    manufacturerNftInstance = await upgrades.deployProxy(
-      ManufacturerNftFactory,
+    manufacturerIdInstance = await upgrades.deployProxy(
+      ManufacturerIdFactory,
       [
         C.MANUFACTURER_NFT_NAME,
         C.MANUFACTURER_NFT_SYMBOL,
@@ -114,11 +114,11 @@ describe('DevAdmin', function () {
         kind: 'uups'
       }
       // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerNft;
-    await manufacturerNftInstance.deployed();
+    ) as ManufacturerId;
+    await manufacturerIdInstance.deployed();
 
-    vehicleNftInstance = await upgrades.deployProxy(
-      VehicleNftFactory,
+    vehicleIdInstance = await upgrades.deployProxy(
+      vehicleIdFactory,
       [
         C.VEHICLE_NFT_NAME,
         C.VEHICLE_NFT_SYMBOL,
@@ -129,11 +129,11 @@ describe('DevAdmin', function () {
         kind: 'uups'
       }
       // eslint-disable-next-line prettier/prettier
-    ) as VehicleNft;
-    await vehicleNftInstance.deployed();
+    ) as VehicleId;
+    await vehicleIdInstance.deployed();
 
-    adNftInstance = await upgrades.deployProxy(
-      AftermarketDeviceNftFactory,
+    adIdInstance = await upgrades.deployProxy(
+      AftermarketDeviceIdFactory,
       [
         C.AD_NFT_NAME,
         C.AD_NFT_SYMBOL,
@@ -144,35 +144,35 @@ describe('DevAdmin', function () {
         kind: 'uups'
       }
       // eslint-disable-next-line prettier/prettier
-    ) as AftermarketDeviceNft;
-    await adNftInstance.deployed();
+    ) as AftermarketDeviceId;
+    await adIdInstance.deployed();
 
     const MANUFACTURER_MINTER_ROLE =
-      await manufacturerNftInstance.MINTER_ROLE();
-    await manufacturerNftInstance
+      await manufacturerIdInstance.MINTER_ROLE();
+    await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
 
-    const VEHICLE_MINTER_ROLE = await vehicleNftInstance.MINTER_ROLE();
-    await vehicleNftInstance
+    const VEHICLE_MINTER_ROLE = await vehicleIdInstance.MINTER_ROLE();
+    await vehicleIdInstance
       .connect(admin)
       .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
 
-    const AD_MINTER_ROLE = await adNftInstance.MINTER_ROLE();
-    await adNftInstance
+    const AD_MINTER_ROLE = await adIdInstance.MINTER_ROLE();
+    await adIdInstance
       .connect(admin)
       .grantRole(AD_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxies
     await manufacturerInstance
       .connect(admin)
-      .setManufacturerNftProxyAddress(manufacturerNftInstance.address);
+      .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
     await vehicleInstance
       .connect(admin)
-      .setVehicleNftProxyAddress(vehicleNftInstance.address);
+      .setVehicleIdProxyAddress(vehicleIdInstance.address);
     await aftermarketDeviceInstance
       .connect(admin)
-      .setAftermarketDeviceNftProxyAddress(adNftInstance.address);
+      .setAftermarketDeviceIdProxyAddress(adIdInstance.address);
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -189,10 +189,10 @@ describe('DevAdmin', function () {
     );
     await mockDimoTokenInstance.deployed();
 
-    // Deploy MockLicense contract
-    const MockLicenseFactory = await ethers.getContractFactory('MockLicense');
-    mockLicenseInstance = await MockLicenseFactory.connect(admin).deploy();
-    await mockLicenseInstance.deployed();
+    // Deploy MockStake contract
+    const MockStakeFactory = await ethers.getContractFactory('MockStake');
+    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+    await mockStakeInstance.deployed();
 
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
@@ -207,7 +207,7 @@ describe('DevAdmin', function () {
     await adLicenseValidatorInstance.setDimoToken(
       mockDimoTokenInstance.address
     );
-    await adLicenseValidatorInstance.setLicense(mockLicenseInstance.address);
+    await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Grant MANUFACTURER_ROLE to manufacturer
@@ -247,20 +247,20 @@ describe('DevAdmin', function () {
         C.mockManufacturerAttributeInfoPairs
       );
 
-    await mockLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
+    await mockStakeInstance.setLicenseBalance(manufacturer1.address, 1);
 
     // Grant Transferer role to DIMO Registry
-    await adNftInstance
+    await adIdInstance
       .connect(admin)
       .grantRole(C.NFT_TRANSFERER_ROLE, dimoRegistryInstance.address);
 
     // Approve DIMO Registry to spend manufacturer1's tokens
-    await adNftInstance
+    await adIdInstance
       .connect(manufacturer1)
       .setApprovalForAll(aftermarketDeviceInstance.address, true);
 
     // Approve DIMO Registry to spend user1's tokens
-    await adNftInstance
+    await adIdInstance
       .connect(user1)
       .setApprovalForAll(aftermarketDeviceInstance.address, true);
   });
@@ -320,8 +320,7 @@ describe('DevAdmin', function () {
           }`
         );
       });
-      // TODO Check not tyep ?
-      it.skip('Should revert if node is not an Aftermarket Device', async () => {
+      it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
@@ -332,13 +331,13 @@ describe('DevAdmin', function () {
 
     context('State change', () => {
       it('Should correctly set new node owner', async () => {
-        expect(await adNftInstance.ownerOf(1)).to.be.equal(user1.address);
+        expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
 
         await devAdminInstance
           .connect(admin)
           .transferAftermarketDeviceOwnership(1, user2.address);
 
-        expect(await adNftInstance.ownerOf(1)).to.be.equal(user2.address);
+        expect(await adIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
     });
 
@@ -441,8 +440,7 @@ describe('DevAdmin', function () {
           }`
         );
       });
-      // TODO Check node type ?
-      it.skip('Should revert if node is not an Aftermarket Device', async () => {
+      it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
@@ -620,8 +618,7 @@ describe('DevAdmin', function () {
           }`
         );
       });
-      // TODO Check node type ?
-      it.skip('Should revert if node is not an Aftermarket Device', async () => {
+      it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
@@ -633,10 +630,10 @@ describe('DevAdmin', function () {
     context('State change', () => {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         expect(
-          await mapperInstance.getLink(adNftInstance.address, 1)
+          await mapperInstance.getLink(adIdInstance.address, 1)
         ).to.be.equal(1);
         expect(
-          await mapperInstance.getLink(adNftInstance.address, 2)
+          await mapperInstance.getLink(adIdInstance.address, 2)
         ).to.be.equal(2);
 
         await devAdminInstance
@@ -644,18 +641,18 @@ describe('DevAdmin', function () {
           .unpairAftermarketDeviceByDeviceNode([1, 2]);
 
         expect(
-          await mapperInstance.getLink(adNftInstance.address, 1)
+          await mapperInstance.getLink(adIdInstance.address, 1)
         ).to.be.equal(0);
         expect(
-          await mapperInstance.getLink(adNftInstance.address, 2)
+          await mapperInstance.getLink(adIdInstance.address, 2)
         ).to.be.equal(0);
       });
       it('Should correctly map the vehicle to the aftermarket device', async () => {
         expect(
-          await mapperInstance.getLink(vehicleNftInstance.address, 1)
+          await mapperInstance.getLink(vehicleIdInstance.address, 1)
         ).to.be.equal(1);
         expect(
-          await mapperInstance.getLink(vehicleNftInstance.address, 2)
+          await mapperInstance.getLink(vehicleIdInstance.address, 2)
         ).to.be.equal(2);
 
         await devAdminInstance
@@ -663,10 +660,10 @@ describe('DevAdmin', function () {
           .unpairAftermarketDeviceByDeviceNode([1, 2]);
 
         expect(
-          await mapperInstance.getLink(vehicleNftInstance.address, 1)
+          await mapperInstance.getLink(vehicleIdInstance.address, 1)
         ).to.be.equal(0);
         expect(
-          await mapperInstance.getLink(vehicleNftInstance.address, 2)
+          await mapperInstance.getLink(vehicleIdInstance.address, 2)
         ).to.be.equal(0);
       });
     });
@@ -798,8 +795,7 @@ describe('DevAdmin', function () {
           }`
         );
       });
-      // TODO Check node type ?
-      it.skip('Should revert if node is not a Vehicle', async () => {
+      it('Should revert if node is not a Vehicle', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
@@ -811,10 +807,10 @@ describe('DevAdmin', function () {
     context('State change', () => {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         expect(
-          await mapperInstance.getLink(adNftInstance.address, 1)
+          await mapperInstance.getLink(adIdInstance.address, 1)
         ).to.be.equal(1);
         expect(
-          await mapperInstance.getLink(adNftInstance.address, 2)
+          await mapperInstance.getLink(adIdInstance.address, 2)
         ).to.be.equal(2);
 
         await devAdminInstance
@@ -822,18 +818,18 @@ describe('DevAdmin', function () {
           .unpairAftermarketDeviceByVehicleNode([1, 2]);
 
         expect(
-          await mapperInstance.getLink(adNftInstance.address, 1)
+          await mapperInstance.getLink(adIdInstance.address, 1)
         ).to.be.equal(0);
         expect(
-          await mapperInstance.getLink(adNftInstance.address, 2)
+          await mapperInstance.getLink(adIdInstance.address, 2)
         ).to.be.equal(0);
       });
       it('Should correctly map the vehicle to the aftermarket device', async () => {
         expect(
-          await mapperInstance.getLink(vehicleNftInstance.address, 1)
+          await mapperInstance.getLink(vehicleIdInstance.address, 1)
         ).to.be.equal(1);
         expect(
-          await mapperInstance.getLink(vehicleNftInstance.address, 2)
+          await mapperInstance.getLink(vehicleIdInstance.address, 2)
         ).to.be.equal(2);
 
         await devAdminInstance
@@ -841,10 +837,10 @@ describe('DevAdmin', function () {
           .unpairAftermarketDeviceByVehicleNode([1, 2]);
 
         expect(
-          await mapperInstance.getLink(vehicleNftInstance.address, 1)
+          await mapperInstance.getLink(vehicleIdInstance.address, 1)
         ).to.be.equal(0);
         expect(
-          await mapperInstance.getLink(vehicleNftInstance.address, 2)
+          await mapperInstance.getLink(vehicleIdInstance.address, 2)
         ).to.be.equal(0);
       });
     });

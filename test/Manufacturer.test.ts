@@ -5,7 +5,7 @@ import {
   DIMORegistry,
   Nodes,
   Manufacturer,
-  ManufacturerNft
+  ManufacturerId
 } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
@@ -20,7 +20,7 @@ describe('Manufacturer', async function () {
   let dimoRegistryInstance: DIMORegistry;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
-  let manufacturerNftInstance: ManufacturerNft;
+  let manufacturerIdInstance: ManufacturerId;
 
   const [admin, nonAdmin, controller1, nonController] = provider.getWallets();
 
@@ -28,11 +28,11 @@ describe('Manufacturer', async function () {
     [dimoRegistryInstance, nodesInstance, manufacturerInstance] =
       await initialize(admin, 'Nodes', 'Manufacturer');
 
-    const ManufacturerNftFactory = await ethers.getContractFactory(
-      'ManufacturerNft'
+    const ManufacturerIdFactory = await ethers.getContractFactory(
+      'ManufacturerId'
     );
-    manufacturerNftInstance = await upgrades.deployProxy(
-      ManufacturerNftFactory,
+    manufacturerIdInstance = await upgrades.deployProxy(
+      ManufacturerIdFactory,
       [
         C.MANUFACTURER_NFT_NAME,
         C.MANUFACTURER_NFT_SYMBOL,
@@ -43,18 +43,18 @@ describe('Manufacturer', async function () {
         kind: 'uups'
       }
       // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerNft;
-    await manufacturerNftInstance.deployed();
+    ) as ManufacturerId;
+    await manufacturerIdInstance.deployed();
 
-    const MINTER_ROLE = await manufacturerNftInstance.MINTER_ROLE();
-    await manufacturerNftInstance
+    const MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
+    await manufacturerIdInstance
       .connect(admin)
       .grantRole(MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxy
     await manufacturerInstance
       .connect(admin)
-      .setManufacturerNftProxyAddress(manufacturerNftInstance.address);
+      .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -73,7 +73,7 @@ describe('Manufacturer', async function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('setManufacturerNftProxyAddress', () => {
+  describe('setManufacturerIdProxyAddress', () => {
     let localManufacturerInstance: Manufacturer;
     beforeEach(async () => {
       [, localManufacturerInstance] = await initialize(admin, 'Manufacturer');
@@ -84,7 +84,7 @@ describe('Manufacturer', async function () {
         await expect(
           localManufacturerInstance
             .connect(nonAdmin)
-            .setManufacturerNftProxyAddress(manufacturerNftInstance.address)
+            .setManufacturerIdProxyAddress(manufacturerIdInstance.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
@@ -94,20 +94,20 @@ describe('Manufacturer', async function () {
         await expect(
           localManufacturerInstance
             .connect(admin)
-            .setManufacturerNftProxyAddress(C.ZERO_ADDRESS)
+            .setManufacturerIdProxyAddress(C.ZERO_ADDRESS)
         ).to.be.revertedWith('Non zero address');
       });
     });
 
     context('Events', () => {
-      it('Should emit ManufacturerNftProxySet event with correct params', async () => {
+      it('Should emit ManufacturerIdProxySet event with correct params', async () => {
         await expect(
           localManufacturerInstance
             .connect(admin)
-            .setManufacturerNftProxyAddress(manufacturerNftInstance.address)
+            .setManufacturerIdProxyAddress(manufacturerIdInstance.address)
         )
-          .to.emit(localManufacturerInstance, 'ManufacturerNftProxySet')
-          .withArgs(manufacturerNftInstance.address);
+          .to.emit(localManufacturerInstance, 'ManufacturerIdProxySet')
+          .withArgs(manufacturerIdInstance.address);
       });
     });
   });
@@ -224,15 +224,15 @@ describe('Manufacturer', async function () {
           .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
 
         const parentNode1 = await nodesInstance.getParentNode(
-          manufacturerNftInstance.address,
+          manufacturerIdInstance.address,
           1
         );
         const parentNode2 = await nodesInstance.getParentNode(
-          manufacturerNftInstance.address,
+          manufacturerIdInstance.address,
           2
         );
         const parentNode3 = await nodesInstance.getParentNode(
-          manufacturerNftInstance.address,
+          manufacturerIdInstance.address,
           3
         );
 
@@ -246,9 +246,9 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
 
-        const nodeOwner1 = await manufacturerNftInstance.ownerOf(1);
-        const nodeOwner2 = await manufacturerNftInstance.ownerOf(2);
-        const nodeOwner3 = await manufacturerNftInstance.ownerOf(3);
+        const nodeOwner1 = await manufacturerIdInstance.ownerOf(1);
+        const nodeOwner2 = await manufacturerIdInstance.ownerOf(2);
+        const nodeOwner3 = await manufacturerIdInstance.ownerOf(3);
 
         expect(nodeOwner1).to.be.equal(admin.address);
         expect(nodeOwner2).to.be.equal(admin.address);
@@ -370,7 +370,7 @@ describe('Manufacturer', async function () {
           );
 
         const parentNode = await nodesInstance.getParentNode(
-          manufacturerNftInstance.address,
+          manufacturerIdInstance.address,
           1
         );
 
@@ -386,7 +386,7 @@ describe('Manufacturer', async function () {
             C.mockManufacturerAttributeInfoPairs
           );
 
-        expect(await manufacturerNftInstance.ownerOf(1)).to.be.equal(
+        expect(await manufacturerIdInstance.ownerOf(1)).to.be.equal(
           controller1.address
         );
       });
@@ -437,14 +437,14 @@ describe('Manufacturer', async function () {
 
         expect(
           await nodesInstance.getInfo(
-            manufacturerNftInstance.address,
+            manufacturerIdInstance.address,
             1,
             C.mockManufacturerAttribute1
           )
         ).to.be.equal(C.mockManufacturerInfo1);
         expect(
           await nodesInstance.getInfo(
-            manufacturerNftInstance.address,
+            manufacturerIdInstance.address,
             1,
             C.mockManufacturerAttribute2
           )
@@ -502,13 +502,12 @@ describe('Manufacturer', async function () {
           }`
         );
       });
-      // TODO
-      it.skip('Should revert if node is not a manufacturer', async () => {
+      it('Should revert if node is not a manufacturer', async () => {
         await expect(
           manufacturerInstance
             .connect(admin)
             .setManufacturerInfo(99, C.mockManufacturerAttributeInfoPairs)
-        ).to.be.revertedWith('Node must be a manufacturer');
+        ).to.be.revertedWith('Invalid manufacturer node');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -532,14 +531,14 @@ describe('Manufacturer', async function () {
 
         expect(
           await nodesInstance.getInfo(
-            manufacturerNftInstance.address,
+            manufacturerIdInstance.address,
             1,
             C.mockManufacturerAttribute1
           )
         ).to.be.equal(C.mockManufacturerInfo1);
         expect(
           await nodesInstance.getInfo(
-            manufacturerNftInstance.address,
+            manufacturerIdInstance.address,
             1,
             C.mockManufacturerAttribute2
           )
@@ -551,14 +550,14 @@ describe('Manufacturer', async function () {
 
         expect(
           await nodesInstance.getInfo(
-            manufacturerNftInstance.address,
+            manufacturerIdInstance.address,
             1,
             C.mockManufacturerAttribute1
           )
         ).to.be.equal(localNewAttributeInfoPairs[0].info);
         expect(
           await nodesInstance.getInfo(
-            manufacturerNftInstance.address,
+            manufacturerIdInstance.address,
             1,
             C.mockManufacturerAttribute2
           )

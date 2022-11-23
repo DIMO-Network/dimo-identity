@@ -1,8 +1,10 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
 import "../AttributeSet.sol";
 
+/// @title VehicleStorage
+/// @notice Storage of the Vehicle contract
 library VehicleStorage {
     using AttributeSet for AttributeSet.Set;
 
@@ -10,7 +12,7 @@ library VehicleStorage {
         keccak256("DIMORegistry.vehicle.storage");
 
     struct Storage {
-        address nftProxyAddress;
+        address idProxyAddress;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
     }

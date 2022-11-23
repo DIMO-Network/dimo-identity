@@ -11,3 +11,8 @@ struct AftermarketDeviceInfos {
     address addr;
     AttributeInfoPair[] attrInfoPairs;
 }
+
+struct AftermarketDeviceOwnerPair {
+    uint256 aftermarketDeviceNodeId;
+    address owner;
+}

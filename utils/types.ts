@@ -21,6 +21,11 @@ export type AftermarketDeviceInfos = {
   attrInfoPairs: AttributeInfoPair[]
 };
 
+export type AftermarketDeviceOwnerPair = {
+  aftermarketDeviceNodeId: string,
+  owner: string
+};
+
 export interface ContractAddressesByNetwork {
   [index: string]: {
     modules: {

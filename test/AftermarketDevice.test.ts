@@ -22,6 +22,7 @@ import {
   createSnapshot,
   revertToSnapshot,
   signMessage,
+  AftermarketDeviceOwnerPair,
   C
 } from '../utils';
 
@@ -582,6 +583,103 @@ describe('AftermarketDevice', function () {
           .withArgs(2, mockAftermarketDeviceInfosList[1].attrInfoPairs[0].attribute, mockAftermarketDeviceInfosList[1].attrInfoPairs[0].info)
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(2, mockAftermarketDeviceInfosList[1].attrInfoPairs[1].attribute, mockAftermarketDeviceInfosList[1].attrInfoPairs[1].info)
+      });
+    });
+  });
+
+  describe.only('claimAftermarketDeviceBatch', () => {
+    const localAdOwnerPairs: AftermarketDeviceOwnerPair[] = [
+      {aftermarketDeviceNodeId: '1', owner: user1.address},
+      {aftermarketDeviceNodeId: '2', owner: user2.address}
+    ]
+
+    let ownerSig: string;
+    let adSig: string;
+    before(async () => {
+      ownerSig = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      adSig = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+    });
+
+    beforeEach(async () => {
+      await adNftInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList
+        );
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(nonAdmin)
+            .claimAftermarketDeviceBatch(localAdOwnerPairs)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          }`
+        );
+      });
+      // TODO Check node type ?
+      it.skip('Should revert if node is not an Aftermarket Device', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceBatch(localAdOwnerPairs)
+        ).to.be.revertedWith('Invalid AD node');
+      });
+      it('Should revert if device is already claimed', async () => {
+        await aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
+
+        await expect(aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceBatch(localAdOwnerPairs)).to.be.revertedWith('Device already claimed');
+      });
+    });
+
+    context('State change', async () => {
+      it('Should correctly set node owners', async () => {
+        await aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceBatch(localAdOwnerPairs);
+
+        expect(await adNftInstance.ownerOf(1)).to.be.equal(user1.address);
+        expect(await adNftInstance.ownerOf(2)).to.be.equal(user2.address);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceBatch(localAdOwnerPairs)
+        )
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+          .withArgs(1, user1.address)
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+          .withArgs(2, user2.address);
       });
     });
   });

@@ -47,7 +47,7 @@
     "mumbai": {
         "modules": {
             "DIMORegistry": {
-                "address": "0xCF395Cd4514490c35e1195dad50DA245b6a2333a",
+                "address": "0x4De1bCf2B7E851E31216fC07989caA902A604784",
                 "selectors": [
                     "0x0df5b997",
                     "0x9748a762",
@@ -55,13 +55,13 @@
                 ]
             },
             "Eip712Checker": {
-                "address": "0x3268dE2A019d80D53dE4C92502119C6B266a0605",
+                "address": "0x912655291361ea0c8A73E519e1fd483ad7Aba871",
                 "selectors": [
                     "0x4cd88b76"
                 ]
             },
             "DimoAccessControl": {
-                "address": "0x0aF7F9f9cab39E4316AdF17b1b82af71bAd989c0",
+                "address": "0xdd20aC4946c1aa40e6a6183bC1B7271699C57B7A",
                 "selectors": [
                     "0x248a9ca3",
                     "0x2f2ff15d",
@@ -71,51 +71,52 @@
                 ]
             },
             "Nodes": {
-                "address": "0x3ae21ee2af3A371484826E525Bce5A79bf4E1886",
+                "address": "0x519F9671Aa502D8e67397d0773D80985B01Bb046",
                 "selectors": [
                     "0xdce2f860",
                     "0x82087d24"
                 ]
             },
             "Manufacturer": {
-                "address": "0x7F7a5136db7Ba104B83EF9B8c17697575ee8F5E2",
+                "address": "0xbE774C37373a236d4c564428065fabE812D4A86B",
                 "selectors": [
                     "0x50300a3f",
+                    "0xce55aab0",
                     "0xb429afeb",
                     "0x456bf169",
-                    "0x17efba21",
+                    "0x5f36da6b",
                     "0x9abb3000",
                     "0x92eefe9b",
-                    "0x63545ffa",
-                    "0x9db2ed9b"
+                    "0xd159f49a",
+                    "0x63545ffa"
                 ]
             },
             "Vehicle": {
-                "address": "0xFa8E43148E725005aFc324CAF3d30E6d6b417440",
+                "address": "0x1A241DbF6c53fEa69ed025bb6b39aF669c4b804d",
                 "selectors": [
                     "0xf0d1a557",
                     "0x3da44e56",
                     "0x1b1a82c8",
-                    "0xd9c3ae61",
-                    "0xda647058"
+                    "0x9bfae6da",
+                    "0xd9c3ae61"
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x9f8acFF8E4bf2B5230827C726EFdF88755eB568D",
+                "address": "0xEC0C5A55D138B54Ed1182D4262F6FAF129A04e6C",
                 "selectors": [
                     "0x6111afa3",
+                    "0xab2ae229",
                     "0x89a841bb",
                     "0x9796cf22",
                     "0x7ba79a39",
                     "0xcfe642dd",
-                    "0xa2160ba4",
+                    "0x4d49d82a",
                     "0x4d13b709",
-                    "0x4e37122c",
                     "0x3f65997a"
                 ]
             },
             "AdLicenseValidator": {
-                "address": "0xCF722B94cD73E71f88659c26483D41e015CcA168",
+                "address": "0xfA8E08A671B086D07A4c17Df8c5eBa5Cd01fD335",
                 "selectors": [
                     "0x46946743",
                     "0x2390baa8",
@@ -125,13 +126,13 @@
                 ]
             },
             "Mapper": {
-                "address": "0x075b25298431642cfb1a1B3Ef05B4cfBe2B94130",
+                "address": "0x17F2C933cAD99E4BfE27795488622474691162C5",
                 "selectors": [
                     "0x112e62a2"
                 ]
             },
             "DevAdmin": {
-                "address": "0xDa92fb8c9fa8c469c64ae6e05963853341B03399",
+                "address": "0x6D81dC52766F9d5EAaEbC5973A60181aE17B4296",
                 "selectors": [
                     "0xff96b761",
                     "0x5c129493",
@@ -141,9 +142,9 @@
             }
         },
         "nfts": {
-            "ManufacturerId": "0xFdB5774D7aCe99226d99B58f4b293E72126cf068",
-            "VehicleId": "0xA975E31A046AbEe2de14a041Dae5d0983C59128D",
-            "AftermarketDeviceId": "0x283568f15Bc5025CfC054427FB9c487D620b3552"
+            "ManufacturerId": "0x3082cBCb476443923ff4d915Acc31217c9c3C6D5",
+            "VehicleId": "0x90C4D6113Ec88dd4BDf12f26DB2b3998fd13A144",
+            "AftermarketDeviceId": "0xcf9Af64522162da85164a714c23a7705E6e466b3"
         }
     },
     "hardhat": {

@@ -157,6 +157,45 @@ contract AftermarketDevice is
         _validateMintRequest(msg.sender, devicesAmount);
     }
 
+    /// @notice Claims the ownership of a list of aftermarket devices to a list of owners
+    /// @dev Caller must have the admin role
+    /// @dev This contract must be approved to spend the tokens in advance
+    /// @param adOwnerPair List of pairs AD-owner
+    function claimAftermarketDeviceBatch(
+        AftermarketDeviceOwnerPair[] calldata adOwnerPair
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        INFT adNftProxy = INFT(ads.nftProxyAddress);
+
+        // TODO Check if aftermarketDeviceNode is valid ?
+        // require(
+        //     NodesStorage.getStorage().nodes[aftermarketDeviceNode].nodeType ==
+        //         AftermarketDeviceStorage.getStorage().nodeType,
+        //     "Invalid AD node"
+        // );
+        uint256 aftermarketDeviceNode;
+        address owner;
+        for (uint256 i = 0; i < adOwnerPair.length; i++) {
+            aftermarketDeviceNode = adOwnerPair[i].aftermarketDeviceNodeId;
+            owner = adOwnerPair[i].owner;
+
+            require(
+                !ads.deviceClaimed[aftermarketDeviceNode],
+                "Device already claimed"
+            );
+
+            ads.deviceClaimed[aftermarketDeviceNode] = true;
+            adNftProxy.safeTransferFrom(
+                adNftProxy.ownerOf(aftermarketDeviceNode),
+                owner,
+                aftermarketDeviceNode
+            );
+
+            emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
+        }
+    }
+
     /// @notice Claims the ownership of an aftermarket device through a metatransaction
     /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role

@@ -4,7 +4,7 @@
   "description": "Dimo web3 identity",
   "main": "hardhat.config.ts",
   "scripts": {
-    "build": "npx hardhat clean && npx hardhat compile",
+    "build": "npx hardhat clean && npx hardhat compile && npx hardhat run scripts/abiGenerator.ts",
     "test": "npx hardhat test",
     "lint": "npm run lint:ts && npm run lint:sol",
     "lint:ts": "npx eslint . --ext .ts",

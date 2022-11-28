@@ -1,35 +1,43 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-import "../../access/AccessControlInternal.sol";
+import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
-import "../shared/IEvents.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
-import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
-// TODO Documentation
-contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
+import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
+import {AttributeInfoPair} from "../../shared/Types.sol";
+
+import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
+
+/// @title Vehicle
+/// @notice Contract that represents the Vehicle node
+contract Vehicle is AccessControlInternal {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
             "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"
         );
 
+    event VehicleIdProxySet(address indexed proxy);
+    event VehicleAttributeAdded(string attribute);
+    event VehicleAttributeSet(uint256 tokenId, string attribute, string info);
+    event VehicleNodeMinted(uint256 tokenId, address owner);
+
     // ***** Admin management ***** //
 
-    /// @notice Sets contract node type
-    /// @dev Only an admin can set the node type
-    /// @dev The node type can only be set once
-    /// @param label The label of the node type
-    function setVehicleNodeType(bytes calldata label)
+    /// @notice Sets the NFT proxy associated with the Vehicle node
+    /// @dev Only an admin can set the address
+    /// @param addr The address of the proxy
+    function setVehicleIdProxyAddress(address addr)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
-        require(s.nodeType == 0, "Node type already set");
+        require(addr != address(0), "Non zero address");
+        VehicleStorage.getStorage().idProxyAddress = addr;
 
-        s.nodeType = uint256(keccak256(label));
+        emit VehicleIdProxySet(addr);
     }
 
     /// @notice Adds an attribute to the whielist
@@ -39,10 +47,15 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
-        AttributeSet.add(s.whitelistedAttributes, attribute);
+        require(
+            AttributeSet.add(
+                VehicleStorage.getStorage().whitelistedAttributes,
+                attribute
+            ),
+            "Attribute already exists"
+        );
 
-        emit AttributeAdded(s.nodeType, attribute);
+        emit VehicleAttributeAdded(attribute);
     }
 
     // ***** Interaction with nodes *****//
@@ -51,34 +64,32 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     /// @dev Caller must have the admin role
     /// @param manufacturerNode Parent manufacturer node id
     /// @param owner The address of the new owner
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param attrInfo List of attribute-info pairs to be added
     function mintVehicle(
         uint256 manufacturerNode,
         address owner,
-        string[] calldata attributes,
-        string[] calldata infos
+        AttributeInfoPair[] calldata attrInfo
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        ManufacturerStorage.Storage storage ms = ManufacturerStorage
-            .getStorage();
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
 
         require(
-            ns.nodes[manufacturerNode].nodeType == ms.nodeType,
+            INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            ),
             "Invalid parent node"
         );
 
-        uint256 newNodeId = ++ns.currentIndex;
-        uint256 nodeType = vs.nodeType;
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
-        ns.nodes[newNodeId].parentNode = manufacturerNode;
-        ns.nodes[newNodeId].nodeType = nodeType;
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
 
-        _safeMint(owner, newNodeId);
-        _setInfo(newNodeId, attributes, infos);
+        _setInfos(newTokenId, attrInfo);
 
-        emit NodeMinted(nodeType, newNodeId);
+        emit VehicleNodeMinted(newTokenId, owner);
     }
 
     /// @notice Mints a vehicle through a metatransaction
@@ -86,34 +97,34 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
     /// @dev Caller must have the admin role
     /// @param manufacturerNode Parent manufacturer node id
     /// @param owner The address of the new owner
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param attrInfo List of attribute-info pairs to be added
     /// @param signature User's signature hash
     function mintVehicleSign(
         uint256 manufacturerNode,
         address owner,
-        string[] calldata attributes,
-        string[] calldata infos,
+        AttributeInfoPair[] calldata attrInfo,
         bytes calldata signature
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
 
         require(
-            ns.nodes[manufacturerNode].nodeType ==
-                ManufacturerStorage.getStorage().nodeType,
+            INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            ),
             "Invalid parent node"
         );
 
-        uint256 newNodeId = ++ns.currentIndex;
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
-        ns.nodes[newNodeId].parentNode = manufacturerNode;
-        ns.nodes[newNodeId].nodeType = vs.nodeType;
+        ns
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
 
-        (bytes32 attributesHash, bytes32 infosHash) = _setInfoHash(
-            newNodeId,
-            attributes,
-            infos
+        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
+            newTokenId,
+            attrInfo
         );
 
         bytes32 message = keccak256(
@@ -131,94 +142,125 @@ contract Vehicle is ERC721MetadataInternal, IEvents, AccessControlInternal {
             "Invalid signature"
         );
 
-        _safeMint(owner, newNodeId);
-
-        emit NodeMinted(vs.nodeType, newNodeId);
+        emit VehicleNodeMinted(newTokenId, owner);
     }
 
     /// @notice Add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
     /// @dev Caller must have the admin role
-    /// @param nodeId Node where the info will be added
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param tokenId Node where the info will be added
+    /// @param attrInfo List of attribute-info pairs to be added
     function setVehicleInfo(
-        uint256 nodeId,
-        string[] calldata attributes,
-        string[] calldata infos
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfo
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
         require(
-            NodesStorage.getStorage().nodes[nodeId].nodeType == s.nodeType,
-            "Node must be a vehicle"
+            INFT(VehicleStorage.getStorage().idProxyAddress).exists(tokenId),
+            "Invalid vehicle node"
         );
-
-        _setInfo(nodeId, attributes, infos);
+        _setInfos(tokenId, attrInfo);
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
 
     /// @dev Internal function to add infos to node
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param nodeId Node where the info will be added
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
-    function _setInfo(
-        uint256 nodeId,
-        string[] calldata attributes,
-        string[] calldata infos
-    ) private {
-        require(attributes.length == infos.length, "Same length");
-
+    /// @param tokenId Node where the info will be added
+    /// @param attrInfo List of attribute-info pairs to be added
+    function _setInfos(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
+        private
+    {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+        address idProxyAddress = s.idProxyAddress;
 
-        for (uint256 i = 0; i < attributes.length; i++) {
+        for (uint256 i = 0; i < attrInfo.length; i++) {
             require(
-                AttributeSet.exists(s.whitelistedAttributes, attributes[i]),
+                AttributeSet.exists(
+                    s.whitelistedAttributes,
+                    attrInfo[i].attribute
+                ),
                 "Not whitelisted"
             );
-            ns.nodes[nodeId].info[attributes[i]] = infos[i];
+            ns.nodes[idProxyAddress][tokenId].info[
+                attrInfo[i].attribute
+            ] = attrInfo[i].info;
+
+            emit VehicleAttributeSet(
+                tokenId,
+                attrInfo[i].attribute,
+                attrInfo[i].info
+            );
         }
     }
 
     /// @dev Internal function to add infos to node and calculate attribute and info hashes
-    /// @dev attributes and infos arrays length must match
     /// @dev attributes must be whitelisted
-    /// @param nodeId Node where the info will be added
-    /// @param attributes List of attributes to be added
-    /// @param infos List of infos matching the attributes param
+    /// @param tokenId Node where the info will be added
+    /// @param attrInfo List of attribute-info pairs to be added
     /// @return keccak256 of the list of attributes and infos
-    function _setInfoHash(
-        uint256 nodeId,
-        string[] calldata attributes,
-        string[] calldata infos
+    function _setInfosHash(
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfo
     ) private returns (bytes32, bytes32) {
-        require(attributes.length == infos.length, "Same length");
-
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+        address idProxyAddress = s.idProxyAddress;
 
-        bytes32[] memory attributeHashes = new bytes32[](attributes.length);
-        bytes32[] memory infoHashes = new bytes32[](attributes.length);
+        bytes32[] memory attributeHashes = new bytes32[](attrInfo.length);
+        bytes32[] memory infoHashes = new bytes32[](attrInfo.length);
 
-        for (uint256 i = 0; i < attributes.length; i++) {
+        for (uint256 i = 0; i < attrInfo.length; i++) {
             require(
-                AttributeSet.exists(s.whitelistedAttributes, attributes[i]),
+                AttributeSet.exists(
+                    s.whitelistedAttributes,
+                    attrInfo[i].attribute
+                ),
                 "Not whitelisted"
             );
 
-            attributeHashes[i] = keccak256(bytes(attributes[i]));
-            infoHashes[i] = keccak256(bytes(infos[i]));
+            attributeHashes[i] = keccak256(bytes(attrInfo[i].attribute));
+            infoHashes[i] = keccak256(bytes(attrInfo[i].info));
 
-            ns.nodes[nodeId].info[attributes[i]] = infos[i];
+            ns.nodes[idProxyAddress][tokenId].info[
+                attrInfo[i].attribute
+            ] = attrInfo[i].info;
+
+            emit VehicleAttributeSet(
+                tokenId,
+                attrInfo[i].attribute,
+                attrInfo[i].info
+            );
         }
 
         return (
             keccak256(abi.encodePacked(attributeHashes)),
             keccak256(abi.encodePacked(infoHashes))
         );
+    }
+
+    /// @dev Internal function to update a single attribute
+    /// @dev attribute must be whitelisted
+    /// @param tokenId Node where the info will be added
+    /// @param attribute Attribute to be updated
+    /// @param info Info to be set
+    function _setAttributeInfo(
+        uint256 tokenId,
+        string calldata attribute,
+        string calldata info
+    ) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+
+        require(
+            AttributeSet.exists(s.whitelistedAttributes, attribute),
+            "Not whitelisted"
+        );
+
+        address idProxyAddress = s.idProxyAddress;
+
+        ns.nodes[idProxyAddress][tokenId].info[attribute] = info;
+
+        emit VehicleAttributeSet(tokenId, attribute, info);
     }
 }

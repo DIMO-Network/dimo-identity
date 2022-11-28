@@ -1,15 +1,20 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-import "../access/AccessControlInternal.sol";
+import "../interfaces/INFT.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/NodesStorage.sol";
 import "../libraries/nodes/VehicleStorage.sol";
 import "../libraries/nodes/AftermarketDeviceStorage.sol";
-import "@solidstate/contracts/token/ERC721/metadata/ERC721MetadataInternal.sol";
 
+import {DEFAULT_ADMIN_ROLE} from "../shared/Roles.sol";
+
+import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
+
+/// @title DevAdmin
 /// @dev Admin module for development and testing
-contract DevAdmin is AccessControlInternal, ERC721MetadataInternal {
+contract DevAdmin is AccessControlInternal {
+    event AftermarketDeviceUnclaimed(uint256 indexed aftermarketDeviceNode);
     event AftermarketDeviceTransferred(
         uint256 indexed aftermarketDeviceNode,
         address indexed oldOwner,
@@ -29,15 +34,14 @@ contract DevAdmin is AccessControlInternal, ERC721MetadataInternal {
         uint256 aftermarketDeviceNode,
         address newOwner
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(
-            NodesStorage.getStorage().nodes[aftermarketDeviceNode].nodeType ==
-                AftermarketDeviceStorage.getStorage().nodeType,
-            "Invalid AD node"
+        INFT adIdProxy = INFT(
+            AftermarketDeviceStorage.getStorage().idProxyAddress
         );
+        require(adIdProxy.exists(aftermarketDeviceNode), "Invalid AD node");
 
-        address oldOwner = _ownerOf(aftermarketDeviceNode);
+        address oldOwner = adIdProxy.ownerOf(aftermarketDeviceNode);
 
-        _safeTransfer(oldOwner, newOwner, aftermarketDeviceNode, "");
+        adIdProxy.safeTransferFrom(oldOwner, newOwner, aftermarketDeviceNode);
 
         emit AftermarketDeviceTransferred(
             aftermarketDeviceNode,
@@ -46,14 +50,44 @@ contract DevAdmin is AccessControlInternal, ERC721MetadataInternal {
         );
     }
 
+    /// @dev Sets deviceClaimed to false for each aftermarket device
+    /// @dev Caller must have the admin role
+    /// @param aftermarketDeviceNodes Array of aftermarket device node ids
+    function unclaimAftermarketDeviceNode(
+        uint256[] calldata aftermarketDeviceNodes
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        INFT adIdProxy = INFT(ads.idProxyAddress);
+
+        uint256 _adNode;
+        for (uint256 i = 0; i < aftermarketDeviceNodes.length; i++) {
+            require(
+                adIdProxy.exists(aftermarketDeviceNodes[i]),
+                "Invalid AD node"
+            );
+
+            _adNode = aftermarketDeviceNodes[i];
+
+            ads.deviceClaimed[_adNode] = false;
+
+            emit AftermarketDeviceUnclaimed(_adNode);
+        }
+    }
+
     /// @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
     /// @dev Caller must have the admin role
     /// @param aftermarketDeviceNodes Array of aftermarket device node ids
     function unpairAftermarketDeviceByDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
 
         uint256 _adNode;
         uint256 _vehicleNode;
@@ -61,20 +95,19 @@ contract DevAdmin is AccessControlInternal, ERC721MetadataInternal {
             _adNode = aftermarketDeviceNodes[i];
 
             require(
-                ns.nodes[_adNode].nodeType ==
-                    AftermarketDeviceStorage.getStorage().nodeType,
+                INFT(adIdProxyAddress).exists(aftermarketDeviceNodes[i]),
                 "Invalid AD node"
             );
 
-            _vehicleNode = ms.links[_adNode];
+            _vehicleNode = ms.links[adIdProxyAddress][_adNode];
 
-            ms.links[_vehicleNode] = 0;
-            ms.links[_adNode] = 0;
+            ms.links[vehicleIdProxyAddress][_vehicleNode] = 0;
+            ms.links[adIdProxyAddress][_adNode] = 0;
 
             emit AftermarketDeviceUnpaired(
                 _adNode,
                 _vehicleNode,
-                _ownerOf(_adNode)
+                INFT(adIdProxyAddress).ownerOf(_adNode)
             );
         }
     }
@@ -85,8 +118,13 @@ contract DevAdmin is AccessControlInternal, ERC721MetadataInternal {
     function unpairAftermarketDeviceByVehicleNode(
         uint256[] calldata vehicleNodes
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
 
         uint256 _adNode;
         uint256 _vehicleNode;
@@ -94,20 +132,19 @@ contract DevAdmin is AccessControlInternal, ERC721MetadataInternal {
             _vehicleNode = vehicleNodes[i];
 
             require(
-                ns.nodes[_vehicleNode].nodeType ==
-                    VehicleStorage.getStorage().nodeType,
+                INFT(vehicleIdProxyAddress).exists(vehicleNodes[i]),
                 "Invalid vehicle node"
             );
 
-            _adNode = ms.links[_vehicleNode];
+            _adNode = ms.links[vehicleIdProxyAddress][_vehicleNode];
 
-            ms.links[_vehicleNode] = 0;
-            ms.links[_adNode] = 0;
+            ms.links[vehicleIdProxyAddress][_vehicleNode] = 0;
+            ms.links[adIdProxyAddress][_adNode] = 0;
 
             emit AftermarketDeviceUnpaired(
                 _adNode,
                 _vehicleNode,
-                _ownerOf(_vehicleNode)
+                INFT(vehicleIdProxyAddress).ownerOf(_vehicleNode)
             );
         }
     }

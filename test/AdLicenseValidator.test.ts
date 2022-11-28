@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { ethers, waffle } from 'hardhat';
 
-import { AdLicenseValidator, MockDimoToken, MockLicense } from '../typechain';
+import { AdLicenseValidator, MockDimoToken, MockStake } from '../typechain';
 import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -14,14 +14,13 @@ describe('AdLicenseValidator', function () {
   let snapshot: string;
   let adLicenseValidatorInstance: AdLicenseValidator;
   let mockDimoTokenInstance: MockDimoToken;
-  let mockLicenseInstance: MockLicense;
+  let mockStakeInstance: MockStake;
 
   const [admin, nonAdmin, foundation] = provider.getWallets();
 
   before(async () => {
     [, adLicenseValidatorInstance] = await initialize(
       admin,
-      [C.name, C.symbol, C.baseURI],
       'AdLicenseValidator'
     );
 
@@ -34,10 +33,10 @@ describe('AdLicenseValidator', function () {
     );
     await mockDimoTokenInstance.deployed();
 
-    // Deploy MockLicense contract
-    const MockLicenseFactory = await ethers.getContractFactory('MockLicense');
-    mockLicenseInstance = await MockLicenseFactory.connect(admin).deploy();
-    await mockLicenseInstance.deployed();
+    // Deploy MockStake contract
+    const MockStakeFactory = await ethers.getContractFactory('MockStake');
+    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+    await mockStakeInstance.deployed();
   });
 
   beforeEach(async () => {
@@ -81,7 +80,7 @@ describe('AdLicenseValidator', function () {
       await expect(
         adLicenseValidatorInstance
           .connect(nonAdmin)
-          .setLicense(mockLicenseInstance.address)
+          .setLicense(mockStakeInstance.address)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
           C.DEFAULT_ADMIN_ROLE

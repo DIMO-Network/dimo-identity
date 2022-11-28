@@ -11,9 +11,32 @@ export type TypedData = {
   message: Record<string, unknown>
 };
 
+export type AttributeInfoPair = {
+  attribute: string,
+  info: string
+};
+
+export type AftermarketDeviceInfos = {
+  addr: string,
+  attrInfoPairs: AttributeInfoPair[]
+};
+
+export type AftermarketDeviceOwnerPair = {
+  aftermarketDeviceNodeId: string,
+  owner: string
+};
+
 export interface ContractAddressesByNetwork {
   [index: string]: {
-    [index: string]: string
+    modules: {
+      [index: string]: {
+        address: string,
+        selectors: string[]
+      }
+    },
+    nfts: {
+      [index: string]: string
+    }
   };
 }
 

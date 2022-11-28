@@ -1,7 +1,9 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-// TODO Documentation
+/// @title IDimo
+/// @notice Interface of the DIMO token
+/// @dev DIMO token repository https://github.com/DIMO-Network/dimo-token
 interface IDimo {
     function transferFrom(
         address from,

@@ -134,5 +134,6 @@ export const makes = [
   'Volkswagen',
   'Volvo',
   'Westfield',
-  'Yugo'
+  'Yugo',
+  'AutoPi'
 ];

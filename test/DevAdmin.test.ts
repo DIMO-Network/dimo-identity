@@ -52,7 +52,6 @@ describe('DevAdmin', function () {
     admin,
     nonAdmin,
     foundation,
-    controller1,
     manufacturer1,
     user1,
     user2,
@@ -242,7 +241,7 @@ describe('DevAdmin', function () {
     await manufacturerInstance
       .connect(admin)
       .mintManufacturer(
-        controller1.address,
+        manufacturer1.address,
         C.mockManufacturerNames[0],
         C.mockManufacturerAttributeInfoPairs
       );

@@ -112,16 +112,21 @@ contract AftermarketDevice is
             .getStorage();
         uint256 devicesAmount = adInfos.length;
         address adIdProxyAddress = ads.idProxyAddress;
+        INFT manufacturerIdProxy = INFT(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
 
         require(
             INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)),
             "Registry must be approved for all"
         );
         require(
-            INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
-                manufacturerNode
-            ),
+            manufacturerIdProxy.exists(manufacturerNode),
             "Invalid parent node"
+        );
+        require(
+            manufacturerIdProxy.ownerOf(manufacturerNode) == msg.sender,
+            "Caller must be the parent node owner"
         );
 
         uint256 newTokenId;

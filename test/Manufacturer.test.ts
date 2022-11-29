@@ -22,7 +22,7 @@ describe('Manufacturer', async function () {
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
 
-  const [admin, nonAdmin, controller1, nonController] = provider.getWallets();
+  const [admin, nonAdmin, manufacturer1, nonController] = provider.getWallets();
 
   before(async () => {
     [dimoRegistryInstance, nodesInstance, manufacturerInstance] =
@@ -152,7 +152,7 @@ describe('Manufacturer', async function () {
         await expect(
           manufacturerInstance
             .connect(nonAdmin)
-            .setController(controller1.address)
+            .setController(manufacturer1.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
           }`
@@ -166,10 +166,10 @@ describe('Manufacturer', async function () {
       it('Should revert if address is already a controller', async () => {
         await manufacturerInstance
           .connect(admin)
-          .setController(controller1.address);
+          .setController(manufacturer1.address);
 
         await expect(
-          manufacturerInstance.connect(admin).setController(controller1.address)
+          manufacturerInstance.connect(admin).setController(manufacturer1.address)
         ).to.be.revertedWith('Already a controller');
       });
     });
@@ -177,10 +177,10 @@ describe('Manufacturer', async function () {
     context('Events', () => {
       it('Should emit ControllerSet event with correct params', async () => {
         await expect(
-          manufacturerInstance.connect(admin).setController(controller1.address)
+          manufacturerInstance.connect(admin).setController(manufacturer1.address)
         )
           .to.emit(manufacturerInstance, 'ControllerSet')
-          .withArgs(controller1.address);
+          .withArgs(manufacturer1.address);
       });
     });
   });
@@ -312,7 +312,7 @@ describe('Manufacturer', async function () {
         await manufacturerInstance
           .connect(admin)
           .mintManufacturer(
-            controller1.address,
+            manufacturer1.address,
             C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
@@ -321,7 +321,7 @@ describe('Manufacturer', async function () {
           manufacturerInstance
             .connect(admin)
             .mintManufacturer(
-              controller1.address,
+              manufacturer1.address,
               C.mockManufacturerNames[1],
               C.mockManufacturerAttributeInfoPairs
             )
@@ -332,7 +332,7 @@ describe('Manufacturer', async function () {
           manufacturerInstance
             .connect(admin)
             .mintManufacturer(
-              controller1.address,
+              manufacturer1.address,
               C.mockManufacturerNames[0],
               C.mockManufacturerAttributeInfoPairsNotWhitelisted
             )
@@ -343,20 +343,20 @@ describe('Manufacturer', async function () {
     context('State change', () => {
       it('Should correctly set owner as controller', async () => {
         const isControllerBefore: boolean =
-          await manufacturerInstance.isController(controller1.address);
+          await manufacturerInstance.isController(manufacturer1.address);
         // eslint-disable-next-line no-unused-expressions
         expect(isControllerBefore).to.be.false;
 
         await manufacturerInstance
           .connect(admin)
           .mintManufacturer(
-            controller1.address,
+            manufacturer1.address,
             C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
 
         const isControllerAfter: boolean =
-          await manufacturerInstance.isController(controller1.address);
+          await manufacturerInstance.isController(manufacturer1.address);
         // eslint-disable-next-line no-unused-expressions
         expect(isControllerAfter).to.be.true;
       });
@@ -364,7 +364,7 @@ describe('Manufacturer', async function () {
         await manufacturerInstance
           .connect(admin)
           .mintManufacturer(
-            controller1.address,
+            manufacturer1.address,
             C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
@@ -381,18 +381,18 @@ describe('Manufacturer', async function () {
         await manufacturerInstance
           .connect(admin)
           .mintManufacturer(
-            controller1.address,
+            manufacturer1.address,
             C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
 
         expect(await manufacturerIdInstance.ownerOf(1)).to.be.equal(
-          controller1.address
+          manufacturer1.address
         );
       });
       it('Should correctly set manufacturerMinted', async () => {
         const isManufacturerMintedBefore =
-          await manufacturerInstance.isManufacturerMinted(controller1.address);
+          await manufacturerInstance.isManufacturerMinted(manufacturer1.address);
 
         // eslint-disable-next-line no-unused-expressions
         expect(isManufacturerMintedBefore).to.be.false;
@@ -400,13 +400,13 @@ describe('Manufacturer', async function () {
         await manufacturerInstance
           .connect(admin)
           .mintManufacturer(
-            controller1.address,
+            manufacturer1.address,
             C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
 
         const isManufacturerMintedAfter =
-          await manufacturerInstance.isManufacturerMinted(controller1.address);
+          await manufacturerInstance.isManufacturerMinted(manufacturer1.address);
 
         // eslint-disable-next-line no-unused-expressions
         expect(isManufacturerMintedAfter).to.be.true;
@@ -415,7 +415,7 @@ describe('Manufacturer', async function () {
         await manufacturerInstance
           .connect(admin)
           .mintManufacturer(
-            controller1.address,
+            manufacturer1.address,
             C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
@@ -430,7 +430,7 @@ describe('Manufacturer', async function () {
         await manufacturerInstance
           .connect(admin)
           .mintManufacturer(
-            controller1.address,
+            manufacturer1.address,
             C.mockManufacturerNames[0],
             C.mockManufacturerAttributeInfoPairs
           );
@@ -458,7 +458,7 @@ describe('Manufacturer', async function () {
           manufacturerInstance
             .connect(admin)
             .mintManufacturer(
-              controller1.address,
+              manufacturer1.address,
               C.mockManufacturerNames[0],
               C.mockManufacturerAttributeInfoPairs
             )
@@ -470,7 +470,7 @@ describe('Manufacturer', async function () {
         await expect(
           manufacturerInstance
             .connect(admin)
-            .mintManufacturer(controller1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
+            .mintManufacturer(manufacturer1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
         )
           .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
           .withArgs(1, C.mockManufacturerAttributeInfoPairs[0].attribute, C.mockManufacturerAttributeInfoPairs[0].info)
@@ -485,7 +485,7 @@ describe('Manufacturer', async function () {
       await manufacturerInstance
         .connect(admin)
         .mintManufacturer(
-          controller1.address,
+          manufacturer1.address,
           C.mockManufacturerNames[0],
           C.mockManufacturerAttributeInfoPairs
         );
@@ -590,7 +590,7 @@ describe('Manufacturer', async function () {
     beforeEach(async () => {
       await manufacturerInstance
         .connect(admin)
-        .mintManufacturer(controller1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
+        .mintManufacturer(manufacturer1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
     });
 
     it('Should return 0 if the queried address is not associated with any minted device', async () => {

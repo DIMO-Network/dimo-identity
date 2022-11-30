@@ -1000,6 +1000,25 @@
                 "type": "address"
             }
         ],
+        "name": "isAllowedToOwnManufacturerNode",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "_isAllowed",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
         "name": "isController",
         "outputs": [
             {

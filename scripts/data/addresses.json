@@ -243,6 +243,7 @@
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
+                    "0xd9c27c40",
                     "0xb429afeb",
                     "0x456bf169",
                     "0x5f36da6b",
@@ -305,7 +306,7 @@
         "nfts": {
             "ManufacturerId": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
             "VehicleId": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
-            "AftermarketDeviceId": "0x9A676e781A523b5d0C0e43731313A708CB607508"
+            "AftermarketDeviceId": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
         }
     }
 }

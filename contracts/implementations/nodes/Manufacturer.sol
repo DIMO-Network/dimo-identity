@@ -187,6 +187,21 @@ contract Manufacturer is AccessControlInternal {
             .manufacturerMinted;
     }
 
+    /// @notice Verify if an address is allowed to own a manufacturer node
+    /// @dev The address must be a controller and not yet minted a node
+    /// @param addr the address to be verified
+    function isAllowedToOwnManufacturerNode(address addr)
+        external
+        view
+        returns (bool _isAllowed)
+    {
+        ManufacturerStorage.Storage storage ms = ManufacturerStorage
+            .getStorage();
+        _isAllowed =
+            ms.controllers[addr].isController &&
+            !ms.controllers[addr].manufacturerMinted;
+    }
+
     /// @notice Gets the Manufacturer Id by name
     /// @dev If the manufacturer is not minted it will return 0
     /// @param name Name associated with the manufacturer

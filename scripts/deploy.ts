@@ -200,7 +200,7 @@ async function addModules(
   return instances;
 }
 
-async function setup(deployer: SignerWithAddress) {
+async function setupRegistry(deployer: SignerWithAddress) {
   const eip712CheckerInstance: Eip712Checker = await ethers.getContractAt(
     'Eip712Checker',
     contractAddresses[C.networkName].modules.DIMORegistry.address
@@ -332,6 +332,21 @@ async function setup(deployer: SignerWithAddress) {
       )
   ).wait();
   console.log('----- Approval set -----\n');
+}
+
+async function setupNfts(deployer: SignerWithAddress) {
+  const manufacturerIdInstance: ManufacturerId = await ethers.getContractAt(
+    'ManufacturerId',
+    contractAddresses[C.networkName].nfts.ManufacturerId
+  );
+
+  console.log('\n----- Setting DIMO Registry address to ManufacturerId -----');
+  await manufacturerIdInstance
+    .connect(deployer)
+    .setDimoRegistryAddress(
+      contractAddresses[C.networkName].modules.DIMORegistry.address
+    );
+  console.log('----- Address set -----\n');
 }
 
 async function grantNftRoles(deployer: SignerWithAddress) {
@@ -467,7 +482,8 @@ async function main() {
   const instancesWithSelectors = await addModules(deployer);
   writeAddresses(instancesWithSelectors, C.networkName);
 
-  await setup(deployer);
+  await setupRegistry(deployer);
+  await setupNfts(deployer);
   await grantRole(deployer, C.DEFAULT_ADMIN_ROLE, kms);
   await grantRole(
     deployer,

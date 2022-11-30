@@ -610,4 +610,31 @@ describe('Manufacturer', async function () {
       expect(tokenId).to.equal(1);
     });
   });
+
+  describe('isAllowedToOwnManufacturerNode', () => {
+    it('Should return false if address is not a controller', async () => {
+      // eslint-disable-next-line no-unused-expressions
+      expect(await manufacturerInstance.isAllowedToOwnManufacturerNode(manufacturer1.address)).to.be.false;
+    });
+    it('Should return false if address has already minted', async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .mintManufacturer(
+          manufacturer1.address,
+          C.mockManufacturerNames[0],
+          C.mockManufacturerAttributeInfoPairs
+        );
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await manufacturerInstance.isAllowedToOwnManufacturerNode(manufacturer1.address)).to.be.false;
+    });
+    it('Should return true if address is a controller and has not yet minted', async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .setController(manufacturer1.address);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await manufacturerInstance.isAllowedToOwnManufacturerNode(manufacturer1.address)).to.be.true;
+    });
+  });
 });

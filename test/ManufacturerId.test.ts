@@ -115,6 +115,20 @@ describe('ManufacturerId', async function () {
             .connect(admin)['safeTransferFrom(address,address,uint256)'](admin.address, manufacturer1.address, 1)
         ).to.be.revertedWith("Address is not allowed to own a new token");
       });
+      it('Should revert if caller does not have transferer role', async () => {
+        await manufacturerIdInstance.connect(admin).renounceRole(C.NFT_TRANSFERER_ROLE, admin.address);
+        await manufacturerInstance
+          .connect(admin)
+          .setController(manufacturer1.address);
+
+        await expect(
+          manufacturerIdInstance
+            .connect(admin)['safeTransferFrom(address,address,uint256)'](admin.address, manufacturer1.address, 1)
+        ).to.be.revertedWith(
+          `AccessControl: account ${admin.address.toLowerCase()} is missing role ${C.NFT_TRANSFERER_ROLE
+          }`
+        );
+      });
     });
 
     context('State', () => {
@@ -158,6 +172,21 @@ describe('ManufacturerId', async function () {
         for (const attrInfoPair of C.mockManufacturerAttributeInfoPairs) {
           expect(await nodesInstance.getInfo(manufacturerIdInstance.address, 1, attrInfoPair.attribute)).to.equal(attrInfoPair.info);
         }
+      });
+      it('Should correctly set manufacturerMinted', async () => {
+        const isManufacturerMintedBefore =
+          await manufacturerInstance.isManufacturerMinted(manufacturer1.address);
+
+        // eslint-disable-next-line no-unused-expressions
+        expect(isManufacturerMintedBefore).to.be.false;
+
+        await manufacturerIdInstance.connect(admin)['safeTransferFrom(address,address,uint256)'](admin.address, manufacturer1.address, 1);
+
+        const isManufacturerMintedAfter =
+          await manufacturerInstance.isManufacturerMinted(manufacturer1.address);
+
+        // eslint-disable-next-line no-unused-expressions
+        expect(isManufacturerMintedAfter).to.be.true;
       });
     });
   });

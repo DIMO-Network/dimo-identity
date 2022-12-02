@@ -586,6 +586,14 @@ describe('Manufacturer', async function () {
     });
   });
 
+  describe('setManufacturerMinted', () => {
+    it('Should revert if caller is not the NFT Proxy', async () => {
+      await expect(
+        manufacturerInstance.connect(nonAdmin).setManufacturerMinted(manufacturer1.address)
+      ).to.be.revertedWith('Only NFT Proxy');
+    });
+  });
+
   describe('getManufacturerIdByName', () => {
     beforeEach(async () => {
       await manufacturerInstance
@@ -593,7 +601,7 @@ describe('Manufacturer', async function () {
         .mintManufacturer(manufacturer1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
     });
 
-    it('Should return 0 if the queried address is not associated with any minted device', async () => {
+    it('Should return 0 if the queried name is not associated with any minted device', async () => {
       const tokenId =
         await manufacturerInstance.getManufacturerIdByName(
           C.mockManufacturerNames[1]
@@ -608,6 +616,65 @@ describe('Manufacturer', async function () {
         );
 
       expect(tokenId).to.equal(1);
+    });
+  });
+
+  describe('getManufacturerNameById', () => {
+    beforeEach(async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .mintManufacturer(manufacturer1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
+    });
+
+    it('Should return an empty string if the queried Id is not associated with any minted device', async () => {
+      const name =
+        await manufacturerInstance.getManufacturerNameById(
+          99
+        );
+
+      expect(name).to.equal('');
+    });
+    it('Should return the correct name', async () => {
+      const name =
+        await manufacturerInstance.getManufacturerNameById(
+          1
+        );
+
+      expect(name).to.equal(C.mockManufacturerNames[0]);
+    });
+  });
+
+  describe('isController', () => {
+    it('Should return false if address is not a controller', async () => {
+      // eslint-disable-next-line no-unused-expressions
+      expect(await manufacturerInstance.isController(nonController.address)).to.be.false;
+    });
+    it('Should return true if address is a controller', async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .setController(manufacturer1.address);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await manufacturerInstance.isController(manufacturer1.address)).to.be.true;
+    });
+  });
+
+  describe('isManufacturerMinted', () => {
+    it('Should return false if manufacturer has not yet minted', async () => {
+      // eslint-disable-next-line no-unused-expressions
+      expect(await manufacturerInstance.isManufacturerMinted(manufacturer1.address)).to.be.false;
+    });
+    it('Should return true if manufacturer has minted', async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .mintManufacturer(
+          manufacturer1.address,
+          C.mockManufacturerNames[0],
+          C.mockManufacturerAttributeInfoPairs
+        )
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await manufacturerInstance.isManufacturerMinted(manufacturer1.address)).to.be.true;
     });
   });
 

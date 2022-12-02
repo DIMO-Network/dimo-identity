@@ -23,6 +23,14 @@ contract Manufacturer is AccessControlInternal {
     event ControllerSet(address indexed controller);
     event ManufacturerNodeMinted(uint256 tokenId, address indexed owner);
 
+    modifier onlyNftProxy() {
+        require(
+            msg.sender == ManufacturerStorage.getStorage().idProxyAddress,
+            "Only NFT Proxy"
+        );
+        _;
+    }
+
     // ***** Admin management ***** //
 
     /// @notice Sets the NFT proxy associated with the Manufacturer node
@@ -161,6 +169,22 @@ contract Manufacturer is AccessControlInternal {
         _setInfos(tokenId, attrInfoList);
     }
 
+    /// @notice Verify if an address is allowed to own a manufacturer node and set as minted
+    /// @dev Can only be called by the NFT Proxy
+    /// @dev The address must be a controller and not yet minted a node
+    /// @param addr the address to be verified and set
+    function setManufacturerMinted(address addr) external onlyNftProxy {
+        ManufacturerStorage.Storage storage s = ManufacturerStorage
+            .getStorage();
+        require(
+            s.controllers[addr].isController &&
+                !s.controllers[addr].manufacturerMinted,
+            "Address is not allowed to own a new token"
+        );
+
+        s.controllers[addr].manufacturerMinted = true;
+    }
+
     /// @notice Verify if an address is a controller
     /// @param addr the address to be verified
     function isController(address addr)
@@ -212,6 +236,19 @@ contract Manufacturer is AccessControlInternal {
     {
         nodeId = ManufacturerStorage.getStorage().manufacturerNameToNodeId[
             name
+        ];
+    }
+
+    /// @notice Gets the Manufacturer name by id
+    /// @dev If the manufacturer is not minted it will return an empty string
+    /// @param tokenId Token id to get the associated name
+    function getManufacturerNameById(uint256 tokenId)
+        external
+        view
+        returns (string memory name)
+    {
+        name = ManufacturerStorage.getStorage().nodeIdToManufacturerName[
+            tokenId
         ];
     }
 

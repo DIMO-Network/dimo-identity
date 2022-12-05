@@ -26,6 +26,11 @@ export type AftermarketDeviceOwnerPair = {
   owner: string
 };
 
+export type IdManufacturerName = {
+  tokenId: string,
+  name: string
+};
+
 export interface ContractAddressesByNetwork {
   [index: string]: {
     modules: {

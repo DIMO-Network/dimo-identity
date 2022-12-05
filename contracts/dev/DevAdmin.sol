@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "../interfaces/INFT.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/NodesStorage.sol";
+import "../libraries/nodes/ManufacturerStorage.sol";
 import "../libraries/nodes/VehicleStorage.sol";
 import "../libraries/nodes/AftermarketDeviceStorage.sol";
 
@@ -25,6 +26,11 @@ contract DevAdmin is AccessControlInternal {
         uint256 indexed vehicleNode,
         address indexed owner
     );
+
+    struct IdManufacturerName {
+        uint256 tokenId;
+        string name;
+    }
 
     /// @dev Transfers the ownership of an afermarket device
     /// @dev Caller must have the admin role
@@ -146,6 +152,32 @@ contract DevAdmin is AccessControlInternal {
                 _vehicleNode,
                 INFT(vehicleIdProxyAddress).ownerOf(_vehicleNode)
             );
+        }
+    }
+
+    /// @notice Renames manufacturer name
+    /// @param idManufacturerNames pairs token id to manufactures to be renamed
+    function renameManufacturers(
+        IdManufacturerName[] calldata idManufacturerNames
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        ManufacturerStorage.Storage storage ms = ManufacturerStorage
+            .getStorage();
+
+        uint256 tokenId;
+        string memory name;
+        for (uint256 i = 0; i < idManufacturerNames.length; i++) {
+            tokenId = idManufacturerNames[i].tokenId;
+            name = idManufacturerNames[i].name;
+
+            require(
+                INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                    tokenId
+                ),
+                "Invalid manufacturer node"
+            );
+
+            ms.manufacturerNameToNodeId[name] = tokenId;
+            ms.nodeIdToManufacturerName[tokenId] = name;
         }
     }
 }

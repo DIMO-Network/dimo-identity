@@ -30,7 +30,7 @@ function parseCSV(): Promise<any> {
 }
 
 // eslint-disable-next-line no-unused-vars
-async function match(
+async function matchVehicleParent(
   id: string,
   idManufacturerNames: IdManufacturerName[],
   networkName: string
@@ -53,6 +53,27 @@ async function match(
   const vehicleMake = await nodes.getInfo(VEHICLE_ID_ADDR, id, 'Make');
 
   return manufName && vehicleMake && manufName === vehicleMake;
+}
+
+// eslint-disable-next-line no-unused-vars
+async function matchChainWithDb(
+  idManufacturerNames: IdManufacturerName[],
+  networkName: string
+) {
+  const manuf = await ethers.getContractAt(
+    'Manufacturer',
+    contractAddresses[networkName].modules.DIMORegistry.address
+  );
+
+  for (const idManufacturerName of idManufacturerNames) {
+    const id = idManufacturerName.tokenId;
+    const name = idManufacturerName.name;
+    const onChainId = (await manuf.getManufacturerIdByName(name)).toString();
+
+    console.log(
+      `${id}-${name} ${id === onChainId ? 'matched' : '----- NOT MATCHED'}`
+    );
+  }
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -89,6 +110,8 @@ async function renameManufacturers(
 async function main() {
   const idManufacturerNames = await parseCSV();
   await renameManufacturers(idManufacturerNames, network.name);
+
+  await matchChainWithDb(idManufacturerNames, network.name);
 }
 
 main().catch((error) => {

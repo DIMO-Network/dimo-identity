@@ -204,8 +204,15 @@ async function upgradeNft(
 async function main() {
   const [deployer] = await ethers.getSigners();
 
-  const instances = await updateModule(deployer, 'Manufacturer', C.networkName);
-  writeAddresses(instances, C.networkName);
+  const instances1 = await updateModule(deployer, 'DevAdmin', C.networkName);
+  writeAddresses(instances1, C.networkName);
+
+  const instances2 = await updateModule(
+    deployer,
+    'Manufacturer',
+    C.networkName
+  );
+  writeAddresses(instances2, C.networkName);
 
   const nftInstances = await upgradeNft('ManufacturerId', C.networkName);
   writeAddresses(nftInstances, C.networkName);

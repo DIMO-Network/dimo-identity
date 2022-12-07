@@ -35,7 +35,7 @@ async function matchVehicleParent(
   idManufacturerNames: IdManufacturerName[],
   networkName: string
 ) {
-  const VEHICLE_ID_ADDR = contractAddresses[networkName].nfts.VehicleId;
+  const VEHICLE_ID_ADDR = contractAddresses[networkName].nfts.VehicleId.proxy;
   const nodes = await ethers.getContractAt(
     'Nodes',
     contractAddresses[networkName].modules.DIMORegistry.address

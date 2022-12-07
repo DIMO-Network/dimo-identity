@@ -8,7 +8,7 @@ const contractAddresses: ContractAddressesByNetwork = addressesJSON;
 async function main() {
   const dimoRegistryInstance = await ethers.getContractAt(
     'VehicleId',
-    contractAddresses[network.name].nfts.VehicleId
+    contractAddresses[network.name].nfts.VehicleId.proxy
   );
   const eventFilter = dimoRegistryInstance.filters.RoleGranted();
 

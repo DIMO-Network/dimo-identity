@@ -40,7 +40,10 @@ export interface ContractAddressesByNetwork {
       }
     },
     nfts: {
-      [index: string]: string
+      [index: string]: {
+        proxy: string,
+        implementation: string
+      }
     }
   };
 }

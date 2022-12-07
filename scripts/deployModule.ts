@@ -163,29 +163,42 @@ async function updateModule(
 }
 
 // eslint-disable-next-line no-unused-vars
-async function upgradeNft(nftName: string, networkName: string) {
+async function upgradeNft(
+  nftName: string,
+  networkName: string
+): Promise<ContractAddressesByNetwork> {
   const NftFactory = await ethers.getContractFactory(nftName);
 
   const instances: ContractAddressesByNetwork = JSON.parse(
     JSON.stringify(contractAddresses)
   );
 
-  const proxyAddress = instances[networkName].nfts[nftName];
+  const oldProxyAddress = instances[networkName].nfts[nftName].proxy;
 
   console.log('\n----- Upgrading NFT -----\n');
 
   await upgrades.validateImplementation(NftFactory, {
     kind: 'uups'
   });
-
-  await upgrades.validateUpgrade(proxyAddress, NftFactory, {
+  await upgrades.validateUpgrade(oldProxyAddress, NftFactory, {
     kind: 'uups'
   });
 
-  const contractImplementation = await NftFactory.deploy();
-  await contractImplementation.deployed();
+  const upgradedProxy = await upgrades.upgradeProxy(
+    oldProxyAddress,
+    NftFactory,
+    {
+      kind: 'uups'
+    }
+  );
+  await upgradedProxy.deployed();
 
   console.log(`----- NFT ${nftName} upgraded -----`);
+
+  instances[networkName].nfts[nftName].implementation =
+    await upgrades.erc1967.getImplementationAddress(upgradedProxy.address);
+
+  return instances;
 }
 
 async function main() {
@@ -194,7 +207,8 @@ async function main() {
   const instances = await updateModule(deployer, 'Manufacturer', C.networkName);
   writeAddresses(instances, C.networkName);
 
-  // await upgradeNft('ManufacturerId', C.networkName);
+  const nftInstances = await upgradeNft('ManufacturerId', C.networkName);
+  writeAddresses(nftInstances, C.networkName);
 }
 
 main().catch((error) => {

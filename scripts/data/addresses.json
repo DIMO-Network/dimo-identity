@@ -97,9 +97,18 @@
             }
         },
         "nfts": {
-            "ManufacturerId": "0x3b07e2A2ABdd0A9B8F7878bdE6487c502164B9dd",
-            "VehicleId": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-            "AftermarketDeviceId": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA"
+            "ManufacturerId": {
+                "proxy": "0x3b07e2A2ABdd0A9B8F7878bdE6487c502164B9dd",
+                "implementation": "0x881BcB0e0A0F9D369579c684Fd01E1d8f624EFce"
+            },
+            "VehicleId": {
+                "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
+                "implementation": "0x5d7E06DeA55f2a71E77F13C679Abd9FBedbb3e00"
+            },
+            "AftermarketDeviceId": {
+                "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
+                "implementation": "0x881BcB0e0A0F9D369579c684Fd01E1d8f624EFce"
+            }
         }
     },
     "mumbai": {
@@ -200,9 +209,18 @@
             }
         },
         "nfts": {
-            "ManufacturerId": "0x3082cBCb476443923ff4d915Acc31217c9c3C6D5",
-            "VehicleId": "0x90C4D6113Ec88dd4BDf12f26DB2b3998fd13A144",
-            "AftermarketDeviceId": "0xcf9Af64522162da85164a714c23a7705E6e466b3"
+            "ManufacturerId": {
+                "proxy": "0x3082cBCb476443923ff4d915Acc31217c9c3C6D5",
+                "implementation": "0x5F38B1Cd64A189084E1e8F143fE10cf569Bb8079"
+            },
+            "VehicleId": {
+                "proxy": "0x90C4D6113Ec88dd4BDf12f26DB2b3998fd13A144",
+                "implementation": "0x9624D69b3Ae2a355Cf252c238627F15FD0015199"
+            },
+            "AftermarketDeviceId": {
+                "proxy": "0xcf9Af64522162da85164a714c23a7705E6e466b3",
+                "implementation": "0x5F38B1Cd64A189084E1e8F143fE10cf569Bb8079"
+            }
         }
     },
     "hardhat": {
@@ -307,9 +325,18 @@
             }
         },
         "nfts": {
-            "ManufacturerId": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
-            "VehicleId": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
-            "AftermarketDeviceId": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+            "ManufacturerId": {
+                "proxy": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+                "implementation": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"
+            },
+            "VehicleId": {
+                "proxy": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+                "implementation": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
+            },
+            "AftermarketDeviceId": {
+                "proxy": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "implementation": "0x9A676e781A523b5d0C0e43731313A708CB607508"
+            }
         }
     },
     "localhost": {
@@ -414,9 +441,18 @@
             }
         },
         "nfts": {
-            "ManufacturerId": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
-            "VehicleId": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
-            "AftermarketDeviceId": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+            "ManufacturerId": {
+                "proxy": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+                "implementation": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"
+            },
+            "VehicleId": {
+                "proxy": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+                "implementation": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
+            },
+            "AftermarketDeviceId": {
+                "proxy": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "implementation": "0x9A676e781A523b5d0C0e43731313A708CB607508"
+            }
         }
     }
 }

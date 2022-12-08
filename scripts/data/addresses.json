@@ -33,17 +33,20 @@
                 ]
             },
             "Manufacturer": {
-                "address": "0x8053e2946864b49D83A83e12522b07B99d8FcD8E",
+                "address": "0x12B870fB7822ec80AF5E66e7CD19379347dE70DF",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
+                    "0x9109b30b",
+                    "0xd9c27c40",
                     "0xb429afeb",
                     "0x456bf169",
                     "0x5f36da6b",
                     "0x9abb3000",
                     "0x92eefe9b",
                     "0xd159f49a",
-                    "0x63545ffa"
+                    "0x63545ffa",
+                    "0xa84ac57f"
                 ]
             },
             "Vehicle": {
@@ -85,21 +88,12 @@
                 "selectors": [
                     "0x112e62a2"
                 ]
-            },
-            "DevAdmin": {
-                "address": "0x1428721Bbe8e48eA9bD045959Bb93b464F8db1E3",
-                "selectors": [
-                    "0xff96b761",
-                    "0x5c129493",
-                    "0x71193956",
-                    "0x8c2ee9bb"
-                ]
             }
         },
         "nfts": {
             "ManufacturerId": {
                 "proxy": "0x3b07e2A2ABdd0A9B8F7878bdE6487c502164B9dd",
-                "implementation": "0x881BcB0e0A0F9D369579c684Fd01E1d8f624EFce"
+                "implementation": "0x418C9103e5b8BD1B8A3d3af4E13F02Fe2292EbA5"
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",

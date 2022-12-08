@@ -107,6 +107,54 @@ async function addModules(
 }
 
 // eslint-disable-next-line no-unused-vars
+async function removeModule(
+  deployer: SignerWithAddress,
+  contractNames: string[],
+  networkName: string
+): Promise<ContractAddressesByNetwork> {
+  const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
+    'DIMORegistry',
+    contractAddresses[networkName].modules.DIMORegistry.address
+  );
+
+  const instances: ContractAddressesByNetwork = JSON.parse(
+    JSON.stringify(contractAddresses)
+  );
+
+  const contractsNameImpl = Object.keys(contractAddresses[networkName].modules)
+    .filter((contractName) => contractNames.includes(contractName))
+    .map((contractName) => {
+      return {
+        name: contractName,
+        implementation:
+          contractAddresses[networkName].modules[contractName].address
+      };
+    });
+
+  console.log('\n----- Removing modules -----\n');
+
+  for (const contract of contractsNameImpl) {
+    const ContractFactory = await ethers.getContractFactory(contract.name);
+
+    const contractSelectors = getSelectors(ContractFactory.interface);
+
+    await (
+      await dimoRegistryInstance
+        .connect(deployer)
+        .removeModule(contract.implementation, contractSelectors)
+    ).wait();
+
+    instances[networkName].modules[contract.name].selectors = contractSelectors;
+
+    console.log(`Module ${contract.name} removed`);
+  }
+
+  console.log('\n----- Modules Removed -----');
+
+  return instances;
+}
+
+// eslint-disable-next-line no-unused-vars
 async function updateModule(
   deployer: SignerWithAddress,
   contractName: string,
@@ -164,10 +212,11 @@ async function updateModule(
 
 // eslint-disable-next-line no-unused-vars
 async function upgradeNft(
+  deployer: SignerWithAddress,
   nftName: string,
   networkName: string
 ): Promise<ContractAddressesByNetwork> {
-  const NftFactory = await ethers.getContractFactory(nftName);
+  const NftFactory = await ethers.getContractFactory(nftName, deployer);
 
   const instances: ContractAddressesByNetwork = JSON.parse(
     JSON.stringify(contractAddresses)
@@ -204,6 +253,10 @@ async function upgradeNft(
 async function main() {
   const [deployer] = await ethers.getSigners();
 
+  // const deployer = await ethers.getImpersonatedSigner(
+  //   '0x1741eC2915Ab71Fc03492715b5640133dA69420B'
+  // );
+
   const instances1 = await updateModule(deployer, 'DevAdmin', C.networkName);
   writeAddresses(instances1, C.networkName);
 
@@ -214,7 +267,11 @@ async function main() {
   );
   writeAddresses(instances2, C.networkName);
 
-  const nftInstances = await upgradeNft('ManufacturerId', C.networkName);
+  const nftInstances = await upgradeNft(
+    deployer,
+    'ManufacturerId',
+    C.networkName
+  );
   writeAddresses(nftInstances, C.networkName);
 }
 

@@ -96,7 +96,9 @@ async function deployModules(
   return instances;
 }
 
-async function deployNfts(): Promise<ContractAddressesByNetwork> {
+async function deployNfts(
+  deployer: SignerWithAddress
+): Promise<ContractAddressesByNetwork> {
   console.log('\n----- Deploying NFT contracts -----\n');
 
   const contractNameArgs = [
@@ -124,7 +126,8 @@ async function deployNfts(): Promise<ContractAddressesByNetwork> {
 
   for (const contractNameArg of contractNameArgs) {
     const ContractFactory = await ethers.getContractFactory(
-      contractNameArg.name
+      contractNameArg.name,
+      deployer
     );
 
     await upgrades.validateImplementation(ContractFactory, {
@@ -481,7 +484,7 @@ async function main() {
 
   const instances = await deployModules(deployer);
   writeAddresses(instances, C.networkName);
-  const nftInstances = await deployNfts();
+  const nftInstances = await deployNfts(deployer);
   writeAddresses(nftInstances, C.networkName);
 
   const instancesWithSelectors = await addModules(deployer);

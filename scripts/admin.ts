@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import { DevAdmin, AftermarketDevice } from '../typechain';
+import { DevAdmin, AftermarketDevice, DimoAccessControl } from '../typechain';
 import {
   ContractAddressesByNetwork,
   AttributeInfoPair,
@@ -83,6 +83,27 @@ async function setInfos(
 
   console.log(`\n----- Infos set -----\n`);
 }
+
+// eslint-disable-next-line no-unused-vars
+async function revokeRole(
+  deployer: SignerWithAddress,
+  role: string,
+  address: string
+) {
+  const accessControlInstance: DimoAccessControl = await ethers.getContractAt(
+    'DimoAccessControl',
+    contractAddresses[C.networkName].modules.DIMORegistry.address
+  );
+
+  console.log(`\n----- Revoking ${role} role to ${address} -----`);
+
+  await (
+    await accessControlInstance.connect(deployer).revokeRole(role, address)
+  ).wait();
+
+  console.log(`----- ${role} role revoked from ${address} -----\n`);
+}
+
 async function main() {
   const [deployer] = await ethers.getSigners();
   await unpair(deployer, []);

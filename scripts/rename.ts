@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import * as csv from 'fast-csv';
 import { ethers, network } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import addressesJSON from './data/addresses.json';
 import { ContractAddressesByNetwork, IdManufacturerName } from '../utils';
@@ -78,6 +79,7 @@ async function matchChainWithDb(
 
 // eslint-disable-next-line no-unused-vars
 async function renameManufacturers(
+  signer: SignerWithAddress,
   idManufacturerNames: IdManufacturerName[],
   networkName: string
 ) {
@@ -95,7 +97,7 @@ async function renameManufacturers(
   for (let i = 0; i < idManufacturerNames.length; i += batchSize) {
     const batch = idManufacturerNames.slice(i, i + batchSize);
 
-    await (await devAdmin.renameManufacturers(batch)).wait();
+    await (await devAdmin.connect(signer).renameManufacturers(batch)).wait();
 
     console.log(
       `Batch ${i / batchSize + 1} of ${Math.ceil(
@@ -108,8 +110,13 @@ async function renameManufacturers(
 }
 
 async function main() {
+  const [signer] = await ethers.getSigners();
+  // const signer = await ethers.getImpersonatedSigner(
+  //   '0x1741eC2915Ab71Fc03492715b5640133dA69420B'
+  // );
+
   const idManufacturerNames = await parseCSV();
-  await renameManufacturers(idManufacturerNames, network.name);
+  await renameManufacturers(signer, idManufacturerNames, network.name);
 
   await matchChainWithDb(idManufacturerNames, network.name);
 }

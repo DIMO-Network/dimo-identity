@@ -34,7 +34,7 @@ describe('Vehicle', function () {
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
 
-  const [admin, nonAdmin, controller1, user1, user2] = provider.getWallets();
+  const [admin, nonAdmin, manufacturer1, user1, user2] = provider.getWallets();
 
   before(async () => {
     [
@@ -214,7 +214,7 @@ describe('Vehicle', function () {
       await manufacturerInstance
         .connect(admin)
         .mintManufacturer(
-          controller1.address,
+          manufacturer1.address,
           C.mockManufacturerNames[0],
           C.mockManufacturerAttributeInfoPairs
         );
@@ -333,7 +333,7 @@ describe('Vehicle', function () {
       await manufacturerInstance
         .connect(admin)
         .mintManufacturer(
-          controller1.address,
+          manufacturer1.address,
           C.mockManufacturerNames[0],
           C.mockManufacturerAttributeInfoPairs
         );
@@ -650,7 +650,7 @@ describe('Vehicle', function () {
       await manufacturerInstance
         .connect(admin)
         .mintManufacturer(
-          controller1.address,
+          manufacturer1.address,
           C.mockManufacturerNames[0],
           C.mockManufacturerAttributeInfoPairs
         );

@@ -53,9 +53,8 @@ describe('AftermarketDevice', function () {
     admin,
     nonAdmin,
     foundation,
-    controller1,
-    controller2,
     manufacturer1,
+    manufacturer2,
     nonManufacturer,
     user1,
     user2,
@@ -247,7 +246,7 @@ describe('AftermarketDevice', function () {
     await manufacturerInstance
       .connect(admin)
       .mintManufacturer(
-        controller1.address,
+        manufacturer1.address,
         C.mockManufacturerNames[0],
         C.mockManufacturerAttributeInfoPairs
       );
@@ -371,6 +370,23 @@ describe('AftermarketDevice', function () {
               mockAftermarketDeviceInfosList
             )
         ).to.be.revertedWith('Invalid parent node');
+      });
+      it('Should revert if the caller is not the parent node owner', async () => {
+        await accessControlInstance
+          .connect(admin)
+          .grantRole(C.MANUFACTURER_ROLE, manufacturer2.address);
+        await adIdInstance
+          .connect(manufacturer2)
+          .setApprovalForAll(aftermarketDeviceInstance.address, true);
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(manufacturer2)
+            .mintAftermarketDeviceByManufacturerBatch(
+              1,
+              mockAftermarketDeviceInfosList
+            )
+        ).to.be.revertedWith('Caller must be the parent node owner');
       });
       it('Should revert if DIMO Registry is not approved for all', async () => {
         await adIdInstance
@@ -600,8 +616,8 @@ describe('AftermarketDevice', function () {
 
   describe('claimAftermarketDeviceBatch', () => {
     const localAdOwnerPairs: AftermarketDeviceOwnerPair[] = [
-      {aftermarketDeviceNodeId: '1', owner: user1.address},
-      {aftermarketDeviceNodeId: '2', owner: user2.address}
+      { aftermarketDeviceNodeId: '1', owner: user1.address },
+      { aftermarketDeviceNodeId: '2', owner: user2.address }
     ]
 
     let ownerSig: string;
@@ -1408,7 +1424,7 @@ describe('AftermarketDevice', function () {
         await manufacturerInstance
           .connect(admin)
           .mintManufacturer(
-            controller2.address,
+            manufacturer2.address,
             C.mockManufacturerNames[1],
             C.mockManufacturerAttributeInfoPairs
           );

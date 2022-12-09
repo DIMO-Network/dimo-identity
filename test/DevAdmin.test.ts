@@ -22,6 +22,7 @@ import {
   createSnapshot,
   revertToSnapshot,
   signMessage,
+  IdManufacturerName,
   C
 } from '../utils';
 
@@ -52,7 +53,6 @@ describe('DevAdmin', function () {
     admin,
     nonAdmin,
     foundation,
-    controller1,
     manufacturer1,
     user1,
     user2,
@@ -242,7 +242,7 @@ describe('DevAdmin', function () {
     await manufacturerInstance
       .connect(admin)
       .mintManufacturer(
-        controller1.address,
+        manufacturer1.address,
         C.mockManufacturerNames[0],
         C.mockManufacturerAttributeInfoPairs
       );
@@ -856,6 +856,71 @@ describe('DevAdmin', function () {
           .withArgs(1, 1, user1.address)
           .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(2, 2, user1.address);
+      });
+    });
+  });
+
+  describe('renameManufacturers', () => {
+    const newIdManufacturerNames: IdManufacturerName[] = [
+      { tokenId: '1', name: 'NewManufacturer1' },
+      { tokenId: '2', name: 'NewManufacturer2' },
+      { tokenId: '3', name: 'NewManufacturer3' }
+    ];
+
+    beforeEach(async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .mintManufacturerBatch(
+          admin.address,
+          C.mockManufacturerNames.slice(1,)
+        );
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .renameManufacturers(newIdManufacturerNames)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          }`
+        );
+      });
+      it('Should revert if token Id does not exist', async () => {
+        const invalidNewIdManufacturerNames = [
+          { tokenId: '99', name: 'NewManufacturer99' }
+        ];
+
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .renameManufacturers(invalidNewIdManufacturerNames)
+        ).to.be.revertedWith('Invalid manufacturer node');
+      });
+    });
+
+    context('State change', () => {
+      it('Should rename manufacturers', async () => {
+        for (let i = 0; i < C.mockManufacturerNames.length; i++) {
+          const idReturned = await manufacturerInstance.getManufacturerIdByName(C.mockManufacturerNames[i]);
+          const nameReturned = await manufacturerInstance.getManufacturerNameById(i + 1);
+
+          expect(idReturned).to.equal(i + 1);
+          expect(nameReturned).to.equal(C.mockManufacturerNames[i]);
+        }
+
+        await devAdminInstance
+          .connect(admin)
+          .renameManufacturers(newIdManufacturerNames);
+
+        for (let i = 0; i < newIdManufacturerNames.length; i++) {
+          const idReturned = await manufacturerInstance.getManufacturerIdByName(newIdManufacturerNames[i].name);
+          const nameReturned = await manufacturerInstance.getManufacturerNameById(newIdManufacturerNames[i].tokenId);
+
+          expect(idReturned).to.equal(newIdManufacturerNames[i].tokenId);
+          expect(nameReturned).to.equal(newIdManufacturerNames[i].name);
+        }
       });
     });
   });

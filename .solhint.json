@@ -18,6 +18,10 @@
       "warn"
     ],
     "indent": "warn",
-    "bracket-align": "warn"
+    "bracket-align": "warn",
+    "function-max-lines": [
+      "error",
+      75
+    ]
   }
 }

@@ -1,5 +1,8 @@
 # DIMO Identity
 
+## Documentation
+
+- [Dimo documentation](https://docs.dimo.zone/docs)
 
 ## How to run
 
@@ -27,6 +30,12 @@ You can deploy the whole system running the following script, where `network_nam
 
 ```sh
 npx hardhat run scripts/deploy.ts --network '<network_name>'
+```
+
+You can more easily add/remove/update modules and update NFTs using the following script. Just make sure to update the `main` function accordingly:
+
+```sh
+npx hardhat run scripts/deployModule.ts --network '<network_name>'
 ```
 
 You can also verify contracts in etherscan/polygonscan/etc running the following command. Remove `<constructor_arguments>` if there isn't any.

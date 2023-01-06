@@ -3,16 +3,16 @@ pragma solidity ^0.8.13;
 
 interface IMultiPrivilege {
     event PrivilegeCreated(
-        uint256 privilegeId,
+        uint256 indexed privilegeId,
         bool enabled,
-        string decription
+        string description
     );
-    event PrivilegeEnabled(uint256 privilegeId);
-    event PrivilegeDisabled(uint256 privilegeId);
+    event PrivilegeEnabled(uint256 indexed privilegeId);
+    event PrivilegeDisabled(uint256 indexed privilegeId);
     event PrivilegeSet(
-        uint256 tokenId,
+        uint256 indexed tokenId,
         uint256 version,
-        uint256 privId,
+        uint256 indexed privId,
         address indexed user,
         uint256 expires
     );

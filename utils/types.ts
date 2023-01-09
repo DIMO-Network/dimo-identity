@@ -31,6 +31,13 @@ export type IdManufacturerName = {
   name: string
 };
 
+export type SetPrivilegeData = {
+  tokenId: string,
+  privId: string,
+  user: string,
+  expires: string
+};
+
 export interface ContractAddressesByNetwork {
   [index: string]: {
     modules: {

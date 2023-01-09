@@ -18,6 +18,13 @@ abstract contract MultiPrivilege is
         string description;
     }
 
+    struct SetPrivilegeData {
+        uint256 tokenId;
+        uint256 privId;
+        address user;
+        uint256 expires;
+    }
+
     CountersUpgradeable.Counter private _privilegeCounter;
 
     // privId => privilegeData
@@ -90,24 +97,27 @@ abstract contract MultiPrivilege is
         address user,
         uint256 expires
     ) external {
-        require(
-            _isApprovedOrOwner(msg.sender, tokenId),
-            "Caller is not owner nor approved"
-        );
-        require(privId <= _privilegeCounter.current(), "Invalid privilege id");
-        require(privilegeRecord[privId].enabled, "Privilege not enabled");
+        _setPrivilege(msg.sender, tokenId, privId, user, expires);
+    }
 
-        privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][
-            user
-        ] = expires;
+    /// @notice Sets multiple privileges to a user with expiration
+    /// It is possible to set the expiration to 0 to revoke the privilege
+    /// @dev The caller must be the owner of the token or approved
+    /// @param privData description
+    function setPrivileges(SetPrivilegeData[] calldata privData) external {
+        uint256 tokenId;
+        uint256 privId;
+        address user;
+        uint256 expires;
 
-        emit PrivilegeSet(
-            tokenId,
-            tokenIdToVersion[tokenId],
-            privId,
-            user,
-            expires
-        );
+        for (uint256 i = 0; i < privData.length; i++) {
+            tokenId = privData[i].tokenId;
+            privId = privData[i].privId;
+            user = privData[i].user;
+            expires = privData[i].expires;
+
+            _setPrivilege(msg.sender, tokenId, privId, user, expires);
+        }
     }
 
     /// @notice Checks if a user has or not a valid privilege
@@ -173,5 +183,39 @@ abstract contract MultiPrivilege is
     ) internal override {
         tokenIdToVersion[tokenId]++;
         super._transfer(from, to, tokenId);
+    }
+
+    /// @notice Internal function to set a privilege to a user with expiration
+    /// @dev The caller must be the owner of the token or approved
+    /// @param owner The token owner
+    /// @param tokenId Token Id associated with the privilege
+    /// @param privId Privilege Id to be set
+    /// @param user User address that will receive the privilege
+    /// @param expires Expiration of the privilege
+    function _setPrivilege(
+        address owner,
+        uint256 tokenId,
+        uint256 privId,
+        address user,
+        uint256 expires
+    ) private {
+        require(
+            _isApprovedOrOwner(owner, tokenId),
+            "Caller is not owner nor approved"
+        );
+        require(privId <= _privilegeCounter.current(), "Invalid privilege id");
+        require(privilegeRecord[privId].enabled, "Privilege not enabled");
+
+        privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][
+            user
+        ] = expires;
+
+        emit PrivilegeSet(
+            tokenId,
+            tokenIdToVersion[tokenId],
+            privId,
+            user,
+            expires
+        );
     }
 }

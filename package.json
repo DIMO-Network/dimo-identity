@@ -22,8 +22,8 @@
     "web3",
     "DID"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "DIMO",
+  "license": "BUSL-1.1",
   "lint-staged": {
     "*.ts": [
       "npx eslint '**/*.ts' --fix"

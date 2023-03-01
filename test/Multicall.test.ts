@@ -13,7 +13,7 @@ import {
   AftermarketDevice,
   AftermarketDeviceId,
   AdLicenseValidator,
-  // Mapper,
+  Mapper,
   MockDimoToken,
   MockStake,
   Multicall
@@ -27,13 +27,13 @@ import {
   C
 } from '../utils';
 
-// const { expect } = chai;
+const { expect } = chai;
 const { solidity } = waffle;
 const provider = waffle.provider;
 
 chai.use(solidity);
 
-describe.only('Multicall - Vehicle', function () {
+describe('Multicall', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
@@ -43,7 +43,7 @@ describe.only('Multicall - Vehicle', function () {
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
-  // let mapperInstance: Mapper;
+  let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let manufacturerIdInstance: ManufacturerId;
@@ -81,12 +81,13 @@ describe.only('Multicall - Vehicle', function () {
       dimoRegistryInstance,
       eip712CheckerInstance,
       accessControlInstance,
-      // nodesInstance,
+      ,
       manufacturerInstance,
       vehicleInstance,
       aftermarketDeviceInstance,
       adLicenseValidatorInstance,
-      // mapperInstance
+      mapperInstance,
+      multicallInstance
     ] = await initialize(
       admin,
       'Eip712Checker',
@@ -96,11 +97,9 @@ describe.only('Multicall - Vehicle', function () {
       'Vehicle',
       'AftermarketDevice',
       'AdLicenseValidator',
-      'Mapper'
+      'Mapper',
+      'Multicall'
     );
-
-    const MulticallFactory = await ethers.getContractFactory('Multicall');
-    multicallInstance = await MulticallFactory.deploy();
 
     const ManufacturerIdFactory = await ethers.getContractFactory(
       'ManufacturerId'
@@ -262,6 +261,16 @@ describe.only('Multicall - Vehicle', function () {
     await adIdInstance
       .connect(admin)
       .grantRole(C.NFT_TRANSFERER_ROLE, dimoRegistryInstance.address);
+
+    await adIdInstance
+      .connect(manufacturer1)
+      .setApprovalForAll(aftermarketDeviceInstance.address, true);
+    await aftermarketDeviceInstance
+      .connect(manufacturer1)
+      .mintAftermarketDeviceByManufacturerBatch(
+        1,
+        mockAftermarketDeviceInfosList
+      );
   });
 
   beforeEach(async () => {
@@ -272,10 +281,14 @@ describe.only('Multicall - Vehicle', function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe.skip('multiDelegateCall', () => {
-    let signature: string;
+  describe('multiDelegateCall', () => {
+
+    let mintSig: string;
+    let ownerSig: string;
+    let adSig: string;
+    let pairSign: string;
     before(async () => {
-      signature = await signMessage({
+      mintSig = await signMessage({
         _signer: user1,
         _primaryType: 'MintVehicleSign',
         _verifyingContract: vehicleInstance.address,
@@ -286,30 +299,82 @@ describe.only('Multicall - Vehicle', function () {
           infos: C.mockVehicleInfos
         }
       });
+      ownerSig = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      adSig = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      pairSign = await signMessage({
+        _signer: user1,
+        _primaryType: 'PairAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          vehicleNode: '1'
+        }
+      });
     });
 
     context('State', () => {
-      // TODO Add multicall as a module
       it('Should mint vehicle and claim aftermarket device in the same transaction', async () => {
         const vehicleInterface = ethers.Contract.getInterface(vehicleInstance.interface);
-        // const aftermarketDeviceInterface = ethers.Contract.getInterface(aftermarketDeviceInstance.interface);
+        const aftermarketDeviceInterface = ethers.Contract.getInterface(aftermarketDeviceInstance.interface);
 
-        // await vehicleInstance
-        //   .connect(admin)
-        //   .mintVehicleSign(
-        //     1,
-        //     user1.address,
-        //     C.mockVehicleAttributeInfoPairs,
-        //     signature
-        //   );
+        const mintVehicleSignEncoded = vehicleInterface.encodeFunctionData(
+          "mintVehicleSign",
+          [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
+        );
+        const claimAftermarketDeviceSignEncoded = aftermarketDeviceInterface.encodeFunctionData(
+          "claimAftermarketDeviceSign",
+          [1, user1.address, ownerSig, adSig]
+        );
 
-        const mintVehicleSignEncoded = vehicleInterface.encodeFunctionData("mintVehicleSign", [1,
-          user1.address,
-          C.mockVehicleAttributeInfoPairs,
-          signature]);
+        await expect(vehicleIdInstance.ownerOf(1)).to.be.reverted;
+        expect(await adIdInstance.ownerOf(1)).to.be.equal(manufacturer1.address);
 
-        await multicallInstance.multiDelegateCall([mintVehicleSignEncoded]);
+        await multicallInstance.multiDelegateCall([mintVehicleSignEncoded, claimAftermarketDeviceSignEncoded]);
+
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+        expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
+      it('Should mint vehicle, claim aftermarket device and pair them in the same transaction', async () => {
+        const vehicleInterface = ethers.Contract.getInterface(vehicleInstance.interface);
+        const aftermarketDeviceInterface = ethers.Contract.getInterface(aftermarketDeviceInstance.interface);
+
+        const mintVehicleSignEncoded = vehicleInterface.encodeFunctionData(
+          "mintVehicleSign",
+          [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
+        );
+        const claimAftermarketDeviceSignEncoded = aftermarketDeviceInterface.encodeFunctionData(
+          "claimAftermarketDeviceSign",
+          [1, user1.address, ownerSig, adSig]
+        );
+        const pairAftermarketDeviceSignEncoded = aftermarketDeviceInterface.encodeFunctionData(
+          "pairAftermarketDeviceSign",
+          [1, 1, pairSign]
+        );
+
+        expect(await mapperInstance.getLink(vehicleIdInstance.address, 1)).to.be.equal(0);
+        expect(await mapperInstance.getLink(adIdInstance.address, 1)).to.be.equal(0);
+
+        await multicallInstance.multiDelegateCall([mintVehicleSignEncoded, claimAftermarketDeviceSignEncoded, pairAftermarketDeviceSignEncoded]);
+
+        expect(await mapperInstance.getLink(vehicleIdInstance.address, 1)).to.be.equal(1);
+        expect(await mapperInstance.getLink(adIdInstance.address, 1)).to.be.equal(1);
+      })
     });
   });
 });

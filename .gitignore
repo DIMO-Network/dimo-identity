@@ -9,3 +9,6 @@ typechain
 cache
 artifacts
 .DS_Store
+
+# OpenZeppelin
+.openzeppelin/unknown-*.json

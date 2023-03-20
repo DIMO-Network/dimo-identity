@@ -88,6 +88,10 @@
                 "selectors": [
                     "0x112e62a2"
                 ]
+            },
+            "Multicall": {
+                "address": "",
+                "selectors": []
             }
         },
         "nfts": {
@@ -97,7 +101,7 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0x5d7E06DeA55f2a71E77F13C679Abd9FBedbb3e00"
+                "implementation": "0x0607Ccd9B0eB0576EEcB3957d115b3360420858a"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
@@ -204,6 +208,10 @@
                     "0x71193956",
                     "0x8c2ee9bb"
                 ]
+            },
+            "Multicall": {
+                "address": "0x7CE3b10571b1ca517dEf45D5F81850467eC8dd2D",
+                "selectors": [ "0x415c2d96", "0x1c0c6e51" ]
             }
         },
         "nfts": {
@@ -320,20 +328,27 @@
                     "0x71193956",
                     "0x8c2ee9bb"
                 ]
+            },
+            "Multicall": {
+                "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+                "selectors": [
+                    "0x415c2d96",
+                    "0x1c0c6e51"
+                ]
             }
         },
         "nfts": {
             "ManufacturerId": {
-                "proxy": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
-                "implementation": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"
+                "proxy": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+                "implementation": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"
             },
             "VehicleId": {
-                "proxy": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
-                "implementation": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
+                "proxy": "0x9A676e781A523b5d0C0e43731313A708CB607508",
+                "implementation": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
             },
             "AftermarketDeviceId": {
-                "proxy": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
-                "implementation": "0x9A676e781A523b5d0C0e43731313A708CB607508"
+                "proxy": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+                "implementation": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
             }
         }
     },
@@ -436,6 +451,10 @@
                     "0x71193956",
                     "0x8c2ee9bb"
                 ]
+            },
+            "Multicall": {
+                "address": "",
+                "selectors": []
             }
         },
         "nfts": {

@@ -53,7 +53,8 @@ async function deployModules(
     { name: 'AftermarketDevice', args: [] },
     { name: 'AdLicenseValidator', args: [] },
     { name: 'Mapper', args: [] },
-    { name: 'DevAdmin', args: [] }
+    { name: 'DevAdmin', args: [] },
+    { name: 'Multicall', args: [] }
   ];
 
   const instances: ContractAddressesByNetwork = JSON.parse(

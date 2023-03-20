@@ -210,8 +210,8 @@
                 ]
             },
             "Multicall": {
-                "address": "",
-                "selectors": []
+                "address": "0x7CE3b10571b1ca517dEf45D5F81850467eC8dd2D",
+                "selectors": [ "0x415c2d96", "0x1c0c6e51" ]
             }
         },
         "nfts": {

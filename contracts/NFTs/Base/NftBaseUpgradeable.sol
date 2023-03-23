@@ -9,8 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-/// @title MultiPrivilege
-/// @dev Based on the EIP-5496 https://eips.ethereum.org/EIPS/eip-5496
+/// @title NftBaseUpgradeable
 abstract contract NftBaseUpgradeable is
     Initializable,
     ERC721Upgradeable,

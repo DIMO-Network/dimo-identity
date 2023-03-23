@@ -941,6 +941,19 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            }
+        ],
+        "name": "verifyAftermarketDeviceTransfer",
+        "outputs": [],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {

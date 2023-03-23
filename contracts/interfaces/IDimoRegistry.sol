@@ -20,4 +20,8 @@ interface IDimoRegistry {
         external
         view
         returns (bool _isAllowed);
+
+    function verifyAftermarketDeviceTransfer(uint256 aftermarketDeviceNode)
+        external
+        view;
 }

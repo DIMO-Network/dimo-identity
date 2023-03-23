@@ -257,6 +257,11 @@ describe('AftermarketDevice', function () {
     await adIdInstance
       .connect(admin)
       .grantRole(C.NFT_TRANSFERER_ROLE, dimoRegistryInstance.address);
+    
+    // Setting DimoRegistry address in the AftermarketDeviceId
+    await adIdInstance
+      .connect(admin)
+      .setDimoRegistryAddress(dimoRegistryInstance.address);
   });
 
   beforeEach(async () => {

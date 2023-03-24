@@ -356,7 +356,7 @@ describe('AftermarketDeviceId', async function () {
 
   context('On transfer', async () => {
     context('Error handling', () => {
-      it('Should revert if caller is not the token owner or approved', async () => {
+      it('Should revert if caller is not the token owner or DimoRegistry', async () => {
         await expect(
           adIdInstance
             .connect(user2)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 1)

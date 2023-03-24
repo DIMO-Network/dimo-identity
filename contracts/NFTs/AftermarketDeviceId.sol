@@ -43,7 +43,10 @@ contract AftermarketDeviceId is Initializable, NftBaseUpgradeable {
         uint256 tokenId
     ) internal override {
         // Approvals are not accepted for now
-        // require(msg.sender == from, "Caller is not the owner");
+        require(
+            msg.sender == address(_dimoRegistry) || msg.sender == from,
+            "Caller is not the owner"
+        );
         _dimoRegistry.verifyAftermarketDeviceTransfer(tokenId);
         ERC721Upgradeable._transfer(from, to, tokenId);
     }

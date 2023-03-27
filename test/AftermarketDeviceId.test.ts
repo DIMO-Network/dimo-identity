@@ -356,11 +356,12 @@ describe('AftermarketDeviceId', async function () {
 
   context('On transfer', async () => {
     context('Error handling', () => {
-      it('Should revert if caller is not the token owner or DimoRegistry', async () => {
+      it('Should revert if caller is approved, but not the token owner or DimoRegistry', async () => {
+        await adIdInstance.connect(user1).approve(user2.address, 1);
         await expect(
           adIdInstance
             .connect(user2)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 1)
-        ).to.be.revertedWith('ERC721: caller is not token owner nor approved');
+        ).to.be.revertedWith('Caller is not authorized');
       });
       it('Should revert if aftermarket device is already paired', async () => {
         await expect(
@@ -371,19 +372,19 @@ describe('AftermarketDeviceId', async function () {
     });
 
     context('State', () => {
-      it('Should keep the same parent node', async () => {
-        const parentNode = await nodesInstance.getParentNode(adIdInstance.address, 2);
-
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
-
-        expect(await nodesInstance.getParentNode(adIdInstance.address, 2)).to.equal(parentNode);
-      });
       it('Should set new owner', async () => {
         expect(await adIdInstance.ownerOf(2)).to.equal(user1.address);
 
         await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
 
         expect(await adIdInstance.ownerOf(2)).to.equal(user2.address);
+      });
+      it('Should keep the same parent node', async () => {
+        const parentNode = await nodesInstance.getParentNode(adIdInstance.address, 2);
+
+        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+
+        expect(await nodesInstance.getParentNode(adIdInstance.address, 2)).to.equal(parentNode);
       });
       it('Should keep the same infos', async () => {
         expect(await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(adAddress2.address)).to.equal(2);
@@ -397,6 +398,13 @@ describe('AftermarketDeviceId', async function () {
         for (const attrInfoPair of mockAftermarketDeviceInfosList[1].attrInfoPairs) {
           expect(await nodesInstance.getInfo(adIdInstance.address, 2, attrInfoPair.attribute)).to.equal(attrInfoPair.info);
         }
+      });
+      it('Should update multi-privilege token version', async () => {
+        const previousVersion = await adIdInstance.tokenIdToVersion(2);
+
+        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+
+        expect(await adIdInstance.tokenIdToVersion(2)).to.equal(previousVersion.add(1));
       });
     });
   });

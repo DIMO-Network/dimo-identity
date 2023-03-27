@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-import "./Base/NftBaseUpgradeable.sol";
 import "../interfaces/IDimoRegistry.sol";
+import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
 
-contract AftermarketDeviceId is Initializable, NftBaseUpgradeable {
+contract AftermarketDeviceId is Initializable, MultiPrivilege {
     IDimoRegistry private _dimoRegistry;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -45,9 +45,9 @@ contract AftermarketDeviceId is Initializable, NftBaseUpgradeable {
         // Approvals are not accepted for now
         require(
             msg.sender == address(_dimoRegistry) || msg.sender == from,
-            "Caller is not the owner"
+            "Caller is not authorized"
         );
         _dimoRegistry.verifyAftermarketDeviceTransfer(tokenId);
-        ERC721Upgradeable._transfer(from, to, tokenId);
+        super._transfer(from, to, tokenId);
     }
 }

@@ -408,7 +408,6 @@ describe('MultiPrivilege', function () {
     });
 
     context('State change', () => {
-      it('Should correctly set ')
       it('Should correctly set privilege expiration', async () => {
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
         await multiPrivilegeInstance.createPrivilege(true, ''); // 2

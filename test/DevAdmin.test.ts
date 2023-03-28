@@ -263,6 +263,11 @@ describe('DevAdmin', function () {
     await adIdInstance
       .connect(user1)
       .setApprovalForAll(aftermarketDeviceInstance.address, true);
+
+    // Setting DimoRegistry address in the AftermarketDeviceId
+    await adIdInstance
+      .connect(admin)
+      .setDimoRegistryAddress(dimoRegistryInstance.address);
   });
 
   beforeEach(async () => {

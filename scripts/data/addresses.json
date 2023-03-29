@@ -173,7 +173,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x8815986E1955C68fE058Bfaf35BC25fcf4e75660",
+                "address": "0x5e6cdEf2e2A18e04568d124302DEb08A40883Fa4",
                 "selectors": [
                     "0x6111afa3",
                     "0xab2ae229",
@@ -183,7 +183,8 @@
                     "0xcfe642dd",
                     "0x4d49d82a",
                     "0x4d13b709",
-                    "0x3f65997a"
+                    "0x3f65997a",
+                    "0x198cec36"
                 ]
             },
             "AdLicenseValidator": {
@@ -231,7 +232,7 @@
             },
             "AftermarketDeviceId": {
                 "proxy": "0xcf9Af64522162da85164a714c23a7705E6e466b3",
-                "implementation": "0x5F38B1Cd64A189084E1e8F143fE10cf569Bb8079"
+                "implementation": "0xcA9d25C9a59CF85210Dd255aA56c4F015c005c9C"
             }
         }
     },

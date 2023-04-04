@@ -305,9 +305,12 @@ contract AftermarketDevice is
             ),
             "Invalid signature"
         );
+
+        address adOwner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
+
         require(
             Eip712CheckerInternal._verifySignature(
-                INFT(vehicleIdProxyAddress).ownerOf(vehicleNode),
+                adOwner,
                 message,
                 vehicleOwnerSig
             ),
@@ -317,7 +320,11 @@ contract AftermarketDevice is
         ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
         ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
 
-        // emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
+        emit AftermarketDevicePaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            adOwner
+        );
     }
 
     /// @notice Pairs an aftermarket device with a vehicle through a metatransaction
@@ -408,16 +415,9 @@ contract AftermarketDevice is
             INFT(vehicleIdProxyAddress).exists(vehicleNode),
             "Invalid vehicle node"
         );
-
-        address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
-
         require(
             INFT(adIdProxyAddress).exists(aftermarketDeviceNode),
             "Invalid AD node"
-        );
-        require(
-            owner == INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode),
-            "Owner of the nodes does not match"
         );
         require(
             ms.links[vehicleIdProxyAddress][vehicleNode] ==
@@ -428,9 +428,14 @@ contract AftermarketDevice is
             ms.links[adIdProxyAddress][aftermarketDeviceNode] == vehicleNode,
             "AD is not paired to vehicle"
         );
+
+        address signer = Eip712CheckerInternal._recover(message, signature);
+        address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
+
         require(
-            Eip712CheckerInternal._verifySignature(owner, message, signature),
-            "Invalid signature"
+            signer == INFT(vehicleIdProxyAddress).ownerOf(vehicleNode) ||
+                signer == adOwner,
+            "Invalid signer"
         );
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = 0;
@@ -439,7 +444,7 @@ contract AftermarketDevice is
         emit AftermarketDeviceUnpaired(
             aftermarketDeviceNode,
             vehicleNode,
-            owner
+            adOwner
         );
     }
 

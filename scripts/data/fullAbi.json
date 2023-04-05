@@ -865,7 +865,12 @@
             },
             {
                 "internalType": "bytes",
-                "name": "signature",
+                "name": "aftermarketDeviceSig",
+                "type": "bytes"
+            },
+            {
+                "internalType": "bytes",
+                "name": "vehicleOwnerSig",
                 "type": "bytes"
             }
         ],
@@ -888,16 +893,11 @@
             },
             {
                 "internalType": "bytes",
-                "name": "aftermarketDeviceSig",
-                "type": "bytes"
-            },
-            {
-                "internalType": "bytes",
-                "name": "vehicleOwnerSig",
+                "name": "signature",
                 "type": "bytes"
             }
         ],
-        "name": "pairAftermarketDeviceSign2",
+        "name": "pairAftermarketDeviceSign",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

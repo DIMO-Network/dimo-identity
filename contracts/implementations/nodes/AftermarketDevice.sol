@@ -246,16 +246,15 @@ contract AftermarketDevice is
         emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
     }
 
-    /// TODO Documentation
-    /// @notice Pairs an aftermarket device with a vehicle through a metatransaction
-    /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
+    /// @notice Pairs an aftermarket device with a vehicle through a metatransaction.
+    /// Both vehicle and AD owners can pair.
+    /// The vehicle/AD owner signs a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role
     /// @param aftermarketDeviceNode Aftermarket device node id
     /// @param vehicleNode Vehicle node id
     /// @param vehicleOwnerSig Vehicle owner signature hash
     /// @param aftermarketDeviceSig Aftermarket Device's signature hash
-    /// TODO To be renamed
-    function pairAftermarketDeviceSign2(
+    function pairAftermarketDeviceSign(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         bytes calldata aftermarketDeviceSig,

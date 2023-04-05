@@ -606,10 +606,10 @@ describe('DevAdmin', function () {
         );
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(1, 1, pairSig1);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(2, 2, pairSig2);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 2, pairSig2);
     });
 
     context('Error handling', () => {
@@ -783,10 +783,10 @@ describe('DevAdmin', function () {
         );
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(1, 1, pairSig1);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(2, 2, pairSig2);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 2, pairSig2);
     });
 
     context('Error handling', () => {

@@ -361,7 +361,7 @@ describe('Multicall', function () {
           [1, user1.address, ownerSig, adSig]
         );
         const pairAftermarketDeviceSignEncoded = aftermarketDeviceInterface.encodeFunctionData(
-          'pairAftermarketDeviceSign',
+          'pairAftermarketDeviceSign(uint256,uint256,bytes)',
           [1, 1, pairSign]
         );
 

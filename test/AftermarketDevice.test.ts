@@ -1094,11 +1094,11 @@ describe('AftermarketDevice', function () {
         }
       });
       pairAdSig2 = await signMessage({
-        _signer: adAddress1,
+        _signer: adAddress2,
         _primaryType: 'PairAftermarketDeviceSign',
         _verifyingContract: aftermarketDeviceInstance.address,
         message: {
-          aftermarketDeviceNode: '1',
+          aftermarketDeviceNode: '2',
           vehicleNode: '1'
         }
       });

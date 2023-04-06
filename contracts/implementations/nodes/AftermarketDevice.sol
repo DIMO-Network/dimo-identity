@@ -247,13 +247,12 @@ contract AftermarketDevice is
     }
 
     /// @notice Pairs an aftermarket device with a vehicle through a metatransaction.
-    /// Both vehicle and AD owners can pair.
     /// The vehicle/AD owner signs a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role
     /// @param aftermarketDeviceNode Aftermarket device node id
     /// @param vehicleNode Vehicle node id
-    /// @param vehicleOwnerSig Vehicle owner signature hash
     /// @param aftermarketDeviceSig Aftermarket Device's signature hash
+    /// @param vehicleOwnerSig Vehicle owner signature hash
     function pairAftermarketDeviceSign(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
@@ -275,7 +274,6 @@ contract AftermarketDevice is
             INFT(vehicleIdProxyAddress).exists(vehicleNode),
             "Invalid vehicle node"
         );
-
         require(
             INFT(adIdProxyAddress).exists(aftermarketDeviceNode),
             "Invalid AD node"
@@ -304,12 +302,9 @@ contract AftermarketDevice is
             ),
             "Invalid signature"
         );
-
-        address adOwner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
-
         require(
             Eip712CheckerInternal._verifySignature(
-                adOwner,
+                INFT(vehicleIdProxyAddress).ownerOf(vehicleNode),
                 message,
                 vehicleOwnerSig
             ),
@@ -322,7 +317,7 @@ contract AftermarketDevice is
         emit AftermarketDevicePaired(
             aftermarketDeviceNode,
             vehicleNode,
-            adOwner
+            INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode)
         );
     }
 
@@ -389,6 +384,7 @@ contract AftermarketDevice is
     }
 
     /// @dev Unpairs an aftermarket device from a vehicles through a metatransaction
+    /// Both vehicle and AD owners can unpair.
     /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role
     /// @param aftermarketDeviceNode Aftermarket device node id

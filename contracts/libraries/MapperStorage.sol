@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
+/// TODO Documentation
 /// @title MapperStorage
 /// @notice Storage of the Mapper contract
 library MapperStorage {
@@ -9,6 +10,7 @@ library MapperStorage {
 
     struct Storage {
         mapping(address => mapping(uint256 => uint256)) links;
+        mapping(address => mapping(uint256 => address)) beneficiaries;
     }
 
     /* solhint-disable no-inline-assembly */

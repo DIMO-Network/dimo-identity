@@ -246,6 +246,81 @@ contract AftermarketDevice is
         emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
     }
 
+    /// @notice Pairs an aftermarket device with a vehicle through a metatransaction.
+    /// The vehicle owner and AD sign a typed structured (EIP-712) message in advance and submits to be verified
+    /// @dev Caller must have the admin role
+    /// @param aftermarketDeviceNode Aftermarket device node id
+    /// @param vehicleNode Vehicle node id
+    /// @param aftermarketDeviceSig Aftermarket Device's signature hash
+    /// @param vehicleOwnerSig Vehicle owner signature hash
+    function pairAftermarketDeviceSign(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
+        bytes calldata aftermarketDeviceSig,
+        bytes calldata vehicleOwnerSig
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        bytes32 message = keccak256(
+            abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
+        );
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        require(
+            INFT(vehicleIdProxyAddress).exists(vehicleNode),
+            "Invalid vehicle node"
+        );
+        require(
+            INFT(adIdProxyAddress).exists(aftermarketDeviceNode),
+            "Invalid AD node"
+        );
+        require(
+            AftermarketDeviceStorage.getStorage().deviceClaimed[
+                aftermarketDeviceNode
+            ],
+            "AD must be claimed"
+        );
+        require(
+            ms.links[vehicleIdProxyAddress][vehicleNode] == 0,
+            "Vehicle already paired"
+        );
+        require(
+            ms.links[adIdProxyAddress][aftermarketDeviceNode] == 0,
+            "AD already paired"
+        );
+        require(
+            Eip712CheckerInternal._verifySignature(
+                AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
+                    aftermarketDeviceNode
+                ],
+                message,
+                aftermarketDeviceSig
+            ),
+            "Invalid signature"
+        );
+        require(
+            Eip712CheckerInternal._verifySignature(
+                INFT(vehicleIdProxyAddress).ownerOf(vehicleNode),
+                message,
+                vehicleOwnerSig
+            ),
+            "Invalid signature"
+        );
+
+        ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
+
+        emit AftermarketDevicePaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode)
+        );
+    }
+
     /// @notice Pairs an aftermarket device with a vehicle through a metatransaction
     /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role
@@ -309,6 +384,7 @@ contract AftermarketDevice is
     }
 
     /// @dev Unpairs an aftermarket device from a vehicles through a metatransaction
+    /// Both vehicle and AD owners can unpair.
     /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role
     /// @param aftermarketDeviceNode Aftermarket device node id
@@ -334,16 +410,9 @@ contract AftermarketDevice is
             INFT(vehicleIdProxyAddress).exists(vehicleNode),
             "Invalid vehicle node"
         );
-
-        address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
-
         require(
             INFT(adIdProxyAddress).exists(aftermarketDeviceNode),
             "Invalid AD node"
-        );
-        require(
-            owner == INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode),
-            "Owner of the nodes does not match"
         );
         require(
             ms.links[vehicleIdProxyAddress][vehicleNode] ==
@@ -354,9 +423,14 @@ contract AftermarketDevice is
             ms.links[adIdProxyAddress][aftermarketDeviceNode] == vehicleNode,
             "AD is not paired to vehicle"
         );
+
+        address signer = Eip712CheckerInternal._recover(message, signature);
+        address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
+
         require(
-            Eip712CheckerInternal._verifySignature(owner, message, signature),
-            "Invalid signature"
+            signer == INFT(vehicleIdProxyAddress).ownerOf(vehicleNode) ||
+                signer == adOwner,
+            "Invalid signer"
         );
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = 0;
@@ -365,7 +439,7 @@ contract AftermarketDevice is
         emit AftermarketDeviceUnpaired(
             aftermarketDeviceNode,
             vehicleNode,
-            owner
+            adOwner
         );
     }
 

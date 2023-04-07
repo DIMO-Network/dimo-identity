@@ -247,7 +247,7 @@ contract AftermarketDevice is
     }
 
     /// @notice Pairs an aftermarket device with a vehicle through a metatransaction.
-    /// The vehicle/AD owner signs a typed structured (EIP-712) message in advance and submits to be verified
+    /// The vehicle owner and AD sign a typed structured (EIP-712) message in advance and submits to be verified
     /// @dev Caller must have the admin role
     /// @param aftermarketDeviceNode Aftermarket device node id
     /// @param vehicleNode Vehicle node id

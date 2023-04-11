@@ -6,8 +6,8 @@ import {
   Nodes,
   Manufacturer,
   ManufacturerId
-} from '../typechain';
-import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
+} from '../../typechain';
+import { initialize, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 const { expect } = chai;
 const { solidity } = waffle;

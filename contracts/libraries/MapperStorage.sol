@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-/// TODO Documentation
 /// @title MapperStorage
 /// @notice Storage of the Mapper contract
 library MapperStorage {
@@ -9,7 +8,11 @@ library MapperStorage {
         keccak256("DIMORegistry.mapper.storage");
 
     struct Storage {
+        // Links between Vehicles and ADs
+        // idProxyAddress -> vehicleId/adId -> adId/vehicleId
         mapping(address => mapping(uint256 => uint256)) links;
+        // Stores beneficiary addresses for a given nodeId of an idProxy
+        // idProxyAddress -> nodeId -> beneficiary
         mapping(address => mapping(uint256 => address)) beneficiaries;
     }
 

@@ -5,7 +5,7 @@ import "../interfaces/INFT.sol";
 import "../libraries/MapperStorage.sol";
 
 /// @title Mapper
-/// @notice Contract to map relationships between nodes
+/// @notice Contract to map relationships between nodes and other contracts
 contract Mapper {
     event BeneficiarySet(
         address indexed idProxyAddress,
@@ -13,20 +13,26 @@ contract Mapper {
         address indexed beneficiary
     );
 
-    /// TODO Documentation
+    /// @notice Sets the beneficiary associated with the pair idProxy/nodeId
+    /// @dev Only the nodeId owner can set a beneficiary
+    /// @param idProxyAddress The address of the NFT proxy
+    /// @param nodeId The node Id to be associated with the beneficiary
+    /// @param beneficiary The address to be a beneficiary
     function setBeneficiary(
         address idProxyAddress,
         uint256 nodeId,
         address beneficiary
     ) external {
-        require(
-            INFT(idProxyAddress).ownerOf(nodeId) == msg.sender,
-            "Only owner"
-        );
+        address nodeOwner = INFT(idProxyAddress).ownerOf(nodeId);
+
+        require(nodeOwner == msg.sender, "Only owner");
+        require(nodeOwner != beneficiary, "Beneficiary cannot be the owner");
 
         MapperStorage.getStorage().beneficiaries[idProxyAddress][
             nodeId
         ] = beneficiary;
+
+        emit BeneficiarySet(idProxyAddress, nodeId, beneficiary);
     }
 
     /// @notice Gets the link between two nodes
@@ -42,7 +48,9 @@ contract Mapper {
         ];
     }
 
-    /// TODO Documentation
+    /// @notice Gets the beneficiary associated with the pair idProxy/nodeId
+    /// @param idProxyAddress The address of the NFT proxy
+    /// @param nodeId The node Id to be queried
     function getBeneficiary(address idProxyAddress, uint256 nodeId)
         external
         view

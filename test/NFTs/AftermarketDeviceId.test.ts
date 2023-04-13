@@ -13,6 +13,7 @@ import {
   AftermarketDevice,
   AftermarketDeviceId,
   AdLicenseValidator,
+  Mapper,
   MockDimoToken,
   MockStake
 } from '../../typechain';
@@ -40,6 +41,7 @@ describe('AftermarketDeviceId', async function () {
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
+  let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let manufacturerIdInstance: ManufacturerId;
@@ -52,6 +54,7 @@ describe('AftermarketDeviceId', async function () {
     manufacturer1,
     user1,
     user2,
+    beneficiary1,
     adAddress1,
     adAddress2
   ] = provider.getWallets();
@@ -76,7 +79,8 @@ describe('AftermarketDeviceId', async function () {
       manufacturerInstance,
       vehicleInstance,
       aftermarketDeviceInstance,
-      adLicenseValidatorInstance
+      adLicenseValidatorInstance,
+      mapperInstance
     ] = await initialize(
       admin,
       'Eip712Checker',
@@ -136,7 +140,8 @@ describe('AftermarketDeviceId', async function () {
       ],
       {
         initializer: 'initialize',
-        kind: 'uups'
+        kind: 'uups',
+        unsafeAllow: ['delegatecall']
       }
       // eslint-disable-next-line prettier/prettier
     ) as AftermarketDeviceId;
@@ -405,6 +410,15 @@ describe('AftermarketDeviceId', async function () {
         await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
 
         expect(await adIdInstance.tokenIdToVersion(2)).to.equal(previousVersion.add(1));
+      });
+      it('Should reset aftermarket device beneficiary', async () => {
+        await mapperInstance.connect(user1).setAftermarketDeviceBeneficiary(2, beneficiary1.address);
+
+        expect(await mapperInstance.getBeneficiary(adIdInstance.address, 2)).to.equal(beneficiary1.address);
+
+        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+
+        expect(await mapperInstance.getBeneficiary(adIdInstance.address, 2)).to.equal(user2.address);
       });
     });
   });

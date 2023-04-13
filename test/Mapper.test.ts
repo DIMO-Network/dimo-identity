@@ -239,18 +239,18 @@ describe('Mapper', function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('setBeneficiary', () => {
+  describe('setAftermarketDeviceBeneficiary', () => {
     context('Error handling', () => {
       it('Should revert if caller is not the node owner', async () => {
         await expect(mapperInstance
           .connect(beneficiary1)
-          .setBeneficiary(adIdInstance.address, 1, beneficiary1.address)
+          .setAftermarketDeviceBeneficiary(1, beneficiary1.address)
         ).to.be.revertedWith('Only owner');
       });
       it('Should revert if beneficiary is equal to owner', async () => {
         await expect(mapperInstance
           .connect(user1)
-          .setBeneficiary(adIdInstance.address, 1, user1.address)
+          .setAftermarketDeviceBeneficiary(1, user1.address)
         ).to.be.revertedWith('Beneficiary cannot be the owner');
       });
     });
@@ -262,7 +262,7 @@ describe('Mapper', function () {
       it('Should correctly set beneficiary', async () => {
         await mapperInstance
           .connect(user1)
-          .setBeneficiary(adIdInstance.address, 1, beneficiary1.address);
+          .setAftermarketDeviceBeneficiary(1, beneficiary1.address);
 
         expect(await mapperInstance.getBeneficiary(adIdInstance.address, 1)).to.be.equal(beneficiary1.address);
       });
@@ -273,7 +273,7 @@ describe('Mapper', function () {
         await expect(
           mapperInstance
             .connect(user1)
-            .setBeneficiary(adIdInstance.address, 1, beneficiary1.address)
+            .setAftermarketDeviceBeneficiary(1, beneficiary1.address)
         )
           .to.emit(mapperInstance, 'BeneficiarySet')
           .withArgs(adIdInstance.address, 1, beneficiary1.address);

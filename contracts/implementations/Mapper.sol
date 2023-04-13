@@ -3,36 +3,42 @@ pragma solidity ^0.8.13;
 
 import "../interfaces/INFT.sol";
 import "../libraries/MapperStorage.sol";
+import "../libraries/nodes/AftermarketDeviceStorage.sol";
 
 /// @title Mapper
 /// @notice Contract to map relationships between nodes and other contracts
 contract Mapper {
     event BeneficiarySet(
         address indexed idProxyAddress,
-        uint256 nodeId,
+        uint256 indexed nodeId,
         address indexed beneficiary
     );
 
-    /// @notice Sets the beneficiary associated with the pair idProxy/nodeId
+    /// @notice Sets the beneficiary associated with the aftermarket device
     /// @dev Only the nodeId owner can set a beneficiary
-    /// @param idProxyAddress The address of the NFT proxy
+    /// @dev To clear the beneficiary, users can pass the zero address
     /// @param nodeId The node Id to be associated with the beneficiary
     /// @param beneficiary The address to be a beneficiary
-    function setBeneficiary(
-        address idProxyAddress,
+    function setAftermarketDeviceBeneficiary(
         uint256 nodeId,
         address beneficiary
     ) external {
-        address nodeOwner = INFT(idProxyAddress).ownerOf(nodeId);
+        address adProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+        address nodeOwner = INFT(adProxyAddress).ownerOf(nodeId);
 
-        require(nodeOwner == msg.sender, "Only owner");
+        require(
+            nodeOwner == msg.sender || adProxyAddress == msg.sender,
+            "Only owner or proxy"
+        );
         require(nodeOwner != beneficiary, "Beneficiary cannot be the owner");
 
-        MapperStorage.getStorage().beneficiaries[idProxyAddress][
+        MapperStorage.getStorage().beneficiaries[adProxyAddress][
             nodeId
         ] = beneficiary;
 
-        emit BeneficiarySet(idProxyAddress, nodeId, beneficiary);
+        emit BeneficiarySet(adProxyAddress, nodeId, beneficiary);
     }
 
     /// @notice Gets the link between two nodes

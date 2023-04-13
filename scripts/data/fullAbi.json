@@ -1558,7 +1558,7 @@
                 "type": "address"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "uint256",
                 "name": "nodeId",
                 "type": "uint256"
@@ -1624,11 +1624,6 @@
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "idProxyAddress",
-                "type": "address"
-            },
-            {
                 "internalType": "uint256",
                 "name": "nodeId",
                 "type": "uint256"
@@ -1639,7 +1634,7 @@
                 "type": "address"
             }
         ],
-        "name": "setBeneficiary",
+        "name": "setAftermarketDeviceBeneficiary",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

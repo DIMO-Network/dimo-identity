@@ -47,7 +47,11 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
             msg.sender == address(_dimoRegistry) || msg.sender == from,
             "Caller is not authorized"
         );
+
         _dimoRegistry.verifyAftermarketDeviceTransfer(tokenId);
+        // Resets aftermarket device beneficiary
+        _dimoRegistry.setAftermarketDeviceBeneficiary(tokenId, address(0));
+
         super._transfer(from, to, tokenId);
     }
 }

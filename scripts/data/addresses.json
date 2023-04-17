@@ -60,7 +60,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x32BFD3Bb7043FD7703EA7b9c29359F987f965Ce0",
+                "address": "0x22Dc95682aB184d6051430f0e6afe587a64E6851",
                 "selectors": [
                     "0x6111afa3",
                     "0xab2ae229",
@@ -108,7 +108,7 @@
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0x881BcB0e0A0F9D369579c684Fd01E1d8f624EFce"
+                "implementation": "0xa05be7118a3F54bDa99791E7e5F896d6A55Ba56f"
             }
         }
     },

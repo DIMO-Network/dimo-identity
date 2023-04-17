@@ -175,7 +175,7 @@
             "slot": "401",
             "type": "t_struct(Counter)2627_storage",
             "contract": "NftBaseUpgradeable",
-            "src": "contracts/NFTs/Base/NftBaseUpgradeable.sol:24"
+            "src": "contracts/NFTs/Base/NftBaseUpgradeable.sol:23"
           },
           {
             "label": "baseURI",
@@ -183,7 +183,7 @@
             "slot": "402",
             "type": "t_string_storage",
             "contract": "NftBaseUpgradeable",
-            "src": "contracts/NFTs/Base/NftBaseUpgradeable.sol:30"
+            "src": "contracts/NFTs/Base/NftBaseUpgradeable.sol:29"
           }
         ],
         "types": {

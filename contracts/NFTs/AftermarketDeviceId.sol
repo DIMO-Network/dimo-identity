@@ -34,6 +34,7 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
     /// @notice Internal function to transfer a token
     /// @dev Only the token owner can transfer (no approvals)
     /// @dev The AD must not be paired
+    /// @dev Clears all privileges and beneficiaries
     /// @param from Old owner
     /// @param to New owner
     /// @param tokenId Token Id to be transferred

@@ -54,7 +54,8 @@ contract Mapper {
         ];
     }
 
-    /// @notice Gets the beneficiary associated with the pair idProxy/nodeId
+    /// @notice Gets the beneficiary associated with the pair idProxy/nodeId.
+    /// @notice If the beneficiary is not explicitly set, it defaults to the owner
     /// @param idProxyAddress The address of the NFT proxy
     /// @param nodeId The node Id to be queried
     function getBeneficiary(address idProxyAddress, uint256 nodeId)

@@ -33,7 +33,6 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
 
     /// @notice Internal function to transfer a token
     /// @dev Only the token owner can transfer (no approvals)
-    /// @dev The AD must not be paired
     /// @dev Clears all privileges and beneficiaries
     /// @param from Old owner
     /// @param to New owner
@@ -49,7 +48,6 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
             "Caller is not authorized"
         );
 
-        _dimoRegistry.verifyAftermarketDeviceTransfer(tokenId);
         // Resets aftermarket device beneficiary
         _dimoRegistry.setAftermarketDeviceBeneficiary(tokenId, address(0));
 

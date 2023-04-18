@@ -368,12 +368,6 @@ describe('AftermarketDeviceId', async function () {
             .connect(user2)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 1)
         ).to.be.revertedWith('Caller is not authorized');
       });
-      it('Should revert if aftermarket device is already paired', async () => {
-        await expect(
-          adIdInstance
-            .connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 1)
-        ).to.be.revertedWith('AD must not be paired');
-      });
     });
 
     context('State', () => {

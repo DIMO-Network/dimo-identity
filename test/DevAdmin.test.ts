@@ -342,13 +342,13 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceTransferred event with correct params', async () => {
+      it('Should emit AftermarketDeviceTransferredDevAdmin event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .transferAftermarketDeviceOwnership(1, user2.address)
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceTransferred')
+          .to.emit(devAdminInstance, 'AftermarketDeviceTransferredDevAdmin')
           .withArgs(1, user1.address, user2.address);
       });
     });
@@ -492,15 +492,15 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnclaimed event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnclaimedDevAdmin event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .unclaimAftermarketDeviceNode([1, 2])
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimed')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimedDevAdmin')
           .withArgs(1)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimed')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimedDevAdmin')
           .withArgs(2);
       });
     });
@@ -669,15 +669,15 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .unpairAftermarketDeviceByDeviceNode([1, 2])
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
           .withArgs(2, 2, user1.address);
       });
     });
@@ -846,15 +846,15 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .unpairAftermarketDeviceByVehicleNode([1, 2])
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
           .withArgs(2, 2, user1.address);
       });
     });

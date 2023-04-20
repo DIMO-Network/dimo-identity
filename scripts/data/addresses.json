@@ -84,9 +84,11 @@
                 ]
             },
             "Mapper": {
-                "address": "0x85f46D3758610193629cB34a0a57EF4368A3454F",
+                "address": "0x8083F96cF51727BE905057a837DAafBE0B91920f",
                 "selectors": [
-                    "0x112e62a2"
+                    "0x0a6cef46",
+                    "0x112e62a2",
+                    "0xbebc0bfc"
                 ]
             },
             "Multicall": {
@@ -108,7 +110,7 @@
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0x881BcB0e0A0F9D369579c684Fd01E1d8f624EFce"
+                "implementation": "0xDBf41a0bc3Bd703B648b55fC50Ef2eeAcbaCd347"
             }
         }
     },

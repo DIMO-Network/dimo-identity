@@ -1,8 +1,8 @@
 import chai from 'chai';
 import { ethers, waffle, upgrades } from 'hardhat';
 
-import { MockMultiPrivilege } from '../typechain';
-import { createSnapshot, revertToSnapshot, SetPrivilegeData, C } from '../utils';
+import { MockMultiPrivilege } from '../../typechain';
+import { createSnapshot, revertToSnapshot, SetPrivilegeData, C } from '../../utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -73,7 +73,7 @@ describe('MultiPrivilege', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set new privilege record', async () => {
         await multiPrivilegeInstance
           .connect(admin)
@@ -130,7 +130,7 @@ describe('MultiPrivilege', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set new privilege record', async () => {
         await multiPrivilegeInstance
           .connect(admin)
@@ -192,7 +192,7 @@ describe('MultiPrivilege', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set new privilege record', async () => {
         await multiPrivilegeInstance
           .connect(admin)
@@ -268,7 +268,7 @@ describe('MultiPrivilege', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set privilege expiration', async () => {
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
 
@@ -407,7 +407,7 @@ describe('MultiPrivilege', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set privilege expiration', async () => {
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
         await multiPrivilegeInstance.createPrivilege(true, ''); // 2

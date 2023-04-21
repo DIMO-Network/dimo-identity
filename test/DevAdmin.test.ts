@@ -334,7 +334,7 @@ describe('DevAdmin', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set new node owner', async () => {
         expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
 
@@ -454,7 +454,7 @@ describe('DevAdmin', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly unclaim aftermarket Device', async () => {
         await expect(aftermarketDeviceInstance
           .connect(admin)
@@ -632,7 +632,7 @@ describe('DevAdmin', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         expect(
           await mapperInstance.getLink(adIdInstance.address, 1)
@@ -809,7 +809,7 @@ describe('DevAdmin', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         expect(
           await mapperInstance.getLink(adIdInstance.address, 1)
@@ -905,7 +905,7 @@ describe('DevAdmin', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should rename manufacturers', async () => {
         for (let i = 0; i < C.mockManufacturerNames.length; i++) {
           const idReturned = await manufacturerInstance.getManufacturerIdByName(C.mockManufacturerNames[i]);

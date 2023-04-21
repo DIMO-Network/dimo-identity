@@ -6,8 +6,8 @@ import {
   Nodes,
   Manufacturer,
   ManufacturerId
-} from '../typechain';
-import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
+} from '../../typechain';
+import { initialize, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -217,7 +217,7 @@ describe('Manufacturer', async function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set parent node', async () => {
         await manufacturerInstance
           .connect(admin)
@@ -340,7 +340,7 @@ describe('Manufacturer', async function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set owner as controller', async () => {
         const isControllerBefore: boolean =
           await manufacturerInstance.isController(manufacturer1.address);
@@ -521,7 +521,7 @@ describe('Manufacturer', async function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set infos', async () => {
         const localNewAttributeInfoPairs = JSON.parse(
           JSON.stringify(C.mockManufacturerAttributeInfoPairs)

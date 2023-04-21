@@ -13,7 +13,6 @@
     },
     {
       "address": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-      "txHash": "0x9c02b6c5f1a6faac29151d00a9ddf2936775a4a46674504824aa0cb455622ce9",
       "kind": "uups"
     }
   ],
@@ -278,7 +277,11 @@
             "numberOfBytes": "1"
           }
         }
-      }
+      },
+      "allAddresses": [
+        "0x881BcB0e0A0F9D369579c684Fd01E1d8f624EFce",
+        "0xa05be7118a3F54bDa99791E7e5F896d6A55Ba56f"
+      ]
     },
     "60e365d88db7e41b8ccc411258bc90d8262492190549817b09942b189215bcbf": {
       "address": "0x5d7E06DeA55f2a71E77F13C679Abd9FBedbb3e00",

@@ -84,9 +84,11 @@
                 ]
             },
             "Mapper": {
-                "address": "0x85f46D3758610193629cB34a0a57EF4368A3454F",
+                "address": "0x8083F96cF51727BE905057a837DAafBE0B91920f",
                 "selectors": [
-                    "0x112e62a2"
+                    "0x0a6cef46",
+                    "0x112e62a2",
+                    "0xbebc0bfc"
                 ]
             },
             "Multicall": {
@@ -173,13 +175,14 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x5e6cdEf2e2A18e04568d124302DEb08A40883Fa4",
+                "address": "0x2FDE841a060a55F002a6944EBD87A56B38a15fC0",
                 "selectors": [
                     "0x6111afa3",
                     "0xab2ae229",
                     "0x89a841bb",
                     "0x9796cf22",
                     "0x7ba79a39",
+                    "0xb50df2f7",
                     "0xcfe642dd",
                     "0x4d49d82a",
                     "0x4d13b709",
@@ -198,9 +201,11 @@
                 ]
             },
             "Mapper": {
-                "address": "0x17F2C933cAD99E4BfE27795488622474691162C5",
+                "address": "0xC0a3ceeeCF84B3f55CCC2Ed78AF1f1DFF17Af7b1",
                 "selectors": [
-                    "0x112e62a2"
+                    "0x0a6cef46",
+                    "0x112e62a2",
+                    "0xbebc0bfc"
                 ]
             },
             "DevAdmin": {
@@ -232,7 +237,7 @@
             },
             "AftermarketDeviceId": {
                 "proxy": "0xcf9Af64522162da85164a714c23a7705E6e466b3",
-                "implementation": "0xcA9d25C9a59CF85210Dd255aA56c4F015c005c9C"
+                "implementation": "0x505afbB70b46B30Fd8D0b9BDFc4f5bfC78d3d7e0"
             }
         }
     },

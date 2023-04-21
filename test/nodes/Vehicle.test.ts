@@ -9,14 +9,14 @@ import {
   ManufacturerId,
   Vehicle,
   VehicleId
-} from '../typechain';
+} from '../../typechain';
 import {
   initialize,
   createSnapshot,
   revertToSnapshot,
   signMessage,
   C
-} from '../utils';
+} from '../../utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -251,7 +251,7 @@ describe('Vehicle', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set parent node', async () => {
         await vehicleInstance
           .connect(admin)
@@ -555,7 +555,7 @@ describe('Vehicle', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set parent node', async () => {
         await vehicleInstance
           .connect(admin)
@@ -686,7 +686,7 @@ describe('Vehicle', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set infos', async () => {
         const localNewAttributeInfoPairs = JSON.parse(
           JSON.stringify(C.mockVehicleAttributeInfoPairs)

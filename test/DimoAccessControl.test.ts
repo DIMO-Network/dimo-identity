@@ -43,7 +43,7 @@ describe('DimoAccessControl', async function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly grant a role to an account', async () => {
         const admin2RoleBefore: boolean = await accessControlInstance.hasRole(
           C.MOCK_ROLE,
@@ -85,7 +85,7 @@ describe('DimoAccessControl', async function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly revoke a role from an account', async () => {
         await accessControlInstance
           .connect(admin1)
@@ -117,7 +117,7 @@ describe('DimoAccessControl', async function () {
   });
 
   describe('renounceRole', async () => {
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly renounce role', async () => {
         await accessControlInstance
           .connect(admin1)

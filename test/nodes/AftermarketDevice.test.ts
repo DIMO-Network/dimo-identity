@@ -16,7 +16,7 @@ import {
   Mapper,
   MockDimoToken,
   MockStake
-} from '../typechain';
+} from '../../typechain';
 import {
   initialize,
   createSnapshot,
@@ -24,7 +24,7 @@ import {
   signMessage,
   AftermarketDeviceOwnerPair,
   C
-} from '../utils';
+} from '../../utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -471,7 +471,7 @@ describe('AftermarketDevice', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set parent node', async () => {
         await aftermarketDeviceInstance
           .connect(manufacturer1)
@@ -682,7 +682,7 @@ describe('AftermarketDevice', function () {
       });
     });
 
-    context('State change', async () => {
+    context('State', async () => {
       it('Should correctly set node owners', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
@@ -1027,7 +1027,7 @@ describe('AftermarketDevice', function () {
       });
     });
 
-    context('State change', async () => {
+    context('State', async () => {
       it('Should correctly set node owner', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
@@ -1370,7 +1370,7 @@ describe('AftermarketDevice', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
@@ -1659,7 +1659,7 @@ describe('AftermarketDevice', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
@@ -1926,7 +1926,7 @@ describe('AftermarketDevice', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
 
       beforeEach(async () => {
         await vehicleInstance
@@ -2041,7 +2041,7 @@ describe('AftermarketDevice', function () {
       });
     });
 
-    context('State change', () => {
+    context('State', () => {
       it('Should correctly set infos', async () => {
         const localNewAttributeInfoPairs = JSON.parse(
           JSON.stringify(C.mockAdAttributeInfoPairs)

@@ -6,6 +6,11 @@ pragma solidity ^0.8.13;
 interface IDimoRegistry {
     function setManufacturerMinted(address addr) external;
 
+    function setAftermarketDeviceBeneficiary(
+        uint256 nodeId,
+        address beneficiary
+    ) external;
+
     function isController(address addr)
         external
         view
@@ -20,4 +25,8 @@ interface IDimoRegistry {
         external
         view
         returns (bool _isAllowed);
+
+    function verifyAftermarketDeviceTransfer(uint256 aftermarketDeviceNode)
+        external
+        view;
 }

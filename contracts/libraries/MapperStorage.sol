@@ -8,7 +8,12 @@ library MapperStorage {
         keccak256("DIMORegistry.mapper.storage");
 
     struct Storage {
+        // Links between Vehicles and ADs
+        // idProxyAddress -> vehicleId/adId -> adId/vehicleId
         mapping(address => mapping(uint256 => uint256)) links;
+        // Stores beneficiary addresses for a given nodeId of an idProxy
+        // idProxyAddress -> nodeId -> beneficiary
+        mapping(address => mapping(uint256 => address)) beneficiaries;
     }
 
     /* solhint-disable no-inline-assembly */

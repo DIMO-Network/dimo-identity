@@ -34,6 +34,7 @@ main([
   'contracts/dev/DevAdmin.sol:DevAdmin',
   'contracts/access/DimoAccessControl.sol:DimoAccessControl',
   'contracts/Eip712/Eip712Checker.sol:Eip712Checker',
+  'contracts/shared/Multicall.sol:Multicall',
   'contracts/implementations/AdLicenseValidator/AdLicenseValidator.sol:AdLicenseValidator',
   'contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice',
   'contracts/implementations/nodes/Manufacturer.sol:Manufacturer',

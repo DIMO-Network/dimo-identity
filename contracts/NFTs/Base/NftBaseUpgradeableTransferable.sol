@@ -142,19 +142,6 @@ abstract contract NftBaseUpgradeable is
         onlyRole(UPGRADER_ROLE)
     {}
 
-    /// @notice Internal function to transfer a token
-    /// @dev Caller must have the transferer role
-    /// @param from Old owner
-    /// @param to New owner
-    /// @param tokenId Token Id to be transferred
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override onlyRole(TRANSFERER_ROLE) {
-        super._transfer(from, to, tokenId);
-    }
-
     /// @notice Internal function to burn a token
     /// @dev Caller must have the burner role
     /// @param tokenId Token Id to be burned

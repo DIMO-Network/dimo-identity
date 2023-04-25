@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./IMultiPrivilege.sol";
-import "../NftBaseUpgradeable.sol";
+import "../NftBaseUpgradeableTransferable.sol";
 
 /// @title MultiPrivilege
 /// @dev Based on the EIP-5496 https://eips.ethereum.org/EIPS/eip-5496
@@ -180,7 +180,7 @@ abstract contract MultiPrivilege is
         address from,
         address to,
         uint256 tokenId
-    ) internal override {
+    ) internal virtual override {
         tokenIdToVersion[tokenId]++;
         super._transfer(from, to, tokenId);
     }

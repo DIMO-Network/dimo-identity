@@ -110,7 +110,7 @@
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0xa05be7118a3F54bDa99791E7e5F896d6A55Ba56f"
+                "implementation": "0xDBf41a0bc3Bd703B648b55fC50Ef2eeAcbaCd347"
             }
         }
     },

@@ -473,20 +473,6 @@ contract AftermarketDevice is
         ];
     }
 
-    /// @notice Verifies if AD Id can be transfered
-    /// @param aftermarketDeviceNode Aftermarket device node id to be validated
-    function verifyAftermarketDeviceTransfer(uint256 aftermarketDeviceNode)
-        external
-        view
-    {
-        require(
-            MapperStorage.getStorage().links[
-                AftermarketDeviceStorage.getStorage().idProxyAddress
-            ][aftermarketDeviceNode] == 0,
-            "AD must not be paired"
-        );
-    }
-
     // ***** PRIVATE FUNCTIONS ***** //
 
     /// @dev Internal function to add infos to node

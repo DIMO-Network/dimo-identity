@@ -15,13 +15,15 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 /// @title DevAdmin
 /// @dev Admin module for development and testing
 contract DevAdmin is AccessControlInternal {
-    event AftermarketDeviceUnclaimed(uint256 indexed aftermarketDeviceNode);
-    event AftermarketDeviceTransferred(
+    event AftermarketDeviceUnclaimedDevAdmin(
+        uint256 indexed aftermarketDeviceNode
+    );
+    event AftermarketDeviceTransferredDevAdmin(
         uint256 indexed aftermarketDeviceNode,
         address indexed oldOwner,
         address indexed newOwner
     );
-    event AftermarketDeviceUnpaired(
+    event AftermarketDeviceUnpairedDevAdmin(
         uint256 indexed aftermarketDeviceNode,
         uint256 indexed vehicleNode,
         address indexed owner
@@ -49,7 +51,7 @@ contract DevAdmin is AccessControlInternal {
 
         adIdProxy.safeTransferFrom(oldOwner, newOwner, aftermarketDeviceNode);
 
-        emit AftermarketDeviceTransferred(
+        emit AftermarketDeviceTransferredDevAdmin(
             aftermarketDeviceNode,
             oldOwner,
             newOwner
@@ -77,7 +79,7 @@ contract DevAdmin is AccessControlInternal {
 
             ads.deviceClaimed[_adNode] = false;
 
-            emit AftermarketDeviceUnclaimed(_adNode);
+            emit AftermarketDeviceUnclaimedDevAdmin(_adNode);
         }
     }
 
@@ -110,7 +112,7 @@ contract DevAdmin is AccessControlInternal {
             ms.links[vehicleIdProxyAddress][_vehicleNode] = 0;
             ms.links[adIdProxyAddress][_adNode] = 0;
 
-            emit AftermarketDeviceUnpaired(
+            emit AftermarketDeviceUnpairedDevAdmin(
                 _adNode,
                 _vehicleNode,
                 INFT(adIdProxyAddress).ownerOf(_adNode)
@@ -147,7 +149,7 @@ contract DevAdmin is AccessControlInternal {
             ms.links[vehicleIdProxyAddress][_vehicleNode] = 0;
             ms.links[adIdProxyAddress][_adNode] = 0;
 
-            emit AftermarketDeviceUnpaired(
+            emit AftermarketDeviceUnpairedDevAdmin(
                 _adNode,
                 _vehicleNode,
                 INFT(vehicleIdProxyAddress).ownerOf(_vehicleNode)

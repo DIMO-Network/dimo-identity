@@ -9,6 +9,16 @@
                     "0x06d1d2a1"
                 ]
             },
+            "DevAdmin": {
+                "address": "0xcac003FD74edBe8D7560d9b8Bc347CD600bcF755",
+                "selectors": [
+                    "0xf73a8f04",
+                    "0xff96b761",
+                    "0x5c129493",
+                    "0x71193956",
+                    "0x8c2ee9bb"
+                ]
+            },
             "Eip712Checker": {
                 "address": "0x385C31C64262904e47e20F8f614B7aF0080650F7",
                 "selectors": [

@@ -57,7 +57,8 @@
           "solidity-coverage",
           "@nomiclabs/hardhat-waffle",
           "@nomiclabs/hardhat-ethers",
-          "@openzeppelin/hardhat-upgrades"
+          "@openzeppelin/hardhat-upgrades",
+          "hardhat-abi-exporter"
         ]
       }
     ]

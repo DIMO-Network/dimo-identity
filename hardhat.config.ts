@@ -9,6 +9,7 @@ import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
+import 'hardhat-abi-exporter';
 
 // eslint-disable-next-line node/no-unpublished-import
 import './scripts/linearization';
@@ -68,6 +69,12 @@ const config: HardhatUserConfig = {
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || ''
     }
+  },
+  abiExporter: {
+    path: './abis',
+    runOnCompile: true,
+    only: [':ManufacturerId$', ':AftermarketDeviceId$', ':VehicleId$'],
+    format: 'json'
   }
 };
 

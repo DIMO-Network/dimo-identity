@@ -6,6 +6,8 @@ pragma solidity ^0.8.13;
 interface IDimoRegistry {
     function setManufacturerMinted(address addr) external;
 
+    function setIntegrationMinted(address addr) external;
+
     function setAftermarketDeviceBeneficiary(
         uint256 nodeId,
         address beneficiary

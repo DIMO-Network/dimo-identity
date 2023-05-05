@@ -1,10 +1,10 @@
 import { Wallet } from 'ethers';
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import { getSelectors } from '.';
+import { getSelectors, ContractNameArgs } from '.';
 
-async function initialize(
+export async function initialize(
   deployer: Wallet | SignerWithAddress,
   ...contracts: string[]
 ): Promise<any[]> {
@@ -51,4 +51,32 @@ async function initialize(
   return instances;
 }
 
-export { initialize };
+export async function deployUpgradeableContracts(
+  deployer: Wallet | SignerWithAddress,
+  contractNameArgs: ContractNameArgs[]
+): Promise<any[]> {
+  const instances: any[] = [];
+
+  for (const contractNameArg of contractNameArgs) {
+    const ContractFactory = await ethers.getContractFactory(
+      contractNameArg.name,
+      deployer
+    );
+
+    await upgrades.validateImplementation(ContractFactory, {
+      kind: contractNameArg.opts.kind
+    });
+
+    const contractProxy = await upgrades.deployProxy(
+      ContractFactory,
+      contractNameArg.args,
+      contractNameArg.opts
+    );
+
+    await contractProxy.deployed();
+
+    instances.push(contractProxy);
+  }
+
+  return instances;
+}

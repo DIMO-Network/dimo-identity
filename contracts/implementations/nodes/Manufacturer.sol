@@ -10,7 +10,7 @@ import {AttributeInfoPair} from "../../shared/Types.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/// @title Vehicle
+/// @title Manufacturer
 /// @notice Contract that represents the Manufacturer node
 contract Manufacturer is AccessControlInternal {
     event ManufacturerIdProxySet(address indexed proxy);

@@ -1,10 +1,4 @@
-import { ethers } from 'hardhat';
 import { AttributeInfoPair } from '../types';
-
-// Node type
-export const manufacturerNodeType = ethers.utils.toUtf8Bytes('Manufacturer');
-export const manufacturerNodeTypeId =
-  ethers.utils.keccak256(manufacturerNodeType);
 
 // Mock Manufacturer attributes
 export const mockManufacturerAttribute1 = 'mockManufacturerAttribute1';

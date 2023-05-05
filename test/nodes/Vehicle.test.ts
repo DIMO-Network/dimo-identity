@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle, upgrades } from 'hardhat';
+import { waffle } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -12,6 +12,7 @@ import {
 } from '../../typechain';
 import {
   initialize,
+  setup,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -42,52 +43,15 @@ describe('Vehicle', function () {
       eip712CheckerInstance,
       nodesInstance,
       manufacturerInstance,
-      vehicleInstance
-    ] = await initialize(
-      admin,
-      'Eip712Checker',
-      'Nodes',
-      'Manufacturer',
-      'Vehicle'
-    );
+      vehicleInstance,
+      manufacturerIdInstance,
+      vehicleIdInstance
+    ] = await setup(admin, {
+      modules: ['Eip712Checker', 'Nodes', 'Manufacturer', 'Vehicle'],
+      nfts: ['ManufacturerId', 'VehicleId']
+    });
 
-    const ManufacturerIdFactory = await ethers.getContractFactory(
-      'ManufacturerId'
-    );
-    const vehicleIdFactory = await ethers.getContractFactory('VehicleId');
-
-    manufacturerIdInstance = await upgrades.deployProxy(
-      ManufacturerIdFactory,
-      [
-        C.MANUFACTURER_NFT_NAME,
-        C.MANUFACTURER_NFT_SYMBOL,
-        C.MANUFACTURER_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerId;
-    await manufacturerIdInstance.deployed();
-
-    vehicleIdInstance = await upgrades.deployProxy(
-      vehicleIdFactory,
-      [
-        C.VEHICLE_NFT_NAME,
-        C.VEHICLE_NFT_SYMBOL,
-        C.VEHICLE_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as VehicleId;
-    await vehicleIdInstance.deployed();
-
-    const MANUFACTURER_MINTER_ROLE =
-      await manufacturerIdInstance.MINTER_ROLE();
+    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
@@ -149,7 +113,8 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .setVehicleIdProxyAddress(localVehicleInstance.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -183,7 +148,8 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .addVehicleAttribute(C.mockVehicleAttribute1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -227,7 +193,8 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -257,7 +224,10 @@ describe('Vehicle', function () {
           .connect(admin)
           .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
 
-        const parentNode = await nodesInstance.getParentNode(vehicleIdInstance.address, 1);
+        const parentNode = await nodesInstance.getParentNode(
+          vehicleIdInstance.address,
+          1
+        );
         expect(parentNode).to.be.equal(1);
       });
       it('Should correctly set node owner', async () => {
@@ -306,9 +276,17 @@ describe('Vehicle', function () {
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
         )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
-          .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, C.mockVehicleAttributeInfoPairs[0].info)
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[0].attribute,
+            C.mockVehicleAttributeInfoPairs[0].info
+          )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
-          .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, C.mockVehicleAttributeInfoPairs[1].info);
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[1].attribute,
+            C.mockVehicleAttributeInfoPairs[1].info
+          );
       });
     });
   });
@@ -351,7 +329,8 @@ describe('Vehicle', function () {
               signature
             )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -638,9 +617,17 @@ describe('Vehicle', function () {
             )
         )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
-          .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, C.mockVehicleAttributeInfoPairs[0].info)
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[0].attribute,
+            C.mockVehicleAttributeInfoPairs[0].info
+          )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
-          .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, C.mockVehicleAttributeInfoPairs[1].info);
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[1].attribute,
+            C.mockVehicleAttributeInfoPairs[1].info
+          );
       });
     });
   });
@@ -666,7 +653,8 @@ describe('Vehicle', function () {
             .connect(nonAdmin)
             .setVehicleInfo(1, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -744,9 +732,17 @@ describe('Vehicle', function () {
             .setVehicleInfo(1, localNewAttributeInfoPairs)
         )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
-          .withArgs(1, localNewAttributeInfoPairs[0].attribute, localNewAttributeInfoPairs[0].info)
+          .withArgs(
+            1,
+            localNewAttributeInfoPairs[0].attribute,
+            localNewAttributeInfoPairs[0].info
+          )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
-          .withArgs(1, localNewAttributeInfoPairs[1].attribute, localNewAttributeInfoPairs[1].info);
+          .withArgs(
+            1,
+            localNewAttributeInfoPairs[1].attribute,
+            localNewAttributeInfoPairs[1].info
+          );
       });
     });
   });

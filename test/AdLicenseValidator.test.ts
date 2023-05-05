@@ -2,7 +2,7 @@ import chai from 'chai';
 import { ethers, waffle } from 'hardhat';
 
 import { AdLicenseValidator, MockDimoToken, MockStake } from '../typechain';
-import { initialize, createSnapshot, revertToSnapshot, C } from '../utils';
+import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
 const { solidity } = waffle;
@@ -19,10 +19,10 @@ describe('AdLicenseValidator', function () {
   const [admin, nonAdmin, foundation] = provider.getWallets();
 
   before(async () => {
-    [, adLicenseValidatorInstance] = await initialize(
-      admin,
-      'AdLicenseValidator'
-    );
+    [, adLicenseValidatorInstance] = await setup(admin, {
+      modules: ['AdLicenseValidator'],
+      nfts: []
+    });
 
     // Deploy MockDimoToken contract
     const MockDimoTokenFactory = await ethers.getContractFactory(

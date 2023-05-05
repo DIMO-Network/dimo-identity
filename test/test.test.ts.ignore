@@ -1,0 +1,79 @@
+import chai from 'chai';
+import { ethers, waffle, upgrades } from 'hardhat';
+
+import {
+  VehicleIdNew,
+  VirtualDeviceId
+} from '../typechain';
+import {
+  createSnapshot,
+  revertToSnapshot,
+  C
+} from '../utils';
+
+const { solidity } = waffle;
+const provider = waffle.provider;
+
+chai.use(solidity);
+
+describe.only('VehicleId test', async function () {
+  let snapshot: string;
+
+  const [
+    user1,
+    user2,
+    user3
+  ] = provider.getWallets();
+
+  describe.only('test', () => {
+    it.only('test', async () => {
+      const VehicleIdFactory = await ethers.getContractFactory('VehicleIdNew');
+      const VirtualDeviceIdFactory = await ethers.getContractFactory('VirtualDeviceId');
+
+      const vehicleIdInstance = await upgrades.deployProxy(
+        VehicleIdFactory,
+        [
+          C.VEHICLE_NFT_NAME,
+          C.VEHICLE_NFT_SYMBOL,
+          C.VEHICLE_NFT_BASE_URI
+        ],
+        {
+          initializer: 'initialize',
+          kind: 'uups',
+          unsafeAllow: ['delegatecall']
+        }
+        // eslint-disable-next-line prettier/prettier
+      ) as VehicleIdNew;
+      await vehicleIdInstance.deployed();
+
+      const virtualDeviceInstance = await upgrades.deployProxy(
+        VirtualDeviceIdFactory,
+        [
+          C.VEHICLE_NFT_NAME,
+          C.VEHICLE_NFT_SYMBOL,
+          C.VEHICLE_NFT_BASE_URI
+        ],
+        {
+          initializer: 'initialize',
+          kind: 'uups',
+          unsafeAllow: ['delegatecall']
+        }
+        // eslint-disable-next-line prettier/prettier
+      ) as VirtualDeviceId;
+      await virtualDeviceInstance.deployed();
+
+      await vehicleIdInstance.setVirtualDeviceAddress(virtualDeviceInstance.address);
+
+      await vehicleIdInstance['safeMint(address)'](user1.address);
+      await virtualDeviceInstance['safeMint(address)'](user1.address);
+
+      console.log(await vehicleIdInstance.ownerOf(1));
+      console.log(await virtualDeviceInstance.ownerOf(1));
+
+      await vehicleIdInstance['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 1);
+
+      console.log(await vehicleIdInstance.ownerOf(1));
+      console.log(await virtualDeviceInstance.ownerOf(1));
+    });
+  });
+});

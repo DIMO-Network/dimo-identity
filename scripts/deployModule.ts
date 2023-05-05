@@ -5,7 +5,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import { DIMORegistry } from '../typechain';
 import { getSelectors, ContractAddressesByNetwork } from '../utils';
-import * as C from './data/deployConstants';
+import * as C from './data/deployArgs';
 import addressesJSON from './data/addresses.json';
 
 const contractAddresses: ContractAddressesByNetwork = addressesJSON;

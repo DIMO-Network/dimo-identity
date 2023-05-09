@@ -15,14 +15,15 @@ const provider = waffle.provider;
 
 chai.use(solidity);
 
-describe.skip('IntegrationId', async function () {
+describe('IntegrationId', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let nodesInstance: Nodes;
   let integrationInstance: Integration;
   let integrationIdInstance: IntegrationId;
 
-  const [admin, integrationOwner1] = provider.getWallets();
+  const [admin, integrationOwner1, integrationOwner2, nonController] =
+    provider.getWallets();
 
   before(async () => {
     [
@@ -86,26 +87,16 @@ describe.skip('IntegrationId', async function () {
           C.mockIntegrationNames[0],
           C.mockIntegrationAttributeInfoPairs
         );
-      // for (const mockIntegrationName of C.mockIntegrationNames) {
-      //   console.log('here');
-      //   await integrationInstance
-      //     .connect(admin)
-      //     .mintIntegration(
-      //       integrationOwner1.address,
-      //       mockIntegrationName,
-      //       C.mockIntegrationAttributeInfoPairs
-      //     );
-      // }
     });
 
     context('Error handling', () => {
       it('Should revert if the new owner is not a controller', async () => {
         await expect(
           integrationIdInstance
-            .connect(admin)
+            .connect(integrationOwner1)
             ['safeTransferFrom(address,address,uint256)'](
-              admin.address,
               integrationOwner1.address,
+              nonController.address,
               1
             )
         ).to.be.revertedWith('Address is not allowed to own a new token');
@@ -114,39 +105,36 @@ describe.skip('IntegrationId', async function () {
         await integrationInstance
           .connect(admin)
           .mintIntegration(
-            integrationOwner1.address,
-            'New name',
+            integrationOwner2.address,
+            C.mockIntegrationNames[1],
             C.mockIntegrationAttributeInfoPairs
           );
 
         await expect(
           integrationIdInstance
-            .connect(admin)
+            .connect(integrationOwner1)
             ['safeTransferFrom(address,address,uint256)'](
               admin.address,
-              integrationOwner1.address,
+              integrationOwner2.address,
               1
             )
         ).to.be.revertedWith('Address is not allowed to own a new token');
       });
       it('Should revert if caller does not have transferer role', async () => {
-        await integrationIdInstance
-          .connect(admin)
-          .renounceRole(C.NFT_TRANSFERER_ROLE, admin.address);
         await integrationInstance
           .connect(admin)
-          .setController(integrationOwner1.address);
+          .setController(integrationOwner2.address);
 
         await expect(
           integrationIdInstance
-            .connect(admin)
+            .connect(integrationOwner1)
             ['safeTransferFrom(address,address,uint256)'](
-              admin.address,
               integrationOwner1.address,
+              integrationOwner2.address,
               1
             )
         ).to.be.revertedWith(
-          `AccessControl: account ${admin.address.toLowerCase()} is missing role ${
+          `AccessControl: account ${integrationOwner1.address.toLowerCase()} is missing role ${
             C.NFT_TRANSFERER_ROLE
           }`
         );
@@ -155,9 +143,12 @@ describe.skip('IntegrationId', async function () {
 
     context('State', () => {
       beforeEach(async () => {
+        await integrationIdInstance
+          .connect(admin)
+          .grantRole(C.NFT_TRANSFERER_ROLE, integrationOwner1.address);
         await integrationInstance
           .connect(admin)
-          .setController(integrationOwner1.address);
+          .setController(integrationOwner2.address);
         await integrationInstance
           .connect(admin)
           .setIntegrationInfo(1, C.mockIntegrationAttributeInfoPairs);
@@ -169,10 +160,10 @@ describe.skip('IntegrationId', async function () {
         ).to.equal(0);
 
         await integrationIdInstance
-          .connect(admin)
+          .connect(integrationOwner1)
           ['safeTransferFrom(address,address,uint256)'](
-            admin.address,
             integrationOwner1.address,
+            integrationOwner2.address,
             1
           );
 
@@ -181,18 +172,20 @@ describe.skip('IntegrationId', async function () {
         ).to.equal(0);
       });
       it('Should set new owner', async () => {
-        expect(await integrationIdInstance.ownerOf(1)).to.equal(admin.address);
+        expect(await integrationIdInstance.ownerOf(1)).to.equal(
+          integrationOwner1.address
+        );
 
         await integrationIdInstance
-          .connect(admin)
+          .connect(integrationOwner1)
           ['safeTransferFrom(address,address,uint256)'](
-            admin.address,
             integrationOwner1.address,
+            integrationOwner2.address,
             1
           );
 
         expect(await integrationIdInstance.ownerOf(1)).to.equal(
-          integrationOwner1.address
+          integrationOwner2.address
         );
       });
       it('Should keep the same name', async () => {
@@ -203,10 +196,10 @@ describe.skip('IntegrationId', async function () {
         ).to.equal(1);
 
         await integrationIdInstance
-          .connect(admin)
+          .connect(integrationOwner1)
           ['safeTransferFrom(address,address,uint256)'](
-            admin.address,
             integrationOwner1.address,
+            integrationOwner2.address,
             1
           );
 
@@ -228,10 +221,10 @@ describe.skip('IntegrationId', async function () {
         }
 
         await integrationIdInstance
-          .connect(admin)
+          .connect(integrationOwner1)
           ['safeTransferFrom(address,address,uint256)'](
-            admin.address,
             integrationOwner1.address,
+            integrationOwner2.address,
             1
           );
 
@@ -248,23 +241,23 @@ describe.skip('IntegrationId', async function () {
       it('Should correctly set integrationMinted', async () => {
         const isIntegrationMintedBefore =
           await integrationInstance.isIntegrationMinted(
-            integrationOwner1.address
+            integrationOwner2.address
           );
 
         // eslint-disable-next-line no-unused-expressions
         expect(isIntegrationMintedBefore).to.be.false;
 
         await integrationIdInstance
-          .connect(admin)
+          .connect(integrationOwner1)
           ['safeTransferFrom(address,address,uint256)'](
-            admin.address,
             integrationOwner1.address,
+            integrationOwner2.address,
             1
           );
 
         const isIntegrationMintedAfter =
           await integrationInstance.isIntegrationMinted(
-            integrationOwner1.address
+            integrationOwner2.address
           );
 
         // eslint-disable-next-line no-unused-expressions

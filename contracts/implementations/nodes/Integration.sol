@@ -85,40 +85,6 @@ contract Integration is AccessControlInternal {
 
     // ***** Interaction with nodes ***** //
 
-    // /// @notice Mints an integration
-    // /// @dev Caller must be an admin
-    // /// @param owner The address of the new owner
-    // /// @param name Name of the integration
-    // /// @param attrInfoPairList List of attribute-info pairs to be added
-    // function mintIntegrationByAdmin(
-    //     address owner,
-    //     string calldata name,
-    //     AttributeInfoPair[] calldata attrInfoPairList
-    // ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    //     require(_hasRole(DEFAULT_ADMIN_ROLE, owner), "Owner must be an admin");
-
-    //     IntegrationStorage.Storage storage s = IntegrationStorage
-    //         .getStorage();
-
-    //     uint256 newTokenId;
-    //     string memory name;
-    //     for (uint256 i = 0; i < names.length; i++) {
-    //         name = names[i];
-
-    //         require(
-    //             s.manufacturerNameToNodeId[name] == 0,
-    //             "Manufacturer name already registered"
-    //         );
-
-    //         newTokenId = INFT(s.idProxyAddress).safeMint(owner);
-
-    //         s.manufacturerNameToNodeId[name] = newTokenId;
-    //         s.nodeIdToManufacturerName[newTokenId] = name;
-
-    //         emit ManufacturerNodeMinted(newTokenId, owner);
-    //     }
-    // }
-
     /// @notice Mints an integration
     /// @dev Caller must be an admin
     /// @param owner The address of the new owner

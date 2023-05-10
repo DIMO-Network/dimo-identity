@@ -17,3 +17,8 @@ struct AftermarketDeviceOwnerPair {
     uint256 aftermarketDeviceNodeId;
     address owner;
 }
+
+struct VirtualDeviceInfos {
+    address addr;
+    AttributeInfoPair[] attrInfoPairs;
+}

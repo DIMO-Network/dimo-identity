@@ -123,7 +123,7 @@ describe('IntegrationId', async function () {
       it('Should revert if caller does not have transferer role', async () => {
         await integrationInstance
           .connect(admin)
-          .setController(integrationOwner2.address);
+          .setIntegrationController(integrationOwner2.address);
 
         await expect(
           integrationIdInstance
@@ -148,7 +148,7 @@ describe('IntegrationId', async function () {
           .grantRole(C.NFT_TRANSFERER_ROLE, integrationOwner1.address);
         await integrationInstance
           .connect(admin)
-          .setController(integrationOwner2.address);
+          .setIntegrationController(integrationOwner2.address);
         await integrationInstance
           .connect(admin)
           .setIntegrationInfo(1, C.mockIntegrationAttributeInfoPairs);

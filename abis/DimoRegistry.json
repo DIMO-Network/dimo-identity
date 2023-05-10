@@ -1429,6 +1429,25 @@
                 "type": "address"
             }
         ],
+        "name": "isIntegrationController",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "_isController",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
         "name": "isIntegrationMinted",
         "outputs": [
             {
@@ -1471,6 +1490,19 @@
             }
         ],
         "name": "mintIntegration",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_controller",
+                "type": "address"
+            }
+        ],
+        "name": "setIntegrationController",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1848,6 +1880,35 @@
             }
         ],
         "name": "getLink",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "targetNode",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "idProxyAddressSource",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "idProxyAddressTarget",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "sourceNode",
+                "type": "uint256"
+            }
+        ],
+        "name": "getVehicleVirtualDeviceLink",
         "outputs": [
             {
                 "internalType": "uint256",

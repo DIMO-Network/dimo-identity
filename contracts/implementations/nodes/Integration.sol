@@ -67,7 +67,7 @@ contract Integration is AccessControlInternal {
     /// @notice Sets a address controller
     /// @dev Only an admin can set new controllers
     /// @param _controller The address of the controller
-    function setController(address _controller)
+    function setIntegrationController(address _controller)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
@@ -151,7 +151,7 @@ contract Integration is AccessControlInternal {
 
     /// @notice Verify if an address is a controller
     /// @param addr the address to be verified
-    function isController(address addr)
+    function isIntegrationController(address addr)
         external
         view
         returns (bool _isController)

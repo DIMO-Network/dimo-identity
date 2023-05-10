@@ -19,4 +19,15 @@ contract VirtualDeviceId is Initializable, NftBaseUpgradeable {
     ) external initializer {
         _baseNftInit(name_, symbol_, baseUri_);
     }
+
+    /// @notice Sets the DIMO Registry address
+    /// @dev Only an admin can set the DIMO Registry address
+    /// @param addr The address to be set
+    function setDimoRegistryAddress(address addr)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(addr != address(0), "Non zero address");
+        _dimoRegistry = IDimoRegistry(addr);
+    }
 }

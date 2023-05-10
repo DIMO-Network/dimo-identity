@@ -102,6 +102,7 @@ contract AftermarketDevice is
 
     /// @notice Mints aftermarket devices in batch
     /// @dev Caller must have the manufacturer role
+    /// @param manufacturerNode Parent manufacturer node id
     /// @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
     function mintAftermarketDeviceByManufacturerBatch(
         uint256 manufacturerNode,

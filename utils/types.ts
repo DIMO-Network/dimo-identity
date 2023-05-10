@@ -26,6 +26,11 @@ export type AftermarketDeviceOwnerPair = {
   owner: string
 };
 
+export type VirtualDeviceInfos = {
+  addr: string,
+  attrInfoPairs: AttributeInfoPair[]
+};
+
 export type IdManufacturerName = {
   tokenId: string,
   name: string

@@ -15,6 +15,10 @@ library VirtualDeviceStorage {
         address idProxyAddress;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
+        // Virtual Device address => Virtual Device Id
+        mapping(address => uint256) deviceAddressToNodeId;
+        // Virtual Device Id => Virtual Device address
+        mapping(uint256 => address) nodeIdToDeviceAddress;
     }
 
     /* solhint-disable no-inline-assembly */

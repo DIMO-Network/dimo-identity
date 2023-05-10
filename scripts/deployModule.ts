@@ -257,6 +257,11 @@ async function main() {
   //   '0x1741eC2915Ab71Fc03492715b5640133dA69420B'
   // );
 
+  // await user1.sendTransaction({
+  //   to: deployer.address,
+  //   value: ethers.utils.parseEther('100')
+  // });
+
   const instances1 = await updateModule(deployer, 'DevAdmin', C.networkName);
   writeAddresses(instances1, C.networkName);
 

@@ -54,6 +54,17 @@ contract Mapper {
         ];
     }
 
+    /// TODO Documentation
+    function getVehicleVirtualDeviceLink(
+        address idProxyAddressSource,
+        address idProxyAddressTarget,
+        uint256 sourceNode
+    ) external view returns (uint256 targetNode) {
+        targetNode = MapperStorage.getStorage().vehicleVirtualDeviceLinks[
+            idProxyAddressSource
+        ][idProxyAddressTarget][sourceNode];
+    }
+
     /// @notice Gets the beneficiary associated with the pair idProxy/nodeId.
     /// @notice If the beneficiary is not explicitly set, it defaults to the owner
     /// @param idProxyAddress The address of the NFT proxy

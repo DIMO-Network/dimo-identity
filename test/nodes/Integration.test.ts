@@ -144,13 +144,13 @@ describe('Integration', async function () {
     });
   });
 
-  describe('setController', () => {
+  describe('setIntegrationController', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
           integrationInstance
             .connect(nonAdmin)
-            .setController(integrationOwner1.address)
+            .setIntegrationController(integrationOwner1.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
             C.DEFAULT_ADMIN_ROLE
@@ -159,18 +159,20 @@ describe('Integration', async function () {
       });
       it('Should revert if address is the zero address', async () => {
         await expect(
-          integrationInstance.connect(admin).setController(C.ZERO_ADDRESS)
+          integrationInstance
+            .connect(admin)
+            .setIntegrationController(C.ZERO_ADDRESS)
         ).to.be.revertedWith('Non zero address');
       });
       it('Should revert if address is already a controller', async () => {
         await integrationInstance
           .connect(admin)
-          .setController(integrationOwner1.address);
+          .setIntegrationController(integrationOwner1.address);
 
         await expect(
           integrationInstance
             .connect(admin)
-            .setController(integrationOwner1.address)
+            .setIntegrationController(integrationOwner1.address)
         ).to.be.revertedWith('Already a controller');
       });
     });
@@ -180,7 +182,7 @@ describe('Integration', async function () {
         await expect(
           integrationInstance
             .connect(admin)
-            .setController(integrationOwner1.address)
+            .setIntegrationController(integrationOwner1.address)
         )
           .to.emit(integrationInstance, 'ControllerSet')
           .withArgs(integrationOwner1.address);
@@ -240,7 +242,9 @@ describe('Integration', async function () {
     context('State', () => {
       it('Should correctly set owner as controller', async () => {
         const isControllerBefore: boolean =
-          await integrationInstance.isController(integrationOwner1.address);
+          await integrationInstance.isIntegrationController(
+            integrationOwner1.address
+          );
         // eslint-disable-next-line no-unused-expressions
         expect(isControllerBefore).to.be.false;
 
@@ -253,7 +257,9 @@ describe('Integration', async function () {
           );
 
         const isControllerAfter: boolean =
-          await integrationInstance.isController(integrationOwner1.address);
+          await integrationInstance.isIntegrationController(
+            integrationOwner1.address
+          );
         // eslint-disable-next-line no-unused-expressions
         expect(isControllerAfter).to.be.true;
       });
@@ -570,20 +576,24 @@ describe('Integration', async function () {
     });
   });
 
-  describe('isController', () => {
+  describe('isIntegrationController', () => {
     it('Should return false if address is not a controller', async () => {
       // eslint-disable-next-line no-unused-expressions
-      expect(await integrationInstance.isController(nonController.address)).to
-        .be.false;
+      expect(
+        await integrationInstance.isIntegrationController(nonController.address)
+      ).to.be.false;
     });
     it('Should return true if address is a controller', async () => {
       await integrationInstance
         .connect(admin)
-        .setController(integrationOwner1.address);
+        .setIntegrationController(integrationOwner1.address);
 
       // eslint-disable-next-line no-unused-expressions
-      expect(await integrationInstance.isController(integrationOwner1.address))
-        .to.be.true;
+      expect(
+        await integrationInstance.isIntegrationController(
+          integrationOwner1.address
+        )
+      ).to.be.true;
     });
   });
 
@@ -638,7 +648,7 @@ describe('Integration', async function () {
     it('Should return true if address is a controller and has not yet minted', async () => {
       await integrationInstance
         .connect(admin)
-        .setController(integrationOwner1.address);
+        .setIntegrationController(integrationOwner1.address);
 
       // eslint-disable-next-line no-unused-expressions
       expect(

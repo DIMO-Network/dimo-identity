@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
-import "../../libraries/nodes/ManufacturerStorage.sol";
+import "../../libraries/nodes/IntegrationStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/VirtualDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
@@ -18,6 +18,11 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 /// @notice Contract that represents the Virtual Device node
 /// @dev It uses the Mapper contract to link Virtual Devices to Vehicles
 contract VirtualDevice is AccessControlInternal {
+    bytes32 private constant PAIR_TYPEHASH =
+        keccak256(
+            "MintVirtualDeviceSign(uint256 integrationNode,uint256 vehicleNode,address virtualDeviceAddress)"
+        );
+
     event VirtualDeviceIdProxySet(address indexed proxy);
     event VirtualDeviceAttributeAdded(string attribute);
     event VirtualDeviceAttributeSet(
@@ -26,7 +31,8 @@ contract VirtualDevice is AccessControlInternal {
         string info
     );
     event VirtualDeviceNodeMinted(
-        uint256 tokenId,
+        uint256 virtualDeviceNode,
+        uint256 vehicleNode,
         address indexed virtualDeviceAddress,
         address indexed owner
     );
@@ -66,66 +72,78 @@ contract VirtualDevice is AccessControlInternal {
 
     // ***** Interaction with nodes *****//
 
-    // /// @notice Mints aftermarket devices in batch
-    // /// @dev Caller must have the manufacturer role
-    // /// @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
-    // function mintAftermarketDeviceByManufacturerBatch(
-    //     uint256 manufacturerNode,
-    //     AftermarketDeviceInfos[] calldata adInfos
-    // ) external onlyRole(MANUFACTURER_ROLE) {
-    //     NodesStorage.Storage storage ns = NodesStorage.getStorage();
-    //     AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-    //         .getStorage();
-    //     uint256 devicesAmount = adInfos.length;
-    //     address adIdProxyAddress = ads.idProxyAddress;
-    //     INFT manufacturerIdProxy = INFT(
-    //         ManufacturerStorage.getStorage().idProxyAddress
-    //     );
+    /// TODO Documentation
+    function mintVirtualDeviceSign(
+        uint256 integrationNode,
+        uint256 vehicleNode,
+        bytes calldata vehicleOwnerSig,
+        VirtualDeviceInfos calldata virtualDeviceInfos
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        VirtualDeviceStorage.Storage storage vds = VirtualDeviceStorage
+            .getStorage();
 
-    //     require(
-    //         INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)),
-    //         "Registry must be approved for all"
-    //     );
-    //     require(
-    //         manufacturerIdProxy.exists(manufacturerNode),
-    //         "Invalid parent node"
-    //     );
-    //     require(
-    //         manufacturerIdProxy.ownerOf(manufacturerNode) == msg.sender,
-    //         "Caller must be the parent node owner"
-    //     );
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address virtualDeviceIdProxyAddress = vds.idProxyAddress;
 
-    //     uint256 newTokenId;
-    //     address deviceAddress;
+        require(
+            INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
+                integrationNode
+            ),
+            "Invalid parent node"
+        );
+        require(
+            INFT(vehicleIdProxyAddress).exists(vehicleNode),
+            "Invalid vehicle node"
+        );
 
-    //     for (uint256 i = 0; i < devicesAmount; i++) {
-    //         newTokenId = INFT(adIdProxyAddress).safeMint(msg.sender);
+        address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
+        uint256 newTokenId = INFT(virtualDeviceIdProxyAddress).safeMint(owner);
+        bytes32 message = keccak256(
+            abi.encode(
+                PAIR_TYPEHASH,
+                integrationNode,
+                vehicleNode,
+                virtualDeviceInfos.addr
+            )
+        );
 
-    //         ns
-    //         .nodes[adIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        require(
+            ms.vehicleVirtualDeviceLinks[vehicleIdProxyAddress][
+                virtualDeviceIdProxyAddress
+            ][vehicleNode] == 0,
+            "Vehicle already paired"
+        );
+        require(
+            Eip712CheckerInternal._verifySignature(
+                owner,
+                message,
+                vehicleOwnerSig
+            ),
+            "Invalid signature"
+        );
 
-    //         deviceAddress = adInfos[i].addr;
-    //         require(
-    //             ads.deviceAddressToNodeId[deviceAddress] == 0,
-    //             "Device address already registered"
-    //         );
+        ms.vehicleVirtualDeviceLinks[vehicleIdProxyAddress][
+            virtualDeviceIdProxyAddress
+        ][vehicleNode] = newTokenId;
+        ms.vehicleVirtualDeviceLinks[virtualDeviceIdProxyAddress][
+            vehicleIdProxyAddress
+        ][newTokenId] = vehicleNode;
 
-    //         ads.deviceAddressToNodeId[deviceAddress] = newTokenId;
-    //         ads.nodeIdToDeviceAddress[newTokenId] = deviceAddress;
+        vds.deviceAddressToNodeId[virtualDeviceInfos.addr] = newTokenId;
+        vds.nodeIdToDeviceAddress[newTokenId] = virtualDeviceInfos.addr;
 
-    //         _setInfos(newTokenId, adInfos[i].attrInfoPairs);
+        _setInfos(newTokenId, virtualDeviceInfos.attrInfoPairs);
 
-    //         emit VirtualDeviceNodeMinted(
-    //             newTokenId,
-    //             deviceAddress,
-    //             msg.sender
-    //         );
-    //     }
-
-    //     // Validate request and transfer funds to foundation
-    //     // This transfer is at the end of the function to prevent reentrancy
-    //     _validateMintRequest(msg.sender, devicesAmount);
-    // }
+        emit VirtualDeviceNodeMinted(
+            newTokenId,
+            vehicleNode,
+            virtualDeviceInfos.addr,
+            owner
+        );
+    }
 
     /// @notice Add infos to node
     /// @dev attributes must be whitelisted
@@ -142,6 +160,17 @@ contract VirtualDevice is AccessControlInternal {
             "Invalid AD node"
         );
         _setInfos(tokenId, attrInfo);
+    }
+
+    /// @notice Gets the Virtual Device Id by the device address
+    /// @dev If the device is not minted it will return 0
+    /// @param addr Address associated with the virtual device
+    function getVirtualDeviceIdByAddress(address addr)
+        external
+        view
+        returns (uint256 nodeId)
+    {
+        nodeId = VirtualDeviceStorage.getStorage().deviceAddressToNodeId[addr];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //

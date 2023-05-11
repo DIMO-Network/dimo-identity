@@ -286,27 +286,4 @@ contract Manufacturer is AccessControlInternal {
             );
         }
     }
-
-    /// @dev Internal function to update a single attribute
-    /// @dev attribute must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attribute Attribute to be updated
-    /// @param info Info to be set
-    function _setAttributeInfo(
-        uint256 tokenId,
-        string calldata attribute,
-        string calldata info
-    ) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        ManufacturerStorage.Storage storage m = ManufacturerStorage
-            .getStorage();
-        require(
-            AttributeSet.exists(m.whitelistedAttributes, attribute),
-            "Not whitelisted"
-        );
-        address idProxyAddress = m.idProxyAddress;
-
-        ns.nodes[idProxyAddress][tokenId].info[attribute] = info;
-        emit ManufacturerAttributeSet(tokenId, attribute, info);
-    }
 }

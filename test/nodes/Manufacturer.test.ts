@@ -28,7 +28,8 @@ describe('Manufacturer', async function () {
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
 
-  const [admin, nonAdmin, manufacturer1, nonController] = provider.getWallets();
+  const [admin, nonAdmin, manufacturer1, manufacturer2, nonController] =
+    provider.getWallets();
 
   before(async () => {
     [
@@ -334,6 +335,25 @@ describe('Manufacturer', async function () {
               C.mockManufacturerAttributeInfoPairs
             )
         ).to.be.revertedWith('Invalid request');
+      });
+      it('Should revert if manufacturer name is already registered', async () => {
+        await manufacturerInstance
+          .connect(admin)
+          .mintManufacturer(
+            manufacturer1.address,
+            C.mockManufacturerNames[0],
+            C.mockManufacturerAttributeInfoPairs
+          );
+
+        await expect(
+          manufacturerInstance
+            .connect(admin)
+            .mintManufacturer(
+              manufacturer2.address,
+              C.mockManufacturerNames[0],
+              C.mockManufacturerAttributeInfoPairs
+            )
+        ).to.be.revertedWith('Manufacturer name already registered');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(

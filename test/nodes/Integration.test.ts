@@ -28,7 +28,7 @@ describe('Integration', async function () {
   let integrationInstance: Integration;
   let integrationIdInstance: IntegrationId;
 
-  const [admin, nonAdmin, integrationOwner1, nonController] =
+  const [admin, nonAdmin, integrationOwner1, integrationOwner2, nonController] =
     provider.getWallets();
 
   before(async () => {
@@ -225,6 +225,44 @@ describe('Integration', async function () {
               C.mockIntegrationAttributeInfoPairs
             )
         ).to.be.revertedWith('Invalid request');
+      });
+      it('Should revert if controller has already minted a integration', async () => {
+        await integrationInstance
+          .connect(admin)
+          .mintIntegration(
+            integrationOwner1.address,
+            C.mockIntegrationNames[0],
+            C.mockIntegrationAttributeInfoPairs
+          );
+
+        await expect(
+          integrationInstance
+            .connect(admin)
+            .mintIntegration(
+              integrationOwner1.address,
+              C.mockIntegrationNames[1],
+              C.mockIntegrationAttributeInfoPairs
+            )
+        ).to.be.revertedWith('Invalid request');
+      });
+      it('Should revert if manufacturer name is already registered', async () => {
+        await integrationInstance
+          .connect(admin)
+          .mintIntegration(
+            integrationOwner1.address,
+            C.mockIntegrationNames[0],
+            C.mockIntegrationAttributeInfoPairs
+          );
+
+        await expect(
+          integrationInstance
+            .connect(admin)
+            .mintIntegration(
+              integrationOwner2.address,
+              C.mockIntegrationNames[0],
+              C.mockIntegrationAttributeInfoPairs
+            )
+        ).to.be.revertedWith('Integration name already registered');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(

@@ -238,29 +238,4 @@ contract Vehicle is AccessControlInternal {
             keccak256(abi.encodePacked(infoHashes))
         );
     }
-
-    /// @dev Internal function to update a single attribute
-    /// @dev attribute must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attribute Attribute to be updated
-    /// @param info Info to be set
-    function _setAttributeInfo(
-        uint256 tokenId,
-        string calldata attribute,
-        string calldata info
-    ) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
-
-        require(
-            AttributeSet.exists(s.whitelistedAttributes, attribute),
-            "Not whitelisted"
-        );
-
-        address idProxyAddress = s.idProxyAddress;
-
-        ns.nodes[idProxyAddress][tokenId].info[attribute] = info;
-
-        emit VehicleAttributeSet(tokenId, attribute, info);
-    }
 }

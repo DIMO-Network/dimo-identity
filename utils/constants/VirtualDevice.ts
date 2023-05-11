@@ -1,4 +1,4 @@
-import { AttributeInfoPair, VirtualDeviceInfos } from '../types';
+import { AttributeInfoPair } from '../types';
 
 // Mock VirtualDevice attributes
 export const mockVirtualDeviceAttribute1 = 'mockVirtualDeviceAttribute1';
@@ -31,24 +31,3 @@ export const mockVirtualDeviceAttributeInfoPairsNotWhitelisted: AttributeInfoPai
       info: mockVirtualDeviceInfo3
     }
   ];
-
-export const mockVirtualDeviceInfosList: VirtualDeviceInfos[] = [
-  {
-    addr: '',
-    attrInfoPairs: mockVirtualDeviceAttributeInfoPairs
-  },
-  {
-    addr: '',
-    attrInfoPairs: mockVirtualDeviceAttributeInfoPairs
-  }
-];
-export const mockVirtualDeviceInfosListNotWhitelisted: VirtualDeviceInfos[] = [
-  {
-    addr: '',
-    attrInfoPairs: mockVirtualDeviceAttributeInfoPairs
-  },
-  {
-    addr: '',
-    attrInfoPairs: mockVirtualDeviceAttributeInfoPairsNotWhitelisted
-  }
-];

@@ -14,7 +14,7 @@ import {
   VehicleId,
   VirtualDevice,
   VirtualDeviceId,
-  // Mapper,
+  Mapper,
   MockDimoToken,
   MockStake
 } from '../../typechain';
@@ -23,8 +23,8 @@ import {
   setup,
   createSnapshot,
   revertToSnapshot,
-  // signMessage,
-  // AftermarketDeviceOwnerPair,
+  signMessage,
+  MintVirtualDeviceInput,
   C
 } from '../../utils';
 
@@ -44,7 +44,7 @@ describe('VirtualDevice', function () {
   let integrationInstance: Integration;
   let vehicleInstance: Vehicle;
   let virtualDeviceInstance: VirtualDevice;
-  // let mapperInstance: Mapper;
+  let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let manufacturerIdInstance: ManufacturerId;
@@ -56,26 +56,13 @@ describe('VirtualDevice', function () {
     admin,
     nonAdmin,
     manufacturer1,
-    // manufacturer2,
-    // nonManufacturer,
     integrationOwner1,
-    // user1,
-    // user2,
-    adAddress1,
-    adAddress2,
-    notMintedAd
+    user1,
+    user2,
+    virtualDeviceAddress1,
+    virtualDeviceAddress2,
+    notMintedVirtualDevice
   ] = provider.getWallets();
-
-  const mockAftermarketDeviceInfosList = JSON.parse(
-    JSON.stringify(C.mockAftermarketDeviceInfosList)
-  );
-  const mockAftermarketDeviceInfosListNotWhitelisted = JSON.parse(
-    JSON.stringify(C.mockAftermarketDeviceInfosListNotWhitelisted)
-  );
-  mockAftermarketDeviceInfosList[0].addr = adAddress1.address;
-  mockAftermarketDeviceInfosList[1].addr = adAddress2.address;
-  mockAftermarketDeviceInfosListNotWhitelisted[0].addr = adAddress1.address;
-  mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
     [
@@ -87,7 +74,7 @@ describe('VirtualDevice', function () {
       integrationInstance,
       vehicleInstance,
       virtualDeviceInstance,
-      ,
+      mapperInstance,
       manufacturerIdInstance,
       integrationIdInstance,
       vehicleIdInstance,
@@ -229,6 +216,10 @@ describe('VirtualDevice', function () {
     await virtualDeviceIdInstance
       .connect(admin)
       .setDimoRegistryAddress(dimoRegistryInstance.address);
+
+    await vehicleInstance
+      .connect(admin)
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
   });
 
   beforeEach(async () => {
@@ -314,19 +305,679 @@ describe('VirtualDevice', function () {
     });
   });
 
-  describe.skip('mintVirtualDeviceSign', () => {});
+  describe('mintVirtualDeviceSign', () => {
+    let mintVirtualDeviceSig1: string;
+    let mintVehicleOwnerSig1: string;
+    let correctMintInput: MintVirtualDeviceInput;
 
-  describe.skip('setVirtualDeviceInfo', () => {
+    before(async () => {
+      mintVirtualDeviceSig1 = await signMessage({
+        _signer: virtualDeviceAddress1,
+        _primaryType: 'MintVirtualDeviceSign',
+        _verifyingContract: virtualDeviceInstance.address,
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+          virtualDeviceAddress: virtualDeviceAddress1.address
+        }
+      });
+      mintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVirtualDeviceSign',
+        _verifyingContract: virtualDeviceInstance.address,
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+          virtualDeviceAddress: virtualDeviceAddress1.address
+        }
+      });
+      correctMintInput = {
+        integrationNode: '1',
+        vehicleNode: '1',
+        virtualDeviceSig: mintVirtualDeviceSig1,
+        vehicleOwnerSig: mintVehicleOwnerSig1,
+        virtualDeviceAddr: virtualDeviceAddress1.address,
+        attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+      };
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          virtualDeviceInstance
+            .connect(nonAdmin)
+            .mintVirtualDeviceSign(correctMintInput)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
+          }`
+        );
+      });
+      it('Should revert if parent node is not an integration node', async () => {
+        const incorrectMintInput = {
+          integrationNode: '99',
+          vehicleNode: '1',
+          virtualDeviceSig: mintVirtualDeviceSig1,
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          virtualDeviceAddr: virtualDeviceAddress1.address,
+          attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+        };
+
+        await expect(
+          virtualDeviceInstance
+            .connect(admin)
+            .mintVirtualDeviceSign(incorrectMintInput)
+        ).to.be.revertedWith('Invalid parent node');
+      });
+      it('Should revert if node is not a Vehicle', async () => {
+        const incorrectMintInput = {
+          integrationNode: '1',
+          vehicleNode: '99',
+          virtualDeviceSig: mintVirtualDeviceSig1,
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          virtualDeviceAddr: virtualDeviceAddress1.address,
+          attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+        };
+
+        await expect(
+          virtualDeviceInstance
+            .connect(admin)
+            .mintVirtualDeviceSign(incorrectMintInput)
+        ).to.be.revertedWith('Invalid vehicle node');
+      });
+      it('Should revert if device address is already registered', async () => {
+        const incorrectMintInput = {
+          integrationNode: '1',
+          vehicleNode: '2',
+          virtualDeviceSig: mintVirtualDeviceSig1,
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          virtualDeviceAddr: virtualDeviceAddress1.address,
+          attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+        };
+
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        await virtualDeviceInstance
+          .connect(admin)
+          .mintVirtualDeviceSign(correctMintInput);
+
+        await expect(
+          virtualDeviceInstance
+            .connect(admin)
+            .mintVirtualDeviceSign(incorrectMintInput)
+        ).to.be.revertedWith('Device address already registered');
+      });
+      it('Should revert if owner is not the vehicle node owner', async () => {
+        const incorrectMintInput = {
+          integrationNode: '1',
+          vehicleNode: '2',
+          virtualDeviceSig: mintVirtualDeviceSig1,
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          virtualDeviceAddr: virtualDeviceAddress1.address,
+          attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+        };
+
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+
+        await expect(
+          virtualDeviceInstance
+            .connect(admin)
+            .mintVirtualDeviceSign(incorrectMintInput)
+        ).to.be.revertedWith('Invalid signature');
+      });
+      it('Should revert if attribute is not whitelisted', async () => {
+        const incorrectMintInput = {
+          integrationNode: '1',
+          vehicleNode: '1',
+          virtualDeviceSig: mintVirtualDeviceSig1,
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          virtualDeviceAddr: virtualDeviceAddress1.address,
+          attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+        };
+
+        await expect(
+          virtualDeviceInstance
+            .connect(admin)
+            .mintVirtualDeviceSign(incorrectMintInput)
+        ).to.be.revertedWith('Not whitelisted');
+      });
+      it('Should revert if vehicle is already paired', async () => {
+        const incorrectMintInput = {
+          integrationNode: '1',
+          vehicleNode: '1',
+          virtualDeviceSig: mintVirtualDeviceSig1,
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          virtualDeviceAddr: virtualDeviceAddress2.address,
+          attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+        };
+
+        await virtualDeviceInstance
+          .connect(admin)
+          .mintVirtualDeviceSign(correctMintInput);
+
+        await expect(
+          virtualDeviceInstance
+            .connect(admin)
+            .mintVirtualDeviceSign(incorrectMintInput)
+        ).to.be.revertedWith('Vehicle already paired');
+      });
+
+      context('Wrong signature', () => {
+        context('Virtual device signature', () => {
+          it('Should revert if signer does not match vehicle owner', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user2,
+              _domainName: 'Wrong domain',
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: invalidSignature,
+              vehicleOwnerSig: mintVehicleOwnerSig1,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if domain name is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _domainName: 'Wrong domain',
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: invalidSignature,
+              vehicleOwnerSig: mintVehicleOwnerSig1,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if domain version is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _domainVersion: '99',
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: invalidSignature,
+              vehicleOwnerSig: mintVehicleOwnerSig1,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if domain chain ID is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _chainId: 99,
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: invalidSignature,
+              vehicleOwnerSig: mintVehicleOwnerSig1,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if integration node is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '99',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: invalidSignature,
+              vehicleOwnerSig: mintVehicleOwnerSig1,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if vehicle node is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '2',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: invalidSignature,
+              vehicleOwnerSig: mintVehicleOwnerSig1,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if virtual device address is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress2.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: invalidSignature,
+              vehicleOwnerSig: mintVehicleOwnerSig1,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+        });
+
+        context('Vehicle owner signature', () => {
+          it('Should revert if signer does not match vehicle owner', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user2,
+              _domainName: 'Wrong domain',
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: mintVirtualDeviceSig1,
+              vehicleOwnerSig: invalidSignature,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if domain name is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _domainName: 'Wrong domain',
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: mintVirtualDeviceSig1,
+              vehicleOwnerSig: invalidSignature,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if domain version is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _domainVersion: '99',
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: mintVirtualDeviceSig1,
+              vehicleOwnerSig: invalidSignature,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if domain chain ID is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _chainId: 99,
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: mintVirtualDeviceSig1,
+              vehicleOwnerSig: invalidSignature,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if integration node is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '99',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: mintVirtualDeviceSig1,
+              vehicleOwnerSig: invalidSignature,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if vehicle node is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '2',
+                virtualDeviceAddress: virtualDeviceAddress1.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: mintVirtualDeviceSig1,
+              vehicleOwnerSig: invalidSignature,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+          it('Should revert if virtual device address is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVirtualDeviceSign',
+              _verifyingContract: virtualDeviceInstance.address,
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                virtualDeviceAddress: virtualDeviceAddress2.address
+              }
+            });
+            const incorrectMintInput = {
+              integrationNode: '1',
+              vehicleNode: '1',
+              virtualDeviceSig: mintVirtualDeviceSig1,
+              vehicleOwnerSig: invalidSignature,
+              virtualDeviceAddr: virtualDeviceAddress1.address,
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+            };
+
+            await expect(
+              virtualDeviceInstance
+                .connect(admin)
+                .mintVirtualDeviceSign(incorrectMintInput)
+            ).to.be.revertedWith('Invalid signature');
+          });
+        });
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await virtualDeviceInstance
+          .connect(admin)
+          .mintVirtualDeviceSign(correctMintInput);
+
+        const parentNode = await nodesInstance.getParentNode(
+          virtualDeviceIdInstance.address,
+          1
+        );
+
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set node owner', async () => {
+        await virtualDeviceInstance
+          .connect(admin)
+          .mintVirtualDeviceSign(correctMintInput);
+
+        expect(await virtualDeviceIdInstance.ownerOf(1)).to.be.equal(
+          user1.address
+        );
+      });
+      it('Should correctly set device address', async () => {
+        await virtualDeviceInstance
+          .connect(admin)
+          .mintVirtualDeviceSign(correctMintInput);
+
+        const id = await virtualDeviceInstance.getVirtualDeviceIdByAddress(
+          virtualDeviceAddress1.address
+        );
+
+        expect(id).to.equal(1);
+      });
+      it('Should correctly set infos', async () => {
+        await virtualDeviceInstance
+          .connect(admin)
+          .mintVirtualDeviceSign(correctMintInput);
+
+        expect(
+          await nodesInstance.getInfo(
+            virtualDeviceIdInstance.address,
+            1,
+            C.mockVirtualDeviceAttribute1
+          )
+        ).to.be.equal(C.mockVirtualDeviceInfo1);
+        expect(
+          await nodesInstance.getInfo(
+            virtualDeviceIdInstance.address,
+            1,
+            C.mockVirtualDeviceAttribute2
+          )
+        ).to.be.equal(C.mockVirtualDeviceInfo2);
+      });
+      it('Should correctly map the virtual device to the vehicle', async () => {
+        await virtualDeviceInstance
+          .connect(admin)
+          .mintVirtualDeviceSign(correctMintInput);
+
+        expect(
+          await mapperInstance.getVehicleVirtualDeviceLink(
+            vehicleIdInstance.address,
+            virtualDeviceIdInstance.address,
+            1
+          )
+        ).to.be.equal(1);
+      });
+      it('Should correctly map the vehicle to the virtual device', async () => {
+        await virtualDeviceInstance
+          .connect(admin)
+          .mintVirtualDeviceSign(correctMintInput);
+
+        expect(
+          await mapperInstance.getVehicleVirtualDeviceLink(
+            virtualDeviceIdInstance.address,
+            vehicleIdInstance.address,
+            1
+          )
+        ).to.be.equal(1);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VirtualDeviceNodeMinted event with correct params', async () => {
+        await expect(
+          virtualDeviceInstance
+            .connect(admin)
+            .mintVirtualDeviceSign(correctMintInput)
+        )
+          .to.emit(virtualDeviceInstance, 'VirtualDeviceNodeMinted')
+          .withArgs(1, 1, virtualDeviceAddress1.address, user1.address);
+      });
+    });
+  });
+
+  describe('setVirtualDeviceInfo', () => {
+    let mintInput: MintVirtualDeviceInput;
+
+    before(async () => {
+      const mintVirtualDeviceSig1 = await signMessage({
+        _signer: virtualDeviceAddress1,
+        _primaryType: 'MintVirtualDeviceSign',
+        _verifyingContract: virtualDeviceInstance.address,
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+          virtualDeviceAddress: virtualDeviceAddress1.address
+        }
+      });
+      const mintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVirtualDeviceSign',
+        _verifyingContract: virtualDeviceInstance.address,
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+          virtualDeviceAddress: virtualDeviceAddress1.address
+        }
+      });
+      mintInput = {
+        integrationNode: '1',
+        vehicleNode: '1',
+        virtualDeviceSig: mintVirtualDeviceSig1,
+        vehicleOwnerSig: mintVehicleOwnerSig1,
+        virtualDeviceAddr: virtualDeviceAddress1.address,
+        attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+      };
+    });
+
     beforeEach(async () => {
-      await virtualDeviceIdInstance
-        .connect(manufacturer1)
-        .setApprovalForAll(virtualDeviceInstance.address, true);
-      // await virtualDeviceInstance
-      //   .connect(manufacturer1)
-      //   .mintAftermarketDeviceByManufacturerBatch(
-      //     1,
-      //     mockAftermarketDeviceInfosList
-      //   );
+      await virtualDeviceInstance
+        .connect(admin)
+        .mintVirtualDeviceSign(mintInput);
     });
 
     context('Error handling', () => {
@@ -427,29 +1078,56 @@ describe('VirtualDevice', function () {
     });
   });
 
-  describe.skip('getVirtualDeviceIdByAddress', () => {
+  describe('getVirtualDeviceIdByAddress', () => {
+    let mintInput: MintVirtualDeviceInput;
+
+    before(async () => {
+      const mintVirtualDeviceSig1 = await signMessage({
+        _signer: virtualDeviceAddress1,
+        _primaryType: 'MintVirtualDeviceSign',
+        _verifyingContract: virtualDeviceInstance.address,
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+          virtualDeviceAddress: virtualDeviceAddress1.address
+        }
+      });
+      const mintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVirtualDeviceSign',
+        _verifyingContract: virtualDeviceInstance.address,
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+          virtualDeviceAddress: virtualDeviceAddress1.address
+        }
+      });
+      mintInput = {
+        integrationNode: '1',
+        vehicleNode: '1',
+        virtualDeviceSig: mintVirtualDeviceSig1,
+        vehicleOwnerSig: mintVehicleOwnerSig1,
+        virtualDeviceAddr: virtualDeviceAddress1.address,
+        attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+      };
+    });
+
     beforeEach(async () => {
-      await virtualDeviceIdInstance
-        .connect(manufacturer1)
-        .setApprovalForAll(virtualDeviceInstance.address, true);
-      // await virtualDeviceInstance
-      //   .connect(manufacturer1)
-      //   .mintAftermarketDeviceByManufacturerBatch(
-      //     1,
-      //     mockAftermarketDeviceInfosList
-      //   );
+      await virtualDeviceInstance
+        .connect(admin)
+        .mintVirtualDeviceSign(mintInput);
     });
 
     it('Should return 0 if the queried address is not associated with any minted device', async () => {
       const tokenId = await virtualDeviceInstance.getVirtualDeviceIdByAddress(
-        notMintedAd.address
+        notMintedVirtualDevice.address
       );
 
       expect(tokenId).to.equal(0);
     });
     it('Should return the correct token Id', async () => {
       const tokenId = await virtualDeviceInstance.getVirtualDeviceIdByAddress(
-        adAddress1.address
+        virtualDeviceAddress1.address
       );
 
       expect(tokenId).to.equal(1);

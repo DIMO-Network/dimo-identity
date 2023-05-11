@@ -18,7 +18,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 /// @notice Contract that represents the Virtual Device node
 /// @dev It uses the Mapper contract to link Virtual Devices to Vehicles
 contract VirtualDevice is AccessControlInternal {
-    bytes32 private constant PAIR_TYPEHASH =
+    bytes32 private constant MINT_TYPEHASH =
         keccak256(
             "MintVirtualDeviceSign(uint256 integrationNode,uint256 vehicleNode,address virtualDeviceAddress)"
         );
@@ -72,13 +72,22 @@ contract VirtualDevice is AccessControlInternal {
 
     // ***** Interaction with nodes *****//
 
-    /// TODO Documentation
-    function mintVirtualDeviceSign(
-        uint256 integrationNode,
-        uint256 vehicleNode,
-        bytes calldata vehicleOwnerSig,
-        VirtualDeviceInfos calldata virtualDeviceInfos
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    /**
+     * @notice Mints a virtual device and pair it with a vehicle
+     * @dev Caller must have the admin role
+     * @param data input data with the following fields:
+     *  integrationNode -> Parent integration node id
+     *  vehicleNode -> Vehicle node id
+     *  virtualDeviceSig -> Virtual Device's signature hash
+     *  vehicleOwnerSig -> Vehicle owner signature hash
+     *  virtualDeviceAddr -> Address associated with the virtual device
+     *  attrInfoPairs -> List of attribute-info pairs to be added
+     */
+    function mintVirtualDeviceSign(MintVirtualDeviceInput calldata data)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         VirtualDeviceStorage.Storage storage vds = VirtualDeviceStorage
             .getStorage();
@@ -90,57 +99,72 @@ contract VirtualDevice is AccessControlInternal {
 
         require(
             INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
-                integrationNode
+                data.integrationNode
             ),
             "Invalid parent node"
         );
         require(
-            INFT(vehicleIdProxyAddress).exists(vehicleNode),
+            INFT(vehicleIdProxyAddress).exists(data.vehicleNode),
             "Invalid vehicle node"
         );
+        require(
+            vds.deviceAddressToNodeId[data.virtualDeviceAddr] == 0,
+            "Device address already registered"
+        );
+        require(
+            ms.vehicleVirtualDeviceLinks[vehicleIdProxyAddress][
+                virtualDeviceIdProxyAddress
+            ][data.vehicleNode] == 0,
+            "Vehicle already paired"
+        );
 
-        address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
+        address owner = INFT(vehicleIdProxyAddress).ownerOf(data.vehicleNode);
         uint256 newTokenId = INFT(virtualDeviceIdProxyAddress).safeMint(owner);
         bytes32 message = keccak256(
             abi.encode(
-                PAIR_TYPEHASH,
-                integrationNode,
-                vehicleNode,
-                virtualDeviceInfos.addr
+                MINT_TYPEHASH,
+                data.integrationNode,
+                data.vehicleNode,
+                data.virtualDeviceAddr
             )
         );
 
         require(
-            ms.vehicleVirtualDeviceLinks[vehicleIdProxyAddress][
-                virtualDeviceIdProxyAddress
-            ][vehicleNode] == 0,
-            "Vehicle already paired"
+            Eip712CheckerInternal._verifySignature(
+                data.virtualDeviceAddr,
+                message,
+                data.virtualDeviceSig
+            ),
+            "Invalid signature"
         );
         require(
             Eip712CheckerInternal._verifySignature(
                 owner,
                 message,
-                vehicleOwnerSig
+                data.vehicleOwnerSig
             ),
             "Invalid signature"
         );
 
+        ns.nodes[virtualDeviceIdProxyAddress][newTokenId].parentNode = data
+            .integrationNode;
+
         ms.vehicleVirtualDeviceLinks[vehicleIdProxyAddress][
             virtualDeviceIdProxyAddress
-        ][vehicleNode] = newTokenId;
+        ][data.vehicleNode] = newTokenId;
         ms.vehicleVirtualDeviceLinks[virtualDeviceIdProxyAddress][
             vehicleIdProxyAddress
-        ][newTokenId] = vehicleNode;
+        ][newTokenId] = data.vehicleNode;
 
-        vds.deviceAddressToNodeId[virtualDeviceInfos.addr] = newTokenId;
-        vds.nodeIdToDeviceAddress[newTokenId] = virtualDeviceInfos.addr;
+        vds.deviceAddressToNodeId[data.virtualDeviceAddr] = newTokenId;
+        vds.nodeIdToDeviceAddress[newTokenId] = data.virtualDeviceAddr;
 
-        _setInfos(newTokenId, virtualDeviceInfos.attrInfoPairs);
+        _setInfos(newTokenId, data.attrInfoPairs);
 
         emit VirtualDeviceNodeMinted(
             newTokenId,
-            vehicleNode,
-            virtualDeviceInfos.addr,
+            data.vehicleNode,
+            data.virtualDeviceAddr,
             owner
         );
     }
@@ -206,29 +230,5 @@ contract VirtualDevice is AccessControlInternal {
                 attrInfo[i].info
             );
         }
-    }
-
-    /// @dev Internal function to set a single attribute
-    /// @dev attribute must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attribute Attribute to be updated
-    /// @param info Info to be set
-    function _setAttributeInfo(
-        uint256 tokenId,
-        string calldata attribute,
-        string calldata info
-    ) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VirtualDeviceStorage.Storage storage vds = VirtualDeviceStorage
-            .getStorage();
-        require(
-            AttributeSet.exists(vds.whitelistedAttributes, attribute),
-            "Not whitelisted"
-        );
-        address idProxyAddress = vds.idProxyAddress;
-
-        ns.nodes[idProxyAddress][tokenId].info[attribute] = info;
-
-        emit VirtualDeviceAttributeSet(tokenId, attribute, info);
     }
 }

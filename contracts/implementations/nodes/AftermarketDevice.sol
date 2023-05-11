@@ -508,28 +508,4 @@ contract AftermarketDevice is
             );
         }
     }
-
-    /// @dev Internal function to set a single attribute
-    /// @dev attribute must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attribute Attribute to be updated
-    /// @param info Info to be set
-    function _setAttributeInfo(
-        uint256 tokenId,
-        string calldata attribute,
-        string calldata info
-    ) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-            .getStorage();
-        require(
-            AttributeSet.exists(ads.whitelistedAttributes, attribute),
-            "Not whitelisted"
-        );
-        address idProxyAddress = ads.idProxyAddress;
-
-        ns.nodes[idProxyAddress][tokenId].info[attribute] = info;
-
-        emit AftermarketDeviceAttributeSet(tokenId, attribute, info);
-    }
 }

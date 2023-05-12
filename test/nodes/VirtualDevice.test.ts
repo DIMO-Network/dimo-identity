@@ -905,7 +905,7 @@ describe('VirtualDevice', function () {
           .mintVirtualDeviceSign(correctMintInput);
 
         expect(
-          await mapperInstance.getVehicleVirtualDeviceLink(
+          await mapperInstance.getNodeLink(
             vehicleIdInstance.address,
             virtualDeviceIdInstance.address,
             1
@@ -918,7 +918,7 @@ describe('VirtualDevice', function () {
           .mintVirtualDeviceSign(correctMintInput);
 
         expect(
-          await mapperInstance.getVehicleVirtualDeviceLink(
+          await mapperInstance.getNodeLink(
             virtualDeviceIdInstance.address,
             vehicleIdInstance.address,
             1

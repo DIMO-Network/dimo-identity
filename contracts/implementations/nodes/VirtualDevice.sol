@@ -119,7 +119,6 @@ contract VirtualDevice is AccessControlInternal {
         );
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(data.vehicleNode);
-        uint256 newTokenId = INFT(virtualDeviceIdProxyAddress).safeMint(owner);
         bytes32 message = keccak256(
             abi.encode(
                 MINT_TYPEHASH,
@@ -145,6 +144,8 @@ contract VirtualDevice is AccessControlInternal {
             ),
             "Invalid signature"
         );
+
+        uint256 newTokenId = INFT(virtualDeviceIdProxyAddress).safeMint(owner);
 
         ns.nodes[virtualDeviceIdProxyAddress][newTokenId].parentNode = data
             .integrationNode;

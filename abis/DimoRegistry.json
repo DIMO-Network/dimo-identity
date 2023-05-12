@@ -1908,7 +1908,7 @@
                 "type": "uint256"
             }
         ],
-        "name": "getVehicleVirtualDeviceLink",
+        "name": "getNodeLink",
         "outputs": [
             {
                 "internalType": "uint256",

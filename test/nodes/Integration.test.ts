@@ -190,6 +190,118 @@ describe('Integration', async function () {
     });
   });
 
+  describe('mintIntegrationBatch', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          integrationInstance
+            .connect(nonAdmin)
+            .mintIntegrationBatch(nonAdmin.address, C.mockIntegrationNames)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
+          }`
+        );
+      });
+      it('Should revert if owner does not have admin role', async () => {
+        await expect(
+          integrationInstance
+            .connect(admin)
+            .mintIntegrationBatch(nonAdmin.address, C.mockIntegrationNames)
+        ).to.be.revertedWith('Owner must be an admin');
+      });
+      it('Should revert if integration name is already registered', async () => {
+        await integrationInstance
+          .connect(admin)
+          .mintIntegrationBatch(admin.address, C.mockIntegrationNames);
+
+        await expect(
+          integrationInstance
+            .connect(admin)
+            .mintIntegrationBatch(admin.address, C.mockIntegrationNames)
+        ).to.be.revertedWith('Integration name already registered');
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await integrationInstance
+          .connect(admin)
+          .mintIntegrationBatch(admin.address, C.mockIntegrationNames);
+
+        const parentNode1 = await nodesInstance.getParentNode(
+          integrationIdInstance.address,
+          1
+        );
+        const parentNode2 = await nodesInstance.getParentNode(
+          integrationIdInstance.address,
+          2
+        );
+        const parentNode3 = await nodesInstance.getParentNode(
+          integrationIdInstance.address,
+          3
+        );
+
+        // Assure it does not have parent
+        expect(parentNode1).to.be.equal(0);
+        expect(parentNode2).to.be.equal(0);
+        expect(parentNode3).to.be.equal(0);
+      });
+      it('Should correctly set node owner', async () => {
+        await integrationInstance
+          .connect(admin)
+          .mintIntegrationBatch(admin.address, C.mockIntegrationNames);
+
+        const nodeOwner1 = await integrationIdInstance.ownerOf(1);
+        const nodeOwner2 = await integrationIdInstance.ownerOf(2);
+        const nodeOwner3 = await integrationIdInstance.ownerOf(3);
+
+        expect(nodeOwner1).to.be.equal(admin.address);
+        expect(nodeOwner2).to.be.equal(admin.address);
+        expect(nodeOwner3).to.be.equal(admin.address);
+      });
+      it('Should correctly set names', async () => {
+        await integrationInstance
+          .connect(admin)
+          .mintIntegrationBatch(admin.address, C.mockIntegrationNames);
+
+        const id1 = (
+          await integrationInstance.getIntegrationIdByName(
+            C.mockIntegrationNames[0]
+          )
+        ).toNumber();
+        const id2 = (
+          await integrationInstance.getIntegrationIdByName(
+            C.mockIntegrationNames[1]
+          )
+        ).toNumber();
+        const id3 = (
+          await integrationInstance.getIntegrationIdByName(
+            C.mockIntegrationNames[2]
+          )
+        ).toNumber();
+
+        expect([id1, id2, id3]).to.eql([1, 2, 3]);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit IntegrationNodeMinted event with correct params', async () => {
+        await expect(
+          integrationInstance
+            .connect(admin)
+            .mintIntegrationBatch(admin.address, C.mockIntegrationNames)
+        )
+          .to.emit(integrationInstance, 'IntegrationNodeMinted')
+          .withArgs(1, admin.address)
+          .to.emit(integrationInstance, 'IntegrationNodeMinted')
+          .withArgs(2, admin.address)
+          .to.emit(integrationInstance, 'IntegrationNodeMinted')
+          .withArgs(3, admin.address);
+      });
+    });
+  });
+
   describe('mintIntegration', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
@@ -245,7 +357,7 @@ describe('Integration', async function () {
             )
         ).to.be.revertedWith('Invalid request');
       });
-      it('Should revert if manufacturer name is already registered', async () => {
+      it('Should revert if integration name is already registered', async () => {
         await integrationInstance
           .connect(admin)
           .mintIntegration(
@@ -554,12 +666,15 @@ describe('Integration', async function () {
     });
   });
 
-  describe('setIntegrationMinted', () => {
+  describe('updateIntegrationMinted', () => {
     it('Should revert if caller is not the NFT Proxy', async () => {
       await expect(
         integrationInstance
           .connect(nonAdmin)
-          .setIntegrationMinted(integrationOwner1.address)
+          .updateIntegrationMinted(
+            integrationOwner1.address,
+            integrationOwner2.address
+          )
       ).to.be.revertedWith('Only NFT Proxy');
     });
   });

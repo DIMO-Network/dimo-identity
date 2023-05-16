@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-import "./Base/NftBaseUpgradeable.sol";
 import "../interfaces/IDimoRegistry.sol";
+import "./Base/MultiPrivilege/MultiPrivilege.sol";
 
-contract IntegrationId is Initializable, NftBaseUpgradeable {
+contract IntegrationId is Initializable, MultiPrivilege {
     IDimoRegistry private _dimoRegistry;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -17,7 +17,7 @@ contract IntegrationId is Initializable, NftBaseUpgradeable {
         string calldata symbol_,
         string calldata baseUri_
     ) external initializer {
-        _baseNftInit(name_, symbol_, baseUri_);
+        _multiPrivilegeInit(name_, symbol_, baseUri_);
     }
 
     /// @notice Sets the DIMO Registry address
@@ -42,7 +42,7 @@ contract IntegrationId is Initializable, NftBaseUpgradeable {
         address to,
         uint256 tokenId
     ) internal override {
-        _dimoRegistry.setIntegrationMinted(to);
+        _dimoRegistry.updateIntegrationMinted(from, to);
         super._transfer(from, to, tokenId);
     }
 }

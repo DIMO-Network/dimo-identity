@@ -1498,6 +1498,24 @@
         "inputs": [
             {
                 "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "string[]",
+                "name": "names",
+                "type": "string[]"
+            }
+        ],
+        "name": "mintIntegrationBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
                 "name": "_controller",
                 "type": "address"
             }
@@ -1554,11 +1572,16 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "addr",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "to",
                 "type": "address"
             }
         ],
-        "name": "setIntegrationMinted",
+        "name": "updateIntegrationMinted",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

@@ -239,13 +239,19 @@ describe('IntegrationId', async function () {
         }
       });
       it('Should correctly set integrationMinted', async () => {
-        const isIntegrationMintedBefore =
+        const isIntegrationMintedBefore1 =
+          await integrationInstance.isIntegrationMinted(
+            integrationOwner1.address
+          );
+        const isIntegrationMintedBefore2 =
           await integrationInstance.isIntegrationMinted(
             integrationOwner2.address
           );
 
         // eslint-disable-next-line no-unused-expressions
-        expect(isIntegrationMintedBefore).to.be.false;
+        expect(isIntegrationMintedBefore1).to.be.true;
+        // eslint-disable-next-line no-unused-expressions
+        expect(isIntegrationMintedBefore2).to.be.false;
 
         await integrationIdInstance
           .connect(integrationOwner1)
@@ -255,13 +261,19 @@ describe('IntegrationId', async function () {
             1
           );
 
-        const isIntegrationMintedAfter =
+        const isIntegrationMintedAfter1 =
+          await integrationInstance.isIntegrationMinted(
+            integrationOwner1.address
+          );
+        const isIntegrationMintedAfter2 =
           await integrationInstance.isIntegrationMinted(
             integrationOwner2.address
           );
 
         // eslint-disable-next-line no-unused-expressions
-        expect(isIntegrationMintedAfter).to.be.true;
+        expect(isIntegrationMintedAfter1).to.be.false;
+        // eslint-disable-next-line no-unused-expressions
+        expect(isIntegrationMintedAfter2).to.be.true;
       });
     });
   });

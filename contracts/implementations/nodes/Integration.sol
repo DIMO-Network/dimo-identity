@@ -85,6 +85,38 @@ contract Integration is AccessControlInternal {
 
     // ***** Interaction with nodes ***** //
 
+    /// @notice Mints integrations in batch
+    /// @dev Caller must be an admin
+    /// @dev It is assumed the 'Name' attribute is whitelisted in advance
+    /// @param owner The address of the new owner
+    /// @param names List of integration names
+    function mintIntegrationBatch(address owner, string[] calldata names)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(_hasRole(DEFAULT_ADMIN_ROLE, owner), "Owner must be an admin");
+
+        IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
+
+        uint256 newTokenId;
+        string memory name;
+        for (uint256 i = 0; i < names.length; i++) {
+            name = names[i];
+
+            require(
+                s.integrationNameToNodeId[name] == 0,
+                "Integration name already registered"
+            );
+
+            newTokenId = INFT(s.idProxyAddress).safeMint(owner);
+
+            s.integrationNameToNodeId[name] = newTokenId;
+            s.nodeIdToIntegrationName[newTokenId] = name;
+
+            emit IntegrationNodeMinted(newTokenId, owner);
+        }
+    }
+
     /// @notice Mints an integration
     /// @dev Caller must be an admin
     /// @param owner The address of the new owner
@@ -134,19 +166,27 @@ contract Integration is AccessControlInternal {
         _setInfos(tokenId, attrInfoList);
     }
 
-    /// @notice Verify if an address is allowed to own an integration node and set as minted
-    /// @dev Can only be called by the NFT Proxy
-    /// @dev The address must be a controller and not yet minted a node
-    /// @param addr the address to be verified and set
-    function setIntegrationMinted(address addr) external onlyNftProxy {
+    /**
+     * @notice Verify if an address is allowed to own an integration node and set as minted
+     * The former owner of the node is set as not minted, as it will not be the owner of a node after the tranfer
+     * @dev Can only be called by the NFT Proxy
+     * @dev The address must be a controller and not yet minted a node
+     * @param from the address to be verified and set
+     * @param to the address to be verified
+     */
+    function updateIntegrationMinted(address from, address to)
+        external
+        onlyNftProxy
+    {
         IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
         require(
-            s.controllers[addr].isController &&
-                !s.controllers[addr].integrationMinted,
+            s.controllers[to].isController &&
+                !s.controllers[to].integrationMinted,
             "Address is not allowed to own a new token"
         );
 
-        s.controllers[addr].integrationMinted = true;
+        s.controllers[from].integrationMinted = false;
+        s.controllers[to].integrationMinted = true;
     }
 
     /// @notice Verify if an address is a controller

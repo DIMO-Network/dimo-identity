@@ -180,7 +180,7 @@ abstract contract MultiPrivilege is
         address from,
         address to,
         uint256 tokenId
-    ) internal override {
+    ) internal virtual override {
         tokenIdToVersion[tokenId]++;
         super._transfer(from, to, tokenId);
     }

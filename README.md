@@ -12,7 +12,7 @@ You can execute the following commands to build the project and run additional s
 # Installs dependencies
 npm i
 
-# Clears cache, compiles contracts and generates typechain files
+# Clears cache, compiles contracts, generates typechain files and NFT ABIs
 npm run build
 
 # Outputs contract sizes
@@ -67,4 +67,4 @@ The DIMO identity architecture uses the `DIMORegistry` contract as an entry poin
 npx hardhat run scripts/abiGenerator.ts
 ```
 
-The output file will be saved in `scripts/data/fullAbi.json`.
+The output file will be saved in `./abis/DimoRegistry.json`.

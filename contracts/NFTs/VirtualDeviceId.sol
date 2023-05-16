@@ -2,9 +2,9 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
-import "./Base/NftBaseUpgradeable.sol";
+import "./Base/MultiPrivilege/MultiPrivilege.sol";
 
-contract VirtualDeviceId is Initializable, NftBaseUpgradeable {
+contract VirtualDeviceId is Initializable, MultiPrivilege {
     IDimoRegistry private _dimoRegistry;
 
     /// @custom:oz-upgrades-unsafe-allow constructor

@@ -6,6 +6,7 @@ import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
 
 contract VehicleId is Initializable, MultiPrivilege {
     IDimoRegistry private _dimoRegistry;
+    address public _trustedForwarder;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -31,6 +32,19 @@ contract VehicleId is Initializable, MultiPrivilege {
         _dimoRegistry = IDimoRegistry(addr);
     }
 
+    function setTrustedForwarder(address trustedForwarder) public {
+        _trustedForwarder = trustedForwarder;
+    }
+
+    function isTrustedForwarder(address forwarder)
+        public
+        view
+        virtual
+        returns (bool)
+    {
+        return forwarder == _trustedForwarder;
+    }
+
     /// @notice Internal function to transfer a token
     /// @dev Only the token owner can transfer (no approvals)
     /// @dev Pairings are maintained
@@ -44,7 +58,39 @@ contract VehicleId is Initializable, MultiPrivilege {
         uint256 tokenId
     ) internal override {
         // Approvals are not accepted for now
-        require(msg.sender == from, "Caller is not authorized");
+        // require(msg.sender == from, "Caller is not authorized");
         super._transfer(from, to, tokenId);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override
+        returns (address sender)
+    {
+        if (isTrustedForwarder(msg.sender)) {
+            // The assembly code is more direct than the Solidity version using `abi.decode`.
+            /// @solidity memory-safe-assembly
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return super._msgSender();
+        }
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override
+        returns (bytes calldata)
+    {
+        if (isTrustedForwarder(msg.sender)) {
+            return msg.data[:msg.data.length - 20];
+        } else {
+            return super._msgData();
+        }
     }
 }

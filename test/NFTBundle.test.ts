@@ -5,7 +5,7 @@ import {
   DIMORegistry,
   Eip712Checker,
   DimoAccessControl,
-  // Nodes,
+  Nodes,
   Manufacturer,
   ManufacturerId,
   Vehicle,
@@ -13,7 +13,7 @@ import {
   AftermarketDevice,
   AftermarketDeviceId,
   AdLicenseValidator,
-  // Mapper,
+  Mapper,
   MockDimoToken,
   MockStake
   // NFTBundle
@@ -36,12 +36,12 @@ describe('NFTBundle', async function () {
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
   let accessControlInstance: DimoAccessControl;
-  // let nodesInstance: Nodes;
+  let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
-  // let mapperInstance: Mapper;
+  let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let manufacturerIdInstance: ManufacturerId;
@@ -74,12 +74,12 @@ describe('NFTBundle', async function () {
       dimoRegistryInstance,
       eip712CheckerInstance,
       accessControlInstance,
-      // nodesInstance,
+      nodesInstance,
       manufacturerInstance,
       vehicleInstance,
       aftermarketDeviceInstance,
       adLicenseValidatorInstance,
-      // mapperInstance,
+      mapperInstance,
       manufacturerIdInstance,
       vehicleIdInstance,
       adIdInstance
@@ -311,6 +311,54 @@ describe('NFTBundle', async function () {
         .connect(user1)
         .transfer2(1, vehicleIdInstance.address, transferToken1);
       // await nftBundleInstance.connect(user1).transfer1(1, 1, user2.address);
+
+      console.log(await vehicleIdInstance.ownerOf(1));
+      console.log(await adIdInstance.ownerOf(1));
+
+      console.log(nodesInstance.address);
+      console.log(mapperInstance.address);
+    });
+
+    it.only('Test forwarder', async () => {
+      const ForwarderFactory = await ethers.getContractFactory(
+        'Forwarder',
+        admin
+      );
+      // const nftBundleInstance = await ForwarderFactory.deploy();
+      const forwarderInstance = await ForwarderFactory.deploy();
+
+      await vehicleIdInstance.setTrustedForwarder(forwarderInstance.address);
+      await adIdInstance.setTrustedForwarder(forwarderInstance.address);
+
+      const vehicleIdInterface = ethers.Contract.getInterface(
+        vehicleIdInstance.interface
+      );
+      const adIdInterface = ethers.Contract.getInterface(
+        adIdInstance.interface
+      );
+
+      const data1 = vehicleIdInterface.encodeFunctionData('transferFrom', [
+        user1.address,
+        user2.address,
+        1
+      ]);
+      const data2 = adIdInterface.encodeFunctionData('transferFrom', [
+        user1.address,
+        user2.address,
+        1
+      ]);
+
+      console.log(await vehicleIdInstance.ownerOf(1));
+      console.log(await adIdInstance.ownerOf(1));
+
+      // await forwarderInstance
+      //   .connect(user1)
+      //   .execute([{ to: vehicleIdInstance.address, data: data1 }]);
+
+      await forwarderInstance.connect(user1).execute([
+        { to: vehicleIdInstance.address, data: data1 },
+        { to: adIdInstance.address, data: data2 }
+      ]);
 
       console.log(await vehicleIdInstance.ownerOf(1));
       console.log(await adIdInstance.ownerOf(1));

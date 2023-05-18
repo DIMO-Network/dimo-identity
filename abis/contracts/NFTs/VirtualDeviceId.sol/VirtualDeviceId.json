@@ -603,6 +603,11 @@
         "internalType": "string",
         "name": "baseUri_",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "trustedForwarder_",
+        "type": "address"
       }
     ],
     "name": "initialize",
@@ -1006,6 +1011,19 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "trustedForwarder_",
+        "type": "address"
+      }
+    ],
+    "name": "setTrustedForwarder",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes4",
         "name": "interfaceId",
         "type": "bytes4"
@@ -1094,6 +1112,19 @@
     "name": "transferFrom",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "trustedForwarder",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

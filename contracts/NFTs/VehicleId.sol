@@ -6,7 +6,7 @@ import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
 
 contract VehicleId is Initializable, MultiPrivilege {
     IDimoRegistry private _dimoRegistry;
-    address public _trustedForwarder;
+    address public trustedForwarder;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -32,17 +32,15 @@ contract VehicleId is Initializable, MultiPrivilege {
         _dimoRegistry = IDimoRegistry(addr);
     }
 
-    function setTrustedForwarder(address trustedForwarder) public {
-        _trustedForwarder = trustedForwarder;
-    }
-
-    function isTrustedForwarder(address forwarder)
-        public
-        view
-        virtual
-        returns (bool)
+    /// @notice Sets the Trusted Forwarder address
+    /// @dev Only an admin can set the DIMO Registry address
+    /// @param trustedForwarder_ The address to be set
+    function setTrustedForwarder(address trustedForwarder_)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        return forwarder == _trustedForwarder;
+        require(trustedForwarder_ != address(0), "Non zero address");
+        trustedForwarder = trustedForwarder_;
     }
 
     /// @notice Internal function to transfer a token
@@ -58,20 +56,13 @@ contract VehicleId is Initializable, MultiPrivilege {
         uint256 tokenId
     ) internal override {
         // Approvals are not accepted for now
-        // require(msg.sender == from, "Caller is not authorized");
+        require(_msgSender() == from, "Caller is not authorized");
         super._transfer(from, to, tokenId);
     }
 
-    function _msgSender()
-        internal
-        view
-        virtual
-        override
-        returns (address sender)
-    {
-        if (isTrustedForwarder(msg.sender)) {
-            // The assembly code is more direct than the Solidity version using `abi.decode`.
-            /// @solidity memory-safe-assembly
+    /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract
+    function _msgSender() internal view override returns (address sender) {
+        if (msg.sender == trustedForwarder) {
             assembly {
                 sender := shr(96, calldataload(sub(calldatasize(), 20)))
             }
@@ -80,14 +71,9 @@ contract VehicleId is Initializable, MultiPrivilege {
         }
     }
 
-    function _msgData()
-        internal
-        view
-        virtual
-        override
-        returns (bytes calldata)
-    {
-        if (isTrustedForwarder(msg.sender)) {
+    /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract
+    function _msgData() internal view override returns (bytes calldata) {
+        if (msg.sender == trustedForwarder) {
             return msg.data[:msg.data.length - 20];
         } else {
             return super._msgData();

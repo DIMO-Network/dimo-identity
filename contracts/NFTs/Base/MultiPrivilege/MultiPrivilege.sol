@@ -97,7 +97,7 @@ abstract contract MultiPrivilege is
         address user,
         uint256 expires
     ) external {
-        _setPrivilege(msg.sender, tokenId, privId, user, expires);
+        _setPrivilege(_msgSender(), tokenId, privId, user, expires);
     }
 
     /// @notice Sets multiple privileges to a user with expiration
@@ -116,7 +116,7 @@ abstract contract MultiPrivilege is
             user = privData[i].user;
             expires = privData[i].expires;
 
-            _setPrivilege(msg.sender, tokenId, privId, user, expires);
+            _setPrivilege(_msgSender(), tokenId, privId, user, expires);
         }
     }
 

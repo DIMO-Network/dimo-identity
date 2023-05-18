@@ -5,7 +5,7 @@ import {
   DIMORegistry,
   Eip712Checker,
   DimoAccessControl,
-  Nodes,
+  // Nodes,
   Manufacturer,
   ManufacturerId,
   Vehicle,
@@ -13,10 +13,10 @@ import {
   AftermarketDevice,
   AftermarketDeviceId,
   AdLicenseValidator,
-  Mapper,
+  // Mapper,
+  Forwarder,
   MockDimoToken,
   MockStake
-  // NFTBundle
 } from '../typechain';
 import {
   setup,
@@ -26,27 +26,29 @@ import {
   C
 } from '../utils';
 
+const { expect } = chai;
 const { solidity } = waffle;
 const provider = waffle.provider;
 
 chai.use(solidity);
 
-describe('NFTBundle', async function () {
+describe('Forwarder', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
   let accessControlInstance: DimoAccessControl;
-  let nodesInstance: Nodes;
+  // let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
-  let mapperInstance: Mapper;
+  // let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
+  let forwarderInstance: Forwarder;
 
   const [
     admin,
@@ -74,12 +76,12 @@ describe('NFTBundle', async function () {
       dimoRegistryInstance,
       eip712CheckerInstance,
       accessControlInstance,
-      nodesInstance,
+      ,
       manufacturerInstance,
       vehicleInstance,
       aftermarketDeviceInstance,
       adLicenseValidatorInstance,
-      mapperInstance,
+      ,
       manufacturerIdInstance,
       vehicleIdInstance,
       adIdInstance
@@ -96,6 +98,12 @@ describe('NFTBundle', async function () {
       ],
       nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId']
     });
+
+    const ForwarderFactory = await ethers.getContractFactory(
+      'Forwarder',
+      admin
+    );
+    forwarderInstance = await ForwarderFactory.deploy();
 
     const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
@@ -222,9 +230,15 @@ describe('NFTBundle', async function () {
     await vehicleIdInstance
       .connect(admin)
       .setDimoRegistryAddress(dimoRegistryInstance.address);
+    await vehicleIdInstance
+      .connect(admin)
+      .setTrustedForwarder(forwarderInstance.address);
     await adIdInstance
       .connect(admin)
       .setDimoRegistryAddress(dimoRegistryInstance.address);
+    await adIdInstance
+      .connect(admin)
+      .setTrustedForwarder(forwarderInstance.address);
 
     const claimOwnerSig1 = await signMessage({
       _signer: user1,
@@ -278,58 +292,8 @@ describe('NFTBundle', async function () {
     await revertToSnapshot(snapshot);
   });
 
-  context.only('On transfer', async () => {
-    it('Test', async () => {
-      const NFTBundleFactory = await ethers.getContractFactory(
-        'NFTBundle',
-        admin
-      );
-      // const nftBundleInstance = await NFTBundleFactory.deploy();
-      const nftBundleInstance = await NFTBundleFactory.deploy(
-        vehicleIdInstance.address,
-        adIdInstance.address
-      );
-
-      const vehicleIdInterface = ethers.Contract.getInterface(
-        vehicleIdInstance.interface
-      );
-      const transferToken1 = vehicleIdInterface.encodeFunctionData(
-        'safeTransferFrom(address,address,uint256)',
-        [user1.address, user2.address, 1]
-      );
-
-      // await vehicleIdInstance
-      //   .connect(user1)
-      //   .approve(nftBundleInstance.address, 1);
-      // await adIdInstance.connect(user1).approve(nftBundleInstance.address, 1);
-
-      console.log(await vehicleIdInstance.ownerOf(1));
-      console.log(await adIdInstance.ownerOf(1));
-
-      // await nftBundleInstance.connect(user1).transfer1(1, 1, user2.address);
-      await nftBundleInstance
-        .connect(user1)
-        .transfer2(1, vehicleIdInstance.address, transferToken1);
-      // await nftBundleInstance.connect(user1).transfer1(1, 1, user2.address);
-
-      console.log(await vehicleIdInstance.ownerOf(1));
-      console.log(await adIdInstance.ownerOf(1));
-
-      console.log(nodesInstance.address);
-      console.log(mapperInstance.address);
-    });
-
-    it.only('Test forwarder', async () => {
-      const ForwarderFactory = await ethers.getContractFactory(
-        'Forwarder',
-        admin
-      );
-      // const nftBundleInstance = await ForwarderFactory.deploy();
-      const forwarderInstance = await ForwarderFactory.deploy();
-
-      await vehicleIdInstance.setTrustedForwarder(forwarderInstance.address);
-      await adIdInstance.setTrustedForwarder(forwarderInstance.address);
-
+  context('On transfer', async () => {
+    it('Basic test forwarder', async () => {
       const vehicleIdInterface = ethers.Contract.getInterface(
         vehicleIdInstance.interface
       );
@@ -337,31 +301,25 @@ describe('NFTBundle', async function () {
         adIdInstance.interface
       );
 
-      const data1 = vehicleIdInterface.encodeFunctionData('transferFrom', [
-        user1.address,
-        user2.address,
-        1
-      ]);
-      const data2 = adIdInterface.encodeFunctionData('transferFrom', [
-        user1.address,
-        user2.address,
-        1
-      ]);
+      const transferEncoded1 = vehicleIdInterface.encodeFunctionData(
+        'safeTransferFrom(address,address,uint256)',
+        [user1.address, user2.address, 1]
+      );
+      const transferEncoded2 = adIdInterface.encodeFunctionData(
+        'safeTransferFrom(address,address,uint256)',
+        [user1.address, user2.address, 1]
+      );
 
-      console.log(await vehicleIdInstance.ownerOf(1));
-      console.log(await adIdInstance.ownerOf(1));
-
-      // await forwarderInstance
-      //   .connect(user1)
-      //   .execute([{ to: vehicleIdInstance.address, data: data1 }]);
+      expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
 
       await forwarderInstance.connect(user1).execute([
-        { to: vehicleIdInstance.address, data: data1 },
-        { to: adIdInstance.address, data: data2 }
+        { to: vehicleIdInstance.address, data: transferEncoded1 },
+        { to: adIdInstance.address, data: transferEncoded2 }
       ]);
 
-      console.log(await vehicleIdInstance.ownerOf(1));
-      console.log(await adIdInstance.ownerOf(1));
+      expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
+      expect(await adIdInstance.ownerOf(1)).to.be.equal(user2.address);
     });
   });
 });

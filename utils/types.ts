@@ -80,3 +80,13 @@ export type ContractAddressesByNetwork = {
 export type NetworkValue = {
   [index: string]: string
 };
+
+export type GenericKeyAny = {
+  [index: string]: any
+};
+
+export type ContractsSetup = {
+  modules: string[],
+  nfts: string[],
+  upgradeableContracts: string[]
+};

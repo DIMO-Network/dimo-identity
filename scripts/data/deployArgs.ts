@@ -59,3 +59,17 @@ export const AD_NFT_URI =
 
 export const vehicleAttributes = ['Make', 'Model', 'Year'];
 export const adAttributes = ['Serial', 'IMEI'];
+
+export const manufacturerIdArgs = {
+  name: 'ManufacturerId',
+  args: [MANUFACTURER_NFT_NAME, MANUFACTURER_NFT_SYMBOL, MANUFACTURER_NFT_URI]
+};
+export const vehicleIdArgs = {
+  name: 'VehicleId',
+  args: [VEHICLE_NFT_NAME, VEHICLE_NFT_SYMBOL, VEHICLE_NFT_URI]
+};
+export const adIdArgs = {
+  name: 'AftermarketDeviceId',
+  args: [AD_NFT_NAME, AD_NFT_SYMBOL, AD_NFT_URI]
+};
+export const nftArgs = [manufacturerIdArgs, vehicleIdArgs, adIdArgs];

@@ -18,7 +18,7 @@ import {
   MockStake
 } from '../../typechain';
 import {
-  setup,
+  setup2,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -26,10 +26,7 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('AftermarketDeviceId', async function () {
   let snapshot: string;
@@ -71,20 +68,7 @@ describe('AftermarketDeviceId', async function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      eip712CheckerInstance,
-      accessControlInstance,
-      nodesInstance,
-      manufacturerInstance,
-      vehicleInstance,
-      aftermarketDeviceInstance,
-      adLicenseValidatorInstance,
-      mapperInstance,
-      manufacturerIdInstance,
-      vehicleIdInstance,
-      adIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup2(admin, {
       modules: [
         'Eip712Checker',
         'DimoAccessControl',
@@ -95,8 +79,22 @@ describe('AftermarketDeviceId', async function () {
         'AdLicenseValidator',
         'Mapper'
       ],
-      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId']
+      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    eip712CheckerInstance = deployments.Eip712Checker;
+    accessControlInstance = deployments.DimoAccessControl;
+    nodesInstance = deployments.Nodes;
+    manufacturerInstance = deployments.Manufacturer;
+    vehicleInstance = deployments.Vehicle;
+    aftermarketDeviceInstance = deployments.AftermarketDevice;
+    adLicenseValidatorInstance = deployments.AdLicenseValidator;
+    mapperInstance = deployments.Mapper;
+    manufacturerIdInstance = deployments.ManufacturerId;
+    vehicleIdInstance = deployments.VehicleId;
+    adIdInstance = deployments.AftermarketDeviceId;
 
     const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance

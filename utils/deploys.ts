@@ -2,13 +2,17 @@ import { Wallet } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import { getSelectors, ContractNameArgs } from '.';
+import { getSelectors, ContractNameArgs, GenericKeyAny } from '.';
 
 export async function initialize(
   deployer: Wallet | SignerWithAddress,
   ...contracts: string[]
-): Promise<any[]> {
-  const instances: any[] = [];
+): Promise<GenericKeyAny> {
+  const instances: GenericKeyAny = {};
+
+  if (contracts.length === 0) {
+    return instances;
+  }
 
   // Deploy DIMORegistry Implementation
   const DIMORegistry = await ethers.getContractFactory('DIMORegistry');
@@ -28,7 +32,7 @@ export async function initialize(
     .connect(deployer)
     .addModule(dimoRegistryImplementation.address, contractSelectors);
 
-  instances.push(dimoRegistry);
+  instances.DIMORegistry = dimoRegistry;
 
   for (const contractName of contracts) {
     const ContractFactory = await ethers.getContractFactory(contractName);
@@ -43,8 +47,9 @@ export async function initialize(
       .connect(deployer)
       .addModule(contractImplementation.address, contractSelectors);
 
-    instances.push(
-      await ethers.getContractAt(contractName, dimoRegistry.address)
+    instances[contractName] = await ethers.getContractAt(
+      contractName,
+      dimoRegistry.address
     );
   }
 
@@ -54,8 +59,8 @@ export async function initialize(
 export async function deployUpgradeableContracts(
   deployer: Wallet | SignerWithAddress,
   contractNameArgs: ContractNameArgs[]
-): Promise<any[]> {
-  const instances: any[] = [];
+): Promise<GenericKeyAny> {
+  const instances: GenericKeyAny = {};
 
   for (const contractNameArg of contractNameArgs) {
     const ContractFactory = await ethers.getContractFactory(
@@ -75,7 +80,7 @@ export async function deployUpgradeableContracts(
 
     await contractProxy.deployed();
 
-    instances.push(contractProxy);
+    instances[contractNameArg.name] = contractProxy;
   }
 
   return instances;

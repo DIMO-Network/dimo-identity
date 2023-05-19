@@ -434,6 +434,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "dimoRegistry",
+    "outputs": [
+      {
+        "internalType": "contract IDimoRegistry",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -603,6 +616,11 @@
         "internalType": "string",
         "name": "baseUri_",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "dimoRegistry_",
+        "type": "address"
       },
       {
         "internalType": "address",
@@ -936,7 +954,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "addr",
+        "name": "dimoRegistry_",
         "type": "address"
       }
     ],

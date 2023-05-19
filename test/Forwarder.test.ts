@@ -14,12 +14,12 @@ import {
   AftermarketDeviceId,
   AdLicenseValidator,
   // Mapper,
-  Forwarder,
+  DimoForwarder,
   MockDimoToken,
   MockStake
 } from '../typechain';
 import {
-  setup,
+  setup2,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -27,12 +27,9 @@ import {
 } from '../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
 
-chai.use(solidity);
-
-describe('Forwarder', async function () {
+describe('DimoForwarder', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
@@ -48,7 +45,7 @@ describe('Forwarder', async function () {
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
-  let forwarderInstance: Forwarder;
+  let forwarderInstance: DimoForwarder;
 
   const [
     admin,
@@ -72,20 +69,7 @@ describe('Forwarder', async function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      eip712CheckerInstance,
-      accessControlInstance,
-      ,
-      manufacturerInstance,
-      vehicleInstance,
-      aftermarketDeviceInstance,
-      adLicenseValidatorInstance,
-      ,
-      manufacturerIdInstance,
-      vehicleIdInstance,
-      adIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup2(admin, {
       modules: [
         'Eip712Checker',
         'DimoAccessControl',
@@ -96,14 +80,23 @@ describe('Forwarder', async function () {
         'AdLicenseValidator',
         'Mapper'
       ],
-      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId']
+      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
+      upgradeableContracts: ['DimoForwarder']
     });
 
-    const ForwarderFactory = await ethers.getContractFactory(
-      'Forwarder',
-      admin
-    );
-    forwarderInstance = await ForwarderFactory.deploy();
+    dimoRegistryInstance = deployments.DIMORegistry;
+    eip712CheckerInstance = deployments.Eip712Checker;
+    accessControlInstance = deployments.DimoAccessControl;
+    // nodesInstance = deployments.Nodes;
+    manufacturerInstance = deployments.Manufacturer;
+    vehicleInstance = deployments.Vehicle;
+    aftermarketDeviceInstance = deployments.AftermarketDevice;
+    adLicenseValidatorInstance = deployments.AdLicenseValidator;
+    // mapperInstance = deployments.Mapper;
+    manufacturerIdInstance = deployments.ManufacturerId;
+    vehicleIdInstance = deployments.VehicleId;
+    adIdInstance = deployments.AftermarketDeviceId;
+    forwarderInstance = deployments.DimoForwarder;
 
     const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
@@ -293,30 +286,22 @@ describe('Forwarder', async function () {
   });
 
   context('On transfer', async () => {
-    it('Basic test forwarder', async () => {
-      const vehicleIdInterface = ethers.Contract.getInterface(
-        vehicleIdInstance.interface
+    it('New forwarder transfer function', async () => {
+      await forwarderInstance.setDimoRegistryAddress(
+        dimoRegistryInstance.address
       );
-      const adIdInterface = ethers.Contract.getInterface(
-        adIdInstance.interface
-      );
-
-      const transferEncoded1 = vehicleIdInterface.encodeFunctionData(
-        'safeTransferFrom(address,address,uint256)',
-        [user1.address, user2.address, 1]
-      );
-      const transferEncoded2 = adIdInterface.encodeFunctionData(
-        'safeTransferFrom(address,address,uint256)',
-        [user1.address, user2.address, 1]
+      await forwarderInstance.setNfts(
+        vehicleIdInstance.address,
+        adIdInstance.address,
+        C.ZERO_ADDRESS
       );
 
       expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
       expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
 
-      await forwarderInstance.connect(user1).execute([
-        { to: vehicleIdInstance.address, data: transferEncoded1 },
-        { to: adIdInstance.address, data: transferEncoded2 }
-      ]);
+      await forwarderInstance
+        .connect(user1)
+        .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
 
       expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
       expect(await adIdInstance.ownerOf(1)).to.be.equal(user2.address);

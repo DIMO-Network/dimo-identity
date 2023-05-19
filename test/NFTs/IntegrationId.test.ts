@@ -7,13 +7,10 @@ import {
   Integration,
   IntegrationId
 } from '../../typechain';
-import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';
+import { setup2, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('IntegrationId', async function () {
   let snapshot: string;
@@ -26,15 +23,16 @@ describe('IntegrationId', async function () {
     provider.getWallets();
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      nodesInstance,
-      integrationInstance,
-      integrationIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup2(admin, {
       modules: ['Nodes', 'Integration'],
-      nfts: ['IntegrationId']
+      nfts: ['IntegrationId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    nodesInstance = deployments.Nodes;
+    integrationInstance = deployments.Integration;
+    integrationIdInstance = deployments.IntegrationId;
 
     const MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
     await integrationIdInstance

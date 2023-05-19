@@ -2,17 +2,13 @@ import { Wallet } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import * as C from './constants';
+import { GenericKeyAny, ContractsSetup } from './types';
 import { initialize, deployUpgradeableContracts } from './deploys';
 
-type ContractsSetup = {
-  modules: string[],
-  nfts: string[]
-};
-
-export async function setup(
+export async function setup2(
   deployer: Wallet | SignerWithAddress,
   contracts: ContractsSetup
-): Promise<any[]> {
+): Promise<GenericKeyAny> {
   const deployedRegistryContracts = await initialize(
     deployer,
     ...contracts.modules
@@ -23,5 +19,16 @@ export async function setup(
     contracts.nfts.map((nftName) => C.nftArgs[nftName])
   );
 
-  return [...deployedRegistryContracts, ...deployedNfts];
+  const deployedUpradeableContracts = await deployUpgradeableContracts(
+    deployer,
+    contracts.upgradeableContracts.map(
+      (contractName) => C.upgradeableContractArgs[contractName]
+    )
+  );
+
+  return {
+    ...deployedRegistryContracts,
+    ...deployedNfts,
+    ...deployedUpradeableContracts
+  };
 }

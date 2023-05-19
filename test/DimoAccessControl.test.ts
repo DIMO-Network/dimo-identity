@@ -2,13 +2,10 @@ import chai from 'chai';
 import { waffle } from 'hardhat';
 
 import { DimoAccessControl } from '../typechain';
-import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
+import { setup2, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('DimoAccessControl', async function () {
   let snapshot: string;
@@ -17,10 +14,12 @@ describe('DimoAccessControl', async function () {
   const [admin1, admin2, nonAdmin] = provider.getWallets();
 
   before(async () => {
-    [, accessControlInstance] = await setup(admin1, {
+    const deployments = await setup2(admin1, {
       modules: ['DimoAccessControl'],
-      nfts: []
+      nfts: [],
+      upgradeableContracts: []
     });
+    accessControlInstance = deployments.DimoAccessControl;
   });
 
   beforeEach(async () => {

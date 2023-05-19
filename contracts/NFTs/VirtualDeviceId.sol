@@ -10,7 +10,7 @@ contract VirtualDeviceId is
     ERC2771ContextUpgradeable,
     MultiPrivilege
 {
-    IDimoRegistry private _dimoRegistry;
+    IDimoRegistry public dimoRegistry;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -21,21 +21,24 @@ contract VirtualDeviceId is
         string calldata name_,
         string calldata symbol_,
         string calldata baseUri_,
+        address dimoRegistry_,
         address trustedForwarder_
     ) external initializer {
         _erc2771Init(trustedForwarder_);
         _multiPrivilegeInit(name_, symbol_, baseUri_);
+
+        dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
 
     /// @notice Sets the DIMO Registry address
     /// @dev Only an admin can set the DIMO Registry address
-    /// @param addr The address to be set
-    function setDimoRegistryAddress(address addr)
+    /// @param dimoRegistry_ The address to be set
+    function setDimoRegistryAddress(address dimoRegistry_)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(addr != address(0), "Non zero address");
-        _dimoRegistry = IDimoRegistry(addr);
+        require(dimoRegistry_ != address(0), "Non zero address");
+        dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
 
     /// @notice Sets the Trusted Forwarder address

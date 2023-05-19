@@ -11,10 +11,7 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('MultiPrivilege', function () {
   let snapshot: string;
@@ -30,7 +27,7 @@ describe('MultiPrivilege', function () {
     const blockBefore = await ethers.provider.getBlock(blockNumBefore);
     expiresAtDefault = blockBefore.timestamp + 31556926; // + 1 year
 
-    [multiPrivilegeInstance] = await deployUpgradeableContracts(admin, [
+    const deployments = await deployUpgradeableContracts(admin, [
       {
         name: 'MockMultiPrivilege',
         args: [
@@ -44,6 +41,7 @@ describe('MultiPrivilege', function () {
         }
       }
     ]);
+    multiPrivilegeInstance = deployments.MockMultiPrivilege;
 
     const receipt = await (
       await multiPrivilegeInstance['safeMint(address)'](user1.address)

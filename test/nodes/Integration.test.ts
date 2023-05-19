@@ -9,17 +9,14 @@ import {
 } from '../../typechain';
 import {
   initialize,
-  setup,
+  setup2,
   createSnapshot,
   revertToSnapshot,
   C
 } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('Integration', async function () {
   let snapshot: string;
@@ -32,15 +29,16 @@ describe('Integration', async function () {
     provider.getWallets();
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      nodesInstance,
-      integrationInstance,
-      integrationIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup2(admin, {
       modules: ['Nodes', 'Integration'],
-      nfts: ['IntegrationId']
+      nfts: ['IntegrationId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    nodesInstance = deployments.Nodes;
+    integrationInstance = deployments.Integration;
+    integrationIdInstance = deployments.IntegrationId;
 
     const MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
     await integrationIdInstance
@@ -72,7 +70,8 @@ describe('Integration', async function () {
   describe('setIntegrationIdProxyAddress', () => {
     let localIntegrationInstance: Integration;
     beforeEach(async () => {
-      [, localIntegrationInstance] = await initialize(admin, 'Integration');
+      const deployments = await initialize(admin, 'Integration');
+      localIntegrationInstance = deployments.Integration;
     });
 
     context('Error handling', () => {

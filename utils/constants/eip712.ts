@@ -30,8 +30,7 @@ export const schemaBase: TypedData = {
     ],
     MintVirtualDeviceSign: [
       { name: 'integrationNode', type: 'uint256' },
-      { name: 'vehicleNode', type: 'uint256' },
-      { name: 'virtualDeviceAddress', type: 'address' }
+      { name: 'vehicleNode', type: 'uint256' }
     ]
   },
   primaryType: '',

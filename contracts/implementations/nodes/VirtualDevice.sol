@@ -20,7 +20,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 contract VirtualDevice is AccessControlInternal {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
-            "MintVirtualDeviceSign(uint256 integrationNode,uint256 vehicleNode,address virtualDeviceAddress)"
+            "MintVirtualDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
         );
 
     event VirtualDeviceIdProxySet(address indexed proxy);
@@ -120,12 +120,7 @@ contract VirtualDevice is AccessControlInternal {
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(data.vehicleNode);
         bytes32 message = keccak256(
-            abi.encode(
-                MINT_TYPEHASH,
-                data.integrationNode,
-                data.vehicleNode,
-                data.virtualDeviceAddr
-            )
+            abi.encode(MINT_TYPEHASH, data.integrationNode, data.vehicleNode)
         );
 
         require(

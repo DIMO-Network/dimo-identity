@@ -317,8 +317,7 @@ describe('VirtualDevice', function () {
         _verifyingContract: virtualDeviceInstance.address,
         message: {
           integrationNode: '1',
-          vehicleNode: '1',
-          virtualDeviceAddress: virtualDeviceAddress1.address
+          vehicleNode: '1'
         }
       });
       mintVehicleOwnerSig1 = await signMessage({
@@ -327,8 +326,7 @@ describe('VirtualDevice', function () {
         _verifyingContract: virtualDeviceInstance.address,
         message: {
           integrationNode: '1',
-          vehicleNode: '1',
-          virtualDeviceAddress: virtualDeviceAddress1.address
+          vehicleNode: '1'
         }
       });
       correctMintInput = {
@@ -451,7 +449,7 @@ describe('VirtualDevice', function () {
           virtualDeviceSig: mintVirtualDeviceSig1,
           vehicleOwnerSig: mintVehicleOwnerSig1,
           virtualDeviceAddr: virtualDeviceAddress2.address,
-          attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+          attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
         };
 
         await virtualDeviceInstance
@@ -475,8 +473,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -485,7 +482,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: invalidSignature,
               vehicleOwnerSig: mintVehicleOwnerSig1,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -502,8 +499,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -512,7 +508,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: invalidSignature,
               vehicleOwnerSig: mintVehicleOwnerSig1,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -529,8 +525,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -539,7 +534,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: invalidSignature,
               vehicleOwnerSig: mintVehicleOwnerSig1,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -556,8 +551,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -566,7 +560,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: invalidSignature,
               vehicleOwnerSig: mintVehicleOwnerSig1,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -582,8 +576,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '99',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -592,7 +585,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: invalidSignature,
               vehicleOwnerSig: mintVehicleOwnerSig1,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -608,8 +601,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '2',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '2'
               }
             });
             const incorrectMintInput = {
@@ -618,7 +610,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: invalidSignature,
               vehicleOwnerSig: mintVehicleOwnerSig1,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -634,8 +626,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress2.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -644,7 +635,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: invalidSignature,
               vehicleOwnerSig: mintVehicleOwnerSig1,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -664,8 +655,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -674,7 +664,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: mintVirtualDeviceSig1,
               vehicleOwnerSig: invalidSignature,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -691,8 +681,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -701,7 +690,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: mintVirtualDeviceSig1,
               vehicleOwnerSig: invalidSignature,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -718,8 +707,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -728,7 +716,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: mintVirtualDeviceSig1,
               vehicleOwnerSig: invalidSignature,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -745,8 +733,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -755,7 +742,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: mintVirtualDeviceSig1,
               vehicleOwnerSig: invalidSignature,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -771,8 +758,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '99',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '1'
               }
             });
             const incorrectMintInput = {
@@ -781,7 +767,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: mintVirtualDeviceSig1,
               vehicleOwnerSig: invalidSignature,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -797,8 +783,7 @@ describe('VirtualDevice', function () {
               _verifyingContract: virtualDeviceInstance.address,
               message: {
                 integrationNode: '1',
-                vehicleNode: '2',
-                virtualDeviceAddress: virtualDeviceAddress1.address
+                vehicleNode: '2'
               }
             });
             const incorrectMintInput = {
@@ -807,33 +792,7 @@ describe('VirtualDevice', function () {
               virtualDeviceSig: mintVirtualDeviceSig1,
               vehicleOwnerSig: invalidSignature,
               virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
-            };
-
-            await expect(
-              virtualDeviceInstance
-                .connect(admin)
-                .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
-          });
-          it('Should revert if virtual device address is incorrect', async () => {
-            const invalidSignature = await signMessage({
-              _signer: user1,
-              _primaryType: 'MintVirtualDeviceSign',
-              _verifyingContract: virtualDeviceInstance.address,
-              message: {
-                integrationNode: '1',
-                vehicleNode: '1',
-                virtualDeviceAddress: virtualDeviceAddress2.address
-              }
-            });
-            const incorrectMintInput = {
-              integrationNode: '1',
-              vehicleNode: '1',
-              virtualDeviceSig: mintVirtualDeviceSig1,
-              vehicleOwnerSig: invalidSignature,
-              virtualDeviceAddr: virtualDeviceAddress1.address,
-              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairsNotWhitelisted
+              attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
             };
 
             await expect(
@@ -950,8 +909,7 @@ describe('VirtualDevice', function () {
         _verifyingContract: virtualDeviceInstance.address,
         message: {
           integrationNode: '1',
-          vehicleNode: '1',
-          virtualDeviceAddress: virtualDeviceAddress1.address
+          vehicleNode: '1'
         }
       });
       const mintVehicleOwnerSig1 = await signMessage({
@@ -960,8 +918,7 @@ describe('VirtualDevice', function () {
         _verifyingContract: virtualDeviceInstance.address,
         message: {
           integrationNode: '1',
-          vehicleNode: '1',
-          virtualDeviceAddress: virtualDeviceAddress1.address
+          vehicleNode: '1'
         }
       });
       mintInput = {
@@ -1088,8 +1045,7 @@ describe('VirtualDevice', function () {
         _verifyingContract: virtualDeviceInstance.address,
         message: {
           integrationNode: '1',
-          vehicleNode: '1',
-          virtualDeviceAddress: virtualDeviceAddress1.address
+          vehicleNode: '1'
         }
       });
       const mintVehicleOwnerSig1 = await signMessage({
@@ -1098,8 +1054,7 @@ describe('VirtualDevice', function () {
         _verifyingContract: virtualDeviceInstance.address,
         message: {
           integrationNode: '1',
-          vehicleNode: '1',
-          virtualDeviceAddress: virtualDeviceAddress1.address
+          vehicleNode: '1'
         }
       });
       mintInput = {

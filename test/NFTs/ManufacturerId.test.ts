@@ -7,7 +7,7 @@ import {
   Manufacturer,
   ManufacturerId
 } from '../../typechain';
-import { setup2, createSnapshot, revertToSnapshot, C } from '../../utils';
+import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 const { expect } = chai;
 const provider = waffle.provider;
@@ -19,10 +19,10 @@ describe('ManufacturerId', async function () {
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
 
-  const [admin, manufacturer1] = provider.getWallets();
+  const [admin, nonAdmin, manufacturer1] = provider.getWallets();
 
   before(async () => {
-    const deployments = await setup2(admin, {
+    const deployments = await setup(admin, {
       modules: ['Nodes', 'Manufacturer'],
       nfts: ['ManufacturerId'],
       upgradeableContracts: []
@@ -66,6 +66,17 @@ describe('ManufacturerId', async function () {
   });
 
   describe('setDimoRegistryAddress', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        manufacturerIdInstance
+          .connect(nonAdmin)
+          .setDimoRegistryAddress(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
+    });
     it('Should revert if addr is zero address', async () => {
       await expect(
         manufacturerIdInstance

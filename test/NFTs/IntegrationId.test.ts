@@ -7,7 +7,7 @@ import {
   Integration,
   IntegrationId
 } from '../../typechain';
-import { setup2, createSnapshot, revertToSnapshot, C } from '../../utils';
+import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 const { expect } = chai;
 const provider = waffle.provider;
@@ -19,11 +19,11 @@ describe('IntegrationId', async function () {
   let integrationInstance: Integration;
   let integrationIdInstance: IntegrationId;
 
-  const [admin, integrationOwner1, integrationOwner2, nonController] =
+  const [admin, nonAdmin, integrationOwner1, integrationOwner2, nonController] =
     provider.getWallets();
 
   before(async () => {
-    const deployments = await setup2(admin, {
+    const deployments = await setup(admin, {
       modules: ['Nodes', 'Integration'],
       nfts: ['IntegrationId'],
       upgradeableContracts: []
@@ -67,6 +67,17 @@ describe('IntegrationId', async function () {
   });
 
   describe('setDimoRegistryAddress', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        integrationIdInstance
+          .connect(nonAdmin)
+          .setDimoRegistryAddress(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
     it('Should revert if addr is zero address', async () => {
       await expect(
         integrationIdInstance

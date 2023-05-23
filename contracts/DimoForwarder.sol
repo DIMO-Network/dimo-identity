@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 error zeroAddress();
+error notWhitelisted(string proxyName);
 error invalidLink(
     address idProxySource,
     address idProxyTraget,
@@ -22,10 +23,11 @@ contract DimoForwarder is
     UUPSUpgradeable
 {
     IDimoRegistry public dimoRegistry;
-    address vehicleIdProxyAddress;
-    address adIdProxyAddress;
-    address virtualDeviceIdProxyAddress;
+    address public vehicleIdProxyAddress;
+    address public adIdProxyAddress;
+    address public virtualDeviceIdProxyAddress;
 
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -48,6 +50,7 @@ contract DimoForwarder is
         virtualDeviceIdProxyAddress = virtualDeviceIdProxyAddress_;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
     }
 
@@ -56,20 +59,32 @@ contract DimoForwarder is
     /// @param dimoRegistry_ The address to be set
     function setDimoRegistryAddress(address dimoRegistry_)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         if (dimoRegistry_ == address(0)) revert zeroAddress();
         dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
 
-    /// TODO Improve this monstrosity
-    function setNfts(
-        address vehicleIdProxyAddress_,
-        address adIdProxyAddress_,
-        address virtualDeviceIdProxyAddress_
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    /// TODO Documentation
+    function setVehicleIdProxyAddress(address vehicleIdProxyAddress_)
+        external
+        onlyRole(ADMIN_ROLE)
+    {
         vehicleIdProxyAddress = vehicleIdProxyAddress_;
+    }
+
+    /// TODO Documentation
+    function setAftermarketDeviceIdProxyAddress(address adIdProxyAddress_)
+        external
+        onlyRole(ADMIN_ROLE)
+    {
         adIdProxyAddress = adIdProxyAddress_;
+    }
+
+    /// TODO Documentation
+    function setVirtualDeviceIdProxyAddress(
+        address virtualDeviceIdProxyAddress_
+    ) external onlyRole(ADMIN_ROLE) {
         virtualDeviceIdProxyAddress = virtualDeviceIdProxyAddress_;
     }
 
@@ -95,33 +110,8 @@ contract DimoForwarder is
                 aftermarketDeviceId
             );
 
-        bool success;
-
-        (success, ) = vehicleIdProxyAddress.call(
-            abi.encodePacked(
-                abi.encodeWithSignature(
-                    "safeTransferFrom(address,address,uint256)",
-                    msg.sender,
-                    to,
-                    vehicleId
-                ),
-                msg.sender
-            )
-        );
-        if (!success) revert transferFailed(vehicleIdProxyAddress, vehicleId);
-
-        (success, ) = adIdProxyAddress.call(
-            abi.encodePacked(
-                abi.encodeWithSignature(
-                    "safeTransferFrom(address,address,uint256)",
-                    msg.sender,
-                    to,
-                    aftermarketDeviceId
-                ),
-                msg.sender
-            )
-        );
-        if (!success) revert transferFailed(adIdProxyAddress, vehicleId);
+        _execTransfer(vehicleIdProxyAddress, to, vehicleId);
+        _execTransfer(adIdProxyAddress, to, aftermarketDeviceId);
     }
 
     /// @notice Tranfers both Vehicle and Virtual Device Ids
@@ -149,34 +139,8 @@ contract DimoForwarder is
                 virtualDeviceId
             );
 
-        bool success;
-
-        (success, ) = vehicleIdProxyAddress.call(
-            abi.encodePacked(
-                abi.encodeWithSignature(
-                    "safeTransferFrom(address,address,uint256)",
-                    msg.sender,
-                    to,
-                    vehicleId
-                ),
-                msg.sender
-            )
-        );
-        if (!success) revert transferFailed(vehicleIdProxyAddress, vehicleId);
-
-        (success, ) = virtualDeviceIdProxyAddress.call(
-            abi.encodePacked(
-                abi.encodeWithSignature(
-                    "safeTransferFrom(address,address,uint256)",
-                    msg.sender,
-                    to,
-                    virtualDeviceId
-                ),
-                msg.sender
-            )
-        );
-        if (!success)
-            revert transferFailed(virtualDeviceIdProxyAddress, vehicleId);
+        _execTransfer(vehicleIdProxyAddress, to, vehicleId);
+        _execTransfer(virtualDeviceIdProxyAddress, to, virtualDeviceId);
     }
 
     /// @notice Internal function to authorize contract upgrade
@@ -187,4 +151,21 @@ contract DimoForwarder is
         override
         onlyRole(UPGRADER_ROLE)
     {}
+
+    /// TODO Documentation
+    /// @dev 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
+    function _execTransfer(
+        address proxy,
+        address to,
+        uint256 id
+    ) private {
+        (bool success, ) = proxy.call(
+            abi.encodePacked(
+                abi.encodeWithSelector(0x42842e0e, msg.sender, to, id),
+                msg.sender
+            )
+        );
+
+        if (!success) revert transferFailed(proxy, id);
+    }
 }

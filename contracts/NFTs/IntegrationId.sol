@@ -12,6 +12,8 @@ contract IntegrationId is
 {
     IDimoRegistry public dimoRegistry;
 
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -28,6 +30,9 @@ contract IntegrationId is
         _multiPrivilegeInit(name_, symbol_, baseUri_);
 
         dimoRegistry = IDimoRegistry(dimoRegistry_);
+
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
     }
 
     /// @notice Sets the DIMO Registry address
@@ -35,7 +40,7 @@ contract IntegrationId is
     /// @param dimoRegistry_ The address to be set
     function setDimoRegistryAddress(address dimoRegistry_)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         require(dimoRegistry_ != address(0), "Non zero address");
         dimoRegistry = IDimoRegistry(dimoRegistry_);
@@ -46,7 +51,7 @@ contract IntegrationId is
     function setTrustedForwarder(address trustedForwarder_)
         public
         override
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         super.setTrustedForwarder(trustedForwarder_);
     }

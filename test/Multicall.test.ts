@@ -19,7 +19,7 @@ import {
   Multicall
 } from '../typechain';
 import {
-  setup2,
+  setup,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -62,7 +62,7 @@ describe('Multicall', function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    const deployments = await setup2(admin, {
+    const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
         'DimoAccessControl',

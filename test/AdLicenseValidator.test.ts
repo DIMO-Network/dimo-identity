@@ -2,7 +2,7 @@ import chai from 'chai';
 import { ethers, waffle } from 'hardhat';
 
 import { AdLicenseValidator, MockDimoToken, MockStake } from '../typechain';
-import { setup2, createSnapshot, revertToSnapshot, C } from '../utils';
+import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
 const provider = waffle.provider;
@@ -16,7 +16,7 @@ describe('AdLicenseValidator', function () {
   const [admin, nonAdmin, foundation] = provider.getWallets();
 
   before(async () => {
-    const deployments = await setup2(admin, {
+    const deployments = await setup(admin, {
       modules: ['AdLicenseValidator'],
       nfts: [],
       upgradeableContracts: []

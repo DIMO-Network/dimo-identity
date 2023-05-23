@@ -5,7 +5,7 @@ import * as C from './constants';
 import { GenericKeyAny, ContractsSetup } from './types';
 import { initialize, deployUpgradeableContracts } from './deploys';
 
-export async function setup2(
+export async function setup(
   deployer: Wallet | SignerWithAddress,
   contracts: ContractsSetup
 ): Promise<GenericKeyAny> {

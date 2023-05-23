@@ -14,7 +14,7 @@ import {
   MockDimoToken,
   MockStake
 } from '../typechain';
-import { setup2, createSnapshot, revertToSnapshot, C } from '../utils';
+import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
 const provider = waffle.provider;
@@ -55,7 +55,7 @@ describe('Mapper', function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    const deployments = await setup2(admin, {
+    const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
         'DimoAccessControl',

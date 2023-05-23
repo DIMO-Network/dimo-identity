@@ -49,7 +49,7 @@ export type SetPrivilegeData = {
 
 export type ContractNameArgs = {
   name: string,
-  args: string[],
+  args: (string | [])[],
   opts: {
     initializer: string | false,
     kind: 'uups' | 'transparent' | 'beacon'

@@ -18,7 +18,7 @@ import {
   MockStake
 } from '../../typechain';
 import {
-  setup2,
+  setup,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -47,6 +47,7 @@ describe('AftermarketDeviceId', async function () {
 
   const [
     admin,
+    nonAdmin,
     foundation,
     manufacturer1,
     user1,
@@ -68,7 +69,7 @@ describe('AftermarketDeviceId', async function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    const deployments = await setup2(admin, {
+    const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
         'DimoAccessControl',
@@ -298,6 +299,15 @@ describe('AftermarketDeviceId', async function () {
   });
 
   describe('setDimoRegistryAddress', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        adIdInstance.connect(nonAdmin).setDimoRegistryAddress(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
+    });
     it('Should revert if addr is zero address', async () => {
       await expect(
         adIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)

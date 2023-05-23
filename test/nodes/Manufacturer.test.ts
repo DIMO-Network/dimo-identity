@@ -9,7 +9,7 @@ import {
 } from '../../typechain';
 import {
   initialize,
-  setup2,
+  setup,
   createSnapshot,
   revertToSnapshot,
   C
@@ -29,7 +29,7 @@ describe('Manufacturer', async function () {
     provider.getWallets();
 
   before(async () => {
-    const deployments = await setup2(admin, {
+    const deployments = await setup(admin, {
       modules: ['Nodes', 'Manufacturer'],
       nfts: ['ManufacturerId'],
       upgradeableContracts: []

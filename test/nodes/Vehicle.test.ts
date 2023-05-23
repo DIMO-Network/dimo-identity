@@ -12,7 +12,7 @@ import {
 } from '../../typechain';
 import {
   initialize,
-  setup2,
+  setup,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -35,7 +35,7 @@ describe('Vehicle', function () {
   const [admin, nonAdmin, manufacturer1, user1, user2] = provider.getWallets();
 
   before(async () => {
-    const deployments = await setup2(admin, {
+    const deployments = await setup(admin, {
       modules: ['Eip712Checker', 'Nodes', 'Manufacturer', 'Vehicle'],
       nfts: ['ManufacturerId', 'VehicleId'],
       upgradeableContracts: []

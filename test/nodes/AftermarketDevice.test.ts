@@ -785,7 +785,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
@@ -808,7 +808,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
@@ -831,7 +831,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
@@ -853,7 +853,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
         it('Should revert if owner does not match signer', async () => {
           const invalidOwnerSig = await signMessage({
@@ -875,7 +875,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
       });
 
@@ -901,7 +901,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidAdSig = await signMessage({
@@ -924,7 +924,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidAdSig = await signMessage({
@@ -947,7 +947,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidAdSig = await signMessage({
@@ -969,7 +969,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if owner does not match owner parameter', async () => {
           const invalidAdSig = await signMessage({
@@ -991,7 +991,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if signer does not match address associated with aftermarket device ID', async () => {
           const invalidAdSig = await signMessage({
@@ -1013,7 +1013,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
       });
     });
@@ -1241,7 +1241,7 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid AD signature');
           });
           it('Should revert if domain version is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1264,7 +1264,7 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid AD signature');
           });
           it('Should revert if domain chain ID is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1287,7 +1287,7 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid AD signature');
           });
           it('Should revert if aftermarket device node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1309,7 +1309,7 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid AD signature');
           });
           it('Should revert if aftermarket vehicle node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1331,9 +1331,10 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid AD signature');
           });
         });
+
         context('Vehicle owner signature', () => {
           it('Should revert if domain name is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1356,7 +1357,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if domain version is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1379,7 +1380,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if domain chain ID is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1402,7 +1403,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if aftermarket device node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1424,7 +1425,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if aftermarket vehicle node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1446,7 +1447,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
         });
       });

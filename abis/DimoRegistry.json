@@ -1272,11 +1272,16 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "addr",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "to",
                 "type": "address"
             }
         ],
-        "name": "setManufacturerMinted",
+        "name": "updateManufacturerMinted",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1298,7 +1303,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
@@ -1323,7 +1328,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "proxy",
                 "type": "address"
@@ -1336,7 +1341,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"

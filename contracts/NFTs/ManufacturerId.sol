@@ -42,7 +42,7 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable {
         address to,
         uint256 tokenId
     ) internal override {
-        _dimoRegistry.setManufacturerMinted(to);
+        _dimoRegistry.updateManufacturerMinted(from, to);
         super._transfer(from, to, tokenId);
     }
 }

@@ -23,16 +23,16 @@ contract VirtualDevice is AccessControlInternal {
             "MintVirtualDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
         );
 
-    event VirtualDeviceIdProxySet(address indexed proxy);
+    event VirtualDeviceIdProxySet(address proxy);
     event VirtualDeviceAttributeAdded(string attribute);
     event VirtualDeviceAttributeSet(
-        uint256 tokenId,
+        uint256 indexed tokenId,
         string attribute,
         string info
     );
     event VirtualDeviceNodeMinted(
         uint256 virtualDeviceNode,
-        uint256 vehicleNode,
+        uint256 indexed vehicleNode,
         address indexed virtualDeviceAddress,
         address indexed owner
     );
@@ -112,9 +112,9 @@ contract VirtualDevice is AccessControlInternal {
             "Device address already registered"
         );
         require(
-            ms.vehicleVirtualDeviceLinks[vehicleIdProxyAddress][
-                virtualDeviceIdProxyAddress
-            ][data.vehicleNode] == 0,
+            ms.nodeLinks[vehicleIdProxyAddress][virtualDeviceIdProxyAddress][
+                data.vehicleNode
+            ] == 0,
             "Vehicle already paired"
         );
 
@@ -129,7 +129,7 @@ contract VirtualDevice is AccessControlInternal {
                 message,
                 data.virtualDeviceSig
             ),
-            "Invalid signature"
+            "Invalid virtual device signature"
         );
         require(
             Eip712CheckerInternal._verifySignature(
@@ -137,7 +137,7 @@ contract VirtualDevice is AccessControlInternal {
                 message,
                 data.vehicleOwnerSig
             ),
-            "Invalid signature"
+            "Invalid vehicle owner signature"
         );
 
         uint256 newTokenId = INFT(virtualDeviceIdProxyAddress).safeMint(owner);
@@ -145,12 +145,12 @@ contract VirtualDevice is AccessControlInternal {
         ns.nodes[virtualDeviceIdProxyAddress][newTokenId].parentNode = data
             .integrationNode;
 
-        ms.vehicleVirtualDeviceLinks[vehicleIdProxyAddress][
-            virtualDeviceIdProxyAddress
-        ][data.vehicleNode] = newTokenId;
-        ms.vehicleVirtualDeviceLinks[virtualDeviceIdProxyAddress][
-            vehicleIdProxyAddress
-        ][newTokenId] = data.vehicleNode;
+        ms.nodeLinks[vehicleIdProxyAddress][virtualDeviceIdProxyAddress][
+                data.vehicleNode
+            ] = newTokenId;
+        ms.nodeLinks[virtualDeviceIdProxyAddress][vehicleIdProxyAddress][
+            newTokenId
+        ] = data.vehicleNode;
 
         vds.deviceAddressToNodeId[data.virtualDeviceAddr] = newTokenId;
         vds.nodeIdToDeviceAddress[newTokenId] = data.virtualDeviceAddr;

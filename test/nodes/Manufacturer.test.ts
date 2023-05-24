@@ -640,12 +640,15 @@ describe('Manufacturer', async function () {
     });
   });
 
-  describe('setManufacturerMinted', () => {
+  describe('updateManufacturerMinted', () => {
     it('Should revert if caller is not the NFT Proxy', async () => {
       await expect(
         manufacturerInstance
           .connect(nonAdmin)
-          .setManufacturerMinted(manufacturer1.address)
+          .updateManufacturerMinted(
+            manufacturer1.address,
+            manufacturer2.address
+          )
       ).to.be.revertedWith('Only NFT Proxy');
     });
   });

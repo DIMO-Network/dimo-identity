@@ -226,7 +226,7 @@ contract AftermarketDevice is
         );
         require(
             Eip712CheckerInternal._verifySignature(owner, message, ownerSig),
-            "Invalid signature"
+            "Invalid owner signature"
         );
         require(
             Eip712CheckerInternal._verifySignature(
@@ -234,7 +234,7 @@ contract AftermarketDevice is
                 message,
                 aftermarketDeviceSig
             ),
-            "Invalid signature"
+            "Invalid AD signature"
         );
 
         ads.deviceClaimed[aftermarketDeviceNode] = true;
@@ -301,7 +301,7 @@ contract AftermarketDevice is
                 message,
                 aftermarketDeviceSig
             ),
-            "Invalid signature"
+            "Invalid AD signature"
         );
         require(
             Eip712CheckerInternal._verifySignature(
@@ -309,7 +309,7 @@ contract AftermarketDevice is
                 message,
                 vehicleOwnerSig
             ),
-            "Invalid signature"
+            "Invalid vehicle owner signature"
         );
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;

@@ -304,7 +304,7 @@ describe('AftermarketDeviceId', async function () {
         adIdInstance.connect(nonAdmin).setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
+          C.ADMIN_ROLE
         }`
       );
     });
@@ -312,6 +312,31 @@ describe('AftermarketDeviceId', async function () {
       await expect(
         adIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith('Non zero address');
+    });
+  });
+
+  describe('setTrustedForwarder', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        adIdInstance.connect(nonAdmin).setTrustedForwarder(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
+    it('Should correctly set trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+
+      expect(await adIdInstance.trustedForwarder()).to.be.equal(C.ZERO_ADDRESS);
+
+      await adIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address);
+
+      expect(await adIdInstance.trustedForwarder()).to.be.equal(
+        mockForwarder.address
+      );
     });
   });
 

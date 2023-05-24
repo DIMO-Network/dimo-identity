@@ -5,7 +5,7 @@ import {
   DIMORegistry,
   Eip712Checker,
   DimoAccessControl,
-  // Nodes,
+  Nodes,
   Manufacturer,
   ManufacturerId,
   Integration,
@@ -17,7 +17,7 @@ import {
   VirtualDevice,
   VirtualDeviceId,
   AdLicenseValidator,
-  // Mapper,
+  Mapper,
   DimoForwarder,
   MockDimoToken,
   MockStake
@@ -38,14 +38,14 @@ describe('DimoForwarder', async function () {
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
   let accessControlInstance: DimoAccessControl;
-  // let nodesInstance: Nodes;
+  let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let integrationInstance: Integration;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let virtualDeviceInstance: VirtualDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
-  // let mapperInstance: Mapper;
+  let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let manufacturerIdInstance: ManufacturerId;
@@ -107,14 +107,14 @@ describe('DimoForwarder', async function () {
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
     accessControlInstance = deployments.DimoAccessControl;
-    // nodesInstance = deployments.Nodes;
+    nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
     integrationInstance = deployments.Integration;
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     virtualDeviceInstance = deployments.VirtualDevice;
     adLicenseValidatorInstance = deployments.AdLicenseValidator;
-    // mapperInstance = deployments.Mapper;
+    mapperInstance = deployments.Mapper;
     manufacturerIdInstance = deployments.ManufacturerId;
     integrationIdInstance = deployments.IntegrationId;
     vehicleIdInstance = deployments.VehicleId;
@@ -296,7 +296,18 @@ describe('DimoForwarder', async function () {
     await adIdInstance
       .connect(admin)
       .setDimoRegistryAddress(dimoRegistryInstance.address);
+    await virtualDeviceIdInstance
+      .connect(admin)
+      .setTrustedForwarder(forwarderInstance.address);
+
+    // Set DimoForwarder in the NFTs
+    await vehicleIdInstance
+      .connect(admin)
+      .setTrustedForwarder(forwarderInstance.address);
     await adIdInstance
+      .connect(admin)
+      .setTrustedForwarder(forwarderInstance.address);
+    await virtualDeviceIdInstance
       .connect(admin)
       .setTrustedForwarder(forwarderInstance.address);
 
@@ -311,6 +322,166 @@ describe('DimoForwarder', async function () {
     await forwarderInstance.setVirtualDeviceIdProxyAddress(
       virtualDeviceIdInstance.address
     );
+
+    // Minting and pairing 2 vehicles and aftermarket devices
+    const claimOwnerSig1 = await signMessage({
+      _signer: user1,
+      _primaryType: 'ClaimAftermarketDeviceSign',
+      _verifyingContract: aftermarketDeviceInstance.address,
+      message: {
+        aftermarketDeviceNode: '1',
+        owner: user1.address
+      }
+    });
+    const claimOwnerSig2 = await signMessage({
+      _signer: user2,
+      _primaryType: 'ClaimAftermarketDeviceSign',
+      _verifyingContract: aftermarketDeviceInstance.address,
+      message: {
+        aftermarketDeviceNode: '2',
+        owner: user2.address
+      }
+    });
+    const claimAdSig2 = await signMessage({
+      _signer: adAddress2,
+      _primaryType: 'ClaimAftermarketDeviceSign',
+      _verifyingContract: aftermarketDeviceInstance.address,
+      message: {
+        aftermarketDeviceNode: '2',
+        owner: user2.address
+      }
+    });
+    const claimAdSig1 = await signMessage({
+      _signer: adAddress1,
+      _primaryType: 'ClaimAftermarketDeviceSign',
+      _verifyingContract: aftermarketDeviceInstance.address,
+      message: {
+        aftermarketDeviceNode: '1',
+        owner: user1.address
+      }
+    });
+    const pairSignature1 = await signMessage({
+      _signer: user1,
+      _primaryType: 'PairAftermarketDeviceSign',
+      _verifyingContract: aftermarketDeviceInstance.address,
+      message: {
+        aftermarketDeviceNode: '1',
+        vehicleNode: '1'
+      }
+    });
+    const pairSignature2 = await signMessage({
+      _signer: user2,
+      _primaryType: 'PairAftermarketDeviceSign',
+      _verifyingContract: aftermarketDeviceInstance.address,
+      message: {
+        aftermarketDeviceNode: '2',
+        vehicleNode: '2'
+      }
+    });
+
+    await vehicleInstance
+      .connect(admin)
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+    await vehicleInstance
+      .connect(admin)
+      .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+    await aftermarketDeviceInstance
+      .connect(admin)
+      .claimAftermarketDeviceSign(
+        1,
+        user1.address,
+        claimOwnerSig1,
+        claimAdSig1
+      );
+    await aftermarketDeviceInstance
+      .connect(admin)
+      .claimAftermarketDeviceSign(
+        2,
+        user2.address,
+        claimOwnerSig2,
+        claimAdSig2
+      );
+    await aftermarketDeviceInstance
+      .connect(admin)
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+        1,
+        1,
+        pairSignature1
+      );
+    await aftermarketDeviceInstance
+      .connect(admin)
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+        2,
+        2,
+        pairSignature2
+      );
+
+    // Minting and linking 2 vehicles and virtual devices
+    const mintVirtualDeviceSig1 = await signMessage({
+      _signer: virtualDeviceAddress1,
+      _primaryType: 'MintVirtualDeviceSign',
+      _verifyingContract: virtualDeviceInstance.address,
+      message: {
+        integrationNode: '1',
+        vehicleNode: '3'
+      }
+    });
+    const mintVirtualDeviceSig2 = await signMessage({
+      _signer: virtualDeviceAddress2,
+      _primaryType: 'MintVirtualDeviceSign',
+      _verifyingContract: virtualDeviceInstance.address,
+      message: {
+        integrationNode: '1',
+        vehicleNode: '4'
+      }
+    });
+    const mintVehicleOwnerSig1 = await signMessage({
+      _signer: user1,
+      _primaryType: 'MintVirtualDeviceSign',
+      _verifyingContract: virtualDeviceInstance.address,
+      message: {
+        integrationNode: '1',
+        vehicleNode: '3'
+      }
+    });
+    const mintVehicleOwnerSig2 = await signMessage({
+      _signer: user2,
+      _primaryType: 'MintVirtualDeviceSign',
+      _verifyingContract: virtualDeviceInstance.address,
+      message: {
+        integrationNode: '1',
+        vehicleNode: '4'
+      }
+    });
+    const correctMintInput1 = {
+      integrationNode: '1',
+      vehicleNode: '3',
+      virtualDeviceSig: mintVirtualDeviceSig1,
+      vehicleOwnerSig: mintVehicleOwnerSig1,
+      virtualDeviceAddr: virtualDeviceAddress1.address,
+      attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+    };
+    const correctMintInput2 = {
+      integrationNode: '1',
+      vehicleNode: '4',
+      virtualDeviceSig: mintVirtualDeviceSig2,
+      vehicleOwnerSig: mintVehicleOwnerSig2,
+      virtualDeviceAddr: virtualDeviceAddress2.address,
+      attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+    };
+
+    await vehicleInstance
+      .connect(admin)
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+    await vehicleInstance
+      .connect(admin)
+      .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+    await virtualDeviceInstance
+      .connect(admin)
+      .mintVirtualDeviceSign(correctMintInput1);
+    await virtualDeviceInstance
+      .connect(admin)
+      .mintVirtualDeviceSign(correctMintInput2);
   });
 
   beforeEach(async () => {
@@ -383,107 +554,8 @@ describe('DimoForwarder', async function () {
   });
 
   describe('transferVehicleAndAftermarketDeviceIds', async () => {
-    beforeEach(async () => {
-      const claimOwnerSig1 = await signMessage({
-        _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '1',
-          owner: user1.address
-        }
-      });
-      const claimOwnerSig2 = await signMessage({
-        _signer: user2,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '2',
-          owner: user2.address
-        }
-      });
-      const claimAdSig2 = await signMessage({
-        _signer: adAddress2,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '2',
-          owner: user2.address
-        }
-      });
-      const claimAdSig1 = await signMessage({
-        _signer: adAddress1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '1',
-          owner: user1.address
-        }
-      });
-      const pairSignature1 = await signMessage({
-        _signer: user1,
-        _primaryType: 'PairAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '1',
-          vehicleNode: '1'
-        }
-      });
-      const pairSignature2 = await signMessage({
-        _signer: user2,
-        _primaryType: 'PairAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '2',
-          vehicleNode: '2'
-        }
-      });
-
-      await vehicleInstance
-        .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-      await vehicleInstance
-        .connect(admin)
-        .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
-      await aftermarketDeviceInstance
-        .connect(admin)
-        .claimAftermarketDeviceSign(
-          1,
-          user1.address,
-          claimOwnerSig1,
-          claimAdSig1
-        );
-      await aftermarketDeviceInstance
-        .connect(admin)
-        .claimAftermarketDeviceSign(
-          2,
-          user2.address,
-          claimOwnerSig2,
-          claimAdSig2
-        );
-      await aftermarketDeviceInstance
-        .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-          1,
-          1,
-          pairSignature1
-        );
-      await aftermarketDeviceInstance
-        .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-          2,
-          2,
-          pairSignature2
-        );
-    });
-
     context('Error handling', () => {
       it('Should revert if vehicle and aftermarket device are not paired', async () => {
-        // Vehicle #3
-        await vehicleInstance
-          .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-
         await expect(
           forwarderInstance
             .connect(user1)
@@ -492,157 +564,335 @@ describe('DimoForwarder', async function () {
           `invalidLink("${vehicleIdInstance.address}", "${adIdInstance.address}", 3, 2)`
         );
       });
+      /**
+       * Note: we don't have to test a failure if the caller is not
+       * aftermarket device owner because the paired vehicle and
+       * aftermarket device must have the same owner.
+       */
       it('Should revert if caller is not the vehicle owner', async () => {
         await expect(
           forwarderInstance
             .connect(user2)
             .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address)
         ).to.be.revertedWith(
-          `transferFailed("${vehicleIdInstance.address}", 1)`
+          `transferFailed("${vehicleIdInstance.address}", 1, "ERC721: caller is not token owner nor approved")`
         );
-      });
-      /// TODO Fix it
-      it.skip('Should revert if caller is not the aftermarket device owner', async () => {
-        await expect(
-          forwarderInstance
-            .connect(user1)
-            .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address)
-        ).to.be.revertedWith(`transferFailed("${adIdInstance.address}", 1)`);
       });
     });
 
     context('State', () => {
       it('Should transfer vehicle ID to the new owner', async () => {
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+
         await forwarderInstance
           .connect(user1)
           .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
 
         expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
-      it('Should transfer vehicle ID to the new owner', async () => {
+      it('Should transfer aftermarket device ID to the new owner', async () => {
+        expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
+
         await forwarderInstance
           .connect(user1)
           .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
 
         expect(await adIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
+      it('Should keep pairing link between vehicle ID and aftermarket device ID', async () => {
+        expect(
+          await mapperInstance.getLink(vehicleIdInstance.address, 1)
+        ).to.equal(1);
+        expect(await mapperInstance.getLink(adIdInstance.address, 1)).to.equal(
+          1
+        );
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+
+        expect(
+          await mapperInstance.getLink(vehicleIdInstance.address, 1)
+        ).to.equal(1);
+        expect(await mapperInstance.getLink(adIdInstance.address, 1)).to.equal(
+          1
+        );
+      });
+      it('Should keep the vehicle ID parent node', async () => {
+        expect(
+          await nodesInstance.getParentNode(vehicleIdInstance.address, 1)
+        ).to.equal(1);
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+
+        expect(
+          await nodesInstance.getParentNode(vehicleIdInstance.address, 1)
+        ).to.equal(1);
+      });
+      it('Should keep the aftermarket device ID parent node', async () => {
+        expect(
+          await nodesInstance.getParentNode(adIdInstance.address, 1)
+        ).to.equal(1);
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+
+        expect(
+          await nodesInstance.getParentNode(adIdInstance.address, 1)
+        ).to.equal(1);
+      });
+      it('Should keep the same vehicle ID infos', async () => {
+        for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              vehicleIdInstance.address,
+              1,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
+        }
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+
+        for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              vehicleIdInstance.address,
+              1,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
+        }
+      });
+      it('Should keep the same aftermarket device ID infos', async () => {
+        for (const attrInfoPair of C.mockAftermarketDeviceInfosList[0]
+          .attrInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              1,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
+        }
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+
+        for (const attrInfoPair of C.mockAftermarketDeviceInfosList[0]
+          .attrInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              1,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
+        }
+      });
+      it('Should keep the same aftermarket device address', async () => {
+        expect(
+          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+            adAddress1.address
+          )
+        ).to.equal(1);
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+
+        expect(
+          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+            adAddress1.address
+          )
+        ).to.equal(1);
+      });
     });
   });
 
   describe('transferVehicleAndVirtualDeviceIds', async () => {
-    beforeEach(async () => {
-      const mintVirtualDeviceSig1 = await signMessage({
-        _signer: virtualDeviceAddress1,
-        _primaryType: 'MintVirtualDeviceSign',
-        _verifyingContract: virtualDeviceInstance.address,
-        message: {
-          integrationNode: '1',
-          vehicleNode: '1'
-        }
-      });
-      const mintVirtualDeviceSig2 = await signMessage({
-        _signer: virtualDeviceAddress2,
-        _primaryType: 'MintVirtualDeviceSign',
-        _verifyingContract: virtualDeviceInstance.address,
-        message: {
-          integrationNode: '1',
-          vehicleNode: '2'
-        }
-      });
-      const mintVehicleOwnerSig1 = await signMessage({
-        _signer: user1,
-        _primaryType: 'MintVirtualDeviceSign',
-        _verifyingContract: virtualDeviceInstance.address,
-        message: {
-          integrationNode: '1',
-          vehicleNode: '1'
-        }
-      });
-      const mintVehicleOwnerSig2 = await signMessage({
-        _signer: user2,
-        _primaryType: 'MintVirtualDeviceSign',
-        _verifyingContract: virtualDeviceInstance.address,
-        message: {
-          integrationNode: '1',
-          vehicleNode: '2'
-        }
-      });
-      const correctMintInput1 = {
-        integrationNode: '1',
-        vehicleNode: '1',
-        virtualDeviceSig: mintVirtualDeviceSig1,
-        vehicleOwnerSig: mintVehicleOwnerSig1,
-        virtualDeviceAddr: virtualDeviceAddress1.address,
-        attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
-      };
-      const correctMintInput2 = {
-        integrationNode: '1',
-        vehicleNode: '2',
-        virtualDeviceSig: mintVirtualDeviceSig2,
-        vehicleOwnerSig: mintVehicleOwnerSig2,
-        virtualDeviceAddr: virtualDeviceAddress2.address,
-        attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
-      };
-
-      await vehicleInstance
-        .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-      await vehicleInstance
-        .connect(admin)
-        .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
-      await virtualDeviceInstance
-        .connect(admin)
-        .mintVirtualDeviceSign(correctMintInput1);
-      await virtualDeviceInstance
-        .connect(admin)
-        .mintVirtualDeviceSign(correctMintInput2);
-    });
-
     context('Error handling', () => {
       it('Should revert if vehicle and virtual device are not linked', async () => {
         await expect(
           forwarderInstance
             .connect(user1)
-            .transferVehicleAndVirtualDeviceIds(2, 1, user2.address)
+            .transferVehicleAndVirtualDeviceIds(4, 1, user2.address)
         ).to.be.revertedWith(
-          `invalidLink("${vehicleIdInstance.address}", "${virtualDeviceIdInstance.address}", 2, 1)`
+          `invalidLink("${vehicleIdInstance.address}", "${virtualDeviceIdInstance.address}", 4, 1)`
         );
       });
-      it('Should revert if caller is not the vehicle owner', async () => {
+      /**
+       * Note: we don't have to test a failure if the caller is not
+       * virtual device owner because the linked vehicle and
+       * virtual device must have the same owner.
+       */
+      it('Should revert if caller is not the vehicle or virtual device owner', async () => {
         await expect(
           forwarderInstance
             .connect(user2)
-            .transferVehicleAndVirtualDeviceIds(1, 1, user2.address)
+            .transferVehicleAndVirtualDeviceIds(3, 1, user2.address)
         ).to.be.revertedWith(
-          `transferFailed("${vehicleIdInstance.address}", 1)`
-        );
-      });
-      /// TODO Double check
-      it('Should revert if caller is not the virtual device owner', async () => {
-        await expect(
-          forwarderInstance
-            .connect(user1)
-            .transferVehicleAndVirtualDeviceIds(1, 1, user2.address)
-        ).to.be.revertedWith(
-          `transferFailed("${virtualDeviceIdInstance.address}", 1)`
+          `transferFailed("${vehicleIdInstance.address}", 3, "ERC721: caller is not token owner nor approved")`
         );
       });
     });
 
     context('State', () => {
-      /// TODO Fix it
-      it.skip('Should transfer vehicle ID to the new owner', async () => {
-        console.log(user1.address);
-        console.log(user2.address);
-        console.log(await virtualDeviceIdInstance.ownerOf(1));
-        console.log(await virtualDeviceIdInstance.ownerOf(2));
+      it('Should transfer vehicle ID to the new owner', async () => {
+        expect(await vehicleIdInstance.ownerOf(3)).to.be.equal(user1.address);
+
         await forwarderInstance
           .connect(user1)
-          .transferVehicleAndVirtualDeviceIds(1, 1, user2.address);
+          .transferVehicleAndVirtualDeviceIds(3, 1, user2.address);
 
-        console.log(await virtualDeviceIdInstance.ownerOf(1));
-        console.log(await virtualDeviceIdInstance.ownerOf(2));
-        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
+        expect(await vehicleIdInstance.ownerOf(3)).to.be.equal(user2.address);
+      });
+      it('Should transfer virtual device ID to the new owner', async () => {
+        expect(await virtualDeviceIdInstance.ownerOf(1)).to.be.equal(
+          user1.address
+        );
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndVirtualDeviceIds(3, 1, user2.address);
+
+        expect(await virtualDeviceIdInstance.ownerOf(1)).to.be.equal(
+          user2.address
+        );
+      });
+      it('Should keep pairing link between vehicle ID and virtual device ID', async () => {
+        expect(
+          await mapperInstance.getNodeLink(
+            vehicleIdInstance.address,
+            virtualDeviceIdInstance.address,
+            3
+          )
+        ).to.equal(1);
+        expect(
+          await mapperInstance.getNodeLink(
+            virtualDeviceIdInstance.address,
+            vehicleIdInstance.address,
+            1
+          )
+        ).to.equal(3);
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndVirtualDeviceIds(3, 1, user2.address);
+
+        expect(
+          await mapperInstance.getNodeLink(
+            vehicleIdInstance.address,
+            virtualDeviceIdInstance.address,
+            3
+          )
+        ).to.equal(1);
+        expect(
+          await mapperInstance.getNodeLink(
+            virtualDeviceIdInstance.address,
+            vehicleIdInstance.address,
+            1
+          )
+        ).to.equal(3);
+      });
+      it('Should keep the vehicle ID parent node', async () => {
+        expect(
+          await nodesInstance.getParentNode(vehicleIdInstance.address, 3)
+        ).to.equal(1);
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndVirtualDeviceIds(3, 1, user2.address);
+
+        expect(
+          await nodesInstance.getParentNode(vehicleIdInstance.address, 3)
+        ).to.equal(1);
+      });
+      it('Should keep the virtual device ID parent node', async () => {
+        expect(
+          await nodesInstance.getParentNode(virtualDeviceIdInstance.address, 1)
+        ).to.equal(1);
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndVirtualDeviceIds(3, 1, user2.address);
+
+        expect(
+          await nodesInstance.getParentNode(virtualDeviceIdInstance.address, 1)
+        ).to.equal(1);
+      });
+      it('Should keep the same vehicle ID infos', async () => {
+        for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              vehicleIdInstance.address,
+              3,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
+        }
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndVirtualDeviceIds(3, 1, user2.address);
+
+        for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              vehicleIdInstance.address,
+              3,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
+        }
+      });
+      it('Should keep the same virtual device ID infos', async () => {
+        for (const attrInfoPair of C.mockVirtualDeviceAttributeInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              virtualDeviceIdInstance.address,
+              1,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
+        }
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndVirtualDeviceIds(3, 1, user2.address);
+
+        for (const attrInfoPair of C.mockVirtualDeviceAttributeInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              virtualDeviceIdInstance.address,
+              1,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
+        }
+      });
+      it('Should keep the same virtual device address', async () => {
+        expect(
+          await virtualDeviceInstance.getVirtualDeviceIdByAddress(
+            virtualDeviceAddress1.address
+          )
+        ).to.equal(1);
+
+        await forwarderInstance
+          .connect(user1)
+          .transferVehicleAndVirtualDeviceIds(3, 1, user2.address);
+
+        expect(
+          await virtualDeviceInstance.getVirtualDeviceIdByAddress(
+            virtualDeviceAddress1.address
+          )
+        ).to.equal(1);
       });
     });
   });

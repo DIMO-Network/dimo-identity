@@ -15,7 +15,7 @@ error invalidLink(
     uint256 sourceId,
     uint256 targetId
 );
-error transferFailed(address idProxy, uint256 id);
+error transferFailed(address idProxy, uint256 id, string errorMessage);
 
 contract DimoForwarder is
     Initializable,
@@ -65,7 +65,9 @@ contract DimoForwarder is
         dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
 
-    /// TODO Documentation
+    /// @notice Sets the Vehicle ID proxy address
+    /// @dev Only an admin can set the Vehicle ID proxy address
+    /// @param vehicleIdProxyAddress_ The address to be set
     function setVehicleIdProxyAddress(address vehicleIdProxyAddress_)
         external
         onlyRole(ADMIN_ROLE)
@@ -73,7 +75,9 @@ contract DimoForwarder is
         vehicleIdProxyAddress = vehicleIdProxyAddress_;
     }
 
-    /// TODO Documentation
+    /// @notice Sets the Aftermarket Device ID proxy address
+    /// @dev Only an admin can set the Aftermarket Device ID proxy address
+    /// @param adIdProxyAddress_ The address to be set
     function setAftermarketDeviceIdProxyAddress(address adIdProxyAddress_)
         external
         onlyRole(ADMIN_ROLE)
@@ -81,7 +85,9 @@ contract DimoForwarder is
         adIdProxyAddress = adIdProxyAddress_;
     }
 
-    /// TODO Documentation
+    /// @notice Sets the Virtual Device ID proxy address
+    /// @dev Only an admin can set the Virtual Device ID proxy address
+    /// @param virtualDeviceIdProxyAddress_ The address to be set
     function setVirtualDeviceIdProxyAddress(
         address virtualDeviceIdProxyAddress_
     ) external onlyRole(ADMIN_ROLE) {
@@ -115,7 +121,7 @@ contract DimoForwarder is
     }
 
     /// @notice Tranfers both Vehicle and Virtual Device Ids
-    /// @dev Vehicle Id and Virtual Device Id must be paired
+    /// @dev Vehicle Id and Virtual Device Id must be linked
     /// @dev For the purpose of this contract, all requests must succeed
     /// @param vehicleId Vehicle Id to be transferred
     /// @param virtualDeviceId Virtual Device Id to be transferred
@@ -152,20 +158,31 @@ contract DimoForwarder is
         onlyRole(UPGRADER_ROLE)
     {}
 
-    /// TODO Documentation
-    /// @dev 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
+    /**
+     * @dev Executes a call encoding a safeTransferFrom from a ERC-721 proxy
+     * @dev 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
+     * @param proxy The proxy address that will call the function
+     * @param to The address to send the token
+     * @param id The token id
+     */
     function _execTransfer(
         address proxy,
         address to,
         uint256 id
     ) private {
-        (bool success, ) = proxy.call(
+        (bool success, bytes memory data) = proxy.call(
             abi.encodePacked(
                 abi.encodeWithSelector(0x42842e0e, msg.sender, to, id),
                 msg.sender
             )
         );
 
-        if (!success) revert transferFailed(proxy, id);
+        if (!success) {
+            // Decodes the error message from bytes to string
+            assembly {
+                data := add(data, 0x04)
+            }
+            revert transferFailed(proxy, id, abi.decode(data, (string)));
+        }
     }
 }

@@ -285,7 +285,7 @@ describe('VehicleId', async function () {
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
+          C.ADMIN_ROLE
         }`
       );
     });
@@ -293,6 +293,33 @@ describe('VehicleId', async function () {
       await expect(
         vehicleIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith('Non zero address');
+    });
+  });
+
+  describe('setTrustedForwarder', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        vehicleIdInstance.connect(nonAdmin).setTrustedForwarder(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
+    it('Should correctly set trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+
+      expect(await vehicleIdInstance.trustedForwarder()).to.be.equal(
+        C.ZERO_ADDRESS
+      );
+
+      await vehicleIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address);
+
+      expect(await vehicleIdInstance.trustedForwarder()).to.be.equal(
+        mockForwarder.address
+      );
     });
   });
 

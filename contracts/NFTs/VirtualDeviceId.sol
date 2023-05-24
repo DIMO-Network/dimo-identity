@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
-import "./Base/MultiPrivilege/MultiPrivilege.sol";
+import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
 import "./Base/ERC2771ContextUpgradeable.sol";
 
 contract VirtualDeviceId is
@@ -31,7 +31,6 @@ contract VirtualDeviceId is
 
         dimoRegistry = IDimoRegistry(dimoRegistry_);
 
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
     }
 
@@ -54,6 +53,23 @@ contract VirtualDeviceId is
         onlyRole(ADMIN_ROLE)
     {
         super.setTrustedForwarder(trustedForwarder_);
+    }
+
+    /// @notice Internal function to transfer a token
+    /// @dev Only the token owner can transfer (no approvals)
+    /// @dev Pairings are maintained
+    /// @dev Clears all privileges
+    /// @param from Old owner
+    /// @param to New owner
+    /// @param tokenId Token Id to be transferred
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override {
+        // Approvals are not accepted for now
+        require(_msgSender() == from, "Caller is not authorized");
+        super._transfer(from, to, tokenId);
     }
 
     /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract

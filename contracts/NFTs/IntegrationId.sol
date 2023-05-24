@@ -31,7 +31,6 @@ contract IntegrationId is
 
         dimoRegistry = IDimoRegistry(dimoRegistry_);
 
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
     }
 

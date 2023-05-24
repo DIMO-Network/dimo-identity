@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { waffle } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -84,6 +84,35 @@ describe('IntegrationId', async function () {
           .connect(admin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith('Non zero address');
+    });
+  });
+
+  describe('setTrustedForwarder', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        integrationIdInstance
+          .connect(nonAdmin)
+          .setTrustedForwarder(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
+    it('Should correctly set trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+
+      expect(await integrationIdInstance.trustedForwarder()).to.be.equal(
+        C.ZERO_ADDRESS
+      );
+
+      await integrationIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address);
+
+      expect(await integrationIdInstance.trustedForwarder()).to.be.equal(
+        mockForwarder.address
+      );
     });
   });
 

@@ -8,6 +8,8 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
     IDimoRegistry private _dimoRegistry;
     address public trustedForwarder;
 
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -19,6 +21,8 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
         string calldata baseUri_
     ) external initializer {
         _baseNftInit(name_, symbol_, baseUri_);
+
+        _grantRole(ADMIN_ROLE, msg.sender);
     }
 
     /// @notice Sets the DIMO Registry address
@@ -26,7 +30,7 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
     /// @param addr The address to be set
     function setDimoRegistryAddress(address addr)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         require(addr != address(0), "Non zero address");
         _dimoRegistry = IDimoRegistry(addr);
@@ -37,9 +41,8 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
     /// @param trustedForwarder_ The address to be set
     function setTrustedForwarder(address trustedForwarder_)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
-        require(trustedForwarder_ != address(0), "Non zero address");
         trustedForwarder = trustedForwarder_;
     }
 

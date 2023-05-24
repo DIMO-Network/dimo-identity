@@ -424,7 +424,7 @@ describe('VirtualDevice', function () {
           virtualDeviceInstance
             .connect(admin)
             .mintVirtualDeviceSign(incorrectMintInput)
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('Invalid virtual device signature');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         const incorrectMintInput = {
@@ -489,7 +489,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid virtual device signature');
           });
           it('Should revert if domain name is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -515,7 +515,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid virtual device signature');
           });
           it('Should revert if domain version is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -541,7 +541,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid virtual device signature');
           });
           it('Should revert if domain chain ID is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -567,7 +567,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid virtual device signature');
           });
           it('Should revert if integration node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -592,7 +592,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid virtual device signature');
           });
           it('Should revert if vehicle node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -617,7 +617,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid virtual device signature');
           });
           it('Should revert if virtual device address is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -642,7 +642,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid virtual device signature');
           });
         });
 
@@ -671,7 +671,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if domain name is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -697,7 +697,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if domain version is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -723,7 +723,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if domain chain ID is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -749,7 +749,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if integration node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -774,7 +774,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if vehicle node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -799,7 +799,7 @@ describe('VirtualDevice', function () {
               virtualDeviceInstance
                 .connect(admin)
                 .mintVirtualDeviceSign(incorrectMintInput)
-            ).to.be.revertedWith('Invalid signature');
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
         });
       });

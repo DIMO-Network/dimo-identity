@@ -15,7 +15,7 @@ library MapperStorage {
         // idProxyAddress -> nodeId -> beneficiary
         mapping(address => mapping(uint256 => address)) beneficiaries;
         // idProxyAddress1 -> idProxyAddress2 -> nftId1 -> nftId2
-        mapping(address => mapping(address => mapping(uint256 => uint256))) vehicleVirtualDeviceLinks;
+        mapping(address => mapping(address => mapping(uint256 => uint256))) nodeLinks;
     }
 
     /* solhint-disable no-inline-assembly */

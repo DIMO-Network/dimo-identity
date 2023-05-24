@@ -58,6 +58,14 @@ describe('IntegrationId', async function () {
     await integrationIdInstance.setDimoRegistryAddress(
       dimoRegistryInstance.address
     );
+
+    await integrationInstance
+      .connect(admin)
+      .mintIntegration(
+        integrationOwner1.address,
+        C.mockIntegrationNames[0],
+        C.mockIntegrationAttributeInfoPairs
+      );
   });
 
   beforeEach(async () => {
@@ -79,16 +87,6 @@ describe('IntegrationId', async function () {
   });
 
   context('On transfer', async () => {
-    beforeEach(async () => {
-      await integrationInstance
-        .connect(admin)
-        .mintIntegration(
-          integrationOwner1.address,
-          C.mockIntegrationNames[0],
-          C.mockIntegrationAttributeInfoPairs
-        );
-    });
-
     context('Error handling', () => {
       it('Should revert if the new owner is not a controller', async () => {
         await expect(

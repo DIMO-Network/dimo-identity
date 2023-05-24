@@ -13,15 +13,15 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 /// @title Integration
 /// @notice Contract that represents the Integration node
 contract Integration is AccessControlInternal {
-    event IntegrationIdProxySet(address indexed proxy);
+    event IntegrationIdProxySet(address proxy);
     event IntegrationAttributeAdded(string attribute);
     event IntegrationAttributeSet(
-        uint256 tokenId,
+        uint256 indexed tokenId,
         string attribute,
         string info
     );
     event ControllerSet(address indexed controller);
-    event IntegrationNodeMinted(uint256 tokenId, address indexed owner);
+    event IntegrationNodeMinted(uint256 indexed tokenId, address indexed owner);
 
     modifier onlyNftProxy() {
         require(
@@ -64,7 +64,7 @@ contract Integration is AccessControlInternal {
         emit IntegrationAttributeAdded(attribute);
     }
 
-    /// @notice Sets a address controller
+    /// @notice Sets an address controller
     /// @dev Only an admin can set new controllers
     /// @param _controller The address of the controller
     function setIntegrationController(address _controller)
@@ -168,8 +168,8 @@ contract Integration is AccessControlInternal {
 
     /**
      * @notice Verify if an address is allowed to own an integration node and set as minted
-     * The former owner of the node is set as not minted, as it will not be the owner of a node after the tranfer
-     * @dev Can only be called by the NFT Proxy
+     * The former owner of the node is set as not minted, as it will not be the owner of a node after the transfer
+     * @dev Can only be called by the IntegrationId Proxy
      * @dev The address must be a controller and not yet minted a node
      * @param from the address to be verified and set
      * @param to the address to be verified

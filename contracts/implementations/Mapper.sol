@@ -41,9 +41,9 @@ contract Mapper {
         emit BeneficiarySet(adProxyAddress, nodeId, beneficiary);
     }
 
-    /// @notice Gets the link between vehicle and aftermarked device nodes
+    /// @notice Gets the link between vehicle and aftermarket device nodes
     /// @param idProxyAddress The address of the NFT proxy
-    /// @param sourceNode The node Id source to be queried
+    /// @param sourceNode The source node id to be queried
     function getLink(address idProxyAddress, uint256 sourceNode)
         external
         view
@@ -57,15 +57,15 @@ contract Mapper {
     /// @notice Gets the link between two nodes (source -> target)
     /// @param idProxyAddressSource The address of the NFT proxy source
     /// @param idProxyAddressTarget The address of the NFT proxy target
-    /// @param sourceNode The node Id source to be queried
+    /// @param sourceNode The source node id to be queried
     function getNodeLink(
         address idProxyAddressSource,
         address idProxyAddressTarget,
         uint256 sourceNode
     ) external view returns (uint256 targetNode) {
-        targetNode = MapperStorage.getStorage().vehicleVirtualDeviceLinks[
-            idProxyAddressSource
-        ][idProxyAddressTarget][sourceNode];
+        targetNode = MapperStorage.getStorage().nodeLinks[idProxyAddressSource][
+            idProxyAddressTarget
+        ][sourceNode];
     }
 
     /// @notice Gets the beneficiary associated with the pair idProxy/nodeId.

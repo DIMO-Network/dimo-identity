@@ -22,7 +22,7 @@ describe('ManufacturerId', async function () {
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
 
-  const [admin, manufacturer1] = provider.getWallets();
+  const [admin, manufacturer1, manufacturer2] = provider.getWallets();
 
   before(async () => {
     [
@@ -57,6 +57,10 @@ describe('ManufacturerId', async function () {
     await manufacturerIdInstance.setDimoRegistryAddress(
       dimoRegistryInstance.address
     );
+
+    await manufacturerInstance
+      .connect(admin)
+      .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
   });
 
   beforeEach(async () => {
@@ -78,12 +82,6 @@ describe('ManufacturerId', async function () {
   });
 
   context('On transfer', async () => {
-    beforeEach(async () => {
-      await manufacturerInstance
-        .connect(admin)
-        .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
-    });
-
     context('Error handling', () => {
       it('Should revert if the new owner is not a controller', async () => {
         await expect(
@@ -232,29 +230,52 @@ describe('ManufacturerId', async function () {
         }
       });
       it('Should correctly set manufacturerMinted', async () => {
-        const isManufacturerMintedBefore =
+        await manufacturerIdInstance.grantRole(
+          C.NFT_TRANSFERER_ROLE,
+          manufacturer1.address
+        );
+        await manufacturerInstance.setController(manufacturer2.address);
+        await manufacturerInstance.mintManufacturer(
+          manufacturer1.address,
+          'Manufacturer4',
+          []
+        );
+
+        const isManufacturerMintedBefore1 =
           await manufacturerInstance.isManufacturerMinted(
             manufacturer1.address
           );
+        const isManufacturerMintedBefore2 =
+          await manufacturerInstance.isManufacturerMinted(
+            manufacturer2.address
+          );
 
         // eslint-disable-next-line no-unused-expressions
-        expect(isManufacturerMintedBefore).to.be.false;
+        expect(isManufacturerMintedBefore1).to.be.true;
+        // eslint-disable-next-line no-unused-expressions
+        expect(isManufacturerMintedBefore2).to.be.false;
 
         await manufacturerIdInstance
-          .connect(admin)
+          .connect(manufacturer1)
           ['safeTransferFrom(address,address,uint256)'](
-            admin.address,
             manufacturer1.address,
-            1
+            manufacturer2.address,
+            4
           );
 
-        const isManufacturerMintedAfter =
+        const isManufacturerMintedAfter1 =
           await manufacturerInstance.isManufacturerMinted(
             manufacturer1.address
           );
+        const isManufacturerMintedAfter2 =
+          await manufacturerInstance.isManufacturerMinted(
+            manufacturer2.address
+          );
 
         // eslint-disable-next-line no-unused-expressions
-        expect(isManufacturerMintedAfter).to.be.true;
+        expect(isManufacturerMintedAfter1).to.be.false;
+        // eslint-disable-next-line no-unused-expressions
+        expect(isManufacturerMintedAfter2).to.be.true;
       });
     });
   });

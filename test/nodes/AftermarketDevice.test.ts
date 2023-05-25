@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle, upgrades } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -19,6 +19,7 @@ import {
 } from '../../typechain';
 import {
   initialize,
+  setup,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -84,74 +85,25 @@ describe('AftermarketDevice', function () {
       vehicleInstance,
       aftermarketDeviceInstance,
       adLicenseValidatorInstance,
-      mapperInstance
-    ] = await initialize(
-      admin,
-      'Eip712Checker',
-      'DimoAccessControl',
-      'Nodes',
-      'Manufacturer',
-      'Vehicle',
-      'AftermarketDevice',
-      'AdLicenseValidator',
-      'Mapper'
-    );
-
-    const ManufacturerIdFactory = await ethers.getContractFactory(
-      'ManufacturerId'
-    );
-    const VehicleIdFactory = await ethers.getContractFactory('VehicleId');
-    const AftermarketDeviceIdFactory = await ethers.getContractFactory(
-      'AftermarketDeviceId'
-    );
-
-    manufacturerIdInstance = await upgrades.deployProxy(
-      ManufacturerIdFactory,
-      [
-        C.MANUFACTURER_NFT_NAME,
-        C.MANUFACTURER_NFT_SYMBOL,
-        C.MANUFACTURER_NFT_BASE_URI
+      mapperInstance,
+      manufacturerIdInstance,
+      vehicleIdInstance,
+      adIdInstance
+    ] = await setup(admin, {
+      modules: [
+        'Eip712Checker',
+        'DimoAccessControl',
+        'Nodes',
+        'Manufacturer',
+        'Vehicle',
+        'AftermarketDevice',
+        'AdLicenseValidator',
+        'Mapper'
       ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerId;
-    await manufacturerIdInstance.deployed();
+      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId']
+    });
 
-    vehicleIdInstance = await upgrades.deployProxy(
-      VehicleIdFactory,
-      [
-        C.VEHICLE_NFT_NAME,
-        C.VEHICLE_NFT_SYMBOL,
-        C.VEHICLE_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as VehicleId;
-    await vehicleIdInstance.deployed();
-
-    adIdInstance = await upgrades.deployProxy(
-      AftermarketDeviceIdFactory,
-      [
-        C.AD_NFT_NAME,
-        C.AD_NFT_SYMBOL,
-        C.AD_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as AftermarketDeviceId;
-    await adIdInstance.deployed();
-
-    const MANUFACTURER_MINTER_ROLE =
-      await manufacturerIdInstance.MINTER_ROLE();
+    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
@@ -285,7 +237,8 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .setAftermarketDeviceIdProxyAddress(adIdInstance.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -319,7 +272,8 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -362,7 +316,8 @@ describe('AftermarketDevice', function () {
               mockAftermarketDeviceInfosList
             )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonManufacturer.address.toLowerCase()} is missing role ${C.MANUFACTURER_ROLE
+          `AccessControl: account ${nonManufacturer.address.toLowerCase()} is missing role ${
+            C.MANUFACTURER_ROLE
           }`
         );
       });
@@ -480,8 +435,14 @@ describe('AftermarketDevice', function () {
             mockAftermarketDeviceInfosList
           );
 
-        const parentNode1 = await nodesInstance.getParentNode(adIdInstance.address, 1);
-        const parentNode2 = await nodesInstance.getParentNode(adIdInstance.address, 2);
+        const parentNode1 = await nodesInstance.getParentNode(
+          adIdInstance.address,
+          1
+        );
+        const parentNode2 = await nodesInstance.getParentNode(
+          adIdInstance.address,
+          2
+        );
 
         expect(parentNode1).to.be.equal(1);
         expect(parentNode2).to.be.equal(1);
@@ -509,8 +470,14 @@ describe('AftermarketDevice', function () {
             mockAftermarketDeviceInfosList
           );
 
-        const id1 = await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(mockAftermarketDeviceInfosList[0].addr);
-        const id2 = await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(mockAftermarketDeviceInfosList[1].addr);
+        const id1 =
+          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+            mockAftermarketDeviceInfosList[0].addr
+          );
+        const id2 =
+          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+            mockAftermarketDeviceInfosList[1].addr
+          );
 
         expect(id1).to.equal(1);
         expect(id2).to.equal(2);
@@ -605,16 +572,35 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(1, mockAftermarketDeviceInfosList)
+            .mintAftermarketDeviceByManufacturerBatch(
+              1,
+              mockAftermarketDeviceInfosList
+            )
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(1, mockAftermarketDeviceInfosList[0].attrInfoPairs[0].attribute, mockAftermarketDeviceInfosList[0].attrInfoPairs[0].info)
+          .withArgs(
+            1,
+            mockAftermarketDeviceInfosList[0].attrInfoPairs[0].attribute,
+            mockAftermarketDeviceInfosList[0].attrInfoPairs[0].info
+          )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(1, mockAftermarketDeviceInfosList[0].attrInfoPairs[1].attribute, mockAftermarketDeviceInfosList[0].attrInfoPairs[1].info)
+          .withArgs(
+            1,
+            mockAftermarketDeviceInfosList[0].attrInfoPairs[1].attribute,
+            mockAftermarketDeviceInfosList[0].attrInfoPairs[1].info
+          )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(2, mockAftermarketDeviceInfosList[1].attrInfoPairs[0].attribute, mockAftermarketDeviceInfosList[1].attrInfoPairs[0].info)
+          .withArgs(
+            2,
+            mockAftermarketDeviceInfosList[1].attrInfoPairs[0].attribute,
+            mockAftermarketDeviceInfosList[1].attrInfoPairs[0].info
+          )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(2, mockAftermarketDeviceInfosList[1].attrInfoPairs[1].attribute, mockAftermarketDeviceInfosList[1].attrInfoPairs[1].info)
+          .withArgs(
+            2,
+            mockAftermarketDeviceInfosList[1].attrInfoPairs[1].attribute,
+            mockAftermarketDeviceInfosList[1].attrInfoPairs[1].info
+          );
       });
     });
   });
@@ -623,7 +609,7 @@ describe('AftermarketDevice', function () {
     const localAdOwnerPairs: AftermarketDeviceOwnerPair[] = [
       { aftermarketDeviceNodeId: '1', owner: user1.address },
       { aftermarketDeviceNodeId: '2', owner: user2.address }
-    ]
+    ];
 
     let ownerSig: string;
     let adSig: string;
@@ -667,7 +653,8 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .claimAftermarketDeviceBatch(localAdOwnerPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -676,9 +663,11 @@ describe('AftermarketDevice', function () {
           .connect(admin)
           .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
 
-        await expect(aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceBatch(localAdOwnerPairs)).to.be.revertedWith('Device already claimed');
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceBatch(localAdOwnerPairs)
+        ).to.be.revertedWith('Device already claimed');
       });
     });
 
@@ -751,7 +740,8 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -767,9 +757,11 @@ describe('AftermarketDevice', function () {
           .connect(admin)
           .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
 
-        await expect(aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig)).to.be.revertedWith('Device already claimed');
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig)
+        ).to.be.revertedWith('Device already claimed');
       });
 
       context('Wrong owner signature', () => {
@@ -794,7 +786,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
@@ -817,7 +809,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
@@ -840,7 +832,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
@@ -862,7 +854,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
         it('Should revert if owner does not match signer', async () => {
           const invalidOwnerSig = await signMessage({
@@ -884,7 +876,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid owner signature');
         });
       });
 
@@ -910,7 +902,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidAdSig = await signMessage({
@@ -933,7 +925,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidAdSig = await signMessage({
@@ -956,7 +948,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidAdSig = await signMessage({
@@ -978,7 +970,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if owner does not match owner parameter', async () => {
           const invalidAdSig = await signMessage({
@@ -1000,7 +992,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
         it('Should revert if signer does not match address associated with aftermarket device ID', async () => {
           const invalidAdSig = await signMessage({
@@ -1022,7 +1014,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('Invalid AD signature');
         });
       });
     });
@@ -1132,9 +1124,15 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, pairVehicleSig1)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+              2,
+              1,
+              pairAdSig2,
+              pairVehicleSig1
+            )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -1142,38 +1140,68 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 99, pairAdSig2, pairVehicleSig1)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+              2,
+              99,
+              pairAdSig2,
+              pairVehicleSig1
+            )
         ).to.be.revertedWith('Invalid vehicle node');
       });
       it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](99, 1, pairAdSig2, pairVehicleSig1)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+              99,
+              1,
+              pairAdSig2,
+              pairVehicleSig1
+            )
         ).to.be.revertedWith('Invalid AD node');
       });
       it('Should revert if device is not claimed', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](1, 1, pairAdSig1, pairVehicleSig1)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+              1,
+              1,
+              pairAdSig1,
+              pairVehicleSig1
+            )
         ).to.be.revertedWith('AD must be claimed');
       });
       it('Should revert if vehicle is already paired', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, pairVehicleSig1)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+            2,
+            1,
+            pairAdSig2,
+            pairVehicleSig1
+          );
 
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, pairVehicleSig1)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+              2,
+              1,
+              pairAdSig2,
+              pairVehicleSig1
+            )
         ).to.be.revertedWith('Vehicle already paired');
       });
       it('Should revert if aftermarket device is already paired', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, pairVehicleSig1)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+            2,
+            1,
+            pairAdSig2,
+            pairVehicleSig1
+          );
 
         await vehicleInstance
           .connect(admin)
@@ -1182,7 +1210,12 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 2, pairAdSig2, pairVehicleSig1)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+              2,
+              2,
+              pairAdSig2,
+              pairVehicleSig1
+            )
         ).to.be.revertedWith('AD already paired');
       });
 
@@ -1203,8 +1236,13 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, invalidSignature, pairVehicleSig1)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  invalidSignature,
+                  pairVehicleSig1
+                )
+            ).to.be.revertedWith('Invalid AD signature');
           });
           it('Should revert if domain version is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1221,8 +1259,13 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, invalidSignature, pairVehicleSig1)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  invalidSignature,
+                  pairVehicleSig1
+                )
+            ).to.be.revertedWith('Invalid AD signature');
           });
           it('Should revert if domain chain ID is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1239,8 +1282,13 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, invalidSignature, pairVehicleSig1)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  invalidSignature,
+                  pairVehicleSig1
+                )
+            ).to.be.revertedWith('Invalid AD signature');
           });
           it('Should revert if aftermarket device node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1256,8 +1304,13 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, invalidSignature, pairVehicleSig1)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  invalidSignature,
+                  pairVehicleSig1
+                )
+            ).to.be.revertedWith('Invalid AD signature');
           });
           it('Should revert if aftermarket vehicle node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1273,10 +1326,16 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, invalidSignature, pairVehicleSig1)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  invalidSignature,
+                  pairVehicleSig1
+                )
+            ).to.be.revertedWith('Invalid AD signature');
           });
         });
+
         context('Vehicle owner signature', () => {
           it('Should revert if domain name is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1293,8 +1352,13 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, invalidSignature)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  pairAdSig2,
+                  invalidSignature
+                )
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if domain version is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1311,8 +1375,13 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, invalidSignature)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  pairAdSig2,
+                  invalidSignature
+                )
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if domain chain ID is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1329,8 +1398,13 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, invalidSignature)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  pairAdSig2,
+                  invalidSignature
+                )
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if aftermarket device node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1346,8 +1420,13 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, invalidSignature)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  pairAdSig2,
+                  invalidSignature
+                )
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
           it('Should revert if aftermarket vehicle node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1363,8 +1442,13 @@ describe('AftermarketDevice', function () {
             await expect(
               aftermarketDeviceInstance
                 .connect(admin)
-              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, invalidSignature)
-            ).to.be.revertedWith('Invalid signature');
+                ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                  2,
+                  1,
+                  pairAdSig2,
+                  invalidSignature
+                )
+            ).to.be.revertedWith('Invalid vehicle owner signature');
           });
         });
       });
@@ -1374,7 +1458,12 @@ describe('AftermarketDevice', function () {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, pairVehicleSig1);
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+            2,
+            1,
+            pairAdSig2,
+            pairVehicleSig1
+          );
 
         expect(
           await mapperInstance.getLink(adIdInstance.address, 2)
@@ -1383,7 +1472,12 @@ describe('AftermarketDevice', function () {
       it('Should correctly map the vehicle to the aftermarket device', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, pairVehicleSig1);
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+            2,
+            1,
+            pairAdSig2,
+            pairVehicleSig1
+          );
 
         expect(
           await mapperInstance.getLink(vehicleIdInstance.address, 1)
@@ -1396,7 +1490,12 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](2, 1, pairAdSig2, pairVehicleSig1)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+              2,
+              1,
+              pairAdSig2,
+              pairVehicleSig1
+            )
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDevicePaired')
           .withArgs(2, 1, user2.address);
@@ -1486,9 +1585,14 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              1,
+              pairSignature
+            )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -1496,21 +1600,33 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 99, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              99,
+              pairSignature
+            )
         ).to.be.revertedWith('Invalid vehicle node');
       });
       it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](99, 1, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              99,
+              1,
+              pairSignature
+            )
         ).to.be.revertedWith('Invalid AD node');
       });
       it('Should revert if device is not claimed', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 1, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              2,
+              1,
+              pairSignature
+            )
         ).to.be.revertedWith('AD must be claimed');
       });
       it('Should revert if owner is not the vehicle node owner', async () => {
@@ -1521,7 +1637,11 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 2, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              2,
+              pairSignature
+            )
         ).to.be.revertedWith('Owner of the nodes does not match');
       });
       it('Should revert if owner is not the aftermarket device node owner', async () => {
@@ -1537,24 +1657,40 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 1, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              2,
+              1,
+              pairSignature
+            )
         ).to.be.revertedWith('Owner of the nodes does not match');
       });
       it('Should revert if vehicle is already paired', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature);
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature
+          );
 
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              1,
+              pairSignature
+            )
         ).to.be.revertedWith('Vehicle already paired');
       });
       it('Should revert if aftermarket device is already paired', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature);
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature
+          );
 
         await vehicleInstance
           .connect(admin)
@@ -1563,7 +1699,11 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 2, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              2,
+              pairSignature
+            )
         ).to.be.revertedWith('AD already paired');
       });
 
@@ -1583,7 +1723,11 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, invalidSignature)
+              ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+                1,
+                1,
+                invalidSignature
+              )
           ).to.be.revertedWith('Invalid signature');
         });
         it('Should revert if domain version is incorrect', async () => {
@@ -1601,7 +1745,11 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, invalidSignature)
+              ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+                1,
+                1,
+                invalidSignature
+              )
           ).to.be.revertedWith('Invalid signature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
@@ -1619,7 +1767,11 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, invalidSignature)
+              ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+                1,
+                1,
+                invalidSignature
+              )
           ).to.be.revertedWith('Invalid signature');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
@@ -1636,7 +1788,11 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, invalidSignature)
+              ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+                1,
+                1,
+                invalidSignature
+              )
           ).to.be.revertedWith('Invalid signature');
         });
         it('Should revert if aftermarket vehicle node is incorrect', async () => {
@@ -1653,7 +1809,11 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, invalidSignature)
+              ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+                1,
+                1,
+                invalidSignature
+              )
           ).to.be.revertedWith('Invalid signature');
         });
       });
@@ -1663,7 +1823,11 @@ describe('AftermarketDevice', function () {
       it('Should correctly map the aftermarket device to the vehicle', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature);
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature
+          );
 
         expect(
           await mapperInstance.getLink(adIdInstance.address, 1)
@@ -1672,7 +1836,11 @@ describe('AftermarketDevice', function () {
       it('Should correctly map the vehicle to the aftermarket device', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature);
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature
+          );
 
         expect(
           await mapperInstance.getLink(vehicleIdInstance.address, 1)
@@ -1685,7 +1853,11 @@ describe('AftermarketDevice', function () {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              1,
+              pairSignature
+            )
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDevicePaired')
           .withArgs(1, 1, user1.address);
@@ -1756,7 +1928,8 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .unpairAftermarketDeviceSign(1, 1, unPairSignature)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -1815,7 +1988,11 @@ describe('AftermarketDevice', function () {
 
           await aftermarketDeviceInstance
             .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              1,
+              pairSignature
+            );
         });
 
         it('Should revert if domain name is incorrect', async () => {
@@ -1927,7 +2104,6 @@ describe('AftermarketDevice', function () {
     });
 
     context('State', () => {
-
       beforeEach(async () => {
         await vehicleInstance
           .connect(admin)
@@ -1944,7 +2120,11 @@ describe('AftermarketDevice', function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature
+          );
       });
 
       it('Should correctly unmap the aftermarket device from vehicle', async () => {
@@ -1985,7 +2165,11 @@ describe('AftermarketDevice', function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature
+          );
 
         await expect(
           aftermarketDeviceInstance
@@ -2018,7 +2202,8 @@ describe('AftermarketDevice', function () {
             .connect(nonAdmin)
             .setAftermarketDeviceInfo(1, C.mockAdAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -2093,9 +2278,17 @@ describe('AftermarketDevice', function () {
             .setAftermarketDeviceInfo(1, C.mockAdAttributeInfoPairs)
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(1, C.mockAdAttributeInfoPairs[0].attribute, C.mockAdAttributeInfoPairs[0].info)
+          .withArgs(
+            1,
+            C.mockAdAttributeInfoPairs[0].attribute,
+            C.mockAdAttributeInfoPairs[0].info
+          )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(1, C.mockAdAttributeInfoPairs[1].attribute, C.mockAdAttributeInfoPairs[1].info);
+          .withArgs(
+            1,
+            C.mockAdAttributeInfoPairs[1].attribute,
+            C.mockAdAttributeInfoPairs[1].info
+          );
       });
     });
   });

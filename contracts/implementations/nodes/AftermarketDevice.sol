@@ -102,6 +102,7 @@ contract AftermarketDevice is
 
     /// @notice Mints aftermarket devices in batch
     /// @dev Caller must have the manufacturer role
+    /// @param manufacturerNode Parent manufacturer node id
     /// @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
     function mintAftermarketDeviceByManufacturerBatch(
         uint256 manufacturerNode,
@@ -225,7 +226,7 @@ contract AftermarketDevice is
         );
         require(
             Eip712CheckerInternal._verifySignature(owner, message, ownerSig),
-            "Invalid signature"
+            "Invalid owner signature"
         );
         require(
             Eip712CheckerInternal._verifySignature(
@@ -233,7 +234,7 @@ contract AftermarketDevice is
                 message,
                 aftermarketDeviceSig
             ),
-            "Invalid signature"
+            "Invalid AD signature"
         );
 
         ads.deviceClaimed[aftermarketDeviceNode] = true;
@@ -300,7 +301,7 @@ contract AftermarketDevice is
                 message,
                 aftermarketDeviceSig
             ),
-            "Invalid signature"
+            "Invalid AD signature"
         );
         require(
             Eip712CheckerInternal._verifySignature(
@@ -308,7 +309,7 @@ contract AftermarketDevice is
                 message,
                 vehicleOwnerSig
             ),
-            "Invalid signature"
+            "Invalid vehicle owner signature"
         );
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
@@ -506,29 +507,5 @@ contract AftermarketDevice is
                 attrInfo[i].info
             );
         }
-    }
-
-    /// @dev Internal function to set a single attribute
-    /// @dev attribute must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attribute Attribute to be updated
-    /// @param info Info to be set
-    function _setAttributeInfo(
-        uint256 tokenId,
-        string calldata attribute,
-        string calldata info
-    ) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-            .getStorage();
-        require(
-            AttributeSet.exists(ads.whitelistedAttributes, attribute),
-            "Not whitelisted"
-        );
-        address idProxyAddress = ads.idProxyAddress;
-
-        ns.nodes[idProxyAddress][tokenId].info[attribute] = info;
-
-        emit AftermarketDeviceAttributeSet(tokenId, attribute, info);
     }
 }

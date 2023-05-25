@@ -21,7 +21,7 @@
     "bracket-align": "warn",
     "function-max-lines": [
       "error",
-      75
+      100
     ]
   }
 }

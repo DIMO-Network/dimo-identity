@@ -1,12 +1,4 @@
-import { ethers } from 'hardhat';
 import { AttributeInfoPair, AftermarketDeviceInfos } from '../types';
-
-// Node type
-export const aftermarketDeviceNodeType =
-  ethers.utils.toUtf8Bytes('AftermarketDevice');
-export const aftermarketDeviceNodeTypeId = ethers.utils.keccak256(
-  aftermarketDeviceNodeType
-);
 
 // Mock AftermarketDevice attributes
 export const mockAftermarketDeviceAttribute1 =

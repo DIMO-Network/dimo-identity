@@ -26,6 +26,15 @@ export type AftermarketDeviceOwnerPair = {
   owner: string
 };
 
+export type MintVirtualDeviceInput = {
+  integrationNode: string,
+  vehicleNode: string,
+  vehicleOwnerSig: string,
+  virtualDeviceAddr: string,
+  virtualDeviceSig: string,
+  attrInfoPairs: AttributeInfoPair[]
+};
+
 export type IdManufacturerName = {
   tokenId: string,
   name: string
@@ -38,7 +47,20 @@ export type SetPrivilegeData = {
   expires: string
 };
 
-export interface ContractAddressesByNetwork {
+export type ContractNameArgs = {
+  name: string,
+  args: string[],
+  opts: {
+    initializer: string | false,
+    kind: 'uups' | 'transparent' | 'beacon'
+  }
+};
+
+export type ContractNameArgsByNetwork = {
+  [index: string]: ContractNameArgs
+};
+
+export type ContractAddressesByNetwork = {
   [index: string]: {
     modules: {
       [index: string]: {
@@ -52,9 +74,9 @@ export interface ContractAddressesByNetwork {
         implementation: string
       }
     }
-  };
-}
+  }
+};
 
-export interface NetworkValue {
-  [index: string]: string;
-}
+export type NetworkValue = {
+  [index: string]: string
+};

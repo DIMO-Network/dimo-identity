@@ -4,7 +4,9 @@ pragma solidity ^0.8.13;
 /// @title IDimoRegistry
 /// @notice Interface to interact with external functions of DIMORegistry modules
 interface IDimoRegistry {
-    function setManufacturerMinted(address addr) external;
+    function updateManufacturerMinted(address from, address to) external;
+
+    function updateIntegrationMinted(address from, address to) external;
 
     function setAftermarketDeviceBeneficiary(
         uint256 nodeId,

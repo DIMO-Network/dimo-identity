@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle, upgrades } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -19,7 +19,7 @@ import {
   Multicall
 } from '../typechain';
 import {
-  initialize,
+  setup,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -50,14 +50,8 @@ describe('Multicall', function () {
   let adIdInstance: AftermarketDeviceId;
   let multicallInstance: Multicall;
 
-  const [
-    admin,
-    foundation,
-    manufacturer1,
-    user1,
-    adAddress1,
-    adAddress2
-  ] = provider.getWallets();
+  const [admin, foundation, manufacturer1, user1, adAddress1, adAddress2] =
+    provider.getWallets();
 
   const mockAftermarketDeviceInfosList = JSON.parse(
     JSON.stringify(C.mockAftermarketDeviceInfosList)
@@ -81,75 +75,26 @@ describe('Multicall', function () {
       aftermarketDeviceInstance,
       adLicenseValidatorInstance,
       mapperInstance,
-      multicallInstance
-    ] = await initialize(
-      admin,
-      'Eip712Checker',
-      'DimoAccessControl',
-      'Nodes',
-      'Manufacturer',
-      'Vehicle',
-      'AftermarketDevice',
-      'AdLicenseValidator',
-      'Mapper',
-      'Multicall'
-    );
-
-    const ManufacturerIdFactory = await ethers.getContractFactory(
-      'ManufacturerId'
-    );
-    const VehicleIdFactory = await ethers.getContractFactory('VehicleId');
-    const AftermarketDeviceIdFactory = await ethers.getContractFactory(
-      'AftermarketDeviceId'
-    );
-
-    manufacturerIdInstance = await upgrades.deployProxy(
-      ManufacturerIdFactory,
-      [
-        C.MANUFACTURER_NFT_NAME,
-        C.MANUFACTURER_NFT_SYMBOL,
-        C.MANUFACTURER_NFT_BASE_URI
+      multicallInstance,
+      manufacturerIdInstance,
+      vehicleIdInstance,
+      adIdInstance
+    ] = await setup(admin, {
+      modules: [
+        'Eip712Checker',
+        'DimoAccessControl',
+        'Nodes',
+        'Manufacturer',
+        'Vehicle',
+        'AftermarketDevice',
+        'AdLicenseValidator',
+        'Mapper',
+        'Multicall'
       ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerId;
-    await manufacturerIdInstance.deployed();
+      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId']
+    });
 
-    vehicleIdInstance = await upgrades.deployProxy(
-      VehicleIdFactory,
-      [
-        C.VEHICLE_NFT_NAME,
-        C.VEHICLE_NFT_SYMBOL,
-        C.VEHICLE_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as VehicleId;
-    await vehicleIdInstance.deployed();
-
-    adIdInstance = await upgrades.deployProxy(
-      AftermarketDeviceIdFactory,
-      [
-        C.AD_NFT_NAME,
-        C.AD_NFT_SYMBOL,
-        C.AD_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as AftermarketDeviceId;
-    await adIdInstance.deployed();
-
-    const MANUFACTURER_MINTER_ROLE =
-      await manufacturerIdInstance.MINTER_ROLE();
+    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
@@ -255,7 +200,7 @@ describe('Multicall', function () {
     await adIdInstance
       .connect(admin)
       .grantRole(C.NFT_TRANSFERER_ROLE, dimoRegistryInstance.address);
-    
+
     // Setting DimoRegistry address in the AftermarketDeviceId
     await adIdInstance
       .connect(admin)
@@ -328,79 +273,126 @@ describe('Multicall', function () {
 
     context('State', () => {
       it('Should mint vehicle and claim aftermarket device in the same transaction', async () => {
-        const vehicleInterface = ethers.Contract.getInterface(vehicleInstance.interface);
-        const aftermarketDeviceInterface = ethers.Contract.getInterface(aftermarketDeviceInstance.interface);
+        const vehicleInterface = ethers.Contract.getInterface(
+          vehicleInstance.interface
+        );
+        const aftermarketDeviceInterface = ethers.Contract.getInterface(
+          aftermarketDeviceInstance.interface
+        );
 
         const mintVehicleSignEncoded = vehicleInterface.encodeFunctionData(
           'mintVehicleSign',
           [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
         );
-        const claimAftermarketDeviceSignEncoded = aftermarketDeviceInterface.encodeFunctionData(
-          'claimAftermarketDeviceSign',
-          [1, user1.address, ownerSig, adSig]
-        );
+        const claimAftermarketDeviceSignEncoded =
+          aftermarketDeviceInterface.encodeFunctionData(
+            'claimAftermarketDeviceSign',
+            [1, user1.address, ownerSig, adSig]
+          );
 
         await expect(vehicleIdInstance.ownerOf(1)).to.be.reverted;
-        expect(await adIdInstance.ownerOf(1)).to.be.equal(manufacturer1.address);
+        expect(await adIdInstance.ownerOf(1)).to.be.equal(
+          manufacturer1.address
+        );
 
-        await multicallInstance.multiDelegateCall([mintVehicleSignEncoded, claimAftermarketDeviceSignEncoded]);
+        await multicallInstance.multiDelegateCall([
+          mintVehicleSignEncoded,
+          claimAftermarketDeviceSignEncoded
+        ]);
 
         expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
         expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should mint vehicle, claim aftermarket device and pair them in the same transaction', async () => {
-        const vehicleInterface = ethers.Contract.getInterface(vehicleInstance.interface);
-        const aftermarketDeviceInterface = ethers.Contract.getInterface(aftermarketDeviceInstance.interface);
+        const vehicleInterface = ethers.Contract.getInterface(
+          vehicleInstance.interface
+        );
+        const aftermarketDeviceInterface = ethers.Contract.getInterface(
+          aftermarketDeviceInstance.interface
+        );
 
         const mintVehicleSignEncoded = vehicleInterface.encodeFunctionData(
           'mintVehicleSign',
           [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
         );
-        const claimAftermarketDeviceSignEncoded = aftermarketDeviceInterface.encodeFunctionData(
-          'claimAftermarketDeviceSign',
-          [1, user1.address, ownerSig, adSig]
-        );
-        const pairAftermarketDeviceSignEncoded = aftermarketDeviceInterface.encodeFunctionData(
-          'pairAftermarketDeviceSign(uint256,uint256,bytes)',
-          [1, 1, pairSign]
-        );
+        const claimAftermarketDeviceSignEncoded =
+          aftermarketDeviceInterface.encodeFunctionData(
+            'claimAftermarketDeviceSign',
+            [1, user1.address, ownerSig, adSig]
+          );
+        const pairAftermarketDeviceSignEncoded =
+          aftermarketDeviceInterface.encodeFunctionData(
+            'pairAftermarketDeviceSign(uint256,uint256,bytes)',
+            [1, 1, pairSign]
+          );
 
-        expect(await mapperInstance.getLink(vehicleIdInstance.address, 1)).to.be.equal(0);
-        expect(await mapperInstance.getLink(adIdInstance.address, 1)).to.be.equal(0);
+        expect(
+          await mapperInstance.getLink(vehicleIdInstance.address, 1)
+        ).to.be.equal(0);
+        expect(
+          await mapperInstance.getLink(adIdInstance.address, 1)
+        ).to.be.equal(0);
 
-        await multicallInstance.multiDelegateCall([mintVehicleSignEncoded, claimAftermarketDeviceSignEncoded, pairAftermarketDeviceSignEncoded]);
+        await multicallInstance.multiDelegateCall([
+          mintVehicleSignEncoded,
+          claimAftermarketDeviceSignEncoded,
+          pairAftermarketDeviceSignEncoded
+        ]);
 
-        expect(await mapperInstance.getLink(vehicleIdInstance.address, 1)).to.be.equal(1);
-        expect(await mapperInstance.getLink(adIdInstance.address, 1)).to.be.equal(1);
-      })
+        expect(
+          await mapperInstance.getLink(vehicleIdInstance.address, 1)
+        ).to.be.equal(1);
+        expect(
+          await mapperInstance.getLink(adIdInstance.address, 1)
+        ).to.be.equal(1);
+      });
     });
   });
 
   describe('multiStaticCall', () => {
     it('Should return information about manufacturer', async () => {
-      const manufacturerInterface = ethers.Contract.getInterface(manufacturerInstance.interface);
-      const nodesInterface = ethers.Contract.getInterface(nodesInstance.interface);
+      const manufacturerInterface = ethers.Contract.getInterface(
+        manufacturerInstance.interface
+      );
+      const nodesInterface = ethers.Contract.getInterface(
+        nodesInstance.interface
+      );
 
       const getIdByName1 = manufacturerInterface.encodeFunctionData(
         'getManufacturerIdByName',
         [C.mockManufacturerNames[0]]
       );
-      const getInfoEncoded1 = nodesInterface.encodeFunctionData(
-        'getInfo',
-        [manufacturerIdInstance.address, 1, C.mockManufacturerAttribute1]
-      );
-      const getInfoEncoded2 = nodesInterface.encodeFunctionData(
-        'getInfo',
-        [manufacturerIdInstance.address, 1, C.mockManufacturerAttribute2]
-      );
+      const getInfoEncoded1 = nodesInterface.encodeFunctionData('getInfo', [
+        manufacturerIdInstance.address,
+        1,
+        C.mockManufacturerAttribute1
+      ]);
+      const getInfoEncoded2 = nodesInterface.encodeFunctionData('getInfo', [
+        manufacturerIdInstance.address,
+        1,
+        C.mockManufacturerAttribute2
+      ]);
 
-      const results = await multicallInstance.multiStaticCall([getIdByName1, getInfoEncoded1, getInfoEncoded2]);
-      
+      const results = await multicallInstance.multiStaticCall([
+        getIdByName1,
+        getInfoEncoded1,
+        getInfoEncoded2
+      ]);
+
       expect(results.length).to.be.equal(3);
 
-      const id = ethers.utils.defaultAbiCoder.decode(["uint256"], results[0])[0];
-      const info1 = ethers.utils.defaultAbiCoder.decode(["string"], results[1])[0];
-      const info2 = ethers.utils.defaultAbiCoder.decode(["string"], results[2])[0];
+      const id = ethers.utils.defaultAbiCoder.decode(
+        ['uint256'],
+        results[0]
+      )[0];
+      const info1 = ethers.utils.defaultAbiCoder.decode(
+        ['string'],
+        results[1]
+      )[0];
+      const info2 = ethers.utils.defaultAbiCoder.decode(
+        ['string'],
+        results[2]
+      )[0];
 
       expect(id).to.be.equal(1);
       expect(info1).to.be.equal(C.mockManufacturerInfo1);
@@ -411,51 +403,83 @@ describe('Multicall', function () {
         .connect(admin)
         .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
 
-      const nodesInterface = ethers.Contract.getInterface(nodesInstance.interface);
-
-      const getInfoEncoded1 = nodesInterface.encodeFunctionData(
-        'getInfo',
-        [vehicleIdInstance.address, 1, C.mockVehicleAttribute1]
-      );
-      const getInfoEncoded2 = nodesInterface.encodeFunctionData(
-        'getInfo',
-        [vehicleIdInstance.address, 1, C.mockVehicleAttribute2]
+      const nodesInterface = ethers.Contract.getInterface(
+        nodesInstance.interface
       );
 
-      const results = await multicallInstance.multiStaticCall([getInfoEncoded1, getInfoEncoded2]);
+      const getInfoEncoded1 = nodesInterface.encodeFunctionData('getInfo', [
+        vehicleIdInstance.address,
+        1,
+        C.mockVehicleAttribute1
+      ]);
+      const getInfoEncoded2 = nodesInterface.encodeFunctionData('getInfo', [
+        vehicleIdInstance.address,
+        1,
+        C.mockVehicleAttribute2
+      ]);
+
+      const results = await multicallInstance.multiStaticCall([
+        getInfoEncoded1,
+        getInfoEncoded2
+      ]);
 
       expect(results.length).to.be.equal(2);
 
-      const info1 = ethers.utils.defaultAbiCoder.decode(["string"], results[0])[0];
-      const info2 = ethers.utils.defaultAbiCoder.decode(["string"], results[1])[0];
+      const info1 = ethers.utils.defaultAbiCoder.decode(
+        ['string'],
+        results[0]
+      )[0];
+      const info2 = ethers.utils.defaultAbiCoder.decode(
+        ['string'],
+        results[1]
+      )[0];
 
       expect(info1).to.be.equal(C.mockVehicleInfo1);
       expect(info2).to.be.equal(C.mockVehicleInfo2);
     });
     it('Should return information about aftermarket device', async () => {
-      const aftermarketDeviceInterface = ethers.Contract.getInterface(aftermarketDeviceInstance.interface);
-      const nodesInterface = ethers.Contract.getInterface(nodesInstance.interface);
+      const aftermarketDeviceInterface = ethers.Contract.getInterface(
+        aftermarketDeviceInstance.interface
+      );
+      const nodesInterface = ethers.Contract.getInterface(
+        nodesInstance.interface
+      );
 
       const getAdByAddress1 = aftermarketDeviceInterface.encodeFunctionData(
         'getAftermarketDeviceIdByAddress',
         [adAddress1.address]
       );
-      const getInfoEncoded1 = nodesInterface.encodeFunctionData(
-        'getInfo',
-        [adIdInstance.address, 1, C.mockAftermarketDeviceAttribute1]
-      );
-      const getInfoEncoded2 = nodesInterface.encodeFunctionData(
-        'getInfo',
-        [adIdInstance.address, 1, C.mockAftermarketDeviceAttribute2]
-      );
+      const getInfoEncoded1 = nodesInterface.encodeFunctionData('getInfo', [
+        adIdInstance.address,
+        1,
+        C.mockAftermarketDeviceAttribute1
+      ]);
+      const getInfoEncoded2 = nodesInterface.encodeFunctionData('getInfo', [
+        adIdInstance.address,
+        1,
+        C.mockAftermarketDeviceAttribute2
+      ]);
 
-      const results = await multicallInstance.multiStaticCall([getAdByAddress1, getInfoEncoded1, getInfoEncoded2]);
+      const results = await multicallInstance.multiStaticCall([
+        getAdByAddress1,
+        getInfoEncoded1,
+        getInfoEncoded2
+      ]);
 
       expect(results.length).to.be.equal(3);
 
-      const id = ethers.utils.defaultAbiCoder.decode(["uint256"], results[0])[0];
-      const info1 = ethers.utils.defaultAbiCoder.decode(["string"], results[1])[0];
-      const info2 = ethers.utils.defaultAbiCoder.decode(["string"], results[2])[0];
+      const id = ethers.utils.defaultAbiCoder.decode(
+        ['uint256'],
+        results[0]
+      )[0];
+      const info1 = ethers.utils.defaultAbiCoder.decode(
+        ['string'],
+        results[1]
+      )[0];
+      const info2 = ethers.utils.defaultAbiCoder.decode(
+        ['string'],
+        results[2]
+      )[0];
 
       expect(id).to.be.equal(1);
       expect(info1).to.be.equal(C.mockAftermarketDeviceInfo1);

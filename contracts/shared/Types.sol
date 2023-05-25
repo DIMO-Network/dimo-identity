@@ -17,3 +17,12 @@ struct AftermarketDeviceOwnerPair {
     uint256 aftermarketDeviceNodeId;
     address owner;
 }
+
+struct MintVirtualDeviceInput {
+    uint256 integrationNode;
+    uint256 vehicleNode;
+    bytes virtualDeviceSig;
+    bytes vehicleOwnerSig;
+    address virtualDeviceAddr;
+    AttributeInfoPair[] attrInfoPairs;
+}

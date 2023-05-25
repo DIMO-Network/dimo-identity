@@ -5,7 +5,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import { DIMORegistry } from '../typechain';
 import { getSelectors, ContractAddressesByNetwork } from '../utils';
-import * as C from './data/deployConstants';
+import * as C from './data/deployArgs';
 import addressesJSON from './data/addresses.json';
 
 const contractAddresses: ContractAddressesByNetwork = addressesJSON;
@@ -256,6 +256,11 @@ async function main() {
   // const deployer = await ethers.getImpersonatedSigner(
   //   '0x1741eC2915Ab71Fc03492715b5640133dA69420B'
   // );
+
+  // await user1.sendTransaction({
+  //   to: deployer.address,
+  //   value: ethers.utils.parseEther('100')
+  // });
 
   const instances1 = await updateModule(deployer, 'DevAdmin', C.networkName);
   writeAddresses(instances1, C.networkName);

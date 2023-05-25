@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle, upgrades } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -18,7 +18,7 @@ import {
   MockStake
 } from '../../typechain';
 import {
-  initialize,
+  setup,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -80,75 +80,25 @@ describe('AftermarketDeviceId', async function () {
       vehicleInstance,
       aftermarketDeviceInstance,
       adLicenseValidatorInstance,
-      mapperInstance
-    ] = await initialize(
-      admin,
-      'Eip712Checker',
-      'DimoAccessControl',
-      'Nodes',
-      'Manufacturer',
-      'Vehicle',
-      'AftermarketDevice',
-      'AdLicenseValidator',
-      'Mapper'
-    );
-
-    const ManufacturerIdFactory = await ethers.getContractFactory(
-      'ManufacturerId'
-    );
-    const VehicleIdFactory = await ethers.getContractFactory('VehicleId');
-    const AftermarketDeviceIdFactory = await ethers.getContractFactory(
-      'AftermarketDeviceId'
-    );
-
-    manufacturerIdInstance = await upgrades.deployProxy(
-      ManufacturerIdFactory,
-      [
-        C.MANUFACTURER_NFT_NAME,
-        C.MANUFACTURER_NFT_SYMBOL,
-        C.MANUFACTURER_NFT_BASE_URI
+      mapperInstance,
+      manufacturerIdInstance,
+      vehicleIdInstance,
+      adIdInstance
+    ] = await setup(admin, {
+      modules: [
+        'Eip712Checker',
+        'DimoAccessControl',
+        'Nodes',
+        'Manufacturer',
+        'Vehicle',
+        'AftermarketDevice',
+        'AdLicenseValidator',
+        'Mapper'
       ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerId;
-    await manufacturerIdInstance.deployed();
+      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId']
+    });
 
-    vehicleIdInstance = await upgrades.deployProxy(
-      VehicleIdFactory,
-      [
-        C.VEHICLE_NFT_NAME,
-        C.VEHICLE_NFT_SYMBOL,
-        C.VEHICLE_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as VehicleId;
-    await vehicleIdInstance.deployed();
-
-    adIdInstance = await upgrades.deployProxy(
-      AftermarketDeviceIdFactory,
-      [
-        C.AD_NFT_NAME,
-        C.AD_NFT_SYMBOL,
-        C.AD_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups',
-        unsafeAllow: ['delegatecall']
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as AftermarketDeviceId;
-    await adIdInstance.deployed();
-
-    const MANUFACTURER_MINTER_ROLE =
-      await manufacturerIdInstance.MINTER_ROLE();
+    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
@@ -338,7 +288,7 @@ describe('AftermarketDeviceId', async function () {
       );
     await aftermarketDeviceInstance
       .connect(admin)
-    ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature);
   });
 
   beforeEach(async () => {
@@ -352,12 +302,10 @@ describe('AftermarketDeviceId', async function () {
   describe('setDimoRegistryAddress', () => {
     it('Should revert if addr is zero address', async () => {
       await expect(
-        adIdInstance
-          .connect(admin)
-          .setDimoRegistryAddress(C.ZERO_ADDRESS)
+        adIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith('Non zero address');
     });
-  })
+  });
 
   context('On transfer', async () => {
     context('Error handling', () => {
@@ -365,7 +313,12 @@ describe('AftermarketDeviceId', async function () {
         await adIdInstance.connect(user1).approve(user2.address, 1);
         await expect(
           adIdInstance
-            .connect(user2)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 1)
+            .connect(user2)
+            ['safeTransferFrom(address,address,uint256)'](
+              user1.address,
+              user2.address,
+              1
+            )
         ).to.be.revertedWith('Caller is not authorized');
       });
     });
@@ -374,45 +327,110 @@ describe('AftermarketDeviceId', async function () {
       it('Should set new owner', async () => {
         expect(await adIdInstance.ownerOf(2)).to.equal(user1.address);
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
         expect(await adIdInstance.ownerOf(2)).to.equal(user2.address);
       });
       it('Should keep the same parent node', async () => {
-        const parentNode = await nodesInstance.getParentNode(adIdInstance.address, 2);
+        const parentNode = await nodesInstance.getParentNode(
+          adIdInstance.address,
+          2
+        );
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
-        expect(await nodesInstance.getParentNode(adIdInstance.address, 2)).to.equal(parentNode);
+        expect(
+          await nodesInstance.getParentNode(adIdInstance.address, 2)
+        ).to.equal(parentNode);
       });
       it('Should keep the same infos', async () => {
-        expect(await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(adAddress2.address)).to.equal(2);
-        for (const attrInfoPair of mockAftermarketDeviceInfosList[1].attrInfoPairs) {
-          expect(await nodesInstance.getInfo(adIdInstance.address, 2, attrInfoPair.attribute)).to.equal(attrInfoPair.info);
+        expect(
+          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+            adAddress2.address
+          )
+        ).to.equal(2);
+        for (const attrInfoPair of mockAftermarketDeviceInfosList[1]
+          .attrInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              2,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
         }
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
-        expect(await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(adAddress2.address)).to.equal(2);
-        for (const attrInfoPair of mockAftermarketDeviceInfosList[1].attrInfoPairs) {
-          expect(await nodesInstance.getInfo(adIdInstance.address, 2, attrInfoPair.attribute)).to.equal(attrInfoPair.info);
+        expect(
+          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+            adAddress2.address
+          )
+        ).to.equal(2);
+        for (const attrInfoPair of mockAftermarketDeviceInfosList[1]
+          .attrInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              2,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
         }
       });
       it('Should update multi-privilege token version', async () => {
         const previousVersion = await adIdInstance.tokenIdToVersion(2);
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
-        expect(await adIdInstance.tokenIdToVersion(2)).to.equal(previousVersion.add(1));
+        expect(await adIdInstance.tokenIdToVersion(2)).to.equal(
+          previousVersion.add(1)
+        );
       });
       it('Should reset aftermarket device beneficiary', async () => {
-        await mapperInstance.connect(user1).setAftermarketDeviceBeneficiary(2, beneficiary1.address);
+        await mapperInstance
+          .connect(user1)
+          .setAftermarketDeviceBeneficiary(2, beneficiary1.address);
 
-        expect(await mapperInstance.getBeneficiary(adIdInstance.address, 2)).to.equal(beneficiary1.address);
+        expect(
+          await mapperInstance.getBeneficiary(adIdInstance.address, 2)
+        ).to.equal(beneficiary1.address);
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
-        expect(await mapperInstance.getBeneficiary(adIdInstance.address, 2)).to.equal(user2.address);
+        expect(
+          await mapperInstance.getBeneficiary(adIdInstance.address, 2)
+        ).to.equal(user2.address);
       });
     });
   });

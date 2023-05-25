@@ -57,9 +57,5 @@ export const AD_NFT_SYMBOL = 'DIMO/AFTERMARKET/DEVICE';
 export const AD_NFT_URI =
   'https://devices-api.dimo.zone/v1/aftermarket/device/';
 
-export const manufacturerNodeType = ethers.utils.toUtf8Bytes('Manufacturer');
-export const vehicleNodeType = ethers.utils.toUtf8Bytes('Vehicle');
-export const adNodeType = ethers.utils.toUtf8Bytes('AftermarketDevice');
-
 export const vehicleAttributes = ['Make', 'Model', 'Year'];
 export const adAttributes = ['Serial', 'IMEI'];

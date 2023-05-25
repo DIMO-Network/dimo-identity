@@ -3,29 +3,29 @@ pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
 import "../../libraries/NodesStorage.sol";
-import "../../libraries/nodes/ManufacturerStorage.sol";
+import "../../libraries/nodes/IntegrationStorage.sol";
 
 import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
 import {AttributeInfoPair} from "../../shared/Types.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/// @title Manufacturer
-/// @notice Contract that represents the Manufacturer node
-contract Manufacturer is AccessControlInternal {
-    event ManufacturerIdProxySet(address indexed proxy);
-    event ManufacturerAttributeAdded(string attribute);
-    event ManufacturerAttributeSet(
-        uint256 tokenId,
+/// @title Integration
+/// @notice Contract that represents the Integration node
+contract Integration is AccessControlInternal {
+    event IntegrationIdProxySet(address proxy);
+    event IntegrationAttributeAdded(string attribute);
+    event IntegrationAttributeSet(
+        uint256 indexed tokenId,
         string attribute,
         string info
     );
     event ControllerSet(address indexed controller);
-    event ManufacturerNodeMinted(uint256 tokenId, address indexed owner);
+    event IntegrationNodeMinted(uint256 indexed tokenId, address indexed owner);
 
     modifier onlyNftProxy() {
         require(
-            msg.sender == ManufacturerStorage.getStorage().idProxyAddress,
+            msg.sender == IntegrationStorage.getStorage().idProxyAddress,
             "Only NFT Proxy"
         );
         _;
@@ -33,46 +33,45 @@ contract Manufacturer is AccessControlInternal {
 
     // ***** Admin management ***** //
 
-    /// @notice Sets the NFT proxy associated with the Manufacturer node
+    /// @notice Sets the NFT proxy associated with the Integration node
     /// @dev Only an admin can set the address
     /// @param addr The address of the proxy
-    function setManufacturerIdProxyAddress(address addr)
+    function setIntegrationIdProxyAddress(address addr)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         require(addr != address(0), "Non zero address");
-        ManufacturerStorage.getStorage().idProxyAddress = addr;
+        IntegrationStorage.getStorage().idProxyAddress = addr;
 
-        emit ManufacturerIdProxySet(addr);
+        emit IntegrationIdProxySet(addr);
     }
 
     /// @notice Adds an attribute to the whitelist
     /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
-    function addManufacturerAttribute(string calldata attribute)
+    function addIntegrationAttribute(string calldata attribute)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         require(
             AttributeSet.add(
-                ManufacturerStorage.getStorage().whitelistedAttributes,
+                IntegrationStorage.getStorage().whitelistedAttributes,
                 attribute
             ),
             "Attribute already exists"
         );
 
-        emit ManufacturerAttributeAdded(attribute);
+        emit IntegrationAttributeAdded(attribute);
     }
 
-    /// @notice Sets a address controller
+    /// @notice Sets an address controller
     /// @dev Only an admin can set new controllers
     /// @param _controller The address of the controller
-    function setController(address _controller)
+    function setIntegrationController(address _controller)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage
-            .getStorage();
+        IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
         require(_controller != address(0), "Non zero address");
         require(
             !s.controllers[_controller].isController,
@@ -86,19 +85,18 @@ contract Manufacturer is AccessControlInternal {
 
     // ***** Interaction with nodes ***** //
 
-    /// @notice Mints manufacturers in batch
+    /// @notice Mints integrations in batch
     /// @dev Caller must be an admin
     /// @dev It is assumed the 'Name' attribute is whitelisted in advance
     /// @param owner The address of the new owner
-    /// @param names List of manufacturer names
-    function mintManufacturerBatch(address owner, string[] calldata names)
+    /// @param names List of integration names
+    function mintIntegrationBatch(address owner, string[] calldata names)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         require(_hasRole(DEFAULT_ADMIN_ROLE, owner), "Owner must be an admin");
 
-        ManufacturerStorage.Storage storage s = ManufacturerStorage
-            .getStorage();
+        IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
 
         uint256 newTokenId;
         string memory name;
@@ -106,158 +104,151 @@ contract Manufacturer is AccessControlInternal {
             name = names[i];
 
             require(
-                s.manufacturerNameToNodeId[name] == 0,
-                "Manufacturer name already registered"
+                s.integrationNameToNodeId[name] == 0,
+                "Integration name already registered"
             );
 
             newTokenId = INFT(s.idProxyAddress).safeMint(owner);
 
-            s.manufacturerNameToNodeId[name] = newTokenId;
-            s.nodeIdToManufacturerName[newTokenId] = name;
+            s.integrationNameToNodeId[name] = newTokenId;
+            s.nodeIdToIntegrationName[newTokenId] = name;
 
-            emit ManufacturerNodeMinted(newTokenId, owner);
+            emit IntegrationNodeMinted(newTokenId, owner);
         }
     }
 
-    /// @notice Mints a manufacturer
+    /// @notice Mints an integration
     /// @dev Caller must be an admin
     /// @param owner The address of the new owner
-    /// @param name Name of the manufacturer
+    /// @param name Name of the integration
     /// @param attrInfoPairList List of attribute-info pairs to be added
-    function mintManufacturer(
+    function mintIntegration(
         address owner,
         string calldata name,
         AttributeInfoPair[] calldata attrInfoPairList
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage
-            .getStorage();
-        require(!s.controllers[owner].manufacturerMinted, "Invalid request");
+        IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
+        require(!s.controllers[owner].integrationMinted, "Invalid request");
         require(
-            s.manufacturerNameToNodeId[name] == 0,
-            "Manufacturer name already registered"
+            s.integrationNameToNodeId[name] == 0,
+            "Integration name already registered"
         );
 
         address idProxyAddress = s.idProxyAddress;
 
         s.controllers[owner].isController = true;
-        s.controllers[owner].manufacturerMinted = true;
+        s.controllers[owner].integrationMinted = true;
 
         uint256 newTokenId = INFT(idProxyAddress).safeMint(owner);
 
-        s.manufacturerNameToNodeId[name] = newTokenId;
-        s.nodeIdToManufacturerName[newTokenId] = name;
+        s.integrationNameToNodeId[name] = newTokenId;
+        s.nodeIdToIntegrationName[newTokenId] = name;
 
         _setInfos(newTokenId, attrInfoPairList);
 
-        emit ManufacturerNodeMinted(newTokenId, msg.sender);
+        emit IntegrationNodeMinted(newTokenId, msg.sender);
     }
 
     /// @notice Add infos to node
     /// @dev attributes must be whitelisted
     /// @param tokenId Node id where the info will be added
     /// @param attrInfoList List of attribute-info pairs to be added
-    function setManufacturerInfo(
+    function setIntegrationInfo(
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfoList
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(
-            INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+            INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
                 tokenId
             ),
-            "Invalid manufacturer node"
+            "Invalid integration node"
         );
         _setInfos(tokenId, attrInfoList);
     }
 
     /**
-     * @notice Verify if an address is allowed to own an manufacturer node and set as minted
+     * @notice Verify if an address is allowed to own an integration node and set as minted
      * The former owner of the node is set as not minted, as it will not be the owner of a node after the transfer
-     * @dev Can only be called by the ManufacturerId Proxy
+     * @dev Can only be called by the IntegrationId Proxy
      * @dev The address must be a controller and not yet minted a node
      * @param from the address to be verified and set
      * @param to the address to be verified
      */
-    function updateManufacturerMinted(address from, address to)
+    function updateIntegrationMinted(address from, address to)
         external
         onlyNftProxy
     {
-        ManufacturerStorage.Storage storage s = ManufacturerStorage
-            .getStorage();
+        IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
         require(
             s.controllers[to].isController &&
-                !s.controllers[to].manufacturerMinted,
+                !s.controllers[to].integrationMinted,
             "Address is not allowed to own a new token"
         );
 
-        s.controllers[from].manufacturerMinted = false;
-        s.controllers[to].manufacturerMinted = true;
+        s.controllers[from].integrationMinted = false;
+        s.controllers[to].integrationMinted = true;
     }
 
     /// @notice Verify if an address is a controller
     /// @param addr the address to be verified
-    function isController(address addr)
+    function isIntegrationController(address addr)
         external
         view
         returns (bool _isController)
     {
-        _isController = ManufacturerStorage
+        _isController = IntegrationStorage
             .getStorage()
             .controllers[addr]
             .isController;
     }
 
-    /// @notice Verify if an address has minted a manufacturer
+    /// @notice Verify if an address has minted an integration
     /// @param addr the address to be verified
-    function isManufacturerMinted(address addr)
+    function isIntegrationMinted(address addr)
         external
         view
-        returns (bool _isManufacturerMinted)
+        returns (bool _isIntegrationMinted)
     {
-        _isManufacturerMinted = ManufacturerStorage
+        _isIntegrationMinted = IntegrationStorage
             .getStorage()
             .controllers[addr]
-            .manufacturerMinted;
+            .integrationMinted;
     }
 
-    /// @notice Verify if an address is allowed to own a manufacturer node
+    /// @notice Verify if an address is allowed to own an integration node
     /// @dev The address must be a controller and not yet minted a node
     /// @param addr the address to be verified
-    function isAllowedToOwnManufacturerNode(address addr)
+    function isAllowedToOwnIntegrationNode(address addr)
         external
         view
         returns (bool _isAllowed)
     {
-        ManufacturerStorage.Storage storage ms = ManufacturerStorage
-            .getStorage();
+        IntegrationStorage.Storage storage ms = IntegrationStorage.getStorage();
         _isAllowed =
             ms.controllers[addr].isController &&
-            !ms.controllers[addr].manufacturerMinted;
+            !ms.controllers[addr].integrationMinted;
     }
 
-    /// @notice Gets the Manufacturer Id by name
-    /// @dev If the manufacturer is not minted it will return 0
-    /// @param name Name associated with the manufacturer
-    function getManufacturerIdByName(string calldata name)
+    /// @notice Gets the Integration Id by name
+    /// @dev If the integration is not minted it will return 0
+    /// @param name Name associated with the integration
+    function getIntegrationIdByName(string calldata name)
         external
         view
         returns (uint256 nodeId)
     {
-        nodeId = ManufacturerStorage.getStorage().manufacturerNameToNodeId[
-            name
-        ];
+        nodeId = IntegrationStorage.getStorage().integrationNameToNodeId[name];
     }
 
-    /// @notice Gets the Manufacturer name by id
-    /// @dev If the manufacturer is not minted it will return an empty string
+    /// @notice Gets the Integration name by id
+    /// @dev If the integration is not minted it will return an empty string
     /// @param tokenId Token id to get the associated name
-    function getManufacturerNameById(uint256 tokenId)
+    function getIntegrationNameById(uint256 tokenId)
         external
         view
         returns (string memory name)
     {
-        name = ManufacturerStorage.getStorage().nodeIdToManufacturerName[
-            tokenId
-        ];
+        name = IntegrationStorage.getStorage().nodeIdToIntegrationName[tokenId];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
@@ -271,8 +262,7 @@ contract Manufacturer is AccessControlInternal {
         AttributeInfoPair[] calldata attrInfoPairList
     ) private {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        ManufacturerStorage.Storage storage s = ManufacturerStorage
-            .getStorage();
+        IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
         address idProxyAddress = s.idProxyAddress;
 
         for (uint256 i = 0; i < attrInfoPairList.length; i++) {
@@ -287,7 +277,7 @@ contract Manufacturer is AccessControlInternal {
                 attrInfoPairList[i].attribute
             ] = attrInfoPairList[i].info;
 
-            emit ManufacturerAttributeSet(
+            emit IntegrationAttributeSet(
                 tokenId,
                 attrInfoPairList[i].attribute,
                 attrInfoPairList[i].info

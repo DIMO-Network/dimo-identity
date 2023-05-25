@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-import "./Base/NftBaseUpgradeable.sol";
 import "../interfaces/IDimoRegistry.sol";
+import "./Base/MultiPrivilege/MultiPrivilege.sol";
 
-contract ManufacturerId is Initializable, NftBaseUpgradeable {
+contract VirtualDeviceId is Initializable, MultiPrivilege {
     IDimoRegistry private _dimoRegistry;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -29,20 +29,5 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable {
     {
         require(addr != address(0), "Non zero address");
         _dimoRegistry = IDimoRegistry(addr);
-    }
-
-    /// @notice Internal function to transfer a token
-    /// @dev Caller must have the transferer role
-    /// @dev The new owner must bet allowed to own a Manufacturer node
-    /// @param from Old owner
-    /// @param to New owner
-    /// @param tokenId Token Id to be transferred
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal override {
-        _dimoRegistry.updateManufacturerMinted(from, to);
-        super._transfer(from, to, tokenId);
     }
 }

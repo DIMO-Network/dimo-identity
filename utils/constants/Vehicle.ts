@@ -1,9 +1,4 @@
-import { ethers } from 'hardhat';
 import { AttributeInfoPair } from '../types';
-
-// Node type
-export const vehicleNodeType = ethers.utils.toUtf8Bytes('Vehicle');
-export const vehicleNodeTypeId = ethers.utils.keccak256(vehicleNodeType);
 
 // Mock Vehicle attributes
 export const mockVehicleAttribute1 = 'mockVehicleAttribute1';

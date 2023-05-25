@@ -73,7 +73,13 @@ const config: HardhatUserConfig = {
   abiExporter: {
     path: './abis',
     runOnCompile: true,
-    only: [':ManufacturerId$', ':AftermarketDeviceId$', ':VehicleId$'],
+    only: [
+      ':ManufacturerId$',
+      ':AftermarketDeviceId$',
+      ':VehicleId$',
+      ':IntegrationId$',
+      ':VirtualDeviceId$'
+    ],
     format: 'json'
   }
 };

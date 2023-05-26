@@ -7,15 +7,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-error zeroAddress();
-error notWhitelisted(string proxyName);
-error invalidLink(
+error ZeroAddress();
+error InvalidLink(
     address idProxySource,
     address idProxyTraget,
     uint256 sourceId,
     uint256 targetId
 );
-error transferFailed(address idProxy, uint256 id, string errorMessage);
+error TransferFailed(address idProxy, uint256 id, string errorMessage);
 
 contract DimoForwarder is
     Initializable,
@@ -25,7 +24,6 @@ contract DimoForwarder is
     IDimoRegistry public dimoRegistry;
     address public vehicleIdProxyAddress;
     address public adIdProxyAddress;
-    address public virtualDeviceIdProxyAddress;
 
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -38,8 +36,7 @@ contract DimoForwarder is
     function initialize(
         address dimoRegistry_,
         address vehicleIdProxyAddress_,
-        address adIdProxyAddress_,
-        address virtualDeviceIdProxyAddress_
+        address adIdProxyAddress_
     ) external initializer {
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -47,7 +44,6 @@ contract DimoForwarder is
         dimoRegistry = IDimoRegistry(dimoRegistry_);
         vehicleIdProxyAddress = vehicleIdProxyAddress_;
         adIdProxyAddress = adIdProxyAddress_;
-        virtualDeviceIdProxyAddress = virtualDeviceIdProxyAddress_;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
@@ -61,7 +57,7 @@ contract DimoForwarder is
         external
         onlyRole(ADMIN_ROLE)
     {
-        if (dimoRegistry_ == address(0)) revert zeroAddress();
+        if (dimoRegistry_ == address(0)) revert ZeroAddress();
         dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
 
@@ -85,15 +81,6 @@ contract DimoForwarder is
         adIdProxyAddress = adIdProxyAddress_;
     }
 
-    /// @notice Sets the Virtual Device ID proxy address
-    /// @dev Only an admin can set the Virtual Device ID proxy address
-    /// @param virtualDeviceIdProxyAddress_ The address to be set
-    function setVirtualDeviceIdProxyAddress(
-        address virtualDeviceIdProxyAddress_
-    ) external onlyRole(ADMIN_ROLE) {
-        virtualDeviceIdProxyAddress = virtualDeviceIdProxyAddress_;
-    }
-
     /// @notice Tranfers both Vehicle and Aftermarket Device Ids
     /// @dev Vehicle Id and Aftermarket Device Id must be paired
     /// @dev For the purpose of this contract, all requests must succeed
@@ -109,7 +96,7 @@ contract DimoForwarder is
             dimoRegistry.getLink(vehicleIdProxyAddress, vehicleId) !=
             aftermarketDeviceId
         )
-            revert invalidLink(
+            revert InvalidLink(
                 vehicleIdProxyAddress,
                 adIdProxyAddress,
                 vehicleId,
@@ -118,35 +105,6 @@ contract DimoForwarder is
 
         _execTransfer(vehicleIdProxyAddress, to, vehicleId);
         _execTransfer(adIdProxyAddress, to, aftermarketDeviceId);
-    }
-
-    /// @notice Tranfers both Vehicle and Virtual Device Ids
-    /// @dev Vehicle Id and Virtual Device Id must be linked
-    /// @dev For the purpose of this contract, all requests must succeed
-    /// @param vehicleId Vehicle Id to be transferred
-    /// @param virtualDeviceId Virtual Device Id to be transferred
-    /// @param to New Ids owner
-    function transferVehicleAndVirtualDeviceIds(
-        uint256 vehicleId,
-        uint256 virtualDeviceId,
-        address to
-    ) external {
-        if (
-            dimoRegistry.getNodeLink(
-                vehicleIdProxyAddress,
-                virtualDeviceIdProxyAddress,
-                vehicleId
-            ) != virtualDeviceId
-        )
-            revert invalidLink(
-                vehicleIdProxyAddress,
-                virtualDeviceIdProxyAddress,
-                vehicleId,
-                virtualDeviceId
-            );
-
-        _execTransfer(vehicleIdProxyAddress, to, vehicleId);
-        _execTransfer(virtualDeviceIdProxyAddress, to, virtualDeviceId);
     }
 
     /// @notice Internal function to authorize contract upgrade
@@ -182,7 +140,7 @@ contract DimoForwarder is
             assembly {
                 data := add(data, 0x04)
             }
-            revert transferFailed(proxy, id, abi.decode(data, (string)));
+            revert TransferFailed(proxy, id, abi.decode(data, (string)));
         }
     }
 }

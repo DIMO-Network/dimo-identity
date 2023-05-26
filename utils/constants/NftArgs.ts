@@ -42,7 +42,7 @@ export const nftArgs: ContractNameArgsByNetwork = {
       INTEGRATION_NFT_SYMBOL,
       INTEGRATION_NFT_BASE_URI,
       ZERO_ADDRESS,
-      ZERO_ADDRESS
+      []
     ],
     opts: {
       initializer: 'initialize',
@@ -75,7 +75,7 @@ export const nftArgs: ContractNameArgsByNetwork = {
       VIRTUAL_DEVICE_NFT_SYMBOL,
       VIRTUAL_DEVICE_NFT_BASE_URI,
       ZERO_ADDRESS,
-      ZERO_ADDRESS
+      []
     ],
     opts: {
       initializer: 'initialize',

@@ -5,6 +5,9 @@ import "../interfaces/IDimoRegistry.sol";
 import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
 import "./Base/ERC2771ContextUpgradeable.sol";
 
+error ZeroAddress();
+error Unauthorized();
+
 contract VirtualDeviceId is
     Initializable,
     ERC2771ContextUpgradeable,
@@ -24,9 +27,9 @@ contract VirtualDeviceId is
         string calldata symbol_,
         string calldata baseUri_,
         address dimoRegistry_,
-        address trustedForwarder_
+        address[] calldata trustedForwarders_
     ) external initializer {
-        _erc2771Init(trustedForwarder_);
+        _erc2771Init(trustedForwarders_);
         _multiPrivilegeInit(name_, symbol_, baseUri_);
 
         dimoRegistry = IDimoRegistry(dimoRegistry_);
@@ -41,18 +44,20 @@ contract VirtualDeviceId is
         external
         onlyRole(ADMIN_ROLE)
     {
-        require(dimoRegistry_ != address(0), "Non zero address");
+        if (dimoRegistry_ == address(0)) revert ZeroAddress();
         dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
 
-    /// @notice Sets the Trusted Forwarder address
-    /// @param trustedForwarder_ The address to be set
-    function setTrustedForwarder(address trustedForwarder_)
+    /// @notice Sets trusted or not to an address
+    /// @dev Only an admin can set a trusted forwarder
+    /// @param addr The address to be set
+    /// @param trusted Whether an address should be trusted or not
+    function setTrustedForwarder(address addr, bool trusted)
         public
         override
         onlyRole(ADMIN_ROLE)
     {
-        super.setTrustedForwarder(trustedForwarder_);
+        super.setTrustedForwarder(addr, trusted);
     }
 
     /// @notice Internal function to transfer a token
@@ -67,8 +72,8 @@ contract VirtualDeviceId is
         address to,
         uint256 tokenId
     ) internal override {
-        // Approvals are not accepted for now
-        require(_msgSender() == from, "Caller is not authorized");
+        // Only trusted forwarder can transfer
+        if (!trustedForwarders[msg.sender]) revert Unauthorized();
         super._transfer(from, to, tokenId);
     }
 

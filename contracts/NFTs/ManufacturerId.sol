@@ -4,6 +4,8 @@ pragma solidity ^0.8.13;
 import "./Base/NftBaseUpgradeable.sol";
 import "../interfaces/IDimoRegistry.sol";
 
+error ZeroAddress();
+
 contract ManufacturerId is Initializable, NftBaseUpgradeable {
     IDimoRegistry private _dimoRegistry;
 
@@ -27,7 +29,7 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(addr != address(0), "Non zero address");
+        if (addr == address(0)) revert ZeroAddress();
         _dimoRegistry = IDimoRegistry(addr);
     }
 

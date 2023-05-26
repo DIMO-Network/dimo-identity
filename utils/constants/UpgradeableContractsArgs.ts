@@ -7,7 +7,6 @@ export const upgradeableContractArgs: ContractNameArgsByNetwork = {
     args: [
       ZERO_ADDRESS,
       ZERO_ADDRESS,
-      ZERO_ADDRESS,
       ZERO_ADDRESS
     ],
     opts: {

@@ -5,6 +5,8 @@ import "../interfaces/IDimoRegistry.sol";
 import "./Base/MultiPrivilege/MultiPrivilege.sol";
 import "./Base/ERC2771ContextUpgradeable.sol";
 
+error ZeroAddress();
+
 contract IntegrationId is
     Initializable,
     ERC2771ContextUpgradeable,
@@ -24,9 +26,9 @@ contract IntegrationId is
         string calldata symbol_,
         string calldata baseUri_,
         address dimoRegistry_,
-        address trustedForwarder_
+        address[] calldata trustedForwarders_
     ) external initializer {
-        _erc2771Init(trustedForwarder_);
+        _erc2771Init(trustedForwarders_);
         _multiPrivilegeInit(name_, symbol_, baseUri_);
 
         dimoRegistry = IDimoRegistry(dimoRegistry_);
@@ -41,18 +43,20 @@ contract IntegrationId is
         external
         onlyRole(ADMIN_ROLE)
     {
-        require(dimoRegistry_ != address(0), "Non zero address");
+        if (dimoRegistry_ == address(0)) revert ZeroAddress();
         dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
 
-    /// @notice Sets the Trusted Forwarder address
-    /// @param trustedForwarder_ The address to be set
-    function setTrustedForwarder(address trustedForwarder_)
+    /// @notice Sets trusted or not to an address
+    /// @dev Only an admin can set a trusted forwarder
+    /// @param addr The address to be set
+    /// @param trusted Whether an address should be trusted or not
+    function setTrustedForwarder(address addr, bool trusted)
         public
         override
         onlyRole(ADMIN_ROLE)
     {
-        super.setTrustedForwarder(trustedForwarder_);
+        super.setTrustedForwarder(addr, trusted);
     }
 
     /// @notice Internal function to transfer a token

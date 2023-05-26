@@ -292,34 +292,83 @@ describe('VehicleId', async function () {
     it('Should revert if addr is zero address', async () => {
       await expect(
         vehicleIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('Non zero address');
+      ).to.be.revertedWith('ZeroAddress');
     });
   });
 
-  describe('setTrustedForwarder', () => {
+  describe('setVirtualDeviceIdAddress', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
-        vehicleIdInstance.connect(nonAdmin).setTrustedForwarder(C.ZERO_ADDRESS)
+        vehicleIdInstance
+          .connect(nonAdmin)
+          .setVirtualDeviceIdAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
           C.ADMIN_ROLE
         }`
       );
     });
-    it('Should correctly set trusted forwarder', async () => {
-      const mockForwarder = ethers.Wallet.createRandom();
+    it('Should correctly set the Virtual Device ID address', async () => {
+      const mockVirtualDeviceId = ethers.Wallet.createRandom();
 
-      expect(await vehicleIdInstance.trustedForwarder()).to.be.equal(
+      expect(await vehicleIdInstance.virtualDeviceId()).to.be.equal(
         C.ZERO_ADDRESS
       );
 
       await vehicleIdInstance
         .connect(admin)
-        .setTrustedForwarder(mockForwarder.address);
+        .setVirtualDeviceIdAddress(mockVirtualDeviceId.address);
 
-      expect(await vehicleIdInstance.trustedForwarder()).to.be.equal(
-        mockForwarder.address
+      expect(await vehicleIdInstance.virtualDeviceId()).to.be.equal(
+        mockVirtualDeviceId.address
       );
+    });
+  });
+
+  describe('setTrustedForwarder', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        vehicleIdInstance
+          .connect(nonAdmin)
+          .setTrustedForwarder(C.ZERO_ADDRESS, true)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
+    it('Should correctly set address as trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await vehicleIdInstance.trustedForwarders(mockForwarder.address))
+        .to.be.false;
+
+      await vehicleIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, true);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await vehicleIdInstance.trustedForwarders(mockForwarder.address))
+        .to.be.true;
+    });
+    it('Should correctly set address as not trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+      await vehicleIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, true);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await vehicleIdInstance.trustedForwarders(mockForwarder.address))
+        .to.be.true;
+
+      await vehicleIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, false);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await vehicleIdInstance.trustedForwarders(mockForwarder.address))
+        .to.be.false;
     });
   });
 
@@ -335,7 +384,7 @@ describe('VehicleId', async function () {
               user2.address,
               1
             )
-        ).to.be.revertedWith('Caller is not authorized');
+        ).to.be.revertedWith('Unauthorized');
       });
     });
 

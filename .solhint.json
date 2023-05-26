@@ -6,22 +6,10 @@
       "^0.8.13"
     ],
     "func-visibility": [
-      "warn",
+      "error",
       {
         "ignoreConstructors": true
       }
-    ],
-    "separate-by-one-line-in-contract": [
-      "warn"
-    ],
-    "two-lines-top-level-separator": [
-      "warn"
-    ],
-    "indent": "warn",
-    "bracket-align": "warn",
-    "function-max-lines": [
-      "error",
-      100
     ]
   }
 }

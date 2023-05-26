@@ -91,7 +91,7 @@ describe('IntegrationId', async function () {
         integrationIdInstance
           .connect(admin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('Non zero address');
+      ).to.be.revertedWith('ZeroAddress');
     });
   });
 
@@ -100,27 +100,49 @@ describe('IntegrationId', async function () {
       await expect(
         integrationIdInstance
           .connect(nonAdmin)
-          .setTrustedForwarder(C.ZERO_ADDRESS)
+          .setTrustedForwarder(C.ZERO_ADDRESS, true)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
           C.ADMIN_ROLE
         }`
       );
     });
-    it('Should correctly set trusted forwarder', async () => {
+    it('Should correctly set address as trusted forwarder', async () => {
       const mockForwarder = ethers.Wallet.createRandom();
 
-      expect(await integrationIdInstance.trustedForwarder()).to.be.equal(
-        C.ZERO_ADDRESS
-      );
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await integrationIdInstance.trustedForwarders(mockForwarder.address)
+      ).to.be.false;
 
       await integrationIdInstance
         .connect(admin)
-        .setTrustedForwarder(mockForwarder.address);
+        .setTrustedForwarder(mockForwarder.address, true);
 
-      expect(await integrationIdInstance.trustedForwarder()).to.be.equal(
-        mockForwarder.address
-      );
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await integrationIdInstance.trustedForwarders(mockForwarder.address)
+      ).to.be.true;
+    });
+    it('Should correctly set address as not trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+      await integrationIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, true);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await integrationIdInstance.trustedForwarders(mockForwarder.address)
+      ).to.be.true;
+
+      await integrationIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, false);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await integrationIdInstance.trustedForwarders(mockForwarder.address)
+      ).to.be.false;
     });
   });
 

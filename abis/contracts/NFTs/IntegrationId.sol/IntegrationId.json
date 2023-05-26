@@ -5,6 +5,11 @@
     "type": "constructor"
   },
   {
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -636,9 +641,9 @@
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "trustedForwarder_",
-        "type": "address"
+        "internalType": "address[]",
+        "name": "trustedForwarders_",
+        "type": "address[]"
       }
     ],
     "name": "initialize",
@@ -1043,8 +1048,13 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "trustedForwarder_",
+        "name": "addr",
         "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "trusted",
+        "type": "bool"
       }
     ],
     "name": "setTrustedForwarder",
@@ -1146,13 +1156,19 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "trustedForwarder",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "name": "trustedForwarders",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",

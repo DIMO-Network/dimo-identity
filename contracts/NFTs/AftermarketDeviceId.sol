@@ -4,9 +4,12 @@ pragma solidity ^0.8.13;
 import "../interfaces/IDimoRegistry.sol";
 import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
 
+error ZeroAddress();
+error Unauthorized();
+
 contract AftermarketDeviceId is Initializable, MultiPrivilege {
     IDimoRegistry private _dimoRegistry;
-    address public trustedForwarder;
+    mapping(address => bool) public trustedForwarders;
 
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
@@ -32,18 +35,19 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
         external
         onlyRole(ADMIN_ROLE)
     {
-        require(addr != address(0), "Non zero address");
+        if (addr == address(0)) revert ZeroAddress();
         _dimoRegistry = IDimoRegistry(addr);
     }
 
-    /// @notice Sets the Trusted Forwarder address
-    /// @dev Only an admin can set the DIMO Registry address
-    /// @param trustedForwarder_ The address to be set
-    function setTrustedForwarder(address trustedForwarder_)
-        external
+    /// @notice Sets trusted or not to an address
+    /// @dev Only an admin can set a trusted forwarder
+    /// @param addr The address to be set
+    /// @param trusted Whether an address should be trusted or not
+    function setTrustedForwarder(address addr, bool trusted)
+        public
         onlyRole(ADMIN_ROLE)
     {
-        trustedForwarder = trustedForwarder_;
+        trustedForwarders[addr] = trusted;
     }
 
     /// @notice Internal function to transfer a token
@@ -58,10 +62,8 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
         uint256 tokenId
     ) internal override {
         // Approvals are not accepted for now
-        require(
-            _msgSender() == address(_dimoRegistry) || _msgSender() == from,
-            "Caller is not authorized"
-        );
+        if (_msgSender() != address(_dimoRegistry) && _msgSender() != from)
+            revert Unauthorized();
 
         // Resets aftermarket device beneficiary
         _dimoRegistry.setAftermarketDeviceBeneficiary(tokenId, address(0));
@@ -71,7 +73,7 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
 
     /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract
     function _msgSender() internal view override returns (address sender) {
-        if (msg.sender == trustedForwarder) {
+        if (trustedForwarders[msg.sender]) {
             assembly {
                 sender := shr(96, calldataload(sub(calldatasize(), 20)))
             }
@@ -82,7 +84,7 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
 
     /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract
     function _msgData() internal view override returns (bytes calldata) {
-        if (msg.sender == trustedForwarder) {
+        if (trustedForwarders[msg.sender]) {
             return msg.data[:msg.data.length - 20];
         } else {
             return super._msgData();

@@ -86,7 +86,7 @@ describe('ManufacturerId', async function () {
         manufacturerIdInstance
           .connect(admin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('Non zero address');
+      ).to.be.revertedWith('ZeroAddress');
     });
   });
 

@@ -78,7 +78,8 @@ const config: HardhatUserConfig = {
       ':AftermarketDeviceId$',
       ':VehicleId$',
       ':IntegrationId$',
-      ':VirtualDeviceId$'
+      ':VirtualDeviceId$',
+      ':DimoForwarder$'
     ],
     format: 'json'
   }

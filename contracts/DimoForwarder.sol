@@ -25,6 +25,8 @@ contract DimoForwarder is
     address public vehicleIdProxyAddress;
     address public adIdProxyAddress;
 
+    // 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
+    bytes4 public constant SAFE_TRANSFER_FROM = 0x42842e0e;
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
@@ -118,7 +120,6 @@ contract DimoForwarder is
 
     /**
      * @dev Executes a call encoding a safeTransferFrom from a ERC-721 proxy
-     * @dev 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
      * @param proxy The proxy address that will call the function
      * @param to The address to send the token
      * @param id The token id
@@ -130,7 +131,7 @@ contract DimoForwarder is
     ) private {
         (bool success, bytes memory data) = proxy.call(
             abi.encodePacked(
-                abi.encodeWithSelector(0x42842e0e, msg.sender, to, id),
+                abi.encodeWithSelector(SAFE_TRANSFER_FROM, msg.sender, to, id),
                 msg.sender
             )
         );

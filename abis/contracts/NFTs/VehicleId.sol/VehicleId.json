@@ -385,6 +385,19 @@
   },
   {
     "inputs": [],
+    "name": "SAFE_TRANSFER_FROM",
+    "outputs": [
+      {
+        "internalType": "bytes4",
+        "name": "",
+        "type": "bytes4"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "TRANSFERER_ROLE",
     "outputs": [
       {

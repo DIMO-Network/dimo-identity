@@ -13,6 +13,8 @@ contract VehicleId is Initializable, MultiPrivilege {
     address public virtualDeviceId;
     mapping(address => bool) public trustedForwarders;
 
+    // 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
+    bytes4 public constant SAFE_TRANSFER_FROM = 0x42842e0e;
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -92,7 +94,7 @@ contract VehicleId is Initializable, MultiPrivilege {
             (bool success, bytes memory data) = virtualDeviceId.call(
                 abi.encodePacked(
                     abi.encodeWithSelector(
-                        0x42842e0e,
+                        SAFE_TRANSFER_FROM,
                         _msgSender(),
                         to,
                         pairedVirtualDeviceId

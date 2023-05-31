@@ -146,8 +146,8 @@ contract VirtualDevice is AccessControlInternal {
             .integrationNode;
 
         ms.nodeLinks[vehicleIdProxyAddress][virtualDeviceIdProxyAddress][
-                data.vehicleNode
-            ] = newTokenId;
+            data.vehicleNode
+        ] = newTokenId;
         ms.nodeLinks[virtualDeviceIdProxyAddress][vehicleIdProxyAddress][
             newTokenId
         ] = data.vehicleNode;

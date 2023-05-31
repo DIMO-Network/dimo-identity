@@ -562,6 +562,13 @@ describe('MultiPrivilege', function () {
         await multiPrivilegeInstance.hasPrivilege(nftTokenId, 99, user2.address)
       ).to.be.false;
     });
+    it.skip('Should return false if privilege is expired', async () => {
+      await ethers.provider.send('evm_increaseTime', [expiresAtDefault * 100]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await multiPrivilegeInstance.hasPrivilege(nftTokenId, 1, user2.address)
+      ).to.be.false;
+    });
     it('Should return true if user has privilege', async () => {
       // eslint-disable-next-line no-unused-expressions
       expect(

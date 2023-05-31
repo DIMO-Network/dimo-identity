@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
+import "../../interfaces/INFTMultiPrivilege.sol";
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
@@ -35,6 +36,8 @@ contract AftermarketDevice is
         keccak256(
             "UnPairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
         );
+    uint256 private constant MANUFACTURER_MINTER_PRIVILEGE = 1;
+    uint256 private constant MANUFACTURER_CLAIMER_PRIVILEGE = 2;
 
     event AftermarketDeviceIdProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
@@ -100,10 +103,15 @@ contract AftermarketDevice is
 
     // ***** Interaction with nodes *****//
 
-    /// @notice Mints aftermarket devices in batch
-    /// @dev Caller must have the manufacturer role
-    /// @param manufacturerNode Parent manufacturer node id
-    /// @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
+    /**
+     * @notice Mints aftermarket devices in batch
+     * @dev Caller must have the manufacturer role
+     * @param manufacturerNode Parent manufacturer node id
+     * @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
+     *  addr -> AD address
+     *  attrInfoPairs[] / attribute
+     *                  \ info
+     */
     function mintAftermarketDeviceByManufacturerBatch(
         uint256 manufacturerNode,
         AftermarketDeviceInfos[] calldata adInfos
@@ -157,18 +165,154 @@ contract AftermarketDevice is
             );
         }
 
-        // Validate request and transfer funds to foundation
-        // This transfer is at the end of the function to prevent reentrancy
-        _validateMintRequest(msg.sender, devicesAmount);
+        // Validate license and transfer funds to foundation
+        _validateMintRequest(msg.sender, msg.sender, devicesAmount);
     }
 
-    /// @notice Claims the ownership of a list of aftermarket devices to a list of owners
-    /// @dev Caller must have the admin role
-    /// @dev This contract must be approved to spend the tokens in advance
-    /// @param adOwnerPair List of pairs AD-owner
+    // TODO Documentation
+    /**
+     * @notice Mints aftermarket devices in batch
+     * @param manufacturerNode Parent manufacturer node id
+     * @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
+     *  addr -> AD address
+     *  attrInfoPairs[] / attribute
+     *                  \ info
+     */
+    function mintAftermarketDeviceByManufacturerBatch2(
+        uint256 manufacturerNode,
+        AftermarketDeviceInfos[] calldata adInfos
+    ) external {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        uint256 devicesAmount = adInfos.length;
+        address adIdProxyAddress = ads.idProxyAddress;
+        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+
+        require(
+            INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)),
+            "Registry must be approved for all"
+        );
+        require(
+            manufacturerIdProxy.exists(manufacturerNode),
+            "Invalid parent node"
+        );
+        require(
+            manufacturerIdProxy.hasPrivilege(
+                manufacturerNode,
+                MANUFACTURER_MINTER_PRIVILEGE,
+                msg.sender
+            ),
+            "Unauthorized"
+        );
+
+        uint256 newTokenId;
+        address deviceAddress;
+
+        for (uint256 i = 0; i < devicesAmount; i++) {
+            newTokenId = INFT(adIdProxyAddress).safeMint(msg.sender);
+
+            ns
+            .nodes[adIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+
+            deviceAddress = adInfos[i].addr;
+            require(
+                ads.deviceAddressToNodeId[deviceAddress] == 0,
+                "Device address already registered"
+            );
+
+            ads.deviceAddressToNodeId[deviceAddress] = newTokenId;
+            ads.nodeIdToDeviceAddress[newTokenId] = deviceAddress;
+
+            _setInfos(newTokenId, adInfos[i].attrInfoPairs);
+
+            emit AftermarketDeviceNodeMinted(
+                newTokenId,
+                deviceAddress,
+                msg.sender
+            );
+        }
+
+        // Validate license and transfer funds to foundation
+        _validateMintRequest(
+            manufacturerIdProxy.ownerOf(manufacturerNode),
+            msg.sender,
+            devicesAmount
+        );
+    }
+
+    // TODO Documentation
+    /**
+     * @notice Claims the ownership of a list of aftermarket devices to a list of owners
+     * @dev Caller must have the admin role
+     * @dev This contract must be approved to spend the tokens in advance
+     * @param adOwnerPair List of pairs AD-owner
+     *  aftermarketDeviceNodeId -> Token ID of the AD
+     *  owner -> Address to be the new AD owner
+     */
     function claimAftermarketDeviceBatch(
         AftermarketDeviceOwnerPair[] calldata adOwnerPair
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        INFT adIdProxy = INFT(ads.idProxyAddress);
+
+        uint256 aftermarketDeviceNode;
+        address owner;
+        for (uint256 i = 0; i < adOwnerPair.length; i++) {
+            aftermarketDeviceNode = adOwnerPair[i].aftermarketDeviceNodeId;
+            owner = adOwnerPair[i].owner;
+
+            require(
+                !ads.deviceClaimed[aftermarketDeviceNode],
+                "Device already claimed"
+            );
+
+            ads.deviceClaimed[aftermarketDeviceNode] = true;
+            adIdProxy.safeTransferFrom(
+                adIdProxy.ownerOf(aftermarketDeviceNode),
+                owner,
+                aftermarketDeviceNode
+            );
+
+            emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
+        }
+    }
+
+    // TODO Documentation
+    /**
+     * @notice Claims the ownership of a list of aftermarket devices to a list of owners
+     * @dev Caller must have the admin role
+     * @dev This contract must be approved to spend the tokens in advance
+     * @param adOwnerPair List of pairs AD-owner
+     *  aftermarketDeviceNodeId -> Token ID of the AD
+     *  owner -> Address to be the new AD owner
+     */
+    function claimAftermarketDeviceBatch2(
+        uint256 manufacturerNode,
+        AftermarketDeviceOwnerPair[] calldata adOwnerPair
+    ) external {
+        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+
+        require(
+            manufacturerIdProxy.hasPrivilege(
+                manufacturerNode,
+                MANUFACTURER_CLAIMER_PRIVILEGE,
+                msg.sender
+            ),
+            "Unauthorized"
+        );
+
+        _claimAftermarketDeviceBatch(adOwnerPair);
+    }
+
+    function _claimAftermarketDeviceBatch(
+        AftermarketDeviceOwnerPair[] calldata adOwnerPair
+    ) private {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         INFT adIdProxy = INFT(ads.idProxyAddress);

@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { waffle } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -10,10 +10,7 @@ import {
 import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('IntegrationId', async function () {
   let snapshot: string;
@@ -22,19 +19,20 @@ describe('IntegrationId', async function () {
   let integrationInstance: Integration;
   let integrationIdInstance: IntegrationId;
 
-  const [admin, integrationOwner1, integrationOwner2, nonController] =
+  const [admin, nonAdmin, integrationOwner1, integrationOwner2, nonController] =
     provider.getWallets();
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      nodesInstance,
-      integrationInstance,
-      integrationIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup(admin, {
       modules: ['Nodes', 'Integration'],
-      nfts: ['IntegrationId']
+      nfts: ['IntegrationId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    nodesInstance = deployments.Nodes;
+    integrationInstance = deployments.Integration;
+    integrationIdInstance = deployments.IntegrationId;
 
     const MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
     await integrationIdInstance
@@ -77,12 +75,74 @@ describe('IntegrationId', async function () {
   });
 
   describe('setDimoRegistryAddress', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        integrationIdInstance
+          .connect(nonAdmin)
+          .setDimoRegistryAddress(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
     it('Should revert if addr is zero address', async () => {
       await expect(
         integrationIdInstance
           .connect(admin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('Non zero address');
+      ).to.be.revertedWith('ZeroAddress');
+    });
+  });
+
+  describe('setTrustedForwarder', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        integrationIdInstance
+          .connect(nonAdmin)
+          .setTrustedForwarder(C.ZERO_ADDRESS, true)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
+    it('Should correctly set address as trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await integrationIdInstance.trustedForwarders(mockForwarder.address)
+      ).to.be.false;
+
+      await integrationIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, true);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await integrationIdInstance.trustedForwarders(mockForwarder.address)
+      ).to.be.true;
+    });
+    it('Should correctly set address as not trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+      await integrationIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, true);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await integrationIdInstance.trustedForwarders(mockForwarder.address)
+      ).to.be.true;
+
+      await integrationIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, false);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await integrationIdInstance.trustedForwarders(mockForwarder.address)
+      ).to.be.false;
     });
   });
 

@@ -49,7 +49,7 @@ export type SetPrivilegeData = {
 
 export type ContractNameArgs = {
   name: string,
-  args: string[],
+  args: (string | [])[],
   opts: {
     initializer: string | false,
     kind: 'uups' | 'transparent' | 'beacon'
@@ -79,4 +79,14 @@ export type ContractAddressesByNetwork = {
 
 export type NetworkValue = {
   [index: string]: string
+};
+
+export type GenericKeyAny = {
+  [index: string]: any
+};
+
+export type ContractsSetup = {
+  modules: string[],
+  nfts: string[],
+  upgradeableContracts: string[]
 };

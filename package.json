@@ -33,6 +33,9 @@
       "npx prettier --write 'contracts/**/*.sol'"
     ]
   },
+  "engines": {
+    "node": ">=16"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
@@ -62,7 +65,7 @@
     "lint-staged": "^12.3.8",
     "prettier": "^2.6.2",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
-    "solhint": "^1.5.1",
+    "solhint": "^3.4.1",
     "solidity-ast": "^0.4.38",
     "solidity-coverage": "^0.7.20"
   },

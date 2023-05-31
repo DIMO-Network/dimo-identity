@@ -10,10 +10,7 @@ import {
 import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('ManufacturerId', async function () {
   let snapshot: string;
@@ -22,18 +19,19 @@ describe('ManufacturerId', async function () {
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
 
-  const [admin, manufacturer1, manufacturer2] = provider.getWallets();
+  const [admin, nonAdmin, manufacturer1, manufacturer2] = provider.getWallets();
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      nodesInstance,
-      manufacturerInstance,
-      manufacturerIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup(admin, {
       modules: ['Nodes', 'Manufacturer'],
-      nfts: ['ManufacturerId']
+      nfts: ['ManufacturerId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    nodesInstance = deployments.Nodes;
+    manufacturerInstance = deployments.Manufacturer;
+    manufacturerIdInstance = deployments.ManufacturerId;
 
     const MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
@@ -72,12 +70,23 @@ describe('ManufacturerId', async function () {
   });
 
   describe('setDimoRegistryAddress', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        manufacturerIdInstance
+          .connect(nonAdmin)
+          .setDimoRegistryAddress(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.DEFAULT_ADMIN_ROLE
+        }`
+      );
+    });
     it('Should revert if addr is zero address', async () => {
       await expect(
         manufacturerIdInstance
           .connect(admin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('Non zero address');
+      ).to.be.revertedWith('ZeroAddress');
     });
   });
 

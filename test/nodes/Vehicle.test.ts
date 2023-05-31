@@ -20,10 +20,7 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('Vehicle', function () {
   let snapshot: string;
@@ -38,18 +35,19 @@ describe('Vehicle', function () {
   const [admin, nonAdmin, manufacturer1, user1, user2] = provider.getWallets();
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      eip712CheckerInstance,
-      nodesInstance,
-      manufacturerInstance,
-      vehicleInstance,
-      manufacturerIdInstance,
-      vehicleIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup(admin, {
       modules: ['Eip712Checker', 'Nodes', 'Manufacturer', 'Vehicle'],
-      nfts: ['ManufacturerId', 'VehicleId']
+      nfts: ['ManufacturerId', 'VehicleId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    eip712CheckerInstance = deployments.Eip712Checker;
+    nodesInstance = deployments.Nodes;
+    manufacturerInstance = deployments.Manufacturer;
+    vehicleInstance = deployments.Vehicle;
+    manufacturerIdInstance = deployments.ManufacturerId;
+    vehicleIdInstance = deployments.VehicleId;
 
     const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
@@ -103,7 +101,8 @@ describe('Vehicle', function () {
   describe('setVehicleIdProxyAddress', () => {
     let localVehicleInstance: Vehicle;
     beforeEach(async () => {
-      [, localVehicleInstance] = await initialize(admin, 'Vehicle');
+      const deployments = await initialize(admin, 'Vehicle');
+      localVehicleInstance = deployments.Vehicle;
     });
 
     context('Error handling', () => {

@@ -26,10 +26,7 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('AftermarketDeviceId', async function () {
   let snapshot: string;
@@ -50,6 +47,7 @@ describe('AftermarketDeviceId', async function () {
 
   const [
     admin,
+    nonAdmin,
     foundation,
     manufacturer1,
     user1,
@@ -71,20 +69,7 @@ describe('AftermarketDeviceId', async function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      eip712CheckerInstance,
-      accessControlInstance,
-      nodesInstance,
-      manufacturerInstance,
-      vehicleInstance,
-      aftermarketDeviceInstance,
-      adLicenseValidatorInstance,
-      mapperInstance,
-      manufacturerIdInstance,
-      vehicleIdInstance,
-      adIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
         'DimoAccessControl',
@@ -95,8 +80,22 @@ describe('AftermarketDeviceId', async function () {
         'AdLicenseValidator',
         'Mapper'
       ],
-      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId']
+      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    eip712CheckerInstance = deployments.Eip712Checker;
+    accessControlInstance = deployments.DimoAccessControl;
+    nodesInstance = deployments.Nodes;
+    manufacturerInstance = deployments.Manufacturer;
+    vehicleInstance = deployments.Vehicle;
+    aftermarketDeviceInstance = deployments.AftermarketDevice;
+    adLicenseValidatorInstance = deployments.AdLicenseValidator;
+    mapperInstance = deployments.Mapper;
+    manufacturerIdInstance = deployments.ManufacturerId;
+    vehicleIdInstance = deployments.VehicleId;
+    adIdInstance = deployments.AftermarketDeviceId;
 
     const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
@@ -300,10 +299,64 @@ describe('AftermarketDeviceId', async function () {
   });
 
   describe('setDimoRegistryAddress', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        adIdInstance.connect(nonAdmin).setDimoRegistryAddress(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
     it('Should revert if addr is zero address', async () => {
       await expect(
         adIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('Non zero address');
+      ).to.be.revertedWith('ZeroAddress');
+    });
+  });
+
+  describe('setTrustedForwarder', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        adIdInstance.connect(nonAdmin).setTrustedForwarder(C.ZERO_ADDRESS, true)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
+    it('Should correctly set address as trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await adIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .false;
+
+      await adIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, true);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await adIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .true;
+    });
+    it('Should correctly set address as not trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+      await adIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, true);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await adIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .true;
+
+      await adIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, false);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await adIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .false;
     });
   });
 
@@ -319,7 +372,7 @@ describe('AftermarketDeviceId', async function () {
               user2.address,
               1
             )
-        ).to.be.revertedWith('Caller is not authorized');
+        ).to.be.revertedWith('Unauthorized');
       });
     });
 

@@ -16,10 +16,7 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('Manufacturer', async function () {
   let snapshot: string;
@@ -32,15 +29,16 @@ describe('Manufacturer', async function () {
     provider.getWallets();
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      nodesInstance,
-      manufacturerInstance,
-      manufacturerIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup(admin, {
       modules: ['Nodes', 'Manufacturer'],
-      nfts: ['ManufacturerId']
+      nfts: ['ManufacturerId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    nodesInstance = deployments.Nodes;
+    manufacturerInstance = deployments.Manufacturer;
+    manufacturerIdInstance = deployments.ManufacturerId;
 
     const MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
@@ -72,7 +70,8 @@ describe('Manufacturer', async function () {
   describe('setManufacturerIdProxyAddress', () => {
     let localManufacturerInstance: Manufacturer;
     beforeEach(async () => {
-      [, localManufacturerInstance] = await initialize(admin, 'Manufacturer');
+      const deployments = await initialize(admin, 'Manufacturer');
+      localManufacturerInstance = deployments.Manufacturer;
     });
 
     context('Error handling', () => {

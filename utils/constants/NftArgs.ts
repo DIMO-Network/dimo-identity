@@ -1,3 +1,4 @@
+import { ZERO_ADDRESS } from './Misc';
 import { ContractNameArgsByNetwork } from '../types';
 
 export const MANUFACTURER_NFT_NAME = 'Manufacturer NFT';
@@ -39,7 +40,9 @@ export const nftArgs: ContractNameArgsByNetwork = {
     args: [
       INTEGRATION_NFT_NAME,
       INTEGRATION_NFT_SYMBOL,
-      INTEGRATION_NFT_BASE_URI
+      INTEGRATION_NFT_BASE_URI,
+      ZERO_ADDRESS,
+      []
     ],
     opts: {
       initializer: 'initialize',
@@ -67,7 +70,13 @@ export const nftArgs: ContractNameArgsByNetwork = {
   },
   VirtualDeviceId: {
     name: 'VirtualDeviceId',
-    args: [VIRTUAL_DEVICE_NFT_NAME, VIRTUAL_DEVICE_NFT_SYMBOL, VIRTUAL_DEVICE_NFT_BASE_URI],
+    args: [
+      VIRTUAL_DEVICE_NFT_NAME,
+      VIRTUAL_DEVICE_NFT_SYMBOL,
+      VIRTUAL_DEVICE_NFT_BASE_URI,
+      ZERO_ADDRESS,
+      []
+    ],
     opts: {
       initializer: 'initialize',
       // eslint-disable-next-line prettier/prettier

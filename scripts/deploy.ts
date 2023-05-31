@@ -102,30 +102,11 @@ async function deployNfts(
 ): Promise<ContractAddressesByNetwork> {
   console.log('\n----- Deploying NFT contracts -----\n');
 
-  const contractNameArgs = [
-    {
-      name: 'ManufacturerId',
-      args: [
-        C.MANUFACTURER_NFT_NAME,
-        C.MANUFACTURER_NFT_SYMBOL,
-        C.MANUFACTURER_NFT_URI
-      ]
-    },
-    {
-      name: 'VehicleId',
-      args: [C.VEHICLE_NFT_NAME, C.VEHICLE_NFT_SYMBOL, C.VEHICLE_NFT_URI]
-    },
-    {
-      name: 'AftermarketDeviceId',
-      args: [C.AD_NFT_NAME, C.AD_NFT_SYMBOL, C.AD_NFT_URI]
-    }
-  ];
-
   const instances: ContractAddressesByNetwork = JSON.parse(
     JSON.stringify(contractAddresses)
   );
 
-  for (const contractNameArg of contractNameArgs) {
+  for (const contractNameArg of C.nftArgs) {
     const ContractFactory = await ethers.getContractFactory(
       contractNameArg.name,
       deployer

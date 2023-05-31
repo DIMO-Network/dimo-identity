@@ -9,3 +9,4 @@ export * from './AftermarketDevice';
 export * from './VirtualDevice';
 export * from './MultiPrivilege';
 export * from './NftArgs';
+export * from './UpgradeableContractsArgs';

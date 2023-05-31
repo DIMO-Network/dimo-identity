@@ -15,8 +15,7 @@ import {
   VirtualDevice,
   VirtualDeviceId,
   Mapper,
-  MockDimoToken,
-  MockStake
+  MockDimoToken
 } from '../../typechain';
 import {
   initialize,
@@ -29,10 +28,7 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('VirtualDevice', function () {
   let snapshot: string;
@@ -46,7 +42,6 @@ describe('VirtualDevice', function () {
   let virtualDeviceInstance: VirtualDevice;
   let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
-  let mockStakeInstance: MockStake;
   let manufacturerIdInstance: ManufacturerId;
   let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
@@ -65,21 +60,7 @@ describe('VirtualDevice', function () {
   ] = provider.getWallets();
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      eip712CheckerInstance,
-      accessControlInstance,
-      nodesInstance,
-      manufacturerInstance,
-      integrationInstance,
-      vehicleInstance,
-      virtualDeviceInstance,
-      mapperInstance,
-      manufacturerIdInstance,
-      integrationIdInstance,
-      vehicleIdInstance,
-      virtualDeviceIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
         'DimoAccessControl',
@@ -90,8 +71,23 @@ describe('VirtualDevice', function () {
         'VirtualDevice',
         'Mapper'
       ],
-      nfts: ['ManufacturerId', 'IntegrationId', 'VehicleId', 'VirtualDeviceId']
+      nfts: ['ManufacturerId', 'IntegrationId', 'VehicleId', 'VirtualDeviceId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    eip712CheckerInstance = deployments.Eip712Checker;
+    accessControlInstance = deployments.DimoAccessControl;
+    nodesInstance = deployments.Nodes;
+    manufacturerInstance = deployments.Manufacturer;
+    integrationInstance = deployments.Integration;
+    vehicleInstance = deployments.Vehicle;
+    virtualDeviceInstance = deployments.VirtualDevice;
+    mapperInstance = deployments.Mapper;
+    manufacturerIdInstance = deployments.ManufacturerId;
+    integrationIdInstance = deployments.IntegrationId;
+    vehicleIdInstance = deployments.VehicleId;
+    virtualDeviceIdInstance = deployments.VirtualDeviceId;
 
     const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
@@ -108,10 +104,11 @@ describe('VirtualDevice', function () {
       .connect(admin)
       .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
 
-    const AD_MINTER_ROLE = await virtualDeviceIdInstance.MINTER_ROLE();
+    const VIRTUAL_DEVICE_MINTER_ROLE =
+      await virtualDeviceIdInstance.MINTER_ROLE();
     await virtualDeviceIdInstance
       .connect(admin)
-      .grantRole(AD_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(VIRTUAL_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -141,11 +138,6 @@ describe('VirtualDevice', function () {
       C.oneBillionE18
     );
     await mockDimoTokenInstance.deployed();
-
-    // Deploy MockStake contract
-    const MockStakeFactory = await ethers.getContractFactory('MockStake');
-    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
-    await mockStakeInstance.deployed();
 
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
@@ -210,8 +202,6 @@ describe('VirtualDevice', function () {
         C.mockIntegrationAttributeInfoPairs
       );
 
-    await mockStakeInstance.setLicenseBalance(manufacturer1.address, 1);
-
     // Setting DimoRegistry address in the AftermarketDeviceId
     await virtualDeviceIdInstance
       .connect(admin)
@@ -233,7 +223,8 @@ describe('VirtualDevice', function () {
   describe('setVirtualDeviceIdProxyAddress', () => {
     let localVirtualDeviceInstance: VirtualDevice;
     beforeEach(async () => {
-      [, localVirtualDeviceInstance] = await initialize(admin, 'VirtualDevice');
+      const deployments = await initialize(admin, 'VirtualDevice');
+      localVirtualDeviceInstance = deployments.VirtualDevice;
     });
 
     context('Error handling', () => {

@@ -5,10 +5,7 @@ import { AdLicenseValidator, MockDimoToken, MockStake } from '../typechain';
 import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('AdLicenseValidator', function () {
   let snapshot: string;
@@ -19,10 +16,12 @@ describe('AdLicenseValidator', function () {
   const [admin, nonAdmin, foundation] = provider.getWallets();
 
   before(async () => {
-    [, adLicenseValidatorInstance] = await setup(admin, {
+    const deployments = await setup(admin, {
       modules: ['AdLicenseValidator'],
-      nfts: []
+      nfts: [],
+      upgradeableContracts: []
     });
+    adLicenseValidatorInstance = deployments.AdLicenseValidator;
 
     // Deploy MockDimoToken contract
     const MockDimoTokenFactory = await ethers.getContractFactory(

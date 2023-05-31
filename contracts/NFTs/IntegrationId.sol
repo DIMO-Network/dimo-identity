@@ -3,9 +3,18 @@ pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
 import "./Base/MultiPrivilege/MultiPrivilege.sol";
+import "./Base/ERC2771ContextUpgradeable.sol";
 
-contract IntegrationId is Initializable, MultiPrivilege {
-    IDimoRegistry private _dimoRegistry;
+error ZeroAddress();
+
+contract IntegrationId is
+    Initializable,
+    ERC2771ContextUpgradeable,
+    MultiPrivilege
+{
+    IDimoRegistry public dimoRegistry;
+
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -15,20 +24,39 @@ contract IntegrationId is Initializable, MultiPrivilege {
     function initialize(
         string calldata name_,
         string calldata symbol_,
-        string calldata baseUri_
+        string calldata baseUri_,
+        address dimoRegistry_,
+        address[] calldata trustedForwarders_
     ) external initializer {
+        _erc2771Init(trustedForwarders_);
         _multiPrivilegeInit(name_, symbol_, baseUri_);
+
+        dimoRegistry = IDimoRegistry(dimoRegistry_);
+
+        _grantRole(ADMIN_ROLE, msg.sender);
     }
 
     /// @notice Sets the DIMO Registry address
     /// @dev Only an admin can set the DIMO Registry address
-    /// @param addr The address to be set
-    function setDimoRegistryAddress(address addr)
+    /// @param dimoRegistry_ The address to be set
+    function setDimoRegistryAddress(address dimoRegistry_)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
-        require(addr != address(0), "Non zero address");
-        _dimoRegistry = IDimoRegistry(addr);
+        if (dimoRegistry_ == address(0)) revert ZeroAddress();
+        dimoRegistry = IDimoRegistry(dimoRegistry_);
+    }
+
+    /// @notice Sets trusted or not to an address
+    /// @dev Only an admin can set a trusted forwarder
+    /// @param addr The address to be set
+    /// @param trusted Whether an address should be trusted or not
+    function setTrustedForwarder(address addr, bool trusted)
+        public
+        override
+        onlyRole(ADMIN_ROLE)
+    {
+        super.setTrustedForwarder(addr, trusted);
     }
 
     /// @notice Internal function to transfer a token
@@ -42,7 +70,27 @@ contract IntegrationId is Initializable, MultiPrivilege {
         address to,
         uint256 tokenId
     ) internal override {
-        _dimoRegistry.updateIntegrationMinted(from, to);
+        dimoRegistry.updateIntegrationMinted(from, to);
         super._transfer(from, to, tokenId);
+    }
+
+    /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771ContextUpgradeable._msgSender();
+    }
+
+    /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract
+    function _msgData()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (bytes calldata)
+    {
+        return ERC2771ContextUpgradeable._msgData();
     }
 }

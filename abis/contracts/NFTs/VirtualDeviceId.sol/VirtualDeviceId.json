@@ -5,6 +5,16 @@
     "type": "constructor"
   },
   {
+    "inputs": [],
+    "name": "Unauthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -302,6 +312,19 @@
   },
   {
     "inputs": [],
+    "name": "ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "BURNER_ROLE",
     "outputs": [
       {
@@ -431,6 +454,19 @@
     "name": "createPrivilege",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "dimoRegistry",
+    "outputs": [
+      {
+        "internalType": "contract IDimoRegistry",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -603,6 +639,16 @@
         "internalType": "string",
         "name": "baseUri_",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "dimoRegistry_",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "trustedForwarders_",
+        "type": "address[]"
       }
     ],
     "name": "initialize",
@@ -931,7 +977,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "addr",
+        "name": "dimoRegistry_",
         "type": "address"
       }
     ],
@@ -999,6 +1045,24 @@
       }
     ],
     "name": "setPrivileges",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "addr",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "trusted",
+        "type": "bool"
+      }
+    ],
+    "name": "setTrustedForwarder",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1094,6 +1158,25 @@
     "name": "transferFrom",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "trustedForwarders",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

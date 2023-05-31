@@ -27,10 +27,7 @@ import {
 } from '../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('DevAdmin', function () {
   let snapshot: string;
@@ -72,20 +69,7 @@ describe('DevAdmin', function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      eip712CheckerInstance,
-      accessControlInstance,
-      manufacturerInstance,
-      vehicleInstance,
-      aftermarketDeviceInstance,
-      adLicenseValidatorInstance,
-      mapperInstance,
-      devAdminInstance,
-      manufacturerIdInstance,
-      vehicleIdInstance,
-      adIdInstance
-    ] = await setup(admin, {
+    const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
         'DimoAccessControl',
@@ -96,8 +80,22 @@ describe('DevAdmin', function () {
         'Mapper',
         'DevAdmin'
       ],
-      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId']
+      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
+      upgradeableContracts: []
     });
+
+    dimoRegistryInstance = deployments.DIMORegistry;
+    eip712CheckerInstance = deployments.Eip712Checker;
+    accessControlInstance = deployments.DimoAccessControl;
+    manufacturerInstance = deployments.Manufacturer;
+    vehicleInstance = deployments.Vehicle;
+    aftermarketDeviceInstance = deployments.AftermarketDevice;
+    adLicenseValidatorInstance = deployments.AdLicenseValidator;
+    mapperInstance = deployments.Mapper;
+    devAdminInstance = deployments.DevAdmin;
+    manufacturerIdInstance = deployments.ManufacturerId;
+    vehicleIdInstance = deployments.VehicleId;
+    adIdInstance = deployments.AftermarketDeviceId;
 
     const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance

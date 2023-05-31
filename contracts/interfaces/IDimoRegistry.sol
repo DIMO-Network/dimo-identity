@@ -27,4 +27,15 @@ interface IDimoRegistry {
         external
         view
         returns (bool _isAllowed);
+
+    function getLink(address idProxyAddress, uint256 sourceNode)
+        external
+        view
+        returns (uint256 targetNode);
+
+    function getNodeLink(
+        address idProxyAddressSource,
+        address idProxyAddressTarget,
+        uint256 sourceNode
+    ) external view returns (uint256 targetNode);
 }

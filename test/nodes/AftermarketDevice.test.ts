@@ -220,6 +220,11 @@ describe('AftermarketDevice', function () {
       .connect(admin)
       .setDimoRegistryAddress(dimoRegistryInstance.address);
 
+    // Setting DIMORegistry address
+    await manufacturerIdInstance.setDimoRegistryAddress(
+      dimoRegistryInstance.address
+    );
+
     // Transfer DIMO Tokens to the privileged address, approve DIMORegistry, create and set privileges
     await mockDimoTokenInstance
       .connect(admin)
@@ -691,12 +696,12 @@ describe('AftermarketDevice', function () {
           C.MANUFACTURER_MINTER_PRIVILEGE
         );
         await adIdInstance
-          .connect(nonManufacturerPrivilged)
+          .connect(manufacturerPrivileged1)
           .setApprovalForAll(aftermarketDeviceInstance.address, true);
 
         await expect(
           aftermarketDeviceInstance
-            .connect(nonManufacturerPrivilged)
+            .connect(manufacturerPrivileged1)
             .mintAftermarketDeviceByManufacturerBatch2(
               1,
               mockAftermarketDeviceInfosList
@@ -704,24 +709,45 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith('Unauthorized');
       });
       it('Should revert if privilage is expired', async () => {
-        await ethers.provider.send('evm_increaseTime', [
-          expiresAtDefault + 100
-        ]);
+        await provider.send('evm_increaseTime', [expiresAtDefault + 100]);
 
         await adIdInstance
-          .connect(nonManufacturerPrivilged)
+          .connect(manufacturerPrivileged1)
           .setApprovalForAll(aftermarketDeviceInstance.address, true);
 
         await expect(
           aftermarketDeviceInstance
-            .connect(nonManufacturerPrivilged)
+            .connect(manufacturerPrivileged1)
             .mintAftermarketDeviceByManufacturerBatch2(
               1,
               mockAftermarketDeviceInfosList
             )
         ).to.be.revertedWith('Unauthorized');
       });
-      it.skip('Should revert if manufacturer has transferred their token', async () => {});
+      it('Should revert if manufacturer has transferred their token', async () => {
+        await manufacturerInstance
+          .connect(admin)
+          .setController(manufacturer2.address);
+        await manufacturerIdInstance
+          .connect(admin)
+          .grantRole(C.NFT_TRANSFERER_ROLE, manufacturer1.address);
+        await manufacturerIdInstance
+          .connect(manufacturer1)
+          ['safeTransferFrom(address,address,uint256)'](
+            manufacturer1.address,
+            manufacturer2.address,
+            1
+          );
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(manufacturerPrivileged1)
+            .mintAftermarketDeviceByManufacturerBatch2(
+              1,
+              mockAftermarketDeviceInfosList
+            )
+        ).to.be.revertedWith('Unauthorized');
+      });
       it('Should revert if manufacturer does not have a license', async () => {
         await mockStakeInstance.setLicenseBalance(manufacturer1.address, 0);
 
@@ -1123,22 +1149,40 @@ describe('AftermarketDevice', function () {
         );
         await expect(
           aftermarketDeviceInstance
-            .connect(nonManufacturerPrivilged)
+            .connect(manufacturerPrivileged1)
             .claimAftermarketDeviceBatch2(1, localAdOwnerPairs)
         ).to.be.revertedWith('Unauthorized');
       });
       it('Should revert if privilage is expired', async () => {
-        await ethers.provider.send('evm_increaseTime', [
-          expiresAtDefault + 100
-        ]);
+        await provider.send('evm_increaseTime', [expiresAtDefault + 100]);
 
         await expect(
           aftermarketDeviceInstance
-            .connect(nonManufacturerPrivilged)
+            .connect(manufacturerPrivileged1)
             .claimAftermarketDeviceBatch2(1, localAdOwnerPairs)
         ).to.be.revertedWith('Unauthorized');
       });
-      it.skip('Should revert if manufacturer has transferred their token', async () => {});
+      it('Should revert if manufacturer has transferred their token', async () => {
+        await manufacturerInstance
+          .connect(admin)
+          .setController(manufacturer2.address);
+        await manufacturerIdInstance
+          .connect(admin)
+          .grantRole(C.NFT_TRANSFERER_ROLE, manufacturer1.address);
+        await manufacturerIdInstance
+          .connect(manufacturer1)
+          ['safeTransferFrom(address,address,uint256)'](
+            manufacturer1.address,
+            manufacturer2.address,
+            1
+          );
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(manufacturerPrivileged1)
+            .claimAftermarketDeviceBatch2(1, localAdOwnerPairs)
+        ).to.be.revertedWith('Unauthorized');
+      });
     });
 
     context('State', async () => {

@@ -287,7 +287,7 @@ describe('AftermarketDevice', function () {
           localAdInstance
             .connect(admin)
             .setAftermarketDeviceIdProxyAddress(C.ZERO_ADDRESS)
-        ).to.be.revertedWith('Non zero address');
+        ).to.be.revertedWith('ZeroAddress');
       });
     });
 
@@ -322,7 +322,9 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(admin)
             .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute1)
-        ).to.be.revertedWith('Attribute already exists');
+        ).to.be.revertedWith(
+          `AttributeExists("${C.mockAftermarketDeviceAttribute1}")`
+        );
       });
     });
 
@@ -369,7 +371,7 @@ describe('AftermarketDevice', function () {
               99,
               mockAftermarketDeviceInfosList
             )
-        ).to.be.revertedWith('Invalid parent node');
+        ).to.be.revertedWith('InvalidParentNode(99)');
       });
       it('Should revert if the caller is not the parent node owner', async () => {
         await accessControlInstance
@@ -386,7 +388,9 @@ describe('AftermarketDevice', function () {
               1,
               mockAftermarketDeviceInfosList
             )
-        ).to.be.revertedWith('Caller must be the parent node owner');
+        ).to.be.revertedWith(
+          `InvalidParentNodeOwner(1, "${manufacturer2.address}")`
+        );
       });
       it('Should revert if DIMO Registry is not approved for all', async () => {
         await adIdInstance
@@ -400,7 +404,7 @@ describe('AftermarketDevice', function () {
               1,
               mockAftermarketDeviceInfosList
             )
-        ).to.be.revertedWith('Registry must be approved for all');
+        ).to.be.revertedWith('RegistryNotApproved');
       });
       it('Should revert if manufacturer does not have a license', async () => {
         await mockStakeInstance.setLicenseBalance(manufacturer1.address, 0);
@@ -450,7 +454,9 @@ describe('AftermarketDevice', function () {
               1,
               mockAftermarketDeviceInfosListNotWhitelisted
             )
-        ).to.be.revertedWith('Not whitelisted');
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${mockAftermarketDeviceInfosListNotWhitelisted[1].attrInfoPairs[1].attribute}")`
+        );
       });
       it('Should revert if device address is already registered', async () => {
         const localInfos = JSON.parse(
@@ -462,7 +468,9 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(1, localInfos)
-        ).to.be.revertedWith('Device address already registered');
+        ).to.be.revertedWith(
+          `DeviceAlreadyRegistered("${adAddress1.address}")`
+        );
       });
     });
 
@@ -658,7 +666,7 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(manufacturerPrivileged1)
             .mintAftermarketDeviceAuthorized(99, mockAftermarketDeviceInfosList)
-        ).to.be.revertedWith('Invalid parent node');
+        ).to.be.revertedWith('InvalidParentNode(99)');
       });
       it('Should revert if DIMO Registry is not approved for all', async () => {
         await adIdInstance
@@ -669,7 +677,7 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(manufacturerPrivileged1)
             .mintAftermarketDeviceAuthorized(1, mockAftermarketDeviceInfosList)
-        ).to.be.revertedWith('Registry must be approved for all');
+        ).to.be.revertedWith('RegistryNotApproved');
       });
       it('Should revert if the caller does not have the minter privilege', async () => {
         await adIdInstance
@@ -769,7 +777,9 @@ describe('AftermarketDevice', function () {
               1,
               mockAftermarketDeviceInfosListNotWhitelisted
             )
-        ).to.be.revertedWith('Not whitelisted');
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${mockAftermarketDeviceInfosListNotWhitelisted[1].attrInfoPairs[1].attribute}")`
+        );
       });
       it('Should revert if device address is already registered', async () => {
         const localInfos = JSON.parse(
@@ -781,7 +791,9 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(manufacturerPrivileged1)
             .mintAftermarketDeviceAuthorized(1, localInfos)
-        ).to.be.revertedWith('Device address already registered');
+        ).to.be.revertedWith(
+          `DeviceAlreadyRegistered("${localInfos[1].addr}")`
+        );
       });
     });
 
@@ -1002,7 +1014,7 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(admin)
             .claimAftermarketDeviceBatch(localAdOwnerPairs)
-        ).to.be.revertedWith('Device already claimed');
+        ).to.be.revertedWith('DeviceAlreadyClaimed(1)');
       });
     });
 
@@ -1083,7 +1095,7 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(manufacturerPrivileged1)
             .claimAftermarketDeviceBatchAuthorized(1, localAdOwnerPairs)
-        ).to.be.revertedWith('Device already claimed');
+        ).to.be.revertedWith('DeviceAlreadyClaimed(1)');
       });
       it('Should revert if the caller does not have the minter privilege', async () => {
         await expect(
@@ -1213,7 +1225,7 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(admin)
             .claimAftermarketDeviceSign(99, user1.address, ownerSig, adSig)
-        ).to.be.revertedWith('Invalid AD node');
+        ).to.be.revertedWith(`InvalidNode("${adIdInstance.address}", 99)`);
       });
       it('Should revert if device is already claimed', async () => {
         await aftermarketDeviceInstance
@@ -1224,7 +1236,7 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(admin)
             .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig)
-        ).to.be.revertedWith('Device already claimed');
+        ).to.be.revertedWith('DeviceAlreadyClaimed(1)');
       });
 
       context('Wrong owner signature', () => {
@@ -1249,7 +1261,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid owner signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
@@ -1272,7 +1284,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid owner signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
@@ -1295,7 +1307,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid owner signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
@@ -1317,7 +1329,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid owner signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if owner does not match signer', async () => {
           const invalidOwnerSig = await signMessage({
@@ -1339,7 +1351,7 @@ describe('AftermarketDevice', function () {
                 invalidOwnerSig,
                 adSig
               )
-          ).to.be.revertedWith('Invalid owner signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
       });
 
@@ -1365,7 +1377,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid AD signature');
+          ).to.be.revertedWith('InvalidAdSignature');
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidAdSig = await signMessage({
@@ -1388,7 +1400,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid AD signature');
+          ).to.be.revertedWith('InvalidAdSignature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidAdSig = await signMessage({
@@ -1411,7 +1423,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid AD signature');
+          ).to.be.revertedWith('InvalidAdSignature');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidAdSig = await signMessage({
@@ -1433,7 +1445,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid AD signature');
+          ).to.be.revertedWith('InvalidAdSignature');
         });
         it('Should revert if owner does not match owner parameter', async () => {
           const invalidAdSig = await signMessage({
@@ -1455,7 +1467,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid AD signature');
+          ).to.be.revertedWith('InvalidAdSignature');
         });
         it('Should revert if signer does not match address associated with aftermarket device ID', async () => {
           const invalidAdSig = await signMessage({
@@ -1477,7 +1489,7 @@ describe('AftermarketDevice', function () {
                 ownerSig,
                 invalidAdSig
               )
-          ).to.be.revertedWith('Invalid AD signature');
+          ).to.be.revertedWith('InvalidAdSignature');
         });
       });
     });
@@ -1609,7 +1621,7 @@ describe('AftermarketDevice', function () {
               pairAdSig2,
               pairVehicleSig1
             )
-        ).to.be.revertedWith('Invalid vehicle node');
+        ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
       });
       it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
@@ -1621,7 +1633,7 @@ describe('AftermarketDevice', function () {
               pairAdSig2,
               pairVehicleSig1
             )
-        ).to.be.revertedWith('Invalid AD node');
+        ).to.be.revertedWith(`InvalidNode("${adIdInstance.address}", 99)`);
       });
       it('Should revert if device is not claimed', async () => {
         await expect(
@@ -1633,7 +1645,7 @@ describe('AftermarketDevice', function () {
               pairAdSig1,
               pairVehicleSig1
             )
-        ).to.be.revertedWith('AD must be claimed');
+        ).to.be.revertedWith('AdNotClaimed(1)');
       });
       it('Should revert if vehicle is already paired', async () => {
         await aftermarketDeviceInstance
@@ -1654,7 +1666,7 @@ describe('AftermarketDevice', function () {
               pairAdSig2,
               pairVehicleSig1
             )
-        ).to.be.revertedWith('Vehicle already paired');
+        ).to.be.revertedWith('VehiclePaired(1)');
       });
       it('Should revert if aftermarket device is already paired', async () => {
         await aftermarketDeviceInstance
@@ -1679,7 +1691,7 @@ describe('AftermarketDevice', function () {
               pairAdSig2,
               pairVehicleSig1
             )
-        ).to.be.revertedWith('AD already paired');
+        ).to.be.revertedWith('AdPaired(2)');
       });
 
       context('Wrong signature', () => {
@@ -1705,7 +1717,7 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid AD signature');
+            ).to.be.revertedWith('InvalidAdSignature');
           });
           it('Should revert if domain version is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1728,7 +1740,7 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid AD signature');
+            ).to.be.revertedWith('InvalidAdSignature');
           });
           it('Should revert if domain chain ID is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1751,7 +1763,7 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid AD signature');
+            ).to.be.revertedWith('InvalidAdSignature');
           });
           it('Should revert if aftermarket device node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1773,7 +1785,7 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid AD signature');
+            ).to.be.revertedWith('InvalidAdSignature');
           });
           it('Should revert if aftermarket vehicle node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1795,7 +1807,7 @@ describe('AftermarketDevice', function () {
                   invalidSignature,
                   pairVehicleSig1
                 )
-            ).to.be.revertedWith('Invalid AD signature');
+            ).to.be.revertedWith('InvalidAdSignature');
           });
         });
 
@@ -1821,7 +1833,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid vehicle owner signature');
+            ).to.be.revertedWith('InvalidOwnerSignature');
           });
           it('Should revert if domain version is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1844,7 +1856,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid vehicle owner signature');
+            ).to.be.revertedWith('InvalidOwnerSignature');
           });
           it('Should revert if domain chain ID is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1867,7 +1879,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid vehicle owner signature');
+            ).to.be.revertedWith('InvalidOwnerSignature');
           });
           it('Should revert if aftermarket device node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1889,7 +1901,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid vehicle owner signature');
+            ).to.be.revertedWith('InvalidOwnerSignature');
           });
           it('Should revert if aftermarket vehicle node is incorrect', async () => {
             const invalidSignature = await signMessage({
@@ -1911,7 +1923,7 @@ describe('AftermarketDevice', function () {
                   pairAdSig2,
                   invalidSignature
                 )
-            ).to.be.revertedWith('Invalid vehicle owner signature');
+            ).to.be.revertedWith('InvalidOwnerSignature');
           });
         });
       });
@@ -2068,7 +2080,7 @@ describe('AftermarketDevice', function () {
               99,
               pairSignature
             )
-        ).to.be.revertedWith('Invalid vehicle node');
+        ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
       });
       it('Should revert if node is not an Aftermarket Device', async () => {
         await expect(
@@ -2079,7 +2091,7 @@ describe('AftermarketDevice', function () {
               1,
               pairSignature
             )
-        ).to.be.revertedWith('Invalid AD node');
+        ).to.be.revertedWith(`InvalidNode("${adIdInstance.address}", 99)`);
       });
       it('Should revert if device is not claimed', async () => {
         await expect(
@@ -2090,7 +2102,7 @@ describe('AftermarketDevice', function () {
               1,
               pairSignature
             )
-        ).to.be.revertedWith('AD must be claimed');
+        ).to.be.revertedWith('AdNotClaimed(2)');
       });
       it('Should revert if owner is not the vehicle node owner', async () => {
         await vehicleInstance
@@ -2105,7 +2117,7 @@ describe('AftermarketDevice', function () {
               2,
               pairSignature
             )
-        ).to.be.revertedWith('Owner of the nodes does not match');
+        ).to.be.revertedWith('OwnersDoesNotMatch');
       });
       it('Should revert if owner is not the aftermarket device node owner', async () => {
         await aftermarketDeviceInstance
@@ -2125,7 +2137,7 @@ describe('AftermarketDevice', function () {
               1,
               pairSignature
             )
-        ).to.be.revertedWith('Owner of the nodes does not match');
+        ).to.be.revertedWith('OwnersDoesNotMatch');
       });
       it('Should revert if vehicle is already paired', async () => {
         await aftermarketDeviceInstance
@@ -2144,7 +2156,7 @@ describe('AftermarketDevice', function () {
               1,
               pairSignature
             )
-        ).to.be.revertedWith('Vehicle already paired');
+        ).to.be.revertedWith('VehiclePaired(1)');
       });
       it('Should revert if aftermarket device is already paired', async () => {
         await aftermarketDeviceInstance
@@ -2167,7 +2179,7 @@ describe('AftermarketDevice', function () {
               2,
               pairSignature
             )
-        ).to.be.revertedWith('AD already paired');
+        ).to.be.revertedWith('AdPaired(1)');
       });
 
       context('Wrong signature', () => {
@@ -2191,7 +2203,7 @@ describe('AftermarketDevice', function () {
                 1,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -2213,7 +2225,7 @@ describe('AftermarketDevice', function () {
                 1,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -2235,7 +2247,7 @@ describe('AftermarketDevice', function () {
                 1,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -2256,7 +2268,7 @@ describe('AftermarketDevice', function () {
                 1,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if aftermarket vehicle node is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -2277,7 +2289,7 @@ describe('AftermarketDevice', function () {
                 1,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
       });
     });
@@ -2405,14 +2417,14 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(admin)
             .unpairAftermarketDeviceSign(99, 1, unPairSignature)
-        ).to.be.revertedWith('Invalid AD node');
+        ).to.be.revertedWith(`InvalidNode("${adIdInstance.address}", 99)`);
       });
       it('Should revert if node is not a Vehicle', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
             .unpairAftermarketDeviceSign(1, 99, pairSignature)
-        ).to.be.revertedWith('Invalid vehicle node');
+        ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
       });
       it('Should revert if vehicle is not already paired', async () => {
         await vehicleInstance
@@ -2431,7 +2443,7 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(admin)
             .unpairAftermarketDeviceSign(1, 1, unPairSignature)
-        ).to.be.revertedWith('Vehicle not paired to AD');
+        ).to.be.revertedWith('VehicleNotPaired(1)');
       });
 
       context('Wrong signature', () => {
@@ -2474,7 +2486,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .unpairAftermarketDeviceSign(1, 1, invalidSignature)
-          ).to.be.revertedWith('Invalid signer');
+          ).to.be.revertedWith('InvalidSigner');
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -2492,7 +2504,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .unpairAftermarketDeviceSign(1, 1, invalidSignature)
-          ).to.be.revertedWith('Invalid signer');
+          ).to.be.revertedWith('InvalidSigner');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -2510,7 +2522,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .unpairAftermarketDeviceSign(1, 1, invalidSignature)
-          ).to.be.revertedWith('Invalid signer');
+          ).to.be.revertedWith('InvalidSigner');
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -2527,7 +2539,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .unpairAftermarketDeviceSign(1, 1, invalidSignature)
-          ).to.be.revertedWith('Invalid signer');
+          ).to.be.revertedWith('InvalidSigner');
         });
         it('Should revert if aftermarket vehicle node is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -2544,7 +2556,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .unpairAftermarketDeviceSign(1, 1, invalidSignature)
-          ).to.be.revertedWith('Invalid signer');
+          ).to.be.revertedWith('InvalidSigner');
         });
         it('Should revert if signer is not the aftermarket device node or vehicle owner', async () => {
           const wrongSignerSignature = await signMessage({
@@ -2561,7 +2573,7 @@ describe('AftermarketDevice', function () {
             aftermarketDeviceInstance
               .connect(admin)
               .unpairAftermarketDeviceSign(1, 1, wrongSignerSignature)
-          ).to.be.revertedWith('Invalid signer');
+          ).to.be.revertedWith('InvalidSigner');
         });
       });
     });
@@ -2675,7 +2687,7 @@ describe('AftermarketDevice', function () {
           aftermarketDeviceInstance
             .connect(admin)
             .setAftermarketDeviceInfo(99, C.mockAdAttributeInfoPairs)
-        ).to.be.revertedWith('Invalid AD node');
+        ).to.be.revertedWith(`InvalidNode("${adIdInstance.address}", 99)`);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -2685,7 +2697,9 @@ describe('AftermarketDevice', function () {
               1,
               C.mockAdAttributeInfoPairsNotWhitelisted
             )
-        ).to.be.revertedWith('Not whitelisted');
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${C.mockAdAttributeInfoPairsNotWhitelisted[1].attribute}")`
+        );
       });
     });
 

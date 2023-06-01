@@ -1,0 +1,17 @@
+//SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.13;
+
+// Misc
+error ZeroAddress();
+error Unauthorized(uint256 privilegeId, address addr);
+error AttributeExists(string attr);
+error AttributeNotWhitelisted(string attr);
+
+// Nodes
+error InvalidParentNode(uint256 id);
+error InvalidParentNodeOwner(uint256 id, address addr);
+error InvalidNode(address proxy, uint256 id);
+
+// Signature
+error InvalidSigner();
+error InvalidOwnerSignature();

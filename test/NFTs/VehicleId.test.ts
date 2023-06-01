@@ -296,31 +296,31 @@ describe('VehicleId', async function () {
     });
   });
 
-  describe('setVirtualDeviceIdAddress', () => {
+  describe('setSyntheticDeviceIdAddress', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
         vehicleIdInstance
           .connect(nonAdmin)
-          .setVirtualDeviceIdAddress(C.ZERO_ADDRESS)
+          .setSyntheticDeviceIdAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
           C.ADMIN_ROLE
         }`
       );
     });
-    it('Should correctly set the Virtual Device ID address', async () => {
-      const mockVirtualDeviceId = ethers.Wallet.createRandom();
+    it('Should correctly set the Synthetic Device ID address', async () => {
+      const mockSyntheticDeviceId = ethers.Wallet.createRandom();
 
-      expect(await vehicleIdInstance.virtualDeviceId()).to.be.equal(
+      expect(await vehicleIdInstance.syntheticDeviceId()).to.be.equal(
         C.ZERO_ADDRESS
       );
 
       await vehicleIdInstance
         .connect(admin)
-        .setVirtualDeviceIdAddress(mockVirtualDeviceId.address);
+        .setSyntheticDeviceIdAddress(mockSyntheticDeviceId.address);
 
-      expect(await vehicleIdInstance.virtualDeviceId()).to.be.equal(
-        mockVirtualDeviceId.address
+      expect(await vehicleIdInstance.syntheticDeviceId()).to.be.equal(
+        mockSyntheticDeviceId.address
       );
     });
   });

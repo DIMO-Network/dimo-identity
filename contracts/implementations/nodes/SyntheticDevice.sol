@@ -6,96 +6,95 @@ import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/IntegrationStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
-import "../../libraries/nodes/VirtualDeviceStorage.sol";
+import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 
-import "../../shared/Roles.sol";
-import "../../shared/Types.sol";
+import "../../shared/Roles.sol" as Roles;
+import "../../shared/Types.sol" as Types;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/// @title VirtualDevice
-/// @notice Contract that represents the Virtual Device node
-/// @dev It uses the Mapper contract to link Virtual Devices to Vehicles
-contract VirtualDevice is AccessControlInternal {
+/// @title SyntheticDevice
+/// @notice Contract that represents the Synthetic Device node
+/// @dev It uses the Mapper contract to link Synthetic Devices to Vehicles
+contract SyntheticDevice is AccessControlInternal {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
-            "MintVirtualDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
+            "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
         );
 
-    event VirtualDeviceIdProxySet(address proxy);
-    event VirtualDeviceAttributeAdded(string attribute);
-    event VirtualDeviceAttributeSet(
+    event SyntheticDeviceIdProxySet(address proxy);
+    event SyntheticDeviceAttributeAdded(string attribute);
+    event SyntheticDeviceAttributeSet(
         uint256 indexed tokenId,
         string attribute,
         string info
     );
-    event VirtualDeviceNodeMinted(
-        uint256 virtualDeviceNode,
+    event SyntheticDeviceNodeMinted(
+        uint256 syntheticDeviceNode,
         uint256 indexed vehicleNode,
-        address indexed virtualDeviceAddress,
+        address indexed syntheticDeviceAddress,
         address indexed owner
     );
 
     // ***** Admin management ***** //
 
-    /// @notice Sets the NFT proxy associated with the Virtual Device node
+    /// @notice Sets the NFT proxy associated with the Synthetic Device node
     /// @dev Only an admin can set the address
     /// @param addr The address of the proxy
-    function setVirtualDeviceIdProxyAddress(address addr)
+    function setSyntheticDeviceIdProxyAddress(address addr)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
     {
         require(addr != address(0), "Non zero address");
-        VirtualDeviceStorage.getStorage().idProxyAddress = addr;
+        SyntheticDeviceStorage.getStorage().idProxyAddress = addr;
 
-        emit VirtualDeviceIdProxySet(addr);
+        emit SyntheticDeviceIdProxySet(addr);
     }
 
     /// @notice Adds an attribute to the whielist
     /// @dev Only an admin can add a new attribute
     /// @param attribute The attribute to be added
-    function addVirtualDeviceAttribute(string calldata attribute)
+    function addSyntheticDeviceAttribute(string calldata attribute)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
     {
         require(
             AttributeSet.add(
-                VirtualDeviceStorage.getStorage().whitelistedAttributes,
+                SyntheticDeviceStorage.getStorage().whitelistedAttributes,
                 attribute
             ),
             "Attribute already exists"
         );
 
-        emit VirtualDeviceAttributeAdded(attribute);
+        emit SyntheticDeviceAttributeAdded(attribute);
     }
 
     // ***** Interaction with nodes *****//
 
     /**
-     * @notice Mints a virtual device and pair it with a vehicle
+     * @notice Mints a synthetic device and pair it with a vehicle
      * @dev Caller must have the admin role
      * @param data input data with the following fields:
      *  integrationNode -> Parent integration node id
      *  vehicleNode -> Vehicle node id
-     *  virtualDeviceSig -> Virtual Device's signature hash
+     *  syntheticDeviceSig -> Synthetic Device's signature hash
      *  vehicleOwnerSig -> Vehicle owner signature hash
-     *  virtualDeviceAddr -> Address associated with the virtual device
+     *  syntheticDeviceAddr -> Address associated with the synthetic device
      *  attrInfoPairs -> List of attribute-info pairs to be added
      */
-    function mintVirtualDeviceSign(MintVirtualDeviceInput calldata data)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function mintSyntheticDeviceSign(
+        Types.MintSyntheticDeviceInput calldata data
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
-        VirtualDeviceStorage.Storage storage vds = VirtualDeviceStorage
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
             .getStorage();
 
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
-        address virtualDeviceIdProxyAddress = vds.idProxyAddress;
+        address sDIdProxyAddress = sds.idProxyAddress;
 
         require(
             INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
@@ -108,11 +107,11 @@ contract VirtualDevice is AccessControlInternal {
             "Invalid vehicle node"
         );
         require(
-            vds.deviceAddressToNodeId[data.virtualDeviceAddr] == 0,
+            sds.deviceAddressToNodeId[data.syntheticDeviceAddr] == 0,
             "Device address already registered"
         );
         require(
-            ms.nodeLinks[vehicleIdProxyAddress][virtualDeviceIdProxyAddress][
+            ms.nodeLinks[vehicleIdProxyAddress][sDIdProxyAddress][
                 data.vehicleNode
             ] == 0,
             "Vehicle already paired"
@@ -125,11 +124,11 @@ contract VirtualDevice is AccessControlInternal {
 
         require(
             Eip712CheckerInternal._verifySignature(
-                data.virtualDeviceAddr,
+                data.syntheticDeviceAddr,
                 message,
-                data.virtualDeviceSig
+                data.syntheticDeviceSig
             ),
-            "Invalid virtual device signature"
+            "Invalid synthetic device signature"
         );
         require(
             Eip712CheckerInternal._verifySignature(
@@ -140,27 +139,26 @@ contract VirtualDevice is AccessControlInternal {
             "Invalid vehicle owner signature"
         );
 
-        uint256 newTokenId = INFT(virtualDeviceIdProxyAddress).safeMint(owner);
+        uint256 newTokenId = INFT(sDIdProxyAddress).safeMint(owner);
 
-        ns.nodes[virtualDeviceIdProxyAddress][newTokenId].parentNode = data
+        ns.nodes[sDIdProxyAddress][newTokenId].parentNode = data
             .integrationNode;
 
-        ms.nodeLinks[vehicleIdProxyAddress][virtualDeviceIdProxyAddress][
+        ms.nodeLinks[vehicleIdProxyAddress][sDIdProxyAddress][
             data.vehicleNode
         ] = newTokenId;
-        ms.nodeLinks[virtualDeviceIdProxyAddress][vehicleIdProxyAddress][
-            newTokenId
-        ] = data.vehicleNode;
+        ms.nodeLinks[sDIdProxyAddress][vehicleIdProxyAddress][newTokenId] = data
+            .vehicleNode;
 
-        vds.deviceAddressToNodeId[data.virtualDeviceAddr] = newTokenId;
-        vds.nodeIdToDeviceAddress[newTokenId] = data.virtualDeviceAddr;
+        sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenId;
+        sds.nodeIdToDeviceAddress[newTokenId] = data.syntheticDeviceAddr;
 
         _setInfos(newTokenId, data.attrInfoPairs);
 
-        emit VirtualDeviceNodeMinted(
+        emit SyntheticDeviceNodeMinted(
             newTokenId,
             data.vehicleNode,
-            data.virtualDeviceAddr,
+            data.syntheticDeviceAddr,
             owner
         );
     }
@@ -169,12 +167,12 @@ contract VirtualDevice is AccessControlInternal {
     /// @dev attributes must be whitelisted
     /// @param tokenId Node id where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function setVirtualDeviceInfo(
+    function setSyntheticDeviceInfo(
         uint256 tokenId,
-        AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        Types.AttributeInfoPair[] calldata attrInfo
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
         require(
-            INFT(VirtualDeviceStorage.getStorage().idProxyAddress).exists(
+            INFT(SyntheticDeviceStorage.getStorage().idProxyAddress).exists(
                 tokenId
             ),
             "Invalid AD node"
@@ -182,15 +180,17 @@ contract VirtualDevice is AccessControlInternal {
         _setInfos(tokenId, attrInfo);
     }
 
-    /// @notice Gets the Virtual Device Id by the device address
+    /// @notice Gets the Synthetic Device Id by the device address
     /// @dev If the device is not minted it will return 0
-    /// @param addr Address associated with the virtual device
-    function getVirtualDeviceIdByAddress(address addr)
+    /// @param addr Address associated with the synthetic device
+    function getSyntheticDeviceIdByAddress(address addr)
         external
         view
         returns (uint256 nodeId)
     {
-        nodeId = VirtualDeviceStorage.getStorage().deviceAddressToNodeId[addr];
+        nodeId = SyntheticDeviceStorage.getStorage().deviceAddressToNodeId[
+            addr
+        ];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
@@ -199,18 +199,19 @@ contract VirtualDevice is AccessControlInternal {
     /// @dev attributes must be whitelisted
     /// @param tokenId Node where the info will be added
     /// @param attrInfo List of attribute-info pairs to be added
-    function _setInfos(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
-        private
-    {
+    function _setInfos(
+        uint256 tokenId,
+        Types.AttributeInfoPair[] calldata attrInfo
+    ) private {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VirtualDeviceStorage.Storage storage vds = VirtualDeviceStorage
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
             .getStorage();
-        address idProxyAddress = vds.idProxyAddress;
+        address idProxyAddress = sds.idProxyAddress;
 
         for (uint256 i = 0; i < attrInfo.length; i++) {
             require(
                 AttributeSet.exists(
-                    vds.whitelistedAttributes,
+                    sds.whitelistedAttributes,
                     attrInfo[i].attribute
                 ),
                 "Not whitelisted"
@@ -220,7 +221,7 @@ contract VirtualDevice is AccessControlInternal {
                 attrInfo[i].attribute
             ] = attrInfo[i].info;
 
-            emit VirtualDeviceAttributeSet(
+            emit SyntheticDeviceAttributeSet(
                 tokenId,
                 attrInfo[i].attribute,
                 attrInfo[i].info

@@ -12,8 +12,8 @@ import {
   IntegrationId,
   Vehicle,
   VehicleId,
-  VirtualDevice,
-  VirtualDeviceId,
+  SyntheticDevice,
+  SyntheticDeviceId,
   Mapper
 } from '../../typechain';
 import {
@@ -27,7 +27,7 @@ import {
 const { expect } = chai;
 const provider = waffle.provider;
 
-describe('VirtualDeviceId', async function () {
+describe('SyntheticDeviceId', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
@@ -36,12 +36,12 @@ describe('VirtualDeviceId', async function () {
   let manufacturerInstance: Manufacturer;
   let integrationInstance: Integration;
   let vehicleInstance: Vehicle;
-  let virtualDeviceInstance: VirtualDevice;
+  let syntheticDeviceInstance: SyntheticDevice;
   let mapperInstance: Mapper;
   let manufacturerIdInstance: ManufacturerId;
   let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
-  let virtualDeviceIdInstance: VirtualDeviceId;
+  let sDIdInstance: SyntheticDeviceId;
 
   const [
     admin,
@@ -50,7 +50,7 @@ describe('VirtualDeviceId', async function () {
     integrationOwner1,
     user1,
     user2,
-    virtualDeviceAddress1
+    sDAddress1
   ] = provider.getWallets();
 
   before(async () => {
@@ -62,10 +62,15 @@ describe('VirtualDeviceId', async function () {
         'Manufacturer',
         'Integration',
         'Vehicle',
-        'VirtualDevice',
+        'SyntheticDevice',
         'Mapper'
       ],
-      nfts: ['ManufacturerId', 'IntegrationId', 'VehicleId', 'VirtualDeviceId'],
+      nfts: [
+        'ManufacturerId',
+        'IntegrationId',
+        'VehicleId',
+        'SyntheticDeviceId'
+      ],
       upgradeableContracts: []
     });
 
@@ -76,12 +81,12 @@ describe('VirtualDeviceId', async function () {
     manufacturerInstance = deployments.Manufacturer;
     integrationInstance = deployments.Integration;
     vehicleInstance = deployments.Vehicle;
-    virtualDeviceInstance = deployments.VirtualDevice;
+    syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
     manufacturerIdInstance = deployments.ManufacturerId;
     integrationIdInstance = deployments.IntegrationId;
     vehicleIdInstance = deployments.VehicleId;
-    virtualDeviceIdInstance = deployments.VirtualDeviceId;
+    sDIdInstance = deployments.SyntheticDeviceId;
 
     const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
@@ -98,11 +103,10 @@ describe('VirtualDeviceId', async function () {
       .connect(admin)
       .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
 
-    const VIRTUAL_DEVICE_MINTER_ROLE =
-      await virtualDeviceIdInstance.MINTER_ROLE();
-    await virtualDeviceIdInstance
+    const SYNTHETIC_DEVICE_MINTER_ROLE = await sDIdInstance.MINTER_ROLE();
+    await sDIdInstance
       .connect(admin)
-      .grantRole(VIRTUAL_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(SYNTHETIC_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -114,9 +118,9 @@ describe('VirtualDeviceId', async function () {
     await vehicleInstance
       .connect(admin)
       .setVehicleIdProxyAddress(vehicleIdInstance.address);
-    await virtualDeviceInstance
+    await syntheticDeviceInstance
       .connect(admin)
-      .setVirtualDeviceIdProxyAddress(virtualDeviceIdInstance.address);
+      .setSyntheticDeviceIdProxyAddress(sDIdInstance.address);
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -153,13 +157,13 @@ describe('VirtualDeviceId', async function () {
       .connect(admin)
       .addVehicleAttribute(C.mockVehicleAttribute2);
 
-    // Whitelist VirtualDevice attributes
-    await virtualDeviceInstance
+    // Whitelist SyntheticDevice attributes
+    await syntheticDeviceInstance
       .connect(admin)
-      .addVirtualDeviceAttribute(C.mockVirtualDeviceAttribute1);
-    await virtualDeviceInstance
+      .addSyntheticDeviceAttribute(C.mockSyntheticDeviceAttribute1);
+    await syntheticDeviceInstance
       .connect(admin)
-      .addVirtualDeviceAttribute(C.mockVirtualDeviceAttribute2);
+      .addSyntheticDeviceAttribute(C.mockSyntheticDeviceAttribute2);
 
     // Mint Manufacturer Node
     await manufacturerInstance
@@ -187,21 +191,21 @@ describe('VirtualDeviceId', async function () {
       .connect(admin)
       .setDimoRegistryAddress(dimoRegistryInstance.address);
 
-    // Set DimoForwarder in the VirtualDeviceId
-    await virtualDeviceIdInstance
+    // Set DimoForwarder in the SyntheticDeviceId
+    await sDIdInstance
       .connect(admin)
       .setTrustedForwarder(vehicleIdInstance.address, true);
 
-    // Set VirtualDeviceId in the VehicleId
+    // Set SyntheticDeviceId in the VehicleId
     await vehicleIdInstance
       .connect(admin)
-      .setVirtualDeviceIdAddress(virtualDeviceIdInstance.address);
+      .setSyntheticDeviceIdAddress(sDIdInstance.address);
 
-    // Minting and linking a vehicle to a virtual device
-    const mintVirtualDeviceSig1 = await signMessage({
-      _signer: virtualDeviceAddress1,
-      _primaryType: 'MintVirtualDeviceSign',
-      _verifyingContract: virtualDeviceInstance.address,
+    // Minting and linking a vehicle to a synthetic device
+    const mintSyntheticDeviceSig1 = await signMessage({
+      _signer: sDAddress1,
+      _primaryType: 'MintSyntheticDeviceSign',
+      _verifyingContract: syntheticDeviceInstance.address,
       message: {
         integrationNode: '1',
         vehicleNode: '1'
@@ -209,8 +213,8 @@ describe('VirtualDeviceId', async function () {
     });
     const mintVehicleOwnerSig1 = await signMessage({
       _signer: user1,
-      _primaryType: 'MintVirtualDeviceSign',
-      _verifyingContract: virtualDeviceInstance.address,
+      _primaryType: 'MintSyntheticDeviceSign',
+      _verifyingContract: syntheticDeviceInstance.address,
       message: {
         integrationNode: '1',
         vehicleNode: '1'
@@ -219,18 +223,18 @@ describe('VirtualDeviceId', async function () {
     const correctMintInput1 = {
       integrationNode: '1',
       vehicleNode: '1',
-      virtualDeviceSig: mintVirtualDeviceSig1,
+      syntheticDeviceSig: mintSyntheticDeviceSig1,
       vehicleOwnerSig: mintVehicleOwnerSig1,
-      virtualDeviceAddr: virtualDeviceAddress1.address,
-      attrInfoPairs: C.mockVirtualDeviceAttributeInfoPairs
+      syntheticDeviceAddr: sDAddress1.address,
+      attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
     };
 
     await vehicleInstance
       .connect(admin)
       .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-    await virtualDeviceInstance
+    await syntheticDeviceInstance
       .connect(admin)
-      .mintVirtualDeviceSign(correctMintInput1);
+      .mintSyntheticDeviceSign(correctMintInput1);
   });
 
   beforeEach(async () => {
@@ -244,9 +248,7 @@ describe('VirtualDeviceId', async function () {
   describe('setDimoRegistryAddress', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
-        virtualDeviceIdInstance
-          .connect(nonAdmin)
-          .setDimoRegistryAddress(C.ZERO_ADDRESS)
+        sDIdInstance.connect(nonAdmin).setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
           C.ADMIN_ROLE
@@ -255,9 +257,7 @@ describe('VirtualDeviceId', async function () {
     });
     it('Should revert if addr is zero address', async () => {
       await expect(
-        virtualDeviceIdInstance
-          .connect(admin)
-          .setDimoRegistryAddress(C.ZERO_ADDRESS)
+        sDIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith('ZeroAddress');
     });
   });
@@ -265,9 +265,7 @@ describe('VirtualDeviceId', async function () {
   describe('setTrustedForwarder', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
-        virtualDeviceIdInstance
-          .connect(nonAdmin)
-          .setTrustedForwarder(C.ZERO_ADDRESS, true)
+        sDIdInstance.connect(nonAdmin).setTrustedForwarder(C.ZERO_ADDRESS, true)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
           C.ADMIN_ROLE
@@ -278,38 +276,34 @@ describe('VirtualDeviceId', async function () {
       const mockForwarder = ethers.Wallet.createRandom();
 
       // eslint-disable-next-line no-unused-expressions
-      expect(
-        await virtualDeviceIdInstance.trustedForwarders(mockForwarder.address)
-      ).to.be.false;
+      expect(await sDIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .false;
 
-      await virtualDeviceIdInstance
+      await sDIdInstance
         .connect(admin)
         .setTrustedForwarder(mockForwarder.address, true);
 
       // eslint-disable-next-line no-unused-expressions
-      expect(
-        await virtualDeviceIdInstance.trustedForwarders(mockForwarder.address)
-      ).to.be.true;
+      expect(await sDIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .true;
     });
     it('Should correctly set address as not trusted forwarder', async () => {
       const mockForwarder = ethers.Wallet.createRandom();
-      await virtualDeviceIdInstance
+      await sDIdInstance
         .connect(admin)
         .setTrustedForwarder(mockForwarder.address, true);
 
       // eslint-disable-next-line no-unused-expressions
-      expect(
-        await virtualDeviceIdInstance.trustedForwarders(mockForwarder.address)
-      ).to.be.true;
+      expect(await sDIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .true;
 
-      await virtualDeviceIdInstance
+      await sDIdInstance
         .connect(admin)
         .setTrustedForwarder(mockForwarder.address, false);
 
       // eslint-disable-next-line no-unused-expressions
-      expect(
-        await virtualDeviceIdInstance.trustedForwarders(mockForwarder.address)
-      ).to.be.false;
+      expect(await sDIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .false;
     });
   });
 
@@ -317,7 +311,7 @@ describe('VirtualDeviceId', async function () {
     context('Error handling', () => {
       it('Should revert if caller is approved, but not the token owner', async () => {
         await expect(
-          virtualDeviceIdInstance
+          sDIdInstance
             .connect(user1)
             ['safeTransferFrom(address,address,uint256)'](
               user1.address,
@@ -342,10 +336,8 @@ describe('VirtualDeviceId', async function () {
 
         expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
-      it('Should transfer virtual device ID to the new owner', async () => {
-        expect(await virtualDeviceIdInstance.ownerOf(1)).to.be.equal(
-          user1.address
-        );
+      it('Should transfer synthetic device ID to the new owner', async () => {
+        expect(await sDIdInstance.ownerOf(1)).to.be.equal(user1.address);
 
         await vehicleIdInstance
           .connect(user1)
@@ -355,52 +347,22 @@ describe('VirtualDeviceId', async function () {
             1
           );
 
-        expect(await virtualDeviceIdInstance.ownerOf(1)).to.be.equal(
-          user2.address
-        );
+        expect(await sDIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
-      it('Should keep pairing link between vehicle ID and virtual device ID', async () => {
+      it('Should keep pairing link between vehicle ID and synthetic device ID', async () => {
         expect(
           await mapperInstance.getNodeLink(
             vehicleIdInstance.address,
-            virtualDeviceIdInstance.address,
+            sDIdInstance.address,
             1
           )
         ).to.equal(1);
         expect(
           await mapperInstance.getNodeLink(
-            virtualDeviceIdInstance.address,
+            sDIdInstance.address,
             vehicleIdInstance.address,
             1
           )
-        ).to.equal(1);
-
-        await vehicleIdInstance
-          .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
-
-        expect(
-          await mapperInstance.getNodeLink(
-            vehicleIdInstance.address,
-            virtualDeviceIdInstance.address,
-            1
-          )
-        ).to.equal(1);
-        expect(
-          await mapperInstance.getNodeLink(
-            virtualDeviceIdInstance.address,
-            vehicleIdInstance.address,
-            1
-          )
-        ).to.equal(1);
-      });
-      it('Should keep the virtual device ID parent node', async () => {
-        expect(
-          await nodesInstance.getParentNode(virtualDeviceIdInstance.address, 1)
         ).to.equal(1);
 
         await vehicleIdInstance
@@ -412,14 +374,42 @@ describe('VirtualDeviceId', async function () {
           );
 
         expect(
-          await nodesInstance.getParentNode(virtualDeviceIdInstance.address, 1)
+          await mapperInstance.getNodeLink(
+            vehicleIdInstance.address,
+            sDIdInstance.address,
+            1
+          )
+        ).to.equal(1);
+        expect(
+          await mapperInstance.getNodeLink(
+            sDIdInstance.address,
+            vehicleIdInstance.address,
+            1
+          )
         ).to.equal(1);
       });
-      it('Should keep the same virtual device ID infos', async () => {
-        for (const attrInfoPair of C.mockVirtualDeviceAttributeInfoPairs) {
+      it('Should keep the synthetic device ID parent node', async () => {
+        expect(
+          await nodesInstance.getParentNode(sDIdInstance.address, 1)
+        ).to.equal(1);
+
+        await vehicleIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            1
+          );
+
+        expect(
+          await nodesInstance.getParentNode(sDIdInstance.address, 1)
+        ).to.equal(1);
+      });
+      it('Should keep the same synthetic device ID infos', async () => {
+        for (const attrInfoPair of C.mockSyntheticDeviceAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              virtualDeviceIdInstance.address,
+              sDIdInstance.address,
               1,
               attrInfoPair.attribute
             )
@@ -434,20 +424,20 @@ describe('VirtualDeviceId', async function () {
             1
           );
 
-        for (const attrInfoPair of C.mockVirtualDeviceAttributeInfoPairs) {
+        for (const attrInfoPair of C.mockSyntheticDeviceAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              virtualDeviceIdInstance.address,
+              sDIdInstance.address,
               1,
               attrInfoPair.attribute
             )
           ).to.equal(attrInfoPair.info);
         }
       });
-      it('Should keep the same virtual device address', async () => {
+      it('Should keep the same synthetic device address', async () => {
         expect(
-          await virtualDeviceInstance.getVirtualDeviceIdByAddress(
-            virtualDeviceAddress1.address
+          await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
+            sDAddress1.address
           )
         ).to.equal(1);
 
@@ -460,8 +450,8 @@ describe('VirtualDeviceId', async function () {
           );
 
         expect(
-          await virtualDeviceInstance.getVirtualDeviceIdByAddress(
-            virtualDeviceAddress1.address
+          await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
+            sDAddress1.address
           )
         ).to.equal(1);
       });

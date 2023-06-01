@@ -19,9 +19,9 @@ export const AD_NFT_NAME = 'Aftermarket Device NFT';
 export const AD_NFT_SYMBOL = 'ADNFT';
 export const AD_NFT_BASE_URI = 'https://dimo.zone/aftermarketDevice/';
 
-export const VIRTUAL_DEVICE_NFT_NAME = 'Virtual Device NFT';
-export const VIRTUAL_DEVICE_NFT_SYMBOL = 'VDNFT';
-export const VIRTUAL_DEVICE_NFT_BASE_URI = 'https://dimo.zone/virtualDevice/';
+export const SYNTHETIC_DEVICE_NFT_NAME = 'Synthetic Device NFT';
+export const SYNTHETIC_DEVICE_NFT_SYMBOL = 'SDNFT';
+export const SYNTHETIC_DEVICE_NFT_BASE_URI = 'https://dimo.zone/syntheticDevice/';
 
 export const nftArgs: ContractNameArgsByNetwork = {
   ManufacturerId: {
@@ -70,12 +70,12 @@ export const nftArgs: ContractNameArgsByNetwork = {
       kind: 'uups' as const
     }
   },
-  VirtualDeviceId: {
-    name: 'VirtualDeviceId',
+  SyntheticDeviceId: {
+    name: 'SyntheticDeviceId',
     args: [
-      VIRTUAL_DEVICE_NFT_NAME,
-      VIRTUAL_DEVICE_NFT_SYMBOL,
-      VIRTUAL_DEVICE_NFT_BASE_URI,
+      SYNTHETIC_DEVICE_NFT_NAME,
+      SYNTHETIC_DEVICE_NFT_SYMBOL,
+      SYNTHETIC_DEVICE_NFT_BASE_URI,
       ZERO_ADDRESS,
       []
     ],

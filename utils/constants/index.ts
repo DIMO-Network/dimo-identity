@@ -6,7 +6,7 @@ export * from './Manufacturer';
 export * from './Integration';
 export * from './Vehicle';
 export * from './AftermarketDevice';
-export * from './VirtualDevice';
+export * from './SyntheticDevice';
 export * from './MultiPrivilege';
 export * from './NftArgs';
 export * from './UpgradeableContractsArgs';

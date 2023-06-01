@@ -580,6 +580,11 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "InvalidLicense",
+        "type": "error"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -766,6 +771,36 @@
         "inputs": [
             {
                 "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "aftermarketDeviceNodeId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct AftermarketDeviceOwnerPair[]",
+                "name": "adOwnerPair",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "claimAftermarketDeviceBatchAuthorized",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
                 "name": "aftermarketDeviceNode",
                 "type": "uint256"
             },
@@ -807,6 +842,48 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "addr",
+                        "type": "address"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "attribute",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "info",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct AttributeInfoPair[]",
+                        "name": "attrInfoPairs",
+                        "type": "tuple[]"
+                    }
+                ],
+                "internalType": "struct AftermarketDeviceInfos[]",
+                "name": "adInfos",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "mintAftermarketDeviceAuthorized",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {

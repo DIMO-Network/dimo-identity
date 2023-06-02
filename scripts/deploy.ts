@@ -9,10 +9,14 @@ import {
   Eip712Checker,
   Manufacturer,
   ManufacturerId,
+  Integration,
+  // IntegrationId,
   Vehicle,
   VehicleId,
   AftermarketDevice,
   AftermarketDeviceId,
+  SyntheticDevice,
+  // SyntheticDeviceId,
   AdLicenseValidator
 } from '../typechain';
 import { getSelectors, ContractAddressesByNetwork } from '../utils';
@@ -49,8 +53,10 @@ async function deployModules(
     { name: 'DimoAccessControl', args: [] },
     { name: 'Nodes', args: [] },
     { name: 'Manufacturer', args: [] },
+    { name: 'Integration', args: [] },
     { name: 'Vehicle', args: [] },
     { name: 'AftermarketDevice', args: [] },
+    { name: 'SyntheticDevice', args: [] },
     { name: 'AdLicenseValidator', args: [] },
     { name: 'Mapper', args: [] },
     { name: 'DevAdmin', args: [] },
@@ -202,6 +208,10 @@ async function setupRegistry(deployer: SignerWithAddress) {
     'Manufacturer',
     contractAddresses[C.networkName].modules.DIMORegistry.address
   );
+  const integrationInstance: Integration = await ethers.getContractAt(
+    'Integration',
+    contractAddresses[C.networkName].modules.DIMORegistry.address
+  );
   const vehicleInstance: Vehicle = await ethers.getContractAt(
     'Vehicle',
     contractAddresses[C.networkName].modules.DIMORegistry.address
@@ -216,6 +226,10 @@ async function setupRegistry(deployer: SignerWithAddress) {
       'AftermarketDeviceId',
       contractAddresses[C.networkName].nfts.AftermarketDeviceId.proxy
     );
+  const syntheticDeviceInstance: SyntheticDevice = await ethers.getContractAt(
+    'SyntheticDevice',
+    contractAddresses[C.networkName].modules.DIMORegistry.address
+  );
 
   console.log('\n----- Initializing EIP712 -----\n');
   await (
@@ -265,6 +279,18 @@ async function setupRegistry(deployer: SignerWithAddress) {
     } proxy address set to Manufacturer`
   );
   await (
+    await integrationInstance
+      .connect(deployer)
+      .setIntegrationIdProxyAddress(
+        contractAddresses[C.networkName].nfts.IntegrationId.proxy
+      )
+  ).wait();
+  console.log(
+    `${
+      contractAddresses[C.networkName].nfts.IntegrationId
+    } proxy address set to Integration`
+  );
+  await (
     await vehicleInstance
       .connect(deployer)
       .setVehicleIdProxyAddress(
@@ -288,6 +314,18 @@ async function setupRegistry(deployer: SignerWithAddress) {
       contractAddresses[C.networkName].nfts.AftermarketDeviceId
     } proxy address set to Aftermarket Device`
   );
+  await (
+    await syntheticDeviceInstance
+      .connect(deployer)
+      .setSyntheticDeviceIdProxyAddress(
+        contractAddresses[C.networkName].nfts.SyntheticDeviceId.proxy
+      )
+  ).wait();
+  console.log(
+    `${
+      contractAddresses[C.networkName].nfts.SyntheticDeviceId
+    } proxy address set to Synthetic Device`
+  );
   console.log('\n----- NFT proxies set -----');
 
   console.log('\n----- Adding Vehicle Attributes -----\n');
@@ -310,6 +348,17 @@ async function setupRegistry(deployer: SignerWithAddress) {
   }
   console.log('\n----- Attributes added -----');
 
+  console.log('\n----- Adding Synthetic Device Attributes -----\n');
+  for (const attribute of C.sdAttributes) {
+    await (
+      await syntheticDeviceInstance
+        .connect(deployer)
+        .addSyntheticDeviceAttribute(attribute)
+    ).wait();
+    console.log(`${attribute} attribute set to Synthetic Device`);
+  }
+  console.log('\n----- Attributes added -----');
+
   console.log(
     '\n----- Aftermarket Device NFT setting approval for all to DIMO Registry -----'
   );
@@ -324,21 +373,101 @@ async function setupRegistry(deployer: SignerWithAddress) {
   console.log('----- Approval set -----\n');
 }
 
+// TODO
 async function setupNfts(deployer: SignerWithAddress) {
   const manufacturerIdInstance: ManufacturerId = await ethers.getContractAt(
     'ManufacturerId',
     contractAddresses[C.networkName].nfts.ManufacturerId.proxy
   );
+  // const integrationIdInstance: IntegrationId = await ethers.getContractAt(
+  //   'IntegrationId',
+  //   contractAddresses[C.networkName].nfts.IntegrationId.proxy
+  // );
+  const vehicleIdInstance: VehicleId = await ethers.getContractAt(
+    'VehicleId',
+    contractAddresses[C.networkName].nfts.VehicleId.proxy
+  );
+  const aftermarketDeviceIdInstance: AftermarketDeviceId =
+    await ethers.getContractAt(
+      'AftermarketDeviceId',
+      contractAddresses[C.networkName].nfts.AftermarketDeviceId.proxy
+    );
+  // const syntheticDeviceIdInstance: SyntheticDeviceId =
+  //   await ethers.getContractAt(
+  //     'SyntheticDeviceId',
+  //     contractAddresses[C.networkName].nfts.SyntheticDeviceId.proxy
+  //   );
 
-  console.log('\n----- Setting DIMO Registry address to ManufacturerId -----');
+  console.log('\n----- Manufacturer ID');
+  console.log('----- Setting DIMO Registry address to ManufacturerId -----');
   await manufacturerIdInstance
     .connect(deployer)
     .setDimoRegistryAddress(
       contractAddresses[C.networkName].modules.DIMORegistry.address
     );
+
+  // console.log('\n----- Integration ID');
+  // console.log('----- Setting DIMO Registry address to IntegrationId -----');
+  // await integrationIdInstance
+  //   .connect(deployer)
+  //   .setDimoRegistryAddress(
+  //     contractAddresses[C.networkName].modules.DIMORegistry.address
+  //   );
+
+  console.log('\n----- Vehicle ID');
+  console.log('----- Setting DIMO Registry address to VehicleId -----');
+  await vehicleIdInstance
+    .connect(deployer)
+    .setDimoRegistryAddress(
+      contractAddresses[C.networkName].modules.DIMORegistry.address
+    );
+  console.log('----- Setting Synthetic Device ID address to VehicleId -----');
+  await vehicleIdInstance
+    .connect(deployer)
+    .setSyntheticDeviceIdAddress(
+      contractAddresses[C.networkName].nfts.SyntheticDeviceId.proxy
+    );
+  // console.log('----- Setting Dimo Forwarder address to VehicleId -----');
+  // await vehicleIdInstance
+  //   .connect(deployer)
+  //   .setTrustedForwarder(
+  //     "forwarderAddress", true
+  //   );
+
+  console.log('\n----- Aftermarket Device ID');
+  console.log(
+    '----- Setting DIMO Registry address to AftermarketDeviceId -----'
+  );
+  await aftermarketDeviceIdInstance
+    .connect(deployer)
+    .setDimoRegistryAddress(
+      contractAddresses[C.networkName].modules.DIMORegistry.address
+    );
+  // console.log('----- Setting Dimo Forwarder address to AftermarketDeviceId -----');
+  // await aftermarketDeviceIdInstance
+  //   .connect(deployer)
+  //   .setTrustedForwarder(
+  //     "forwarderAddress", true
+  //   );
+
+  // console.log('\n----- Synthetic Device ID');
+  // console.log('----- Setting DIMO Registry address to SyntheticDeviceId -----');
+  // await syntheticDeviceIdInstance
+  //   .connect(deployer)
+  //   .setDimoRegistryAddress(
+  //     contractAddresses[C.networkName].modules.DIMORegistry.address
+  //   );
+  // console.log('----- Setting Dimo Forwarder address to SyntheticDeviceId -----');
+  // await sytheticDeviceIdInstance
+  //   .connect(deployer)
+  //   .setTrustedForwarder(
+  //     "forwarderAddress", true
+  //   );
+
   console.log('----- Address set -----\n');
 }
 
+// TODO
 async function grantNftRoles(deployer: SignerWithAddress) {
   const manufacturerIdInstance: ManufacturerId = await ethers.getContractAt(
     'ManufacturerId',

@@ -11,6 +11,3 @@ export const MOCK_ROLE = ethers.utils.keccak256(
 export const MINTER_ROLE = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes('Minter')
 );
-export const MANUFACTURER_ROLE = ethers.utils.keccak256(
-  ethers.utils.toUtf8Bytes('Manufacturer')
-);

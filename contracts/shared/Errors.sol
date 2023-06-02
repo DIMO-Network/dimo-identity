@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 // Misc
 error ZeroAddress();
-error Unauthorized(uint256 privilegeId, address addr);
+error Unauthorized(address addr);
 error AttributeExists(string attr);
 error AttributeNotWhitelisted(string attr);
 

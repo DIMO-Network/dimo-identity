@@ -37,9 +37,9 @@ main([
   'contracts/shared/Multicall.sol:Multicall',
   'contracts/implementations/AdLicenseValidator/AdLicenseValidator.sol:AdLicenseValidator',
   'contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice',
-  'contracts/implementations/nodes/SyntheticDevice.sol:SyntheticDevice',
   'contracts/implementations/nodes/Manufacturer.sol:Manufacturer',
   'contracts/implementations/nodes/Integration.sol:Integration',
+  'contracts/implementations/nodes/SyntheticDevice.sol:SyntheticDevice',
   'contracts/implementations/nodes/Vehicle.sol:Vehicle',
   'contracts/implementations/Nodes.sol:Nodes',
   'contracts/implementations/Mapper.sol:Mapper'

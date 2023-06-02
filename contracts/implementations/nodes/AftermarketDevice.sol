@@ -121,7 +121,8 @@ contract AftermarketDevice is
 
     /**
      * @notice Mints aftermarket devices in batch
-     * @dev Caller must have the manufacturer role
+     * Caller must be the manufacturer node owner or an authorized address
+     * The manufacturer node owner must grant the minter privilege to the authorized address
      * @param manufacturerNode Parent manufacturer node id
      * @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
      *  addr -> AD address
@@ -129,64 +130,6 @@ contract AftermarketDevice is
      *                  \ info
      */
     function mintAftermarketDeviceByManufacturerBatch(
-        uint256 manufacturerNode,
-        Types.AftermarketDeviceInfos[] calldata adInfos
-    ) external onlyRole(Roles.MANUFACTURER_ROLE) {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-            .getStorage();
-        uint256 devicesAmount = adInfos.length;
-        address adIdProxyAddress = ads.idProxyAddress;
-        INFT manufacturerIdProxy = INFT(
-            ManufacturerStorage.getStorage().idProxyAddress
-        );
-
-        if (!INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)))
-            revert RegistryNotApproved();
-        if (!manufacturerIdProxy.exists(manufacturerNode))
-            revert Errors.InvalidParentNode(manufacturerNode);
-        if (manufacturerIdProxy.ownerOf(manufacturerNode) != msg.sender)
-            revert Errors.InvalidParentNodeOwner(manufacturerNode, msg.sender);
-
-        uint256 newTokenId;
-        address deviceAddress;
-
-        for (uint256 i = 0; i < devicesAmount; i++) {
-            newTokenId = INFT(adIdProxyAddress).safeMint(msg.sender);
-
-            ns
-            .nodes[adIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-
-            deviceAddress = adInfos[i].addr;
-            if (ads.deviceAddressToNodeId[deviceAddress] != 0)
-                revert DeviceAlreadyRegistered(deviceAddress);
-
-            ads.deviceAddressToNodeId[deviceAddress] = newTokenId;
-            ads.nodeIdToDeviceAddress[newTokenId] = deviceAddress;
-
-            _setInfos(newTokenId, adInfos[i].attrInfoPairs);
-
-            emit AftermarketDeviceNodeMinted(
-                newTokenId,
-                deviceAddress,
-                msg.sender
-            );
-        }
-
-        // Validate license and transfer funds to foundation
-        _validateMintRequest(msg.sender, msg.sender, devicesAmount);
-    }
-
-    /**
-     * @notice Mints aftermarket devices in batch by an authorized address
-     * The manufacturer node owner must grant the minter privilege to the caller
-     * @param manufacturerNode Parent manufacturer node id
-     * @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
-     *  addr -> AD address
-     *  attrInfoPairs[] / attribute
-     *                  \ info
-     */
-    function mintAftermarketDeviceAuthorized(
         uint256 manufacturerNode,
         Types.AftermarketDeviceInfos[] calldata adInfos
     ) external {
@@ -209,13 +152,16 @@ contract AftermarketDevice is
                 MANUFACTURER_MINTER_PRIVILEGE,
                 msg.sender
             )
-        ) revert Errors.Unauthorized(MANUFACTURER_MINTER_PRIVILEGE, msg.sender);
+        ) revert Errors.Unauthorized(msg.sender);
 
         uint256 newTokenId;
         address deviceAddress;
+        address manufacturerNodeOwner = manufacturerIdProxy.ownerOf(
+            manufacturerNode
+        );
 
         for (uint256 i = 0; i < devicesAmount; i++) {
-            newTokenId = INFT(adIdProxyAddress).safeMint(msg.sender);
+            newTokenId = INFT(adIdProxyAddress).safeMint(manufacturerNodeOwner);
 
             ns
             .nodes[adIdProxyAddress][newTokenId].parentNode = manufacturerNode;
@@ -232,16 +178,12 @@ contract AftermarketDevice is
             emit AftermarketDeviceNodeMinted(
                 newTokenId,
                 deviceAddress,
-                msg.sender
+                manufacturerNodeOwner
             );
         }
 
         // Validate license and transfer funds to foundation
-        _validateMintRequest(
-            manufacturerIdProxy.ownerOf(manufacturerNode),
-            msg.sender,
-            devicesAmount
-        );
+        _validateMintRequest(manufacturerNodeOwner, msg.sender, devicesAmount);
     }
 
     /**
@@ -280,11 +222,7 @@ contract AftermarketDevice is
                 MANUFACTURER_CLAIMER_PRIVILEGE,
                 msg.sender
             )
-        )
-            revert Errors.Unauthorized(
-                MANUFACTURER_CLAIMER_PRIVILEGE,
-                msg.sender
-            );
+        ) revert Errors.Unauthorized(msg.sender);
 
         _claimAftermarketDeviceBatch(adOwnerPair);
     }

@@ -155,10 +155,10 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         address user
     ) external view returns (bool) {
         return
-            privilegeRecord[privId].enabled &&
-            (privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][user] >=
-                block.timestamp ||
-                ownerOf(tokenId) == user);
+            (privilegeRecord[privId].enabled &&
+                (privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][
+                    user
+                ] >= block.timestamp)) || ownerOf(tokenId) == user;
     }
 
     /// @notice Checks the expiration of a certain user privilege

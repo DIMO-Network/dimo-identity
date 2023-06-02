@@ -4,7 +4,6 @@ import { ethers, waffle } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
-  DimoAccessControl,
   Nodes,
   Manufacturer,
   ManufacturerId,
@@ -34,7 +33,6 @@ describe('SyntheticDevice', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
-  let accessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let integrationInstance: Integration;
@@ -82,7 +80,6 @@ describe('SyntheticDevice', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
-    accessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
     integrationInstance = deployments.Integration;
@@ -150,11 +147,6 @@ describe('SyntheticDevice', function () {
     await mockDimoTokenInstance
       .connect(manufacturer1)
       .approve(dimoRegistryInstance.address, C.manufacturerDimoTokensAmount);
-
-    // Grant MANUFACTURER_ROLE to manufacturer
-    await accessControlInstance
-      .connect(admin)
-      .grantRole(C.MANUFACTURER_ROLE, manufacturer1.address);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance

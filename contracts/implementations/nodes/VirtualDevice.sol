@@ -146,8 +146,8 @@ contract VirtualDevice is AccessControlInternal {
             .integrationNode;
 
         ms.nodeLinks[vehicleIdProxyAddress][virtualDeviceIdProxyAddress][
-                data.vehicleNode
-            ] = newTokenId;
+            data.vehicleNode
+        ] = newTokenId;
         ms.nodeLinks[virtualDeviceIdProxyAddress][vehicleIdProxyAddress][
             newTokenId
         ] = data.vehicleNode;
@@ -177,7 +177,7 @@ contract VirtualDevice is AccessControlInternal {
             INFT(VirtualDeviceStorage.getStorage().idProxyAddress).exists(
                 tokenId
             ),
-            "Invalid AD node"
+            "Invalid virtual device node"
         );
         _setInfos(tokenId, attrInfo);
     }

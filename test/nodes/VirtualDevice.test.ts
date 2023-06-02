@@ -945,7 +945,7 @@ describe('VirtualDevice', function () {
           virtualDeviceInstance
             .connect(admin)
             .setVirtualDeviceInfo(99, C.mockVirtualDeviceAttributeInfoPairs)
-        ).to.be.revertedWith('Invalid AD node');
+        ).to.be.revertedWith('Invalid virtual device node');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(

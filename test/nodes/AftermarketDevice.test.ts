@@ -340,7 +340,7 @@ describe('AftermarketDevice', function () {
       });
 
       context('Error handling', () => {
-        it('Should revert if caller is not authorized the manufacturer node owner nor', async () => {
+        it('Should revert if caller is not authorized nor the manufacturer node owner', async () => {
           await adIdInstance
             .connect(nonManufacturer)
             .setApprovalForAll(aftermarketDeviceInstance.address, true);

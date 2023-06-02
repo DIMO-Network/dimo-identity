@@ -1489,6 +1489,55 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "AlreadyController",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            }
+        ],
+        "name": "IntegrationNameRegisterd",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "MustBeAdmin",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "NotAllowed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "OnlyNftProxy",
+        "type": "error"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -1792,6 +1841,11 @@
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidSdSignature",
+        "type": "error"
     },
     {
         "anonymous": false,

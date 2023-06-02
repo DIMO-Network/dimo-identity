@@ -21,7 +21,6 @@ error DeviceAlreadyRegistered(address addr);
 error DeviceAlreadyClaimed(uint256 id);
 error InvalidAdSignature();
 error AdNotClaimed(uint256 id);
-error VehiclePaired(uint256 id);
 error AdPaired(uint256 id);
 error VehicleNotPaired(uint256 id);
 error AdNotPaired(uint256 id);
@@ -313,7 +312,7 @@ contract AftermarketDevice is
             ]
         ) revert AdNotClaimed(aftermarketDeviceNode);
         if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
-            revert VehiclePaired(vehicleNode);
+            revert Errors.VehiclePaired(vehicleNode);
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
             revert AdPaired(aftermarketDeviceNode);
         if (
@@ -383,7 +382,7 @@ contract AftermarketDevice is
         if (owner != INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode))
             revert OwnersDoesNotMatch();
         if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
-            revert VehiclePaired(vehicleNode);
+            revert Errors.VehiclePaired(vehicleNode);
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
             revert AdPaired(aftermarketDeviceNode);
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))

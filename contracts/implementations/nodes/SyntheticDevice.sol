@@ -11,12 +11,18 @@ import "../../libraries/MapperStorage.sol";
 
 import "../../shared/Roles.sol" as Roles;
 import "../../shared/Types.sol" as Types;
+import "../../shared/Errors.sol" as Errors;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/// @title SyntheticDevice
-/// @notice Contract that represents the Synthetic Device node
-/// @dev It uses the Mapper contract to link Synthetic Devices to Vehicles
+error DeviceAlreadyRegistered(address addr);
+error InvalidSdSignature();
+
+/**
+ * @title SyntheticDevice
+ * @notice Contract that represents the Synthetic Device node
+ * @dev It uses the Mapper contract to link Synthetic Devices to Vehicles
+ */
 contract SyntheticDevice is AccessControlInternal {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
@@ -39,33 +45,36 @@ contract SyntheticDevice is AccessControlInternal {
 
     // ***** Admin management ***** //
 
-    /// @notice Sets the NFT proxy associated with the Synthetic Device node
-    /// @dev Only an admin can set the address
-    /// @param addr The address of the proxy
+    /**
+     * @notice Sets the NFT proxy associated with the Synthetic Device node
+     * @dev Only an admin can set the address
+     * @param addr The address of the proxy
+     */
     function setSyntheticDeviceIdProxyAddress(address addr)
         external
         onlyRole(Roles.DEFAULT_ADMIN_ROLE)
     {
-        require(addr != address(0), "Non zero address");
+        if (addr == address(0)) revert Errors.ZeroAddress();
         SyntheticDeviceStorage.getStorage().idProxyAddress = addr;
 
         emit SyntheticDeviceIdProxySet(addr);
     }
 
-    /// @notice Adds an attribute to the whielist
-    /// @dev Only an admin can add a new attribute
-    /// @param attribute The attribute to be added
+    /**
+     * @notice Adds an attribute to the whielist
+     * @dev Only an admin can add a new attribute
+     * @param attribute The attribute to be added
+     */
     function addSyntheticDeviceAttribute(string calldata attribute)
         external
         onlyRole(Roles.DEFAULT_ADMIN_ROLE)
     {
-        require(
-            AttributeSet.add(
+        if (
+            !AttributeSet.add(
                 SyntheticDeviceStorage.getStorage().whitelistedAttributes,
                 attribute
-            ),
-            "Attribute already exists"
-        );
+            )
+        ) revert Errors.AttributeExists(attribute);
 
         emit SyntheticDeviceAttributeAdded(attribute);
     }
@@ -94,60 +103,52 @@ contract SyntheticDevice is AccessControlInternal {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
-        address sDIdProxyAddress = sds.idProxyAddress;
+        address sdIdProxyAddress = sds.idProxyAddress;
 
-        require(
-            INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
+        if (
+            !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
                 data.integrationNode
-            ),
-            "Invalid parent node"
-        );
-        require(
-            INFT(vehicleIdProxyAddress).exists(data.vehicleNode),
-            "Invalid vehicle node"
-        );
-        require(
-            sds.deviceAddressToNodeId[data.syntheticDeviceAddr] == 0,
-            "Device address already registered"
-        );
-        require(
-            ms.nodeLinks[vehicleIdProxyAddress][sDIdProxyAddress][
+            )
+        ) revert Errors.InvalidParentNode(data.integrationNode);
+        if (!INFT(vehicleIdProxyAddress).exists(data.vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, data.vehicleNode);
+        if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
+            revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
+        if (
+            ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                 data.vehicleNode
-            ] == 0,
-            "Vehicle already paired"
-        );
+            ] != 0
+        ) revert Errors.VehiclePaired(data.vehicleNode);
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(data.vehicleNode);
         bytes32 message = keccak256(
             abi.encode(MINT_TYPEHASH, data.integrationNode, data.vehicleNode)
         );
 
-        require(
-            Eip712CheckerInternal._verifySignature(
+        if (
+            !Eip712CheckerInternal._verifySignature(
                 data.syntheticDeviceAddr,
                 message,
                 data.syntheticDeviceSig
-            ),
-            "Invalid synthetic device signature"
-        );
-        require(
-            Eip712CheckerInternal._verifySignature(
+            )
+        ) revert InvalidSdSignature();
+        if (
+            !Eip712CheckerInternal._verifySignature(
                 owner,
                 message,
                 data.vehicleOwnerSig
-            ),
-            "Invalid vehicle owner signature"
-        );
+            )
+        ) revert Errors.InvalidOwnerSignature();
 
-        uint256 newTokenId = INFT(sDIdProxyAddress).safeMint(owner);
+        uint256 newTokenId = INFT(sdIdProxyAddress).safeMint(owner);
 
-        ns.nodes[sDIdProxyAddress][newTokenId].parentNode = data
+        ns.nodes[sdIdProxyAddress][newTokenId].parentNode = data
             .integrationNode;
 
-        ms.nodeLinks[vehicleIdProxyAddress][sDIdProxyAddress][
+        ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
             data.vehicleNode
         ] = newTokenId;
-        ms.nodeLinks[sDIdProxyAddress][vehicleIdProxyAddress][newTokenId] = data
+        ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][newTokenId] = data
             .vehicleNode;
 
         sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenId;
@@ -163,20 +164,19 @@ contract SyntheticDevice is AccessControlInternal {
         );
     }
 
-    /// @notice Add infos to node
-    /// @dev attributes must be whitelisted
-    /// @param tokenId Node id where the info will be added
-    /// @param attrInfo List of attribute-info pairs to be added
+    /**
+     * @notice Add infos to node
+     * @dev attributes must be whitelisted
+     * @param tokenId Node id where the info will be added
+     * @param attrInfo List of attribute-info pairs to be added
+     */
     function setSyntheticDeviceInfo(
         uint256 tokenId,
         Types.AttributeInfoPair[] calldata attrInfo
     ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
-        require(
-            INFT(SyntheticDeviceStorage.getStorage().idProxyAddress).exists(
-                tokenId
-            ),
-            "Invalid AD node"
-        );
+        address sdIdProxy = SyntheticDeviceStorage.getStorage().idProxyAddress;
+        if (!INFT(sdIdProxy).exists(tokenId))
+            revert Errors.InvalidNode(sdIdProxy, tokenId);
         _setInfos(tokenId, attrInfo);
     }
 
@@ -195,36 +195,40 @@ contract SyntheticDevice is AccessControlInternal {
 
     // ***** PRIVATE FUNCTIONS ***** //
 
-    /// @dev Internal function to add infos to node
-    /// @dev attributes must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attrInfo List of attribute-info pairs to be added
+    /**
+     * @dev Internal function to add infos to node
+     * @dev attributes must be whitelisted
+     * @param tokenId Node where the info will be added
+     * @param attrInfoPairList List of attribute-info pairs to be added
+     */
     function _setInfos(
         uint256 tokenId,
-        Types.AttributeInfoPair[] calldata attrInfo
+        Types.AttributeInfoPair[] calldata attrInfoPairList
     ) private {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
             .getStorage();
         address idProxyAddress = sds.idProxyAddress;
 
-        for (uint256 i = 0; i < attrInfo.length; i++) {
-            require(
-                AttributeSet.exists(
+        for (uint256 i = 0; i < attrInfoPairList.length; i++) {
+            if (
+                !AttributeSet.exists(
                     sds.whitelistedAttributes,
-                    attrInfo[i].attribute
-                ),
-                "Not whitelisted"
-            );
+                    attrInfoPairList[i].attribute
+                )
+            )
+                revert Errors.AttributeNotWhitelisted(
+                    attrInfoPairList[i].attribute
+                );
 
             ns.nodes[idProxyAddress][tokenId].info[
-                attrInfo[i].attribute
-            ] = attrInfo[i].info;
+                attrInfoPairList[i].attribute
+            ] = attrInfoPairList[i].info;
 
             emit SyntheticDeviceAttributeSet(
                 tokenId,
-                attrInfo[i].attribute,
-                attrInfo[i].info
+                attrInfoPairList[i].attribute,
+                attrInfoPairList[i].info
             );
         }
     }

@@ -580,6 +580,11 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "InvalidLicense",
+        "type": "error"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -739,6 +744,11 @@
     },
     {
         "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
             {
                 "components": [
                     {

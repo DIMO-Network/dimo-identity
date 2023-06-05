@@ -4,7 +4,6 @@ import { ethers, waffle } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
-  DimoAccessControl,
   Nodes,
   Manufacturer,
   ManufacturerId,
@@ -34,7 +33,6 @@ describe('AftermarketDevice', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
-  let accessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
@@ -46,6 +44,7 @@ describe('AftermarketDevice', function () {
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
+  let expiresAtDefault: number;
 
   const [
     admin,
@@ -53,7 +52,9 @@ describe('AftermarketDevice', function () {
     foundation,
     manufacturer1,
     manufacturer2,
+    manufacturerPrivileged1,
     nonManufacturer,
+    nonManufacturerPrivilged,
     user1,
     user2,
     adAddress1,
@@ -73,6 +74,10 @@ describe('AftermarketDevice', function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
+    const blockNumBefore = await ethers.provider.getBlockNumber();
+    const blockBefore = await ethers.provider.getBlock(blockNumBefore);
+    expiresAtDefault = blockBefore.timestamp + 31556926; // + 1 year
+
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
@@ -90,7 +95,6 @@ describe('AftermarketDevice', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
-    accessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
     vehicleInstance = deployments.Vehicle;
@@ -163,11 +167,6 @@ describe('AftermarketDevice', function () {
     await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
-    // Grant MANUFACTURER_ROLE to manufacturer
-    await accessControlInstance
-      .connect(admin)
-      .grantRole(C.MANUFACTURER_ROLE, manufacturer1.address);
-
     // Whitelist Manufacturer attributes
     await manufacturerInstance
       .connect(admin)
@@ -212,6 +211,40 @@ describe('AftermarketDevice', function () {
     await adIdInstance
       .connect(admin)
       .setDimoRegistryAddress(dimoRegistryInstance.address);
+
+    // Setting DIMORegistry address
+    await manufacturerIdInstance.setDimoRegistryAddress(
+      dimoRegistryInstance.address
+    );
+
+    // Transfer DIMO Tokens to the privileged address, approve DIMORegistry, create and set privileges
+    await mockDimoTokenInstance
+      .connect(admin)
+      .transfer(
+        manufacturerPrivileged1.address,
+        C.manufacturerDimoTokensAmount
+      );
+    await mockDimoTokenInstance
+      .connect(manufacturerPrivileged1)
+      .approve(dimoRegistryInstance.address, C.manufacturerDimoTokensAmount);
+    await manufacturerIdInstance.createPrivilege(true, 'Minter');
+    await manufacturerIdInstance.createPrivilege(true, 'Claimer');
+    await manufacturerIdInstance
+      .connect(manufacturer1)
+      .setPrivilege(
+        1,
+        C.MANUFACTURER_MINTER_PRIVILEGE,
+        manufacturerPrivileged1.address,
+        expiresAtDefault
+      );
+    await manufacturerIdInstance
+      .connect(manufacturer1)
+      .setPrivilege(
+        1,
+        C.MANUFACTURER_CLAIMER_PRIVILEGE,
+        manufacturerPrivileged1.address,
+        expiresAtDefault
+      );
   });
 
   beforeEach(async () => {
@@ -299,307 +332,660 @@ describe('AftermarketDevice', function () {
   });
 
   describe('mintAftermarketDeviceByManufacturerBatch', () => {
-    beforeEach(async () => {
-      await adIdInstance
-        .connect(manufacturer1)
-        .setApprovalForAll(aftermarketDeviceInstance.address, true);
-    });
-
-    context('Error handling', () => {
-      it('Should revert if caller does not have manufacturer role', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(nonManufacturer)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              mockAftermarketDeviceInfosList
-            )
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonManufacturer.address.toLowerCase()} is missing role ${
-            C.MANUFACTURER_ROLE
-          }`
-        );
-      });
-      it('Should revert if parent node is not a Manufacturer', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              99,
-              mockAftermarketDeviceInfosList
-            )
-        ).to.be.revertedWith('Invalid parent node');
-      });
-      it('Should revert if the caller is not the parent node owner', async () => {
-        await accessControlInstance
-          .connect(admin)
-          .grantRole(C.MANUFACTURER_ROLE, manufacturer2.address);
+    context('Manufacturer as minter', () => {
+      beforeEach(async () => {
         await adIdInstance
-          .connect(manufacturer2)
+          .connect(manufacturer1)
           .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      });
 
-        await expect(
-          aftermarketDeviceInstance
+      context('Error handling', () => {
+        it('Should revert if caller is not authorized nor the manufacturer node owner', async () => {
+          await adIdInstance
+            .connect(nonManufacturer)
+            .setApprovalForAll(aftermarketDeviceInstance.address, true);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(nonManufacturer)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if parent node is not a Manufacturer', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                99,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Invalid parent node');
+        });
+        it('Should revert if the caller is not the parent node owner', async () => {
+          await adIdInstance
             .connect(manufacturer2)
+            .setApprovalForAll(aftermarketDeviceInstance.address, true);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer2)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if DIMO Registry is not approved for all', async () => {
+          await adIdInstance
+            .connect(manufacturer1)
+            .setApprovalForAll(aftermarketDeviceInstance.address, false);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Registry must be approved for all');
+        });
+        it('Should revert if manufacturer does not have a license', async () => {
+          await mockStakeInstance.setLicenseBalance(manufacturer1.address, 0);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('InvalidLicense');
+        });
+        it('Should revert if manufacturer does not have enough DIMO tokens', async () => {
+          await mockDimoTokenInstance
+            .connect(manufacturer1)
+            .burn(C.manufacturerDimoTokensAmount);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
+        });
+        it('Should revert if manufacturer has not approve DIMORegistry', async () => {
+          await mockDimoTokenInstance
+            .connect(manufacturer1)
+            .approve(dimoRegistryInstance.address, 0);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('ERC20: insufficient allowance');
+        });
+        it('Should revert if attribute is not whitelisted', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosListNotWhitelisted
+              )
+          ).to.be.revertedWith('Not whitelisted');
+        });
+        it('Should revert if device address is already registered', async () => {
+          const localInfos = JSON.parse(
+            JSON.stringify(mockAftermarketDeviceInfosList)
+          );
+          localInfos[1].addr = adAddress1.address;
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(1, localInfos)
+          ).to.be.revertedWith('Device address already registered');
+        });
+      });
+
+      context('State', () => {
+        it('Should correctly set parent node', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturer1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
               mockAftermarketDeviceInfosList
+            );
+
+          const parentNode1 = await nodesInstance.getParentNode(
+            adIdInstance.address,
+            1
+          );
+          const parentNode2 = await nodesInstance.getParentNode(
+            adIdInstance.address,
+            2
+          );
+
+          expect(parentNode1).to.be.equal(1);
+          expect(parentNode2).to.be.equal(1);
+        });
+        it('Should correctly set nodes owner', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturer1)
+            .mintAftermarketDeviceByManufacturerBatch(
+              1,
+              mockAftermarketDeviceInfosList
+            );
+
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(
+            manufacturer1.address
+          );
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(
+            manufacturer1.address
+          );
+        });
+        it('Should correctly set device address', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturer1)
+            .mintAftermarketDeviceByManufacturerBatch(
+              1,
+              mockAftermarketDeviceInfosList
+            );
+
+          const id1 =
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              mockAftermarketDeviceInfosList[0].addr
+            );
+          const id2 =
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              mockAftermarketDeviceInfosList[1].addr
+            );
+
+          expect(id1).to.equal(1);
+          expect(id2).to.equal(2);
+        });
+        it('Should correctly set infos', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturer1)
+            .mintAftermarketDeviceByManufacturerBatch(
+              1,
+              mockAftermarketDeviceInfosList
+            );
+
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              1,
+              C.mockAftermarketDeviceAttribute1
             )
-        ).to.be.revertedWith('Caller must be the parent node owner');
+          ).to.be.equal(C.mockAftermarketDeviceInfo1);
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              1,
+              C.mockAftermarketDeviceAttribute2
+            )
+          ).to.be.equal(C.mockAftermarketDeviceInfo2);
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              2,
+              C.mockAftermarketDeviceAttribute1
+            )
+          ).to.be.equal(C.mockAftermarketDeviceInfo1);
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              2,
+              C.mockAftermarketDeviceAttribute2
+            )
+          ).to.be.equal(C.mockAftermarketDeviceInfo2);
+        });
+        it('Should correctly decrease the DIMO balance of the manufacturer', async () => {
+          const balanceChange = C.adMintCost
+            .mul(C.mockAdAttributeInfoPairs.length)
+            .mul(-1);
+
+          await expect(() =>
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).changeTokenBalance(
+            mockDimoTokenInstance,
+            manufacturer1,
+            balanceChange
+          );
+        });
+        it('Should correctly transfer the DIMO tokens to the foundation', async () => {
+          const balanceChange = C.adMintCost.mul(
+            C.mockAdAttributeInfoPairs.length
+          );
+
+          await expect(() =>
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).changeTokenBalance(
+            mockDimoTokenInstance,
+            foundation,
+            balanceChange
+          );
+        });
       });
-      it('Should revert if DIMO Registry is not approved for all', async () => {
+
+      context('Events', () => {
+        it('Should emit AftermarketDeviceNodeMinted event with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
+            .withArgs(1, adAddress1.address, manufacturer1.address)
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
+            .withArgs(2, adAddress2.address, manufacturer1.address);
+        });
+        it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+            .withArgs(
+              1,
+              mockAftermarketDeviceInfosList[0].attrInfoPairs[0].attribute,
+              mockAftermarketDeviceInfosList[0].attrInfoPairs[0].info
+            )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+            .withArgs(
+              1,
+              mockAftermarketDeviceInfosList[0].attrInfoPairs[1].attribute,
+              mockAftermarketDeviceInfosList[0].attrInfoPairs[1].info
+            )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+            .withArgs(
+              2,
+              mockAftermarketDeviceInfosList[1].attrInfoPairs[0].attribute,
+              mockAftermarketDeviceInfosList[1].attrInfoPairs[0].info
+            )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+            .withArgs(
+              2,
+              mockAftermarketDeviceInfosList[1].attrInfoPairs[1].attribute,
+              mockAftermarketDeviceInfosList[1].attrInfoPairs[1].info
+            );
+        });
+      });
+    });
+
+    context('Privileged address as minter', () => {
+      beforeEach(async () => {
         await adIdInstance
-          .connect(manufacturer1)
-          .setApprovalForAll(aftermarketDeviceInstance.address, false);
+          .connect(manufacturerPrivileged1)
+          .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      });
 
-        await expect(
-          aftermarketDeviceInstance
+      context('Error handling', () => {
+        it('Should revert if parent node is not a Manufacturer', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                99,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Invalid parent node');
+        });
+        it('Should revert if DIMO Registry is not approved for all', async () => {
+          await adIdInstance
+            .connect(manufacturerPrivileged1)
+            .setApprovalForAll(aftermarketDeviceInstance.address, false);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Registry must be approved for all');
+        });
+        it('Should revert if the caller does not have the minter privilege', async () => {
+          await adIdInstance
+            .connect(nonManufacturerPrivilged)
+            .setApprovalForAll(aftermarketDeviceInstance.address, true);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(nonManufacturerPrivilged)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if privilage has been disabled', async () => {
+          await manufacturerIdInstance.disablePrivilege(
+            C.MANUFACTURER_MINTER_PRIVILEGE
+          );
+          await adIdInstance
+            .connect(manufacturerPrivileged1)
+            .setApprovalForAll(aftermarketDeviceInstance.address, true);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if privilage is expired', async () => {
+          await provider.send('evm_increaseTime', [expiresAtDefault + 100]);
+
+          await adIdInstance
+            .connect(manufacturerPrivileged1)
+            .setApprovalForAll(aftermarketDeviceInstance.address, true);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if manufacturer has transferred their token', async () => {
+          await manufacturerInstance
+            .connect(admin)
+            .setController(manufacturer2.address);
+          await manufacturerIdInstance
+            .connect(admin)
+            .grantRole(C.NFT_TRANSFERER_ROLE, manufacturer1.address);
+          await manufacturerIdInstance
             .connect(manufacturer1)
+            ['safeTransferFrom(address,address,uint256)'](
+              manufacturer1.address,
+              manufacturer2.address,
+              1
+            );
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if manufacturer does not have a license', async () => {
+          await mockStakeInstance.setLicenseBalance(manufacturer1.address, 0);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('InvalidLicense');
+        });
+        it('Should revert if manufacturer does not have enough DIMO tokens', async () => {
+          await mockDimoTokenInstance
+            .connect(manufacturerPrivileged1)
+            .burn(C.manufacturerDimoTokensAmount);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
+        });
+        it('Should revert if manufacturer has not approve DIMORegistry', async () => {
+          await mockDimoTokenInstance
+            .connect(manufacturerPrivileged1)
+            .approve(dimoRegistryInstance.address, 0);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).to.be.revertedWith('ERC20: insufficient allowance');
+        });
+        it('Should revert if attribute is not whitelisted', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosListNotWhitelisted
+              )
+          ).to.be.revertedWith('Not whitelisted');
+        });
+        it('Should revert if device address is already registered', async () => {
+          const localInfos = JSON.parse(
+            JSON.stringify(mockAftermarketDeviceInfosList)
+          );
+          localInfos[1].addr = adAddress1.address;
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(1, localInfos)
+          ).to.be.revertedWith('Device address already registered');
+        });
+      });
+
+      context('State', () => {
+        it('Should correctly set parent node', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturerPrivileged1)
             .mintAftermarketDeviceByManufacturerBatch(
               1,
               mockAftermarketDeviceInfosList
-            )
-        ).to.be.revertedWith('Registry must be approved for all');
-      });
-      it('Should revert if manufacturer does not have a license', async () => {
-        await mockStakeInstance.setLicenseBalance(manufacturer1.address, 0);
+            );
 
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              mockAftermarketDeviceInfosList
-            )
-        ).to.be.revertedWith('Invalid license');
-      });
-      it('Should revert if manufacturer does not have a enough DIMO tokens', async () => {
-        await mockDimoTokenInstance
-          .connect(manufacturer1)
-          .burn(C.manufacturerDimoTokensAmount);
-
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              mockAftermarketDeviceInfosList
-            )
-        ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
-      });
-      it('Should revert if manufacturer has not approve DIMORegistry', async () => {
-        await mockDimoTokenInstance
-          .connect(manufacturer1)
-          .approve(dimoRegistryInstance.address, 0);
-
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              mockAftermarketDeviceInfosList
-            )
-        ).to.be.revertedWith('ERC20: insufficient allowance');
-      });
-      it('Should revert if attribute is not whitelisted', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              mockAftermarketDeviceInfosListNotWhitelisted
-            )
-        ).to.be.revertedWith('Not whitelisted');
-      });
-      it('Should revert if device address is already registered', async () => {
-        const localInfos = JSON.parse(
-          JSON.stringify(mockAftermarketDeviceInfosList)
-        );
-        localInfos[1].addr = adAddress1.address;
-
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(1, localInfos)
-        ).to.be.revertedWith('Device address already registered');
-      });
-    });
-
-    context('State', () => {
-      it('Should correctly set parent node', async () => {
-        await aftermarketDeviceInstance
-          .connect(manufacturer1)
-          .mintAftermarketDeviceByManufacturerBatch(
-            1,
-            mockAftermarketDeviceInfosList
-          );
-
-        const parentNode1 = await nodesInstance.getParentNode(
-          adIdInstance.address,
-          1
-        );
-        const parentNode2 = await nodesInstance.getParentNode(
-          adIdInstance.address,
-          2
-        );
-
-        expect(parentNode1).to.be.equal(1);
-        expect(parentNode2).to.be.equal(1);
-      });
-      it('Should correctly set nodes owner', async () => {
-        await aftermarketDeviceInstance
-          .connect(manufacturer1)
-          .mintAftermarketDeviceByManufacturerBatch(
-            1,
-            mockAftermarketDeviceInfosList
-          );
-
-        expect(await adIdInstance.ownerOf(1)).to.be.equal(
-          manufacturer1.address
-        );
-        expect(await adIdInstance.ownerOf(2)).to.be.equal(
-          manufacturer1.address
-        );
-      });
-      it('Should correctly set device address', async () => {
-        await aftermarketDeviceInstance
-          .connect(manufacturer1)
-          .mintAftermarketDeviceByManufacturerBatch(
-            1,
-            mockAftermarketDeviceInfosList
-          );
-
-        const id1 =
-          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
-            mockAftermarketDeviceInfosList[0].addr
-          );
-        const id2 =
-          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
-            mockAftermarketDeviceInfosList[1].addr
-          );
-
-        expect(id1).to.equal(1);
-        expect(id2).to.equal(2);
-      });
-      it('Should correctly set infos', async () => {
-        await aftermarketDeviceInstance
-          .connect(manufacturer1)
-          .mintAftermarketDeviceByManufacturerBatch(
-            1,
-            mockAftermarketDeviceInfosList
-          );
-
-        expect(
-          await nodesInstance.getInfo(
+          const parentNode1 = await nodesInstance.getParentNode(
             adIdInstance.address,
-            1,
-            C.mockAftermarketDeviceAttribute1
-          )
-        ).to.be.equal(C.mockAftermarketDeviceInfo1);
-        expect(
-          await nodesInstance.getInfo(
-            adIdInstance.address,
-            1,
-            C.mockAftermarketDeviceAttribute2
-          )
-        ).to.be.equal(C.mockAftermarketDeviceInfo2);
-        expect(
-          await nodesInstance.getInfo(
-            adIdInstance.address,
-            2,
-            C.mockAftermarketDeviceAttribute1
-          )
-        ).to.be.equal(C.mockAftermarketDeviceInfo1);
-        expect(
-          await nodesInstance.getInfo(
-            adIdInstance.address,
-            2,
-            C.mockAftermarketDeviceAttribute2
-          )
-        ).to.be.equal(C.mockAftermarketDeviceInfo2);
-      });
-      it('Should correctly decrease the DIMO balance of the manufacturer', async () => {
-        const balanceChange = C.adMintCost
-          .mul(C.mockAdAttributeInfoPairs.length)
-          .mul(-1);
-
-        await expect(() =>
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              mockAftermarketDeviceInfosList
-            )
-        ).changeTokenBalance(
-          mockDimoTokenInstance,
-          manufacturer1,
-          balanceChange
-        );
-      });
-      it('Should correctly transfer the DIMO tokens to the foundation', async () => {
-        const balanceChange = C.adMintCost.mul(
-          C.mockAdAttributeInfoPairs.length
-        );
-
-        await expect(() =>
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              mockAftermarketDeviceInfosList
-            )
-        ).changeTokenBalance(mockDimoTokenInstance, foundation, balanceChange);
-      });
-    });
-
-    context('Events', () => {
-      it('Should emit AftermarketDeviceNodeMinted event with correct params', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              mockAftermarketDeviceInfosList
-            )
-        )
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-          .withArgs(1, adAddress1.address, manufacturer1.address)
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-          .withArgs(2, adAddress2.address, manufacturer1.address);
-      });
-      it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturer1)
-            .mintAftermarketDeviceByManufacturerBatch(
-              1,
-              mockAftermarketDeviceInfosList
-            )
-        )
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(
-            1,
-            mockAftermarketDeviceInfosList[0].attrInfoPairs[0].attribute,
-            mockAftermarketDeviceInfosList[0].attrInfoPairs[0].info
-          )
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(
-            1,
-            mockAftermarketDeviceInfosList[0].attrInfoPairs[1].attribute,
-            mockAftermarketDeviceInfosList[0].attrInfoPairs[1].info
-          )
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(
-            2,
-            mockAftermarketDeviceInfosList[1].attrInfoPairs[0].attribute,
-            mockAftermarketDeviceInfosList[1].attrInfoPairs[0].info
-          )
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
-          .withArgs(
-            2,
-            mockAftermarketDeviceInfosList[1].attrInfoPairs[1].attribute,
-            mockAftermarketDeviceInfosList[1].attrInfoPairs[1].info
+            1
           );
+          const parentNode2 = await nodesInstance.getParentNode(
+            adIdInstance.address,
+            2
+          );
+
+          expect(parentNode1).to.be.equal(1);
+          expect(parentNode2).to.be.equal(1);
+        });
+        it('Should correctly set nodes owner', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturerPrivileged1)
+            .mintAftermarketDeviceByManufacturerBatch(
+              1,
+              mockAftermarketDeviceInfosList
+            );
+
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(
+            manufacturer1.address
+          );
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(
+            manufacturer1.address
+          );
+        });
+        it('Should correctly set device address', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturerPrivileged1)
+            .mintAftermarketDeviceByManufacturerBatch(
+              1,
+              mockAftermarketDeviceInfosList
+            );
+
+          const id1 =
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              mockAftermarketDeviceInfosList[0].addr
+            );
+          const id2 =
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              mockAftermarketDeviceInfosList[1].addr
+            );
+
+          expect(id1).to.equal(1);
+          expect(id2).to.equal(2);
+        });
+        it('Should correctly set infos', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturerPrivileged1)
+            .mintAftermarketDeviceByManufacturerBatch(
+              1,
+              mockAftermarketDeviceInfosList
+            );
+
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              1,
+              C.mockAftermarketDeviceAttribute1
+            )
+          ).to.be.equal(C.mockAftermarketDeviceInfo1);
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              1,
+              C.mockAftermarketDeviceAttribute2
+            )
+          ).to.be.equal(C.mockAftermarketDeviceInfo2);
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              2,
+              C.mockAftermarketDeviceAttribute1
+            )
+          ).to.be.equal(C.mockAftermarketDeviceInfo1);
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              2,
+              C.mockAftermarketDeviceAttribute2
+            )
+          ).to.be.equal(C.mockAftermarketDeviceInfo2);
+        });
+        it('Should correctly decrease the DIMO balance of the privileged address', async () => {
+          const balanceChange = C.adMintCost
+            .mul(C.mockAdAttributeInfoPairs.length)
+            .mul(-1);
+
+          await expect(() =>
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).changeTokenBalance(
+            mockDimoTokenInstance,
+            manufacturerPrivileged1,
+            balanceChange
+          );
+        });
+        it('Should correctly transfer the DIMO tokens to the foundation', async () => {
+          const balanceChange = C.adMintCost.mul(
+            C.mockAdAttributeInfoPairs.length
+          );
+
+          await expect(() =>
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          ).changeTokenBalance(
+            mockDimoTokenInstance,
+            foundation,
+            balanceChange
+          );
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit AftermarketDeviceNodeMinted event with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
+            .withArgs(1, adAddress1.address, manufacturer1.address)
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
+            .withArgs(2, adAddress2.address, manufacturer1.address);
+        });
+        it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .mintAftermarketDeviceByManufacturerBatch(
+                1,
+                mockAftermarketDeviceInfosList
+              )
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+            .withArgs(
+              1,
+              mockAftermarketDeviceInfosList[0].attrInfoPairs[0].attribute,
+              mockAftermarketDeviceInfosList[0].attrInfoPairs[0].info
+            )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+            .withArgs(
+              1,
+              mockAftermarketDeviceInfosList[0].attrInfoPairs[1].attribute,
+              mockAftermarketDeviceInfosList[0].attrInfoPairs[1].info
+            )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+            .withArgs(
+              2,
+              mockAftermarketDeviceInfosList[1].attrInfoPairs[0].attribute,
+              mockAftermarketDeviceInfosList[1].attrInfoPairs[0].info
+            )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAttributeSet')
+            .withArgs(
+              2,
+              mockAftermarketDeviceInfosList[1].attrInfoPairs[1].attribute,
+              mockAftermarketDeviceInfosList[1].attrInfoPairs[1].info
+            );
+        });
       });
     });
   });
@@ -645,53 +1031,139 @@ describe('AftermarketDevice', function () {
         );
     });
 
-    context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(nonAdmin)
-            .claimAftermarketDeviceBatch(localAdOwnerPairs)
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
-          }`
-        );
-      });
-      it('Should revert if device is already claimed', async () => {
-        await aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
-
-        await expect(
-          aftermarketDeviceInstance
+    context('Admin as claimer', () => {
+      context('Error handling', () => {
+        it('Should revert if caller does not have admin role', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(nonAdmin)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if device is already claimed', async () => {
+          await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(localAdOwnerPairs)
-        ).to.be.revertedWith('Device already claimed');
+            .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Device already claimed');
+        });
+      });
+
+      context('State', async () => {
+        it('Should correctly set node owners', async () => {
+          await aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(1, user1.address)
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(2, user2.address);
+        });
       });
     });
 
-    context('State', async () => {
-      it('Should correctly set node owners', async () => {
-        await aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceBatch(localAdOwnerPairs);
-
-        expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
-        expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
-      });
-    });
-
-    context('Events', () => {
-      it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
-        await expect(
-          aftermarketDeviceInstance
+    context('Privileged address as claimer', () => {
+      context('Error handling', () => {
+        it('Should revert if device is already claimed', async () => {
+          await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(localAdOwnerPairs)
-        )
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
-          .withArgs(1, user1.address)
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
-          .withArgs(2, user2.address);
+            .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Device already claimed');
+        });
+        it('Should revert if the caller does not have the minter privilege', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(nonManufacturerPrivilged)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if privilage has been disabled', async () => {
+          await manufacturerIdInstance.disablePrivilege(
+            C.MANUFACTURER_CLAIMER_PRIVILEGE
+          );
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if privilage is expired', async () => {
+          await provider.send('evm_increaseTime', [expiresAtDefault + 100]);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if manufacturer has transferred their token', async () => {
+          await manufacturerInstance
+            .connect(admin)
+            .setController(manufacturer2.address);
+          await manufacturerIdInstance
+            .connect(admin)
+            .grantRole(C.NFT_TRANSFERER_ROLE, manufacturer1.address);
+          await manufacturerIdInstance
+            .connect(manufacturer1)
+            ['safeTransferFrom(address,address,uint256)'](
+              manufacturer1.address,
+              manufacturer2.address,
+              1
+            );
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
+      });
+
+      context('State', async () => {
+        it('Should correctly set node owners', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturerPrivileged1)
+            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(1, user1.address)
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(2, user2.address);
+        });
       });
     });
   });

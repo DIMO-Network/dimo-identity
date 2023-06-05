@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
+import "../../interfaces/INFTMultiPrivilege.sol";
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
@@ -15,9 +16,11 @@ import "../../shared/Types.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/// @title AftermarketDevice
-/// @notice Contract that represents the Aftermarket Device node
-/// @dev It uses the Mapper contract to link Aftermarket Devices to Vehicles
+/**
+ * @title AftermarketDevice
+ * @notice Contract that represents the Aftermarket Device node
+ * @dev It uses the Mapper contract to link Aftermarket Devices to Vehicles
+ */
 contract AftermarketDevice is
     AccessControlInternal,
     AdLicenseValidatorInternal
@@ -35,6 +38,8 @@ contract AftermarketDevice is
         keccak256(
             "UnPairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
         );
+    uint256 private constant MANUFACTURER_MINTER_PRIVILEGE = 1;
+    uint256 private constant MANUFACTURER_CLAIMER_PRIVILEGE = 2;
 
     event AftermarketDeviceIdProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
@@ -67,9 +72,11 @@ contract AftermarketDevice is
 
     // ***** Admin management ***** //
 
-    /// @notice Sets the NFT proxy associated with the Aftermarket Device node
-    /// @dev Only an admin can set the address
-    /// @param addr The address of the proxy
+    /**
+     * @notice Sets the NFT proxy associated with the Aftermarket Device node
+     * @dev Only an admin can set the address
+     * @param addr The address of the proxy
+     */
     function setAftermarketDeviceIdProxyAddress(address addr)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -80,9 +87,11 @@ contract AftermarketDevice is
         emit AftermarketDeviceIdProxySet(addr);
     }
 
-    /// @notice Adds an attribute to the whielist
-    /// @dev Only an admin can add a new attribute
-    /// @param attribute The attribute to be added
+    /**
+     * @notice Adds an attribute to the whielist
+     * @dev Only an admin can add a new attribute
+     * @param attribute The attribute to be added
+     */
     function addAftermarketDeviceAttribute(string calldata attribute)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -100,20 +109,26 @@ contract AftermarketDevice is
 
     // ***** Interaction with nodes *****//
 
-    /// @notice Mints aftermarket devices in batch
-    /// @dev Caller must have the manufacturer role
-    /// @param manufacturerNode Parent manufacturer node id
-    /// @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
+    /**
+     * @notice Mints aftermarket devices in batch
+     * Caller must be the manufacturer node owner or an authorized address
+     * The manufacturer node owner must grant the minter privilege to the authorized address
+     * @param manufacturerNode Parent manufacturer node id
+     * @param adInfos List of attribute-info pairs and addresses associated with the AD to be added
+     *  addr -> AD address
+     *  attrInfoPairs[] / attribute
+     *                  \ info
+     */
     function mintAftermarketDeviceByManufacturerBatch(
         uint256 manufacturerNode,
         AftermarketDeviceInfos[] calldata adInfos
-    ) external onlyRole(MANUFACTURER_ROLE) {
+    ) external {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         uint256 devicesAmount = adInfos.length;
         address adIdProxyAddress = ads.idProxyAddress;
-        INFT manufacturerIdProxy = INFT(
+        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
             ManufacturerStorage.getStorage().idProxyAddress
         );
 
@@ -126,15 +141,22 @@ contract AftermarketDevice is
             "Invalid parent node"
         );
         require(
-            manufacturerIdProxy.ownerOf(manufacturerNode) == msg.sender,
-            "Caller must be the parent node owner"
+            manufacturerIdProxy.hasPrivilege(
+                manufacturerNode,
+                MANUFACTURER_MINTER_PRIVILEGE,
+                msg.sender
+            ),
+            "Unauthorized"
         );
 
         uint256 newTokenId;
         address deviceAddress;
+        address manufacturerNodeOwner = manufacturerIdProxy.ownerOf(
+            manufacturerNode
+        );
 
         for (uint256 i = 0; i < devicesAmount; i++) {
-            newTokenId = INFT(adIdProxyAddress).safeMint(msg.sender);
+            newTokenId = INFT(adIdProxyAddress).safeMint(manufacturerNodeOwner);
 
             ns
             .nodes[adIdProxyAddress][newTokenId].parentNode = manufacturerNode;
@@ -153,22 +175,40 @@ contract AftermarketDevice is
             emit AftermarketDeviceNodeMinted(
                 newTokenId,
                 deviceAddress,
-                msg.sender
+                manufacturerNodeOwner
             );
         }
 
-        // Validate request and transfer funds to foundation
-        // This transfer is at the end of the function to prevent reentrancy
-        _validateMintRequest(msg.sender, devicesAmount);
+        // Validate license and transfer funds to foundation
+        _validateMintRequest(manufacturerNodeOwner, msg.sender, devicesAmount);
     }
 
-    /// @notice Claims the ownership of a list of aftermarket devices to a list of owners
-    /// @dev Caller must have the admin role
-    /// @dev This contract must be approved to spend the tokens in advance
-    /// @param adOwnerPair List of pairs AD-owner
+    /**
+     * @notice Claims the ownership of a list of aftermarket devices to a list of owners
+     * Caller must have the admin role or the manufacturer node owner must grant the claimer privilege to the caller
+     * @dev This contract must be approved to spend the tokens in advance
+     * @param adOwnerPair List of pairs AD-owner
+     *  aftermarketDeviceNodeId -> Token ID of the AD
+     *  owner -> Address to be the new AD owner
+     */
     function claimAftermarketDeviceBatch(
+        uint256 manufacturerNode,
         AftermarketDeviceOwnerPair[] calldata adOwnerPair
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external {
+        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+
+        require(
+            _hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
+                manufacturerIdProxy.hasPrivilege(
+                    manufacturerNode,
+                    MANUFACTURER_CLAIMER_PRIVILEGE,
+                    msg.sender
+                ),
+            "Unauthorized"
+        );
+
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         INFT adIdProxy = INFT(ads.idProxyAddress);
@@ -195,14 +235,16 @@ contract AftermarketDevice is
         }
     }
 
-    /// @notice Claims the ownership of an aftermarket device through a metatransaction
-    /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
-    /// @dev Caller must have the admin role
-    /// @dev This contract must be approved to spend the tokens in advance
-    /// @param aftermarketDeviceNode Aftermarket device node id
-    /// @param owner The address of the new owner
-    /// @param ownerSig User's signature hash
-    /// @param aftermarketDeviceSig Aftermarket Device's signature hash
+    /**
+     * @notice Claims the ownership of an aftermarket device through a metatransaction
+     * The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
+     * @dev Caller must have the admin role
+     * @dev This contract must be approved to spend the tokens in advance
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param owner The address of the new owner
+     * @param ownerSig User's signature hash
+     * @param aftermarketDeviceSig Aftermarket Device's signature hash
+     */
     function claimAftermarketDeviceSign(
         uint256 aftermarketDeviceNode,
         address owner,
@@ -247,13 +289,15 @@ contract AftermarketDevice is
         emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
     }
 
-    /// @notice Pairs an aftermarket device with a vehicle through a metatransaction.
-    /// The vehicle owner and AD sign a typed structured (EIP-712) message in advance and submits to be verified
-    /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNode Aftermarket device node id
-    /// @param vehicleNode Vehicle node id
-    /// @param aftermarketDeviceSig Aftermarket Device's signature hash
-    /// @param vehicleOwnerSig Vehicle owner signature hash
+    /**
+     * @notice Pairs an aftermarket device with a vehicle through a metatransaction.
+     * The vehicle owner and AD sign a typed structured (EIP-712) message in advance and submits to be verified
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
+     * @param aftermarketDeviceSig Aftermarket Device's signature hash
+     * @param vehicleOwnerSig Vehicle owner signature hash
+     */
     function pairAftermarketDeviceSign(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
@@ -322,12 +366,14 @@ contract AftermarketDevice is
         );
     }
 
-    /// @notice Pairs an aftermarket device with a vehicle through a metatransaction
-    /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
-    /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNode Aftermarket device node id
-    /// @param vehicleNode Vehicle node id
-    /// @param signature User's signature hash
+    /**
+     * @notice Pairs an aftermarket device with a vehicle through a metatransaction
+     * The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
+     * @param signature User's signature hash
+     */
     function pairAftermarketDeviceSign(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
@@ -384,13 +430,15 @@ contract AftermarketDevice is
         emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
     }
 
-    /// @dev Unpairs an aftermarket device from a vehicles through a metatransaction
-    /// Both vehicle and AD owners can unpair.
-    /// The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
-    /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNode Aftermarket device node id
-    /// @param vehicleNode Vehicle node id
-    /// @param signature User's signature hash
+    /**
+     * @dev Unpairs an aftermarket device from a vehicles through a metatransaction
+     * Both vehicle and AD owners can unpair.
+     * The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
+     * @param signature User's signature hash
+     */
     function unpairAftermarketDeviceSign(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
@@ -444,10 +492,12 @@ contract AftermarketDevice is
         );
     }
 
-    /// @notice Add infos to node
-    /// @dev attributes must be whitelisted
-    /// @param tokenId Node id where the info will be added
-    /// @param attrInfo List of attribute-info pairs to be added
+    /**
+     * @notice Add infos to node
+     * @dev attributes must be whitelisted
+     * @param tokenId Node id where the info will be added
+     * @param attrInfo List of attribute-info pairs to be added
+     */
     function setAftermarketDeviceInfo(
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfo
@@ -461,9 +511,11 @@ contract AftermarketDevice is
         _setInfos(tokenId, attrInfo);
     }
 
-    /// @notice Gets the AD Id by the device address
-    /// @dev If the device is not minted it will return 0
-    /// @param addr Address associated with the aftermarket device
+    /**
+     * @notice Gets the AD Id by the device address
+     * @dev If the device is not minted it will return 0
+     * @param addr Address associated with the aftermarket device
+     */
     function getAftermarketDeviceIdByAddress(address addr)
         external
         view
@@ -476,10 +528,12 @@ contract AftermarketDevice is
 
     // ***** PRIVATE FUNCTIONS ***** //
 
-    /// @dev Internal function to add infos to node
-    /// @dev attributes must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attrInfo List of attribute-info pairs to be added
+    /**
+     * @dev Internal function to add infos to node
+     * @dev attributes must be whitelisted
+     * @param tokenId Node where the info will be added
+     * @param attrInfo List of attribute-info pairs to be added
+     */
     function _setInfos(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
         private
     {

@@ -4,6 +4,8 @@ import { ContractNameArgsByNetwork } from '../types';
 export const MANUFACTURER_NFT_NAME = 'Manufacturer NFT';
 export const MANUFACTURER_NFT_SYMBOL = 'MNFT';
 export const MANUFACTURER_NFT_BASE_URI = 'https://dimo.zone/manufacturer/';
+export const MANUFACTURER_MINTER_PRIVILEGE = '1';
+export const MANUFACTURER_CLAIMER_PRIVILEGE = '2';
 
 export const INTEGRATION_NFT_NAME = 'Integration NFT';
 export const INTEGRATION_NFT_SYMBOL = 'INFT';

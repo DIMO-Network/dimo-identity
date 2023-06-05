@@ -4,7 +4,6 @@ import { ethers, waffle } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
-  DimoAccessControl,
   Manufacturer,
   ManufacturerId,
   AftermarketDevice,
@@ -23,7 +22,6 @@ describe('Mapper', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
-  let accessControlInstance: DimoAccessControl;
   let manufacturerInstance: Manufacturer;
   let aftermarketDeviceInstance: AftermarketDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
@@ -71,7 +69,6 @@ describe('Mapper', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
-    accessControlInstance = deployments.DimoAccessControl;
     manufacturerInstance = deployments.Manufacturer;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     adLicenseValidatorInstance = deployments.AdLicenseValidator;
@@ -133,11 +130,6 @@ describe('Mapper', function () {
     await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
-    // Grant MANUFACTURER_ROLE to manufacturer
-    await accessControlInstance
-      .connect(admin)
-      .grantRole(C.MANUFACTURER_ROLE, manufacturer1.address);
-
     // Whitelist Manufacturer attributes
     await manufacturerInstance
       .connect(admin)
@@ -186,7 +178,7 @@ describe('Mapper', function () {
       );
     await aftermarketDeviceInstance
       .connect(admin)
-      .claimAftermarketDeviceBatch([
+      .claimAftermarketDeviceBatch(1, [
         { aftermarketDeviceNodeId: '1', owner: user1.address }
       ]);
   });

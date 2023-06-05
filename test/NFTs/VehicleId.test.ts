@@ -317,7 +317,7 @@ describe('VehicleId', async function () {
       );
     await aftermarketDeviceInstance
       .connect(admin)
-    ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature);
+      .pairAftermarketDeviceSign(1, 1, pairSignature);
   });
 
   beforeEach(async () => {

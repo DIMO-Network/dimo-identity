@@ -1031,181 +1031,139 @@ describe('AftermarketDevice', function () {
         );
     });
 
-    context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(nonAdmin)
-            .claimAftermarketDeviceBatch(localAdOwnerPairs)
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
-          }`
-        );
-      });
-      it('Should revert if device is already claimed', async () => {
-        await aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
-
-        await expect(
-          aftermarketDeviceInstance
+    context('Admin as claimer', () => {
+      context('Error handling', () => {
+        it('Should revert if caller does not have admin role', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(nonAdmin)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if device is already claimed', async () => {
+          await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(localAdOwnerPairs)
-        ).to.be.revertedWith('Device already claimed');
+            .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Device already claimed');
+        });
       });
-    });
 
-    context('State', async () => {
-      it('Should correctly set node owners', async () => {
-        await aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceBatch(localAdOwnerPairs);
-
-        expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
-        expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
-      });
-    });
-
-    context('Events', () => {
-      it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
-        await expect(
-          aftermarketDeviceInstance
+      context('State', async () => {
+        it('Should correctly set node owners', async () => {
+          await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(localAdOwnerPairs)
-        )
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
-          .withArgs(1, user1.address)
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
-          .withArgs(2, user2.address);
-      });
-    });
-  });
+            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
 
-  describe('claimAftermarketDeviceBatchAuthorized', () => {
-    const localAdOwnerPairs: AftermarketDeviceOwnerPair[] = [
-      { aftermarketDeviceNodeId: '1', owner: user1.address },
-      { aftermarketDeviceNodeId: '2', owner: user2.address }
-    ];
-
-    let ownerSig: string;
-    let adSig: string;
-    before(async () => {
-      ownerSig = await signMessage({
-        _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '1',
-          owner: user1.address
-        }
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
+        });
       });
-      adSig = await signMessage({
-        _signer: adAddress1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '1',
-          owner: user1.address
-        }
+
+      context('Events', () => {
+        it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(1, user1.address)
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(2, user2.address);
+        });
       });
     });
 
-    beforeEach(async () => {
-      await adIdInstance
-        .connect(manufacturer1)
-        .setApprovalForAll(aftermarketDeviceInstance.address, true);
-      await aftermarketDeviceInstance
-        .connect(manufacturer1)
-        .mintAftermarketDeviceByManufacturerBatch(
-          1,
-          mockAftermarketDeviceInfosList
-        );
-    });
+    context('Privileged address as claimer', () => {
+      context('Error handling', () => {
+        it('Should revert if device is already claimed', async () => {
+          await aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
 
-    context('Error handling', () => {
-      it('Should revert if device is already claimed', async () => {
-        await aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
-
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturerPrivileged1)
-            .claimAftermarketDeviceBatchAuthorized(1, localAdOwnerPairs)
-        ).to.be.revertedWith('Device already claimed');
-      });
-      it('Should revert if the caller does not have the minter privilege', async () => {
-        await expect(
-          aftermarketDeviceInstance
-            .connect(nonManufacturerPrivilged)
-            .claimAftermarketDeviceBatchAuthorized(1, localAdOwnerPairs)
-        ).to.be.revertedWith('Unauthorized');
-      });
-      it('Should revert if privilage has been disabled', async () => {
-        await manufacturerIdInstance.disablePrivilege(
-          C.MANUFACTURER_CLAIMER_PRIVILEGE
-        );
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturerPrivileged1)
-            .claimAftermarketDeviceBatchAuthorized(1, localAdOwnerPairs)
-        ).to.be.revertedWith('Unauthorized');
-      });
-      it('Should revert if privilage is expired', async () => {
-        await provider.send('evm_increaseTime', [expiresAtDefault + 100]);
-
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturerPrivileged1)
-            .claimAftermarketDeviceBatchAuthorized(1, localAdOwnerPairs)
-        ).to.be.revertedWith('Unauthorized');
-      });
-      it('Should revert if manufacturer has transferred their token', async () => {
-        await manufacturerInstance
-          .connect(admin)
-          .setController(manufacturer2.address);
-        await manufacturerIdInstance
-          .connect(admin)
-          .grantRole(C.NFT_TRANSFERER_ROLE, manufacturer1.address);
-        await manufacturerIdInstance
-          .connect(manufacturer1)
-          ['safeTransferFrom(address,address,uint256)'](
-            manufacturer1.address,
-            manufacturer2.address,
-            1
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Device already claimed');
+        });
+        it('Should revert if the caller does not have the minter privilege', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(nonManufacturerPrivilged)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if privilage has been disabled', async () => {
+          await manufacturerIdInstance.disablePrivilege(
+            C.MANUFACTURER_CLAIMER_PRIVILEGE
           );
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if privilage is expired', async () => {
+          await provider.send('evm_increaseTime', [expiresAtDefault + 100]);
 
-        await expect(
-          aftermarketDeviceInstance
-            .connect(manufacturerPrivileged1)
-            .claimAftermarketDeviceBatchAuthorized(1, localAdOwnerPairs)
-        ).to.be.revertedWith('Unauthorized');
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
+        it('Should revert if manufacturer has transferred their token', async () => {
+          await manufacturerInstance
+            .connect(admin)
+            .setController(manufacturer2.address);
+          await manufacturerIdInstance
+            .connect(admin)
+            .grantRole(C.NFT_TRANSFERER_ROLE, manufacturer1.address);
+          await manufacturerIdInstance
+            .connect(manufacturer1)
+            ['safeTransferFrom(address,address,uint256)'](
+              manufacturer1.address,
+              manufacturer2.address,
+              1
+            );
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          ).to.be.revertedWith('Unauthorized');
+        });
       });
-    });
 
-    context('State', async () => {
-      it('Should correctly set node owners', async () => {
-        await aftermarketDeviceInstance
-          .connect(manufacturerPrivileged1)
-          .claimAftermarketDeviceBatchAuthorized(1, localAdOwnerPairs);
-
-        expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
-        expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
-      });
-    });
-
-    context('Events', () => {
-      it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
-        await expect(
-          aftermarketDeviceInstance
+      context('State', async () => {
+        it('Should correctly set node owners', async () => {
+          await aftermarketDeviceInstance
             .connect(manufacturerPrivileged1)
-            .claimAftermarketDeviceBatchAuthorized(1, localAdOwnerPairs)
-        )
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
-          .withArgs(1, user1.address)
-          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
-          .withArgs(2, user2.address);
+            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(1, localAdOwnerPairs)
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(1, user1.address)
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(2, user2.address);
+        });
       });
     });
   });

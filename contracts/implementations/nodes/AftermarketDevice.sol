@@ -185,27 +185,13 @@ contract AftermarketDevice is
 
     /**
      * @notice Claims the ownership of a list of aftermarket devices to a list of owners
-     * @dev Caller must have the admin role
+     * Caller must have the admin role or the manufacturer node owner must grant the claimer privilege to the caller
      * @dev This contract must be approved to spend the tokens in advance
      * @param adOwnerPair List of pairs AD-owner
      *  aftermarketDeviceNodeId -> Token ID of the AD
      *  owner -> Address to be the new AD owner
      */
     function claimAftermarketDeviceBatch(
-        AftermarketDeviceOwnerPair[] calldata adOwnerPair
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _claimAftermarketDeviceBatch(adOwnerPair);
-    }
-
-    /**
-     * @notice Claims the ownership of a list of aftermarket devices to a list of owners
-     * The manufacturer node owner must grant the claimer privilege to the caller
-     * @dev This contract must be approved to spend the tokens in advance
-     * @param adOwnerPair List of pairs AD-owner
-     *  aftermarketDeviceNodeId -> Token ID of the AD
-     *  owner -> Address to be the new AD owner
-     */
-    function claimAftermarketDeviceBatchAuthorized(
         uint256 manufacturerNode,
         AftermarketDeviceOwnerPair[] calldata adOwnerPair
     ) external {
@@ -214,15 +200,39 @@ contract AftermarketDevice is
         );
 
         require(
-            manufacturerIdProxy.hasPrivilege(
-                manufacturerNode,
-                MANUFACTURER_CLAIMER_PRIVILEGE,
-                msg.sender
-            ),
+            _hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
+                manufacturerIdProxy.hasPrivilege(
+                    manufacturerNode,
+                    MANUFACTURER_CLAIMER_PRIVILEGE,
+                    msg.sender
+                ),
             "Unauthorized"
         );
 
-        _claimAftermarketDeviceBatch(adOwnerPair);
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        INFT adIdProxy = INFT(ads.idProxyAddress);
+
+        uint256 aftermarketDeviceNode;
+        address owner;
+        for (uint256 i = 0; i < adOwnerPair.length; i++) {
+            aftermarketDeviceNode = adOwnerPair[i].aftermarketDeviceNodeId;
+            owner = adOwnerPair[i].owner;
+
+            require(
+                !ads.deviceClaimed[aftermarketDeviceNode],
+                "Device already claimed"
+            );
+
+            ads.deviceClaimed[aftermarketDeviceNode] = true;
+            adIdProxy.safeTransferFrom(
+                adIdProxy.ownerOf(aftermarketDeviceNode),
+                owner,
+                aftermarketDeviceNode
+            );
+
+            emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
+        }
     }
 
     /**
@@ -517,41 +527,6 @@ contract AftermarketDevice is
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
-
-    /**
-     * @dev Internal function to claim the ownership of a list of aftermarket devices to a list of owners
-     * @param adOwnerPair List of pairs AD-owner
-     *  aftermarketDeviceNodeId -> Token ID of the AD
-     *  owner -> Address to be the new AD owner
-     */
-    function _claimAftermarketDeviceBatch(
-        AftermarketDeviceOwnerPair[] calldata adOwnerPair
-    ) private {
-        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-            .getStorage();
-        INFT adIdProxy = INFT(ads.idProxyAddress);
-
-        uint256 aftermarketDeviceNode;
-        address owner;
-        for (uint256 i = 0; i < adOwnerPair.length; i++) {
-            aftermarketDeviceNode = adOwnerPair[i].aftermarketDeviceNodeId;
-            owner = adOwnerPair[i].owner;
-
-            require(
-                !ads.deviceClaimed[aftermarketDeviceNode],
-                "Device already claimed"
-            );
-
-            ads.deviceClaimed[aftermarketDeviceNode] = true;
-            adIdProxy.safeTransferFrom(
-                adIdProxy.ownerOf(aftermarketDeviceNode),
-                owner,
-                aftermarketDeviceNode
-            );
-
-            emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
-        }
-    }
 
     /**
      * @dev Internal function to add infos to node

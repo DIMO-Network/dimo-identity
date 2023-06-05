@@ -60,13 +60,14 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x22Dc95682aB184d6051430f0e6afe587a64E6851",
+                "address": "0x1265B8CC11c08cDee055F2ee4bf73387d8E231B9",
                 "selectors": [
                     "0x6111afa3",
                     "0xab2ae229",
                     "0x89a841bb",
                     "0x9796cf22",
                     "0x7ba79a39",
+                    "0xb50df2f7",
                     "0xcfe642dd",
                     "0x4d49d82a",
                     "0x4d13b709",
@@ -107,11 +108,11 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0x0607Ccd9B0eB0576EEcB3957d115b3360420858a"
+                "implementation": "0x236135CC02686ec50BbDBbc838e5942019D5235b"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0xDBf41a0bc3Bd703B648b55fC50Ef2eeAcbaCd347"
+                "implementation": "0x9190536a0f981CE44121F7e05e5D728136580181"
             }
         }
     },
@@ -176,7 +177,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x2FDE841a060a55F002a6944EBD87A56B38a15fC0",
+                "address": "0x693e0796E02d69717DE293d9BEf488396651835B",
                 "selectors": [
                     "0x6111afa3",
                     "0xab2ae229",
@@ -187,8 +188,7 @@
                     "0xcfe642dd",
                     "0x4d49d82a",
                     "0x4d13b709",
-                    "0x3f65997a",
-                    "0x198cec36"
+                    "0x3f65997a"
                 ]
             },
             "AdLicenseValidator": {
@@ -234,11 +234,11 @@
             },
             "VehicleId": {
                 "proxy": "0x90C4D6113Ec88dd4BDf12f26DB2b3998fd13A144",
-                "implementation": "0x7973A748E657C113102b51FCc57f16e418d4D360"
+                "implementation": "0xb0C1C4DdF0F6E1909E7716Af16F28DcF5E1C59a3"
             },
             "AftermarketDeviceId": {
                 "proxy": "0xcf9Af64522162da85164a714c23a7705E6e466b3",
-                "implementation": "0x505afbB70b46B30Fd8D0b9BDFc4f5bfC78d3d7e0"
+                "implementation": "0xBF3c25F4cC43251fAB1d3D0b3fE5ac610A1B6DD8"
             }
         }
     },

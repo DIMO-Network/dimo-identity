@@ -21,7 +21,7 @@ async function main(paths: string[]) {
   const setParsed = Array.from(set).map((a) => JSON.parse(a));
 
   fs.writeFileSync(
-    path.resolve(__dirname, 'data', 'fullAbi.json'),
+    path.resolve(__dirname, '..', 'abis', 'DimoRegistry.json'),
     `${JSON.stringify(setParsed, null, 4)}\n`,
     {
       flag: 'w'

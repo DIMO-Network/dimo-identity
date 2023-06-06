@@ -157,7 +157,7 @@ describe('IntegrationId', async function () {
               nonController.address,
               1
             )
-        ).to.be.revertedWith('Address is not allowed to own a new token');
+        ).to.be.revertedWith(`NotAllowed("${nonController.address}")`);
       });
       it('Should revert if the new owner has already minted', async () => {
         await integrationInstance
@@ -176,7 +176,7 @@ describe('IntegrationId', async function () {
               integrationOwner2.address,
               1
             )
-        ).to.be.revertedWith('Address is not allowed to own a new token');
+        ).to.be.revertedWith(`NotAllowed("${integrationOwner2.address}")`);
       });
       it('Should revert if caller does not have transferer role', async () => {
         await integrationInstance

@@ -8,7 +8,7 @@ import "./Base/ERC2771ContextUpgradeable.sol";
 error ZeroAddress();
 error Unauthorized();
 
-contract VirtualDeviceId is
+contract SyntheticDeviceId is
     Initializable,
     ERC2771ContextUpgradeable,
     MultiPrivilege

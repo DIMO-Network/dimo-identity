@@ -91,7 +91,7 @@ describe('Integration', async function () {
           localIntegrationInstance
             .connect(admin)
             .setIntegrationIdProxyAddress(C.ZERO_ADDRESS)
-        ).to.be.revertedWith('Non zero address');
+        ).to.be.revertedWith('ZeroAddress');
       });
     });
 
@@ -126,7 +126,9 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .addIntegrationAttribute(C.mockIntegrationAttribute1)
-        ).to.be.revertedWith('Attribute already exists');
+        ).to.be.revertedWith(
+          `AttributeExists("${C.mockIntegrationAttribute1}")`
+        );
       });
     });
 
@@ -161,7 +163,7 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .setIntegrationController(C.ZERO_ADDRESS)
-        ).to.be.revertedWith('Non zero address');
+        ).to.be.revertedWith('ZeroAddress');
       });
       it('Should revert if address is already a controller', async () => {
         await integrationInstance
@@ -172,7 +174,9 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .setIntegrationController(integrationOwner1.address)
-        ).to.be.revertedWith('Already a controller');
+        ).to.be.revertedWith(
+          `AlreadyController("${integrationOwner1.address}")`
+        );
       });
     });
 
@@ -207,7 +211,7 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .mintIntegrationBatch(nonAdmin.address, C.mockIntegrationNames)
-        ).to.be.revertedWith('Owner must be an admin');
+        ).to.be.revertedWith(`MustBeAdmin("${nonAdmin.address}")`);
       });
       it('Should revert if integration name is already registered', async () => {
         await integrationInstance
@@ -218,7 +222,9 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .mintIntegrationBatch(admin.address, C.mockIntegrationNames)
-        ).to.be.revertedWith('Integration name already registered');
+        ).to.be.revertedWith(
+          `IntegrationNameRegisterd("${C.mockIntegrationNames[0]}")`
+        );
       });
     });
 
@@ -335,7 +341,7 @@ describe('Integration', async function () {
               C.mockIntegrationNames[1],
               C.mockIntegrationAttributeInfoPairs
             )
-        ).to.be.revertedWith('Invalid request');
+        ).to.be.revertedWith(`Unauthorized("${integrationOwner1.address}")`);
       });
       it('Should revert if controller has already minted a integration', async () => {
         await integrationInstance
@@ -354,7 +360,7 @@ describe('Integration', async function () {
               C.mockIntegrationNames[1],
               C.mockIntegrationAttributeInfoPairs
             )
-        ).to.be.revertedWith('Invalid request');
+        ).to.be.revertedWith(`Unauthorized("${integrationOwner1.address}")`);
       });
       it('Should revert if integration name is already registered', async () => {
         await integrationInstance
@@ -373,7 +379,9 @@ describe('Integration', async function () {
               C.mockIntegrationNames[0],
               C.mockIntegrationAttributeInfoPairs
             )
-        ).to.be.revertedWith('Integration name already registered');
+        ).to.be.revertedWith(
+          `IntegrationNameRegisterd("${C.mockIntegrationNames[0]}")`
+        );
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -384,7 +392,9 @@ describe('Integration', async function () {
               C.mockIntegrationNames[0],
               C.mockIntegrationAttributeInfoPairsNotWhitelisted
             )
-        ).to.be.revertedWith('Not whitelisted');
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${C.mockIntegrationAttributeInfoPairsNotWhitelisted[1].attribute}")`
+        );
       });
     });
 
@@ -578,7 +588,9 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .setIntegrationInfo(99, C.mockIntegrationAttributeInfoPairs)
-        ).to.be.revertedWith('Invalid integration node');
+        ).to.be.revertedWith(
+          `InvalidNode("${integrationIdInstance.address}", 99)`
+        );
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -588,7 +600,9 @@ describe('Integration', async function () {
               1,
               C.mockIntegrationAttributeInfoPairsNotWhitelisted
             )
-        ).to.be.revertedWith('Not whitelisted');
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${C.mockIntegrationAttributeInfoPairsNotWhitelisted[1].attribute}")`
+        );
       });
     });
 
@@ -674,7 +688,7 @@ describe('Integration', async function () {
             integrationOwner1.address,
             integrationOwner2.address
           )
-      ).to.be.revertedWith('Only NFT Proxy');
+      ).to.be.revertedWith('OnlyNftProxy');
     });
   });
 

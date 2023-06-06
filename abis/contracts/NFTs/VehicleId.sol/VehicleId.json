@@ -1079,14 +1079,9 @@
         "internalType": "address",
         "name": "addr",
         "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "trusted",
-        "type": "bool"
       }
     ],
-    "name": "setTrustedForwarder",
+    "name": "setSyntheticDeviceIdAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1097,9 +1092,14 @@
         "internalType": "address",
         "name": "addr",
         "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "trusted",
+        "type": "bool"
       }
     ],
-    "name": "setVirtualDeviceIdAddress",
+    "name": "setTrustedForwarder",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1131,6 +1131,19 @@
         "internalType": "string",
         "name": "",
         "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "syntheticDeviceId",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1245,19 +1258,6 @@
     "name": "upgradeToAndCall",
     "outputs": [],
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "virtualDeviceId",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   }
 ]

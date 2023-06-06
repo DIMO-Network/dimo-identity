@@ -26,12 +26,12 @@ export type AftermarketDeviceOwnerPair = {
   owner: string
 };
 
-export type MintVirtualDeviceInput = {
+export type MintSyntheticDeviceInput = {
   integrationNode: string,
   vehicleNode: string,
   vehicleOwnerSig: string,
-  virtualDeviceAddr: string,
-  virtualDeviceSig: string,
+  syntheticDeviceAddr: string,
+  syntheticDeviceSig: string,
   attrInfoPairs: AttributeInfoPair[]
 };
 

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFTMultiPrivilege.sol";
-import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
@@ -11,10 +10,21 @@ import "../../libraries/nodes/AftermarketDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 import "../AdLicenseValidator/AdLicenseValidatorInternal.sol";
 
-import "../../shared/Roles.sol";
-import "../../shared/Types.sol";
+import "../../shared/Roles.sol" as Roles;
+import "../../shared/Types.sol" as Types;
+import "../../shared/Errors.sol" as Errors;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
+
+error RegistryNotApproved();
+error DeviceAlreadyRegistered(address addr);
+error DeviceAlreadyClaimed(uint256 id);
+error InvalidAdSignature();
+error AdNotClaimed(uint256 id);
+error AdPaired(uint256 id);
+error VehicleNotPaired(uint256 id);
+error AdNotPaired(uint256 id);
+error OwnersDoesNotMatch();
 
 /**
  * @title AftermarketDevice
@@ -79,9 +89,9 @@ contract AftermarketDevice is
      */
     function setAftermarketDeviceIdProxyAddress(address addr)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
     {
-        require(addr != address(0), "Non zero address");
+        if (addr == address(0)) revert Errors.ZeroAddress();
         AftermarketDeviceStorage.getStorage().idProxyAddress = addr;
 
         emit AftermarketDeviceIdProxySet(addr);
@@ -94,15 +104,14 @@ contract AftermarketDevice is
      */
     function addAftermarketDeviceAttribute(string calldata attribute)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
     {
-        require(
-            AttributeSet.add(
+        if (
+            !AttributeSet.add(
                 AftermarketDeviceStorage.getStorage().whitelistedAttributes,
                 attribute
-            ),
-            "Attribute already exists"
-        );
+            )
+        ) revert Errors.AttributeExists(attribute);
 
         emit AftermarketDeviceAttributeAdded(attribute);
     }
@@ -121,7 +130,7 @@ contract AftermarketDevice is
      */
     function mintAftermarketDeviceByManufacturerBatch(
         uint256 manufacturerNode,
-        AftermarketDeviceInfos[] calldata adInfos
+        Types.AftermarketDeviceInfos[] calldata adInfos
     ) external {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
@@ -132,22 +141,17 @@ contract AftermarketDevice is
             ManufacturerStorage.getStorage().idProxyAddress
         );
 
-        require(
-            INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)),
-            "Registry must be approved for all"
-        );
-        require(
-            manufacturerIdProxy.exists(manufacturerNode),
-            "Invalid parent node"
-        );
-        require(
-            manufacturerIdProxy.hasPrivilege(
+        if (!INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)))
+            revert RegistryNotApproved();
+        if (!manufacturerIdProxy.exists(manufacturerNode))
+            revert Errors.InvalidParentNode(manufacturerNode);
+        if (
+            !manufacturerIdProxy.hasPrivilege(
                 manufacturerNode,
                 MANUFACTURER_MINTER_PRIVILEGE,
                 msg.sender
-            ),
-            "Unauthorized"
-        );
+            )
+        ) revert Errors.Unauthorized(msg.sender);
 
         uint256 newTokenId;
         address deviceAddress;
@@ -162,10 +166,8 @@ contract AftermarketDevice is
             .nodes[adIdProxyAddress][newTokenId].parentNode = manufacturerNode;
 
             deviceAddress = adInfos[i].addr;
-            require(
-                ads.deviceAddressToNodeId[deviceAddress] == 0,
-                "Device address already registered"
-            );
+            if (ads.deviceAddressToNodeId[deviceAddress] != 0)
+                revert DeviceAlreadyRegistered(deviceAddress);
 
             ads.deviceAddressToNodeId[deviceAddress] = newTokenId;
             ads.nodeIdToDeviceAddress[newTokenId] = deviceAddress;
@@ -193,21 +195,20 @@ contract AftermarketDevice is
      */
     function claimAftermarketDeviceBatch(
         uint256 manufacturerNode,
-        AftermarketDeviceOwnerPair[] calldata adOwnerPair
+        Types.AftermarketDeviceOwnerPair[] calldata adOwnerPair
     ) external {
         INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
             ManufacturerStorage.getStorage().idProxyAddress
         );
 
-        require(
-            _hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
-                manufacturerIdProxy.hasPrivilege(
-                    manufacturerNode,
-                    MANUFACTURER_CLAIMER_PRIVILEGE,
-                    msg.sender
-                ),
-            "Unauthorized"
-        );
+        if (
+            !_hasRole(Roles.DEFAULT_ADMIN_ROLE, msg.sender) &&
+            !manufacturerIdProxy.hasPrivilege(
+                manufacturerNode,
+                MANUFACTURER_CLAIMER_PRIVILEGE,
+                msg.sender
+            )
+        ) revert Errors.Unauthorized(msg.sender);
 
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
@@ -219,10 +220,8 @@ contract AftermarketDevice is
             aftermarketDeviceNode = adOwnerPair[i].aftermarketDeviceNodeId;
             owner = adOwnerPair[i].owner;
 
-            require(
-                !ads.deviceClaimed[aftermarketDeviceNode],
-                "Device already claimed"
-            );
+            if (ads.deviceClaimed[aftermarketDeviceNode])
+                revert DeviceAlreadyClaimed(aftermarketDeviceNode);
 
             ads.deviceClaimed[aftermarketDeviceNode] = true;
             adIdProxy.safeTransferFrom(
@@ -250,7 +249,7 @@ contract AftermarketDevice is
         address owner,
         bytes calldata ownerSig,
         bytes calldata aftermarketDeviceSig
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         bytes32 message = keccak256(
@@ -259,29 +258,25 @@ contract AftermarketDevice is
         address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
             aftermarketDeviceNode
         ];
-        INFT adIdProxy = INFT(ads.idProxyAddress);
+        address adIdProxy = ads.idProxyAddress;
 
-        require(adIdProxy.exists(aftermarketDeviceNode), "Invalid AD node");
-        require(
-            !ads.deviceClaimed[aftermarketDeviceNode],
-            "Device already claimed"
-        );
-        require(
-            Eip712CheckerInternal._verifySignature(owner, message, ownerSig),
-            "Invalid owner signature"
-        );
-        require(
-            Eip712CheckerInternal._verifySignature(
+        if (!INFT(adIdProxy).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxy, aftermarketDeviceNode);
+        if (ads.deviceClaimed[aftermarketDeviceNode])
+            revert DeviceAlreadyClaimed(aftermarketDeviceNode);
+        if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
+            revert Errors.InvalidOwnerSignature();
+        if (
+            !Eip712CheckerInternal._verifySignature(
                 aftermarketDeviceAddress,
                 message,
                 aftermarketDeviceSig
-            ),
-            "Invalid AD signature"
-        );
+            )
+        ) revert InvalidAdSignature();
 
         ads.deviceClaimed[aftermarketDeviceNode] = true;
-        adIdProxy.safeTransferFrom(
-            adIdProxy.ownerOf(aftermarketDeviceNode),
+        INFT(adIdProxy).safeTransferFrom(
+            INFT(adIdProxy).ownerOf(aftermarketDeviceNode),
             owner,
             aftermarketDeviceNode
         );
@@ -303,7 +298,7 @@ contract AftermarketDevice is
         uint256 vehicleNode,
         bytes calldata aftermarketDeviceSig,
         bytes calldata vehicleOwnerSig
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
@@ -315,46 +310,36 @@ contract AftermarketDevice is
             .getStorage()
             .idProxyAddress;
 
-        require(
-            INFT(vehicleIdProxyAddress).exists(vehicleNode),
-            "Invalid vehicle node"
-        );
-        require(
-            INFT(adIdProxyAddress).exists(aftermarketDeviceNode),
-            "Invalid AD node"
-        );
-        require(
-            AftermarketDeviceStorage.getStorage().deviceClaimed[
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (
+            !AftermarketDeviceStorage.getStorage().deviceClaimed[
                 aftermarketDeviceNode
-            ],
-            "AD must be claimed"
-        );
-        require(
-            ms.links[vehicleIdProxyAddress][vehicleNode] == 0,
-            "Vehicle already paired"
-        );
-        require(
-            ms.links[adIdProxyAddress][aftermarketDeviceNode] == 0,
-            "AD already paired"
-        );
-        require(
-            Eip712CheckerInternal._verifySignature(
+            ]
+        ) revert AdNotClaimed(aftermarketDeviceNode);
+        if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
+            revert Errors.VehiclePaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
+            revert AdPaired(aftermarketDeviceNode);
+        if (
+            !Eip712CheckerInternal._verifySignature(
                 AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
                     aftermarketDeviceNode
                 ],
                 message,
                 aftermarketDeviceSig
-            ),
-            "Invalid AD signature"
-        );
-        require(
-            Eip712CheckerInternal._verifySignature(
+            )
+        ) revert InvalidAdSignature();
+
+        if (
+            !Eip712CheckerInternal._verifySignature(
                 INFT(vehicleIdProxyAddress).ownerOf(vehicleNode),
                 message,
                 vehicleOwnerSig
-            ),
-            "Invalid vehicle owner signature"
-        );
+            )
+        ) revert Errors.InvalidOwnerSignature();
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
         ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
@@ -378,7 +363,7 @@ contract AftermarketDevice is
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         bytes calldata signature
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
@@ -390,39 +375,26 @@ contract AftermarketDevice is
             .getStorage()
             .idProxyAddress;
 
-        require(
-            INFT(vehicleIdProxyAddress).exists(vehicleNode),
-            "Invalid vehicle node"
-        );
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
 
-        require(
-            INFT(adIdProxyAddress).exists(aftermarketDeviceNode),
-            "Invalid AD node"
-        );
-        require(
-            AftermarketDeviceStorage.getStorage().deviceClaimed[
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (
+            !AftermarketDeviceStorage.getStorage().deviceClaimed[
                 aftermarketDeviceNode
-            ],
-            "AD must be claimed"
-        );
-        require(
-            owner == INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode),
-            "Owner of the nodes does not match"
-        );
-        require(
-            ms.links[vehicleIdProxyAddress][vehicleNode] == 0,
-            "Vehicle already paired"
-        );
-        require(
-            ms.links[adIdProxyAddress][aftermarketDeviceNode] == 0,
-            "AD already paired"
-        );
-        require(
-            Eip712CheckerInternal._verifySignature(owner, message, signature),
-            "Invalid signature"
-        );
+            ]
+        ) revert AdNotClaimed(aftermarketDeviceNode);
+        if (owner != INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode))
+            revert OwnersDoesNotMatch();
+        if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
+            revert Errors.VehiclePaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
+            revert AdPaired(aftermarketDeviceNode);
+        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
+            revert Errors.InvalidOwnerSignature();
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
         ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
@@ -443,7 +415,7 @@ contract AftermarketDevice is
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         bytes calldata signature
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
         bytes32 message = keccak256(
             abi.encode(UNPAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
         );
@@ -455,32 +427,24 @@ contract AftermarketDevice is
             .getStorage()
             .idProxyAddress;
 
-        require(
-            INFT(vehicleIdProxyAddress).exists(vehicleNode),
-            "Invalid vehicle node"
-        );
-        require(
-            INFT(adIdProxyAddress).exists(aftermarketDeviceNode),
-            "Invalid AD node"
-        );
-        require(
-            ms.links[vehicleIdProxyAddress][vehicleNode] ==
-                aftermarketDeviceNode,
-            "Vehicle not paired to AD"
-        );
-        require(
-            ms.links[adIdProxyAddress][aftermarketDeviceNode] == vehicleNode,
-            "AD is not paired to vehicle"
-        );
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (
+            ms.links[vehicleIdProxyAddress][vehicleNode] !=
+            aftermarketDeviceNode
+        ) revert VehicleNotPaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != vehicleNode)
+            revert AdNotPaired(aftermarketDeviceNode);
 
         address signer = Eip712CheckerInternal._recover(message, signature);
         address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
 
-        require(
-            signer == INFT(vehicleIdProxyAddress).ownerOf(vehicleNode) ||
-                signer == adOwner,
-            "Invalid signer"
-        );
+        if (
+            signer != adOwner &&
+            signer != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
+        ) revert Errors.InvalidSigner();
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = 0;
         ms.links[adIdProxyAddress][aftermarketDeviceNode] = 0;
@@ -500,22 +464,19 @@ contract AftermarketDevice is
      */
     function setAftermarketDeviceInfo(
         uint256 tokenId,
-        AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(
-            INFT(AftermarketDeviceStorage.getStorage().idProxyAddress).exists(
-                tokenId
-            ),
-            "Invalid AD node"
-        );
+        Types.AttributeInfoPair[] calldata attrInfo
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+        address adIdProxy = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+        if (!INFT(adIdProxy).exists(tokenId))
+            revert Errors.InvalidNode(adIdProxy, tokenId);
         _setInfos(tokenId, attrInfo);
     }
 
-    /**
-     * @notice Gets the AD Id by the device address
-     * @dev If the device is not minted it will return 0
-     * @param addr Address associated with the aftermarket device
-     */
+    /// @notice Gets the AD Id by the device address
+    /// @dev If the device is not minted it will return 0
+    /// @param addr Address associated with the aftermarket device
     function getAftermarketDeviceIdByAddress(address addr)
         external
         view
@@ -534,22 +495,22 @@ contract AftermarketDevice is
      * @param tokenId Node where the info will be added
      * @param attrInfo List of attribute-info pairs to be added
      */
-    function _setInfos(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
-        private
-    {
+    function _setInfos(
+        uint256 tokenId,
+        Types.AttributeInfoPair[] calldata attrInfo
+    ) private {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         address idProxyAddress = ads.idProxyAddress;
 
         for (uint256 i = 0; i < attrInfo.length; i++) {
-            require(
-                AttributeSet.exists(
+            if (
+                !AttributeSet.exists(
                     ads.whitelistedAttributes,
                     attrInfo[i].attribute
-                ),
-                "Not whitelisted"
-            );
+                )
+            ) revert Errors.AttributeNotWhitelisted(attrInfo[i].attribute);
 
             ns.nodes[idProxyAddress][tokenId].info[
                 attrInfo[i].attribute

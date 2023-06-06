@@ -406,7 +406,7 @@ describe('DevAdmin', function () {
               claimOwnerSig1,
               claimAdSig1
             )
-        ).to.be.revertedWith('Device already claimed');
+        ).to.be.revertedWith('DeviceAlreadyClaimed(1)');
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
@@ -416,7 +416,7 @@ describe('DevAdmin', function () {
               claimOwnerSig2,
               claimAdSig2
             )
-        ).to.be.revertedWith('Device already claimed');
+        ).to.be.revertedWith('DeviceAlreadyClaimed(2)');
 
         await devAdminInstance
           .connect(admin)

@@ -39,7 +39,7 @@ main([
   'contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice',
   'contracts/implementations/nodes/Manufacturer.sol:Manufacturer',
   'contracts/implementations/nodes/Integration.sol:Integration',
-  'contracts/implementations/nodes/VirtualDevice.sol:VirtualDevice',
+  'contracts/implementations/nodes/SyntheticDevice.sol:SyntheticDevice',
   'contracts/implementations/nodes/Vehicle.sol:Vehicle',
   'contracts/implementations/Nodes.sol:Nodes',
   'contracts/implementations/Mapper.sol:Mapper'

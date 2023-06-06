@@ -53,9 +53,13 @@ export const AD_NFT_NAME = 'Dimo Aftermarket Device ID';
 export const AD_NFT_SYMBOL = 'DIMO/AFTERMARKET/DEVICE';
 export const AD_NFT_URI =
   'https://devices-api.dimo.zone/v1/aftermarket/device/';
+export const SD_NFT_NAME = 'Dimo Synthetic Device ID';
+export const SD_NFT_SYMBOL = 'DIMO/SYNTHETIC/DEVICE';
+export const SD_NFT_URI = 'https://devices-api.dimo.zone/v1/synthetic/device/';
 
 export const vehicleAttributes = ['Make', 'Model', 'Year'];
 export const adAttributes = ['Serial', 'IMEI'];
+export const sdAttributes = [];
 
 export const manufacturerIdArgs = {
   name: 'ManufacturerId',
@@ -65,8 +69,14 @@ export const vehicleIdArgs = {
   name: 'VehicleId',
   args: [VEHICLE_NFT_NAME, VEHICLE_NFT_SYMBOL, VEHICLE_NFT_URI]
 };
+// TODO DimoRegistry arg, forwarders arg
 export const adIdArgs = {
   name: 'AftermarketDeviceId',
   args: [AD_NFT_NAME, AD_NFT_SYMBOL, AD_NFT_URI]
 };
-export const nftArgs = [manufacturerIdArgs, vehicleIdArgs, adIdArgs];
+// TODO DimoRegistry arg, forwarders arg
+export const sdIdArgs = {
+  name: 'SynthetictDeviceId',
+  args: [SD_NFT_NAME, SD_NFT_SYMBOL, SD_NFT_URI]
+};
+export const nftArgs = [manufacturerIdArgs, vehicleIdArgs, adIdArgs, sdIdArgs];

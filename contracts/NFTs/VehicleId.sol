@@ -10,7 +10,7 @@ error TransferFailed(address idProxy, uint256 id, string errorMessage);
 
 contract VehicleId is Initializable, MultiPrivilege {
     IDimoRegistry public _dimoRegistry;
-    address public virtualDeviceId;
+    address public syntheticDeviceId;
     mapping(address => bool) public trustedForwarders;
 
     // 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
@@ -43,15 +43,15 @@ contract VehicleId is Initializable, MultiPrivilege {
         _dimoRegistry = IDimoRegistry(addr);
     }
 
-    /// @notice Sets the Virtual Device Id address
-    /// @dev Only an admin can set the Virtual Device Id address
+    /// @notice Sets the Synthetic Device Id address
+    /// @dev Only an admin can set the Synthetic Device Id address
     /// @param addr The address to be set
-    function setVirtualDeviceIdAddress(address addr)
+    function setSyntheticDeviceIdAddress(address addr)
         external
         onlyRole(ADMIN_ROLE)
     {
         if (addr == address(0)) revert ZeroAddress();
-        virtualDeviceId = addr;
+        syntheticDeviceId = addr;
     }
 
     /// @notice Sets trusted or not to an address
@@ -67,7 +67,7 @@ contract VehicleId is Initializable, MultiPrivilege {
 
     /**
      * @notice Internal function to transfer a token. If the vehicle is
-     * paired to a virtual device, the corresponding token is also transferred.
+     * paired to a synthetic device, the corresponding token is also transferred.
      * @dev Only the token owner can transfer (no approvals)
      * @dev Pairings are maintained
      * @dev Clears all privileges
@@ -84,20 +84,20 @@ contract VehicleId is Initializable, MultiPrivilege {
         // Approvals are not accepted for now
         if (_msgSender() != from) revert Unauthorized();
 
-        uint256 pairedVirtualDeviceId = _dimoRegistry.getNodeLink(
+        uint256 pairedSdId = _dimoRegistry.getNodeLink(
             address(this),
-            virtualDeviceId,
+            syntheticDeviceId,
             tokenId
         );
 
-        if (pairedVirtualDeviceId != 0) {
-            (bool success, bytes memory data) = virtualDeviceId.call(
+        if (pairedSdId != 0) {
+            (bool success, bytes memory data) = syntheticDeviceId.call(
                 abi.encodePacked(
                     abi.encodeWithSelector(
                         SAFE_TRANSFER_FROM,
                         _msgSender(),
                         to,
-                        pairedVirtualDeviceId
+                        pairedSdId
                     ),
                     _msgSender()
                 )
@@ -109,8 +109,8 @@ contract VehicleId is Initializable, MultiPrivilege {
                     data := add(data, 0x04)
                 }
                 revert TransferFailed(
-                    virtualDeviceId,
-                    pairedVirtualDeviceId,
+                    syntheticDeviceId,
+                    pairedSdId,
                     abi.decode(data, (string))
                 );
             }

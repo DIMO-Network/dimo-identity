@@ -77,7 +77,7 @@ describe('ManufacturerId', async function () {
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
+          C.ADMIN_ROLE
         }`
       );
     });

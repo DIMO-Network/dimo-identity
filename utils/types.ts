@@ -73,6 +73,12 @@ export type ContractAddressesByNetwork = {
         proxy: string,
         implementation: string
       }
+    },
+    auxContracts: {
+      [index: string]: {
+        proxy: string,
+        implementation: string
+      }
     }
   }
 };

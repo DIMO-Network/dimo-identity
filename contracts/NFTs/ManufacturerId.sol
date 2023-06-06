@@ -36,6 +36,8 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => uint256))))
         public privilegeEntry;
 
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -47,6 +49,8 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         string calldata baseUri_
     ) external initializer {
         _baseNftInit(name_, symbol_, baseUri_);
+
+        _grantRole(ADMIN_ROLE, msg.sender);
     }
 
     /// @notice Sets the DIMO Registry address
@@ -54,7 +58,7 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     /// @param addr The address to be set
     function setDimoRegistryAddress(address addr)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         if (addr == address(0)) revert ZeroAddress();
         _dimoRegistry = IDimoRegistry(addr);
@@ -67,7 +71,7 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     /// @param description Description of the new privilege
     function createPrivilege(bool enabled, string calldata description)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         _privilegeCounter.increment();
         uint256 privilegeId = _privilegeCounter.current();
@@ -80,10 +84,7 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     /// @notice Enables existing privilege
     /// @dev The caller must have the admin role
     /// @param privId Privilege Id to be enabled
-    function enablePrivilege(uint256 privId)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function enablePrivilege(uint256 privId) external onlyRole(ADMIN_ROLE) {
         require(privId <= _privilegeCounter.current(), "Invalid privilege id");
         require(!privilegeRecord[privId].enabled, "Privilege is enabled");
 
@@ -95,10 +96,7 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     /// @notice Disables existing privilege
     /// @dev The caller must have the admin role
     /// @param privId Privilege Id to be disabled
-    function disablePrivilege(uint256 privId)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function disablePrivilege(uint256 privId) external onlyRole(ADMIN_ROLE) {
         require(privId <= _privilegeCounter.current(), "Invalid privilege id");
         require(privilegeRecord[privId].enabled, "Privilege is disabled");
 

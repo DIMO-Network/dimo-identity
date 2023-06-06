@@ -178,7 +178,7 @@ describe('Mapper', function () {
       );
     await aftermarketDeviceInstance
       .connect(admin)
-      .claimAftermarketDeviceBatch([
+      .claimAftermarketDeviceBatch(1, [
         { aftermarketDeviceNodeId: '1', owner: user1.address }
       ]);
   });

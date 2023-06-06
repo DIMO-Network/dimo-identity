@@ -45,7 +45,7 @@ async function claimByAdmin(
     const batch = aftermarketDeviceOwnerPairs.slice(i, i + batchSize);
 
     const receipt = await (
-      await adInstance.connect(deployer).claimAftermarketDeviceBatch(batch, {
+      await adInstance.connect(deployer).claimAftermarketDeviceBatch(1, batch, {
         gasPrice: process.env.GAS_PRICE
       })
     ).wait();

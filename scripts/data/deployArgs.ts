@@ -79,7 +79,7 @@ export const adIdArgs = {
 };
 // TODO DimoRegistry arg, forwarders arg
 export const sdIdArgs = {
-  name: 'SynthetictDeviceId',
+  name: 'SyntheticDeviceId',
   args: [SD_NFT_NAME, SD_NFT_SYMBOL, SD_NFT_URI]
 };
 export const nftArgs = [manufacturerIdArgs, vehicleIdArgs, adIdArgs, sdIdArgs];

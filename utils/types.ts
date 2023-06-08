@@ -60,7 +60,7 @@ export type ContractNameArgsByNetwork = {
   [index: string]: ContractNameArgs
 };
 
-export type ContractAddressesByNetwork = {
+export type AddressesByNetwork = {
   [index: string]: {
     modules: {
       [index: string]: {
@@ -74,11 +74,8 @@ export type ContractAddressesByNetwork = {
         implementation: string
       }
     },
-    auxContracts: {
-      [index: string]: {
-        proxy: string,
-        implementation: string
-      }
+    misc: {
+      [index: string]: any
     }
   }
 };
@@ -95,4 +92,9 @@ export type ContractsSetup = {
   modules: string[],
   nfts: string[],
   upgradeableContracts: string[]
+};
+
+export type NftArgs = {
+  name: string,
+  args: (string | string[])[]
 };

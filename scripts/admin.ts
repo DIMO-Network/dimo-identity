@@ -1,22 +1,25 @@
-import { ethers } from 'hardhat';
+import { ethers, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import { DevAdmin, AftermarketDevice, DimoAccessControl } from '../typechain';
 import {
-  ContractAddressesByNetwork,
+  AddressesByNetwork,
   AttributeInfoPair,
   AftermarketDeviceOwnerPair
 } from '../utils';
-import * as C from './data/deployArgs';
 import addressesJSON from './data/addresses.json';
 
-const contractAddresses: ContractAddressesByNetwork = addressesJSON;
+const contractAddresses: AddressesByNetwork = addressesJSON;
 
 // eslint-disable-next-line no-unused-vars
-async function unpair(deployer: SignerWithAddress, devices: string[]) {
+async function unpair(
+  deployer: SignerWithAddress,
+  devices: string[],
+  networkName: string
+) {
   const devAdminInstance: DevAdmin = await ethers.getContractAt(
     'DevAdmin',
-    contractAddresses[C.networkName].modules.DIMORegistry.address
+    contractAddresses[networkName].modules.DIMORegistry.address
   );
 
   console.log(`\n----- Unpairing ${devices} device -----\n`);
@@ -31,12 +34,13 @@ async function unpair(deployer: SignerWithAddress, devices: string[]) {
 // eslint-disable-next-line no-unused-vars
 async function claimByAdmin(
   deployer: SignerWithAddress,
-  aftermarketDeviceOwnerPairs: AftermarketDeviceOwnerPair[]
+  aftermarketDeviceOwnerPairs: AftermarketDeviceOwnerPair[],
+  networkName: string
 ) {
   const batchSize = 50;
   const adInstance: AftermarketDevice = await ethers.getContractAt(
     'AftermarketDevice',
-    contractAddresses[C.networkName].modules.DIMORegistry.address
+    contractAddresses[networkName].modules.DIMORegistry.address
   );
 
   console.log(`\n----- Claiming devices -----\n`);
@@ -64,11 +68,12 @@ async function claimByAdmin(
 async function setInfos(
   deployer: SignerWithAddress,
   tokenId: string,
-  attributeInfoPairs: AttributeInfoPair[]
+  attributeInfoPairs: AttributeInfoPair[],
+  networkName: string
 ) {
   const adInstance: AftermarketDevice = await ethers.getContractAt(
     'AftermarketDevice',
-    contractAddresses[C.networkName].modules.DIMORegistry.address
+    contractAddresses[networkName].modules.DIMORegistry.address
   );
 
   console.log(`\n----- Setting infos to device ${tokenId} -----\n`);
@@ -88,11 +93,12 @@ async function setInfos(
 async function revokeRole(
   deployer: SignerWithAddress,
   role: string,
-  address: string
+  address: string,
+  networkName: string
 ) {
   const accessControlInstance: DimoAccessControl = await ethers.getContractAt(
     'DimoAccessControl',
-    contractAddresses[C.networkName].modules.DIMORegistry.address
+    contractAddresses[networkName].modules.DIMORegistry.address
   );
 
   console.log(`\n----- Revoking ${role} role to ${address} -----`);
@@ -106,9 +112,11 @@ async function revokeRole(
 
 async function main() {
   const [deployer] = await ethers.getSigners();
-  await unpair(deployer, []);
-  await claimByAdmin(deployer, []);
-  await setInfos(deployer, '', []);
+  const networkName = network.name;
+
+  await unpair(deployer, [], networkName);
+  await claimByAdmin(deployer, [], networkName);
+  await setInfos(deployer, '', [], networkName);
 }
 
 main().catch((error) => {

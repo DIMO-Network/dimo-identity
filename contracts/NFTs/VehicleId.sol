@@ -25,9 +25,18 @@ contract VehicleId is Initializable, MultiPrivilege {
     function initialize(
         string calldata name_,
         string calldata symbol_,
-        string calldata baseUri_
+        string calldata baseUri_,
+        address dimoRegistry_,
+        address syntheticDeviceId_,
+        address[] calldata trustedForwarders_
     ) external initializer {
-        _baseNftInit(name_, symbol_, baseUri_);
+        _multiPrivilegeInit(name_, symbol_, baseUri_);
+
+        _dimoRegistry = IDimoRegistry(dimoRegistry_);
+        syntheticDeviceId = syntheticDeviceId_;
+        for (uint256 i = 0; i < trustedForwarders_.length; i++) {
+            trustedForwarders[trustedForwarders_[i]] = true;
+        }
 
         _grantRole(ADMIN_ROLE, msg.sender);
     }

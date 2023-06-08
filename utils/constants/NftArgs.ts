@@ -29,7 +29,8 @@ export const nftArgs: ContractNameArgsByNetwork = {
     args: [
       MANUFACTURER_NFT_NAME,
       MANUFACTURER_NFT_SYMBOL,
-      MANUFACTURER_NFT_BASE_URI
+      MANUFACTURER_NFT_BASE_URI,
+      ZERO_ADDRESS
     ],
     opts: {
       initializer: 'initialize',
@@ -54,7 +55,14 @@ export const nftArgs: ContractNameArgsByNetwork = {
   },
   VehicleId: {
     name: 'VehicleId',
-    args: [VEHICLE_NFT_NAME, VEHICLE_NFT_SYMBOL, VEHICLE_NFT_BASE_URI],
+    args: [
+      VEHICLE_NFT_NAME,
+      VEHICLE_NFT_SYMBOL,
+      VEHICLE_NFT_BASE_URI,
+      ZERO_ADDRESS,
+      ZERO_ADDRESS,
+      []
+    ],
     opts: {
       initializer: 'initialize',
       // eslint-disable-next-line prettier/prettier
@@ -63,7 +71,13 @@ export const nftArgs: ContractNameArgsByNetwork = {
   },
   AftermarketDeviceId: {
     name: 'AftermarketDeviceId',
-    args: [AD_NFT_NAME, AD_NFT_SYMBOL, AD_NFT_BASE_URI],
+    args: [
+      AD_NFT_NAME,
+      AD_NFT_SYMBOL,
+      AD_NFT_BASE_URI,
+      ZERO_ADDRESS,
+      []
+    ],
     opts: {
       initializer: 'initialize',
       // eslint-disable-next-line prettier/prettier

@@ -1,23 +1,19 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { ethers, upgrades } from 'hardhat';
+import { ethers, network, upgrades } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import { DIMORegistry } from '../typechain';
-import { getSelectors, ContractAddressesByNetwork } from '../utils';
-import * as C from './data/deployArgs';
+import { getSelectors, AddressesByNetwork } from '../utils';
 import addressesJSON from './data/addresses.json';
 
-const contractAddresses: ContractAddressesByNetwork = addressesJSON;
+const contractAddresses: AddressesByNetwork = addressesJSON;
 
 // eslint-disable-next-line no-unused-vars
-function writeAddresses(
-  addresses: ContractAddressesByNetwork,
-  networkName: string
-) {
+function writeAddresses(addresses: AddressesByNetwork, networkName: string) {
   console.log('\n----- Writing addresses to file -----\n');
 
-  const currentAddresses: ContractAddressesByNetwork = contractAddresses;
+  const currentAddresses: AddressesByNetwork = contractAddresses;
   currentAddresses[networkName] = addresses[networkName];
 
   fs.writeFileSync(
@@ -31,10 +27,10 @@ async function deployModules(
   deployer: SignerWithAddress,
   contractNames: string[],
   networkName: string
-): Promise<ContractAddressesByNetwork> {
+): Promise<AddressesByNetwork> {
   console.log('\n----- Deploying contracts -----\n');
 
-  const instances: ContractAddressesByNetwork = JSON.parse(
+  const instances: AddressesByNetwork = JSON.parse(
     JSON.stringify(contractAddresses)
   );
 
@@ -63,13 +59,13 @@ async function addModules(
   deployer: SignerWithAddress,
   contractNames: string[],
   networkName: string
-): Promise<ContractAddressesByNetwork> {
+): Promise<AddressesByNetwork> {
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
     'DIMORegistry',
     contractAddresses[networkName].modules.DIMORegistry.address
   );
 
-  const instances: ContractAddressesByNetwork = JSON.parse(
+  const instances: AddressesByNetwork = JSON.parse(
     JSON.stringify(contractAddresses)
   );
 
@@ -111,13 +107,13 @@ async function removeModule(
   deployer: SignerWithAddress,
   contractNames: string[],
   networkName: string
-): Promise<ContractAddressesByNetwork> {
+): Promise<AddressesByNetwork> {
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
     'DIMORegistry',
     contractAddresses[networkName].modules.DIMORegistry.address
   );
 
-  const instances: ContractAddressesByNetwork = JSON.parse(
+  const instances: AddressesByNetwork = JSON.parse(
     JSON.stringify(contractAddresses)
   );
 
@@ -159,13 +155,13 @@ async function updateModule(
   deployer: SignerWithAddress,
   contractName: string,
   networkName: string
-): Promise<ContractAddressesByNetwork> {
+): Promise<AddressesByNetwork> {
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
     'DIMORegistry',
     contractAddresses[networkName].modules.DIMORegistry.address
   );
 
-  const instances: ContractAddressesByNetwork = JSON.parse(
+  const instances: AddressesByNetwork = JSON.parse(
     JSON.stringify(contractAddresses)
   );
 
@@ -215,10 +211,10 @@ async function upgradeNft(
   deployer: SignerWithAddress,
   nftName: string,
   networkName: string
-): Promise<ContractAddressesByNetwork> {
+): Promise<AddressesByNetwork> {
   const NftFactory = await ethers.getContractFactory(nftName, deployer);
 
-  const instances: ContractAddressesByNetwork = JSON.parse(
+  const instances: AddressesByNetwork = JSON.parse(
     JSON.stringify(contractAddresses)
   );
 
@@ -252,6 +248,7 @@ async function upgradeNft(
 
 async function main() {
   const [deployer] = await ethers.getSigners();
+  const networkName = network.name;
 
   // const deployer = await ethers.getImpersonatedSigner(
   //   '0x1741eC2915Ab71Fc03492715b5640133dA69420B'
@@ -262,22 +259,18 @@ async function main() {
   //   value: ethers.utils.parseEther('100')
   // });
 
-  const instances1 = await updateModule(deployer, 'DevAdmin', C.networkName);
-  writeAddresses(instances1, C.networkName);
+  const instances1 = await updateModule(deployer, 'DevAdmin', networkName);
+  writeAddresses(instances1, networkName);
 
-  const instances2 = await updateModule(
-    deployer,
-    'Manufacturer',
-    C.networkName
-  );
-  writeAddresses(instances2, C.networkName);
+  const instances2 = await updateModule(deployer, 'Manufacturer', networkName);
+  writeAddresses(instances2, networkName);
 
   const nftInstances = await upgradeNft(
     deployer,
     'ManufacturerId',
-    C.networkName
+    networkName
   );
-  writeAddresses(nftInstances, C.networkName);
+  writeAddresses(nftInstances, networkName);
 }
 
 main().catch((error) => {

@@ -389,6 +389,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "_dimoRegistry",
+    "outputs": [
+      {
+        "internalType": "contract IDimoRegistry",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -626,6 +639,16 @@
         "internalType": "string",
         "name": "baseUri_",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "dimoRegistry_",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "trustedForwarders_",
+        "type": "address[]"
       }
     ],
     "name": "initialize",

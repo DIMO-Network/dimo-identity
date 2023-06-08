@@ -673,6 +673,21 @@
         "internalType": "string",
         "name": "baseUri_",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "dimoRegistry_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "syntheticDeviceId_",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "trustedForwarders_",
+        "type": "address[]"
       }
     ],
     "name": "initialize",

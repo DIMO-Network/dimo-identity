@@ -22,7 +22,7 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         uint256 expires;
     }
 
-    IDimoRegistry private _dimoRegistry;
+    IDimoRegistry public _dimoRegistry;
 
     CountersUpgradeable.Counter private _privilegeCounter;
 
@@ -46,9 +46,12 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     function initialize(
         string calldata name_,
         string calldata symbol_,
-        string calldata baseUri_
+        string calldata baseUri_,
+        address dimoRegistry_
     ) external initializer {
         _baseNftInit(name_, symbol_, baseUri_);
+
+        _dimoRegistry = IDimoRegistry(dimoRegistry_);
 
         _grantRole(ADMIN_ROLE, msg.sender);
     }

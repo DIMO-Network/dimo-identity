@@ -1,28 +1,30 @@
 import { ethers, network } from 'hardhat';
 
 import addressesJSON from './data/addresses.json';
-import { ContractAddressesByNetwork } from '../utils';
+import { AddressesByNetwork } from '../utils';
 
-const contractAddresses: ContractAddressesByNetwork = addressesJSON;
+const contractAddresses: AddressesByNetwork = addressesJSON;
 
 async function main() {
   const dimoRegistryInstance = await ethers.getContractAt(
-    'VehicleId',
-    contractAddresses[network.name].nfts.VehicleId.proxy
+    'DIMORegistry',
+    contractAddresses[network.name].modules.DIMORegistry.address
   );
-  const eventFilter = dimoRegistryInstance.filters.RoleGranted();
+  const eventFilter = dimoRegistryInstance.filters.ModuleUpdated();
 
   const events = await dimoRegistryInstance.queryFilter(
     eventFilter,
-    34569053,
-    36502214
+    25389115,
+    35489115
   );
 
-  const filtered = events.map((e) => {
-    return { role: e.args.role, account: e.args.account };
-  });
+  // const filtered = events.map((e) => {
+  //   return { role: e.args.role, account: e.args.account };
+  // });
 
-  console.log(filtered);
+  // console.log(events[2].args.oldSelectors);
+  // console.log(events[2].args.newSelectors);
+  console.log(events);
 }
 
 main().catch((error) => {

@@ -103,15 +103,15 @@
         "nfts": {
             "ManufacturerId": {
                 "proxy": "0x3b07e2A2ABdd0A9B8F7878bdE6487c502164B9dd",
-                "implementation": "0xBc65644cd6C3B4331a9F3D5e2A425C413bBA25ED"
+                "implementation": "0x976b6BE673459271697F25d744903b84eB70F867"
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0xa7b8E4D8A9Ab895AF96DE032025Bc6758F810CaD"
+                "implementation": "0xD6f5cFfA4140E1C0F716f28E6f412C6dD1B65264"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0x83c54aB79Ac918E129BfC12fBa4f1626d2D423a7"
+                "implementation": "0xDA0dD59e160c5e29f19043ac965b5c121F248D69"
             }
         },
         "misc": {

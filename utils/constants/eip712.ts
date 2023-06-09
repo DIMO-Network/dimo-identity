@@ -27,10 +27,6 @@ export const schemaBase: TypedData = {
     UnPairAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
       { name: 'vehicleNode', type: 'uint256' }
-    ],
-    MintSyntheticDeviceSign: [
-      { name: 'integrationNode', type: 'uint256' },
-      { name: 'vehicleNode', type: 'uint256' }
     ]
   },
   primaryType: '',

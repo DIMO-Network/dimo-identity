@@ -14,8 +14,6 @@ library MapperStorage {
         // Stores beneficiary addresses for a given nodeId of an idProxy
         // idProxyAddress -> nodeId -> beneficiary
         mapping(address => mapping(uint256 => address)) beneficiaries;
-        // idProxyAddress1 -> idProxyAddress2 -> nftId1 -> nftId2
-        mapping(address => mapping(address => mapping(uint256 => uint256))) nodeLinks;
     }
 
     /* solhint-disable no-inline-assembly */

@@ -26,15 +26,6 @@ export type AftermarketDeviceOwnerPair = {
   owner: string
 };
 
-export type MintSyntheticDeviceInput = {
-  integrationNode: string,
-  vehicleNode: string,
-  vehicleOwnerSig: string,
-  syntheticDeviceAddr: string,
-  syntheticDeviceSig: string,
-  attrInfoPairs: AttributeInfoPair[]
-};
-
 export type IdManufacturerName = {
   tokenId: string,
   name: string

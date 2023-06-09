@@ -288,35 +288,6 @@ describe('VehicleId', async function () {
     });
   });
 
-  describe('setSyntheticDeviceIdAddress', () => {
-    it('Should revert if caller does not have admin role', async () => {
-      await expect(
-        vehicleIdInstance
-          .connect(nonAdmin)
-          .setSyntheticDeviceIdAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
-        }`
-      );
-    });
-    it('Should correctly set the Synthetic Device ID address', async () => {
-      const mockSyntheticDeviceId = ethers.Wallet.createRandom();
-
-      expect(await vehicleIdInstance.syntheticDeviceId()).to.be.equal(
-        C.ZERO_ADDRESS
-      );
-
-      await vehicleIdInstance
-        .connect(admin)
-        .setSyntheticDeviceIdAddress(mockSyntheticDeviceId.address);
-
-      expect(await vehicleIdInstance.syntheticDeviceId()).to.be.equal(
-        mockSyntheticDeviceId.address
-      );
-    });
-  });
-
   describe('setTrustedForwarder', () => {
     it('Should revert if caller does not have admin role', async () => {
       await expect(

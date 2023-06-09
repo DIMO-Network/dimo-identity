@@ -54,20 +54,6 @@ contract Mapper {
         ];
     }
 
-    /// @notice Gets the link between two nodes (source -> target)
-    /// @param idProxyAddressSource The address of the NFT proxy source
-    /// @param idProxyAddressTarget The address of the NFT proxy target
-    /// @param sourceNode The source node id to be queried
-    function getNodeLink(
-        address idProxyAddressSource,
-        address idProxyAddressTarget,
-        uint256 sourceNode
-    ) external view returns (uint256 targetNode) {
-        targetNode = MapperStorage.getStorage().nodeLinks[idProxyAddressSource][
-            idProxyAddressTarget
-        ][sourceNode];
-    }
-
     /// @notice Gets the beneficiary associated with the pair idProxy/nodeId.
     /// @notice If the beneficiary is not explicitly set, it defaults to the owner
     /// @param idProxyAddress The address of the NFT proxy

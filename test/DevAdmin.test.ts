@@ -1,10 +1,9 @@
 import chai from 'chai';
-import { ethers, waffle, upgrades } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
   Eip712Checker,
-  DimoAccessControl,
   Manufacturer,
   ManufacturerId,
   Vehicle,
@@ -18,7 +17,7 @@ import {
   DevAdmin
 } from '../typechain';
 import {
-  initialize,
+  setup,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -27,16 +26,12 @@ import {
 } from '../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('DevAdmin', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
-  let accessControlInstance: DimoAccessControl;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
@@ -72,83 +67,34 @@ describe('DevAdmin', function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      eip712CheckerInstance,
-      accessControlInstance,
-      manufacturerInstance,
-      vehicleInstance,
-      aftermarketDeviceInstance,
-      adLicenseValidatorInstance,
-      mapperInstance,
-      devAdminInstance
-    ] = await initialize(
-      admin,
-      'Eip712Checker',
-      'DimoAccessControl',
-      'Manufacturer',
-      'Vehicle',
-      'AftermarketDevice',
-      'AdLicenseValidator',
-      'Mapper',
-      'DevAdmin'
-    );
-
-    const ManufacturerIdFactory = await ethers.getContractFactory(
-      'ManufacturerId'
-    );
-    const vehicleIdFactory = await ethers.getContractFactory('VehicleId');
-    const AftermarketDeviceIdFactory = await ethers.getContractFactory(
-      'AftermarketDeviceId'
-    );
-
-    manufacturerIdInstance = await upgrades.deployProxy(
-      ManufacturerIdFactory,
-      [
-        C.MANUFACTURER_NFT_NAME,
-        C.MANUFACTURER_NFT_SYMBOL,
-        C.MANUFACTURER_NFT_BASE_URI
+    const deployments = await setup(admin, {
+      modules: [
+        'Eip712Checker',
+        'DimoAccessControl',
+        'Manufacturer',
+        'Vehicle',
+        'AftermarketDevice',
+        'AdLicenseValidator',
+        'Mapper',
+        'DevAdmin'
       ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerId;
-    await manufacturerIdInstance.deployed();
+      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
+      upgradeableContracts: []
+    });
 
-    vehicleIdInstance = await upgrades.deployProxy(
-      vehicleIdFactory,
-      [
-        C.VEHICLE_NFT_NAME,
-        C.VEHICLE_NFT_SYMBOL,
-        C.VEHICLE_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as VehicleId;
-    await vehicleIdInstance.deployed();
+    dimoRegistryInstance = deployments.DIMORegistry;
+    eip712CheckerInstance = deployments.Eip712Checker;
+    manufacturerInstance = deployments.Manufacturer;
+    vehicleInstance = deployments.Vehicle;
+    aftermarketDeviceInstance = deployments.AftermarketDevice;
+    adLicenseValidatorInstance = deployments.AdLicenseValidator;
+    mapperInstance = deployments.Mapper;
+    devAdminInstance = deployments.DevAdmin;
+    manufacturerIdInstance = deployments.ManufacturerId;
+    vehicleIdInstance = deployments.VehicleId;
+    adIdInstance = deployments.AftermarketDeviceId;
 
-    adIdInstance = await upgrades.deployProxy(
-      AftermarketDeviceIdFactory,
-      [
-        C.AD_NFT_NAME,
-        C.AD_NFT_SYMBOL,
-        C.AD_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as AftermarketDeviceId;
-    await adIdInstance.deployed();
-
-    const MANUFACTURER_MINTER_ROLE =
-      await manufacturerIdInstance.MINTER_ROLE();
+    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
@@ -209,11 +155,6 @@ describe('DevAdmin', function () {
     );
     await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
-
-    // Grant MANUFACTURER_ROLE to manufacturer
-    await accessControlInstance
-      .connect(admin)
-      .grantRole(C.MANUFACTURER_ROLE, manufacturer1.address);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -321,7 +262,8 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .transferAftermarketDeviceOwnership(1, user2.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -437,11 +379,10 @@ describe('DevAdmin', function () {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
-          devAdminInstance
-            .connect(nonAdmin)
-            .unclaimAftermarketDeviceNode([1])
+          devAdminInstance.connect(nonAdmin).unclaimAftermarketDeviceNode([1])
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -456,52 +397,58 @@ describe('DevAdmin', function () {
 
     context('State', () => {
       it('Should correctly unclaim aftermarket Device', async () => {
-        await expect(aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceSign(
-            1,
-            user1.address,
-            claimOwnerSig1,
-            claimAdSig1
-          )).to.be.revertedWith('Device already claimed');
-        await expect(aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceSign(
-            2,
-            user1.address,
-            claimOwnerSig2,
-            claimAdSig2
-          )).to.be.revertedWith('Device already claimed');
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(
+              1,
+              user1.address,
+              claimOwnerSig1,
+              claimAdSig1
+            )
+        ).to.be.revertedWith('DeviceAlreadyClaimed(1)');
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(
+              2,
+              user1.address,
+              claimOwnerSig2,
+              claimAdSig2
+            )
+        ).to.be.revertedWith('DeviceAlreadyClaimed(2)');
 
         await devAdminInstance
           .connect(admin)
           .unclaimAftermarketDeviceNode([1, 2]);
 
-        await expect(aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceSign(
-            1,
-            user1.address,
-            claimOwnerSig1,
-            claimAdSig1
-          )).to.not.be.reverted;
-        await expect(aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceSign(
-            2,
-            user1.address,
-            claimOwnerSig2,
-            claimAdSig2
-          )).to.not.be.reverted;
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(
+              1,
+              user1.address,
+              claimOwnerSig1,
+              claimAdSig1
+            )
+        ).to.not.be.reverted;
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(
+              2,
+              user1.address,
+              claimOwnerSig2,
+              claimAdSig2
+            )
+        ).to.not.be.reverted;
       });
     });
 
     context('Events', () => {
       it('Should emit AftermarketDeviceUnclaimedDevAdmin event with correct params', async () => {
         await expect(
-          devAdminInstance
-            .connect(admin)
-            .unclaimAftermarketDeviceNode([1, 2])
+          devAdminInstance.connect(admin).unclaimAftermarketDeviceNode([1, 2])
         )
           .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimedDevAdmin')
           .withArgs(1)
@@ -606,10 +553,10 @@ describe('DevAdmin', function () {
         );
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(1, 1, pairSig1);
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(2, 2, pairSig2);
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 2, pairSig2);
     });
 
     context('Error handling', () => {
@@ -619,7 +566,8 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .unpairAftermarketDeviceByDeviceNode([2])
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -783,10 +731,10 @@ describe('DevAdmin', function () {
         );
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(1, 1, pairSig1);
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
       await aftermarketDeviceInstance
         .connect(admin)
-        .pairAftermarketDeviceSign(2, 2, pairSig2);
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 2, pairSig2);
     });
 
     context('Error handling', () => {
@@ -796,7 +744,8 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .unpairAftermarketDeviceByVehicleNode([4, 5])
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -875,10 +824,7 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       await manufacturerInstance
         .connect(admin)
-        .mintManufacturerBatch(
-          admin.address,
-          C.mockManufacturerNames.slice(1,)
-        );
+        .mintManufacturerBatch(admin.address, C.mockManufacturerNames.slice(1));
     });
 
     context('Error handling', () => {
@@ -888,7 +834,8 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .renameManufacturers(newIdManufacturerNames)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -908,8 +855,11 @@ describe('DevAdmin', function () {
     context('State', () => {
       it('Should rename manufacturers', async () => {
         for (let i = 0; i < C.mockManufacturerNames.length; i++) {
-          const idReturned = await manufacturerInstance.getManufacturerIdByName(C.mockManufacturerNames[i]);
-          const nameReturned = await manufacturerInstance.getManufacturerNameById(i + 1);
+          const idReturned = await manufacturerInstance.getManufacturerIdByName(
+            C.mockManufacturerNames[i]
+          );
+          const nameReturned =
+            await manufacturerInstance.getManufacturerNameById(i + 1);
 
           expect(idReturned).to.equal(i + 1);
           expect(nameReturned).to.equal(C.mockManufacturerNames[i]);
@@ -920,8 +870,13 @@ describe('DevAdmin', function () {
           .renameManufacturers(newIdManufacturerNames);
 
         for (let i = 0; i < newIdManufacturerNames.length; i++) {
-          const idReturned = await manufacturerInstance.getManufacturerIdByName(newIdManufacturerNames[i].name);
-          const nameReturned = await manufacturerInstance.getManufacturerNameById(newIdManufacturerNames[i].tokenId);
+          const idReturned = await manufacturerInstance.getManufacturerIdByName(
+            newIdManufacturerNames[i].name
+          );
+          const nameReturned =
+            await manufacturerInstance.getManufacturerNameById(
+              newIdManufacturerNames[i].tokenId
+            );
 
           expect(idReturned).to.equal(newIdManufacturerNames[i].tokenId);
           expect(nameReturned).to.equal(newIdManufacturerNames[i].name);

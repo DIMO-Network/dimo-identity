@@ -41,9 +41,9 @@ contract Mapper {
         emit BeneficiarySet(adProxyAddress, nodeId, beneficiary);
     }
 
-    /// @notice Gets the link between two nodes
+    /// @notice Gets the link between vehicle and aftermarket device nodes
     /// @param idProxyAddress The address of the NFT proxy
-    /// @param sourceNode The node Id to be queried
+    /// @param sourceNode The source node id to be queried
     function getLink(address idProxyAddress, uint256 sourceNode)
         external
         view

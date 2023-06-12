@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle, upgrades } from 'hardhat';
+import { waffle } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -7,13 +7,16 @@ import {
   Manufacturer,
   ManufacturerId
 } from '../../typechain';
-import { initialize, createSnapshot, revertToSnapshot, C } from '../../utils';
+import {
+  initialize,
+  setup,
+  createSnapshot,
+  revertToSnapshot,
+  C
+} from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('Manufacturer', async function () {
   let snapshot: string;
@@ -22,29 +25,20 @@ describe('Manufacturer', async function () {
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
 
-  const [admin, nonAdmin, manufacturer1, nonController] = provider.getWallets();
+  const [admin, nonAdmin, manufacturer1, manufacturer2, nonController] =
+    provider.getWallets();
 
   before(async () => {
-    [dimoRegistryInstance, nodesInstance, manufacturerInstance] =
-      await initialize(admin, 'Nodes', 'Manufacturer');
+    const deployments = await setup(admin, {
+      modules: ['Nodes', 'Manufacturer'],
+      nfts: ['ManufacturerId'],
+      upgradeableContracts: []
+    });
 
-    const ManufacturerIdFactory = await ethers.getContractFactory(
-      'ManufacturerId'
-    );
-    manufacturerIdInstance = await upgrades.deployProxy(
-      ManufacturerIdFactory,
-      [
-        C.MANUFACTURER_NFT_NAME,
-        C.MANUFACTURER_NFT_SYMBOL,
-        C.MANUFACTURER_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerId;
-    await manufacturerIdInstance.deployed();
+    dimoRegistryInstance = deployments.DIMORegistry;
+    nodesInstance = deployments.Nodes;
+    manufacturerInstance = deployments.Manufacturer;
+    manufacturerIdInstance = deployments.ManufacturerId;
 
     const MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
@@ -76,7 +70,8 @@ describe('Manufacturer', async function () {
   describe('setManufacturerIdProxyAddress', () => {
     let localManufacturerInstance: Manufacturer;
     beforeEach(async () => {
-      [, localManufacturerInstance] = await initialize(admin, 'Manufacturer');
+      const deployments = await initialize(admin, 'Manufacturer');
+      localManufacturerInstance = deployments.Manufacturer;
     });
 
     context('Error handling', () => {
@@ -86,7 +81,8 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .setManufacturerIdProxyAddress(manufacturerIdInstance.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -120,7 +116,8 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .addManufacturerAttribute(C.mockManufacturerAttribute1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -154,7 +151,8 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .setController(manufacturer1.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -169,7 +167,9 @@ describe('Manufacturer', async function () {
           .setController(manufacturer1.address);
 
         await expect(
-          manufacturerInstance.connect(admin).setController(manufacturer1.address)
+          manufacturerInstance
+            .connect(admin)
+            .setController(manufacturer1.address)
         ).to.be.revertedWith('Already a controller');
       });
     });
@@ -177,7 +177,9 @@ describe('Manufacturer', async function () {
     context('Events', () => {
       it('Should emit ControllerSet event with correct params', async () => {
         await expect(
-          manufacturerInstance.connect(admin).setController(manufacturer1.address)
+          manufacturerInstance
+            .connect(admin)
+            .setController(manufacturer1.address)
         )
           .to.emit(manufacturerInstance, 'ControllerSet')
           .withArgs(manufacturer1.address);
@@ -193,7 +195,8 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .mintManufacturerBatch(nonAdmin.address, C.mockManufacturerNames)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -259,19 +262,23 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
 
-        const id1 = (await manufacturerInstance.getManufacturerIdByName(
-          C.mockManufacturerNames[0]
-        )).toNumber();
-        const id2 = (await manufacturerInstance.getManufacturerIdByName(
-          C.mockManufacturerNames[1]
-        )).toNumber();
-        const id3 = (await manufacturerInstance.getManufacturerIdByName(
-          C.mockManufacturerNames[2]
-        )).toNumber();
+        const id1 = (
+          await manufacturerInstance.getManufacturerIdByName(
+            C.mockManufacturerNames[0]
+          )
+        ).toNumber();
+        const id2 = (
+          await manufacturerInstance.getManufacturerIdByName(
+            C.mockManufacturerNames[1]
+          )
+        ).toNumber();
+        const id3 = (
+          await manufacturerInstance.getManufacturerIdByName(
+            C.mockManufacturerNames[2]
+          )
+        ).toNumber();
 
-        expect([id1, id2, id3]).to.eql(
-          [1, 2, 3]
-        );
+        expect([id1, id2, id3]).to.eql([1, 2, 3]);
       });
     });
 
@@ -304,7 +311,8 @@ describe('Manufacturer', async function () {
               C.mockManufacturerAttributeInfoPairs
             )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -326,6 +334,25 @@ describe('Manufacturer', async function () {
               C.mockManufacturerAttributeInfoPairs
             )
         ).to.be.revertedWith('Invalid request');
+      });
+      it('Should revert if manufacturer name is already registered', async () => {
+        await manufacturerInstance
+          .connect(admin)
+          .mintManufacturer(
+            manufacturer1.address,
+            C.mockManufacturerNames[0],
+            C.mockManufacturerAttributeInfoPairs
+          );
+
+        await expect(
+          manufacturerInstance
+            .connect(admin)
+            .mintManufacturer(
+              manufacturer2.address,
+              C.mockManufacturerNames[0],
+              C.mockManufacturerAttributeInfoPairs
+            )
+        ).to.be.revertedWith('Manufacturer name already registered');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -392,7 +419,9 @@ describe('Manufacturer', async function () {
       });
       it('Should correctly set manufacturerMinted', async () => {
         const isManufacturerMintedBefore =
-          await manufacturerInstance.isManufacturerMinted(manufacturer1.address);
+          await manufacturerInstance.isManufacturerMinted(
+            manufacturer1.address
+          );
 
         // eslint-disable-next-line no-unused-expressions
         expect(isManufacturerMintedBefore).to.be.false;
@@ -406,7 +435,9 @@ describe('Manufacturer', async function () {
           );
 
         const isManufacturerMintedAfter =
-          await manufacturerInstance.isManufacturerMinted(manufacturer1.address);
+          await manufacturerInstance.isManufacturerMinted(
+            manufacturer1.address
+          );
 
         // eslint-disable-next-line no-unused-expressions
         expect(isManufacturerMintedAfter).to.be.true;
@@ -420,9 +451,11 @@ describe('Manufacturer', async function () {
             C.mockManufacturerAttributeInfoPairs
           );
 
-        const id = (await manufacturerInstance.getManufacturerIdByName(
-          C.mockManufacturerNames[0]
-        )).toNumber();
+        const id = (
+          await manufacturerInstance.getManufacturerIdByName(
+            C.mockManufacturerNames[0]
+          )
+        ).toNumber();
 
         expect(id).to.be.equal(1);
       });
@@ -470,12 +503,24 @@ describe('Manufacturer', async function () {
         await expect(
           manufacturerInstance
             .connect(admin)
-            .mintManufacturer(manufacturer1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
+            .mintManufacturer(
+              manufacturer1.address,
+              C.mockManufacturerNames[0],
+              C.mockManufacturerAttributeInfoPairs
+            )
         )
           .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
-          .withArgs(1, C.mockManufacturerAttributeInfoPairs[0].attribute, C.mockManufacturerAttributeInfoPairs[0].info)
+          .withArgs(
+            1,
+            C.mockManufacturerAttributeInfoPairs[0].attribute,
+            C.mockManufacturerAttributeInfoPairs[0].info
+          )
           .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
-          .withArgs(1, C.mockManufacturerAttributeInfoPairs[1].attribute, C.mockManufacturerAttributeInfoPairs[1].info);
+          .withArgs(
+            1,
+            C.mockManufacturerAttributeInfoPairs[1].attribute,
+            C.mockManufacturerAttributeInfoPairs[1].info
+          );
       });
     });
   });
@@ -498,7 +543,8 @@ describe('Manufacturer', async function () {
             .connect(nonAdmin)
             .setManufacturerInfo(1, C.mockManufacturerAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -579,17 +625,30 @@ describe('Manufacturer', async function () {
             .setManufacturerInfo(1, localNewAttributeInfoPairs)
         )
           .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
-          .withArgs(1, localNewAttributeInfoPairs[0].attribute, localNewAttributeInfoPairs[0].info)
+          .withArgs(
+            1,
+            localNewAttributeInfoPairs[0].attribute,
+            localNewAttributeInfoPairs[0].info
+          )
           .to.emit(manufacturerInstance, 'ManufacturerAttributeSet')
-          .withArgs(1, localNewAttributeInfoPairs[1].attribute, localNewAttributeInfoPairs[1].info);
+          .withArgs(
+            1,
+            localNewAttributeInfoPairs[1].attribute,
+            localNewAttributeInfoPairs[1].info
+          );
       });
     });
   });
 
-  describe('setManufacturerMinted', () => {
+  describe('updateManufacturerMinted', () => {
     it('Should revert if caller is not the NFT Proxy', async () => {
       await expect(
-        manufacturerInstance.connect(nonAdmin).setManufacturerMinted(manufacturer1.address)
+        manufacturerInstance
+          .connect(nonAdmin)
+          .updateManufacturerMinted(
+            manufacturer1.address,
+            manufacturer2.address
+          )
       ).to.be.revertedWith('Only NFT Proxy');
     });
   });
@@ -598,22 +657,24 @@ describe('Manufacturer', async function () {
     beforeEach(async () => {
       await manufacturerInstance
         .connect(admin)
-        .mintManufacturer(manufacturer1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
+        .mintManufacturer(
+          manufacturer1.address,
+          C.mockManufacturerNames[0],
+          C.mockManufacturerAttributeInfoPairs
+        );
     });
 
     it('Should return 0 if the queried name is not associated with any minted device', async () => {
-      const tokenId =
-        await manufacturerInstance.getManufacturerIdByName(
-          C.mockManufacturerNames[1]
-        );
+      const tokenId = await manufacturerInstance.getManufacturerIdByName(
+        C.mockManufacturerNames[1]
+      );
 
       expect(tokenId).to.equal(0);
     });
     it('Should return the correct token Id', async () => {
-      const tokenId =
-        await manufacturerInstance.getManufacturerIdByName(
-          C.mockManufacturerNames[0]
-        );
+      const tokenId = await manufacturerInstance.getManufacturerIdByName(
+        C.mockManufacturerNames[0]
+      );
 
       expect(tokenId).to.equal(1);
     });
@@ -623,22 +684,20 @@ describe('Manufacturer', async function () {
     beforeEach(async () => {
       await manufacturerInstance
         .connect(admin)
-        .mintManufacturer(manufacturer1.address, C.mockManufacturerNames[0], C.mockManufacturerAttributeInfoPairs)
+        .mintManufacturer(
+          manufacturer1.address,
+          C.mockManufacturerNames[0],
+          C.mockManufacturerAttributeInfoPairs
+        );
     });
 
     it('Should return an empty string if the queried Id is not associated with any minted device', async () => {
-      const name =
-        await manufacturerInstance.getManufacturerNameById(
-          99
-        );
+      const name = await manufacturerInstance.getManufacturerNameById(99);
 
       expect(name).to.equal('');
     });
     it('Should return the correct name', async () => {
-      const name =
-        await manufacturerInstance.getManufacturerNameById(
-          1
-        );
+      const name = await manufacturerInstance.getManufacturerNameById(1);
 
       expect(name).to.equal(C.mockManufacturerNames[0]);
     });
@@ -647,7 +706,8 @@ describe('Manufacturer', async function () {
   describe('isController', () => {
     it('Should return false if address is not a controller', async () => {
       // eslint-disable-next-line no-unused-expressions
-      expect(await manufacturerInstance.isController(nonController.address)).to.be.false;
+      expect(await manufacturerInstance.isController(nonController.address)).to
+        .be.false;
     });
     it('Should return true if address is a controller', async () => {
       await manufacturerInstance
@@ -655,14 +715,17 @@ describe('Manufacturer', async function () {
         .setController(manufacturer1.address);
 
       // eslint-disable-next-line no-unused-expressions
-      expect(await manufacturerInstance.isController(manufacturer1.address)).to.be.true;
+      expect(await manufacturerInstance.isController(manufacturer1.address)).to
+        .be.true;
     });
   });
 
   describe('isManufacturerMinted', () => {
     it('Should return false if manufacturer has not yet minted', async () => {
       // eslint-disable-next-line no-unused-expressions
-      expect(await manufacturerInstance.isManufacturerMinted(manufacturer1.address)).to.be.false;
+      expect(
+        await manufacturerInstance.isManufacturerMinted(manufacturer1.address)
+      ).to.be.false;
     });
     it('Should return true if manufacturer has minted', async () => {
       await manufacturerInstance
@@ -671,17 +734,23 @@ describe('Manufacturer', async function () {
           manufacturer1.address,
           C.mockManufacturerNames[0],
           C.mockManufacturerAttributeInfoPairs
-        )
+        );
 
       // eslint-disable-next-line no-unused-expressions
-      expect(await manufacturerInstance.isManufacturerMinted(manufacturer1.address)).to.be.true;
+      expect(
+        await manufacturerInstance.isManufacturerMinted(manufacturer1.address)
+      ).to.be.true;
     });
   });
 
   describe('isAllowedToOwnManufacturerNode', () => {
     it('Should return false if address is not a controller', async () => {
       // eslint-disable-next-line no-unused-expressions
-      expect(await manufacturerInstance.isAllowedToOwnManufacturerNode(manufacturer1.address)).to.be.false;
+      expect(
+        await manufacturerInstance.isAllowedToOwnManufacturerNode(
+          manufacturer1.address
+        )
+      ).to.be.false;
     });
     it('Should return false if address has already minted', async () => {
       await manufacturerInstance
@@ -693,7 +762,11 @@ describe('Manufacturer', async function () {
         );
 
       // eslint-disable-next-line no-unused-expressions
-      expect(await manufacturerInstance.isAllowedToOwnManufacturerNode(manufacturer1.address)).to.be.false;
+      expect(
+        await manufacturerInstance.isAllowedToOwnManufacturerNode(
+          manufacturer1.address
+        )
+      ).to.be.false;
     });
     it('Should return true if address is a controller and has not yet minted', async () => {
       await manufacturerInstance
@@ -701,7 +774,11 @@ describe('Manufacturer', async function () {
         .setController(manufacturer1.address);
 
       // eslint-disable-next-line no-unused-expressions
-      expect(await manufacturerInstance.isAllowedToOwnManufacturerNode(manufacturer1.address)).to.be.true;
+      expect(
+        await manufacturerInstance.isAllowedToOwnManufacturerNode(
+          manufacturer1.address
+        )
+      ).to.be.true;
     });
   });
 });

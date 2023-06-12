@@ -38,7 +38,20 @@ export type SetPrivilegeData = {
   expires: string
 };
 
-export interface ContractAddressesByNetwork {
+export type ContractNameArgs = {
+  name: string,
+  args: (string | [])[],
+  opts: {
+    initializer: string | false,
+    kind: 'uups' | 'transparent' | 'beacon'
+  }
+};
+
+export type ContractNameArgsByNetwork = {
+  [index: string]: ContractNameArgs
+};
+
+export type AddressesByNetwork = {
   [index: string]: {
     modules: {
       [index: string]: {
@@ -51,10 +64,28 @@ export interface ContractAddressesByNetwork {
         proxy: string,
         implementation: string
       }
+    },
+    misc: {
+      [index: string]: any
     }
-  };
-}
+  }
+};
 
-export interface NetworkValue {
-  [index: string]: string;
-}
+export type NetworkValue = {
+  [index: string]: string
+};
+
+export type GenericKeyAny = {
+  [index: string]: any
+};
+
+export type ContractsSetup = {
+  modules: string[],
+  nfts: string[],
+  upgradeableContracts: string[]
+};
+
+export type NftArgs = {
+  name: string,
+  args: (string | string[])[]
+};

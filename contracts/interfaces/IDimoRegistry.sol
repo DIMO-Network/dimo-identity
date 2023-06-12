@@ -4,7 +4,9 @@ pragma solidity ^0.8.13;
 /// @title IDimoRegistry
 /// @notice Interface to interact with external functions of DIMORegistry modules
 interface IDimoRegistry {
-    function setManufacturerMinted(address addr) external;
+    function updateManufacturerMinted(address from, address to) external;
+
+    function updateIntegrationMinted(address from, address to) external;
 
     function setAftermarketDeviceBeneficiary(
         uint256 nodeId,
@@ -25,4 +27,15 @@ interface IDimoRegistry {
         external
         view
         returns (bool _isAllowed);
+
+    function getLink(address idProxyAddress, uint256 sourceNode)
+        external
+        view
+        returns (uint256 targetNode);
+
+    function getNodeLink(
+        address idProxyAddressSource,
+        address idProxyAddressTarget,
+        uint256 sourceNode
+    ) external view returns (uint256 targetNode);
 }

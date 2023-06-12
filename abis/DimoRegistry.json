@@ -580,6 +580,178 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "AdNotClaimed",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "AdNotPaired",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "AdPaired",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "attr",
+                "type": "string"
+            }
+        ],
+        "name": "AttributeExists",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "attr",
+                "type": "string"
+            }
+        ],
+        "name": "AttributeNotWhitelisted",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "DeviceAlreadyClaimed",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "DeviceAlreadyRegistered",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidAdSignature",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidLicense",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "proxy",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "InvalidNode",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidOwnerSignature",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "InvalidParentNode",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidSigner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "OwnersDoesNotMatch",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "RegistryNotApproved",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "Unauthorized",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "VehicleNotPaired",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "VehiclePaired",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ZeroAddress",
+        "type": "error"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -740,6 +912,11 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
                 "components": [
                     {
                         "internalType": "uint256",
@@ -847,6 +1024,34 @@
             }
         ],
         "name": "mintAftermarketDeviceByManufacturerBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "aftermarketDeviceSig",
+                "type": "bytes"
+            },
+            {
+                "internalType": "bytes",
+                "name": "vehicleOwnerSig",
+                "type": "bytes"
+            }
+        ],
+        "name": "pairAftermarketDeviceSign",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1244,11 +1449,16 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "addr",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "to",
                 "type": "address"
             }
         ],
-        "name": "setManufacturerMinted",
+        "name": "updateManufacturerMinted",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

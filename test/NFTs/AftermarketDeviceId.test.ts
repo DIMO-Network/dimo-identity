@@ -1,10 +1,9 @@
 import chai from 'chai';
-import { ethers, waffle, upgrades } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
   Eip712Checker,
-  DimoAccessControl,
   Nodes,
   Manufacturer,
   ManufacturerId,
@@ -18,7 +17,7 @@ import {
   MockStake
 } from '../../typechain';
 import {
-  initialize,
+  setup,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -26,16 +25,12 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('AftermarketDeviceId', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
-  let accessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
@@ -50,6 +45,7 @@ describe('AftermarketDeviceId', async function () {
 
   const [
     admin,
+    nonAdmin,
     foundation,
     manufacturer1,
     user1,
@@ -71,84 +67,34 @@ describe('AftermarketDeviceId', async function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      eip712CheckerInstance,
-      accessControlInstance,
-      nodesInstance,
-      manufacturerInstance,
-      vehicleInstance,
-      aftermarketDeviceInstance,
-      adLicenseValidatorInstance,
-      mapperInstance
-    ] = await initialize(
-      admin,
-      'Eip712Checker',
-      'DimoAccessControl',
-      'Nodes',
-      'Manufacturer',
-      'Vehicle',
-      'AftermarketDevice',
-      'AdLicenseValidator',
-      'Mapper'
-    );
-
-    const ManufacturerIdFactory = await ethers.getContractFactory(
-      'ManufacturerId'
-    );
-    const VehicleIdFactory = await ethers.getContractFactory('VehicleId');
-    const AftermarketDeviceIdFactory = await ethers.getContractFactory(
-      'AftermarketDeviceId'
-    );
-
-    manufacturerIdInstance = await upgrades.deployProxy(
-      ManufacturerIdFactory,
-      [
-        C.MANUFACTURER_NFT_NAME,
-        C.MANUFACTURER_NFT_SYMBOL,
-        C.MANUFACTURER_NFT_BASE_URI
+    const deployments = await setup(admin, {
+      modules: [
+        'Eip712Checker',
+        'DimoAccessControl',
+        'Nodes',
+        'Manufacturer',
+        'Vehicle',
+        'AftermarketDevice',
+        'AdLicenseValidator',
+        'Mapper'
       ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerId;
-    await manufacturerIdInstance.deployed();
+      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
+      upgradeableContracts: []
+    });
 
-    vehicleIdInstance = await upgrades.deployProxy(
-      VehicleIdFactory,
-      [
-        C.VEHICLE_NFT_NAME,
-        C.VEHICLE_NFT_SYMBOL,
-        C.VEHICLE_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as VehicleId;
-    await vehicleIdInstance.deployed();
+    dimoRegistryInstance = deployments.DIMORegistry;
+    eip712CheckerInstance = deployments.Eip712Checker;
+    nodesInstance = deployments.Nodes;
+    manufacturerInstance = deployments.Manufacturer;
+    vehicleInstance = deployments.Vehicle;
+    aftermarketDeviceInstance = deployments.AftermarketDevice;
+    adLicenseValidatorInstance = deployments.AdLicenseValidator;
+    mapperInstance = deployments.Mapper;
+    manufacturerIdInstance = deployments.ManufacturerId;
+    vehicleIdInstance = deployments.VehicleId;
+    adIdInstance = deployments.AftermarketDeviceId;
 
-    adIdInstance = await upgrades.deployProxy(
-      AftermarketDeviceIdFactory,
-      [
-        C.AD_NFT_NAME,
-        C.AD_NFT_SYMBOL,
-        C.AD_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups',
-        unsafeAllow: ['delegatecall']
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as AftermarketDeviceId;
-    await adIdInstance.deployed();
-
-    const MANUFACTURER_MINTER_ROLE =
-      await manufacturerIdInstance.MINTER_ROLE();
+    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
@@ -209,11 +155,6 @@ describe('AftermarketDeviceId', async function () {
     );
     await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
-
-    // Grant MANUFACTURER_ROLE to manufacturer
-    await accessControlInstance
-      .connect(admin)
-      .grantRole(C.MANUFACTURER_ROLE, manufacturer1.address);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -338,7 +279,7 @@ describe('AftermarketDeviceId', async function () {
       );
     await aftermarketDeviceInstance
       .connect(admin)
-      .pairAftermarketDeviceSign(1, 1, pairSignature);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature);
   });
 
   beforeEach(async () => {
@@ -350,14 +291,66 @@ describe('AftermarketDeviceId', async function () {
   });
 
   describe('setDimoRegistryAddress', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        adIdInstance.connect(nonAdmin).setDimoRegistryAddress(C.ZERO_ADDRESS)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
     it('Should revert if addr is zero address', async () => {
       await expect(
-        adIdInstance
-          .connect(admin)
-          .setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('Non zero address');
+        adIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)
+      ).to.be.revertedWith('ZeroAddress');
     });
-  })
+  });
+
+  describe('setTrustedForwarder', () => {
+    it('Should revert if caller does not have admin role', async () => {
+      await expect(
+        adIdInstance.connect(nonAdmin).setTrustedForwarder(C.ZERO_ADDRESS, true)
+      ).to.be.revertedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+          C.ADMIN_ROLE
+        }`
+      );
+    });
+    it('Should correctly set address as trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await adIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .false;
+
+      await adIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, true);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await adIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .true;
+    });
+    it('Should correctly set address as not trusted forwarder', async () => {
+      const mockForwarder = ethers.Wallet.createRandom();
+      await adIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, true);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await adIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .true;
+
+      await adIdInstance
+        .connect(admin)
+        .setTrustedForwarder(mockForwarder.address, false);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(await adIdInstance.trustedForwarders(mockForwarder.address)).to.be
+        .false;
+    });
+  });
 
   context('On transfer', async () => {
     context('Error handling', () => {
@@ -365,8 +358,13 @@ describe('AftermarketDeviceId', async function () {
         await adIdInstance.connect(user1).approve(user2.address, 1);
         await expect(
           adIdInstance
-            .connect(user2)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 1)
-        ).to.be.revertedWith('Caller is not authorized');
+            .connect(user2)
+            ['safeTransferFrom(address,address,uint256)'](
+              user1.address,
+              user2.address,
+              1
+            )
+        ).to.be.revertedWith('Unauthorized');
       });
     });
 
@@ -374,45 +372,110 @@ describe('AftermarketDeviceId', async function () {
       it('Should set new owner', async () => {
         expect(await adIdInstance.ownerOf(2)).to.equal(user1.address);
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
         expect(await adIdInstance.ownerOf(2)).to.equal(user2.address);
       });
       it('Should keep the same parent node', async () => {
-        const parentNode = await nodesInstance.getParentNode(adIdInstance.address, 2);
+        const parentNode = await nodesInstance.getParentNode(
+          adIdInstance.address,
+          2
+        );
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
-        expect(await nodesInstance.getParentNode(adIdInstance.address, 2)).to.equal(parentNode);
+        expect(
+          await nodesInstance.getParentNode(adIdInstance.address, 2)
+        ).to.equal(parentNode);
       });
       it('Should keep the same infos', async () => {
-        expect(await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(adAddress2.address)).to.equal(2);
-        for (const attrInfoPair of mockAftermarketDeviceInfosList[1].attrInfoPairs) {
-          expect(await nodesInstance.getInfo(adIdInstance.address, 2, attrInfoPair.attribute)).to.equal(attrInfoPair.info);
+        expect(
+          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+            adAddress2.address
+          )
+        ).to.equal(2);
+        for (const attrInfoPair of mockAftermarketDeviceInfosList[1]
+          .attrInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              2,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
         }
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
-        expect(await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(adAddress2.address)).to.equal(2);
-        for (const attrInfoPair of mockAftermarketDeviceInfosList[1].attrInfoPairs) {
-          expect(await nodesInstance.getInfo(adIdInstance.address, 2, attrInfoPair.attribute)).to.equal(attrInfoPair.info);
+        expect(
+          await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+            adAddress2.address
+          )
+        ).to.equal(2);
+        for (const attrInfoPair of mockAftermarketDeviceInfosList[1]
+          .attrInfoPairs) {
+          expect(
+            await nodesInstance.getInfo(
+              adIdInstance.address,
+              2,
+              attrInfoPair.attribute
+            )
+          ).to.equal(attrInfoPair.info);
         }
       });
       it('Should update multi-privilege token version', async () => {
         const previousVersion = await adIdInstance.tokenIdToVersion(2);
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
-        expect(await adIdInstance.tokenIdToVersion(2)).to.equal(previousVersion.add(1));
+        expect(await adIdInstance.tokenIdToVersion(2)).to.equal(
+          previousVersion.add(1)
+        );
       });
       it('Should reset aftermarket device beneficiary', async () => {
-        await mapperInstance.connect(user1).setAftermarketDeviceBeneficiary(2, beneficiary1.address);
+        await mapperInstance
+          .connect(user1)
+          .setAftermarketDeviceBeneficiary(2, beneficiary1.address);
 
-        expect(await mapperInstance.getBeneficiary(adIdInstance.address, 2)).to.equal(beneficiary1.address);
+        expect(
+          await mapperInstance.getBeneficiary(adIdInstance.address, 2)
+        ).to.equal(beneficiary1.address);
 
-        await adIdInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, user2.address, 2);
+        await adIdInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            2
+          );
 
-        expect(await mapperInstance.getBeneficiary(adIdInstance.address, 2)).to.equal(user2.address);
+        expect(
+          await mapperInstance.getBeneficiary(adIdInstance.address, 2)
+        ).to.equal(user2.address);
       });
     });
   });

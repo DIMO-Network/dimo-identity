@@ -10,7 +10,7 @@ import {AttributeInfoPair} from "../../shared/Types.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/// @title Vehicle
+/// @title Manufacturer
 /// @notice Contract that represents the Manufacturer node
 contract Manufacturer is AccessControlInternal {
     event ManufacturerIdProxySet(address indexed proxy);
@@ -169,20 +169,28 @@ contract Manufacturer is AccessControlInternal {
         _setInfos(tokenId, attrInfoList);
     }
 
-    /// @notice Verify if an address is allowed to own a manufacturer node and set as minted
-    /// @dev Can only be called by the NFT Proxy
-    /// @dev The address must be a controller and not yet minted a node
-    /// @param addr the address to be verified and set
-    function setManufacturerMinted(address addr) external onlyNftProxy {
+    /**
+     * @notice Verify if an address is allowed to own an manufacturer node and set as minted
+     * The former owner of the node is set as not minted, as it will not be the owner of a node after the transfer
+     * @dev Can only be called by the ManufacturerId Proxy
+     * @dev The address must be a controller and not yet minted a node
+     * @param from the address to be verified and set
+     * @param to the address to be verified
+     */
+    function updateManufacturerMinted(address from, address to)
+        external
+        onlyNftProxy
+    {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         require(
-            s.controllers[addr].isController &&
-                !s.controllers[addr].manufacturerMinted,
+            s.controllers[to].isController &&
+                !s.controllers[to].manufacturerMinted,
             "Address is not allowed to own a new token"
         );
 
-        s.controllers[addr].manufacturerMinted = true;
+        s.controllers[from].manufacturerMinted = false;
+        s.controllers[to].manufacturerMinted = true;
     }
 
     /// @notice Verify if an address is a controller
@@ -285,28 +293,5 @@ contract Manufacturer is AccessControlInternal {
                 attrInfoPairList[i].info
             );
         }
-    }
-
-    /// @dev Internal function to update a single attribute
-    /// @dev attribute must be whitelisted
-    /// @param tokenId Node where the info will be added
-    /// @param attribute Attribute to be updated
-    /// @param info Info to be set
-    function _setAttributeInfo(
-        uint256 tokenId,
-        string calldata attribute,
-        string calldata info
-    ) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        ManufacturerStorage.Storage storage m = ManufacturerStorage
-            .getStorage();
-        require(
-            AttributeSet.exists(m.whitelistedAttributes, attribute),
-            "Not whitelisted"
-        );
-        address idProxyAddress = m.idProxyAddress;
-
-        ns.nodes[idProxyAddress][tokenId].info[attribute] = info;
-        emit ManufacturerAttributeSet(tokenId, attribute, info);
     }
 }

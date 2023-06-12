@@ -1,14 +1,17 @@
 import chai from 'chai';
-import { ethers, waffle, upgrades } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import { MockMultiPrivilege } from '../../typechain';
-import { createSnapshot, revertToSnapshot, SetPrivilegeData, C } from '../../utils';
+import {
+  deployUpgradeableContracts,
+  createSnapshot,
+  revertToSnapshot,
+  SetPrivilegeData,
+  C
+} from '../../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('MultiPrivilege', function () {
   let snapshot: string;
@@ -16,31 +19,29 @@ describe('MultiPrivilege', function () {
   let nftTokenId: string;
   let expiresAtDefault: number;
 
-  const [admin, nonAdmin, user1, user2, user3, newOwner] = provider.getWallets();
+  const [admin, nonAdmin, user1, user2, user3, newOwner] =
+    provider.getWallets();
 
   before(async () => {
     const blockNumBefore = await ethers.provider.getBlockNumber();
     const blockBefore = await ethers.provider.getBlock(blockNumBefore);
     expiresAtDefault = blockBefore.timestamp + 31556926; // + 1 year
 
-    // Deploy MultiPrivilege contract
-    const MultiPrivilegeFactory = await ethers.getContractFactory(
-      'MockMultiPrivilege'
-    );
-    multiPrivilegeInstance = await upgrades.deployProxy(
-      MultiPrivilegeFactory,
-      [
-        C.MULTI_PRIVILEGE_NAME,
-        C.MULTI_PRIVILEGE_SYMBOL,
-        C.MULTI_PRIVILEGE_URI
-      ],
+    const deployments = await deployUpgradeableContracts(admin, [
       {
-        initializer: 'initialize',
-        kind: 'uups'
+        name: 'MockMultiPrivilege',
+        args: [
+          C.MULTI_PRIVILEGE_NAME,
+          C.MULTI_PRIVILEGE_SYMBOL,
+          C.MULTI_PRIVILEGE_URI
+        ],
+        opts: {
+          initializer: 'initialize',
+          kind: 'uups'
+        }
       }
-      // eslint-disable-next-line prettier/prettier
-    ) as MockMultiPrivilege;
-    await multiPrivilegeInstance.deployed();
+    ]);
+    multiPrivilegeInstance = deployments.MockMultiPrivilege;
 
     const receipt = await (
       await multiPrivilegeInstance['safeMint(address)'](user1.address)
@@ -67,7 +68,8 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance.connect(nonAdmin).createPrivilege(true, '')
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -114,7 +116,8 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance.connect(nonAdmin).enablePrivilege(1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -176,7 +179,8 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance.connect(nonAdmin).disablePrivilege(1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEFAULT_ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
           }`
         );
       });
@@ -232,24 +236,14 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(nonAdmin)
-            .setPrivilege(
-              nftTokenId,
-              1,
-              user2.address,
-              expiresAtDefault
-            )
+            .setPrivilege(nftTokenId, 1, user2.address, expiresAtDefault)
         ).to.be.revertedWith('Caller is not owner nor approved');
       });
       it('Should revert if privilege Id is not valid', async () => {
         await expect(
           multiPrivilegeInstance
             .connect(user1)
-            .setPrivilege(
-              nftTokenId,
-              99,
-              user2.address,
-              expiresAtDefault
-            )
+            .setPrivilege(nftTokenId, 99, user2.address, expiresAtDefault)
         ).to.be.revertedWith('Invalid privilege id');
       });
       it('Should revert if privilege is not enabled', async () => {
@@ -258,12 +252,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(user1)
-            .setPrivilege(
-              nftTokenId,
-              1,
-              user2.address,
-              expiresAtDefault
-            )
+            .setPrivilege(nftTokenId, 1, user2.address, expiresAtDefault)
         ).to.be.revertedWith('Privilege not enabled');
       });
     });
@@ -292,12 +281,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance
             .connect(user1)
-            .setPrivilege(
-              nftTokenId,
-              1,
-              user2.address,
-              expiresAtDefault
-            )
+            .setPrivilege(nftTokenId, 1, user2.address, expiresAtDefault)
         )
           .to.emit(multiPrivilegeInstance, 'PrivilegeSet')
           .withArgs(nftTokenId, 0, 1, user2.address, expiresAtDefault);
@@ -306,8 +290,16 @@ describe('MultiPrivilege', function () {
 
     context('Transferring token to new owner', () => {
       it('Should correctly set privilege expiration', async () => {
-        await multiPrivilegeInstance.connect(admin).grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
-        await multiPrivilegeInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, newOwner.address, nftTokenId);
+        await multiPrivilegeInstance
+          .connect(admin)
+          .grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
+        await multiPrivilegeInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            newOwner.address,
+            nftTokenId
+          );
 
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
 
@@ -323,20 +315,23 @@ describe('MultiPrivilege', function () {
         expect(expiresAt).to.equal(expiresAtDefault);
       });
       it('Should emit PrivilegeSet event with the new version', async () => {
-        await multiPrivilegeInstance.connect(admin).grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
-        await multiPrivilegeInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, newOwner.address, nftTokenId);
+        await multiPrivilegeInstance
+          .connect(admin)
+          .grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
+        await multiPrivilegeInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            newOwner.address,
+            nftTokenId
+          );
 
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
 
         await expect(
           multiPrivilegeInstance
             .connect(newOwner)
-            .setPrivilege(
-              nftTokenId,
-              1,
-              user2.address,
-              expiresAtDefault
-            )
+            .setPrivilege(nftTokenId, 1, user2.address, expiresAtDefault)
         )
           .to.emit(multiPrivilegeInstance, 'PrivilegeSet')
           .withArgs(nftTokenId, 1, 1, user2.address, expiresAtDefault);
@@ -370,16 +365,46 @@ describe('MultiPrivilege', function () {
         .args?.tokenId.toString();
 
       mockSetPrivilegeData = [
-        { tokenId: nftTokenId, privId: '1', user: user2.address, expires: expiresAtDefault.toString() },
-        { tokenId: nftTokenId2, privId: '2', user: user2.address, expires: expiresAtDefault.toString() },
-        { tokenId: nftTokenId3, privId: '3', user: user2.address, expires: expiresAtDefault.toString() }
+        {
+          tokenId: nftTokenId,
+          privId: '1',
+          user: user2.address,
+          expires: expiresAtDefault.toString()
+        },
+        {
+          tokenId: nftTokenId2,
+          privId: '2',
+          user: user2.address,
+          expires: expiresAtDefault.toString()
+        },
+        {
+          tokenId: nftTokenId3,
+          privId: '3',
+          user: user2.address,
+          expires: expiresAtDefault.toString()
+        }
       ];
       mockSetPrivilegeDataWrongPrivId = [
-        { tokenId: nftTokenId, privId: '1', user: user2.address, expires: expiresAtDefault.toString() },
-        { tokenId: nftTokenId2, privId: '99', user: user2.address, expires: expiresAtDefault.toString() },
-        { tokenId: nftTokenId3, privId: '3', user: user2.address, expires: expiresAtDefault.toString() }
+        {
+          tokenId: nftTokenId,
+          privId: '1',
+          user: user2.address,
+          expires: expiresAtDefault.toString()
+        },
+        {
+          tokenId: nftTokenId2,
+          privId: '99',
+          user: user2.address,
+          expires: expiresAtDefault.toString()
+        },
+        {
+          tokenId: nftTokenId3,
+          privId: '3',
+          user: user2.address,
+          expires: expiresAtDefault.toString()
+        }
       ];
-    })
+    });
 
     context('Error handling', () => {
       it('Should revert if caller is not owner or approved', async () => {
@@ -460,8 +485,16 @@ describe('MultiPrivilege', function () {
 
     context('Transferring token to new owner', () => {
       it('Should correctly set privilege expiration', async () => {
-        await multiPrivilegeInstance.connect(admin).grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
-        await multiPrivilegeInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, newOwner.address, nftTokenId);
+        await multiPrivilegeInstance
+          .connect(admin)
+          .grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
+        await multiPrivilegeInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            newOwner.address,
+            nftTokenId
+          );
 
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
 
@@ -477,20 +510,23 @@ describe('MultiPrivilege', function () {
         expect(expiresAt).to.equal(expiresAtDefault);
       });
       it('Should emit PrivilegeSet event with the new version', async () => {
-        await multiPrivilegeInstance.connect(admin).grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
-        await multiPrivilegeInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, newOwner.address, nftTokenId);
+        await multiPrivilegeInstance
+          .connect(admin)
+          .grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
+        await multiPrivilegeInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            newOwner.address,
+            nftTokenId
+          );
 
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
 
         await expect(
           multiPrivilegeInstance
             .connect(newOwner)
-            .setPrivilege(
-              nftTokenId,
-              1,
-              user2.address,
-              expiresAtDefault
-            )
+            .setPrivilege(nftTokenId, 1, user2.address, expiresAtDefault)
         )
           .to.emit(multiPrivilegeInstance, 'PrivilegeSet')
           .withArgs(nftTokenId, 1, 1, user2.address, expiresAtDefault);
@@ -511,57 +547,48 @@ describe('MultiPrivilege', function () {
 
       // eslint-disable-next-line no-unused-expressions
       expect(
-        await multiPrivilegeInstance.hasPrivilege(
-          nftTokenId,
-          1,
-          user2.address
-        )
+        await multiPrivilegeInstance.hasPrivilege(nftTokenId, 1, user2.address)
       ).to.be.false;
     });
     it('Should return false if user has no privilege', async () => {
       // eslint-disable-next-line no-unused-expressions
       expect(
-        await multiPrivilegeInstance.hasPrivilege(
-          nftTokenId,
-          1,
-          user3.address
-        )
+        await multiPrivilegeInstance.hasPrivilege(nftTokenId, 1, user3.address)
       ).to.be.false;
     });
     it('Should return false if privilege Id is not valid', async () => {
       // eslint-disable-next-line no-unused-expressions
       expect(
-        await multiPrivilegeInstance.hasPrivilege(
-          nftTokenId,
-          99,
-          user2.address
-        )
+        await multiPrivilegeInstance.hasPrivilege(nftTokenId, 99, user2.address)
+      ).to.be.false;
+    });
+    it('Should return false if privilege is expired', async () => {
+      await provider.send('evm_increaseTime', [expiresAtDefault * 100]);
+      await provider.send('evm_mine', []);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await multiPrivilegeInstance.hasPrivilege(nftTokenId, 1, user2.address)
       ).to.be.false;
     });
     it('Should return true if user has privilege', async () => {
       // eslint-disable-next-line no-unused-expressions
       expect(
-        await multiPrivilegeInstance.hasPrivilege(
-          nftTokenId,
-          1,
-          user2.address
-        )
+        await multiPrivilegeInstance.hasPrivilege(nftTokenId, 1, user2.address)
       ).to.be.true;
     });
     it('Should return true if user is the NFT owner', async () => {
       // eslint-disable-next-line no-unused-expressions
       expect(
-        await multiPrivilegeInstance.hasPrivilege(
-          nftTokenId,
-          1,
-          user1.address
-        )
+        await multiPrivilegeInstance.hasPrivilege(nftTokenId, 1, user1.address)
       ).to.be.true;
     });
 
     context('Transferring token to new owner', () => {
       beforeEach(async () => {
-        await multiPrivilegeInstance.connect(admin).grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
+        await multiPrivilegeInstance
+          .connect(admin)
+          .grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
       });
 
       it('Should return false for previous owner', async () => {
@@ -574,7 +601,13 @@ describe('MultiPrivilege', function () {
           )
         ).to.be.true;
 
-        await multiPrivilegeInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, newOwner.address, nftTokenId);
+        await multiPrivilegeInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            newOwner.address,
+            nftTokenId
+          );
 
         // eslint-disable-next-line no-unused-expressions
         expect(
@@ -595,7 +628,13 @@ describe('MultiPrivilege', function () {
           )
         ).to.be.false;
 
-        await multiPrivilegeInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, newOwner.address, nftTokenId);
+        await multiPrivilegeInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            newOwner.address,
+            nftTokenId
+          );
 
         // eslint-disable-next-line no-unused-expressions
         expect(
@@ -616,7 +655,13 @@ describe('MultiPrivilege', function () {
           )
         ).to.be.true;
 
-        await multiPrivilegeInstance.connect(user1)['safeTransferFrom(address,address,uint256)'](user1.address, newOwner.address, nftTokenId);
+        await multiPrivilegeInstance
+          .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            newOwner.address,
+            nftTokenId
+          );
 
         // eslint-disable-next-line no-unused-expressions
         expect(

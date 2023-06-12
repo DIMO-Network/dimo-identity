@@ -1,10 +1,9 @@
 import chai from 'chai';
-import { ethers, waffle, upgrades } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
   Eip712Checker,
-  DimoAccessControl,
   Manufacturer,
   ManufacturerId,
   AftermarketDevice,
@@ -14,24 +13,15 @@ import {
   MockDimoToken,
   MockStake
 } from '../typechain';
-import {
-  initialize,
-  createSnapshot,
-  revertToSnapshot,
-  C
-} from '../utils';
+import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
-const { solidity } = waffle;
 const provider = waffle.provider;
-
-chai.use(solidity);
 
 describe('Mapper', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
-  let accessControlInstance: DimoAccessControl;
   let manufacturerInstance: Manufacturer;
   let aftermarketDeviceInstance: AftermarketDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
@@ -63,65 +53,30 @@ describe('Mapper', function () {
   mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
-    [
-      dimoRegistryInstance,
-      eip712CheckerInstance,
-      accessControlInstance,
-      ,
-      manufacturerInstance,
-      aftermarketDeviceInstance,
-      adLicenseValidatorInstance,
-      mapperInstance
-    ] = await initialize(
-      admin,
-      'Eip712Checker',
-      'DimoAccessControl',
-      'Nodes',
-      'Manufacturer',
-      'AftermarketDevice',
-      'AdLicenseValidator',
-      'Mapper'
-    );
-
-    const ManufacturerIdFactory = await ethers.getContractFactory(
-      'ManufacturerId'
-    );
-    const AftermarketDeviceIdFactory = await ethers.getContractFactory(
-      'AftermarketDeviceId'
-    );
-
-    manufacturerIdInstance = await upgrades.deployProxy(
-      ManufacturerIdFactory,
-      [
-        C.MANUFACTURER_NFT_NAME,
-        C.MANUFACTURER_NFT_SYMBOL,
-        C.MANUFACTURER_NFT_BASE_URI
+    const deployments = await setup(admin, {
+      modules: [
+        'Eip712Checker',
+        'DimoAccessControl',
+        'Nodes',
+        'Manufacturer',
+        'AftermarketDevice',
+        'AdLicenseValidator',
+        'Mapper'
       ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as ManufacturerId;
-    await manufacturerIdInstance.deployed();
+      nfts: ['ManufacturerId', 'AftermarketDeviceId'],
+      upgradeableContracts: []
+    });
 
-    adIdInstance = await upgrades.deployProxy(
-      AftermarketDeviceIdFactory,
-      [
-        C.AD_NFT_NAME,
-        C.AD_NFT_SYMBOL,
-        C.AD_NFT_BASE_URI
-      ],
-      {
-        initializer: 'initialize',
-        kind: 'uups'
-      }
-      // eslint-disable-next-line prettier/prettier
-    ) as AftermarketDeviceId;
-    await adIdInstance.deployed();
+    dimoRegistryInstance = deployments.DIMORegistry;
+    eip712CheckerInstance = deployments.Eip712Checker;
+    manufacturerInstance = deployments.Manufacturer;
+    aftermarketDeviceInstance = deployments.AftermarketDevice;
+    adLicenseValidatorInstance = deployments.AdLicenseValidator;
+    mapperInstance = deployments.Mapper;
+    manufacturerIdInstance = deployments.ManufacturerId;
+    adIdInstance = deployments.AftermarketDeviceId;
 
-    const MANUFACTURER_MINTER_ROLE =
-      await manufacturerIdInstance.MINTER_ROLE();
+    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
@@ -175,11 +130,6 @@ describe('Mapper', function () {
     await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
-    // Grant MANUFACTURER_ROLE to manufacturer
-    await accessControlInstance
-      .connect(admin)
-      .grantRole(C.MANUFACTURER_ROLE, manufacturer1.address);
-
     // Whitelist Manufacturer attributes
     await manufacturerInstance
       .connect(admin)
@@ -228,7 +178,9 @@ describe('Mapper', function () {
       );
     await aftermarketDeviceInstance
       .connect(admin)
-      .claimAftermarketDeviceBatch([{ aftermarketDeviceNodeId: '1', owner: user1.address }]);
+      .claimAftermarketDeviceBatch(1, [
+        { aftermarketDeviceNodeId: '1', owner: user1.address }
+      ]);
   });
 
   beforeEach(async () => {
@@ -242,29 +194,35 @@ describe('Mapper', function () {
   describe('setAftermarketDeviceBeneficiary', () => {
     context('Error handling', () => {
       it('Should revert if caller is not the node owner', async () => {
-        await expect(mapperInstance
-          .connect(beneficiary1)
-          .setAftermarketDeviceBeneficiary(1, beneficiary1.address)
+        await expect(
+          mapperInstance
+            .connect(beneficiary1)
+            .setAftermarketDeviceBeneficiary(1, beneficiary1.address)
         ).to.be.revertedWith('Only owner');
       });
       it('Should revert if beneficiary is equal to owner', async () => {
-        await expect(mapperInstance
-          .connect(user1)
-          .setAftermarketDeviceBeneficiary(1, user1.address)
+        await expect(
+          mapperInstance
+            .connect(user1)
+            .setAftermarketDeviceBeneficiary(1, user1.address)
         ).to.be.revertedWith('Beneficiary cannot be the owner');
       });
     });
 
     context('State', () => {
       it('Should return the node owner if no beneficiary is set', async () => {
-        expect(await mapperInstance.getBeneficiary(adIdInstance.address, 1)).to.be.equal(user1.address);
+        expect(
+          await mapperInstance.getBeneficiary(adIdInstance.address, 1)
+        ).to.be.equal(user1.address);
       });
       it('Should correctly set beneficiary', async () => {
         await mapperInstance
           .connect(user1)
           .setAftermarketDeviceBeneficiary(1, beneficiary1.address);
 
-        expect(await mapperInstance.getBeneficiary(adIdInstance.address, 1)).to.be.equal(beneficiary1.address);
+        expect(
+          await mapperInstance.getBeneficiary(adIdInstance.address, 1)
+        ).to.be.equal(beneficiary1.address);
       });
     });
 

@@ -5,9 +5,9 @@ import { ethers, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import addressesJSON from './data/addresses.json';
-import { ContractAddressesByNetwork, IdManufacturerName } from '../utils';
+import { AddressesByNetwork, IdManufacturerName } from '../utils';
 
-const contractAddresses: ContractAddressesByNetwork = addressesJSON;
+const contractAddresses: AddressesByNetwork = addressesJSON;
 
 interface ManufacturerIdRow {
   tids: string;

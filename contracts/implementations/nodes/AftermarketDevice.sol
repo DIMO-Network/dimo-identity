@@ -448,11 +448,10 @@ contract AftermarketDevice is
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = 0;
         ms.links[adIdProxyAddress][aftermarketDeviceNode] = 0;
-
         emit AftermarketDeviceUnpaired(
             aftermarketDeviceNode,
             vehicleNode,
-            adOwner
+            owner
         );
     }
 

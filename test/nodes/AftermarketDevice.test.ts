@@ -2388,7 +2388,6 @@ describe('AftermarketDevice', function () {
         }
       });
     });
-
     beforeEach(async () => {
       await adIdInstance
         .connect(manufacturer1)
@@ -2400,7 +2399,6 @@ describe('AftermarketDevice', function () {
           mockAftermarketDeviceInfosList
         );
     });
-
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
@@ -2417,7 +2415,6 @@ describe('AftermarketDevice', function () {
         await vehicleInstance
           .connect(admin)
           .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
@@ -2431,11 +2428,40 @@ describe('AftermarketDevice', function () {
             .unpairAftermarketDeviceSign(1, 99, pairSignature)
         ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
       });
+      it('Should revert if owner is not the vehicle node owner', async () => {
+        await manufacturerInstance
+          .connect(admin)
+          .mintManufacturer(
+            manufacturer2.address,
+            C.mockManufacturerNames[1],
+            C.mockManufacturerAttributeInfoPairs
+          );
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(2, user2.address, C.mockVehicleAttributeInfoPairs);
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .unpairAftermarketDeviceSign(2, 1, unPairSignature)
+        ).to.be.revertedWith('Owner of the nodes does not match');
+      });
+
+      it('Should revert if owner is not the aftermarket device node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        await expect(
+          aftermarketDeviceInstance
+            .connect(admin)
+            .unpairAftermarketDeviceSign(1, 1, unPairSignature)
+        ).to.be.revertedWith('Owner of the nodes does not match');
+      });
+
       it('Should revert if vehicle is not already paired', async () => {
         await vehicleInstance
           .connect(admin)
           .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-
         await aftermarketDeviceInstance
           .connect(admin)
           .claimAftermarketDeviceSign(
@@ -2450,13 +2476,11 @@ describe('AftermarketDevice', function () {
             .unpairAftermarketDeviceSign(1, 1, unPairSignature)
         ).to.be.revertedWith('VehicleNotPaired(1)');
       });
-
       context('Wrong signature', () => {
         beforeEach(async () => {
           await vehicleInstance
             .connect(admin)
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-
           await aftermarketDeviceInstance
             .connect(admin)
             .claimAftermarketDeviceSign(
@@ -2486,7 +2510,6 @@ describe('AftermarketDevice', function () {
               vehicleNode: '1'
             }
           });
-
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
@@ -2504,7 +2527,6 @@ describe('AftermarketDevice', function () {
               vehicleNode: '1'
             }
           });
-
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
@@ -2522,13 +2544,13 @@ describe('AftermarketDevice', function () {
               vehicleNode: '1'
             }
           });
-
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
               .unpairAftermarketDeviceSign(1, 1, invalidSignature)
           ).to.be.revertedWith('InvalidSigner');
         });
+
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidSignature = await signMessage({
             _signer: user1,
@@ -2539,13 +2561,13 @@ describe('AftermarketDevice', function () {
               vehicleNode: '1'
             }
           });
-
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
               .unpairAftermarketDeviceSign(1, 1, invalidSignature)
           ).to.be.revertedWith('InvalidSigner');
         });
+
         it('Should revert if aftermarket vehicle node is incorrect', async () => {
           const invalidSignature = await signMessage({
             _signer: user1,
@@ -2556,7 +2578,6 @@ describe('AftermarketDevice', function () {
               vehicleNode: '99'
             }
           });
-
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
@@ -2588,7 +2609,6 @@ describe('AftermarketDevice', function () {
         await vehicleInstance
           .connect(admin)
           .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-
         await aftermarketDeviceInstance
           .connect(admin)
           .claimAftermarketDeviceSign(
@@ -2611,29 +2631,24 @@ describe('AftermarketDevice', function () {
         await aftermarketDeviceInstance
           .connect(admin)
           .unpairAftermarketDeviceSign(1, 1, unPairSignature);
-
         expect(
           await mapperInstance.getLink(adIdInstance.address, 1)
         ).to.be.equal(0);
       });
-
       it('Should correctly unmap the vehicle from the aftermarket device', async () => {
         await aftermarketDeviceInstance
           .connect(admin)
           .unpairAftermarketDeviceSign(1, 1, unPairSignature);
-
         expect(
           await mapperInstance.getLink(vehicleIdInstance.address, 1)
         ).to.be.equal(0);
       });
     });
-
     context('Events', () => {
       it('Should emit AftermarketDeviceUnPaired event with correct params', async () => {
         await vehicleInstance
           .connect(admin)
           .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-
         await aftermarketDeviceInstance
           .connect(admin)
           .claimAftermarketDeviceSign(

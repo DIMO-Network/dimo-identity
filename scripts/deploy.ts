@@ -20,6 +20,7 @@ import {
 import { getSelectors, AddressesByNetwork, NftArgs } from '../utils';
 import * as C from './data/deployArgs';
 import { makes } from './data/Makes';
+import { integrations } from './data/Integrations';
 
 function getAddresses(): AddressesByNetwork {
   return JSON.parse(
@@ -567,7 +568,7 @@ async function grantRole(
   console.log(`----- ${role} role granted to ${address} -----\n`);
 }
 
-async function mintBatch(
+async function mintBatchManufacturers(
   deployer: SignerWithAddress,
   owner: string,
   networkName: string
@@ -599,6 +600,40 @@ async function mintBatch(
   }
 
   console.log(`\n----- Manufacturers minted -----\n`);
+}
+
+async function mintBatchIntegrations(
+  deployer: SignerWithAddress,
+  owner: string,
+  networkName: string
+) {
+  const instances = getAddresses();
+
+  const batchSize = 50;
+  const integrationInstance: Integration = await ethers.getContractAt(
+    'Integration',
+    instances[networkName].modules.DIMORegistry.address
+  );
+
+  console.log(`\n----- Minting integrations -----\n`);
+
+  for (let i = 0; i < integrations.length; i += batchSize) {
+    const batch = integrations.slice(i, i + batchSize);
+
+    const receipt = await (
+      await integrationInstance
+        .connect(deployer)
+        .mintIntegrationBatch(owner, batch)
+    ).wait();
+
+    const ids = receipt.events
+      ?.filter((e: any) => e.event === 'IntegrationNodeMinted')
+      .map((e: any) => e.args.tokenId);
+
+    console.log(`Minted ids: ${ids?.join(',')}`);
+  }
+
+  console.log(`\n----- Integrations minted -----\n`);
 }
 
 async function buildMocks(
@@ -675,7 +710,12 @@ async function main() {
     networkName
   );
   await grantNftRoles(deployer, networkName);
-  await mintBatch(
+  await mintBatchManufacturers(
+    deployer,
+    instances[networkName].misc.Foundation,
+    networkName
+  );
+  await mintBatchIntegrations(
     deployer,
     instances[networkName].misc.Foundation,
     networkName

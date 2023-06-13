@@ -292,19 +292,19 @@
             },
             "IntegrationId": {
                 "proxy": "0x44f2d6184E4F57b5d358d7D311c6909e2BFb1fdc",
-                "implementation": "0xDd6481eeE1cE1FE3B4bfDd975fC6Aad7f2b2BB6a"
+                "implementation": "0x976b6BE673459271697F25d744903b84eB70F867"
             },
             "VehicleId": {
                 "proxy": "0x90C4D6113Ec88dd4BDf12f26DB2b3998fd13A144",
-                "implementation": "0x1265B8CC11c08cDee055F2ee4bf73387d8E231B9"
+                "implementation": "0xDA0dD59e160c5e29f19043ac965b5c121F248D69"
             },
             "AftermarketDeviceId": {
                 "proxy": "0xcf9Af64522162da85164a714c23a7705E6e466b3",
-                "implementation": "0x236135CC02686ec50BbDBbc838e5942019D5235b"
+                "implementation": "0xD76726B4739B79ccAaF09E72b41Ad1b4E05bc46D"
             },
             "SyntheticDeviceId": {
                 "proxy": "0x85226A67FF1b3Ec6cb033162f7df5038a6C3bAB2",
-                "implementation": "0x051bd9fBaA18E0EA22b69874545C56907946C8F8"
+                "implementation": "0xa7b8E4D8A9Ab895AF96DE032025Bc6758F810CaD"
             }
         },
         "misc": {

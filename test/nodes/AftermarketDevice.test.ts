@@ -604,9 +604,9 @@ describe('AftermarketDevice', function () {
               )
           )
             .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-            .withArgs(1, adAddress1.address, manufacturer1.address)
+            .withArgs(1, 1, adAddress1.address, manufacturer1.address)
             .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-            .withArgs(2, adAddress2.address, manufacturer1.address);
+            .withArgs(1, 2, adAddress2.address, manufacturer1.address);
         });
         it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
           await expect(
@@ -958,9 +958,9 @@ describe('AftermarketDevice', function () {
               )
           )
             .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-            .withArgs(1, adAddress1.address, manufacturer1.address)
+            .withArgs(1, 1, adAddress1.address, manufacturer1.address)
             .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceNodeMinted')
-            .withArgs(2, adAddress2.address, manufacturer1.address);
+            .withArgs(1, 2, adAddress2.address, manufacturer1.address);
         });
         it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
           await expect(

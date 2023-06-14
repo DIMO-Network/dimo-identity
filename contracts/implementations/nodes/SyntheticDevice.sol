@@ -83,6 +83,96 @@ contract SyntheticDevice is AccessControlInternal {
     // ***** Interaction with nodes *****//
 
     /**
+     * @notice Mints a list of synthetic devices and link them to vehicles
+     * To be called for existing vehicles already connected
+     * @dev Caller must have the admin role
+     * @param data input data with the following fields:
+     *  integrationNode -> Parent integration node id
+     *  vehicleNode -> Vehicle node id
+     *  syntheticDeviceSig -> Synthetic Device's signature hash
+     *  syntheticDeviceAddr -> Address associated with the synthetic device
+     *  attrInfoPairs -> List of attribute-info pairs to be added
+     */
+    function mintSyntheticDeviceBatch(
+        Types.MintSyntheticDeviceBatchInput[] calldata data
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = sds.idProxyAddress;
+
+        address owner;
+        bytes32 message;
+        uint256 newTokenId;
+        for (uint256 i = 0; i < data.length; i++) {
+            if (
+                !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
+                    data[i].integrationNode
+                )
+            ) revert Errors.InvalidParentNode(data[i].integrationNode);
+            if (!INFT(vehicleIdProxyAddress).exists(data[i].vehicleNode))
+                revert Errors.InvalidNode(
+                    vehicleIdProxyAddress,
+                    data[i].vehicleNode
+                );
+            if (sds.deviceAddressToNodeId[data[i].syntheticDeviceAddr] != 0)
+                revert DeviceAlreadyRegistered(data[i].syntheticDeviceAddr);
+            if (
+                ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+                    data[i].vehicleNode
+                ] != 0
+            ) revert Errors.VehiclePaired(data[i].vehicleNode);
+
+            message = keccak256(
+                abi.encode(
+                    MINT_TYPEHASH,
+                    data[i].integrationNode,
+                    data[i].vehicleNode
+                )
+            );
+
+            if (
+                !Eip712CheckerInternal._verifySignature(
+                    data[i].syntheticDeviceAddr,
+                    message,
+                    data[i].syntheticDeviceSig
+                )
+            ) revert InvalidSdSignature();
+
+            owner = INFT(vehicleIdProxyAddress).ownerOf(data[i].vehicleNode);
+            newTokenId = INFT(sdIdProxyAddress).safeMint(owner);
+
+            ns.nodes[sdIdProxyAddress][newTokenId].parentNode = data[i]
+                .integrationNode;
+
+            ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+                data[i].vehicleNode
+            ] = newTokenId;
+            ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
+                newTokenId
+            ] = data[i].vehicleNode;
+
+            sds.deviceAddressToNodeId[data[i].syntheticDeviceAddr] = newTokenId;
+            sds.nodeIdToDeviceAddress[newTokenId] = data[i].syntheticDeviceAddr;
+
+            _setInfos(newTokenId, data[i].attrInfoPairs);
+
+            emit SyntheticDeviceNodeMinted(
+                data[i].integrationNode,
+                newTokenId,
+                data[i].vehicleNode,
+                data[i].syntheticDeviceAddr,
+                owner
+            );
+        }
+    }
+
+    /**
      * @notice Mints a synthetic device and pair it with a vehicle
      * @dev Caller must have the admin role
      * @param data input data with the following fields:

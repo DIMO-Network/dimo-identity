@@ -1968,6 +1968,58 @@
                         "type": "bytes"
                     },
                     {
+                        "internalType": "address",
+                        "name": "syntheticDeviceAddr",
+                        "type": "address"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "attribute",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "info",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct AttributeInfoPair[]",
+                        "name": "attrInfoPairs",
+                        "type": "tuple[]"
+                    }
+                ],
+                "internalType": "struct MintSyntheticDeviceBatchInput[]",
+                "name": "data",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "mintSyntheticDeviceBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "integrationNode",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "vehicleNode",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "syntheticDeviceSig",
+                        "type": "bytes"
+                    },
+                    {
                         "internalType": "bytes",
                         "name": "vehicleOwnerSig",
                         "type": "bytes"

@@ -28,6 +28,10 @@ contract SyntheticDevice is AccessControlInternal {
         keccak256(
             "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
         );
+    bytes32 private constant BURN_TYPEHASH =
+        keccak256(
+            "BurnSyntheticDeviceSign(uint256 vehicleNode,uint256 syntheticDeviceNode)"
+        );
 
     event SyntheticDeviceIdProxySet(address proxy);
     event SyntheticDeviceAttributeAdded(string attribute);
@@ -256,6 +260,52 @@ contract SyntheticDevice is AccessControlInternal {
         );
     }
 
+    // TODO Documentation
+    function burnSyntheticDeviceSign(
+        uint256 vehicleNode,
+        uint256 syntheticDeviceNode,
+        bytes calldata ownerSig
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = sds.idProxyAddress;
+
+        if (
+            ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+                vehicleNode
+            ] != syntheticDeviceNode
+        ) revert Errors.VehiclePaired(vehicleNode); // TODO not paired
+
+        address owner = INFT(sdIdProxyAddress).ownerOf(syntheticDeviceNode);
+        bytes32 message = keccak256(
+            abi.encode(BURN_TYPEHASH, vehicleNode, syntheticDeviceNode)
+        ); // TODO vehicleNode and sdNode ???
+        if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
+            revert Errors.InvalidOwnerSignature();
+
+        ns.nodes[sdIdProxyAddress][syntheticDeviceNode].parentNode = 0;
+
+        ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][vehicleNode] = 0;
+        ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
+            syntheticDeviceNode
+        ] = 0;
+
+        sds.deviceAddressToNodeId[
+            sds.nodeIdToDeviceAddress[syntheticDeviceNode]
+        ] = 0;
+        sds.nodeIdToDeviceAddress[syntheticDeviceNode] = address(0);
+
+        _resetInfos(syntheticDeviceNode);
+
+        // TODO emit
+    }
+
     /**
      * @notice Add infos to node
      * @dev attributes must be whitelisted
@@ -322,6 +372,27 @@ contract SyntheticDevice is AccessControlInternal {
                 attrInfoPairList[i].attribute,
                 attrInfoPairList[i].info
             );
+        }
+    }
+
+    // TODO Documentation
+    function _resetInfos(uint256 tokenId) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        address idProxyAddress = sds.idProxyAddress;
+        string[] memory attributes = AttributeSet.values(
+            sds.whitelistedAttributes
+        );
+
+        for (
+            uint256 i = 0;
+            i < AttributeSet.count(sds.whitelistedAttributes);
+            i++
+        ) {
+            ns.nodes[idProxyAddress][tokenId].info[attributes[i]] = "";
+
+            emit SyntheticDeviceAttributeSet(tokenId, attributes[i], "");
         }
     }
 }

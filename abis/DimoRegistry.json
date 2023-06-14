@@ -1932,6 +1932,29 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "syntheticDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "ownerSig",
+                "type": "bytes"
+            }
+        ],
+        "name": "burnSyntheticDeviceSign",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address",
                 "name": "addr",
                 "type": "address"

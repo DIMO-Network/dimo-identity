@@ -224,7 +224,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0xb661bf6437f3842128855d981e8E7E3c83aee15a",
+                "address": "0x1ca0E65e55ceC0F7dd092a14553fAED8bf9d5c4A",
                 "selectors": [
                     "0x6111afa3",
                     "0x60deec60",
@@ -239,7 +239,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0x3C78A46aD482371aD5aeF3c5a60633E3aD078ac2",
+                "address": "0x2f8320468950e1a933669F4bF9CDb50E79117137",
                 "selectors": [
                     "0xe1f371df",
                     "0x795b910a",

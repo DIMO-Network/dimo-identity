@@ -37,6 +37,7 @@ contract SyntheticDevice is AccessControlInternal {
         string info
     );
     event SyntheticDeviceNodeMinted(
+        uint256 integrationNode,
         uint256 syntheticDeviceNode,
         uint256 indexed vehicleNode,
         address indexed syntheticDeviceAddress,
@@ -157,6 +158,7 @@ contract SyntheticDevice is AccessControlInternal {
         _setInfos(newTokenId, data.attrInfoPairs);
 
         emit SyntheticDeviceNodeMinted(
+            data.integrationNode,
             newTokenId,
             data.vehicleNode,
             data.syntheticDeviceAddr,

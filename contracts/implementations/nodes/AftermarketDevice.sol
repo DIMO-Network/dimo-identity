@@ -59,6 +59,7 @@ contract AftermarketDevice is
         string info
     );
     event AftermarketDeviceNodeMinted(
+        uint256 indexed manufacturerId,
         uint256 tokenId,
         address indexed aftermarketDeviceAddress,
         address indexed owner
@@ -175,6 +176,7 @@ contract AftermarketDevice is
             _setInfos(newTokenId, adInfos[i].attrInfoPairs);
 
             emit AftermarketDeviceNodeMinted(
+                manufacturerNode,
                 newTokenId,
                 deviceAddress,
                 manufacturerNodeOwner

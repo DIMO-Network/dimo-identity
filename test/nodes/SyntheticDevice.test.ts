@@ -885,7 +885,7 @@ describe('SyntheticDevice', function () {
             .mintSyntheticDeviceSign(correctMintInput)
         )
           .to.emit(syntheticDeviceInstance, 'SyntheticDeviceNodeMinted')
-          .withArgs(1, 1, sdAddress1.address, user1.address);
+          .withArgs(1, 1, 1, sdAddress1.address, user1.address);
       });
     });
   });

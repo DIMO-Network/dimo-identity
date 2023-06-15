@@ -47,6 +47,11 @@ contract SyntheticDevice is AccessControlInternal {
         address indexed syntheticDeviceAddress,
         address indexed owner
     );
+    event SyntheticDeviceNodeBurned(
+        uint256 indexed syntheticDeviceNode,
+        uint256 indexed vehicleNode,
+        address indexed owner
+    );
 
     // ***** Admin management ***** //
 
@@ -87,17 +92,17 @@ contract SyntheticDevice is AccessControlInternal {
     // ***** Interaction with nodes *****//
 
     /**
-     * @notice Mints a list of synthetic devices and link them to vehicles
+     * @notice Mints a list of synthetic devices and links them to vehicles
      * To be called for existing vehicles already connected
      * @dev Caller must have the admin role
+     * @dev All devices will be minted under the same integration node
      * @param data input data with the following fields:
-     *  integrationNode -> Parent integration node id
      *  vehicleNode -> Vehicle node id
-     *  syntheticDeviceSig -> Synthetic Device's signature hash
      *  syntheticDeviceAddr -> Address associated with the synthetic device
      *  attrInfoPairs -> List of attribute-info pairs to be added
      */
     function mintSyntheticDeviceBatch(
+        uint256 integrationNode,
         Types.MintSyntheticDeviceBatchInput[] calldata data
     ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
@@ -110,15 +115,15 @@ contract SyntheticDevice is AccessControlInternal {
             .idProxyAddress;
         address sdIdProxyAddress = sds.idProxyAddress;
 
+        if (
+            !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
+                integrationNode
+            )
+        ) revert Errors.InvalidParentNode(integrationNode);
+
         address owner;
-        bytes32 message;
         uint256 newTokenId;
         for (uint256 i = 0; i < data.length; i++) {
-            if (
-                !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
-                    data[i].integrationNode
-                )
-            ) revert Errors.InvalidParentNode(data[i].integrationNode);
             if (!INFT(vehicleIdProxyAddress).exists(data[i].vehicleNode))
                 revert Errors.InvalidNode(
                     vehicleIdProxyAddress,
@@ -132,27 +137,10 @@ contract SyntheticDevice is AccessControlInternal {
                 ] != 0
             ) revert Errors.VehiclePaired(data[i].vehicleNode);
 
-            message = keccak256(
-                abi.encode(
-                    MINT_TYPEHASH,
-                    data[i].integrationNode,
-                    data[i].vehicleNode
-                )
-            );
-
-            if (
-                !Eip712CheckerInternal._verifySignature(
-                    data[i].syntheticDeviceAddr,
-                    message,
-                    data[i].syntheticDeviceSig
-                )
-            ) revert InvalidSdSignature();
-
             owner = INFT(vehicleIdProxyAddress).ownerOf(data[i].vehicleNode);
             newTokenId = INFT(sdIdProxyAddress).safeMint(owner);
 
-            ns.nodes[sdIdProxyAddress][newTokenId].parentNode = data[i]
-                .integrationNode;
+            ns.nodes[sdIdProxyAddress][newTokenId].parentNode = integrationNode;
 
             ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                 data[i].vehicleNode
@@ -167,7 +155,7 @@ contract SyntheticDevice is AccessControlInternal {
             _setInfos(newTokenId, data[i].attrInfoPairs);
 
             emit SyntheticDeviceNodeMinted(
-                data[i].integrationNode,
+                integrationNode,
                 newTokenId,
                 data[i].vehicleNode,
                 data[i].syntheticDeviceAddr,
@@ -260,7 +248,14 @@ contract SyntheticDevice is AccessControlInternal {
         );
     }
 
-    // TODO Documentation
+    /**
+     * @notice Burns a synthetic device and reset all its attributes and links
+     * @dev Caller must have the admin role
+     * @dev This contract has the BURNER_ROLE in the SyntheticDeviceId
+     * @param vehicleNode Vehicle node id
+     * @param syntheticDeviceNode Synthetic Device node id
+     * @param ownerSig Vehicle/Synthetic Device's owner signature hash
+     */
     function burnSyntheticDeviceSign(
         uint256 vehicleNode,
         uint256 syntheticDeviceNode,
@@ -280,12 +275,13 @@ contract SyntheticDevice is AccessControlInternal {
             ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                 vehicleNode
             ] != syntheticDeviceNode
-        ) revert Errors.VehiclePaired(vehicleNode); // TODO not paired
+        ) revert Errors.VehicleNotPaired(vehicleNode);
 
         address owner = INFT(sdIdProxyAddress).ownerOf(syntheticDeviceNode);
         bytes32 message = keccak256(
             abi.encode(BURN_TYPEHASH, vehicleNode, syntheticDeviceNode)
-        ); // TODO vehicleNode and sdNode ???
+        );
+
         if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
             revert Errors.InvalidOwnerSignature();
 
@@ -303,7 +299,9 @@ contract SyntheticDevice is AccessControlInternal {
 
         _resetInfos(syntheticDeviceNode);
 
-        // TODO emit
+        INFT(sdIdProxyAddress).burn(syntheticDeviceNode);
+
+        emit SyntheticDeviceNodeBurned(syntheticDeviceNode, vehicleNode, owner);
     }
 
     /**
@@ -375,7 +373,11 @@ contract SyntheticDevice is AccessControlInternal {
         }
     }
 
-    // TODO Documentation
+    /**
+     * @dev Internal function to reset node infos
+     * It iterates over all whitelisted attributes to reset each info
+     * @param tokenId Node which will have the infos reset
+     */
     function _resetInfos(uint256 tokenId) private {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage

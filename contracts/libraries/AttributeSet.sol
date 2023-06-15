@@ -65,16 +65,4 @@ library AttributeSet {
     function values(Set storage set) internal view returns (string[] memory) {
         return set._values;
     }
-
-    function values2(Set storage set) internal view returns (string[] memory) {
-        string[] memory store = set._values;
-        string[] memory result;
-
-        /// @solidity memory-safe-assembly
-        assembly {
-            result := store
-        }
-
-        return result;
-    }
 }

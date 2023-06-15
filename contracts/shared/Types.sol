@@ -19,9 +19,7 @@ struct AftermarketDeviceOwnerPair {
 }
 
 struct MintSyntheticDeviceBatchInput {
-    uint256 integrationNode;
     uint256 vehicleNode;
-    bytes syntheticDeviceSig;
     address syntheticDeviceAddr;
     AttributeInfoPair[] attrInfoPairs;
 }

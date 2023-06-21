@@ -18,6 +18,12 @@ struct AftermarketDeviceOwnerPair {
     address owner;
 }
 
+struct MintSyntheticDeviceBatchInput {
+    uint256 vehicleNode;
+    address syntheticDeviceAddr;
+    AttributeInfoPair[] attrInfoPairs;
+}
+
 struct MintSyntheticDeviceInput {
     uint256 integrationNode;
     uint256 vehicleNode;

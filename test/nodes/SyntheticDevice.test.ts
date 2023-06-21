@@ -1082,14 +1082,14 @@ describe('SyntheticDevice', function () {
           syntheticDeviceInstance
             .connect(admin)
             .burnSyntheticDeviceSign(99, 1, burnSyntheticDeviceOwnerSig1)
-        ).to.be.revertedWith(`VehicleNotPaired(99)`);
+        ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
       });
       it('Should revert if node is not a Synthetic Device', async () => {
         await expect(
           syntheticDeviceInstance
             .connect(admin)
             .burnSyntheticDeviceSign(1, 99, burnSyntheticDeviceOwnerSig1)
-        ).to.be.revertedWith(`VehicleNotPaired(1)`);
+        ).to.be.revertedWith(`InvalidNode("${sdIdInstance.address}", 99)`);
       });
       it('Should revert if Vehicle is paired to another Synthetic Device', async () => {
         const localBurnSyntheticDeviceOwnerSig = await signMessage({

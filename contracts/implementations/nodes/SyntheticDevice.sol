@@ -96,7 +96,8 @@ contract SyntheticDevice is AccessControlInternal {
      * To be called for existing vehicles already connected
      * @dev Caller must have the admin role
      * @dev All devices will be minted under the same integration node
-     * @param data input data with the following fields:
+     * @param integrationNode Parent integration node id
+     * @param data Input data with the following fields:
      *  vehicleNode -> Vehicle node id
      *  syntheticDeviceAddr -> Address associated with the synthetic device
      *  attrInfoPairs -> List of attribute-info pairs to be added
@@ -167,7 +168,7 @@ contract SyntheticDevice is AccessControlInternal {
     /**
      * @notice Mints a synthetic device and pair it with a vehicle
      * @dev Caller must have the admin role
-     * @param data input data with the following fields:
+     * @param data Input data with the following fields:
      *  integrationNode -> Parent integration node id
      *  vehicleNode -> Vehicle node id
      *  syntheticDeviceSig -> Synthetic Device's signature hash
@@ -271,6 +272,10 @@ contract SyntheticDevice is AccessControlInternal {
             .idProxyAddress;
         address sdIdProxyAddress = sds.idProxyAddress;
 
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (!INFT(sdIdProxyAddress).exists(syntheticDeviceNode))
+            revert Errors.InvalidNode(sdIdProxyAddress, syntheticDeviceNode);
         if (
             ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                 vehicleNode

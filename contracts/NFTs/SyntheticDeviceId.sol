@@ -60,6 +60,14 @@ contract SyntheticDeviceId is
         super.setTrustedForwarder(addr, trusted);
     }
 
+    /// @notice Function to burn a token
+    /// @dev Caller must have the burner role
+    /// @dev To be called by DIMORegistry in burnSyntheticDeviceSign function
+    /// @param tokenId Token Id to be burned
+    function burn(uint256 tokenId) public override {
+        super._burn(tokenId);
+    }
+
     /// @notice Internal function to transfer a token
     /// @dev Only the token owner can transfer (no approvals)
     /// @dev Pairings are maintained

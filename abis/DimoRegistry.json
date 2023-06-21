@@ -1883,6 +1883,31 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "syntheticDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "SyntheticDeviceNodeBurned",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": false,
                 "internalType": "uint256",
                 "name": "integrationNode",
@@ -1925,6 +1950,29 @@
             }
         ],
         "name": "addSyntheticDeviceAttribute",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "syntheticDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "ownerSig",
+                "type": "bytes"
+            }
+        ],
+        "name": "burnSyntheticDeviceSign",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

@@ -28,6 +28,10 @@ contract SyntheticDevice is AccessControlInternal {
         keccak256(
             "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
         );
+    bytes32 private constant BURN_TYPEHASH =
+        keccak256(
+            "BurnSyntheticDeviceSign(uint256 vehicleNode,uint256 syntheticDeviceNode)"
+        );
 
     event SyntheticDeviceIdProxySet(address proxy);
     event SyntheticDeviceAttributeAdded(string attribute);
@@ -41,6 +45,11 @@ contract SyntheticDevice is AccessControlInternal {
         uint256 syntheticDeviceNode,
         uint256 indexed vehicleNode,
         address indexed syntheticDeviceAddress,
+        address indexed owner
+    );
+    event SyntheticDeviceNodeBurned(
+        uint256 indexed syntheticDeviceNode,
+        uint256 indexed vehicleNode,
         address indexed owner
     );
 
@@ -87,7 +96,8 @@ contract SyntheticDevice is AccessControlInternal {
      * To be called for existing vehicles already connected
      * @dev Caller must have the admin role
      * @dev All devices will be minted under the same integration node
-     * @param data input data with the following fields:
+     * @param integrationNode Parent integration node id
+     * @param data Input data with the following fields:
      *  vehicleNode -> Vehicle node id
      *  syntheticDeviceAddr -> Address associated with the synthetic device
      *  attrInfoPairs -> List of attribute-info pairs to be added
@@ -158,7 +168,7 @@ contract SyntheticDevice is AccessControlInternal {
     /**
      * @notice Mints a synthetic device and pair it with a vehicle
      * @dev Caller must have the admin role
-     * @param data input data with the following fields:
+     * @param data Input data with the following fields:
      *  integrationNode -> Parent integration node id
      *  vehicleNode -> Vehicle node id
      *  syntheticDeviceSig -> Synthetic Device's signature hash
@@ -240,6 +250,66 @@ contract SyntheticDevice is AccessControlInternal {
     }
 
     /**
+     * @notice Burns a synthetic device and reset all its attributes and links
+     * @dev Caller must have the admin role
+     * @dev This contract has the BURNER_ROLE in the SyntheticDeviceId
+     * @param vehicleNode Vehicle node id
+     * @param syntheticDeviceNode Synthetic Device node id
+     * @param ownerSig Vehicle/Synthetic Device's owner signature hash
+     */
+    function burnSyntheticDeviceSign(
+        uint256 vehicleNode,
+        uint256 syntheticDeviceNode,
+        bytes calldata ownerSig
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = sds.idProxyAddress;
+
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (!INFT(sdIdProxyAddress).exists(syntheticDeviceNode))
+            revert Errors.InvalidNode(sdIdProxyAddress, syntheticDeviceNode);
+        if (
+            ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+                vehicleNode
+            ] != syntheticDeviceNode
+        ) revert Errors.VehicleNotPaired(vehicleNode);
+
+        address owner = INFT(sdIdProxyAddress).ownerOf(syntheticDeviceNode);
+        bytes32 message = keccak256(
+            abi.encode(BURN_TYPEHASH, vehicleNode, syntheticDeviceNode)
+        );
+
+        if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
+            revert Errors.InvalidOwnerSignature();
+
+        ns.nodes[sdIdProxyAddress][syntheticDeviceNode].parentNode = 0;
+
+        ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][vehicleNode] = 0;
+        ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
+            syntheticDeviceNode
+        ] = 0;
+
+        sds.deviceAddressToNodeId[
+            sds.nodeIdToDeviceAddress[syntheticDeviceNode]
+        ] = 0;
+        sds.nodeIdToDeviceAddress[syntheticDeviceNode] = address(0);
+
+        _resetInfos(syntheticDeviceNode);
+
+        INFT(sdIdProxyAddress).burn(syntheticDeviceNode);
+
+        emit SyntheticDeviceNodeBurned(syntheticDeviceNode, vehicleNode, owner);
+    }
+
+    /**
      * @notice Add infos to node
      * @dev attributes must be whitelisted
      * @param tokenId Node id where the info will be added
@@ -305,6 +375,31 @@ contract SyntheticDevice is AccessControlInternal {
                 attrInfoPairList[i].attribute,
                 attrInfoPairList[i].info
             );
+        }
+    }
+
+    /**
+     * @dev Internal function to reset node infos
+     * It iterates over all whitelisted attributes to reset each info
+     * @param tokenId Node which will have the infos reset
+     */
+    function _resetInfos(uint256 tokenId) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        address idProxyAddress = sds.idProxyAddress;
+        string[] memory attributes = AttributeSet.values(
+            sds.whitelistedAttributes
+        );
+
+        for (
+            uint256 i = 0;
+            i < AttributeSet.count(sds.whitelistedAttributes);
+            i++
+        ) {
+            ns.nodes[idProxyAddress][tokenId].info[attributes[i]] = "";
+
+            emit SyntheticDeviceAttributeSet(tokenId, attributes[i], "");
         }
     }
 }

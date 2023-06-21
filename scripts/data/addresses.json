@@ -420,7 +420,9 @@
                 "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
                 "selectors": [
                     "0xe1f371df",
+                    "0x7c7c9978",
                     "0x795b910a",
+                    "0x261d982a",
                     "0xc624e8a1",
                     "0xecf452d7",
                     "0x80430e0d"

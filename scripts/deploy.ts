@@ -15,6 +15,7 @@ import {
   AftermarketDeviceId,
   AdLicenseValidator,
   SyntheticDevice,
+  SyntheticDeviceId,
   DimoForwarder
 } from '../typechain';
 import { getSelectors, AddressesByNetwork, NftArgs } from '../utils';
@@ -543,6 +544,26 @@ async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {
 
   console.log(
     `----- ${C.TRANSFERER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----\n`
+  );
+
+  const syntheticDeviceIdInstance: SyntheticDeviceId =
+    await ethers.getContractAt(
+      'SyntheticDeviceId',
+      instances[networkName].nfts.SyntheticDeviceId.proxy
+    );
+
+  console.log(
+    `\n----- Granting ${C.BURNER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----`
+  );
+
+  await (
+    await syntheticDeviceIdInstance
+      .connect(deployer)
+      .grantRole(C.BURNER_ROLE, dimoRegistryAddress)
+  ).wait();
+
+  console.log(
+    `----- ${C.BURNER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----\n`
   );
 }
 

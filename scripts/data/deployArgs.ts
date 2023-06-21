@@ -11,6 +11,9 @@ export const MINTER_ROLE = ethers.utils.keccak256(
 export const TRANSFERER_ROLE = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes('TRANSFERER_ROLE')
 );
+export const BURNER_ROLE = ethers.utils.keccak256(
+  ethers.utils.toUtf8Bytes('BURNER_ROLE')
+);
 
 export const dimoRegistryName = 'DIMORegistry';
 

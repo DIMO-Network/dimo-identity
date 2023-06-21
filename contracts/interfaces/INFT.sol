@@ -27,6 +27,8 @@ interface INFT {
         bytes calldata data
     ) external;
 
+    function burn(uint256 tokenId) external;
+
     function ownerOf(uint256 tokenId) external view returns (address owner);
 
     function exists(uint256 tokenId) external view returns (bool);

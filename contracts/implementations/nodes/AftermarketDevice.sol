@@ -22,7 +22,6 @@ error DeviceAlreadyClaimed(uint256 id);
 error InvalidAdSignature();
 error AdNotClaimed(uint256 id);
 error AdPaired(uint256 id);
-error VehicleNotPaired(uint256 id);
 error AdNotPaired(uint256 id);
 error OwnersDoesNotMatch();
 
@@ -436,7 +435,7 @@ contract AftermarketDevice is
         if (
             ms.links[vehicleIdProxyAddress][vehicleNode] !=
             aftermarketDeviceNode
-        ) revert VehicleNotPaired(vehicleNode);
+        ) revert Errors.VehicleNotPaired(vehicleNode);
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != vehicleNode)
             revert AdNotPaired(aftermarketDeviceNode);
 

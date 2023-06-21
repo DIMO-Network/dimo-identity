@@ -2345,6 +2345,352 @@ describe('AftermarketDevice', function () {
     });
   });
 
+  describe('unpairAftermarketDevice', () => {
+    let claimOwnerSig: string;
+    let claimAdSig: string;
+    let pairSignature: string;
+
+    before(async () => {
+      claimOwnerSig = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      claimAdSig = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      pairSignature = await signMessage({
+        _signer: user1,
+        _primaryType: 'PairAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          vehicleNode: '1'
+        }
+      });
+    });
+
+    beforeEach(async () => {
+      await adIdInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList
+        );
+    });
+
+    context('Error handling', () => {
+      it('Should revert if node is not an Aftermarket Device', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .unpairAftermarketDevice(99, 1)
+        ).to.be.revertedWith(`InvalidNode("${adIdInstance.address}", 99)`);
+      });
+      it('Should revert if node is not a Vehicle', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .unpairAftermarketDevice(1, 99)
+        ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
+      });
+      it('Should revert if vehicle is not paired', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+        await aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceSign(
+            1,
+            user1.address,
+            claimOwnerSig,
+            claimAdSig
+          );
+        await expect(
+          aftermarketDeviceInstance.connect(user1).unpairAftermarketDevice(1, 1)
+        ).to.be.revertedWith('VehicleNotPaired(1)');
+      });
+      it('Should revert if caller does the vehicle or aftermarket device owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+        await aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceSign(
+            1,
+            user1.address,
+            claimOwnerSig,
+            claimAdSig
+          );
+
+        await aftermarketDeviceInstance
+          .connect(admin)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature
+          );
+
+        await expect(
+          aftermarketDeviceInstance.connect(user2).unpairAftermarketDevice(1, 1)
+        ).to.be.revertedWith(`Unauthorized("${user2.address}")`);
+      });
+    });
+
+    context('State', () => {
+      beforeEach(async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+        await aftermarketDeviceInstance
+          .connect(admin)
+          .claimAftermarketDeviceSign(
+            1,
+            user1.address,
+            claimOwnerSig,
+            claimAdSig
+          );
+
+        await aftermarketDeviceInstance
+          .connect(admin)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature
+          );
+      });
+
+      context(
+        'Being the owner of the vehicle and the aftermarket device',
+        () => {
+          it('Should correctly unmap the aftermarket device from vehicle', async () => {
+            await aftermarketDeviceInstance
+              .connect(user1)
+              .unpairAftermarketDevice(1, 1);
+
+            expect(
+              await mapperInstance.getLink(adIdInstance.address, 1)
+            ).to.be.equal(0);
+          });
+
+          it('Should correctly unmap the vehicle from the aftermarket device', async () => {
+            await aftermarketDeviceInstance
+              .connect(user1)
+              .unpairAftermarketDevice(1, 1);
+
+            expect(
+              await mapperInstance.getLink(vehicleIdInstance.address, 1)
+            ).to.be.equal(0);
+          });
+        }
+      );
+
+      context('Being the owner of the vehicle', () => {
+        beforeEach(async () => {
+          await adIdInstance
+            .connect(user1)
+            ['safeTransferFrom(address,address,uint256)'](
+              user1.address,
+              user2.address,
+              1
+            );
+        });
+
+        it('Should correctly unmap the aftermarket device from vehicle', async () => {
+          await aftermarketDeviceInstance
+            .connect(user1)
+            .unpairAftermarketDevice(1, 1);
+
+          expect(
+            await mapperInstance.getLink(adIdInstance.address, 1)
+          ).to.be.equal(0);
+        });
+
+        it('Should correctly unmap the vehicle from the aftermarket device', async () => {
+          await aftermarketDeviceInstance
+            .connect(user1)
+            .unpairAftermarketDevice(1, 1);
+
+          expect(
+            await mapperInstance.getLink(vehicleIdInstance.address, 1)
+          ).to.be.equal(0);
+        });
+      });
+
+      context('Being the owner of the aftermarket device', () => {
+        beforeEach(async () => {
+          await adIdInstance
+            .connect(user1)
+            ['safeTransferFrom(address,address,uint256)'](
+              user1.address,
+              user2.address,
+              1
+            );
+        });
+
+        it('Should correctly unmap the aftermarket device from vehicle', async () => {
+          await aftermarketDeviceInstance
+            .connect(user2)
+            .unpairAftermarketDevice(1, 1);
+
+          expect(
+            await mapperInstance.getLink(adIdInstance.address, 1)
+          ).to.be.equal(0);
+        });
+
+        it('Should correctly unmap the vehicle from the aftermarket device', async () => {
+          await aftermarketDeviceInstance
+            .connect(user2)
+            .unpairAftermarketDevice(1, 1);
+
+          expect(
+            await mapperInstance.getLink(vehicleIdInstance.address, 1)
+          ).to.be.equal(0);
+        });
+      });
+    });
+
+    context('Events', () => {
+      context(
+        'Being the owner of the vehicle and the aftermarket device',
+        () => {
+          it('Should emit AftermarketDeviceUnPaired event with correct params', async () => {
+            await vehicleInstance
+              .connect(admin)
+              .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+            await aftermarketDeviceInstance
+              .connect(admin)
+              .claimAftermarketDeviceSign(
+                1,
+                user1.address,
+                claimOwnerSig,
+                claimAdSig
+              );
+
+            await aftermarketDeviceInstance
+              .connect(admin)
+              ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+                1,
+                1,
+                pairSignature
+              );
+
+            await expect(
+              aftermarketDeviceInstance
+                .connect(user1)
+                .unpairAftermarketDevice(1, 1)
+            )
+              .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceUnpaired')
+              .withArgs(1, 1, user1.address);
+          });
+        }
+      );
+
+      context('Being the owner of the vehicle', () => {
+        it('Should emit AftermarketDeviceUnPaired event with correct params', async () => {
+          await vehicleInstance
+            .connect(admin)
+            .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+          await aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(
+              1,
+              user1.address,
+              claimOwnerSig,
+              claimAdSig
+            );
+
+          await aftermarketDeviceInstance
+            .connect(admin)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              1,
+              pairSignature
+            );
+
+          await adIdInstance
+            .connect(user1)
+            ['safeTransferFrom(address,address,uint256)'](
+              user1.address,
+              user2.address,
+              1
+            );
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(user1)
+              .unpairAftermarketDevice(1, 1)
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceUnpaired')
+            .withArgs(1, 1, user2.address);
+        });
+      });
+
+      context('Being the owner of the aftermarket device', () => {
+        it('Should emit AftermarketDeviceUnPaired event with correct params', async () => {
+          await vehicleInstance
+            .connect(admin)
+            .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+          await aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(
+              1,
+              user1.address,
+              claimOwnerSig,
+              claimAdSig
+            );
+
+          await aftermarketDeviceInstance
+            .connect(admin)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              1,
+              pairSignature
+            );
+
+          await adIdInstance
+            .connect(user1)
+            ['safeTransferFrom(address,address,uint256)'](
+              user1.address,
+              user2.address,
+              1
+            );
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(user2)
+              .unpairAftermarketDevice(1, 1)
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceUnpaired')
+            .withArgs(1, 1, user2.address);
+        });
+      });
+    });
+  });
+
   describe('unpairAftermarketDeviceSign', () => {
     let claimOwnerSig: string;
     let claimAdSig: string;
@@ -2414,10 +2760,6 @@ describe('AftermarketDevice', function () {
         );
       });
       it('Should revert if node is not an Aftermarket Device', async () => {
-        await vehicleInstance
-          .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
@@ -2425,13 +2767,17 @@ describe('AftermarketDevice', function () {
         ).to.be.revertedWith(`InvalidNode("${adIdInstance.address}", 99)`);
       });
       it('Should revert if node is not a Vehicle', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
-            .unpairAftermarketDeviceSign(1, 99, pairSignature)
+            .unpairAftermarketDeviceSign(1, 99, unPairSignature)
         ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
       });
-      it('Should revert if vehicle is not already paired', async () => {
+      it('Should revert if vehicle is not paired', async () => {
         await vehicleInstance
           .connect(admin)
           .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);

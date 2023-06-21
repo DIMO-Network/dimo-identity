@@ -405,6 +405,53 @@ contract AftermarketDevice is
     }
 
     /**
+     * @dev Unpairs an aftermarket device from a vehicles
+     * Both vehicle and AD owners can unpair.
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
+     */
+    function unpairAftermarketDevice(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode
+    ) external {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (
+            ms.links[vehicleIdProxyAddress][vehicleNode] !=
+            aftermarketDeviceNode
+        ) revert VehicleNotPaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != vehicleNode)
+            revert AdNotPaired(aftermarketDeviceNode);
+
+        address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
+
+        if (
+            msg.sender != adOwner &&
+            msg.sender != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
+        ) revert Errors.Unauthorized(msg.sender);
+
+        ms.links[vehicleIdProxyAddress][vehicleNode] = 0;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = 0;
+
+        emit AftermarketDeviceUnpaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            adOwner
+        );
+    }
+
+    /**
      * @dev Unpairs an aftermarket device from a vehicles through a metatransaction
      * Both vehicle and AD owners can unpair.
      * The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
@@ -429,10 +476,10 @@ contract AftermarketDevice is
             .getStorage()
             .idProxyAddress;
 
-        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
-            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
         if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
             revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
         if (
             ms.links[vehicleIdProxyAddress][vehicleNode] !=
             aftermarketDeviceNode

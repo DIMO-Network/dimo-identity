@@ -290,17 +290,19 @@ contract SyntheticDevice is AccessControlInternal {
         if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
             revert Errors.InvalidOwnerSignature();
 
-        ns.nodes[sdIdProxyAddress][syntheticDeviceNode].parentNode = 0;
+        delete ns.nodes[sdIdProxyAddress][syntheticDeviceNode].parentNode;
 
-        ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][vehicleNode] = 0;
-        ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
+        delete ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+            vehicleNode
+        ];
+        delete ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
             syntheticDeviceNode
-        ] = 0;
+        ];
 
-        sds.deviceAddressToNodeId[
+        delete sds.deviceAddressToNodeId[
             sds.nodeIdToDeviceAddress[syntheticDeviceNode]
-        ] = 0;
-        sds.nodeIdToDeviceAddress[syntheticDeviceNode] = address(0);
+        ];
+        delete sds.nodeIdToDeviceAddress[syntheticDeviceNode];
 
         _resetInfos(syntheticDeviceNode);
 
@@ -397,7 +399,7 @@ contract SyntheticDevice is AccessControlInternal {
             i < AttributeSet.count(sds.whitelistedAttributes);
             i++
         ) {
-            ns.nodes[idProxyAddress][tokenId].info[attributes[i]] = "";
+            delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
             emit SyntheticDeviceAttributeSet(tokenId, attributes[i], "");
         }

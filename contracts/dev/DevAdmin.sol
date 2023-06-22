@@ -109,8 +109,8 @@ contract DevAdmin is AccessControlInternal {
 
             _vehicleNode = ms.links[adIdProxyAddress][_adNode];
 
-            ms.links[vehicleIdProxyAddress][_vehicleNode] = 0;
-            ms.links[adIdProxyAddress][_adNode] = 0;
+            delete ms.links[vehicleIdProxyAddress][_vehicleNode];
+            delete ms.links[adIdProxyAddress][_adNode];
 
             emit AftermarketDeviceUnpairedDevAdmin(
                 _adNode,
@@ -146,8 +146,8 @@ contract DevAdmin is AccessControlInternal {
 
             _adNode = ms.links[vehicleIdProxyAddress][_vehicleNode];
 
-            ms.links[vehicleIdProxyAddress][_vehicleNode] = 0;
-            ms.links[adIdProxyAddress][_adNode] = 0;
+            delete ms.links[vehicleIdProxyAddress][_vehicleNode];
+            delete ms.links[adIdProxyAddress][_adNode];
 
             emit AftermarketDeviceUnpairedDevAdmin(
                 _adNode,

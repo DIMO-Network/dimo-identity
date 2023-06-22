@@ -447,8 +447,8 @@ contract AftermarketDevice is
             signer != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
         ) revert Errors.InvalidSigner();
 
-        ms.links[vehicleIdProxyAddress][vehicleNode] = 0;
-        ms.links[adIdProxyAddress][aftermarketDeviceNode] = 0;
+        delete ms.links[vehicleIdProxyAddress][vehicleNode];
+        delete ms.links[adIdProxyAddress][aftermarketDeviceNode];
 
         emit AftermarketDeviceUnpaired(
             aftermarketDeviceNode,

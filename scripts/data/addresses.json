@@ -306,7 +306,7 @@
             },
             "SyntheticDeviceId": {
                 "proxy": "0x85226A67FF1b3Ec6cb033162f7df5038a6C3bAB2",
-                "implementation": "0xa7b8E4D8A9Ab895AF96DE032025Bc6758F810CaD"
+                "implementation": "0xF80Ec6C7526611a89e582C03dD4933b5B70A8281"
             }
         },
         "misc": {

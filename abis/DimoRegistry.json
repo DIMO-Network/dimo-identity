@@ -1139,6 +1139,24 @@
                 "internalType": "uint256",
                 "name": "vehicleNode",
                 "type": "uint256"
+            }
+        ],
+        "name": "unpairAftermarketDevice",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
             },
             {
                 "internalType": "bytes",

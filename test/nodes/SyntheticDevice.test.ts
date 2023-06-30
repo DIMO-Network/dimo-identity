@@ -23,6 +23,7 @@ import {
   revertToSnapshot,
   signMessage,
   MintSyntheticDeviceInput,
+  MintSyntheticDeviceInput2,
   MintSyntheticDeviceBatchInput,
   C
 } from '../../utils';
@@ -212,6 +213,9 @@ describe('SyntheticDevice', function () {
     await vehicleInstance
       .connect(admin)
       .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+    await vehicleInstance
+      .connect(admin)
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
   });
 
   beforeEach(async () => {
@@ -301,26 +305,19 @@ describe('SyntheticDevice', function () {
   });
 
   describe('mintSyntheticDeviceBatch', () => {
-    let correctMintInput: MintSyntheticDeviceBatchInput[];
     let incorrectMintInput: MintSyntheticDeviceBatchInput[];
-
-    before(async () => {
-      await vehicleInstance
-        .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-      correctMintInput = [
-        {
-          vehicleNode: '1',
-          syntheticDeviceAddr: sdAddress1.address,
-          attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
-        },
-        {
-          vehicleNode: '2',
-          syntheticDeviceAddr: sdAddress2.address,
-          attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
-        }
-      ];
-    });
+    const correctMintInput: MintSyntheticDeviceBatchInput[] = [
+      {
+        vehicleNode: '1',
+        syntheticDeviceAddr: sdAddress1.address,
+        attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
+      },
+      {
+        vehicleNode: '2',
+        syntheticDeviceAddr: sdAddress2.address,
+        attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
+      }
+    ];
 
     context('Error handling', () => {
       beforeEach(() => {
@@ -982,6 +979,588 @@ describe('SyntheticDevice', function () {
             C.mockSyntheticDeviceAttributeInfoPairs[0].attribute,
             C.mockSyntheticDeviceAttributeInfoPairs[0].info
           );
+      });
+      it('Should not emit SyntheticDeviceAttributeSet event if attrInfoPairsDevice is empty', async () => {
+        correctMintInput = {
+          integrationNode: '1',
+          vehicleNode: '1',
+          syntheticDeviceSig: mintSyntheticDeviceSig1,
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          syntheticDeviceAddr: sdAddress1.address,
+          attrInfoPairs: []
+        };
+
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign(correctMintInput)
+        ).to.not.emit(syntheticDeviceInstance, 'SyntheticDeviceAttributeSet');
+      });
+    });
+  });
+
+  describe('mintSyntheticDeviceSign2', () => {
+    let mintSyntheticDeviceSig1: string;
+    let mintVehicleOwnerSig1: string;
+    let correctMintInput: MintSyntheticDeviceInput2;
+    let incorrectMintInput: MintSyntheticDeviceInput2;
+
+    before(async () => {
+      mintSyntheticDeviceSig1 = await signMessage({
+        _signer: sdAddress1,
+        _primaryType: 'MintSyntheticDeviceSign2',
+        _verifyingContract: syntheticDeviceInstance.address,
+        message: {
+          integrationNode: '1'
+        }
+      });
+      mintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVehicleSign',
+        _verifyingContract: vehicleInstance.address,
+        message: {
+          manufacturerNode: '1',
+          owner: user1.address,
+          attributes: C.mockVehicleAttributes,
+          infos: C.mockVehicleInfos
+        }
+      });
+      correctMintInput = {
+        manufacturerNode: '1',
+        owner: user1.address,
+        attrInfoPairsVehicle: C.mockVehicleAttributeInfoPairs,
+        integrationNode: '1',
+        vehicleOwnerSig: mintVehicleOwnerSig1,
+        syntheticDeviceSig: mintSyntheticDeviceSig1,
+        syntheticDeviceAddr: sdAddress1.address,
+        attrInfoPairsDevice: C.mockSyntheticDeviceAttributeInfoPairs
+      };
+    });
+
+    context('Error handling', () => {
+      beforeEach(() => {
+        incorrectMintInput = { ...correctMintInput };
+      });
+
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          syntheticDeviceInstance
+            .connect(nonAdmin)
+            .mintSyntheticDeviceSign2(correctMintInput)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
+            C.DEFAULT_ADMIN_ROLE
+          }`
+        );
+      });
+      it('Should revert if vehicle parent node is not a manufacturer node', async () => {
+        incorrectMintInput.manufacturerNode = '99';
+
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(incorrectMintInput)
+        ).to.be.revertedWith('InvalidParentNode(99)');
+      });
+      it('Should revert if synthetic device parent node is not an integration node', async () => {
+        incorrectMintInput.integrationNode = '99';
+
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(incorrectMintInput)
+        ).to.be.revertedWith('InvalidParentNode(99)');
+      });
+      it('Should revert if device address is already registered', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(correctMintInput)
+        ).to.be.revertedWith(
+          `DeviceAlreadyRegistered("${sdAddress1.address}")`
+        );
+      });
+      it('Should revert if synthetic device attribute is not whitelisted', async () => {
+        incorrectMintInput.attrInfoPairsDevice =
+          C.mockSyntheticDeviceAttributeInfoPairsNotWhitelisted;
+
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(incorrectMintInput)
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${C.mockSyntheticDeviceAttributeInfoPairsNotWhitelisted[1].attribute}")`
+        );
+      });
+      it('Should revert if vehicle attribute is not whitelisted', async () => {
+        incorrectMintInput.attrInfoPairsVehicle =
+          C.mockVehicleAttributeInfoPairsNotWhitelisted;
+
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(incorrectMintInput)
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute}")`
+        );
+      });
+
+      context('Wrong signature', () => {
+        context('Vehicle owner signature', () => {
+          it('Should revert if signer does not match vehicle owner', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user2,
+              _primaryType: 'MintVehicleSign',
+              _verifyingContract: vehicleInstance.address,
+              message: {
+                manufacturerNode: '1',
+                owner: user1.address,
+                attributes: C.mockVehicleAttributes,
+                infos: C.mockVehicleInfos
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidOwnerSignature');
+          });
+          it('Should revert if domain name is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _domainName: 'Wrong domain',
+              _primaryType: 'MintVehicleSign',
+              _verifyingContract: vehicleInstance.address,
+              message: {
+                manufacturerNode: '1',
+                owner: user1.address,
+                attributes: C.mockVehicleAttributes,
+                infos: C.mockVehicleInfos
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidOwnerSignature');
+          });
+          it('Should revert if domain version is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _domainVersion: '99',
+              _primaryType: 'MintVehicleSign',
+              _verifyingContract: vehicleInstance.address,
+              message: {
+                manufacturerNode: '1',
+                owner: user1.address,
+                attributes: C.mockVehicleAttributes,
+                infos: C.mockVehicleInfos
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidOwnerSignature');
+          });
+          it('Should revert if domain chain ID is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _chainId: 99,
+              _primaryType: 'MintVehicleSign',
+              _verifyingContract: vehicleInstance.address,
+              message: {
+                manufacturerNode: '1',
+                owner: user1.address,
+                attributes: C.mockVehicleAttributes,
+                infos: C.mockVehicleInfos
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidOwnerSignature');
+          });
+          it('Should revert if manufacturer node is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVehicleSign',
+              _verifyingContract: vehicleInstance.address,
+              message: {
+                manufacturerNode: '99',
+                owner: user1.address,
+                attributes: C.mockVehicleAttributes,
+                infos: C.mockVehicleInfos
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidOwnerSignature');
+          });
+          it('Should revert if attributes are incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVehicleSign',
+              _verifyingContract: vehicleInstance.address,
+              message: {
+                manufacturerNode: '1',
+                owner: user1.address,
+                attributes: C.mockVehicleAttributes.slice(1),
+                infos: C.mockVehicleInfos
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidOwnerSignature');
+          });
+          it('Should revert if infos are incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVehicleSign',
+              _verifyingContract: vehicleInstance.address,
+              message: {
+                manufacturerNode: '1',
+                owner: user1.address,
+                attributes: C.mockVehicleAttributes,
+                infos: C.mockVehicleInfosWrongSize
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidOwnerSignature');
+          });
+          it('Should revert if owner does not match signer', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVehicleSign',
+              _verifyingContract: vehicleInstance.address,
+              message: {
+                manufacturerNode: '1',
+                owner: user2.address,
+                attributes: C.mockVehicleAttributes,
+                infos: C.mockVehicleInfos
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidOwnerSignature');
+          });
+        });
+
+        context('Synthetic device signature', () => {
+          it('Should revert if signer does not match vehicle owner', async () => {
+            const invalidSignature = await signMessage({
+              _signer: sdAddress2,
+              _primaryType: 'MintSyntheticDeviceSign2',
+              _verifyingContract: syntheticDeviceInstance.address,
+              message: {
+                integrationNode: '1'
+              }
+            });
+            incorrectMintInput.syntheticDeviceSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidSdSignature');
+          });
+          it('Should revert if domain name is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: sdAddress1,
+              _domainName: 'Wrong domain',
+              _primaryType: 'MintSyntheticDeviceSign2',
+              _verifyingContract: syntheticDeviceInstance.address,
+              message: {
+                integrationNode: '1'
+              }
+            });
+            incorrectMintInput.syntheticDeviceSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidSdSignature');
+          });
+          it('Should revert if domain version is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: sdAddress1,
+              _domainVersion: '99',
+              _primaryType: 'MintSyntheticDeviceSign2',
+              _verifyingContract: syntheticDeviceInstance.address,
+              message: {
+                integrationNode: '1'
+              }
+            });
+            incorrectMintInput.syntheticDeviceSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidSdSignature');
+          });
+          it('Should revert if domain chain ID is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: sdAddress1,
+              _chainId: 99,
+              _primaryType: 'MintSyntheticDeviceSign2',
+              _verifyingContract: syntheticDeviceInstance.address,
+              message: {
+                integrationNode: '1'
+              }
+            });
+            incorrectMintInput.syntheticDeviceSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidSdSignature');
+          });
+          it('Should revert if integration node is incorrect', async () => {
+            const invalidSignature = await signMessage({
+              _signer: sdAddress1,
+              _primaryType: 'MintSyntheticDeviceSign2',
+              _verifyingContract: syntheticDeviceInstance.address,
+              message: {
+                integrationNode: '99'
+              }
+            });
+            incorrectMintInput.syntheticDeviceSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign2(incorrectMintInput)
+            ).to.be.revertedWith('InvalidSdSignature');
+          });
+        });
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set vehicle parent node', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        const parentNode = await nodesInstance.getParentNode(
+          vehicleIdInstance.address,
+          3
+        );
+
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set vehicle node owner', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        expect(await vehicleIdInstance.ownerOf(3)).to.be.equal(user1.address);
+      });
+      it('Should correctly set vehicle infos', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        expect(
+          await nodesInstance.getInfo(
+            vehicleIdInstance.address,
+            3,
+            C.mockVehicleAttribute1
+          )
+        ).to.be.equal(C.mockVehicleInfo1);
+        expect(
+          await nodesInstance.getInfo(
+            vehicleIdInstance.address,
+            3,
+            C.mockVehicleAttribute2
+          )
+        ).to.be.equal(C.mockVehicleInfo2);
+      });
+      it('Should correctly set synthetic device parent node', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        const parentNode = await nodesInstance.getParentNode(
+          sdIdInstance.address,
+          1
+        );
+
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set synthetic device node owner', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        expect(await sdIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should correctly set synthetic device address', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        const id = await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
+          sdAddress1.address
+        );
+
+        expect(id).to.equal(1);
+      });
+      it('Should correctly set synthetic device infos', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        expect(
+          await nodesInstance.getInfo(
+            sdIdInstance.address,
+            1,
+            C.mockSyntheticDeviceAttribute1
+          )
+        ).to.be.equal(C.mockSyntheticDeviceInfo1);
+        expect(
+          await nodesInstance.getInfo(
+            sdIdInstance.address,
+            1,
+            C.mockSyntheticDeviceAttribute2
+          )
+        ).to.be.equal(C.mockSyntheticDeviceInfo2);
+      });
+      it('Should correctly map the synthetic device to the vehicle', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        expect(
+          await mapperInstance.getNodeLink(
+            vehicleIdInstance.address,
+            sdIdInstance.address,
+            3
+          )
+        ).to.be.equal(1);
+      });
+      it('Should correctly map the vehicle to the synthetic device', async () => {
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign2(correctMintInput);
+
+        expect(
+          await mapperInstance.getNodeLink(
+            sdIdInstance.address,
+            vehicleIdInstance.address,
+            1
+          )
+        ).to.be.equal(3);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMinted event with correct params', async () => {
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(correctMintInput)
+        )
+          .to.emit(syntheticDeviceInstance, 'VehicleNodeMinted')
+          .withArgs(3, user1.address);
+      });
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(correctMintInput)
+        )
+          .to.emit(syntheticDeviceInstance, 'VehicleAttributeSet')
+          .withArgs(
+            3,
+            C.mockVehicleAttributeInfoPairs[0].attribute,
+            C.mockVehicleAttributeInfoPairs[0].info
+          )
+          .to.emit(syntheticDeviceInstance, 'VehicleAttributeSet')
+          .withArgs(
+            3,
+            C.mockVehicleAttributeInfoPairs[1].attribute,
+            C.mockVehicleAttributeInfoPairs[1].info
+          );
+      });
+      it('Should emit SyntheticDeviceNodeMinted event with correct params', async () => {
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(correctMintInput)
+        )
+          .to.emit(syntheticDeviceInstance, 'SyntheticDeviceNodeMinted')
+          .withArgs(1, 1, 3, sdAddress1.address, user1.address);
+      });
+      it('Should emit SyntheticDeviceAttributeSet events with correct params', async () => {
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(correctMintInput)
+        )
+          .to.emit(syntheticDeviceInstance, 'SyntheticDeviceAttributeSet')
+          .withArgs(
+            1,
+            C.mockSyntheticDeviceAttributeInfoPairs[0].attribute,
+            C.mockSyntheticDeviceAttributeInfoPairs[0].info
+          )
+          .to.emit(syntheticDeviceInstance, 'SyntheticDeviceAttributeSet')
+          .withArgs(
+            1,
+            C.mockSyntheticDeviceAttributeInfoPairs[1].attribute,
+            C.mockSyntheticDeviceAttributeInfoPairs[1].info
+          );
+      });
+      it('Should not emit SyntheticDeviceAttributeSet event if attrInfoPairsDevice is empty', async () => {
+        correctMintInput = {
+          manufacturerNode: '1',
+          owner: user1.address,
+          attrInfoPairsVehicle: C.mockVehicleAttributeInfoPairs,
+          integrationNode: '1',
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          syntheticDeviceSig: mintSyntheticDeviceSig1,
+          syntheticDeviceAddr: sdAddress1.address,
+          attrInfoPairsDevice: []
+        };
+
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign2(correctMintInput)
+        ).to.not.emit(syntheticDeviceInstance, 'SyntheticDeviceAttributeSet');
       });
     });
   });

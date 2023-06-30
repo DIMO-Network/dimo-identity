@@ -32,3 +32,14 @@ struct MintSyntheticDeviceInput {
     address syntheticDeviceAddr;
     AttributeInfoPair[] attrInfoPairs;
 }
+
+struct MintSyntheticDeviceInput2 {
+    uint256 manufacturerNode;
+    address owner;
+    AttributeInfoPair[] attrInfoPairsVehicle;
+    uint256 integrationNode;
+    bytes vehicleOwnerSig;
+    bytes syntheticDeviceSig;
+    address syntheticDeviceAddr;
+    AttributeInfoPair[] attrInfoPairsDevice;
+}

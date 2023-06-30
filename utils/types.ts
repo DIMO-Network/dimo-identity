@@ -41,6 +41,17 @@ export type MintSyntheticDeviceInput = {
   attrInfoPairs: AttributeInfoPair[]
 };
 
+export type MintSyntheticDeviceInput2 = {
+  manufacturerNode: string,
+  owner: string,
+  attrInfoPairsVehicle: AttributeInfoPair[],
+  integrationNode: string,
+  vehicleOwnerSig: string,
+  syntheticDeviceSig: string,
+  syntheticDeviceAddr: string,
+  attrInfoPairsDevice: AttributeInfoPair[]
+};
+
 export type IdManufacturerName = {
   tokenId: string,
   name: string

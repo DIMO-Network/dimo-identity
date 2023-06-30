@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
+import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/IntegrationStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
@@ -24,10 +25,18 @@ error InvalidSdSignature();
  * @dev It uses the Mapper contract to link Synthetic Devices to Vehicles
  */
 contract SyntheticDevice is AccessControlInternal {
+    // TODO Remove it from here
+    bytes32 private constant MINT_VEHICLE_TYPEHASH =
+        keccak256(
+            "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"
+        );
+    // TODO Rename ?
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
             "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
         );
+    bytes32 private constant MINT_TYPEHASH_2 =
+        keccak256("MintSyntheticDeviceSign2(uint256 integrationNode)");
     bytes32 private constant BURN_TYPEHASH =
         keccak256(
             "BurnSyntheticDeviceSign(uint256 vehicleNode,uint256 syntheticDeviceNode)"
@@ -40,6 +49,10 @@ contract SyntheticDevice is AccessControlInternal {
         string attribute,
         string info
     );
+    // TODO Remove it from here
+    event VehicleAttributeSet(uint256 tokenId, string attribute, string info);
+    // TODO Remove it from here
+    event VehicleNodeMinted(uint256 tokenId, address owner);
     event SyntheticDeviceNodeMinted(
         uint256 integrationNode,
         uint256 syntheticDeviceNode,
@@ -153,7 +166,8 @@ contract SyntheticDevice is AccessControlInternal {
             sds.deviceAddressToNodeId[data[i].syntheticDeviceAddr] = newTokenId;
             sds.nodeIdToDeviceAddress[newTokenId] = data[i].syntheticDeviceAddr;
 
-            _setInfos(newTokenId, data[i].attrInfoPairs);
+            if (data[i].attrInfoPairs.length > 0)
+                _setInfos(newTokenId, data[i].attrInfoPairs);
 
             emit SyntheticDeviceNodeMinted(
                 integrationNode,
@@ -246,6 +260,122 @@ contract SyntheticDevice is AccessControlInternal {
             data.vehicleNode,
             data.syntheticDeviceAddr,
             owner
+        );
+    }
+
+    // TODO Documentation
+    function mintSyntheticDeviceSign2(
+        Types.MintSyntheticDeviceInput2 calldata data
+    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = sds.idProxyAddress;
+
+        // if (
+        //     !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
+        //         data.integrationNode
+        //     )
+        // )
+        //     revert Errors.InvalidParentNode2(
+        //         IntegrationStorage.getStorage().idProxyAddress,
+        //         data.integrationNode
+        //     );
+        // if (
+        //     !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+        //         data.manufacturerNode
+        //     )
+        // )
+        //     revert Errors.InvalidParentNode2(
+        //         ManufacturerStorage.getStorage().idProxyAddress,
+        //         data.manufacturerNode
+        //     );
+
+        if (
+            !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
+                data.integrationNode
+            )
+        ) revert Errors.InvalidParentNode(data.integrationNode);
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                data.manufacturerNode
+            )
+        ) revert Errors.InvalidParentNode(data.manufacturerNode);
+        if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
+            revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
+
+        bytes32 message = keccak256(
+            abi.encode(MINT_TYPEHASH_2, data.integrationNode)
+        );
+
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                data.syntheticDeviceAddr,
+                message,
+                data.syntheticDeviceSig
+            )
+        ) revert InvalidSdSignature();
+
+        uint256 newTokenIdVehicle = INFT(vehicleIdProxyAddress).safeMint(
+            data.owner
+        );
+        uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);
+
+        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
+            newTokenIdVehicle,
+            data.attrInfoPairsVehicle
+        );
+
+        message = keccak256(
+            abi.encode(
+                MINT_VEHICLE_TYPEHASH,
+                data.manufacturerNode,
+                data.owner,
+                attributesHash,
+                infosHash
+            )
+        );
+
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                data.owner,
+                message,
+                data.vehicleOwnerSig
+            )
+        ) revert Errors.InvalidOwnerSignature();
+
+        ns.nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
+            .manufacturerNode;
+
+        ns.nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
+            .integrationNode;
+
+        ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+            newTokenIdVehicle
+        ] = newTokenIdDevice;
+        ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
+            newTokenIdDevice
+        ] = newTokenIdVehicle;
+
+        sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
+        sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
+
+        if (data.attrInfoPairsDevice.length > 0)
+            _setInfos(newTokenIdDevice, data.attrInfoPairsDevice);
+
+        emit VehicleNodeMinted(newTokenIdVehicle, data.owner);
+
+        emit SyntheticDeviceNodeMinted(
+            data.integrationNode,
+            newTokenIdDevice,
+            newTokenIdVehicle,
+            data.syntheticDeviceAddr,
+            data.owner
         );
     }
 
@@ -403,5 +533,45 @@ contract SyntheticDevice is AccessControlInternal {
 
             emit SyntheticDeviceAttributeSet(tokenId, attributes[i], "");
         }
+    }
+
+    // TODO Documentation
+    function _setInfosHash(
+        uint256 tokenId,
+        Types.AttributeInfoPair[] calldata attrInfo
+    ) private returns (bytes32, bytes32) {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+        address idProxyAddress = s.idProxyAddress;
+
+        bytes32[] memory attributeHashes = new bytes32[](attrInfo.length);
+        bytes32[] memory infoHashes = new bytes32[](attrInfo.length);
+
+        for (uint256 i = 0; i < attrInfo.length; i++) {
+            if (
+                !AttributeSet.exists(
+                    s.whitelistedAttributes,
+                    attrInfo[i].attribute
+                )
+            ) revert Errors.AttributeNotWhitelisted(attrInfo[i].attribute);
+
+            attributeHashes[i] = keccak256(bytes(attrInfo[i].attribute));
+            infoHashes[i] = keccak256(bytes(attrInfo[i].info));
+
+            ns.nodes[idProxyAddress][tokenId].info[
+                attrInfo[i].attribute
+            ] = attrInfo[i].info;
+
+            emit VehicleAttributeSet(
+                tokenId,
+                attrInfo[i].attribute,
+                attrInfo[i].info
+            );
+        }
+
+        return (
+            keccak256(abi.encodePacked(attributeHashes)),
+            keccak256(abi.encodePacked(infoHashes))
+        );
     }
 }

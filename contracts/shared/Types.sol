@@ -33,7 +33,7 @@ struct MintSyntheticDeviceInput {
     AttributeInfoPair[] attrInfoPairs;
 }
 
-struct MintSyntheticDeviceInput2 {
+struct MintVehicleAndSdInput {
     uint256 manufacturerNode;
     address owner;
     AttributeInfoPair[] attrInfoPairsVehicle;

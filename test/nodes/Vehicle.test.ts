@@ -122,7 +122,7 @@ describe('Vehicle', function () {
           localVehicleInstance
             .connect(admin)
             .setVehicleIdProxyAddress(C.ZERO_ADDRESS)
-        ).to.be.revertedWith('Non zero address');
+        ).to.be.revertedWith('ZeroAddress');
       });
     });
 
@@ -157,7 +157,7 @@ describe('Vehicle', function () {
           vehicleInstance
             .connect(admin)
             .addVehicleAttribute(C.mockVehicleAttribute1)
-        ).to.be.revertedWith('Attribute already exists');
+        ).to.be.revertedWith(`AttributeExists("${C.mockVehicleAttribute1}")`);
       });
     });
 
@@ -202,7 +202,7 @@ describe('Vehicle', function () {
           vehicleInstance
             .connect(admin)
             .mintVehicle(99, user1.address, C.mockVehicleAttributeInfoPairs)
-        ).to.be.revertedWith('Invalid parent node');
+        ).to.be.revertedWith('InvalidParentNode(99)');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -213,7 +213,9 @@ describe('Vehicle', function () {
               user1.address,
               C.mockVehicleAttributeInfoPairsNotWhitelisted
             )
-        ).to.be.revertedWith('Not whitelisted');
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute}")`
+        );
       });
     });
 
@@ -343,7 +345,7 @@ describe('Vehicle', function () {
               C.mockVehicleAttributeInfoPairs,
               signature
             )
-        ).to.be.revertedWith('Invalid parent node');
+        ).to.be.revertedWith('InvalidParentNode(99)');
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -355,7 +357,9 @@ describe('Vehicle', function () {
               C.mockVehicleAttributeInfoPairsNotWhitelisted,
               signature
             )
-        ).to.be.revertedWith('Not whitelisted');
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute}")`
+        );
       });
 
       context('Wrong signature', () => {
@@ -382,7 +386,7 @@ describe('Vehicle', function () {
                 C.mockVehicleAttributeInfoPairs,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -407,7 +411,7 @@ describe('Vehicle', function () {
                 C.mockVehicleAttributeInfoPairs,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -432,7 +436,7 @@ describe('Vehicle', function () {
                 C.mockVehicleAttributeInfoPairs,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if manufactuer node is incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -456,7 +460,7 @@ describe('Vehicle', function () {
                 C.mockVehicleAttributeInfoPairs,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if attributes are incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -480,7 +484,7 @@ describe('Vehicle', function () {
                 C.mockVehicleAttributeInfoPairs,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if infos are incorrect', async () => {
           const invalidSignature = await signMessage({
@@ -504,7 +508,7 @@ describe('Vehicle', function () {
                 C.mockVehicleAttributeInfoPairs,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
         it('Should revert if owner does not match signer', async () => {
           const invalidSignature = await signMessage({
@@ -528,7 +532,7 @@ describe('Vehicle', function () {
                 C.mockVehicleAttributeInfoPairs,
                 invalidSignature
               )
-          ).to.be.revertedWith('Invalid signature');
+          ).to.be.revertedWith('InvalidOwnerSignature');
         });
       });
     });
@@ -662,14 +666,16 @@ describe('Vehicle', function () {
           vehicleInstance
             .connect(admin)
             .setVehicleInfo(99, C.mockVehicleAttributeInfoPairs)
-        ).to.be.revertedWith('Invalid vehicle node');
+        ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
             .setVehicleInfo(1, C.mockVehicleAttributeInfoPairsNotWhitelisted)
-        ).to.be.revertedWith('Not whitelisted');
+        ).to.be.revertedWith(
+          `AttributeNotWhitelisted("${C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute}")`
+        );
       });
     });
 

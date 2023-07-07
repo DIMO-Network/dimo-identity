@@ -99,6 +99,10 @@
                     "0xbebc0bfc"
                 ]
             },
+            "MultipleMinter": {
+                "address": "",
+                "selectors": []
+            },
             "Multicall": {
                 "address": "0x4dc23B40c952aBc34344c4dCDF9d8f5777DA2b0c",
                 "selectors": [
@@ -268,6 +272,10 @@
                     "0xbd2b5568",
                     "0xbebc0bfc"
                 ]
+            },
+            "MultipleMinter": {
+                "address": "",
+                "selectors": []
             },
             "DevAdmin": {
                 "address": "0x8D75e310b78cCa0136C4F2E367e17ca660d3b71B",
@@ -449,8 +457,14 @@
                     "0xbebc0bfc"
                 ]
             },
-            "DevAdmin": {
+            "MultipleMinter": {
                 "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+                "selectors": [
+                    "0xde386606"
+                ]
+            },
+            "DevAdmin": {
+                "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
                 "selectors": [
                     "0xf73a8f04",
                     "0xff96b761",
@@ -460,7 +474,7 @@
                 ]
             },
             "Multicall": {
-                "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+                "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
                 "selectors": [
                     "0x415c2d96",
                     "0x1c0c6e51"
@@ -469,38 +483,38 @@
         },
         "nfts": {
             "ManufacturerId": {
-                "proxy": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
-                "implementation": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+                "proxy": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+                "implementation": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1"
             },
             "IntegrationId": {
-                "proxy": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
-                "implementation": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE"
+                "proxy": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+                "implementation": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed"
             },
             "VehicleId": {
-                "proxy": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
-                "implementation": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c"
+                "proxy": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+                "implementation": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d"
             },
             "AftermarketDeviceId": {
-                "proxy": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1",
-                "implementation": "0x59b670e9fA9D0A427751Af201D676719a970857b"
+                "proxy": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
+                "implementation": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1"
             },
             "SyntheticDeviceId": {
-                "proxy": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
-                "implementation": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44"
+                "proxy": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+                "implementation": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
             }
         },
         "misc": {
             "DimoToken": {
-                "proxy": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528",
+                "proxy": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
                 "implementation": ""
             },
             "Stake": {
-                "proxy": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf",
+                "proxy": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf",
                 "implementation": ""
             },
             "DimoForwarder": {
-                "proxy": "0x9A676e781A523b5d0C0e43731313A708CB607508",
-                "implementation": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
+                "proxy": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "implementation": "0x9A676e781A523b5d0C0e43731313A708CB607508"
             },
             "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
             "Kms": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
@@ -549,6 +563,10 @@
                 "selectors": []
             },
             "Mapper": {
+                "address": "",
+                "selectors": []
+            },
+            "MultipleMinter": {
                 "address": "",
                 "selectors": []
             },

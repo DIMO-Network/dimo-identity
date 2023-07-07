@@ -32,7 +32,7 @@ export const schemaBase: TypedData = {
       { name: 'integrationNode', type: 'uint256' },
       { name: 'vehicleNode', type: 'uint256' }
     ],
-    MintSyntheticDeviceSign2: [{ name: 'integrationNode', type: 'uint256' }],
+    MintVehicleAndSdSign: [{ name: 'integrationNode', type: 'uint256' }],
     BurnSyntheticDeviceSign: [
       { name: 'vehicleNode', type: 'uint256' },
       { name: 'syntheticDeviceNode', type: 'uint256' }

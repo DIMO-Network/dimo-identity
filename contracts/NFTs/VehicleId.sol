@@ -74,6 +74,14 @@ contract VehicleId is Initializable, MultiPrivilege {
         trustedForwarders[addr] = trusted;
     }
 
+    /// @notice Function to burn a token
+    /// @dev Caller must have the burner role
+    /// @dev To be called by DIMORegistry in burnVehicleSign function
+    /// @param tokenId Token Id to be burned
+    function burn(uint256 tokenId) public override {
+        super._burn(tokenId);
+    }
+
     /**
      * @notice Internal function to transfer a token. If the vehicle is
      * paired to a synthetic device, the corresponding token is also transferred.

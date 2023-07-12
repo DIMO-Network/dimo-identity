@@ -5,8 +5,10 @@ import "./VehicleInternal.sol";
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
+import "../../libraries/MapperStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
+import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 
 import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
 
@@ -17,8 +19,12 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
  * @notice Contract that represents the Vehicle node
  */
 contract Vehicle is AccessControlInternal, VehicleInternal {
+    bytes32 private constant BURN_TYPEHASH =
+        keccak256("BurnVehicleSign(uint256 vehicleNode)");
+
     event VehicleIdProxySet(address indexed proxy);
     event VehicleAttributeAdded(string attribute);
+    event VehicleNodeBurned(uint256 indexed vehicleNode, address indexed owner);
 
     // ***** Admin management ***** //
 
@@ -144,6 +150,49 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     }
 
     /**
+     * @notice Burns a vehicle and reset all its attributes
+     * @dev Caller must have the admin role
+     * @dev This contract has the BURNER_ROLE in the VehicleId
+     * @param tokenId Vehicle node id
+     * @param ownerSig Vehicle owner signature hash
+     */
+    function burnVehicleSign(uint256 tokenId, bytes calldata ownerSig)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = SyntheticDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (!INFT(vehicleIdProxyAddress).exists(tokenId))
+            revert InvalidNode(vehicleIdProxyAddress, tokenId);
+        if (ms.links[vehicleIdProxyAddress][tokenId] != 0)
+            revert VehiclePaired(tokenId);
+        if (ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][tokenId] != 0)
+            revert VehiclePaired(tokenId);
+
+        address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
+        bytes32 message = keccak256(abi.encode(BURN_TYPEHASH, tokenId));
+
+        if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
+            revert InvalidOwnerSignature();
+
+        delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+
+        _resetInfos(tokenId);
+
+        INFT(vehicleIdProxyAddress).burn(tokenId);
+
+        emit VehicleNodeBurned(tokenId, owner);
+    }
+
+    /**
      * @notice Add infos to node
      * @dev attributes must be whitelisted
      * @dev Caller must have the admin role
@@ -193,6 +242,30 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
                 attrInfo[i].attribute,
                 attrInfo[i].info
             );
+        }
+    }
+
+    /**
+     * @dev Internal function to reset node infos
+     * It iterates over all whitelisted attributes to reset each info
+     * @param tokenId Node which will have the infos reset
+     */
+    function _resetInfos(uint256 tokenId) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage sds = VehicleStorage.getStorage();
+        address idProxyAddress = sds.idProxyAddress;
+        string[] memory attributes = AttributeSet.values(
+            sds.whitelistedAttributes
+        );
+
+        for (
+            uint256 i = 0;
+            i < AttributeSet.count(sds.whitelistedAttributes);
+            i++
+        ) {
+            delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
+
+            emit VehicleAttributeSet(tokenId, attributes[i], "");
         }
     }
 }

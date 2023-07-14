@@ -127,10 +127,6 @@ describe('Vehicle', function () {
     await vehicleIdInstance
       .connect(admin)
       .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
-    const VEHICLE_DEVICE_BURNER_ROLE = await vehicleIdInstance.BURNER_ROLE();
-    await vehicleIdInstance
-      .connect(admin)
-      .grantRole(VEHICLE_DEVICE_BURNER_ROLE, dimoRegistryInstance.address);
 
     const AD_MINTER_ROLE = await adIdInstance.MINTER_ROLE();
     await adIdInstance
@@ -260,7 +256,10 @@ describe('Vehicle', function () {
       .connect(admin)
       .grantRole(C.NFT_TRANSFERER_ROLE, dimoRegistryInstance.address);
 
-    // Setting DimoRegistry address in the AftermarketDeviceId
+    // Setting DimoRegistry address in the Proxy IDs
+    await vehicleIdInstance
+      .connect(admin)
+      .setDimoRegistryAddress(dimoRegistryInstance.address);
     await adIdInstance
       .connect(admin)
       .setDimoRegistryAddress(dimoRegistryInstance.address);
@@ -1040,6 +1039,15 @@ describe('Vehicle', function () {
           )
         ).to.be.equal('');
       });
+      it('Should update multi-privilege token version', async () => {
+        const previousVersion = await vehicleIdInstance.tokenIdToVersion(1);
+
+        await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig);
+
+        expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
+          previousVersion.add(1)
+        );
+      });
     });
 
     context('Events', () => {
@@ -1169,6 +1177,14 @@ describe('Vehicle', function () {
             localNewAttributeInfoPairs[1].info
           );
       });
+    });
+  });
+
+  describe('validateBurnAndResetNode', () => {
+    it('Should revert if caller is not the NFT Proxy', async () => {
+      await expect(
+        vehicleInstance.connect(nonAdmin).validateBurnAndResetNode(1)
+      ).to.be.revertedWith('OnlyNftProxy');
     });
   });
 });

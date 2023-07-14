@@ -7,8 +7,12 @@ import {
   Nodes,
   Manufacturer,
   ManufacturerId,
+  Integration,
+  IntegrationId,
   Vehicle,
   VehicleId,
+  SyntheticDevice,
+  SyntheticDeviceId,
   AftermarketDevice,
   AftermarketDeviceId,
   AdLicenseValidator,
@@ -33,25 +37,31 @@ describe('VehicleId', async function () {
   let eip712CheckerInstance: Eip712Checker;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
+  let integrationInstance: Integration;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
+  let syntheticDeviceInstance: SyntheticDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let manufacturerIdInstance: ManufacturerId;
+  let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
+  let sdIdInstance: SyntheticDeviceId;
 
   const [
     admin,
     nonAdmin,
     foundation,
     manufacturer1,
+    integrationOwner1,
     user1,
     user2,
     adAddress1,
-    adAddress2
+    adAddress2,
+    sdAddress1
   ] = provider.getWallets();
 
   const mockAftermarketDeviceInfosList = JSON.parse(
@@ -72,12 +82,20 @@ describe('VehicleId', async function () {
         'DimoAccessControl',
         'Nodes',
         'Manufacturer',
+        'Integration',
         'Vehicle',
         'AftermarketDevice',
+        'SyntheticDevice',
         'AdLicenseValidator',
         'Mapper'
       ],
-      nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
+      nfts: [
+        'ManufacturerId',
+        'IntegrationId',
+        'VehicleId',
+        'AftermarketDeviceId',
+        'SyntheticDeviceId'
+      ],
       upgradeableContracts: []
     });
 
@@ -85,18 +103,27 @@ describe('VehicleId', async function () {
     eip712CheckerInstance = deployments.Eip712Checker;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
+    integrationInstance = deployments.Integration;
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
+    syntheticDeviceInstance = deployments.SyntheticDevice;
     adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
     manufacturerIdInstance = deployments.ManufacturerId;
+    integrationIdInstance = deployments.IntegrationId;
     vehicleIdInstance = deployments.VehicleId;
     adIdInstance = deployments.AftermarketDeviceId;
+    sdIdInstance = deployments.SyntheticDeviceId;
 
     const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
+
+    const INTEGRATION_MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
+    await integrationIdInstance
+      .connect(admin)
+      .grantRole(INTEGRATION_MINTER_ROLE, dimoRegistryInstance.address);
 
     const VEHICLE_MINTER_ROLE = await vehicleIdInstance.MINTER_ROLE();
     await vehicleIdInstance
@@ -108,16 +135,27 @@ describe('VehicleId', async function () {
       .connect(admin)
       .grantRole(AD_MINTER_ROLE, dimoRegistryInstance.address);
 
+    const SYNTHETIC_DEVICE_MINTER_ROLE = await sdIdInstance.MINTER_ROLE();
+    await sdIdInstance
+      .connect(admin)
+      .grantRole(SYNTHETIC_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
+
     // Set NFT Proxies
     await manufacturerInstance
       .connect(admin)
       .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
+    await integrationInstance
+      .connect(admin)
+      .setIntegrationIdProxyAddress(integrationIdInstance.address);
     await vehicleInstance
       .connect(admin)
       .setVehicleIdProxyAddress(vehicleIdInstance.address);
     await aftermarketDeviceInstance
       .connect(admin)
       .setAftermarketDeviceIdProxyAddress(adIdInstance.address);
+    await syntheticDeviceInstance
+      .connect(admin)
+      .setSyntheticDeviceIdProxyAddress(sdIdInstance.address);
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -163,6 +201,14 @@ describe('VehicleId', async function () {
       .connect(admin)
       .addManufacturerAttribute(C.mockManufacturerAttribute2);
 
+    // Whitelist Integration attributes
+    await integrationInstance
+      .connect(admin)
+      .addIntegrationAttribute(C.mockIntegrationAttribute1);
+    await integrationInstance
+      .connect(admin)
+      .addIntegrationAttribute(C.mockIntegrationAttribute2);
+
     // Whitelist Vehicle attributes
     await vehicleInstance
       .connect(admin)
@@ -179,6 +225,14 @@ describe('VehicleId', async function () {
       .connect(admin)
       .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute2);
 
+    // Whitelist SyntheticDevice attributes
+    await syntheticDeviceInstance
+      .connect(admin)
+      .addSyntheticDeviceAttribute(C.mockSyntheticDeviceAttribute1);
+    await syntheticDeviceInstance
+      .connect(admin)
+      .addSyntheticDeviceAttribute(C.mockSyntheticDeviceAttribute2);
+
     // Mint Manufacturer Node
     await manufacturerInstance
       .connect(admin)
@@ -186,6 +240,15 @@ describe('VehicleId', async function () {
         manufacturer1.address,
         C.mockManufacturerNames[0],
         C.mockManufacturerAttributeInfoPairs
+      );
+
+    // Mint Integration Node
+    await integrationInstance
+      .connect(admin)
+      .mintIntegration(
+        integrationOwner1.address,
+        C.mockIntegrationNames[0],
+        C.mockIntegrationAttributeInfoPairs
       );
 
     await mockStakeInstance.setLicenseBalance(manufacturer1.address, 1);
@@ -207,6 +270,7 @@ describe('VehicleId', async function () {
         mockAftermarketDeviceInfosList
       );
 
+    // Setting DimoRegistry address in the Proxy IDs
     await manufacturerIdInstance
       .connect(admin)
       .setDimoRegistryAddress(dimoRegistryInstance.address);
@@ -235,15 +299,6 @@ describe('VehicleId', async function () {
         owner: user1.address
       }
     });
-    const pairSignature = await signMessage({
-      _signer: user1,
-      _primaryType: 'PairAftermarketDeviceSign',
-      _verifyingContract: aftermarketDeviceInstance.address,
-      message: {
-        aftermarketDeviceNode: '1',
-        vehicleNode: '1'
-      }
-    });
 
     await vehicleInstance
       .connect(admin)
@@ -256,9 +311,6 @@ describe('VehicleId', async function () {
         claimOwnerSig1,
         claimAdSig1
       );
-    await aftermarketDeviceInstance
-      .connect(admin)
-      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSignature);
   });
 
   beforeEach(async () => {
@@ -413,6 +465,24 @@ describe('VehicleId', async function () {
         ).to.equal(parentNode);
       });
       it('Should keep the aftermarket device pairing', async () => {
+        const pairSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'PairAftermarketDeviceSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
+            aftermarketDeviceNode: '1',
+            vehicleNode: '1'
+          }
+        });
+
+        await aftermarketDeviceInstance
+          .connect(admin)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature
+          );
+
         const vehicleIdToAdId = await mapperInstance.getLink(
           vehicleIdInstance.address,
           1
@@ -480,6 +550,146 @@ describe('VehicleId', async function () {
         expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
           previousVersion.add(1)
         );
+      });
+    });
+  });
+
+  describe('burn', () => {
+    context('Error handling', () => {
+      it('Should revert if token is not a Vehicle', async () => {
+        await expect(
+          vehicleIdInstance.connect(user1).burn(99)
+        ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
+      });
+      it('Should revert if caller is not the token owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+
+        await expect(
+          vehicleIdInstance.connect(user1).burn(2)
+        ).to.be.revertedWith('ERC721: caller is not token owner nor approved');
+      });
+      it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
+        const localPairSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'PairAftermarketDeviceSign',
+          _verifyingContract: aftermarketDeviceInstance.address,
+          message: {
+            aftermarketDeviceNode: '1',
+            vehicleNode: '1'
+          }
+        });
+
+        await aftermarketDeviceInstance
+          .connect(admin)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            localPairSignature
+          );
+
+        await expect(
+          vehicleIdInstance.connect(user1).burn(1)
+        ).to.be.revertedWith('VehiclePaired(1)');
+      });
+      it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
+        const localMintVehicleOwnerSig = await signMessage({
+          _signer: user1,
+          _primaryType: 'MintSyntheticDeviceSign',
+          _verifyingContract: syntheticDeviceInstance.address,
+          message: {
+            integrationNode: '1',
+            vehicleNode: '1'
+          }
+        });
+        const mintSyntheticDeviceSig1 = await signMessage({
+          _signer: sdAddress1,
+          _primaryType: 'MintSyntheticDeviceSign',
+          _verifyingContract: syntheticDeviceInstance.address,
+          message: {
+            integrationNode: '1',
+            vehicleNode: '1'
+          }
+        });
+        const localMintSdInput = {
+          integrationNode: '1',
+          vehicleNode: '1',
+          syntheticDeviceSig: mintSyntheticDeviceSig1,
+          vehicleOwnerSig: localMintVehicleOwnerSig,
+          syntheticDeviceAddr: sdAddress1.address,
+          attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
+        };
+
+        await syntheticDeviceInstance
+          .connect(admin)
+          .mintSyntheticDeviceSign(localMintSdInput);
+
+        await expect(
+          vehicleIdInstance.connect(user1).burn(1)
+        ).to.be.revertedWith('VehiclePaired(1)');
+      });
+
+      context('State', () => {
+        it('Should correctly reset parent node to 0', async () => {
+          await vehicleIdInstance.connect(user1).burn(1);
+
+          const parentNode = await nodesInstance.getParentNode(
+            sdIdInstance.address,
+            1
+          );
+
+          expect(parentNode).to.be.equal(0);
+        });
+        it('Should correctly reset node owner to zero address', async () => {
+          await vehicleIdInstance.connect(user1).burn(1);
+
+          await expect(sdIdInstance.ownerOf(1)).to.be.revertedWith(
+            'ERC721: invalid token ID'
+          );
+        });
+        it('Should correctly reset infos to blank', async () => {
+          await vehicleIdInstance.connect(user1).burn(1);
+
+          expect(
+            await nodesInstance.getInfo(
+              sdIdInstance.address,
+              1,
+              C.mockSyntheticDeviceAttribute1
+            )
+          ).to.be.equal('');
+          expect(
+            await nodesInstance.getInfo(
+              sdIdInstance.address,
+              1,
+              C.mockSyntheticDeviceAttribute2
+            )
+          ).to.be.equal('');
+        });
+        it('Should update multi-privilege token version', async () => {
+          const previousVersion = await vehicleIdInstance.tokenIdToVersion(1);
+
+          await vehicleIdInstance.connect(user1).burn(1);
+
+          expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
+            previousVersion.add(1)
+          );
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit VehicleNodeBurned event with correct params', async () => {
+          await expect(vehicleIdInstance.connect(user1).burn(1))
+            .to.emit(vehicleInstance, 'VehicleNodeBurned')
+            .withArgs(1, user1.address);
+        });
+        it('Should emit VehicleAttributeSet events with correct params', async () => {
+          await expect(vehicleIdInstance.connect(user1).burn(1))
+            .to.emit(vehicleInstance, 'VehicleAttributeSet')
+            .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, '')
+            .to.emit(vehicleInstance, 'VehicleAttributeSet')
+            .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, '');
+        });
       });
     });
   });

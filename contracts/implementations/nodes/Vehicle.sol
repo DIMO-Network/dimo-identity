@@ -26,6 +26,12 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     event VehicleAttributeAdded(string attribute);
     event VehicleNodeBurned(uint256 indexed vehicleNode, address indexed owner);
 
+    modifier onlyNftProxy() {
+        if (msg.sender != VehicleStorage.getStorage().idProxyAddress)
+            revert OnlyNftProxy();
+        _;
+    }
+
     // ***** Admin management ***** //
 
     /**
@@ -150,6 +156,24 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     }
 
     /**
+     * @notice Add infos to node
+     * @dev attributes must be whitelisted
+     * @dev Caller must have the admin role
+     * @param tokenId Node where the info will be added
+     * @param attrInfo List of attribute-info pairs to be added
+     */
+    function setVehicleInfo(
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfo
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        address vehicleIdProxy = VehicleStorage.getStorage().idProxyAddress;
+        if (!INFT(vehicleIdProxy).exists(tokenId))
+            revert InvalidNode(vehicleIdProxy, tokenId);
+
+        _setInfos(tokenId, attrInfo);
+    }
+
+    /**
      * @notice Burns a vehicle and reset all its attributes
      * @dev Caller must have the admin role
      * @dev This contract has the BURNER_ROLE in the VehicleId
@@ -187,27 +211,41 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         _resetInfos(tokenId);
 
-        INFT(vehicleIdProxyAddress).burn(tokenId);
-
         emit VehicleNodeBurned(tokenId, owner);
+
+        INFT(vehicleIdProxyAddress).burn(tokenId);
     }
 
     /**
-     * @notice Add infos to node
-     * @dev attributes must be whitelisted
-     * @dev Caller must have the admin role
-     * @param tokenId Node where the info will be added
-     * @param attrInfo List of attribute-info pairs to be added
+     * @notice Validates burning of a vehicle and reset all its attributes
+     * @dev Can only be called by the VehicleId Proxy when a token owner calls the `burn` function
+     * @param tokenId Vehicle node id
      */
-    function setVehicleInfo(
-        uint256 tokenId,
-        AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        address vehicleIdProxy = VehicleStorage.getStorage().idProxyAddress;
-        if (!INFT(vehicleIdProxy).exists(tokenId))
-            revert InvalidNode(vehicleIdProxy, tokenId);
+    function validateBurnAndResetNode(uint256 tokenId) external onlyNftProxy {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
 
-        _setInfos(tokenId, attrInfo);
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = SyntheticDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (!INFT(vehicleIdProxyAddress).exists(tokenId))
+            revert InvalidNode(vehicleIdProxyAddress, tokenId);
+        if (ms.links[vehicleIdProxyAddress][tokenId] != 0)
+            revert VehiclePaired(tokenId);
+        if (ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][tokenId] != 0)
+            revert VehiclePaired(tokenId);
+
+        address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
+
+        delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+
+        _resetInfos(tokenId);
+
+        emit VehicleNodeBurned(tokenId, owner);
     }
 
     // ***** PRIVATE FUNCTIONS ***** //

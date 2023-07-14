@@ -7,6 +7,7 @@ error Unauthorized(address addr);
 error AttributeExists(string attr);
 error AttributeNotWhitelisted(string attr);
 error AlreadyController(address addr);
+error OnlyNftProxy();
 
 // Nodes
 error InvalidParentNode(uint256 id);

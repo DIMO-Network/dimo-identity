@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
-import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
+import "./Base/MultiPrivilege/MultiPrivilegeTransferableBurnable.sol";
 
 error ZeroAddress();
 error Unauthorized();
@@ -41,9 +41,11 @@ contract VehicleId is Initializable, MultiPrivilege {
         _grantRole(ADMIN_ROLE, msg.sender);
     }
 
-    /// @notice Sets the DIMO Registry address
-    /// @dev Only an admin can set the DIMO Registry address
-    /// @param addr The address to be set
+    /**
+     * @notice Sets the DIMO Registry address
+     * @dev Only an admin can set the DIMO Registry address
+     * @param addr The address to be set
+     */
     function setDimoRegistryAddress(address addr)
         external
         onlyRole(ADMIN_ROLE)
@@ -52,9 +54,11 @@ contract VehicleId is Initializable, MultiPrivilege {
         _dimoRegistry = IDimoRegistry(addr);
     }
 
-    /// @notice Sets the Synthetic Device Id address
-    /// @dev Only an admin can set the Synthetic Device Id address
-    /// @param addr The address to be set
+    /**
+     * @notice Sets the Synthetic Device Id address
+     * @dev Only an admin can set the Synthetic Device Id address
+     * @param addr The address to be set
+     */
     function setSyntheticDeviceIdAddress(address addr)
         external
         onlyRole(ADMIN_ROLE)
@@ -63,23 +67,17 @@ contract VehicleId is Initializable, MultiPrivilege {
         syntheticDeviceId = addr;
     }
 
-    /// @notice Sets trusted or not to an address
-    /// @dev Only an admin can set a trusted forwarder
-    /// @param addr The address to be set
-    /// @param trusted Whether an address should be trusted or not
+    /**
+     * @notice Sets trusted or not to an address
+     * @dev Only an admin can set a trusted forwarder
+     * @param addr The address to be set
+     * @param trusted Whether an address should be trusted or not
+     */
     function setTrustedForwarder(address addr, bool trusted)
         external
         onlyRole(ADMIN_ROLE)
     {
         trustedForwarders[addr] = trusted;
-    }
-
-    /// @notice Function to burn a token
-    /// @dev Caller must have the burner role
-    /// @dev To be called by DIMORegistry in burnVehicleSign function
-    /// @param tokenId Token Id to be burned
-    function burn(uint256 tokenId) public override {
-        super._burn(tokenId);
     }
 
     /**
@@ -134,6 +132,22 @@ contract VehicleId is Initializable, MultiPrivilege {
         }
 
         super._transfer(from, to, tokenId);
+    }
+
+    /**
+     * @notice Function to burn a token
+     * @dev To be called by DIMORegistry or a token owner
+     * DIMORegistry calls this function in burnVehicleSign function
+     * When a user calls it, burning is validated in the DIMORegistry
+     * @param tokenId Token Id to be burned
+     */
+    function burn(uint256 tokenId) public override {
+        if (_msgSender() != address(_dimoRegistry)) {
+            _dimoRegistry.validateBurnAndResetNode(tokenId);
+            ERC721BurnableUpgradeable.burn(tokenId);
+        } else {
+            super._burn(tokenId);
+        }
     }
 
     /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract

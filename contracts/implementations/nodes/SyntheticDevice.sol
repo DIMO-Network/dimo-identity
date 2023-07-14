@@ -1,17 +1,18 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
+import "./VehicleInternal.sol";
+import "./SyntheticDeviceInternal.sol";
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
+import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/IntegrationStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 
-import "../../shared/Roles.sol" as Roles;
-import "../../shared/Types.sol" as Types;
-import "../../shared/Errors.sol" as Errors;
+import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
@@ -23,7 +24,11 @@ error InvalidSdSignature();
  * @notice Contract that represents the Synthetic Device node
  * @dev It uses the Mapper contract to link Synthetic Devices to Vehicles
  */
-contract SyntheticDevice is AccessControlInternal {
+contract SyntheticDevice is
+    AccessControlInternal,
+    VehicleInternal,
+    SyntheticDeviceInternal
+{
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
             "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
@@ -35,18 +40,6 @@ contract SyntheticDevice is AccessControlInternal {
 
     event SyntheticDeviceIdProxySet(address proxy);
     event SyntheticDeviceAttributeAdded(string attribute);
-    event SyntheticDeviceAttributeSet(
-        uint256 indexed tokenId,
-        string attribute,
-        string info
-    );
-    event SyntheticDeviceNodeMinted(
-        uint256 integrationNode,
-        uint256 syntheticDeviceNode,
-        uint256 indexed vehicleNode,
-        address indexed syntheticDeviceAddress,
-        address indexed owner
-    );
     event SyntheticDeviceNodeBurned(
         uint256 indexed syntheticDeviceNode,
         uint256 indexed vehicleNode,
@@ -62,9 +55,9 @@ contract SyntheticDevice is AccessControlInternal {
      */
     function setSyntheticDeviceIdProxyAddress(address addr)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        if (addr == address(0)) revert Errors.ZeroAddress();
+        if (addr == address(0)) revert ZeroAddress();
         SyntheticDeviceStorage.getStorage().idProxyAddress = addr;
 
         emit SyntheticDeviceIdProxySet(addr);
@@ -77,14 +70,14 @@ contract SyntheticDevice is AccessControlInternal {
      */
     function addSyntheticDeviceAttribute(string calldata attribute)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(DEFAULT_ADMIN_ROLE)
     {
         if (
             !AttributeSet.add(
                 SyntheticDeviceStorage.getStorage().whitelistedAttributes,
                 attribute
             )
-        ) revert Errors.AttributeExists(attribute);
+        ) revert AttributeExists(attribute);
 
         emit SyntheticDeviceAttributeAdded(attribute);
     }
@@ -104,8 +97,8 @@ contract SyntheticDevice is AccessControlInternal {
      */
     function mintSyntheticDeviceBatch(
         uint256 integrationNode,
-        Types.MintSyntheticDeviceBatchInput[] calldata data
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+        MintSyntheticDeviceBatchInput[] calldata data
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
@@ -120,23 +113,20 @@ contract SyntheticDevice is AccessControlInternal {
             !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
                 integrationNode
             )
-        ) revert Errors.InvalidParentNode(integrationNode);
+        ) revert InvalidParentNode(integrationNode);
 
         address owner;
         uint256 newTokenId;
         for (uint256 i = 0; i < data.length; i++) {
             if (!INFT(vehicleIdProxyAddress).exists(data[i].vehicleNode))
-                revert Errors.InvalidNode(
-                    vehicleIdProxyAddress,
-                    data[i].vehicleNode
-                );
+                revert InvalidNode(vehicleIdProxyAddress, data[i].vehicleNode);
             if (sds.deviceAddressToNodeId[data[i].syntheticDeviceAddr] != 0)
                 revert DeviceAlreadyRegistered(data[i].syntheticDeviceAddr);
             if (
                 ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                     data[i].vehicleNode
                 ] != 0
-            ) revert Errors.VehiclePaired(data[i].vehicleNode);
+            ) revert VehiclePaired(data[i].vehicleNode);
 
             owner = INFT(vehicleIdProxyAddress).ownerOf(data[i].vehicleNode);
             newTokenId = INFT(sdIdProxyAddress).safeMint(owner);
@@ -153,7 +143,8 @@ contract SyntheticDevice is AccessControlInternal {
             sds.deviceAddressToNodeId[data[i].syntheticDeviceAddr] = newTokenId;
             sds.nodeIdToDeviceAddress[newTokenId] = data[i].syntheticDeviceAddr;
 
-            _setInfos(newTokenId, data[i].attrInfoPairs);
+            if (data[i].attrInfoPairs.length > 0)
+                _setInfos(newTokenId, data[i].attrInfoPairs);
 
             emit SyntheticDeviceNodeMinted(
                 integrationNode,
@@ -176,9 +167,10 @@ contract SyntheticDevice is AccessControlInternal {
      *  syntheticDeviceAddr -> Address associated with the synthetic device
      *  attrInfoPairs -> List of attribute-info pairs to be added
      */
-    function mintSyntheticDeviceSign(
-        Types.MintSyntheticDeviceInput calldata data
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    function mintSyntheticDeviceSign(MintSyntheticDeviceInput calldata data)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
@@ -193,16 +185,16 @@ contract SyntheticDevice is AccessControlInternal {
             !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
                 data.integrationNode
             )
-        ) revert Errors.InvalidParentNode(data.integrationNode);
+        ) revert InvalidParentNode(data.integrationNode);
         if (!INFT(vehicleIdProxyAddress).exists(data.vehicleNode))
-            revert Errors.InvalidNode(vehicleIdProxyAddress, data.vehicleNode);
+            revert InvalidNode(vehicleIdProxyAddress, data.vehicleNode);
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
         if (
             ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                 data.vehicleNode
             ] != 0
-        ) revert Errors.VehiclePaired(data.vehicleNode);
+        ) revert VehiclePaired(data.vehicleNode);
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(data.vehicleNode);
         bytes32 message = keccak256(
@@ -222,7 +214,7 @@ contract SyntheticDevice is AccessControlInternal {
                 message,
                 data.vehicleOwnerSig
             )
-        ) revert Errors.InvalidOwnerSignature();
+        ) revert InvalidOwnerSignature();
 
         uint256 newTokenId = INFT(sdIdProxyAddress).safeMint(owner);
 
@@ -261,7 +253,7 @@ contract SyntheticDevice is AccessControlInternal {
         uint256 vehicleNode,
         uint256 syntheticDeviceNode,
         bytes calldata ownerSig
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
@@ -273,14 +265,14 @@ contract SyntheticDevice is AccessControlInternal {
         address sdIdProxyAddress = sds.idProxyAddress;
 
         if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
-            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+            revert InvalidNode(vehicleIdProxyAddress, vehicleNode);
         if (!INFT(sdIdProxyAddress).exists(syntheticDeviceNode))
-            revert Errors.InvalidNode(sdIdProxyAddress, syntheticDeviceNode);
+            revert InvalidNode(sdIdProxyAddress, syntheticDeviceNode);
         if (
             ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                 vehicleNode
             ] != syntheticDeviceNode
-        ) revert Errors.VehicleNotPaired(vehicleNode);
+        ) revert VehicleNotPaired(vehicleNode);
 
         address owner = INFT(sdIdProxyAddress).ownerOf(syntheticDeviceNode);
         bytes32 message = keccak256(
@@ -288,7 +280,7 @@ contract SyntheticDevice is AccessControlInternal {
         );
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
-            revert Errors.InvalidOwnerSignature();
+            revert InvalidOwnerSignature();
 
         delete ns.nodes[sdIdProxyAddress][syntheticDeviceNode].parentNode;
 
@@ -319,11 +311,11 @@ contract SyntheticDevice is AccessControlInternal {
      */
     function setSyntheticDeviceInfo(
         uint256 tokenId,
-        Types.AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+        AttributeInfoPair[] calldata attrInfo
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         address sdIdProxy = SyntheticDeviceStorage.getStorage().idProxyAddress;
         if (!INFT(sdIdProxy).exists(tokenId))
-            revert Errors.InvalidNode(sdIdProxy, tokenId);
+            revert InvalidNode(sdIdProxy, tokenId);
         _setInfos(tokenId, attrInfo);
     }
 
@@ -341,44 +333,6 @@ contract SyntheticDevice is AccessControlInternal {
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
-
-    /**
-     * @dev Internal function to add infos to node
-     * @dev attributes must be whitelisted
-     * @param tokenId Node where the info will be added
-     * @param attrInfoPairList List of attribute-info pairs to be added
-     */
-    function _setInfos(
-        uint256 tokenId,
-        Types.AttributeInfoPair[] calldata attrInfoPairList
-    ) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
-            .getStorage();
-        address idProxyAddress = sds.idProxyAddress;
-
-        for (uint256 i = 0; i < attrInfoPairList.length; i++) {
-            if (
-                !AttributeSet.exists(
-                    sds.whitelistedAttributes,
-                    attrInfoPairList[i].attribute
-                )
-            )
-                revert Errors.AttributeNotWhitelisted(
-                    attrInfoPairList[i].attribute
-                );
-
-            ns.nodes[idProxyAddress][tokenId].info[
-                attrInfoPairList[i].attribute
-            ] = attrInfoPairList[i].info;
-
-            emit SyntheticDeviceAttributeSet(
-                tokenId,
-                attrInfoPairList[i].attribute,
-                attrInfoPairList[i].info
-            );
-        }
-    }
 
     /**
      * @dev Internal function to reset node infos

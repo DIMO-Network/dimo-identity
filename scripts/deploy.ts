@@ -105,6 +105,7 @@ async function deployModules(
     { name: 'SyntheticDevice', args: [] },
     { name: 'AdLicenseValidator', args: [] },
     { name: 'Mapper', args: [] },
+    { name: 'MultipleMinter', args: [] },
     { name: 'DevAdmin', args: [] },
     { name: 'Multicall', args: [] }
   ];

@@ -212,6 +212,9 @@ describe('SyntheticDevice', function () {
     await vehicleInstance
       .connect(admin)
       .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+    await vehicleInstance
+      .connect(admin)
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
   });
 
   beforeEach(async () => {
@@ -301,26 +304,19 @@ describe('SyntheticDevice', function () {
   });
 
   describe('mintSyntheticDeviceBatch', () => {
-    let correctMintInput: MintSyntheticDeviceBatchInput[];
     let incorrectMintInput: MintSyntheticDeviceBatchInput[];
-
-    before(async () => {
-      await vehicleInstance
-        .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
-      correctMintInput = [
-        {
-          vehicleNode: '1',
-          syntheticDeviceAddr: sdAddress1.address,
-          attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
-        },
-        {
-          vehicleNode: '2',
-          syntheticDeviceAddr: sdAddress2.address,
-          attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
-        }
-      ];
-    });
+    const correctMintInput: MintSyntheticDeviceBatchInput[] = [
+      {
+        vehicleNode: '1',
+        syntheticDeviceAddr: sdAddress1.address,
+        attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
+      },
+      {
+        vehicleNode: '2',
+        syntheticDeviceAddr: sdAddress2.address,
+        attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
+      }
+    ];
 
     context('Error handling', () => {
       beforeEach(() => {
@@ -982,6 +978,22 @@ describe('SyntheticDevice', function () {
             C.mockSyntheticDeviceAttributeInfoPairs[0].attribute,
             C.mockSyntheticDeviceAttributeInfoPairs[0].info
           );
+      });
+      it('Should not emit SyntheticDeviceAttributeSet event if attrInfoPairsDevice is empty', async () => {
+        correctMintInput = {
+          integrationNode: '1',
+          vehicleNode: '1',
+          syntheticDeviceSig: mintSyntheticDeviceSig1,
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          syntheticDeviceAddr: sdAddress1.address,
+          attrInfoPairs: []
+        };
+
+        await expect(
+          syntheticDeviceInstance
+            .connect(admin)
+            .mintSyntheticDeviceSign(correctMintInput)
+        ).to.not.emit(syntheticDeviceInstance, 'SyntheticDeviceAttributeSet');
       });
     });
   });

@@ -32,21 +32,6 @@ library Eip712CheckerInternal {
             );
     }
 
-    /// @dev Recovers message signer
-    /// @param message Hashed data payload
-    /// @param signature Signed data payload
-    function _recover(bytes32 message, bytes calldata signature)
-        internal
-        view
-        returns (address signer)
-    {
-        bytes32 msgHash = keccak256(
-            abi.encodePacked("\x19\x01", _eip712Domain(), message)
-        );
-
-        return ECDSA.recover(msgHash, signature);
-    }
-
     /// @dev Recovers message signer and verifies if metches signatory
     /// @param signatory The signer to be verified
     /// @param message Hashed data payload

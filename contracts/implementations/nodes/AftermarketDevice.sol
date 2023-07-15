@@ -15,6 +15,7 @@ import "../../shared/Types.sol" as Types;
 import "../../shared/Errors.sol" as Errors;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
 error RegistryNotApproved();
 error DeviceAlreadyRegistered(address addr);
@@ -438,13 +439,20 @@ contract AftermarketDevice is
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != vehicleNode)
             revert AdNotPaired(aftermarketDeviceNode);
 
-        address signer = Eip712CheckerInternal._recover(message, signature);
         address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
 
-        if (
-            signer != adOwner &&
-            signer != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
-        ) revert Errors.InvalidSigner();
+        bool isValidSignature = Eip712CheckerInternal._verifySignature(
+            adOwner,
+            message,
+            signature
+        ) ||
+            Eip712CheckerInternal._verifySignature(
+                INFT(vehicleIdProxyAddress).ownerOf(vehicleNode),
+                message,
+                signature
+            );
+
+        if (!isValidSignature) revert Errors.InvalidSigner();
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = 0;
         ms.links[adIdProxyAddress][aftermarketDeviceNode] = 0;

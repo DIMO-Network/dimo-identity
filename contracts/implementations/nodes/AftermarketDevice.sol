@@ -15,7 +15,6 @@ import "../../shared/Types.sol" as Types;
 import "../../shared/Errors.sol" as Errors;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
-import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
 error RegistryNotApproved();
 error DeviceAlreadyRegistered(address addr);

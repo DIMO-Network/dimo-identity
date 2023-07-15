@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "./Eip712CheckerStorage.sol";
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
 /// @title Eip712CheckerInternal
 /// @notice Contract with internal functions to assist in verifying signatures
@@ -61,7 +62,8 @@ library Eip712CheckerInternal {
             abi.encodePacked("\x19\x01", _eip712Domain(), message)
         );
 
-        return signatory == ECDSA.recover(msgHash, signature);
+        return
+            SignatureChecker.isValidSignatureNow(signatory, msgHash, signature);
     }
 
     /// @dev Recovers message signer and verifies if metches signatory
@@ -82,7 +84,9 @@ library Eip712CheckerInternal {
         bytes32 msgHash = keccak256(
             abi.encodePacked("\x19\x01", _eip712Domain(), message)
         );
+        bytes memory signature = abi.encodePacked(r, s, v);
 
-        return signatory == ECDSA.recover(msgHash, v, r, s);
+        return
+            SignatureChecker.isValidSignatureNow(signatory, msgHash, signature);
     }
 }

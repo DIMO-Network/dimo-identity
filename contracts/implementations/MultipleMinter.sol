@@ -85,20 +85,9 @@ contract MultipleMinter is
         );
         uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);
 
-        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
-            newTokenIdVehicle,
-            data.attrInfoPairsVehicle
-        );
-
-        message = keccak256(
-            abi.encode(
-                MINT_VEHICLE_TYPEHASH,
-                data.manufacturerNode,
-                data.owner,
-                attributesHash,
-                infosHash
-            )
-        );
+        if (data.attrInfoPairsVehicle.length > 0) {
+            _setVehicleInfos(newTokenIdVehicle, data.attrInfoPairsVehicle);
+        }
 
         if (
             !Eip712CheckerInternal._verifySignature(
@@ -136,5 +125,39 @@ contract MultipleMinter is
             data.syntheticDeviceAddr,
             data.owner
         );
+    }
+
+    /**
+     * @dev Internal function to add infos to a vehicle node. Attributes must be
+     * @dev whitelisted.
+     * @param tokenId Node where the info will be added
+     * @param attrInfo List of attribute-info pairs to be added
+     */
+    function _setVehicleInfos(
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfo
+    ) internal {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
+        address idProxyAddress = s.idProxyAddress;
+
+        for (uint256 i = 0; i < attrInfo.length; i++) {
+            if (
+                !AttributeSet.exists(
+                    s.whitelistedAttributes,
+                    attrInfo[i].attribute
+                )
+            ) revert AttributeNotWhitelisted(attrInfo[i].attribute);
+
+            ns.nodes[idProxyAddress][tokenId].info[
+                attrInfo[i].attribute
+            ] = attrInfo[i].info;
+
+            emit VehicleAttributeSet(
+                tokenId,
+                attrInfo[i].attribute,
+                attrInfo[i].info
+            );
+        }
     }
 }

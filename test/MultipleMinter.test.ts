@@ -242,13 +242,10 @@ describe('MultipleMinter', function () {
       });
       mintVehicleOwnerSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'MintVehicleSign',
+        _primaryType: 'MintVehicleAndSdSign',
         _verifyingContract: vehicleInstance.address,
         message: {
-          manufacturerNode: '1',
-          owner: user1.address,
-          attributes: C.mockVehicleAttributes,
-          infos: C.mockVehicleInfos
+          integrationNode: '1'
         }
       });
       correctMintInput = {
@@ -340,13 +337,10 @@ describe('MultipleMinter', function () {
           it('Should revert if signer does not match vehicle owner', async () => {
             const invalidSignature = await signMessage({
               _signer: user2,
-              _primaryType: 'MintVehicleSign',
+              _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: vehicleInstance.address,
               message: {
-                manufacturerNode: '1',
-                owner: user1.address,
-                attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                integrationNode: '1'
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -361,13 +355,10 @@ describe('MultipleMinter', function () {
             const invalidSignature = await signMessage({
               _signer: user1,
               _domainName: 'Wrong domain',
-              _primaryType: 'MintVehicleSign',
+              _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: vehicleInstance.address,
               message: {
-                manufacturerNode: '1',
-                owner: user1.address,
-                attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                integrationNode: '1'
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -382,13 +373,10 @@ describe('MultipleMinter', function () {
             const invalidSignature = await signMessage({
               _signer: user1,
               _domainVersion: '99',
-              _primaryType: 'MintVehicleSign',
+              _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: vehicleInstance.address,
               message: {
-                manufacturerNode: '1',
-                owner: user1.address,
-                attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                integrationNode: '1'
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -403,13 +391,10 @@ describe('MultipleMinter', function () {
             const invalidSignature = await signMessage({
               _signer: user1,
               _chainId: 99,
-              _primaryType: 'MintVehicleSign',
+              _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: vehicleInstance.address,
               message: {
-                manufacturerNode: '1',
-                owner: user1.address,
-                attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                integrationNode: '1'
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -420,56 +405,13 @@ describe('MultipleMinter', function () {
                 .mintVehicleAndSdSign(incorrectMintInput)
             ).to.be.revertedWith('InvalidOwnerSignature');
           });
-          it('Should revert if manufacturer node is incorrect', async () => {
+          it('Should revert if integration node is incorrect', async () => {
             const invalidSignature = await signMessage({
               _signer: user1,
-              _primaryType: 'MintVehicleSign',
+              _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: vehicleInstance.address,
               message: {
-                manufacturerNode: '99',
-                owner: user1.address,
-                attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
-              }
-            });
-            incorrectMintInput.vehicleOwnerSig = invalidSignature;
-
-            await expect(
-              multipleMinterInstance
-                .connect(admin)
-                .mintVehicleAndSdSign(incorrectMintInput)
-            ).to.be.revertedWith('InvalidOwnerSignature');
-          });
-          it('Should revert if attributes are incorrect', async () => {
-            const invalidSignature = await signMessage({
-              _signer: user1,
-              _primaryType: 'MintVehicleSign',
-              _verifyingContract: vehicleInstance.address,
-              message: {
-                manufacturerNode: '1',
-                owner: user1.address,
-                attributes: C.mockVehicleAttributes.slice(1),
-                infos: C.mockVehicleInfos
-              }
-            });
-            incorrectMintInput.vehicleOwnerSig = invalidSignature;
-
-            await expect(
-              multipleMinterInstance
-                .connect(admin)
-                .mintVehicleAndSdSign(incorrectMintInput)
-            ).to.be.revertedWith('InvalidOwnerSignature');
-          });
-          it('Should revert if infos are incorrect', async () => {
-            const invalidSignature = await signMessage({
-              _signer: user1,
-              _primaryType: 'MintVehicleSign',
-              _verifyingContract: vehicleInstance.address,
-              message: {
-                manufacturerNode: '1',
-                owner: user1.address,
-                attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfosWrongSize
+                integrationNode: '99'
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -483,13 +425,10 @@ describe('MultipleMinter', function () {
           it('Should revert if owner does not match signer', async () => {
             const invalidSignature = await signMessage({
               _signer: user1,
-              _primaryType: 'MintVehicleSign',
+              _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: vehicleInstance.address,
               message: {
-                manufacturerNode: '1',
-                owner: user2.address,
-                attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                integrationNode: '1'
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;

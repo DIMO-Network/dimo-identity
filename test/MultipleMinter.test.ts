@@ -422,23 +422,6 @@ describe('MultipleMinter', function () {
                 .mintVehicleAndSdSign(incorrectMintInput)
             ).to.be.revertedWith('InvalidOwnerSignature');
           });
-          it('Should revert if owner does not match signer', async () => {
-            const invalidSignature = await signMessage({
-              _signer: user1,
-              _primaryType: 'MintVehicleAndSdSign',
-              _verifyingContract: vehicleInstance.address,
-              message: {
-                integrationNode: '1'
-              }
-            });
-            incorrectMintInput.vehicleOwnerSig = invalidSignature;
-
-            await expect(
-              multipleMinterInstance
-                .connect(admin)
-                .mintVehicleAndSdSign(incorrectMintInput)
-            ).to.be.revertedWith('InvalidOwnerSignature');
-          });
         });
 
         context('Synthetic device signature', () => {

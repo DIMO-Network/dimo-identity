@@ -2232,6 +2232,25 @@
         "type": "event"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "VehicleNodeBurned",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "internalType": "string",
@@ -2240,6 +2259,24 @@
             }
         ],
         "name": "addVehicleAttribute",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "ownerSig",
+                "type": "bytes"
+            }
+        ],
+        "name": "burnVehicleSign",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -2358,6 +2395,19 @@
             }
         ],
         "name": "setVehicleInfo",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "validateBurnAndResetNode",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

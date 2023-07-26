@@ -8,6 +8,8 @@ interface IDimoRegistry {
 
     function updateIntegrationMinted(address from, address to) external;
 
+    function validateBurnAndResetNode(uint256 tokenId) external;
+
     function setAftermarketDeviceBeneficiary(
         uint256 nodeId,
         address beneficiary

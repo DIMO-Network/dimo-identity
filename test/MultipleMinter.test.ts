@@ -721,7 +721,7 @@ describe('MultipleMinter', function () {
             .mintVehicleAndSdSign(correctMintInput)
         )
           .to.emit(multipleMinterInstance, 'VehicleNodeMinted')
-          .withArgs(3, user1.address);
+          .withArgs(1, 3, user1.address);
       });
       it('Should emit VehicleAttributeSet events with correct params', async () => {
         await expect(

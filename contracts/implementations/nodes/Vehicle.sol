@@ -98,9 +98,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         .getStorage()
         .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
 
-        _setInfos(newTokenId, attrInfo);
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
-        emit VehicleNodeMinted(newTokenId, owner);
+        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
     }
 
     /**
@@ -131,6 +131,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
+
         ns
         .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
 
@@ -151,8 +153,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
             revert InvalidOwnerSignature();
-
-        emit VehicleNodeMinted(newTokenId, owner);
     }
 
     /**
@@ -209,11 +209,11 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
 
-        _resetInfos(tokenId);
-
         emit VehicleNodeBurned(tokenId, owner);
 
         INFT(vehicleIdProxyAddress).burn(tokenId);
+
+        _resetInfos(tokenId);
     }
 
     /**

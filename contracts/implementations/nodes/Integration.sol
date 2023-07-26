@@ -155,9 +155,10 @@ contract Integration is AccessControlInternal {
         s.integrationNameToNodeId[name] = newTokenId;
         s.nodeIdToIntegrationName[newTokenId] = name;
 
-        _setInfos(newTokenId, attrInfoPairList);
-
         emit IntegrationNodeMinted(newTokenId, msg.sender);
+
+        if (attrInfoPairList.length > 0)
+            _setInfos(newTokenId, attrInfoPairList);
     }
 
     /**

@@ -438,7 +438,7 @@ describe('Vehicle', function () {
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
         )
           .to.emit(vehicleInstance, 'VehicleNodeMinted')
-          .withArgs(1, user1.address);
+          .withArgs(1, 1, user1.address);
       });
       it('Should emit VehicleAttributeSet events with correct params', async () => {
         await expect(
@@ -766,7 +766,7 @@ describe('Vehicle', function () {
             )
         )
           .to.emit(vehicleInstance, 'VehicleNodeMinted')
-          .withArgs(1, user1.address);
+          .withArgs(1, 1, user1.address);
       });
       it('Should emit VehicleAttributeSet events with correct params', async () => {
         await expect(

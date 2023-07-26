@@ -172,14 +172,15 @@ contract AftermarketDevice is
             ads.deviceAddressToNodeId[deviceAddress] = newTokenId;
             ads.nodeIdToDeviceAddress[newTokenId] = deviceAddress;
 
-            _setInfos(newTokenId, adInfos[i].attrInfoPairs);
-
             emit AftermarketDeviceNodeMinted(
                 manufacturerNode,
                 newTokenId,
                 deviceAddress,
                 manufacturerNodeOwner
             );
+
+            if (adInfos[i].attrInfoPairs.length > 0)
+                _setInfos(newTokenId, adInfos[i].attrInfoPairs);
         }
 
         // Validate license and transfer funds to foundation

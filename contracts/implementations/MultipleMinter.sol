@@ -127,7 +127,11 @@ contract MultipleMinter is
         if (data.attrInfoPairsDevice.length > 0)
             _setInfos(newTokenIdDevice, data.attrInfoPairsDevice);
 
-        emit VehicleNodeMinted(newTokenIdVehicle, data.owner);
+        emit VehicleNodeMinted(
+            data.manufacturerNode,
+            newTokenIdVehicle,
+            data.owner
+        );
 
         emit SyntheticDeviceNodeMinted(
             data.integrationNode,

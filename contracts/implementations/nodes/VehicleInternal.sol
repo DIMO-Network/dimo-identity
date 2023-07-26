@@ -18,7 +18,11 @@ contract VehicleInternal {
         );
 
     event VehicleAttributeSet(uint256 tokenId, string attribute, string info);
-    event VehicleNodeMinted(uint256 tokenId, address owner);
+    event VehicleNodeMinted(
+        uint256 manufacturerNode,
+        uint256 tokenId,
+        address owner
+    );
 
     /**
      * @dev Internal function to add infos to node and calculate attribute and info hashes

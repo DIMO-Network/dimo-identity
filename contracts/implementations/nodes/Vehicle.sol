@@ -219,6 +219,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     /**
      * @notice Validates burning of a vehicle and reset all its attributes
      * @dev Can only be called by the VehicleId Proxy when a token owner calls the `burn` function
+     * @dev The actual burn takes place on the VehicleId contract
      * @param tokenId Vehicle node id
      */
     function validateBurnAndResetNode(uint256 tokenId) external onlyNftProxy {

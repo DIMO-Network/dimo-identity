@@ -143,9 +143,6 @@ contract SyntheticDevice is
             sds.deviceAddressToNodeId[data[i].syntheticDeviceAddr] = newTokenId;
             sds.nodeIdToDeviceAddress[newTokenId] = data[i].syntheticDeviceAddr;
 
-            if (data[i].attrInfoPairs.length > 0)
-                _setInfos(newTokenId, data[i].attrInfoPairs);
-
             emit SyntheticDeviceNodeMinted(
                 integrationNode,
                 newTokenId,
@@ -153,6 +150,9 @@ contract SyntheticDevice is
                 data[i].syntheticDeviceAddr,
                 owner
             );
+
+            if (data[i].attrInfoPairs.length > 0)
+                _setInfos(newTokenId, data[i].attrInfoPairs);
         }
     }
 
@@ -230,8 +230,6 @@ contract SyntheticDevice is
         sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenId;
         sds.nodeIdToDeviceAddress[newTokenId] = data.syntheticDeviceAddr;
 
-        _setInfos(newTokenId, data.attrInfoPairs);
-
         emit SyntheticDeviceNodeMinted(
             data.integrationNode,
             newTokenId,
@@ -239,6 +237,9 @@ contract SyntheticDevice is
             data.syntheticDeviceAddr,
             owner
         );
+
+        if (data.attrInfoPairs.length > 0)
+            _setInfos(newTokenId, data.attrInfoPairs);
     }
 
     /**
@@ -296,11 +297,11 @@ contract SyntheticDevice is
         ];
         delete sds.nodeIdToDeviceAddress[syntheticDeviceNode];
 
-        _resetInfos(syntheticDeviceNode);
-
         INFT(sdIdProxyAddress).burn(syntheticDeviceNode);
 
         emit SyntheticDeviceNodeBurned(syntheticDeviceNode, vehicleNode, owner);
+
+        _resetInfos(syntheticDeviceNode);
     }
 
     /**

@@ -147,9 +147,10 @@ contract Manufacturer is AccessControlInternal {
         s.manufacturerNameToNodeId[name] = newTokenId;
         s.nodeIdToManufacturerName[newTokenId] = name;
 
-        _setInfos(newTokenId, attrInfoPairList);
-
         emit ManufacturerNodeMinted(newTokenId, msg.sender);
+
+        if (attrInfoPairList.length > 0)
+            _setInfos(newTokenId, attrInfoPairList);
     }
 
     /// @notice Add infos to node

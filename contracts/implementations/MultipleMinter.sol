@@ -9,6 +9,7 @@ import "../libraries/NodesStorage.sol";
 import "../libraries/nodes/ManufacturerStorage.sol";
 import "../libraries/nodes/IntegrationStorage.sol";
 import "../libraries/nodes/VehicleStorage.sol";
+import "../libraries/nodes/AftermarketDeviceStorage.sol";
 import "../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../libraries/MapperStorage.sol";
 
@@ -24,8 +25,125 @@ contract MultipleMinter is
     VehicleInternal,
     SyntheticDeviceInternal
 {
+    bytes32 private constant MINT_VEHICLE_AD_TYPEHASH =
+        keccak256("MintVehicleAndAdSign(uint256 aftermarketDeviceNode)");
     bytes32 private constant MINT_VEHICLE_SD_TYPEHASH =
         keccak256("MintVehicleAndSdSign(uint256 integrationNode)");
+
+    event AftermarketDeviceClaimed(
+        uint256 aftermarketDeviceNode,
+        address indexed owner
+    );
+    event AftermarketDevicePaired(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
+        address indexed owner
+    );
+
+    /**
+     * @notice Mints a vehicle, claim and pairs an aftermarket device through a metatransaction
+     * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
+     * @dev Caller must have the admin role
+     * @param data Input data with the following fields:
+     *  manufacturerNodeVehicle -> Parent manufacturer node id of the vehicle
+     *  owner -> The new nodes owner
+     *  attrInfoPairsVehicle -> List of attribute-info pairs to be added of the vehicle
+     *  aftermarketDeviceNode -> The aftermarket device node ID to be claimed and paired
+     *  vehicleOwnerSig -> Vehicle owner signature hash
+     *  aftermarketDeviceSig -> Aftermarket Device's signature hash
+     */
+    function mintVehicleAndAdSign(MintVehicleAndAdInput calldata data)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = ads.idProxyAddress;
+        uint256 aftermarketDeviceNode = data.aftermarketDeviceNode;
+        address owner = data.owner;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                data.manufacturerNodeVehicle
+            )
+        ) revert InvalidParentNode(data.manufacturerNodeVehicle);
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (ads.deviceClaimed[aftermarketDeviceNode])
+            revert DeviceAlreadyClaimed(aftermarketDeviceNode);
+
+        bytes32 message = keccak256(
+            abi.encode(MINT_VEHICLE_AD_TYPEHASH, aftermarketDeviceNode)
+        );
+
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                ads.nodeIdToDeviceAddress[aftermarketDeviceNode],
+                message,
+                data.aftermarketDeviceSig
+            )
+        ) revert InvalidAdSignature();
+
+        uint256 newTokenIdVehicle = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        emit VehicleNodeMinted(
+            data.manufacturerNodeVehicle,
+            newTokenIdVehicle,
+            owner
+        );
+
+        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
+            newTokenIdVehicle,
+            data.attrInfoPairsVehicle
+        );
+
+        message = keccak256(
+            abi.encode(
+                MINT_VEHICLE_TYPEHASH,
+                data.manufacturerNodeVehicle,
+                owner,
+                attributesHash,
+                infosHash
+            )
+        );
+
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                owner,
+                message,
+                data.vehicleOwnerSig
+            )
+        ) revert InvalidOwnerSignature();
+
+        ads.deviceClaimed[aftermarketDeviceNode] = true;
+        INFT(adIdProxyAddress).safeTransferFrom(
+            INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode),
+            owner,
+            aftermarketDeviceNode
+        );
+
+        emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
+
+        ns.nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
+            .manufacturerNodeVehicle;
+
+        ms.links[vehicleIdProxyAddress][
+            newTokenIdVehicle
+        ] = aftermarketDeviceNode;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = newTokenIdVehicle;
+
+        emit AftermarketDevicePaired(
+            aftermarketDeviceNode,
+            newTokenIdVehicle,
+            owner
+        );
+    }
 
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
@@ -54,6 +172,7 @@ contract MultipleMinter is
             .getStorage()
             .idProxyAddress;
         address sdIdProxyAddress = sds.idProxyAddress;
+        address syntheticDeviceAddr = data.syntheticDeviceAddr;
 
         if (
             !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
@@ -65,8 +184,8 @@ contract MultipleMinter is
                 data.manufacturerNode
             )
         ) revert InvalidParentNode(data.manufacturerNode);
-        if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
-            revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
+        if (sds.deviceAddressToNodeId[syntheticDeviceAddr] != 0)
+            revert DeviceAlreadyRegistered(syntheticDeviceAddr);
 
         bytes32 message = keccak256(
             abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.integrationNode)
@@ -74,7 +193,7 @@ contract MultipleMinter is
 
         if (
             !Eip712CheckerInternal._verifySignature(
-                data.syntheticDeviceAddr,
+                syntheticDeviceAddr,
                 message,
                 data.syntheticDeviceSig
             )
@@ -84,6 +203,20 @@ contract MultipleMinter is
             data.owner
         );
         uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);
+
+        emit VehicleNodeMinted(
+            data.manufacturerNode,
+            newTokenIdVehicle,
+            data.owner
+        );
+
+        emit SyntheticDeviceNodeMinted(
+            data.integrationNode,
+            newTokenIdDevice,
+            newTokenIdVehicle,
+            syntheticDeviceAddr,
+            data.owner
+        );
 
         (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
             newTokenIdVehicle,
@@ -121,24 +254,10 @@ contract MultipleMinter is
             newTokenIdDevice
         ] = newTokenIdVehicle;
 
-        sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
-        sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
+        sds.deviceAddressToNodeId[syntheticDeviceAddr] = newTokenIdDevice;
+        sds.nodeIdToDeviceAddress[newTokenIdDevice] = syntheticDeviceAddr;
 
         if (data.attrInfoPairsDevice.length > 0)
             _setInfos(newTokenIdDevice, data.attrInfoPairsDevice);
-
-        emit VehicleNodeMinted(
-            data.manufacturerNode,
-            newTokenIdVehicle,
-            data.owner
-        );
-
-        emit SyntheticDeviceNodeMinted(
-            data.integrationNode,
-            newTokenIdDevice,
-            newTokenIdVehicle,
-            data.syntheticDeviceAddr,
-            data.owner
-        );
     }
 }

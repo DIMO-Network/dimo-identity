@@ -18,8 +18,6 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 error RegistryNotApproved();
 error DeviceAlreadyRegistered(address addr);
-error DeviceAlreadyClaimed(uint256 id);
-error InvalidAdSignature();
 error AdNotClaimed(uint256 id);
 error AdPaired(uint256 id);
 error AdNotPaired(uint256 id);
@@ -223,7 +221,7 @@ contract AftermarketDevice is
             owner = adOwnerPair[i].owner;
 
             if (ads.deviceClaimed[aftermarketDeviceNode])
-                revert DeviceAlreadyClaimed(aftermarketDeviceNode);
+                revert Errors.DeviceAlreadyClaimed(aftermarketDeviceNode);
 
             ads.deviceClaimed[aftermarketDeviceNode] = true;
             adIdProxy.safeTransferFrom(
@@ -265,7 +263,7 @@ contract AftermarketDevice is
         if (!INFT(adIdProxy).exists(aftermarketDeviceNode))
             revert Errors.InvalidNode(adIdProxy, aftermarketDeviceNode);
         if (ads.deviceClaimed[aftermarketDeviceNode])
-            revert DeviceAlreadyClaimed(aftermarketDeviceNode);
+            revert Errors.DeviceAlreadyClaimed(aftermarketDeviceNode);
         if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
             revert Errors.InvalidOwnerSignature();
         if (
@@ -274,7 +272,7 @@ contract AftermarketDevice is
                 message,
                 aftermarketDeviceSig
             )
-        ) revert InvalidAdSignature();
+        ) revert Errors.InvalidAdSignature();
 
         ads.deviceClaimed[aftermarketDeviceNode] = true;
         INFT(adIdProxy).safeTransferFrom(
@@ -333,7 +331,7 @@ contract AftermarketDevice is
                 message,
                 aftermarketDeviceSig
             )
-        ) revert InvalidAdSignature();
+        ) revert Errors.InvalidAdSignature();
 
         if (
             !Eip712CheckerInternal._verifySignature(

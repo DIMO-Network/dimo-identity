@@ -2597,6 +2597,63 @@
                 "components": [
                     {
                         "internalType": "uint256",
+                        "name": "manufacturerNodeVehicle",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "attribute",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "info",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct AttributeInfoPair[]",
+                        "name": "attrInfoPairsVehicle",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "aftermarketDeviceNode",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "vehicleOwnerSig",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "aftermarketDeviceSig",
+                        "type": "bytes"
+                    }
+                ],
+                "internalType": "struct MintVehicleAndAdInput",
+                "name": "data",
+                "type": "tuple"
+            }
+        ],
+        "name": "mintVehicleAndAdSign",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
                         "name": "manufacturerNode",
                         "type": "uint256"
                     },

@@ -32,6 +32,10 @@
                     "0x82087d24"
                 ]
             },
+            "Data": {
+                "address": "",
+                "selectors": []
+            },
             "Manufacturer": {
                 "address": "0x12B870fB7822ec80AF5E66e7CD19379347dE70DF",
                 "selectors": [
@@ -182,6 +186,10 @@
                     "0xdce2f860",
                     "0x82087d24"
                 ]
+            },
+            "Data": {
+                "address": "",
+                "selectors": []
             },
             "Manufacturer": {
                 "address": "0x50FfE1d5d65B363E783981590FE15d5b6830cf77",
@@ -369,6 +377,10 @@
                     "0x82087d24"
                 ]
             },
+            "Data": {
+                "address": "",
+                "selectors": []
+            },
             "Manufacturer": {
                 "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
                 "selectors": [
@@ -537,6 +549,10 @@
                 "selectors": []
             },
             "Nodes": {
+                "address": "",
+                "selectors": []
+            },
+            "Data": {
                 "address": "",
                 "selectors": []
             },

@@ -2429,6 +2429,30 @@
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
+            }
+        ],
+        "name": "getData",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "data",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "idProxyAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
             },
             {
                 "internalType": "string",

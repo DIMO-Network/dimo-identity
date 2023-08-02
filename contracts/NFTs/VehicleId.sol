@@ -85,12 +85,12 @@ contract VehicleId is Initializable, MultiPrivilege {
      * @param tokenId Token Id to be checked
      * @return data Data URI
      */
-    function getData(uint256 tokenId)
+    function getDataURI(uint256 tokenId)
         external
         view
         returns (string memory data)
     {
-        data = _dimoRegistry.getData(address(this), tokenId);
+        data = _dimoRegistry.getDataURI(address(this), tokenId);
     }
 
     /**

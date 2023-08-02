@@ -52,7 +52,7 @@ contract Nodes {
      * @param tokenId Node id from which info will be obtained
      * @return data Data obtained
      */
-    function getData(address idProxyAddress, uint256 tokenId)
+    function getDataURI(address idProxyAddress, uint256 tokenId)
         external
         view
         returns (string memory data)
@@ -64,7 +64,7 @@ contract Nodes {
         if (bytes(data).length == 0)
             data = string(
                 abi.encodePacked(
-                    DataStorage.getStorage().dataUri,
+                    DataStorage.getStorage().dataURIs[idProxyAddress],
                     tokenId.toString()
                 )
             );

@@ -145,7 +145,7 @@ describe('VehicleId', async function () {
       .grantRole(SYNTHETIC_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set base data URI
-    await dataInstance.setDataUri(C.BASE_DATA_URI);
+    await dataInstance.setDataURI(vehicleIdInstance.address, C.BASE_DATA_URI);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -561,9 +561,9 @@ describe('VehicleId', async function () {
     });
   });
 
-  describe('getData', () => {
+  describe('getDataURI', () => {
     it('Should return the default data URI if not data is set in the token', async () => {
-      const dataUriReturn = await nodesInstance.getData(
+      const dataUriReturn = await nodesInstance.getDataURI(
         vehicleIdInstance.address,
         1
       );
@@ -581,7 +581,7 @@ describe('VehicleId', async function () {
         }
       ]);
 
-      const dataUriReturn = await nodesInstance.getData(
+      const dataUriReturn = await nodesInstance.getDataURI(
         vehicleIdInstance.address,
         1
       );

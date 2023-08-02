@@ -41,7 +41,7 @@ interface IDimoRegistry {
         uint256 sourceNode
     ) external view returns (uint256 targetNode);
 
-    function getData(address idProxyAddress, uint256 tokenId)
+    function getDataURI(address idProxyAddress, uint256 tokenId)
         external
         view
         returns (string memory data);

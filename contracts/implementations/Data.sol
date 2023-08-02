@@ -9,16 +9,19 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 /// @title Data
 /// @notice Contract to store data related to the nodes
 contract Data is AccessControlInternal {
-    event DataUriSet(string dataUri);
+    event DataUriSet(address idProxyAddress, string dataUri);
 
-    /// @notice Sets the data URI
-    /// @dev Only an admin can set the data URI
-    /// @param _dataUri The data URI string
-    function setDataUri(string calldata _dataUri)
+    /**
+     * @notice Sets the data URI
+     * @dev Only an admin can set the data URI
+     * @param idProxyAddress The address of the NFT proxy
+     * @param _dataUri The data URI string
+     */
+    function setDataURI(address idProxyAddress, string calldata _dataUri)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        DataStorage.getStorage().dataUri = _dataUri;
-        emit DataUriSet(_dataUri);
+        DataStorage.getStorage().dataURIs[idProxyAddress] = _dataUri;
+        emit DataUriSet(idProxyAddress, _dataUri);
     }
 }

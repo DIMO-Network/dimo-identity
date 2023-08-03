@@ -1,20 +1,22 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
+import "../implementations/nodes/VehicleInternal.sol";
 import "../interfaces/INFT.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/NodesStorage.sol";
 import "../libraries/nodes/ManufacturerStorage.sol";
 import "../libraries/nodes/VehicleStorage.sol";
 import "../libraries/nodes/AftermarketDeviceStorage.sol";
+import "../libraries/nodes/SyntheticDeviceStorage.sol";
 
-import {DEFAULT_ADMIN_ROLE} from "../shared/Roles.sol";
+import "../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 /// @title DevAdmin
 /// @dev Admin module for development and testing
-contract DevAdmin is AccessControlInternal {
+contract DevAdmin is AccessControlInternal, VehicleInternal {
     event AftermarketDeviceUnclaimedDevAdmin(
         uint256 indexed aftermarketDeviceNode
     );
@@ -25,6 +27,15 @@ contract DevAdmin is AccessControlInternal {
     );
     event AftermarketDeviceUnpairedDevAdmin(
         uint256 indexed aftermarketDeviceNode,
+        uint256 indexed vehicleNode,
+        address indexed owner
+    );
+    event VehicleNodeBurnedDevAdmin(
+        uint256 indexed vehicleNode,
+        address indexed owner
+    );
+    event SyntheticDeviceNodeBurnedDevAdmin(
+        uint256 indexed syntheticDeviceNode,
         uint256 indexed vehicleNode,
         address indexed owner
     );
@@ -180,6 +191,193 @@ contract DevAdmin is AccessControlInternal {
 
             ms.manufacturerNameToNodeId[name] = tokenId;
             ms.nodeIdToManufacturerName[tokenId] = name;
+        }
+    }
+
+    /**
+     * @notice Admin function to burn a list of vehicles and reset all its attributes
+     * @dev It reverts if any vehicle is paired
+     * @dev Caller must have the admin role
+     * @dev This contract has the BURNER_ROLE in the VehicleId
+     * @param tokenIds List of vehicle node ids
+     */
+    function adminBurnVehicles(uint256[] calldata tokenIds)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = SyntheticDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        uint256 tokenId;
+        address owner;
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            tokenId = tokenIds[i];
+
+            if (!INFT(vehicleIdProxyAddress).exists(tokenId))
+                revert InvalidNode(vehicleIdProxyAddress, tokenId);
+            if (ms.links[vehicleIdProxyAddress][tokenId] != 0)
+                revert VehiclePaired(tokenId);
+            if (
+                ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+                    tokenId
+                ] != 0
+            ) revert VehiclePaired(tokenId);
+
+            owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
+
+            delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+
+            emit VehicleNodeBurnedDevAdmin(tokenId, owner);
+
+            INFT(vehicleIdProxyAddress).burn(tokenId);
+
+            _resetVehicleInfos(tokenId);
+        }
+    }
+
+    /**
+     * @notice Admin function to burn a list of vehicles and reset all its attributes
+     * @dev Caller must have the admin role
+     * @dev This contract has the BURNER_ROLE in the VehicleId
+     * @param tokenIds List of vehicle node ids
+     */
+    function adminBurnVehiclesAndDeletePairings(uint256[] calldata tokenIds)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = SyntheticDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        uint256 tokenId;
+        uint256 pairedNode;
+        address owner;
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            tokenId = tokenIds[i];
+
+            if (!INFT(vehicleIdProxyAddress).exists(tokenId))
+                revert InvalidNode(vehicleIdProxyAddress, tokenId);
+
+            owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
+
+            pairedNode = ms.links[vehicleIdProxyAddress][tokenId];
+            if (pairedNode != 0) {
+                delete ms.links[vehicleIdProxyAddress][tokenId];
+                delete ms.links[adIdProxyAddress][pairedNode];
+
+                emit AftermarketDeviceUnpairedDevAdmin(
+                    pairedNode,
+                    tokenId,
+                    owner
+                );
+            } else if (
+                ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+                    tokenId
+                ] != 0
+            ) {
+                pairedNode = ms.nodeLinks[vehicleIdProxyAddress][
+                    sdIdProxyAddress
+                ][tokenId];
+
+                delete ns.nodes[sdIdProxyAddress][pairedNode].parentNode;
+
+                delete ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+                    tokenId
+                ];
+                delete ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
+                    pairedNode
+                ];
+
+                delete sds.deviceAddressToNodeId[
+                    sds.nodeIdToDeviceAddress[pairedNode]
+                ];
+                delete sds.nodeIdToDeviceAddress[pairedNode];
+
+                INFT(sdIdProxyAddress).burn(pairedNode);
+
+                emit SyntheticDeviceNodeBurnedDevAdmin(
+                    pairedNode,
+                    tokenId,
+                    owner
+                );
+
+                _resetSdInfos(pairedNode);
+            }
+
+            delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+
+            emit VehicleNodeBurnedDevAdmin(tokenId, owner);
+
+            INFT(vehicleIdProxyAddress).burn(tokenId);
+
+            _resetVehicleInfos(tokenId);
+        }
+    }
+
+    /**
+     * @dev Internal function to reset node infos
+     * It iterates over all whitelisted attributes to reset each info
+     * @param tokenId Node which will have the infos reset
+     */
+    function _resetSdInfos(uint256 tokenId) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        address idProxyAddress = sds.idProxyAddress;
+        string[] memory attributes = AttributeSet.values(
+            sds.whitelistedAttributes
+        );
+
+        for (
+            uint256 i = 0;
+            i < AttributeSet.count(sds.whitelistedAttributes);
+            i++
+        ) {
+            delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
+
+            // emit SyntheticDeviceAttributeSet(tokenId, attributes[i], "");
+        }
+    }
+
+    /**
+     * @dev Internal function to reset node infos
+     * It iterates over all whitelisted attributes to reset each info
+     * @param tokenId Node which will have the infos reset
+     */
+    function _resetVehicleInfos(uint256 tokenId) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage sds = VehicleStorage.getStorage();
+        address idProxyAddress = sds.idProxyAddress;
+        string[] memory attributes = AttributeSet.values(
+            sds.whitelistedAttributes
+        );
+
+        for (
+            uint256 i = 0;
+            i < AttributeSet.count(sds.whitelistedAttributes);
+            i++
+        ) {
+            delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
+
+            emit VehicleAttributeSet(tokenId, attributes[i], "");
         }
     }
 }

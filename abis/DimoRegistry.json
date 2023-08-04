@@ -317,6 +317,31 @@
             {
                 "indexed": true,
                 "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "attribute",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "info",
+                "type": "string"
+            }
+        ],
+        "name": "SyntheticDeviceAttributeSetDevAdmin",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
                 "name": "syntheticDeviceNode",
                 "type": "uint256"
             },
@@ -340,7 +365,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
@@ -358,7 +383,7 @@
                 "type": "string"
             }
         ],
-        "name": "VehicleAttributeSet",
+        "name": "VehicleAttributeSetDevAdmin",
         "type": "event"
     },
     {
@@ -378,31 +403,6 @@
             }
         ],
         "name": "VehicleNodeBurnedDevAdmin",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "manufacturerNode",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            }
-        ],
-        "name": "VehicleNodeMinted",
         "type": "event"
     },
     {
@@ -2077,6 +2077,56 @@
             }
         ],
         "name": "SyntheticDeviceNodeMinted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "attribute",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "info",
+                "type": "string"
+            }
+        ],
+        "name": "VehicleAttributeSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "VehicleNodeMinted",
         "type": "event"
     },
     {

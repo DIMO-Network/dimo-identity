@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-import "../implementations/nodes/VehicleInternal.sol";
 import "../interfaces/INFT.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/NodesStorage.sol";
@@ -11,12 +10,13 @@ import "../libraries/nodes/AftermarketDeviceStorage.sol";
 import "../libraries/nodes/SyntheticDeviceStorage.sol";
 
 import "../shared/Roles.sol";
+import "../shared/Errors.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 /// @title DevAdmin
 /// @dev Admin module for development and testing
-contract DevAdmin is AccessControlInternal, VehicleInternal {
+contract DevAdmin is AccessControlInternal {
     event AftermarketDeviceUnclaimedDevAdmin(
         uint256 indexed aftermarketDeviceNode
     );
@@ -38,6 +38,16 @@ contract DevAdmin is AccessControlInternal, VehicleInternal {
         uint256 indexed syntheticDeviceNode,
         uint256 indexed vehicleNode,
         address indexed owner
+    );
+    event VehicleAttributeSetDevAdmin(
+        uint256 indexed tokenId,
+        string attribute,
+        string info
+    );
+    event SyntheticDeviceAttributeSetDevAdmin(
+        uint256 indexed tokenId,
+        string attribute,
+        string info
     );
 
     struct IdManufacturerName {
@@ -243,7 +253,7 @@ contract DevAdmin is AccessControlInternal, VehicleInternal {
     }
 
     /**
-     * @notice Admin function to burn a list of vehicles and reset all its attributes
+     * @notice Admin function to burn a list of vehicles and reset all its attributes and links
      * @dev Caller must have the admin role
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenIds List of vehicle node ids
@@ -353,7 +363,11 @@ contract DevAdmin is AccessControlInternal, VehicleInternal {
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
-            // emit SyntheticDeviceAttributeSet(tokenId, attributes[i], "");
+            emit SyntheticDeviceAttributeSetDevAdmin(
+                tokenId,
+                attributes[i],
+                ""
+            );
         }
     }
 
@@ -377,7 +391,7 @@ contract DevAdmin is AccessControlInternal, VehicleInternal {
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
-            emit VehicleAttributeSet(tokenId, attributes[i], "");
+            emit VehicleAttributeSetDevAdmin(tokenId, attributes[i], "");
         }
     }
 }

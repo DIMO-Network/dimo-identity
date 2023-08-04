@@ -1327,7 +1327,7 @@ describe('SyntheticDevice', function () {
           )
         ).to.be.equal(0);
       });
-      it('Should correctly reset mapping the vehicle to t0', async () => {
+      it('Should correctly reset mapping the vehicle to 0', async () => {
         await syntheticDeviceInstance
           .connect(admin)
           .burnSyntheticDeviceSign(1, 1, burnSyntheticDeviceOwnerSig1);

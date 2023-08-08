@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../libraries/NodesStorage.sol";
-import "../libraries/DataStorage.sol";
+import "../libraries/BaseDataURIStorage.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
@@ -58,13 +58,15 @@ contract Nodes {
         returns (string memory data)
     {
         data = NodesStorage.getStorage().nodes[idProxyAddress][tokenId].info[
-            "Data"
+            "Data URI"
         ];
 
         if (bytes(data).length == 0)
             data = string(
                 abi.encodePacked(
-                    DataStorage.getStorage().dataURIs[idProxyAddress],
+                    BaseDataURIStorage.getStorage().baseDataURIs[
+                        idProxyAddress
+                    ],
                     tokenId.toString()
                 )
             );

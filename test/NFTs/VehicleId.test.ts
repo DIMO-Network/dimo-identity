@@ -5,7 +5,7 @@ import {
   DIMORegistry,
   Eip712Checker,
   Nodes,
-  Data,
+  BaseDataURI,
   Manufacturer,
   ManufacturerId,
   Integration,
@@ -37,7 +37,7 @@ describe('VehicleId', async function () {
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
   let nodesInstance: Nodes;
-  let dataInstance: Data;
+  let baseDataUriInstance: BaseDataURI;
   let manufacturerInstance: Manufacturer;
   let integrationInstance: Integration;
   let vehicleInstance: Vehicle;
@@ -83,7 +83,7 @@ describe('VehicleId', async function () {
         'Eip712Checker',
         'DimoAccessControl',
         'Nodes',
-        'Data',
+        'BaseDataURI',
         'Manufacturer',
         'Integration',
         'Vehicle',
@@ -105,7 +105,7 @@ describe('VehicleId', async function () {
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
     nodesInstance = deployments.Nodes;
-    dataInstance = deployments.Data;
+    baseDataUriInstance = deployments.BaseDataURI;
     manufacturerInstance = deployments.Manufacturer;
     integrationInstance = deployments.Integration;
     vehicleInstance = deployments.Vehicle;
@@ -145,7 +145,10 @@ describe('VehicleId', async function () {
       .grantRole(SYNTHETIC_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set base data URI
-    await dataInstance.setDataURI(vehicleIdInstance.address, C.BASE_DATA_URI);
+    await baseDataUriInstance.setBaseDataURI(
+      vehicleIdInstance.address,
+      C.BASE_DATA_URI
+    );
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -562,7 +565,7 @@ describe('VehicleId', async function () {
   });
 
   describe('getDataURI', () => {
-    it('Should return the default data URI if not data is set in the token', async () => {
+    it('Should return the default data URI if no data is set in the token', async () => {
       const dataUriReturn = await nodesInstance.getDataURI(
         vehicleIdInstance.address,
         1
@@ -573,10 +576,10 @@ describe('VehicleId', async function () {
     it('Should correctly return the data URI set in the token', async () => {
       const customDataUri = 'custom.data.uri';
 
-      await vehicleInstance.addVehicleAttribute('Data');
+      await vehicleInstance.addVehicleAttribute('Data URI');
       await vehicleInstance.connect(admin).setVehicleInfo(1, [
         {
-          attribute: 'Data',
+          attribute: 'Data URI',
           info: customDataUri
         }
       ]);

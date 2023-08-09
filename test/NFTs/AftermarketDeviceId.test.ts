@@ -352,6 +352,33 @@ describe('AftermarketDeviceId', async function () {
     });
   });
 
+  describe('getDefinitionURI', () => {
+    it('Should return the empty if no definition is set in the token', async () => {
+      const definitionUriReturn = await adIdInstance.getDefinitionURI(1);
+
+      expect(definitionUriReturn).to.eq('');
+    });
+    it('Should correctly return the definition URI set in the token', async () => {
+      const customDefinitionUri = 'custom.definition.uri';
+
+      await aftermarketDeviceInstance.addAftermarketDeviceAttribute(
+        'Definition URI'
+      );
+      await aftermarketDeviceInstance
+        .connect(admin)
+        .setAftermarketDeviceInfo(1, [
+          {
+            attribute: 'Definition URI',
+            info: customDefinitionUri
+          }
+        ]);
+
+      const definitionUriReturn = await adIdInstance.getDefinitionURI(1);
+
+      expect(definitionUriReturn).to.equal(customDefinitionUri);
+    });
+  });
+
   context('On transfer', async () => {
     context('Error handling', () => {
       it('Should revert if caller is approved, but not the token owner or DimoRegistry', async () => {

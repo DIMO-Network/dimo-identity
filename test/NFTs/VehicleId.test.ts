@@ -566,10 +566,7 @@ describe('VehicleId', async function () {
 
   describe('getDataURI', () => {
     it('Should return the default data URI if no data is set in the token', async () => {
-      const dataUriReturn = await nodesInstance.getDataURI(
-        vehicleIdInstance.address,
-        1
-      );
+      const dataUriReturn = await vehicleIdInstance.getDataURI(1);
 
       expect(dataUriReturn).to.eq(`${C.BASE_DATA_URI}1`);
     });
@@ -584,12 +581,32 @@ describe('VehicleId', async function () {
         }
       ]);
 
-      const dataUriReturn = await nodesInstance.getDataURI(
-        vehicleIdInstance.address,
-        1
-      );
+      const dataUriReturn = await vehicleIdInstance.getDataURI(1);
 
       expect(dataUriReturn).to.equal(customDataUri);
+    });
+  });
+
+  describe('getDefinitionURI', () => {
+    it('Should return the empty if no definition is set in the token', async () => {
+      const definitionUriReturn = await vehicleIdInstance.getDefinitionURI(1);
+
+      expect(definitionUriReturn).to.eq('');
+    });
+    it('Should correctly return the definition URI set in the token', async () => {
+      const customDefinitionUri = 'custom.definition.uri';
+
+      await vehicleInstance.addVehicleAttribute('Definition URI');
+      await vehicleInstance.connect(admin).setVehicleInfo(1, [
+        {
+          attribute: 'Definition URI',
+          info: customDefinitionUri
+        }
+      ]);
+
+      const definitionUriReturn = await vehicleIdInstance.getDefinitionURI(1);
+
+      expect(definitionUriReturn).to.equal(customDefinitionUri);
     });
   });
 

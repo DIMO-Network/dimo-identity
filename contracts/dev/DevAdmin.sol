@@ -128,6 +128,7 @@ contract DevAdmin is AccessControlInternal {
                 "Invalid AD node"
             );
 
+            // Check AD pairing
             _vehicleNode = ms.links[adIdProxyAddress][_adNode];
 
             delete ms.links[vehicleIdProxyAddress][_vehicleNode];
@@ -165,6 +166,7 @@ contract DevAdmin is AccessControlInternal {
                 "Invalid vehicle node"
             );
 
+            // Check AD pairing
             _adNode = ms.links[vehicleIdProxyAddress][_vehicleNode];
 
             delete ms.links[vehicleIdProxyAddress][_vehicleNode];
@@ -206,7 +208,7 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Admin function to burn a list of vehicles and reset all its attributes
-     * @dev It reverts if any vehicle is paired
+     * @dev It reverts if any vehicle doesn't exist or is paired
      * @dev Caller must have the admin role
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenIds List of vehicle node ids
@@ -232,8 +234,10 @@ contract DevAdmin is AccessControlInternal {
 
             if (!INFT(vehicleIdProxyAddress).exists(tokenId))
                 revert InvalidNode(vehicleIdProxyAddress, tokenId);
+            // Check AD pairing
             if (ms.links[vehicleIdProxyAddress][tokenId] != 0)
                 revert VehiclePaired(tokenId);
+            // Check SD pairing
             if (
                 ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                     tokenId
@@ -288,6 +292,7 @@ contract DevAdmin is AccessControlInternal {
 
             owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
 
+            // Check AD pairing
             pairedNode = ms.links[vehicleIdProxyAddress][tokenId];
             if (pairedNode != 0) {
                 delete ms.links[vehicleIdProxyAddress][tokenId];
@@ -298,6 +303,7 @@ contract DevAdmin is AccessControlInternal {
                     tokenId,
                     owner
                 );
+                // Check SD pairing
             } else if (
                 ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                     tokenId

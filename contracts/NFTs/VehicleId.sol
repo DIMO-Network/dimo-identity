@@ -81,6 +81,35 @@ contract VehicleId is Initializable, MultiPrivilege {
     }
 
     /**
+     * @notice Gets the data URI associated to a token
+     * @param tokenId Token Id to be checked
+     * @return data Data URI
+     */
+    function getDataURI(uint256 tokenId)
+        external
+        view
+        returns (string memory data)
+    {
+        data = _dimoRegistry.getDataURI(address(this), tokenId);
+    }
+
+    /**
+     * @notice Function to burn a token
+     * @dev To be called by DIMORegistry or a token owner
+     * DIMORegistry calls this function in burnVehicleSign function
+     * When a user calls it, burning is validated in the DIMORegistry
+     * @param tokenId Token Id to be burned
+     */
+    function burn(uint256 tokenId) public override {
+        if (_msgSender() != address(_dimoRegistry)) {
+            _dimoRegistry.validateBurnAndResetNode(tokenId);
+            ERC721BurnableUpgradeable.burn(tokenId);
+        } else {
+            super._burn(tokenId);
+        }
+    }
+
+    /**
      * @notice Internal function to transfer a token. If the vehicle is
      * paired to a synthetic device, the corresponding token is also transferred.
      * @dev Only the token owner can transfer (no approvals)
@@ -132,22 +161,6 @@ contract VehicleId is Initializable, MultiPrivilege {
         }
 
         super._transfer(from, to, tokenId);
-    }
-
-    /**
-     * @notice Function to burn a token
-     * @dev To be called by DIMORegistry or a token owner
-     * DIMORegistry calls this function in burnVehicleSign function
-     * When a user calls it, burning is validated in the DIMORegistry
-     * @param tokenId Token Id to be burned
-     */
-    function burn(uint256 tokenId) public override {
-        if (_msgSender() != address(_dimoRegistry)) {
-            _dimoRegistry.validateBurnAndResetNode(tokenId);
-            ERC721BurnableUpgradeable.burn(tokenId);
-        } else {
-            super._burn(tokenId);
-        }
     }
 
     /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract

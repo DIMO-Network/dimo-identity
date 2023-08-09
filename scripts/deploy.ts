@@ -98,6 +98,7 @@ async function deployModules(
     { name: 'Eip712Checker', args: [] },
     { name: 'DimoAccessControl', args: [] },
     { name: 'Nodes', args: [] },
+    { name: 'Data', args: [] },
     { name: 'Manufacturer', args: [] },
     { name: 'Integration', args: [] },
     { name: 'Vehicle', args: [] },

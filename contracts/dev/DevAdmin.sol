@@ -303,16 +303,13 @@ contract DevAdmin is AccessControlInternal {
                     tokenId,
                     owner
                 );
-                // Check SD pairing
-            } else if (
-                ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
-                    tokenId
-                ] != 0
-            ) {
-                pairedNode = ms.nodeLinks[vehicleIdProxyAddress][
-                    sdIdProxyAddress
-                ][tokenId];
+            }
 
+            // Check SD pairing
+            pairedNode = ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+                tokenId
+            ];
+            if (pairedNode != 0) {
                 delete ns.nodes[sdIdProxyAddress][pairedNode].parentNode;
 
                 delete ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
@@ -349,7 +346,7 @@ contract DevAdmin is AccessControlInternal {
     }
 
     /**
-     * @dev Internal function to reset node infos
+     * @dev Internal function to reset SD node infos
      * It iterates over all whitelisted attributes to reset each info
      * @param tokenId Node which will have the infos reset
      */
@@ -362,11 +359,7 @@ contract DevAdmin is AccessControlInternal {
             sds.whitelistedAttributes
         );
 
-        for (
-            uint256 i = 0;
-            i < AttributeSet.count(sds.whitelistedAttributes);
-            i++
-        ) {
+        for (uint256 i = 0; i < attributes.length; i++) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
             emit SyntheticDeviceAttributeSetDevAdmin(

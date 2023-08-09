@@ -1309,179 +1309,188 @@ describe('DevAdmin', function () {
           .mintSyntheticDeviceSign(localMintSdInput);
       });
 
-      it('Should correctly reset vehicle parent node to 0', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
+      context('Vehicle', () => {
+        it('Should correctly reset vehicle parent node to 0', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
 
-        const parentNode1 = await nodesInstance.getParentNode(
-          vehicleIdInstance.address,
-          1
-        );
-        const parentNode2 = await nodesInstance.getParentNode(
-          vehicleIdInstance.address,
-          2
-        );
-
-        expect(parentNode1).to.be.equal(0);
-        expect(parentNode2).to.be.equal(0);
-      });
-      it('Should correctly reset synthetic device parent node to 0', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        const parentNode = await nodesInstance.getParentNode(
-          sdIdInstance.address,
-          1
-        );
-
-        expect(parentNode).to.be.equal(0);
-      });
-      it('Should correctly reset vehicle node owner to zero address', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        await expect(vehicleIdInstance.ownerOf(1)).to.be.revertedWith(
-          'ERC721: invalid token ID'
-        );
-        await expect(vehicleIdInstance.ownerOf(2)).to.be.revertedWith(
-          'ERC721: invalid token ID'
-        );
-      });
-      it('Should correctly reset synthetic device node owner to zero address', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        await expect(sdIdInstance.ownerOf(1)).to.be.revertedWith(
-          'ERC721: invalid token ID'
-        );
-      });
-      it('Should correctly reset synthetic device address do zero address', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        const id = await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
-          sdAddress1.address
-        );
-
-        expect(id).to.equal(0);
-      });
-      it('Should correctly reset vehicle infos to blank', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        expect(
-          await nodesInstance.getInfo(
-            vehicleIdInstance.address,
-            1,
-            C.mockVehicleAttribute1
-          )
-        ).to.be.equal('');
-        expect(
-          await nodesInstance.getInfo(
-            vehicleIdInstance.address,
-            1,
-            C.mockVehicleAttribute2
-          )
-        ).to.be.equal('');
-        expect(
-          await nodesInstance.getInfo(
-            vehicleIdInstance.address,
-            2,
-            C.mockVehicleAttribute1
-          )
-        ).to.be.equal('');
-        expect(
-          await nodesInstance.getInfo(
-            vehicleIdInstance.address,
-            2,
-            C.mockVehicleAttribute2
-          )
-        ).to.be.equal('');
-      });
-      it('Should correctly reset synthetic device infos to blank', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        expect(
-          await nodesInstance.getInfo(
-            sdIdInstance.address,
-            2,
-            C.mockSyntheticDeviceAttribute1
-          )
-        ).to.be.equal('');
-        expect(
-          await nodesInstance.getInfo(
-            sdIdInstance.address,
-            2,
-            C.mockSyntheticDeviceAttribute2
-          )
-        ).to.be.equal('');
-      });
-      it('Should correctly reset mapping the aftermarket device to vehicle to 0', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        expect(
-          await mapperInstance.getLink(vehicleIdInstance.address, 1)
-        ).to.be.equal(0);
-      });
-      it('Should correctly reset mapping the vehicle to aftermarket device to 0', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        expect(
-          await mapperInstance.getLink(adIdInstance.address, 1)
-        ).to.be.equal(0);
-      });
-      it('Should correctly reset mapping the synthetic device to vehicle to 0', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        expect(
-          await mapperInstance.getNodeLink(
-            vehicleIdInstance.address,
-            sdIdInstance.address,
-            2
-          )
-        ).to.be.equal(0);
-      });
-      it('Should correctly reset mapping the vehicle to synthetic device to 0', async () => {
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
-
-        expect(
-          await mapperInstance.getNodeLink(
-            sdIdInstance.address,
+          const parentNode1 = await nodesInstance.getParentNode(
             vehicleIdInstance.address,
             1
-          )
-        ).to.be.equal(0);
+          );
+          const parentNode2 = await nodesInstance.getParentNode(
+            vehicleIdInstance.address,
+            2
+          );
+
+          expect(parentNode1).to.be.equal(0);
+          expect(parentNode2).to.be.equal(0);
+        });
+        it('Should correctly reset vehicle node owner to zero address', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          await expect(vehicleIdInstance.ownerOf(1)).to.be.revertedWith(
+            'ERC721: invalid token ID'
+          );
+          await expect(vehicleIdInstance.ownerOf(2)).to.be.revertedWith(
+            'ERC721: invalid token ID'
+          );
+        });
+        it('Should correctly reset vehicle infos to blank', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          expect(
+            await nodesInstance.getInfo(
+              vehicleIdInstance.address,
+              1,
+              C.mockVehicleAttribute1
+            )
+          ).to.be.equal('');
+          expect(
+            await nodesInstance.getInfo(
+              vehicleIdInstance.address,
+              1,
+              C.mockVehicleAttribute2
+            )
+          ).to.be.equal('');
+          expect(
+            await nodesInstance.getInfo(
+              vehicleIdInstance.address,
+              2,
+              C.mockVehicleAttribute1
+            )
+          ).to.be.equal('');
+          expect(
+            await nodesInstance.getInfo(
+              vehicleIdInstance.address,
+              2,
+              C.mockVehicleAttribute2
+            )
+          ).to.be.equal('');
+        });
+        it('Should update multi-privilege token version', async () => {
+          const previousVersion1 = await vehicleIdInstance.tokenIdToVersion(1);
+          const previousVersion2 = await vehicleIdInstance.tokenIdToVersion(2);
+
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
+            previousVersion1.add(1)
+          );
+          expect(await vehicleIdInstance.tokenIdToVersion(2)).to.equal(
+            previousVersion2.add(1)
+          );
+        });
       });
-      it('Should update multi-privilege token version', async () => {
-        const previousVersion1 = await vehicleIdInstance.tokenIdToVersion(1);
-        const previousVersion2 = await vehicleIdInstance.tokenIdToVersion(2);
 
-        await devAdminInstance
-          .connect(admin)
-          .adminBurnVehiclesAndDeletePairings([1, 2]);
+      context('Aftermarket Device paired', () => {
+        it('Should correctly reset mapping the aftermarket device to vehicle to 0', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
 
-        expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
-          previousVersion1.add(1)
-        );
-        expect(await vehicleIdInstance.tokenIdToVersion(2)).to.equal(
-          previousVersion2.add(1)
-        );
+          expect(
+            await mapperInstance.getLink(vehicleIdInstance.address, 1)
+          ).to.be.equal(0);
+        });
+        it('Should correctly reset mapping the vehicle to aftermarket device to 0', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          expect(
+            await mapperInstance.getLink(adIdInstance.address, 1)
+          ).to.be.equal(0);
+        });
+      });
+
+      context('Synthetic Device paired', () => {
+        it('Should correctly reset synthetic device parent node to 0', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          const parentNode = await nodesInstance.getParentNode(
+            sdIdInstance.address,
+            1
+          );
+
+          expect(parentNode).to.be.equal(0);
+        });
+        it('Should correctly reset synthetic device node owner to zero address', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          await expect(sdIdInstance.ownerOf(1)).to.be.revertedWith(
+            'ERC721: invalid token ID'
+          );
+        });
+        it('Should correctly reset synthetic device address do zero address', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          const id =
+            await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
+              sdAddress1.address
+            );
+
+          expect(id).to.equal(0);
+        });
+        it('Should correctly reset synthetic device infos to blank', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          expect(
+            await nodesInstance.getInfo(
+              sdIdInstance.address,
+              2,
+              C.mockSyntheticDeviceAttribute1
+            )
+          ).to.be.equal('');
+          expect(
+            await nodesInstance.getInfo(
+              sdIdInstance.address,
+              2,
+              C.mockSyntheticDeviceAttribute2
+            )
+          ).to.be.equal('');
+        });
+        it('Should correctly reset mapping the synthetic device to vehicle to 0', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          expect(
+            await mapperInstance.getNodeLink(
+              vehicleIdInstance.address,
+              sdIdInstance.address,
+              2
+            )
+          ).to.be.equal(0);
+        });
+        it('Should correctly reset mapping the vehicle to synthetic device to 0', async () => {
+          await devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2]);
+
+          expect(
+            await mapperInstance.getNodeLink(
+              sdIdInstance.address,
+              vehicleIdInstance.address,
+              1
+            )
+          ).to.be.equal(0);
+        });
       });
     });
 

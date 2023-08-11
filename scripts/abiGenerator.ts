@@ -43,7 +43,8 @@ main([
   'contracts/implementations/nodes/Vehicle.sol:Vehicle',
   'contracts/implementations/Nodes.sol:Nodes',
   'contracts/implementations/Mapper.sol:Mapper',
-  'contracts/implementations/MultipleMinter.sol:MultipleMinter'
+  'contracts/implementations/MultipleMinter.sol:MultipleMinter',
+  'contracts/implementations/BaseDataURI.sol:BaseDataURI'
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

@@ -14,6 +14,10 @@ import "../shared/Errors.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
+error AdNotClaimed(uint256 id);
+error AdPaired(uint256 id);
+error OwnersDoesNotMatch();
+
 /// @title DevAdmin
 /// @dev Admin module for development and testing
 contract DevAdmin is AccessControlInternal {
@@ -48,6 +52,11 @@ contract DevAdmin is AccessControlInternal {
         uint256 indexed tokenId,
         string attribute,
         string info
+    );
+    event AftermarketDevicePaired(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
+        address indexed owner
     );
 
     struct IdManufacturerName {
@@ -343,6 +352,49 @@ contract DevAdmin is AccessControlInternal {
 
             _resetVehicleInfos(tokenId);
         }
+    }
+
+    /**
+     * @notice Admin function to pair an aftermarket device with a vehicle
+     * @dev Caller must have the DEV_AD_PAIR role
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
+     */
+    function adminPairAftermarketDevice(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode
+    ) external onlyRole(DEV_AD_PAIR_ROLE) {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (
+            !AftermarketDeviceStorage.getStorage().deviceClaimed[
+                aftermarketDeviceNode
+            ]
+        ) revert AdNotClaimed(aftermarketDeviceNode);
+
+        address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
+
+        if (owner != INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode))
+            revert OwnersDoesNotMatch();
+        if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
+            revert VehiclePaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
+            revert AdPaired(aftermarketDeviceNode);
+
+        ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
+
+        emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
     }
 
     /**

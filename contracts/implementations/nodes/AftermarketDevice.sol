@@ -16,7 +16,6 @@ import "../../shared/Errors.sol" as Errors;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-error RegistryNotApproved();
 error DeviceAlreadyRegistered(address addr);
 error DeviceAlreadyClaimed(uint256 id);
 error InvalidAdSignature();
@@ -141,8 +140,6 @@ contract AftermarketDevice is
             ManufacturerStorage.getStorage().idProxyAddress
         );
 
-        if (!INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)))
-            revert RegistryNotApproved();
         if (!manufacturerIdProxy.exists(manufacturerNode))
             revert Errors.InvalidParentNode(manufacturerNode);
         if (

@@ -709,11 +709,6 @@
         "type": "error"
     },
     {
-        "inputs": [],
-        "name": "RegistryNotApproved",
-        "type": "error"
-    },
-    {
         "inputs": [
             {
                 "internalType": "address",

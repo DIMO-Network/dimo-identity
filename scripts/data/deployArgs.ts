@@ -40,6 +40,8 @@ export const SD_NFT_NAME = 'Dimo Synthetic Device ID';
 export const SD_NFT_SYMBOL = 'DIMO/SYNTHETIC/DEVICE';
 export const SD_NFT_URI = 'https://devices-api.dimo.zone/v1/synthetic/device/';
 
+export const BASE_DATA_URI = '';
+
 export const vehicleAttributes = [
   'Make',
   'Model',

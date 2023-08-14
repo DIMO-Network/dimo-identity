@@ -7,6 +7,7 @@ import {
   DIMORegistry,
   DimoAccessControl,
   Eip712Checker,
+  BaseDataURI,
   Manufacturer,
   Integration,
   Vehicle,
@@ -98,7 +99,7 @@ async function deployModules(
     { name: 'Eip712Checker', args: [] },
     { name: 'DimoAccessControl', args: [] },
     { name: 'Nodes', args: [] },
-    { name: 'Data', args: [] },
+    { name: 'BaseDataURI', args: [] },
     { name: 'Manufacturer', args: [] },
     { name: 'Integration', args: [] },
     { name: 'Vehicle', args: [] },
@@ -371,6 +372,10 @@ async function setupRegistry(deployer: SignerWithAddress, networkName: string) {
     'SyntheticDevice',
     instances[networkName].modules.DIMORegistry.address
   );
+  const baseDataUriInstance: BaseDataURI = await ethers.getContractAt(
+    'BaseDataURI',
+    instances[networkName].modules.DIMORegistry.address
+  );
 
   console.log('\n----- Initializing EIP712 -----\n');
   await (
@@ -492,7 +497,18 @@ async function setupRegistry(deployer: SignerWithAddress, networkName: string) {
         true
       )
   ).wait();
-  console.log('----- Approval set -----\n');
+  console.log('----- Approval set -----');
+
+  console.log('\n----- Setting Base Data URI -----');
+  await (
+    await baseDataUriInstance
+      .connect(deployer)
+      .setBaseDataURI(
+        instances[networkName].nfts.VehicleId.proxy,
+        C.BASE_DATA_URI
+      )
+  ).wait();
+  console.log('----- Base Data URI set -----');
 }
 
 async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {

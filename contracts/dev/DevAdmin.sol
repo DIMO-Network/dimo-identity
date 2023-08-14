@@ -16,7 +16,6 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 error AdNotClaimed(uint256 id);
 error AdPaired(uint256 id);
-error OwnersDoesNotMatch();
 
 /// @title DevAdmin
 /// @dev Admin module for development and testing
@@ -382,10 +381,6 @@ contract DevAdmin is AccessControlInternal {
             ]
         ) revert AdNotClaimed(aftermarketDeviceNode);
 
-        address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
-
-        if (owner != INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode))
-            revert OwnersDoesNotMatch();
         if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
             revert VehiclePaired(vehicleNode);
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
@@ -394,7 +389,11 @@ contract DevAdmin is AccessControlInternal {
         ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
         ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
 
-        emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
+        emit AftermarketDevicePaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
+        );
     }
 
     /**

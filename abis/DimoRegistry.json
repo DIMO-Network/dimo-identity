@@ -260,11 +260,6 @@
         "type": "error"
     },
     {
-        "inputs": [],
-        "name": "OwnersDoesNotMatch",
-        "type": "error"
-    },
-    {
         "inputs": [
             {
                 "internalType": "uint256",
@@ -880,6 +875,11 @@
     {
         "inputs": [],
         "name": "InvalidSigner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "OwnersDoNotMatch",
         "type": "error"
     },
     {

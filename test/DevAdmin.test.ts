@@ -1636,9 +1636,7 @@ describe('DevAdmin', function () {
 
   describe('adminPairAftermarketDevice', () => {
     let claimOwnerSig1: string;
-    let claimOwnerSig2: string;
     let claimAdSig1: string;
-    let claimAdSig2: string;
     before(async () => {
       claimOwnerSig1 = await signMessage({
         _signer: user1,
@@ -1656,24 +1654,6 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address
-        }
-      });
-      claimOwnerSig2 = await signMessage({
-        _signer: user2,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '2',
-          owner: user2.address
-        }
-      });
-      claimAdSig2 = await signMessage({
-        _signer: adAddress2,
-        _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
-        message: {
-          aftermarketDeviceNode: '2',
-          owner: user2.address
         }
       });
     });
@@ -1725,29 +1705,6 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance.connect(admin).adminPairAftermarketDevice(2, 1)
         ).to.be.revertedWith('AdNotClaimed(2)');
-      });
-      it('Should revert if owner is not the vehicle node owner', async () => {
-        await vehicleInstance
-          .connect(admin)
-          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
-
-        await expect(
-          devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 2)
-        ).to.be.revertedWith('OwnersDoesNotMatch');
-      });
-      it('Should revert if owner is not the aftermarket device node owner', async () => {
-        await aftermarketDeviceInstance
-          .connect(admin)
-          .claimAftermarketDeviceSign(
-            2,
-            user2.address,
-            claimOwnerSig2,
-            claimAdSig2
-          );
-
-        await expect(
-          devAdminInstance.connect(admin).adminPairAftermarketDevice(2, 1)
-        ).to.be.revertedWith('OwnersDoesNotMatch');
       });
       it('Should revert if vehicle is already paired', async () => {
         await devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 1);

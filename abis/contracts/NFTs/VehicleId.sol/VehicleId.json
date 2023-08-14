@@ -579,7 +579,26 @@
     "outputs": [
       {
         "internalType": "string",
-        "name": "data",
+        "name": "dataURI",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getDefinitionURI",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "definitionURI",
         "type": "string"
       }
     ],

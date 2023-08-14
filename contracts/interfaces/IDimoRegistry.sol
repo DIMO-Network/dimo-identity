@@ -45,4 +45,10 @@ interface IDimoRegistry {
         external
         view
         returns (string memory data);
+
+    function getInfo(
+        address idProxyAddress,
+        uint256 tokenId,
+        string calldata attribute
+    ) external view returns (string memory info);
 }

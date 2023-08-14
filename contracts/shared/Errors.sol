@@ -16,7 +16,9 @@ error InvalidParentNodeOwner(uint256 id, address addr);
 error InvalidNode(address proxy, uint256 id);
 error VehiclePaired(uint256 id);
 error VehicleNotPaired(uint256 id);
+error DeviceAlreadyClaimed(uint256 id);
 
 // Signature
 error InvalidSigner();
 error InvalidOwnerSignature();
+error InvalidAdSignature();

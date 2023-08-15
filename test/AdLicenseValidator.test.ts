@@ -1,7 +1,12 @@
 import chai from 'chai';
 import { ethers, waffle } from 'hardhat';
 
-import { AdLicenseValidator, MockDimoToken, MockStake } from '../typechain';
+import {
+  DimoAccessControl,
+  AdLicenseValidator,
+  MockDimoToken,
+  MockStake
+} from '../typechain';
 import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
@@ -9,6 +14,7 @@ const provider = waffle.provider;
 
 describe('AdLicenseValidator', function () {
   let snapshot: string;
+  let dimoAccessControlInstance: DimoAccessControl;
   let adLicenseValidatorInstance: AdLicenseValidator;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
@@ -17,11 +23,17 @@ describe('AdLicenseValidator', function () {
 
   before(async () => {
     const deployments = await setup(admin, {
-      modules: ['AdLicenseValidator'],
+      modules: ['DimoAccessControl', 'AdLicenseValidator'],
       nfts: [],
       upgradeableContracts: []
     });
+
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     adLicenseValidatorInstance = deployments.AdLicenseValidator;
+
+    await dimoAccessControlInstance
+      .connect(admin)
+      .grantRole(C.ADMIN_ROLE, admin.address);
 
     // Deploy MockDimoToken contract
     const MockDimoTokenFactory = await ethers.getContractFactory(
@@ -54,7 +66,7 @@ describe('AdLicenseValidator', function () {
           .setFoundationAddress(foundation.address)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
+          C.ADMIN_ROLE
         }`
       );
     });
@@ -68,7 +80,7 @@ describe('AdLicenseValidator', function () {
           .setDimoToken(mockDimoTokenInstance.address)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
+          C.ADMIN_ROLE
         }`
       );
     });
@@ -82,7 +94,7 @@ describe('AdLicenseValidator', function () {
           .setLicense(mockStakeInstance.address)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
+          C.ADMIN_ROLE
         }`
       );
     });
@@ -94,7 +106,7 @@ describe('AdLicenseValidator', function () {
         adLicenseValidatorInstance.connect(nonAdmin).setAdMintCost(C.adMintCost)
       ).to.be.revertedWith(
         `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.DEFAULT_ADMIN_ROLE
+          C.ADMIN_ROLE
         }`
       );
     });

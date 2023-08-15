@@ -1,19 +1,40 @@
 import { ethers } from 'hardhat';
 
-export const DEFAULT_ADMIN_ROLE =
-  '0x0000000000000000000000000000000000000000000000000000000000000000';
-export const ADMIN_ROLE = ethers.utils.keccak256(
-  ethers.utils.toUtf8Bytes('ADMIN_ROLE')
-);
-export const MINTER_ROLE = ethers.utils.keccak256(
-  ethers.utils.toUtf8Bytes('MINTER_ROLE')
-);
-export const TRANSFERER_ROLE = ethers.utils.keccak256(
-  ethers.utils.toUtf8Bytes('TRANSFERER_ROLE')
-);
-export const BURNER_ROLE = ethers.utils.keccak256(
-  ethers.utils.toUtf8Bytes('BURNER_ROLE')
-);
+const _hashRole = (role: string) =>
+  ethers.utils.keccak256(ethers.utils.toUtf8Bytes(role));
+
+export const roles = {
+  DEFAULT_ADMIN_ROLE:
+    '0x0000000000000000000000000000000000000000000000000000000000000000',
+  ADMIN_ROLE: _hashRole('ADMIN_ROLE'),
+  modules: {
+    CLAIM_AD_ROLE: _hashRole('CLAIM_AD_ROLE'),
+    PAIR_AD_ROLE: _hashRole('PAIR_AD_ROLE'),
+    UNPAIR_AD_ROLE: _hashRole('UNPAIR_AD_ROLE'),
+    SET_AD_INFO_ROLE: _hashRole('SET_AD_INFO_ROLE'),
+    MINT_INTEGRATION_ROLE: _hashRole('MINT_INTEGRATION_ROLE'),
+    SET_INTEGRATION_INFO_ROLE: _hashRole('SET_INTEGRATION_INFO_ROLE'),
+    MINT_MANUFACTURER_ROLE: _hashRole('MINT_MANUFACTURER_ROLE'),
+    SET_MANUFACTURER_INFO_ROLE: _hashRole('SET_MANUFACTURER_INFO_ROLE'),
+    MINT_SD_ROLE: _hashRole('MINT_SD_ROLE'),
+    BURN_SD_ROLE: _hashRole('BURN_SD_ROLE'),
+    SET_SD_INFO_ROLE: _hashRole('SET_SD_INFO_ROLE'),
+    MINT_VEHICLE_ROLE: _hashRole('MINT_VEHICLE_ROLE'),
+    BURN_VEHICLE_ROLE: _hashRole('BURN_VEHICLE_ROLE'),
+    SET_VEHICLE_INFO_ROLE: _hashRole('SET_VEHICLE_INFO_ROLE'),
+    MINT_VEHICLE_SD_ROLE: _hashRole('MINT_VEHICLE_SD_ROLE'),
+    DEV_AD_TRANSFER_ROLE: _hashRole('DEV_AD_TRANSFER_ROLE'),
+    DEV_AD_UNCLAIM_ROLE: _hashRole('DEV_AD_UNCLAIM_ROLE'),
+    DEV_AD_UNPAIR_ROLE: _hashRole('DEV_AD_UNPAIR_ROLE'),
+    DEV_RENAME_MANUFACTURERS_ROLE: _hashRole('DEV_RENAME_MANUFACTURERS_ROLE'),
+    DEV_VEHICLE_BURN_ROLE: _hashRole('DEV_VEHICLE_BURN_ROLE')
+  },
+  nfts: {
+    MINTER_ROLE: _hashRole('MINTER_ROLE'),
+    TRANSFERER_ROLE: _hashRole('TRANSFERER_ROLE'),
+    BURNER_ROLE: _hashRole('BURNER_ROLE')
+  }
+};
 
 export const dimoRegistryName = 'DIMORegistry';
 

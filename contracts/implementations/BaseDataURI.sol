@@ -20,7 +20,7 @@ contract BaseDataURI is AccessControlInternal {
     function setBaseDataURI(
         address idProxyAddress,
         string calldata _baseDataURI
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(ADMIN_ROLE) {
         BaseDataURIStorage.getStorage().baseDataURIs[
             idProxyAddress
         ] = _baseDataURI;

@@ -12,7 +12,7 @@ import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 
-import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
+import {ADMIN_ROLE, MINT_SD_ROLE, BURN_SD_ROLE, SET_SD_INFO_ROLE} from "../../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
@@ -55,7 +55,7 @@ contract SyntheticDevice is
      */
     function setSyntheticDeviceIdProxyAddress(address addr)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         if (addr == address(0)) revert ZeroAddress();
         SyntheticDeviceStorage.getStorage().idProxyAddress = addr;
@@ -70,7 +70,7 @@ contract SyntheticDevice is
      */
     function addSyntheticDeviceAttribute(string calldata attribute)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         if (
             !AttributeSet.add(
@@ -98,7 +98,7 @@ contract SyntheticDevice is
     function mintSyntheticDeviceBatch(
         uint256 integrationNode,
         MintSyntheticDeviceBatchInput[] calldata data
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(MINT_SD_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
@@ -169,7 +169,7 @@ contract SyntheticDevice is
      */
     function mintSyntheticDeviceSign(MintSyntheticDeviceInput calldata data)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(MINT_SD_ROLE)
     {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
@@ -254,7 +254,7 @@ contract SyntheticDevice is
         uint256 vehicleNode,
         uint256 syntheticDeviceNode,
         bytes calldata ownerSig
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(BURN_SD_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
@@ -313,7 +313,7 @@ contract SyntheticDevice is
     function setSyntheticDeviceInfo(
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(SET_SD_INFO_ROLE) {
         address sdIdProxy = SyntheticDeviceStorage.getStorage().idProxyAddress;
         if (!INFT(sdIdProxy).exists(tokenId))
             revert InvalidNode(sdIdProxy, tokenId);

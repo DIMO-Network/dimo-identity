@@ -5,7 +5,7 @@ import "../../interfaces/INFT.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 
-import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
+import {ADMIN_ROLE, MINT_MANUFACTURER_ROLE, SET_MANUFACTURER_INFO_ROLE} from "../../shared/Roles.sol";
 import {AttributeInfoPair} from "../../shared/Types.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
@@ -38,7 +38,7 @@ contract Manufacturer is AccessControlInternal {
     /// @param addr The address of the proxy
     function setManufacturerIdProxyAddress(address addr)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         require(addr != address(0), "Non zero address");
         ManufacturerStorage.getStorage().idProxyAddress = addr;
@@ -51,7 +51,7 @@ contract Manufacturer is AccessControlInternal {
     /// @param attribute The attribute to be added
     function addManufacturerAttribute(string calldata attribute)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         require(
             AttributeSet.add(
@@ -67,10 +67,7 @@ contract Manufacturer is AccessControlInternal {
     /// @notice Sets a address controller
     /// @dev Only an admin can set new controllers
     /// @param _controller The address of the controller
-    function setController(address _controller)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setController(address _controller) external onlyRole(ADMIN_ROLE) {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         require(_controller != address(0), "Non zero address");
@@ -93,9 +90,9 @@ contract Manufacturer is AccessControlInternal {
     /// @param names List of manufacturer names
     function mintManufacturerBatch(address owner, string[] calldata names)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(MINT_MANUFACTURER_ROLE)
     {
-        require(_hasRole(DEFAULT_ADMIN_ROLE, owner), "Owner must be an admin");
+        require(_hasRole(ADMIN_ROLE, owner), "Owner must be an admin");
 
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
@@ -119,16 +116,18 @@ contract Manufacturer is AccessControlInternal {
         }
     }
 
-    /// @notice Mints a manufacturer
-    /// @dev Caller must be an admin
-    /// @param owner The address of the new owner
-    /// @param name Name of the manufacturer
-    /// @param attrInfoPairList List of attribute-info pairs to be added
+    /**
+     * @notice Mints a manufacturer
+     * @dev Caller must be an admin
+     * @param owner The address of the new owner
+     * @param name Name of the manufacturer
+     * @param attrInfoPairList List of attribute-info pairs to be added
+     */
     function mintManufacturer(
         address owner,
         string calldata name,
         AttributeInfoPair[] calldata attrInfoPairList
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(MINT_MANUFACTURER_ROLE) {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         require(!s.controllers[owner].manufacturerMinted, "Invalid request");
@@ -160,7 +159,7 @@ contract Manufacturer is AccessControlInternal {
     function setManufacturerInfo(
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfoList
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(SET_MANUFACTURER_INFO_ROLE) {
         require(
             INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
                 tokenId

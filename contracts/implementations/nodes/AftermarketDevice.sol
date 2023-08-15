@@ -89,7 +89,7 @@ contract AftermarketDevice is
      */
     function setAftermarketDeviceIdProxyAddress(address addr)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.ADMIN_ROLE)
     {
         if (addr == address(0)) revert Errors.ZeroAddress();
         AftermarketDeviceStorage.getStorage().idProxyAddress = addr;
@@ -104,7 +104,7 @@ contract AftermarketDevice is
      */
     function addAftermarketDeviceAttribute(string calldata attribute)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.ADMIN_ROLE)
     {
         if (
             !AttributeSet.add(
@@ -204,7 +204,7 @@ contract AftermarketDevice is
         );
 
         if (
-            !_hasRole(Roles.DEFAULT_ADMIN_ROLE, msg.sender) &&
+            !_hasRole(Roles.ADMIN_ROLE, msg.sender) &&
             !manufacturerIdProxy.hasPrivilege(
                 manufacturerNode,
                 MANUFACTURER_CLAIMER_PRIVILEGE,
@@ -251,7 +251,7 @@ contract AftermarketDevice is
         address owner,
         bytes calldata ownerSig,
         bytes calldata aftermarketDeviceSig
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.CLAIM_AD_ROLE) {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         bytes32 message = keccak256(
@@ -300,7 +300,7 @@ contract AftermarketDevice is
         uint256 vehicleNode,
         bytes calldata aftermarketDeviceSig,
         bytes calldata vehicleOwnerSig
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.PAIR_AD_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
@@ -365,7 +365,7 @@ contract AftermarketDevice is
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         bytes calldata signature
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.PAIR_AD_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
@@ -464,7 +464,7 @@ contract AftermarketDevice is
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         bytes calldata signature
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.UNPAIR_AD_ROLE) {
         bytes32 message = keccak256(
             abi.encode(UNPAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
         );
@@ -514,7 +514,7 @@ contract AftermarketDevice is
     function setAftermarketDeviceInfo(
         uint256 tokenId,
         Types.AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.SET_AD_INFO_ROLE) {
         address adIdProxy = AftermarketDeviceStorage
             .getStorage()
             .idProxyAddress;

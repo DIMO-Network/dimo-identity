@@ -36,8 +36,6 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => uint256))))
         public privilegeEntry;
 
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();

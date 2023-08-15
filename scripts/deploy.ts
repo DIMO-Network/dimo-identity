@@ -530,17 +530,17 @@ async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {
     );
 
     console.log(
-      `\n----- Granting ${C.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the ${contractName} contract -----`
+      `\n----- Granting ${C.roles.nfts.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the ${contractName} contract -----`
     );
 
     await (
       await contractInstance
         .connect(deployer)
-        .grantRole(C.MINTER_ROLE, dimoRegistryAddress)
+        .grantRole(C.roles.nfts.MINTER_ROLE, dimoRegistryAddress)
     ).wait();
 
     console.log(
-      `----- ${C.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the ${contractName} contract -----\n`
+      `----- ${C.roles.nfts.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the ${contractName} contract -----\n`
     );
   }
 
@@ -551,17 +551,17 @@ async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {
     );
 
   console.log(
-    `\n----- Granting ${C.TRANSFERER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----`
+    `\n----- Granting ${C.roles.nfts.TRANSFERER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----`
   );
 
   await (
     await aftermarketDeviceIdInstance
       .connect(deployer)
-      .grantRole(C.TRANSFERER_ROLE, dimoRegistryAddress)
+      .grantRole(C.roles.nfts.TRANSFERER_ROLE, dimoRegistryAddress)
   ).wait();
 
   console.log(
-    `----- ${C.TRANSFERER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----\n`
+    `----- ${C.roles.nfts.TRANSFERER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----\n`
   );
 
   const syntheticDeviceIdInstance: SyntheticDeviceId =
@@ -571,17 +571,17 @@ async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {
     );
 
   console.log(
-    `\n----- Granting ${C.BURNER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----`
+    `\n----- Granting ${C.roles.nfts.BURNER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----`
   );
 
   await (
     await syntheticDeviceIdInstance
       .connect(deployer)
-      .grantRole(C.BURNER_ROLE, dimoRegistryAddress)
+      .grantRole(C.roles.nfts.BURNER_ROLE, dimoRegistryAddress)
   ).wait();
 
   console.log(
-    `----- ${C.BURNER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----\n`
+    `----- ${C.roles.nfts.BURNER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----\n`
   );
 }
 
@@ -735,19 +735,38 @@ async function main() {
 
   const instances = getAddresses();
 
-  await setupRegistry(deployer, networkName);
+  await grantRole(deployer, C.roles.ADMIN_ROLE, deployer.address, networkName);
   await grantRole(
     deployer,
-    C.DEFAULT_ADMIN_ROLE,
+    C.roles.modules.MINT_MANUFACTURER_ROLE,
+    deployer.address,
+    networkName
+  );
+  await grantRole(
+    deployer,
+    C.roles.modules.MINT_INTEGRATION_ROLE,
+    deployer.address,
+    networkName
+  );
+  await grantRole(
+    deployer,
+    C.roles.DEFAULT_ADMIN_ROLE,
     instances[networkName].misc.Kms,
     networkName
   );
   await grantRole(
     deployer,
-    C.DEFAULT_ADMIN_ROLE,
+    C.roles.DEFAULT_ADMIN_ROLE,
     instances[networkName].misc.Foundation,
     networkName
   );
+  await grantRole(
+    deployer,
+    C.roles.ADMIN_ROLE,
+    instances[networkName].misc.Foundation,
+    networkName
+  );
+  await setupRegistry(deployer, networkName);
   await grantNftRoles(deployer, networkName);
   await mintBatchManufacturers(
     deployer,

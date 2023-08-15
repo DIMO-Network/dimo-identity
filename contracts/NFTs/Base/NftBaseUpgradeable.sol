@@ -21,6 +21,7 @@ abstract contract NftBaseUpgradeable is
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -34,7 +35,7 @@ abstract contract NftBaseUpgradeable is
     function setBaseURI(string calldata baseURI_)
         external
         virtual
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         baseURI = baseURI_;
     }

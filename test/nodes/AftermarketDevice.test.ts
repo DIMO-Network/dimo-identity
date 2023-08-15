@@ -4,6 +4,7 @@ import { ethers, waffle } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
+  DimoAccessControl,
   Nodes,
   Manufacturer,
   ManufacturerId,
@@ -19,6 +20,7 @@ import {
 import {
   initialize,
   setup,
+  grantAdminRoles,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -33,6 +35,7 @@ describe('AftermarketDevice', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
@@ -95,6 +98,7 @@ describe('AftermarketDevice', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
     vehicleInstance = deployments.Vehicle;
@@ -105,20 +109,17 @@ describe('AftermarketDevice', function () {
     vehicleIdInstance = deployments.VehicleId;
     adIdInstance = deployments.AftermarketDeviceId;
 
-    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
+    await grantAdminRoles(admin, dimoAccessControlInstance);
+
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const VEHICLE_MINTER_ROLE = await vehicleIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const AD_MINTER_ROLE = await adIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await adIdInstance
       .connect(admin)
-      .grantRole(AD_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -258,8 +259,18 @@ describe('AftermarketDevice', function () {
   describe('setAftermarketDeviceIdProxyAddress', () => {
     let localAdInstance: AftermarketDevice;
     beforeEach(async () => {
-      const deployments = await initialize(admin, 'AftermarketDevice');
+      const deployments = await initialize(
+        admin,
+        'DimoAccessControl',
+        'AftermarketDevice'
+      );
+
+      const localDimoAccessControlInstance = deployments.DimoAccessControl;
       localAdInstance = deployments.AftermarketDevice;
+
+      await localDimoAccessControlInstance
+        .connect(admin)
+        .grantRole(C.ADMIN_ROLE, admin.address);
     });
 
     context('Error handling', () => {
@@ -270,7 +281,7 @@ describe('AftermarketDevice', function () {
             .setAftermarketDeviceIdProxyAddress(adIdInstance.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -305,7 +316,7 @@ describe('AftermarketDevice', function () {
             .addAftermarketDeviceAttribute(C.mockAftermarketDeviceAttribute1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -1214,14 +1225,14 @@ describe('AftermarketDevice', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have CLAIM_AD_ROLE', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
             .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.CLAIM_AD_ROLE
           }`
         );
       });
@@ -1600,7 +1611,7 @@ describe('AftermarketDevice', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have PAIR_AD_ROLE', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
@@ -1612,7 +1623,7 @@ describe('AftermarketDevice', function () {
             )
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.PAIR_AD_ROLE
           }`
         );
       });
@@ -2061,7 +2072,7 @@ describe('AftermarketDevice', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have PAIR_AD_ROLE', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
@@ -2072,7 +2083,7 @@ describe('AftermarketDevice', function () {
             )
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.PAIR_AD_ROLE
           }`
         );
       });
@@ -2748,14 +2759,14 @@ describe('AftermarketDevice', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have UNPAIR_AD_ROLE', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
             .unpairAftermarketDeviceSign(1, 1, unPairSignature)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.UNPAIR_AD_ROLE
           }`
         );
       });
@@ -3022,14 +3033,14 @@ describe('AftermarketDevice', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have SET_AD_INFO_ROLE', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(nonAdmin)
             .setAftermarketDeviceInfo(1, C.mockAdAttributeInfoPairs)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.SET_AD_INFO_ROLE
           }`
         );
       });

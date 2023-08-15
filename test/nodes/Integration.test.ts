@@ -3,6 +3,7 @@ import { waffle } from 'hardhat';
 
 import {
   DIMORegistry,
+  DimoAccessControl,
   Nodes,
   Integration,
   IntegrationId
@@ -10,6 +11,7 @@ import {
 import {
   initialize,
   setup,
+  grantAdminRoles,
   createSnapshot,
   revertToSnapshot,
   C
@@ -21,6 +23,7 @@ const provider = waffle.provider;
 describe('Integration', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
+  let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let integrationInstance: Integration;
   let integrationIdInstance: IntegrationId;
@@ -30,20 +33,22 @@ describe('Integration', async function () {
 
   before(async () => {
     const deployments = await setup(admin, {
-      modules: ['Nodes', 'Integration'],
+      modules: ['DimoAccessControl', 'Nodes', 'Integration'],
       nfts: ['IntegrationId'],
       upgradeableContracts: []
     });
 
     dimoRegistryInstance = deployments.DIMORegistry;
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     integrationInstance = deployments.Integration;
     integrationIdInstance = deployments.IntegrationId;
 
-    const MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
+    await grantAdminRoles(admin, dimoAccessControlInstance);
+
     await integrationIdInstance
       .connect(admin)
-      .grantRole(MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxy
     await integrationInstance
@@ -70,8 +75,18 @@ describe('Integration', async function () {
   describe('setIntegrationIdProxyAddress', () => {
     let localIntegrationInstance: Integration;
     beforeEach(async () => {
-      const deployments = await initialize(admin, 'Integration');
+      const deployments = await initialize(
+        admin,
+        'DimoAccessControl',
+        'Integration'
+      );
+
+      const localDimoAccessControlInstance = deployments.DimoAccessControl;
       localIntegrationInstance = deployments.Integration;
+
+      await localDimoAccessControlInstance
+        .connect(admin)
+        .grantRole(C.ADMIN_ROLE, admin.address);
     });
 
     context('Error handling', () => {
@@ -82,7 +97,7 @@ describe('Integration', async function () {
             .setIntegrationIdProxyAddress(integrationIdInstance.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -117,7 +132,7 @@ describe('Integration', async function () {
             .addIntegrationAttribute(C.mockIntegrationAttribute1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -154,7 +169,7 @@ describe('Integration', async function () {
             .setIntegrationController(integrationOwner1.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -195,14 +210,14 @@ describe('Integration', async function () {
 
   describe('mintIntegrationBatch', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have MINT_INTEGRATION_ROLE', async () => {
         await expect(
           integrationInstance
             .connect(nonAdmin)
             .mintIntegrationBatch(nonAdmin.address, C.mockIntegrationNames)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.MINT_INTEGRATION_ROLE
           }`
         );
       });
@@ -309,7 +324,7 @@ describe('Integration', async function () {
 
   describe('mintIntegration', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have MINT_INTEGRATION_ROLE', async () => {
         await expect(
           integrationInstance
             .connect(nonAdmin)
@@ -320,7 +335,7 @@ describe('Integration', async function () {
             )
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.MINT_INTEGRATION_ROLE
           }`
         );
       });
@@ -572,14 +587,14 @@ describe('Integration', async function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have SET_INTEGRATION_INFO_ROLE', async () => {
         await expect(
           integrationInstance
             .connect(nonAdmin)
             .setIntegrationInfo(1, C.mockIntegrationAttributeInfoPairs)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.SET_INTEGRATION_INFO_ROLE
           }`
         );
       });

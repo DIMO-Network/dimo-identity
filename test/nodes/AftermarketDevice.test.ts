@@ -2122,7 +2122,7 @@ describe('AftermarketDevice', function () {
               2,
               pairSignature
             )
-        ).to.be.revertedWith('OwnersDoesNotMatch');
+        ).to.be.revertedWith('OwnersDoNotMatch');
       });
       it('Should revert if owner is not the aftermarket device node owner', async () => {
         await aftermarketDeviceInstance
@@ -2142,7 +2142,7 @@ describe('AftermarketDevice', function () {
               1,
               pairSignature
             )
-        ).to.be.revertedWith('OwnersDoesNotMatch');
+        ).to.be.revertedWith('OwnersDoNotMatch');
       });
       it('Should revert if vehicle is already paired', async () => {
         await aftermarketDeviceInstance

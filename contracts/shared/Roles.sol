@@ -3,3 +3,4 @@ pragma solidity ^0.8.13;
 
 bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
 bytes32 constant MINTER_ROLE = keccak256("Minter");
+bytes32 constant DEV_AD_PAIR_ROLE = keccak256("DEV_AD_PAIR_ROLE");

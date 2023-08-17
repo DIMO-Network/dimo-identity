@@ -23,7 +23,7 @@ error InvalidAdSignature();
 error AdNotClaimed(uint256 id);
 error AdPaired(uint256 id);
 error AdNotPaired(uint256 id);
-error OwnersDoesNotMatch();
+error OwnersDoNotMatch();
 
 /**
  * @title AftermarketDevice
@@ -390,7 +390,7 @@ contract AftermarketDevice is
             ]
         ) revert AdNotClaimed(aftermarketDeviceNode);
         if (owner != INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode))
-            revert OwnersDoesNotMatch();
+            revert OwnersDoNotMatch();
         if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
             revert Errors.VehiclePaired(vehicleNode);
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)

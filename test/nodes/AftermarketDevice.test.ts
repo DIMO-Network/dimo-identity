@@ -380,20 +380,6 @@ describe('AftermarketDevice', function () {
               )
           ).to.be.revertedWith(`Unauthorized("${manufacturer2.address}")`);
         });
-        it('Should revert if DIMO Registry is not approved for all', async () => {
-          await adIdInstance
-            .connect(manufacturer1)
-            .setApprovalForAll(aftermarketDeviceInstance.address, false);
-
-          await expect(
-            aftermarketDeviceInstance
-              .connect(manufacturer1)
-              .mintAftermarketDeviceByManufacturerBatch(
-                1,
-                mockAftermarketDeviceInfosList
-              )
-          ).to.be.revertedWith('RegistryNotApproved');
-        });
         it('Should revert if manufacturer does not have a license', async () => {
           await mockStakeInstance.setLicenseBalance(manufacturer1.address, 0);
 
@@ -646,12 +632,6 @@ describe('AftermarketDevice', function () {
     });
 
     context('Privileged address as minter', () => {
-      beforeEach(async () => {
-        await adIdInstance
-          .connect(manufacturerPrivileged1)
-          .setApprovalForAll(aftermarketDeviceInstance.address, true);
-      });
-
       context('Error handling', () => {
         it('Should revert if parent node is not a Manufacturer', async () => {
           await expect(
@@ -662,20 +642,6 @@ describe('AftermarketDevice', function () {
                 mockAftermarketDeviceInfosList
               )
           ).to.be.revertedWith('InvalidParentNode(99)');
-        });
-        it('Should revert if DIMO Registry is not approved for all', async () => {
-          await adIdInstance
-            .connect(manufacturerPrivileged1)
-            .setApprovalForAll(aftermarketDeviceInstance.address, false);
-
-          await expect(
-            aftermarketDeviceInstance
-              .connect(manufacturerPrivileged1)
-              .mintAftermarketDeviceByManufacturerBatch(
-                1,
-                mockAftermarketDeviceInfosList
-              )
-          ).to.be.revertedWith('RegistryNotApproved');
         });
         it('Should revert if the caller does not have the minter privilege', async () => {
           await adIdInstance

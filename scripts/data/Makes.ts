@@ -138,5 +138,6 @@ export const makes = [
   'AutoPi',
   'DAF',
   'HINO',
-  'Scania'
+  'Scania',
+  'International'
 ];

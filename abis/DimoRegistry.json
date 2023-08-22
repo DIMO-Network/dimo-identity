@@ -1409,6 +1409,12 @@
         "inputs": [
             {
                 "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"

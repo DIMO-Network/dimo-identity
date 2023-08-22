@@ -1,8 +1,10 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-/// @title INFT
-/// @notice Interface of a generic NFT
+/**
+ * @title INFT
+ * @notice Interface of a generic NFT
+ */
 interface INFT {
     function safeMint(address to) external returns (uint256);
 

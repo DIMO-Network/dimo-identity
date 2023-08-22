@@ -17,8 +17,10 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 error AdNotClaimed(uint256 id);
 error AdPaired(uint256 id);
 
-/// @title DevAdmin
-/// @dev Admin module for development and testing
+/**
+ * @title DevAdmin
+ * @dev Admin module for development and testing
+ */
 contract DevAdmin is AccessControlInternal {
     event AftermarketDeviceUnclaimedDevAdmin(
         uint256 indexed aftermarketDeviceNode
@@ -63,10 +65,12 @@ contract DevAdmin is AccessControlInternal {
         string name;
     }
 
-    /// @dev Transfers the ownership of an afermarket device
-    /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNode Aftermarket device node id
-    /// @param newOwner The address of the new owner
+    /**
+     * @dev Transfers the ownership of an afermarket device
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param newOwner The address of the new owner
+     */
     function transferAftermarketDeviceOwnership(
         uint256 aftermarketDeviceNode,
         address newOwner
@@ -87,9 +91,11 @@ contract DevAdmin is AccessControlInternal {
         );
     }
 
-    /// @dev Sets deviceClaimed to false for each aftermarket device
-    /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNodes Array of aftermarket device node ids
+    /**
+     * @dev Sets deviceClaimed to false for each aftermarket device
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNodes Array of aftermarket device node ids
+     */
     function unclaimAftermarketDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -112,9 +118,11 @@ contract DevAdmin is AccessControlInternal {
         }
     }
 
-    /// @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
-    /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNodes Array of aftermarket device node ids
+    /**
+     * @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNodes Array of aftermarket device node ids
+     */
     function unpairAftermarketDeviceByDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -150,9 +158,11 @@ contract DevAdmin is AccessControlInternal {
         }
     }
 
-    /// @dev Unpairs a list of aftermarket devices from their respective vehicles by the vehicle node ids
-    /// @dev Caller must have the admin role
-    /// @param vehicleNodes Array of vehicle node id
+    /**
+     * @dev Unpairs a list of aftermarket devices from their respective vehicles by the vehicle node ids
+     * @dev Caller must have the admin role
+     * @param vehicleNodes Array of vehicle node id
+     */
     function unpairAftermarketDeviceByVehicleNode(
         uint256[] calldata vehicleNodes
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -188,8 +198,10 @@ contract DevAdmin is AccessControlInternal {
         }
     }
 
-    /// @notice Renames manufacturer name
-    /// @param idManufacturerNames pairs token id to manufactures to be renamed
+    /**
+     * @notice Renames manufacturer name
+     * @param idManufacturerNames pairs token id to manufactures to be renamed
+     */
     function renameManufacturers(
         IdManufacturerName[] calldata idManufacturerNames
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {

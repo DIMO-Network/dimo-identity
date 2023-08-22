@@ -3,8 +3,10 @@ pragma solidity ^0.8.13;
 
 import "../AttributeSet.sol";
 
-/// @title IntegrationStorage
-/// @notice Storage of the Integration contract
+/**
+ * @title IntegrationStorage
+ * @notice Storage of the Integration contract
+ */
 library IntegrationStorage {
     using AttributeSet for AttributeSet.Set;
 

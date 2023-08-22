@@ -6,8 +6,10 @@ import "../libraries/BaseDataURIStorage.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
-/// @title Nodes
-/// @notice Contract to store data related to the nodes
+/**
+ * @title Nodes
+ * @notice Contract to store data related to the nodes
+ */
 contract Nodes {
     using StringsUpgradeable for uint256;
 

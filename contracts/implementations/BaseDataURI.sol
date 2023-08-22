@@ -6,8 +6,10 @@ import "../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/// @title BaseDataURI
-/// @notice Contract to store data URI related to the nodes
+/**
+ * @title BaseDataURI
+ * @notice Contract to store data URI related to the nodes
+ */
 contract BaseDataURI is AccessControlInternal {
     event BaseDataURISet(address idProxyAddress, string dataUri);
 

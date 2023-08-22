@@ -3117,4 +3117,83 @@ describe('AftermarketDevice', function () {
       expect(tokenId).to.equal(1);
     });
   });
+
+  describe('getAftermarketDeviceAddressById', () => {
+    beforeEach(async () => {
+      await adIdInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList
+        );
+    });
+
+    it('Should return 0x00 address if the queried node ID is not associated with any minted device', async () => {
+      const address =
+        await aftermarketDeviceInstance.getAftermarketDeviceAddressById(99);
+
+      expect(address).to.equal(C.ZERO_ADDRESS);
+    });
+    it('Should return the correct token Id', async () => {
+      const address =
+        await aftermarketDeviceInstance.getAftermarketDeviceAddressById(1);
+
+      expect(address).to.equal(adAddress1.address);
+    });
+  });
+
+  describe('isAftermarketDeviceClaimed', () => {
+    beforeEach(async () => {
+      await adIdInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList
+        );
+    });
+
+    it('Should return false if the queried AD is not claimed', async () => {
+      const isClaimed =
+        await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(isClaimed).to.be.false;
+    });
+    it('Should return true if the queried AD is claimed', async () => {
+      const ownerSig = await signMessage({
+        _signer: user1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+      const adSig = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: aftermarketDeviceInstance.address,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address
+        }
+      });
+
+      await aftermarketDeviceInstance
+        .connect(admin)
+        .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
+
+      const isClaimed =
+        await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1);
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(isClaimed).to.be.true;
+    });
+  });
 });

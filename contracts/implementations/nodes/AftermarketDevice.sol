@@ -520,9 +520,11 @@ contract AftermarketDevice is
         _setInfos(tokenId, attrInfo);
     }
 
-    /// @notice Gets the AD Id by the device address
-    /// @dev If the device is not minted it will return 0
-    /// @param addr Address associated with the aftermarket device
+    /**
+     * @notice Gets the AD Id by the device address
+     * @dev If the device is not minted it will return 0
+     * @param addr Address associated with the aftermarket device
+     */
     function getAftermarketDeviceIdByAddress(address addr)
         external
         view
@@ -531,6 +533,33 @@ contract AftermarketDevice is
         nodeId = AftermarketDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
         ];
+    }
+
+    /**
+     * @notice Gets the AD address by the node ID
+     * @dev If the device is not minted it will return 0x00 address
+     * @param nodeId Node ID associated with the aftermarket device
+     */
+    function getAftermarketDeviceAddressById(uint256 nodeId)
+        external
+        view
+        returns (address addr)
+    {
+        addr = AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
+            nodeId
+        ];
+    }
+
+    /**
+     * @notice Checks if an AD has been already claimed or not
+     * @param nodeId Node ID associated with the aftermarket device
+     */
+    function isAftermarketDeviceClaimed(uint256 nodeId)
+        external
+        view
+        returns (bool isClaimed)
+    {
+        isClaimed = AftermarketDeviceStorage.getStorage().deviceClaimed[nodeId];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //

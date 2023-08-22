@@ -1109,6 +1109,25 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "nodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getAftermarketDeviceAddressById",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address",
                 "name": "addr",
                 "type": "address"
@@ -1120,6 +1139,25 @@
                 "internalType": "uint256",
                 "name": "nodeId",
                 "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "nodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "isAftermarketDeviceClaimed",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "isClaimed",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",

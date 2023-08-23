@@ -196,7 +196,7 @@
                 ]
             },
             "Manufacturer": {
-                "address": "0x54E27D28A7518651979fC3010B79A42676C4D44C",
+                "address": "0xb460b7e39F8571Fe897C32C8174Fe3D5bC835b6f",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
@@ -242,12 +242,14 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x86b10DB61C0deC9A3e8FBF3dC7b1ae8c33b74B3c",
+                "address": "0x4Dd3A7F05541bEe8770a414e8C65e002199b931C",
                 "selectors": [
                     "0x6111afa3",
                     "0x60deec60",
                     "0x89a841bb",
+                    "0x682a25e3",
                     "0x9796cf22",
+                    "0xc6b36f2a",
                     "0x7ba79a39",
                     "0xb50df2f7",
                     "0xcfe642dd",

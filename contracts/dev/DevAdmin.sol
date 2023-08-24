@@ -14,8 +14,13 @@ import "../shared/Errors.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-/// @title DevAdmin
-/// @dev Admin module for development and testing
+error AdNotClaimed(uint256 id);
+error AdPaired(uint256 id);
+
+/**
+ * @title DevAdmin
+ * @dev Admin module for development and testing
+ */
 contract DevAdmin is AccessControlInternal {
     event AftermarketDeviceUnclaimedDevAdmin(
         uint256 indexed aftermarketDeviceNode
@@ -49,16 +54,23 @@ contract DevAdmin is AccessControlInternal {
         string attribute,
         string info
     );
+    event AftermarketDevicePaired(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
+        address indexed owner
+    );
 
     struct IdManufacturerName {
         uint256 tokenId;
         string name;
     }
 
-    /// @dev Transfers the ownership of an afermarket device
-    /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNode Aftermarket device node id
-    /// @param newOwner The address of the new owner
+    /**
+     * @dev Transfers the ownership of an afermarket device
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param newOwner The address of the new owner
+     */
     function transferAftermarketDeviceOwnership(
         uint256 aftermarketDeviceNode,
         address newOwner
@@ -79,9 +91,11 @@ contract DevAdmin is AccessControlInternal {
         );
     }
 
-    /// @dev Sets deviceClaimed to false for each aftermarket device
-    /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNodes Array of aftermarket device node ids
+    /**
+     * @dev Sets deviceClaimed to false for each aftermarket device
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNodes Array of aftermarket device node ids
+     */
     function unclaimAftermarketDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
     ) external onlyRole(DEV_AD_UNCLAIM_ROLE) {
@@ -104,9 +118,11 @@ contract DevAdmin is AccessControlInternal {
         }
     }
 
-    /// @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
-    /// @dev Caller must have the admin role
-    /// @param aftermarketDeviceNodes Array of aftermarket device node ids
+    /**
+     * @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNodes Array of aftermarket device node ids
+     */
     function unpairAftermarketDeviceByDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
     ) external onlyRole(DEV_AD_UNPAIR_ROLE) {
@@ -142,9 +158,11 @@ contract DevAdmin is AccessControlInternal {
         }
     }
 
-    /// @dev Unpairs a list of aftermarket devices from their respective vehicles by the vehicle node ids
-    /// @dev Caller must have the admin role
-    /// @param vehicleNodes Array of vehicle node id
+    /**
+     * @dev Unpairs a list of aftermarket devices from their respective vehicles by the vehicle node ids
+     * @dev Caller must have the admin role
+     * @param vehicleNodes Array of vehicle node id
+     */
     function unpairAftermarketDeviceByVehicleNode(
         uint256[] calldata vehicleNodes
     ) external onlyRole(DEV_AD_UNPAIR_ROLE) {
@@ -180,8 +198,10 @@ contract DevAdmin is AccessControlInternal {
         }
     }
 
-    /// @notice Renames manufacturer name
-    /// @param idManufacturerNames pairs token id to manufactures to be renamed
+    /**
+     * @notice Renames manufacturer name
+     * @param idManufacturerNames pairs token id to manufactures to be renamed
+     */
     function renameManufacturers(
         IdManufacturerName[] calldata idManufacturerNames
     ) external onlyRole(DEV_RENAME_MANUFACTURERS_ROLE) {
@@ -343,6 +363,49 @@ contract DevAdmin is AccessControlInternal {
 
             _resetVehicleInfos(tokenId);
         }
+    }
+
+    /**
+     * @notice Admin function to pair an aftermarket device with a vehicle
+     * @dev Caller must have the DEV_AD_PAIR role
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
+     */
+    function adminPairAftermarketDevice(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode
+    ) external onlyRole(DEV_AD_PAIR_ROLE) {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (
+            !AftermarketDeviceStorage.getStorage().deviceClaimed[
+                aftermarketDeviceNode
+            ]
+        ) revert AdNotClaimed(aftermarketDeviceNode);
+
+        if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
+            revert VehiclePaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
+            revert AdPaired(aftermarketDeviceNode);
+
+        ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
+
+        emit AftermarketDevicePaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
+        );
     }
 
     /**

@@ -224,6 +224,28 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "AdNotClaimed",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "AdPaired",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address",
                 "name": "proxy",
                 "type": "address"
@@ -247,6 +269,31 @@
         ],
         "name": "VehiclePaired",
         "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "AftermarketDevicePaired",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -427,6 +474,24 @@
             }
         ],
         "name": "adminBurnVehiclesAndDeletePairings",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            }
+        ],
+        "name": "adminPairAftermarketDevice",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -734,29 +799,7 @@
                 "type": "uint256"
             }
         ],
-        "name": "AdNotClaimed",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-            }
-        ],
         "name": "AdNotPaired",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-            }
-        ],
-        "name": "AdPaired",
         "type": "error"
     },
     {
@@ -836,12 +879,7 @@
     },
     {
         "inputs": [],
-        "name": "OwnersDoesNotMatch",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "RegistryNotApproved",
+        "name": "OwnersDoNotMatch",
         "type": "error"
     },
     {
@@ -994,31 +1032,6 @@
                 "type": "address"
             }
         ],
-        "name": "AftermarketDevicePaired",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "aftermarketDeviceNode",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "vehicleNode",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            }
-        ],
         "name": "AftermarketDeviceUnpaired",
         "type": "event"
     },
@@ -1096,6 +1109,25 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "nodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getAftermarketDeviceAddressById",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address",
                 "name": "addr",
                 "type": "address"
@@ -1107,6 +1139,25 @@
                 "internalType": "uint256",
                 "name": "nodeId",
                 "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "nodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "isAftermarketDeviceClaimed",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "isClaimed",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",
@@ -1356,6 +1407,12 @@
     {
         "anonymous": false,
         "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
             {
                 "indexed": false,
                 "internalType": "uint256",

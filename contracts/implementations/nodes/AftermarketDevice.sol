@@ -16,14 +16,13 @@ import "../../shared/Errors.sol" as Errors;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-error RegistryNotApproved();
 error DeviceAlreadyRegistered(address addr);
 error DeviceAlreadyClaimed(uint256 id);
 error InvalidAdSignature();
 error AdNotClaimed(uint256 id);
 error AdPaired(uint256 id);
 error AdNotPaired(uint256 id);
-error OwnersDoesNotMatch();
+error OwnersDoNotMatch();
 
 /**
  * @title AftermarketDevice
@@ -141,8 +140,6 @@ contract AftermarketDevice is
             ManufacturerStorage.getStorage().idProxyAddress
         );
 
-        if (!INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)))
-            revert RegistryNotApproved();
         if (!manufacturerIdProxy.exists(manufacturerNode))
             revert Errors.InvalidParentNode(manufacturerNode);
         if (
@@ -390,7 +387,7 @@ contract AftermarketDevice is
             ]
         ) revert AdNotClaimed(aftermarketDeviceNode);
         if (owner != INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode))
-            revert OwnersDoesNotMatch();
+            revert OwnersDoNotMatch();
         if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
             revert Errors.VehiclePaired(vehicleNode);
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
@@ -523,9 +520,11 @@ contract AftermarketDevice is
         _setInfos(tokenId, attrInfo);
     }
 
-    /// @notice Gets the AD Id by the device address
-    /// @dev If the device is not minted it will return 0
-    /// @param addr Address associated with the aftermarket device
+    /**
+     * @notice Gets the AD Id by the device address
+     * @dev If the device is not minted it will return 0
+     * @param addr Address associated with the aftermarket device
+     */
     function getAftermarketDeviceIdByAddress(address addr)
         external
         view
@@ -534,6 +533,33 @@ contract AftermarketDevice is
         nodeId = AftermarketDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
         ];
+    }
+
+    /**
+     * @notice Gets the AD address by the node ID
+     * @dev If the device is not minted it will return 0x00 address
+     * @param nodeId Node ID associated with the aftermarket device
+     */
+    function getAftermarketDeviceAddressById(uint256 nodeId)
+        external
+        view
+        returns (address addr)
+    {
+        addr = AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
+            nodeId
+        ];
+    }
+
+    /**
+     * @notice Checks if an AD has been already claimed or not
+     * @param nodeId Node ID associated with the aftermarket device
+     */
+    function isAftermarketDeviceClaimed(uint256 nodeId)
+        external
+        view
+        returns (bool isClaimed)
+    {
+        isClaimed = AftermarketDeviceStorage.getStorage().deviceClaimed[nodeId];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //

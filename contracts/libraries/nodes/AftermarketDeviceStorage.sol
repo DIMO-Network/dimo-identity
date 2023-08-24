@@ -3,8 +3,10 @@ pragma solidity ^0.8.13;
 
 import "../AttributeSet.sol";
 
-/// @title AftermarketDeviceStorage
-/// @notice Storage of the AftermarketDevice contract
+/**
+ * @title AftermarketDeviceStorage
+ * @notice Storage of the AftermarketDevice contract
+ */
 library AftermarketDeviceStorage {
     using AttributeSet for AttributeSet.Set;
 

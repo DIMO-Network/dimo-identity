@@ -305,11 +305,11 @@ describe('Manufacturer', async function () {
             .mintManufacturerBatch(admin.address, C.mockManufacturerNames)
         )
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(1, admin.address)
+          .withArgs(C.mockManufacturerNames[0], 1, admin.address)
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(2, admin.address)
+          .withArgs(C.mockManufacturerNames[1], 2, admin.address)
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(3, admin.address);
+          .withArgs(C.mockManufacturerNames[2], 3, admin.address);
       });
     });
   });
@@ -512,7 +512,7 @@ describe('Manufacturer', async function () {
             )
         )
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(1, admin.address);
+          .withArgs(C.mockManufacturerNames[0], 1, admin.address);
       });
       it('Should emit ManufacturerAttributeSet events with correct params', async () => {
         await expect(

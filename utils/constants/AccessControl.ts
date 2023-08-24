@@ -82,3 +82,6 @@ export const DEV_RENAME_MANUFACTURERS_ROLE = ethers.utils.keccak256(
 export const DEV_VEHICLE_BURN_ROLE = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes('DEV_VEHICLE_BURN_ROLE')
 );
+export const DEV_AD_PAIR_ROLE = ethers.utils.keccak256(
+  ethers.utils.toUtf8Bytes('DEV_AD_PAIR_ROLE')
+);

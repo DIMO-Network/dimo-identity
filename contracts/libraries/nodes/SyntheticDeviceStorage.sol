@@ -3,8 +3,10 @@ pragma solidity ^0.8.13;
 
 import "../AttributeSet.sol";
 
-/// @title SyntheticDeviceStorage
-/// @notice Storage of the SyntheticDevice contract
+/**
+ * @title SyntheticDeviceStorage
+ * @notice Storage of the SyntheticDevice contract
+ */
 library SyntheticDeviceStorage {
     using AttributeSet for AttributeSet.Set;
 

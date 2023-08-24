@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import * as csv from 'fast-csv';
 import { ethers, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -15,10 +14,10 @@ interface ManufacturerIdRow {
 }
 
 // eslint-disable-next-line no-unused-vars
-function parseCSV(): Promise<any> {
+function parseCSV(tokenIdMakeNamePath: string): Promise<any> {
   return new Promise((resolve, reject) => {
     const output: IdManufacturerName[] = [];
-    fs.createReadStream(path.resolve('scripts', 'data', 'make_tokens.csv'))
+    fs.createReadStream(tokenIdMakeNamePath)
       .pipe(csv.parse({ headers: true }))
       .on('data', async (row: ManufacturerIdRow) => {
         if (!row.tids || !row.name) reject(Error('Empty input'));
@@ -115,7 +114,7 @@ async function main() {
   //   '0x1741eC2915Ab71Fc03492715b5640133dA69420B'
   // );
 
-  const idManufacturerNames = await parseCSV();
+  const idManufacturerNames = await parseCSV('./make_token.csv');
   await renameManufacturers(signer, idManufacturerNames, network.name);
 
   await matchChainWithDb(idManufacturerNames, network.name);

@@ -37,7 +37,7 @@
                 "selectors": []
             },
             "Manufacturer": {
-                "address": "0x12B870fB7822ec80AF5E66e7CD19379347dE70DF",
+                "address": "0xD76726B4739B79ccAaF09E72b41Ad1b4E05bc46D",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
@@ -50,7 +50,7 @@
                     "0x92eefe9b",
                     "0xd159f49a",
                     "0x63545ffa",
-                    "0xa84ac57f"
+                    "0x20d60248"
                 ]
             },
             "Integration": {
@@ -68,13 +68,14 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x22Dc95682aB184d6051430f0e6afe587a64E6851",
+                "address": "0x560E2B3fdc0fBD4FeA480C1bF7Eaa08F3a953605",
                 "selectors": [
                     "0x6111afa3",
-                    "0xab2ae229",
+                    "0x60deec60",
                     "0x89a841bb",
                     "0x9796cf22",
                     "0x7ba79a39",
+                    "0xb50df2f7",
                     "0xcfe642dd",
                     "0x4d49d82a",
                     "0x4d13b709",
@@ -118,7 +119,7 @@
         "nfts": {
             "ManufacturerId": {
                 "proxy": "0x3b07e2A2ABdd0A9B8F7878bdE6487c502164B9dd",
-                "implementation": "0x418C9103e5b8BD1B8A3d3af4E13F02Fe2292EbA5"
+                "implementation": "0x976b6BE673459271697F25d744903b84eB70F867"
             },
             "IntegrationId": {
                 "proxy": "",
@@ -126,11 +127,11 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0x0607Ccd9B0eB0576EEcB3957d115b3360420858a"
+                "implementation": "0xD6f5cFfA4140E1C0F716f28E6f412C6dD1B65264"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0xa05be7118a3F54bDa99791E7e5F896d6A55Ba56f"
+                "implementation": "0xDA0dD59e160c5e29f19043ac965b5c121F248D69"
             },
             "SyntheticDeviceId": {
                 "proxy": "",
@@ -147,8 +148,8 @@
                 "implementation": ""
             },
             "DimoForwarder": {
-                "proxy": "",
-                "implementation": ""
+                "proxy": "0xA6D4a36CECAdd7b23C7B6DC2377746D08cf5a609",
+                "implementation": "0xA6c4e0938835cb6d66074833737A87Fc1400533b"
             },
             "Foundation": "0xCED3c922200559128930180d3f0bfFd4d9f4F123",
             "Kms": "0xcce4eF41A67E28C3CF3dbc51a6CD3d004F53aCBd"
@@ -195,7 +196,7 @@
                 ]
             },
             "Manufacturer": {
-                "address": "0x54E27D28A7518651979fC3010B79A42676C4D44C",
+                "address": "0xb460b7e39F8571Fe897C32C8174Fe3D5bC835b6f",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
@@ -241,12 +242,14 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x86b10DB61C0deC9A3e8FBF3dC7b1ae8c33b74B3c",
+                "address": "0x4Dd3A7F05541bEe8770a414e8C65e002199b931C",
                 "selectors": [
                     "0x6111afa3",
                     "0x60deec60",
                     "0x89a841bb",
+                    "0x682a25e3",
                     "0x9796cf22",
+                    "0xc6b36f2a",
                     "0x7ba79a39",
                     "0xb50df2f7",
                     "0xcfe642dd",
@@ -294,8 +297,11 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0xdF72B08E425AdB4bf7Ff23798D490A6f4b3AbAfA",
+                "address": "0x64dFc7f801a00Ba02B93717eC51787264F93C66a",
                 "selectors": [
+                    "0x282eb387",
+                    "0x11d679c9",
+                    "0x3febacab",
                     "0xf73a8f04",
                     "0xff96b761",
                     "0x5c129493",

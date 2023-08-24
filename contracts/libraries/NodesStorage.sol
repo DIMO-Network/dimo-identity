@@ -1,8 +1,10 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-/// @title NodesStorage
-/// @notice Storage of the Nodes contract
+/**
+ * @title NodesStorage
+ * @notice Storage of the Nodes contract
+ */
 library NodesStorage {
     bytes32 internal constant NODES_STORAGE_SLOT =
         keccak256("DIMORegistry.nodes.storage");

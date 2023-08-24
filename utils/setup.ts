@@ -59,6 +59,7 @@ export async function grantAdminRoles(
     C.DEV_AD_UNCLAIM_ROLE,
     C.DEV_AD_UNPAIR_ROLE,
     C.DEV_RENAME_MANUFACTURERS_ROLE,
+    C.DEV_AD_PAIR_ROLE,
     C.DEV_VEHICLE_BURN_ROLE
   ];
 

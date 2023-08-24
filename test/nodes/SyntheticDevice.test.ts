@@ -4,6 +4,7 @@ import { ethers, waffle } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
+  DimoAccessControl,
   Nodes,
   Manufacturer,
   ManufacturerId,
@@ -19,6 +20,7 @@ import {
 import {
   initialize,
   setup,
+  grantAdminRoles,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -34,6 +36,7 @@ describe('SyntheticDevice', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let integrationInstance: Integration;
@@ -82,6 +85,7 @@ describe('SyntheticDevice', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
     integrationInstance = deployments.Integration;
@@ -93,29 +97,23 @@ describe('SyntheticDevice', function () {
     vehicleIdInstance = deployments.VehicleId;
     sdIdInstance = deployments.SyntheticDeviceId;
 
-    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
+    await grantAdminRoles(admin, dimoAccessControlInstance);
+
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const INTEGRATION_MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await integrationIdInstance
       .connect(admin)
-      .grantRole(INTEGRATION_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const VEHICLE_MINTER_ROLE = await vehicleIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const SYNTHETIC_DEVICE_MINTER_ROLE = await sdIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await sdIdInstance
       .connect(admin)
-      .grantRole(SYNTHETIC_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
-    const SYNTHETIC_DEVICE_BURNER_ROLE = await sdIdInstance.BURNER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await sdIdInstance
       .connect(admin)
-      .grantRole(SYNTHETIC_DEVICE_BURNER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_BURNER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -228,8 +226,18 @@ describe('SyntheticDevice', function () {
   describe('setSyntheticDeviceIdProxyAddress', () => {
     let localSyntheticDeviceInstance: SyntheticDevice;
     beforeEach(async () => {
-      const deployments = await initialize(admin, 'SyntheticDevice');
+      const deployments = await initialize(
+        admin,
+        'DimoAccessControl',
+        'SyntheticDevice'
+      );
+
+      const localDimoAccessControlInstance = deployments.DimoAccessControl;
       localSyntheticDeviceInstance = deployments.SyntheticDevice;
+
+      await localDimoAccessControlInstance
+        .connect(admin)
+        .grantRole(C.ADMIN_ROLE, admin.address);
     });
 
     context('Error handling', () => {
@@ -240,7 +248,7 @@ describe('SyntheticDevice', function () {
             .setSyntheticDeviceIdProxyAddress(sdIdInstance.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -275,7 +283,7 @@ describe('SyntheticDevice', function () {
             .addSyntheticDeviceAttribute(C.mockSyntheticDeviceAttribute1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -323,14 +331,14 @@ describe('SyntheticDevice', function () {
         incorrectMintInput = JSON.parse(JSON.stringify(correctMintInput));
       });
 
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have MINT_SD_ROLE', async () => {
         await expect(
           syntheticDeviceInstance
             .connect(nonAdmin)
             .mintSyntheticDeviceBatch(1, correctMintInput)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.MINT_SD_ROLE
           }`
         );
       });
@@ -558,14 +566,14 @@ describe('SyntheticDevice', function () {
         incorrectMintInput = { ...correctMintInput };
       });
 
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have MINT_SD_ROLE', async () => {
         await expect(
           syntheticDeviceInstance
             .connect(nonAdmin)
             .mintSyntheticDeviceSign(correctMintInput)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.MINT_SD_ROLE
           }`
         );
       });
@@ -1078,14 +1086,14 @@ describe('SyntheticDevice', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have BURN_SD_ROLE', async () => {
         await expect(
           syntheticDeviceInstance
             .connect(nonAdmin)
             .burnSyntheticDeviceSign(1, 1, burnSyntheticDeviceOwnerSig1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.BURN_SD_ROLE
           }`
         );
       });
@@ -1409,14 +1417,14 @@ describe('SyntheticDevice', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have SET_SD_INFO_ROLE', async () => {
         await expect(
           syntheticDeviceInstance
             .connect(nonAdmin)
             .setSyntheticDeviceInfo(1, C.mockSyntheticDeviceAttributeInfoPairs)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.SET_SD_INFO_ROLE
           }`
         );
       });

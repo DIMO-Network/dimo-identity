@@ -15,7 +15,6 @@ contract VehicleId is Initializable, MultiPrivilege {
 
     // 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
     bytes4 public constant SAFE_TRANSFER_FROM = 0x42842e0e;
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

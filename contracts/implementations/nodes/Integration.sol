@@ -46,7 +46,7 @@ contract Integration is AccessControlInternal {
      */
     function setIntegrationIdProxyAddress(address addr)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.ADMIN_ROLE)
     {
         if (addr == address(0)) revert Errors.ZeroAddress();
         IntegrationStorage.getStorage().idProxyAddress = addr;
@@ -61,7 +61,7 @@ contract Integration is AccessControlInternal {
      */
     function addIntegrationAttribute(string calldata attribute)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.ADMIN_ROLE)
     {
         if (
             !AttributeSet.add(
@@ -80,7 +80,7 @@ contract Integration is AccessControlInternal {
      */
     function setIntegrationController(address _controller)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.ADMIN_ROLE)
     {
         IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
         if (_controller == address(0)) revert Errors.ZeroAddress();
@@ -103,10 +103,9 @@ contract Integration is AccessControlInternal {
      */
     function mintIntegrationBatch(address owner, string[] calldata names)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.MINT_INTEGRATION_ROLE)
     {
-        if (!_hasRole(Roles.DEFAULT_ADMIN_ROLE, owner))
-            revert MustBeAdmin(owner);
+        if (!_hasRole(Roles.ADMIN_ROLE, owner)) revert MustBeAdmin(owner);
 
         IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
 
@@ -138,7 +137,7 @@ contract Integration is AccessControlInternal {
         address owner,
         string calldata name,
         Types.AttributeInfoPair[] calldata attrInfoPairList
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.MINT_INTEGRATION_ROLE) {
         IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
         if (s.controllers[owner].integrationMinted)
             revert Errors.Unauthorized(owner);
@@ -170,7 +169,7 @@ contract Integration is AccessControlInternal {
     function setIntegrationInfo(
         uint256 tokenId,
         Types.AttributeInfoPair[] calldata attrInfoList
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.SET_INTEGRATION_INFO_ROLE) {
         address integrationIdProxy = IntegrationStorage
             .getStorage()
             .idProxyAddress;

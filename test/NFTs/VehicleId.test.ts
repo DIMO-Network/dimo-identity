@@ -4,6 +4,7 @@ import { ethers, waffle } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
+  DimoAccessControl,
   Nodes,
   BaseDataURI,
   Manufacturer,
@@ -23,6 +24,7 @@ import {
 } from '../../typechain';
 import {
   setup,
+  grantAdminRoles,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -36,6 +38,7 @@ describe('VehicleId', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let baseDataUriInstance: BaseDataURI;
   let manufacturerInstance: Manufacturer;
@@ -104,6 +107,7 @@ describe('VehicleId', async function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     baseDataUriInstance = deployments.BaseDataURI;
     manufacturerInstance = deployments.Manufacturer;
@@ -119,30 +123,23 @@ describe('VehicleId', async function () {
     adIdInstance = deployments.AftermarketDeviceId;
     sdIdInstance = deployments.SyntheticDeviceId;
 
-    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
+    await grantAdminRoles(admin, dimoAccessControlInstance);
+
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const INTEGRATION_MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await integrationIdInstance
       .connect(admin)
-      .grantRole(INTEGRATION_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const VEHICLE_MINTER_ROLE = await vehicleIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const AD_MINTER_ROLE = await adIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await adIdInstance
       .connect(admin)
-      .grantRole(AD_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const SYNTHETIC_DEVICE_MINTER_ROLE = await sdIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await sdIdInstance
       .connect(admin)
-      .grantRole(SYNTHETIC_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set base data URI
     await baseDataUriInstance.setBaseDataURI(

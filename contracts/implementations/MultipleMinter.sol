@@ -43,7 +43,7 @@ contract MultipleMinter is
      */
     function mintVehicleAndSdSign(MintVehicleAndSdInput calldata data)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(MINT_VEHICLE_SD_ROLE)
     {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();

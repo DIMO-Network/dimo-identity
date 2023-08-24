@@ -4,6 +4,7 @@ import { waffle, ethers } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
+  DimoAccessControl,
   Nodes,
   Manufacturer,
   ManufacturerId,
@@ -22,6 +23,7 @@ import {
 import {
   initialize,
   setup,
+  grantAdminRoles,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -35,6 +37,7 @@ describe('Vehicle', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let integrationInstance: Integration;
@@ -100,6 +103,7 @@ describe('Vehicle', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
     integrationInstance = deployments.Integration;
@@ -113,30 +117,23 @@ describe('Vehicle', function () {
     adIdInstance = deployments.AftermarketDeviceId;
     sdIdInstance = deployments.SyntheticDeviceId;
 
-    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
+    await grantAdminRoles(admin, dimoAccessControlInstance);
+
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const INTEGRATION_MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await integrationIdInstance
       .connect(admin)
-      .grantRole(INTEGRATION_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const VEHICLE_MINTER_ROLE = await vehicleIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const AD_MINTER_ROLE = await adIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await adIdInstance
       .connect(admin)
-      .grantRole(AD_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const SYNTHETIC_DEVICE_MINTER_ROLE = await sdIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await sdIdInstance
       .connect(admin)
-      .grantRole(SYNTHETIC_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -281,8 +278,18 @@ describe('Vehicle', function () {
   describe('setVehicleIdProxyAddress', () => {
     let localVehicleInstance: Vehicle;
     beforeEach(async () => {
-      const deployments = await initialize(admin, 'Vehicle');
+      const deployments = await initialize(
+        admin,
+        'DimoAccessControl',
+        'Vehicle'
+      );
+
+      const localDimoAccessControlInstance = deployments.DimoAccessControl;
       localVehicleInstance = deployments.Vehicle;
+
+      await localDimoAccessControlInstance
+        .connect(admin)
+        .grantRole(C.ADMIN_ROLE, admin.address);
     });
 
     context('Error handling', () => {
@@ -293,7 +300,7 @@ describe('Vehicle', function () {
             .setVehicleIdProxyAddress(localVehicleInstance.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -328,7 +335,7 @@ describe('Vehicle', function () {
             .addVehicleAttribute(C.mockVehicleAttribute1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -356,14 +363,14 @@ describe('Vehicle', function () {
 
   describe('mintVehicle', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
         await expect(
           vehicleInstance
             .connect(nonAdmin)
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.MINT_VEHICLE_ROLE
           }`
         );
       });
@@ -479,7 +486,7 @@ describe('Vehicle', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
         await expect(
           vehicleInstance
             .connect(nonAdmin)
@@ -491,7 +498,7 @@ describe('Vehicle', function () {
             )
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.MINT_VEHICLE_ROLE
           }`
         );
       });
@@ -816,12 +823,12 @@ describe('Vehicle', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have BURN_VEHICLE_ROLE', async () => {
         await expect(
           vehicleInstance.connect(nonAdmin).burnVehicleSign(1, burnVehicleSig)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.BURN_VEHICLE_ROLE
           }`
         );
       });
@@ -1078,14 +1085,14 @@ describe('Vehicle', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have SET_VEHICLE_INFO_ROLE', async () => {
         await expect(
           vehicleInstance
             .connect(nonAdmin)
             .setVehicleInfo(1, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.SET_VEHICLE_INFO_ROLE
           }`
         );
       });

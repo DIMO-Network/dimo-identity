@@ -74,7 +74,7 @@ contract DevAdmin is AccessControlInternal {
     function transferAftermarketDeviceOwnership(
         uint256 aftermarketDeviceNode,
         address newOwner
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEV_AD_TRANSFER_ROLE) {
         INFT adIdProxy = INFT(
             AftermarketDeviceStorage.getStorage().idProxyAddress
         );
@@ -98,7 +98,7 @@ contract DevAdmin is AccessControlInternal {
      */
     function unclaimAftermarketDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEV_AD_UNCLAIM_ROLE) {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         INFT adIdProxy = INFT(ads.idProxyAddress);
@@ -125,7 +125,7 @@ contract DevAdmin is AccessControlInternal {
      */
     function unpairAftermarketDeviceByDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEV_AD_UNPAIR_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -165,7 +165,7 @@ contract DevAdmin is AccessControlInternal {
      */
     function unpairAftermarketDeviceByVehicleNode(
         uint256[] calldata vehicleNodes
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEV_AD_UNPAIR_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -204,7 +204,7 @@ contract DevAdmin is AccessControlInternal {
      */
     function renameManufacturers(
         IdManufacturerName[] calldata idManufacturerNames
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEV_RENAME_MANUFACTURERS_ROLE) {
         ManufacturerStorage.Storage storage ms = ManufacturerStorage
             .getStorage();
 
@@ -235,7 +235,7 @@ contract DevAdmin is AccessControlInternal {
      */
     function adminBurnVehicles(uint256[] calldata tokenIds)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(DEV_VEHICLE_BURN_ROLE)
     {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
@@ -284,7 +284,7 @@ contract DevAdmin is AccessControlInternal {
      */
     function adminBurnVehiclesAndDeletePairings(uint256[] calldata tokenIds)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(DEV_VEHICLE_BURN_ROLE)
     {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();

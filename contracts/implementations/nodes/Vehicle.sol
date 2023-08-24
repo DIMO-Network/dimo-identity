@@ -10,7 +10,7 @@ import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 
-import {DEFAULT_ADMIN_ROLE} from "../../shared/Roles.sol";
+import {ADMIN_ROLE, MINT_VEHICLE_ROLE, BURN_VEHICLE_ROLE, SET_VEHICLE_INFO_ROLE} from "../../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
@@ -41,7 +41,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
      */
     function setVehicleIdProxyAddress(address addr)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         if (addr == address(0)) revert ZeroAddress();
         VehicleStorage.getStorage().idProxyAddress = addr;
@@ -56,7 +56,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
      */
     function addVehicleAttribute(string calldata attribute)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         if (
             !AttributeSet.add(
@@ -81,7 +81,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         uint256 manufacturerNode,
         address owner,
         AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(MINT_VEHICLE_ROLE) {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
@@ -117,7 +117,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         address owner,
         AttributeInfoPair[] calldata attrInfo,
         bytes calldata signature
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(MINT_VEHICLE_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -165,7 +165,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     function setVehicleInfo(
         uint256 tokenId,
         AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(SET_VEHICLE_INFO_ROLE) {
         address vehicleIdProxy = VehicleStorage.getStorage().idProxyAddress;
         if (!INFT(vehicleIdProxy).exists(tokenId))
             revert InvalidNode(vehicleIdProxy, tokenId);
@@ -182,7 +182,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
      */
     function burnVehicleSign(uint256 tokenId, bytes calldata ownerSig)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(BURN_VEHICLE_ROLE)
     {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();

@@ -24,6 +24,7 @@ import {
 } from '../typechain';
 import {
   setup,
+  grantAdminRoles,
   createSnapshot,
   revertToSnapshot,
   signMessage,
@@ -123,38 +124,26 @@ describe('DevAdmin', function () {
     adIdInstance = deployments.AftermarketDeviceId;
     sdIdInstance = deployments.SyntheticDeviceId;
 
-    await dimoAccessControlInstance
-      .connect(admin)
-      .grantRole(C.DEV_AD_PAIR_ROLE, admin.address);
+    await grantAdminRoles(admin, dimoAccessControlInstance);
 
-    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const INTEGRATION_MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await integrationIdInstance
       .connect(admin)
-      .grantRole(INTEGRATION_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const VEHICLE_MINTER_ROLE = await vehicleIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(VEHICLE_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const AD_MINTER_ROLE = await adIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await adIdInstance
       .connect(admin)
-      .grantRole(AD_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const SYNTHETIC_DEVICE_MINTER_ROLE = await sdIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await sdIdInstance
       .connect(admin)
-      .grantRole(SYNTHETIC_DEVICE_MINTER_ROLE, dimoRegistryInstance.address);
-    const SYNTHETIC_DEVICE_BURNER_ROLE = await sdIdInstance.BURNER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await sdIdInstance
       .connect(admin)
-      .grantRole(SYNTHETIC_DEVICE_BURNER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_BURNER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -351,14 +340,14 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have DEV_AD_TRANSFER_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
             .transferAftermarketDeviceOwnership(1, user2.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.DEV_AD_TRANSFER_ROLE
           }`
         );
       });
@@ -472,12 +461,12 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have DEV_AD_UNCLAIM_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).unclaimAftermarketDeviceNode([1])
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.DEV_AD_UNCLAIM_ROLE
           }`
         );
       });
@@ -655,14 +644,14 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have DEV_AD_UNPAIR_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
             .unpairAftermarketDeviceByDeviceNode([2])
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.DEV_AD_UNPAIR_ROLE
           }`
         );
       });
@@ -833,14 +822,14 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have DEV_AD_UNPAIR_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
             .unpairAftermarketDeviceByVehicleNode([4, 5])
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.DEV_AD_UNPAIR_ROLE
           }`
         );
       });
@@ -923,14 +912,14 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have DEV_RENAME_MANUFACTURERS_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
             .renameManufacturers(newIdManufacturerNames)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.DEV_RENAME_MANUFACTURERS_ROLE
           }`
         );
       });
@@ -991,12 +980,12 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have DEV_VEHICLE_BURN_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).adminBurnVehicles([1, 2])
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.DEV_VEHICLE_BURN_ROLE
           }`
         );
       });
@@ -1208,14 +1197,14 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have DEV_VEHICLE_BURN_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
             .adminBurnVehiclesAndDeletePairings([1, 2])
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.DEV_VEHICLE_BURN_ROLE
           }`
         );
       });

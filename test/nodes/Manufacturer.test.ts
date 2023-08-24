@@ -3,6 +3,7 @@ import { waffle } from 'hardhat';
 
 import {
   DIMORegistry,
+  DimoAccessControl,
   Nodes,
   Manufacturer,
   ManufacturerId
@@ -10,6 +11,7 @@ import {
 import {
   initialize,
   setup,
+  grantAdminRoles,
   createSnapshot,
   revertToSnapshot,
   C
@@ -21,6 +23,7 @@ const provider = waffle.provider;
 describe('Manufacturer', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
+  let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
@@ -30,20 +33,22 @@ describe('Manufacturer', async function () {
 
   before(async () => {
     const deployments = await setup(admin, {
-      modules: ['Nodes', 'Manufacturer'],
+      modules: ['DimoAccessControl', 'Nodes', 'Manufacturer'],
       nfts: ['ManufacturerId'],
       upgradeableContracts: []
     });
 
     dimoRegistryInstance = deployments.DIMORegistry;
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
     manufacturerIdInstance = deployments.ManufacturerId;
 
-    const MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
+    await grantAdminRoles(admin, dimoAccessControlInstance);
+
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxy
     await manufacturerInstance
@@ -70,8 +75,18 @@ describe('Manufacturer', async function () {
   describe('setManufacturerIdProxyAddress', () => {
     let localManufacturerInstance: Manufacturer;
     beforeEach(async () => {
-      const deployments = await initialize(admin, 'Manufacturer');
+      const deployments = await initialize(
+        admin,
+        'DimoAccessControl',
+        'Manufacturer'
+      );
+
+      const localDimoAccessControlInstance = deployments.DimoAccessControl;
       localManufacturerInstance = deployments.Manufacturer;
+
+      await localDimoAccessControlInstance
+        .connect(admin)
+        .grantRole(C.ADMIN_ROLE, admin.address);
     });
 
     context('Error handling', () => {
@@ -82,7 +97,7 @@ describe('Manufacturer', async function () {
             .setManufacturerIdProxyAddress(manufacturerIdInstance.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -117,7 +132,7 @@ describe('Manufacturer', async function () {
             .addManufacturerAttribute(C.mockManufacturerAttribute1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -152,7 +167,7 @@ describe('Manufacturer', async function () {
             .setController(manufacturer1.address)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -189,14 +204,14 @@ describe('Manufacturer', async function () {
 
   describe('mintManufacturerBatch', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have MINT_MANUFACTURER_ROLE', async () => {
         await expect(
           manufacturerInstance
             .connect(nonAdmin)
             .mintManufacturerBatch(nonAdmin.address, C.mockManufacturerNames)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.MINT_MANUFACTURER_ROLE
           }`
         );
       });
@@ -301,7 +316,7 @@ describe('Manufacturer', async function () {
 
   describe('mintManufacturer', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have MINT_MANUFACTURER_ROLE', async () => {
         await expect(
           manufacturerInstance
             .connect(nonAdmin)
@@ -312,7 +327,7 @@ describe('Manufacturer', async function () {
             )
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.MINT_MANUFACTURER_ROLE
           }`
         );
       });
@@ -537,14 +552,14 @@ describe('Manufacturer', async function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have admin role', async () => {
+      it('Should revert if caller does not have SET_MANUFACTURER_INFO_ROLE', async () => {
         await expect(
           manufacturerInstance
             .connect(nonAdmin)
             .setManufacturerInfo(1, C.mockManufacturerAttributeInfoPairs)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.SET_MANUFACTURER_INFO_ROLE
           }`
         );
       });

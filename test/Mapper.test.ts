@@ -4,6 +4,7 @@ import { ethers, waffle } from 'hardhat';
 import {
   DIMORegistry,
   Eip712Checker,
+  DimoAccessControl,
   Manufacturer,
   ManufacturerId,
   AftermarketDevice,
@@ -13,7 +14,13 @@ import {
   MockDimoToken,
   MockStake
 } from '../typechain';
-import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
+import {
+  setup,
+  grantAdminRoles,
+  createSnapshot,
+  revertToSnapshot,
+  C
+} from '../utils';
 
 const { expect } = chai;
 const provider = waffle.provider;
@@ -22,6 +29,7 @@ describe('Mapper', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let dimoAccessControlInstance: DimoAccessControl;
   let manufacturerInstance: Manufacturer;
   let aftermarketDeviceInstance: AftermarketDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
@@ -69,6 +77,7 @@ describe('Mapper', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     manufacturerInstance = deployments.Manufacturer;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     adLicenseValidatorInstance = deployments.AdLicenseValidator;
@@ -76,15 +85,14 @@ describe('Mapper', function () {
     manufacturerIdInstance = deployments.ManufacturerId;
     adIdInstance = deployments.AftermarketDeviceId;
 
-    const MANUFACTURER_MINTER_ROLE = await manufacturerIdInstance.MINTER_ROLE();
+    await grantAdminRoles(admin, dimoAccessControlInstance);
+
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(MANUFACTURER_MINTER_ROLE, dimoRegistryInstance.address);
-
-    const AD_MINTER_ROLE = await adIdInstance.MINTER_ROLE();
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
     await adIdInstance
       .connect(admin)
-      .grantRole(AD_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxies
     await manufacturerInstance

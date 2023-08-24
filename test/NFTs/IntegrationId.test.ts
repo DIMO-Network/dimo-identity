@@ -3,11 +3,18 @@ import { ethers, waffle } from 'hardhat';
 
 import {
   DIMORegistry,
+  DimoAccessControl,
   Nodes,
   Integration,
   IntegrationId
 } from '../../typechain';
-import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';
+import {
+  setup,
+  grantAdminRoles,
+  createSnapshot,
+  revertToSnapshot,
+  C
+} from '../../utils';
 
 const { expect } = chai;
 const provider = waffle.provider;
@@ -15,6 +22,7 @@ const provider = waffle.provider;
 describe('IntegrationId', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
+  let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let integrationInstance: Integration;
   let integrationIdInstance: IntegrationId;
@@ -24,20 +32,22 @@ describe('IntegrationId', async function () {
 
   before(async () => {
     const deployments = await setup(admin, {
-      modules: ['Nodes', 'Integration'],
+      modules: ['DimoAccessControl', 'Nodes', 'Integration'],
       nfts: ['IntegrationId'],
       upgradeableContracts: []
     });
 
     dimoRegistryInstance = deployments.DIMORegistry;
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     integrationInstance = deployments.Integration;
     integrationIdInstance = deployments.IntegrationId;
 
-    const MINTER_ROLE = await integrationIdInstance.MINTER_ROLE();
+    await grantAdminRoles(admin, dimoAccessControlInstance);
+
     await integrationIdInstance
       .connect(admin)
-      .grantRole(MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
 
     // Set NFT Proxy
     await integrationInstance

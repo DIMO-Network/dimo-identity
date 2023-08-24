@@ -44,7 +44,7 @@ abstract contract MultiPrivilege is
     /// @param description Description of the new privilege
     function createPrivilege(bool enabled, string calldata description)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
         _privilegeCounter.increment();
         uint256 privilegeId = _privilegeCounter.current();
@@ -57,10 +57,7 @@ abstract contract MultiPrivilege is
     /// @notice Enables existing privilege
     /// @dev The caller must have the admin role
     /// @param privId Privilege Id to be enabled
-    function enablePrivilege(uint256 privId)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function enablePrivilege(uint256 privId) external onlyRole(ADMIN_ROLE) {
         require(privId <= _privilegeCounter.current(), "Invalid privilege id");
         require(!privilegeRecord[privId].enabled, "Privilege is enabled");
 
@@ -72,10 +69,7 @@ abstract contract MultiPrivilege is
     /// @notice Disables existing privilege
     /// @dev The caller must have the admin role
     /// @param privId Privilege Id to be disabled
-    function disablePrivilege(uint256 privId)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function disablePrivilege(uint256 privId) external onlyRole(ADMIN_ROLE) {
         require(privId <= _privilegeCounter.current(), "Invalid privilege id");
         require(privilegeRecord[privId].enabled, "Privilege is disabled");
 

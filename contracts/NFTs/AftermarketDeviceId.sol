@@ -11,8 +11,6 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
     IDimoRegistry public _dimoRegistry;
     mapping(address => bool) public trustedForwarders;
 
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();

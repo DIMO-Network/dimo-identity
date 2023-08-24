@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { waffle } from 'hardhat';
 
-import { BaseDataURI } from '../../typechain';
+import { DimoAccessControl, BaseDataURI } from '../../typechain';
 import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 const { expect } = chai;
@@ -9,18 +9,24 @@ const provider = waffle.provider;
 
 describe('BaseDataURI', async function () {
   let snapshot: string;
+  let dimoAccessControlInstance: DimoAccessControl;
   let baseDataUriInstance: BaseDataURI;
 
   const [admin, nonAdmin, mockProxy] = provider.getWallets();
 
   before(async () => {
     const deployments = await setup(admin, {
-      modules: ['BaseDataURI'],
+      modules: ['DimoAccessControl', 'BaseDataURI'],
       nfts: [],
       upgradeableContracts: []
     });
 
+    dimoAccessControlInstance = deployments.DimoAccessControl;
     baseDataUriInstance = deployments.BaseDataURI;
+
+    await dimoAccessControlInstance
+      .connect(admin)
+      .grantRole(C.ADMIN_ROLE, admin.address);
   });
 
   beforeEach(async () => {
@@ -40,7 +46,7 @@ describe('BaseDataURI', async function () {
             .setBaseDataURI(mockProxy.address, C.BASE_DATA_URI)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });

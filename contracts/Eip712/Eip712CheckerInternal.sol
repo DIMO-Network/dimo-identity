@@ -5,9 +5,11 @@ import "./Eip712CheckerStorage.sol";
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-/// @title Eip712CheckerInternal
-/// @notice Contract with internal functions to assist in verifying signatures
-/// @dev Based on the EIP-712 https://eips.ethereum.org/EIPS/eip-712
+/**
+ * @title Eip712CheckerInternal
+ * @notice Contract with internal functions to assist in verifying signatures
+ * @dev Based on the EIP-712 https://eips.ethereum.org/EIPS/eip-712
+ */
 library Eip712CheckerInternal {
     bytes32 private constant EIP712_DOMAIN_TYPEHASH =
         keccak256(
@@ -31,9 +33,11 @@ library Eip712CheckerInternal {
             );
     }
 
-    /// @dev Recovers message signer
-    /// @param message Hashed data payload
-    /// @param signature Signed data payload
+    /**
+     * @dev Recovers message signer
+     * @param message Hashed data payload
+     * @param signature Signed data payload
+     */
     function _recover(bytes32 message, bytes calldata signature)
         internal
         view
@@ -46,10 +50,12 @@ library Eip712CheckerInternal {
         return ECDSA.recover(msgHash, signature);
     }
 
-    /// @dev Recovers message signer and verifies if metches signatory
-    /// @param signatory The signer to be verified
-    /// @param message Hashed data payload
-    /// @param signature Signed data payload
+    /**
+     * @dev Recovers message signer and verifies if metches signatory
+     * @param signatory The signer to be verified
+     * @param message Hashed data payload
+     * @param signature Signed data payload
+     */
     function _verifySignature(
         address signatory,
         bytes32 message,
@@ -64,12 +70,14 @@ library Eip712CheckerInternal {
         return signatory == ECDSA.recover(msgHash, signature);
     }
 
-    /// @dev Recovers message signer and verifies if metches signatory
-    /// @param signatory The signer to be verified
-    /// @param message Hashed data payload
-    /// @param v Signature "v" value
-    /// @param r Signature "r" value
-    /// @param s Signature "s" value
+    /**
+     * @dev Recovers message signer and verifies if metches signatory
+     * @param signatory The signer to be verified
+     * @param message Hashed data payload
+     * @param v Signature "v" value
+     * @param r Signature "r" value
+     * @param s Signature "s" value
+     */
     function _verifySignature(
         address signatory,
         bytes32 message,

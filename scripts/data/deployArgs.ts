@@ -32,7 +32,8 @@ export const roles = {
   nfts: {
     MINTER_ROLE: _hashRole('MINTER_ROLE'),
     TRANSFERER_ROLE: _hashRole('TRANSFERER_ROLE'),
-    BURNER_ROLE: _hashRole('BURNER_ROLE')
+    BURNER_ROLE: _hashRole('BURNER_ROLE'),
+    UPGRADER_ROLE: _hashRole('UPGRADER_ROLE')
   }
 };
 
@@ -42,22 +43,22 @@ export const eip712Name = 'DIMO';
 export const eip712Version = '1';
 export const adMintCost = ethers.utils.parseEther('50');
 
-export const MANUFACTURER_NFT_NAME = 'Dimo Manufacturer ID';
+export const MANUFACTURER_NFT_NAME = 'DIMO Manufacturer ID';
 export const MANUFACTURER_NFT_SYMBOL = 'DIMO/MANUFACTURER';
 export const MANUFACTURER_NFT_URI =
   'https://devices-api.dimo.zone/v1/manufacturer/';
-export const INTEGRATION_NFT_NAME = 'Dimo Integration ID';
+export const INTEGRATION_NFT_NAME = 'DIMO Integration ID';
 export const INTEGRATION_NFT_SYMBOL = 'DIMO/INTEGRATION';
 export const INTEGRATION_NFT_URI =
   'https://devices-api.dimo.zone/v1/integration/';
-export const VEHICLE_NFT_NAME = 'Dimo Vehicle ID';
+export const VEHICLE_NFT_NAME = 'DIMO Vehicle ID';
 export const VEHICLE_NFT_SYMBOL = 'DIMO/VEHICLE';
 export const VEHICLE_NFT_URI = 'https://devices-api.dimo.zone/v1/vehicle/';
-export const AD_NFT_NAME = 'Dimo Aftermarket Device ID';
+export const AD_NFT_NAME = 'DIMO Aftermarket Device ID';
 export const AD_NFT_SYMBOL = 'DIMO/AFTERMARKET/DEVICE';
 export const AD_NFT_URI =
   'https://devices-api.dimo.zone/v1/aftermarket/device/';
-export const SD_NFT_NAME = 'Dimo Synthetic Device ID';
+export const SD_NFT_NAME = 'DIMO Synthetic Device ID';
 export const SD_NFT_SYMBOL = 'DIMO/SYNTHETIC/DEVICE';
 export const SD_NFT_URI = 'https://devices-api.dimo.zone/v1/synthetic/device/';
 

@@ -10,7 +10,7 @@
                 ]
             },
             "Eip712Checker": {
-                "address": "0x385C31C64262904e47e20F8f614B7aF0080650F7",
+                "address": "0x28f6701ae35879F881511EA6135455e894330116",
                 "selectors": [
                     "0x4cd88b76"
                 ]
@@ -26,18 +26,21 @@
                 ]
             },
             "Nodes": {
-                "address": "0x83974355a82925fA0F84A9dD9C8fB022485cE2Ea",
+                "address": "0x2f8320468950e1a933669F4bF9CDb50E79117137",
                 "selectors": [
+                    "0xbc60a6ba",
                     "0xdce2f860",
                     "0x82087d24"
                 ]
             },
             "BaseDataURI": {
-                "address": "",
-                "selectors": []
+                "address": "0x49CF1F785037DEa3D9d66cB10FB90d608C417D4c",
+                "selectors": [
+                    "0xe324093f"
+                ]
             },
             "Manufacturer": {
-                "address": "0xD76726B4739B79ccAaF09E72b41Ad1b4E05bc46D",
+                "address": "0xf67BC4dBb947E45b3Aa2a54C0EEA9cac9B6A13f1",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
@@ -54,11 +57,24 @@
                 ]
             },
             "Integration": {
-                "address": "",
-                "selectors": []
+                "address": "0x25f58785A56bEC607a5932ad4B0e910d39B84d3e",
+                "selectors": [
+                    "0x044d2498",
+                    "0x714b7cfb",
+                    "0x123141bd",
+                    "0xbc8002f0",
+                    "0xe21f68b7",
+                    "0x603dd1db",
+                    "0xd6739004",
+                    "0x653af271",
+                    "0x106129aa",
+                    "0x636c1d1b",
+                    "0x8d7e6001",
+                    "0x440707b5"
+                ]
             },
             "Vehicle": {
-                "address": "0x569D12e4dD3B86836E790d38cf58471d4d32Db9E",
+                "address": "0x9F67f131507F5D9e491beA439222b29AAD9ba082",
                 "selectors": [
                     "0xf0d1a557",
                     "0x3da44e56",
@@ -68,26 +84,37 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x560E2B3fdc0fBD4FeA480C1bF7Eaa08F3a953605",
+                "address": "0xe17abb835338E5A389f6a4b11c61F773a69d1B38",
                 "selectors": [
                     "0x6111afa3",
                     "0x60deec60",
                     "0x89a841bb",
+                    "0x682a25e3",
                     "0x9796cf22",
+                    "0xc6b36f2a",
                     "0x7ba79a39",
                     "0xb50df2f7",
                     "0xcfe642dd",
                     "0x4d49d82a",
                     "0x4d13b709",
+                    "0xee4d9596",
                     "0x3f65997a"
                 ]
             },
             "SyntheticDevice": {
-                "address": "",
-                "selectors": []
+                "address": "0xEd8B51a2270ebd5AB1FFA5253937604c2aF68E7C",
+                "selectors": [
+                    "0xe1f371df",
+                    "0x7c7c9978",
+                    "0x795b910a",
+                    "0x261d982a",
+                    "0xc624e8a1",
+                    "0xecf452d7",
+                    "0x80430e0d"
+                ]
             },
             "AdLicenseValidator": {
-                "address": "0xEB850524cb04806673A04F01BA4068740876af3C",
+                "address": "0x8AA7EbCa4202d49de98DF90149d1C970793f17D3",
                 "selectors": [
                     "0x46946743",
                     "0x2390baa8",
@@ -97,16 +124,19 @@
                 ]
             },
             "Mapper": {
-                "address": "0x8083F96cF51727BE905057a837DAafBE0B91920f",
+                "address": "0xe9A927Ee6f6D6b41B4c0599D5Df4EB5ebD7537eA",
                 "selectors": [
                     "0x0a6cef46",
                     "0x112e62a2",
+                    "0xbd2b5568",
                     "0xbebc0bfc"
                 ]
             },
             "MultipleMinter": {
-                "address": "",
-                "selectors": []
+                "address": "0x3B76075452D8EE8aD8a49b1dC53A15e726D6f10D",
+                "selectors": [
+                    "0xfb1a28e8"
+                ]
             },
             "Multicall": {
                 "address": "0x4dc23B40c952aBc34344c4dCDF9d8f5777DA2b0c",
@@ -119,29 +149,29 @@
         "nfts": {
             "ManufacturerId": {
                 "proxy": "0x3b07e2A2ABdd0A9B8F7878bdE6487c502164B9dd",
-                "implementation": "0x976b6BE673459271697F25d744903b84eB70F867"
+                "implementation": "0x9dAbfAB72049809C2b702892edbe8eF6Ad59d1f9"
             },
             "IntegrationId": {
-                "proxy": "",
-                "implementation": ""
+                "proxy": "0xf41cE833C1A35C80eB5Feb69e23F1Ed2ECBE20e0",
+                "implementation": "0x0F98fDf1E3166aB99859c7A040ba09daF95c8c84"
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0xD6f5cFfA4140E1C0F716f28E6f412C6dD1B65264"
+                "implementation": "0x96198B0969ae01D5E8E6A2950772D92a5799635F"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0xDA0dD59e160c5e29f19043ac965b5c121F248D69"
+                "implementation": "0x0793530DC7c5018388AcEf0A359C51138e7ff5A7"
             },
             "SyntheticDeviceId": {
-                "proxy": "",
-                "implementation": ""
+                "proxy": "0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D",
+                "implementation": "0x14e26D1B5A9E47DDBeF2Eb5326CE3B296CE9B1B6"
             }
         },
         "misc": {
             "DimoToken": {
                 "proxy": "0xe261d618a959afffd53168cd07d12e37b26761db",
-                "implementation": ""
+                "implementation": "0x379e5770d36Bf563C267097E3fA54DdCcbEFC00B"
             },
             "Stake": {
                 "proxy": "0xaa32a9e74486dd136ccedf17061fe4efc95a621e",

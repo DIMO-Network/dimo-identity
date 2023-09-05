@@ -60,7 +60,7 @@ const config: HardhatUserConfig = {
   tenderly: {
     username: process.env.TENDERLY_USERNAME || '', // tenderly username (or organization name)
     project: process.env.TENDERLY_PROJECT_NAME || '', // project name
-    privateVerification: true // if true, contracts will be verified privately, if false, contracts will be verified publicly
+    privateVerification: false // if true, contracts will be verified privately, if false, contracts will be verified publicly
   },
   contractSizer: {
     alphaSort: true,

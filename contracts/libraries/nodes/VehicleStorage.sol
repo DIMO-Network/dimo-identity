@@ -3,8 +3,10 @@ pragma solidity ^0.8.13;
 
 import "../AttributeSet.sol";
 
-/// @title VehicleStorage
-/// @notice Storage of the Vehicle contract
+/**
+ * @title VehicleStorage
+ * @notice Storage of the Vehicle contract
+ */
 library VehicleStorage {
     using AttributeSet for AttributeSet.Set;
 

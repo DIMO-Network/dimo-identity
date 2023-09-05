@@ -3,8 +3,10 @@ pragma solidity ^0.8.13;
 
 import "./INFT.sol";
 
-/// @title INFTMultiPrivilege
-/// @notice Interface of a MultiPrivilege NFT
+/**
+ * @title INFTMultiPrivilege
+ * @notice Interface of a MultiPrivilege NFT
+ */
 interface INFTMultiPrivilege is INFT {
     function hasPrivilege(
         uint256 tokenId,

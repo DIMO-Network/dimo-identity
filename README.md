@@ -68,3 +68,13 @@ npx hardhat run scripts/abiGenerator.ts
 ```
 
 The output file will be saved in `./abis/DimoRegistry.json`.
+
+### Go ABI
+
+To regenerate the Go bindings for, e.g., [the devices API](https://github.com/DIMO-Network/devices-api/blob/main/internal/contracts/registry.go), you would run
+
+```sh
+abigen --abi abis/DimoRegistry.json --out registry.go --pkg contracts --type Registry
+```
+
+and copy over that file.

@@ -61,4 +61,8 @@ library AttributeSet {
     {
         return set._indexes[key] != 0;
     }
+
+    function values(Set storage set) internal view returns (string[] memory) {
+        return set._values;
+    }
 }

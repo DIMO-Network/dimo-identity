@@ -192,5 +192,14 @@ export const makes = [
   'VW',
   'VW TOROUND',
   'Westfield',
-  'Yugo'
+  'Yugo',
+  'AutoPi',
+  'Brien Corp Industry',
+  'SharedManufacturer',
+  'Daf',
+  'DAF',
+  'HINO',
+  'TestManufacturer',
+  'Hashdog',
+  'International'
 ];

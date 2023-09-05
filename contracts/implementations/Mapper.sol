@@ -5,8 +5,10 @@ import "../interfaces/INFT.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/nodes/AftermarketDeviceStorage.sol";
 
-/// @title Mapper
-/// @notice Contract to map relationships between nodes and other contracts
+/**
+ * @title Mapper
+ * @notice Contract to map relationships between nodes and other contracts
+ */
 contract Mapper {
     event BeneficiarySet(
         address indexed idProxyAddress,
@@ -14,11 +16,13 @@ contract Mapper {
         address indexed beneficiary
     );
 
-    /// @notice Sets the beneficiary associated with the aftermarket device
-    /// @dev Only the nodeId owner can set a beneficiary
-    /// @dev To clear the beneficiary, users can pass the zero address
-    /// @param nodeId The node Id to be associated with the beneficiary
-    /// @param beneficiary The address to be a beneficiary
+    /**
+     * @notice Sets the beneficiary associated with the aftermarket device
+     * @dev Only the nodeId owner can set a beneficiary
+     * @dev To clear the beneficiary, users can pass the zero address
+     * @param nodeId The node Id to be associated with the beneficiary
+     * @param beneficiary The address to be a beneficiary
+     */
     function setAftermarketDeviceBeneficiary(
         uint256 nodeId,
         address beneficiary
@@ -54,10 +58,28 @@ contract Mapper {
         ];
     }
 
-    /// @notice Gets the beneficiary associated with the pair idProxy/nodeId.
-    /// @notice If the beneficiary is not explicitly set, it defaults to the owner
-    /// @param idProxyAddress The address of the NFT proxy
-    /// @param nodeId The node Id to be queried
+    /**
+     * @notice Gets the link between two nodes (source -> target)
+     * @param idProxyAddressSource The address of the NFT proxy source
+     * @param idProxyAddressTarget The address of the NFT proxy target
+     * @param sourceNode The source node id to be queried
+     */
+    function getNodeLink(
+        address idProxyAddressSource,
+        address idProxyAddressTarget,
+        uint256 sourceNode
+    ) external view returns (uint256 targetNode) {
+        targetNode = MapperStorage.getStorage().nodeLinks[idProxyAddressSource][
+            idProxyAddressTarget
+        ][sourceNode];
+    }
+
+    /**
+     * @notice Gets the beneficiary associated with the pair idProxy/nodeId.
+     * @notice If the beneficiary is not explicitly set, it defaults to the owner
+     * @param idProxyAddress The address of the NFT proxy
+     * @param nodeId The node Id to be queried
+     */
     function getBeneficiary(address idProxyAddress, uint256 nodeId)
         external
         view

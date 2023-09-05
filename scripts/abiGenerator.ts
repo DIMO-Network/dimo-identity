@@ -38,9 +38,13 @@ main([
   'contracts/implementations/AdLicenseValidator/AdLicenseValidator.sol:AdLicenseValidator',
   'contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice',
   'contracts/implementations/nodes/Manufacturer.sol:Manufacturer',
+  'contracts/implementations/nodes/Integration.sol:Integration',
+  'contracts/implementations/nodes/SyntheticDevice.sol:SyntheticDevice',
   'contracts/implementations/nodes/Vehicle.sol:Vehicle',
   'contracts/implementations/Nodes.sol:Nodes',
-  'contracts/implementations/Mapper.sol:Mapper'
+  'contracts/implementations/Mapper.sol:Mapper',
+  'contracts/implementations/MultipleMinter.sol:MultipleMinter',
+  'contracts/implementations/BaseDataURI.sol:BaseDataURI'
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

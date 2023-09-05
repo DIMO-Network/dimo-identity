@@ -58,7 +58,8 @@
           "@nomiclabs/hardhat-waffle",
           "@nomiclabs/hardhat-ethers",
           "@openzeppelin/hardhat-upgrades",
-          "hardhat-abi-exporter"
+          "hardhat-abi-exporter",
+          "@tenderly/hardhat-tenderly"
         ]
       }
     ]

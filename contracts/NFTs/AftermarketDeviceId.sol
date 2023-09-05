@@ -11,8 +11,6 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
     IDimoRegistry public _dimoRegistry;
     mapping(address => bool) public trustedForwarders;
 
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -35,9 +33,11 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
         _grantRole(ADMIN_ROLE, msg.sender);
     }
 
-    /// @notice Sets the DIMO Registry address
-    /// @dev Only an admin can set the DIMO Registry address
-    /// @param addr The address to be set
+    /**
+     * @notice Sets the DIMO Registry address
+     * @dev Only an admin can set the DIMO Registry address
+     * @param addr The address to be set
+     */
     function setDimoRegistryAddress(address addr)
         external
         onlyRole(ADMIN_ROLE)
@@ -46,10 +46,12 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
         _dimoRegistry = IDimoRegistry(addr);
     }
 
-    /// @notice Sets trusted or not to an address
-    /// @dev Only an admin can set a trusted forwarder
-    /// @param addr The address to be set
-    /// @param trusted Whether an address should be trusted or not
+    /**
+     * @notice Sets trusted or not to an address
+     * @dev Only an admin can set a trusted forwarder
+     * @param addr The address to be set
+     * @param trusted Whether an address should be trusted or not
+     */
     function setTrustedForwarder(address addr, bool trusted)
         public
         onlyRole(ADMIN_ROLE)
@@ -57,12 +59,31 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
         trustedForwarders[addr] = trusted;
     }
 
-    /// @notice Internal function to transfer a token
-    /// @dev Only the token owner can transfer (no approvals)
-    /// @dev Clears all privileges and beneficiaries
-    /// @param from Old owner
-    /// @param to New owner
-    /// @param tokenId Token Id to be transferred
+    /**
+     * @notice Gets the definition URI associated to a token
+     * @param tokenId Token Id to be checked
+     * @return definitionURI Definition URI
+     */
+    function getDefinitionURI(uint256 tokenId)
+        external
+        view
+        returns (string memory definitionURI)
+    {
+        definitionURI = _dimoRegistry.getInfo(
+            address(this),
+            tokenId,
+            "Definition URI"
+        );
+    }
+
+    /**
+     * @notice Internal function to transfer a token
+     * @dev Only the token owner can transfer (no approvals)
+     * @dev Clears all privileges and beneficiaries
+     * @param from Old owner
+     * @param to New owner
+     * @param tokenId Token Id to be transferred
+     */
     function _transfer(
         address from,
         address to,

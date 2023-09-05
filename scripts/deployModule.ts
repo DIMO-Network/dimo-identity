@@ -247,17 +247,23 @@ async function upgradeNft(
 }
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
-  const networkName = network.name;
+  let [deployer, user1] = await ethers.getSigners();
+  let networkName = network.name;
 
-  // const deployer = await ethers.getImpersonatedSigner(
-  //   '0x1741eC2915Ab71Fc03492715b5640133dA69420B'
-  // );
+  if (network.name === 'hardhat' || network.name === 'localhost') {
+    networkName = 'mumbai';
 
-  // await user1.sendTransaction({
-  //   to: deployer.address,
-  //   value: ethers.utils.parseEther('100')
-  // });
+    // 0xCED3c922200559128930180d3f0bfFd4d9f4F123
+    // 0x1741eC2915Ab71Fc03492715b5640133dA69420B
+    deployer = await ethers.getImpersonatedSigner(
+      '0x1741eC2915Ab71Fc03492715b5640133dA69420B'
+    );
+
+    await user1.sendTransaction({
+      to: deployer.address,
+      value: ethers.utils.parseEther('100')
+    });
+  }
 
   const instances1 = await updateModule(deployer, 'DevAdmin', networkName);
   writeAddresses(instances1, networkName);

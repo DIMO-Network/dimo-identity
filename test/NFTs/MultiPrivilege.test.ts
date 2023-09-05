@@ -43,6 +43,10 @@ describe('MultiPrivilege', function () {
     ]);
     multiPrivilegeInstance = deployments.MockMultiPrivilege;
 
+    await multiPrivilegeInstance
+      .connect(admin)
+      .grantRole(C.ADMIN_ROLE, admin.address);
+
     const receipt = await (
       await multiPrivilegeInstance['safeMint(address)'](user1.address)
     ).wait();
@@ -69,7 +73,7 @@ describe('MultiPrivilege', function () {
           multiPrivilegeInstance.connect(nonAdmin).createPrivilege(true, '')
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -117,7 +121,7 @@ describe('MultiPrivilege', function () {
           multiPrivilegeInstance.connect(nonAdmin).enablePrivilege(1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });
@@ -180,7 +184,7 @@ describe('MultiPrivilege', function () {
           multiPrivilegeInstance.connect(nonAdmin).disablePrivilege(1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEFAULT_ADMIN_ROLE
+            C.ADMIN_ROLE
           }`
         );
       });

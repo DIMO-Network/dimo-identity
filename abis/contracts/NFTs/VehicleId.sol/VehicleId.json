@@ -5,6 +5,27 @@
     "type": "constructor"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "idProxy",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "errorMessage",
+        "type": "string"
+      }
+    ],
+    "name": "TransferFailed",
+    "type": "error"
+  },
+  {
     "inputs": [],
     "name": "Unauthorized",
     "type": "error"
@@ -364,6 +385,19 @@
   },
   {
     "inputs": [],
+    "name": "SAFE_TRANSFER_FROM",
+    "outputs": [
+      {
+        "internalType": "bytes4",
+        "name": "",
+        "type": "bytes4"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "TRANSFERER_ROLE",
     "outputs": [
       {
@@ -536,6 +570,44 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getDataURI",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "dataURI",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getDefinitionURI",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "definitionURI",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes32",
         "name": "role",
         "type": "bytes32"
@@ -643,6 +715,11 @@
       {
         "internalType": "address",
         "name": "dimoRegistry_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "syntheticDeviceId_",
         "type": "address"
       },
       {
@@ -1055,6 +1132,19 @@
         "internalType": "address",
         "name": "addr",
         "type": "address"
+      }
+    ],
+    "name": "setSyntheticDeviceIdAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "addr",
+        "type": "address"
       },
       {
         "internalType": "bool",
@@ -1094,6 +1184,19 @@
         "internalType": "string",
         "name": "",
         "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "syntheticDeviceId",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

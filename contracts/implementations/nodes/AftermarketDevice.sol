@@ -16,15 +16,13 @@ import "../../shared/Errors.sol" as Errors;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-error RegistryNotApproved();
 error DeviceAlreadyRegistered(address addr);
 error DeviceAlreadyClaimed(uint256 id);
 error InvalidAdSignature();
 error AdNotClaimed(uint256 id);
 error AdPaired(uint256 id);
-error VehicleNotPaired(uint256 id);
 error AdNotPaired(uint256 id);
-error OwnersDoesNotMatch();
+error OwnersDoNotMatch();
 
 /**
  * @title AftermarketDevice
@@ -59,6 +57,7 @@ contract AftermarketDevice is
         string info
     );
     event AftermarketDeviceNodeMinted(
+        uint256 indexed manufacturerId,
         uint256 tokenId,
         address indexed aftermarketDeviceAddress,
         address indexed owner
@@ -89,7 +88,7 @@ contract AftermarketDevice is
      */
     function setAftermarketDeviceIdProxyAddress(address addr)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.ADMIN_ROLE)
     {
         if (addr == address(0)) revert Errors.ZeroAddress();
         AftermarketDeviceStorage.getStorage().idProxyAddress = addr;
@@ -104,7 +103,7 @@ contract AftermarketDevice is
      */
     function addAftermarketDeviceAttribute(string calldata attribute)
         external
-        onlyRole(Roles.DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.ADMIN_ROLE)
     {
         if (
             !AttributeSet.add(
@@ -141,8 +140,6 @@ contract AftermarketDevice is
             ManufacturerStorage.getStorage().idProxyAddress
         );
 
-        if (!INFT(adIdProxyAddress).isApprovedForAll(msg.sender, address(this)))
-            revert RegistryNotApproved();
         if (!manufacturerIdProxy.exists(manufacturerNode))
             revert Errors.InvalidParentNode(manufacturerNode);
         if (
@@ -172,13 +169,15 @@ contract AftermarketDevice is
             ads.deviceAddressToNodeId[deviceAddress] = newTokenId;
             ads.nodeIdToDeviceAddress[newTokenId] = deviceAddress;
 
-            _setInfos(newTokenId, adInfos[i].attrInfoPairs);
-
             emit AftermarketDeviceNodeMinted(
+                manufacturerNode,
                 newTokenId,
                 deviceAddress,
                 manufacturerNodeOwner
             );
+
+            if (adInfos[i].attrInfoPairs.length > 0)
+                _setInfos(newTokenId, adInfos[i].attrInfoPairs);
         }
 
         // Validate license and transfer funds to foundation
@@ -202,7 +201,7 @@ contract AftermarketDevice is
         );
 
         if (
-            !_hasRole(Roles.DEFAULT_ADMIN_ROLE, msg.sender) &&
+            !_hasRole(Roles.ADMIN_ROLE, msg.sender) &&
             !manufacturerIdProxy.hasPrivilege(
                 manufacturerNode,
                 MANUFACTURER_CLAIMER_PRIVILEGE,
@@ -249,7 +248,7 @@ contract AftermarketDevice is
         address owner,
         bytes calldata ownerSig,
         bytes calldata aftermarketDeviceSig
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.CLAIM_AD_ROLE) {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         bytes32 message = keccak256(
@@ -298,7 +297,7 @@ contract AftermarketDevice is
         uint256 vehicleNode,
         bytes calldata aftermarketDeviceSig,
         bytes calldata vehicleOwnerSig
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.PAIR_AD_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
@@ -363,7 +362,7 @@ contract AftermarketDevice is
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         bytes calldata signature
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.PAIR_AD_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         bytes32 message = keccak256(
             abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
@@ -388,7 +387,7 @@ contract AftermarketDevice is
             ]
         ) revert AdNotClaimed(aftermarketDeviceNode);
         if (owner != INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode))
-            revert OwnersDoesNotMatch();
+            revert OwnersDoNotMatch();
         if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
             revert Errors.VehiclePaired(vehicleNode);
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
@@ -400,6 +399,53 @@ contract AftermarketDevice is
         ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
 
         emit AftermarketDevicePaired(aftermarketDeviceNode, vehicleNode, owner);
+    }
+
+    /**
+     * @dev Unpairs an aftermarket device from a vehicles
+     * Both vehicle and AD owners can unpair.
+     * @dev Caller must have the admin role
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
+     */
+    function unpairAftermarketDevice(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode
+    ) external {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (
+            ms.links[vehicleIdProxyAddress][vehicleNode] !=
+            aftermarketDeviceNode
+        ) revert Errors.VehicleNotPaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != vehicleNode)
+            revert AdNotPaired(aftermarketDeviceNode);
+
+        address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
+
+        if (
+            msg.sender != adOwner &&
+            msg.sender != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
+        ) revert Errors.Unauthorized(msg.sender);
+
+        delete ms.links[vehicleIdProxyAddress][vehicleNode];
+        delete ms.links[adIdProxyAddress][aftermarketDeviceNode];
+
+        emit AftermarketDeviceUnpaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            adOwner
+        );
     }
 
     /**
@@ -415,7 +461,7 @@ contract AftermarketDevice is
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         bytes calldata signature
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.UNPAIR_AD_ROLE) {
         bytes32 message = keccak256(
             abi.encode(UNPAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
         );
@@ -427,14 +473,14 @@ contract AftermarketDevice is
             .getStorage()
             .idProxyAddress;
 
-        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
-            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
         if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
             revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
         if (
             ms.links[vehicleIdProxyAddress][vehicleNode] !=
             aftermarketDeviceNode
-        ) revert VehicleNotPaired(vehicleNode);
+        ) revert Errors.VehicleNotPaired(vehicleNode);
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != vehicleNode)
             revert AdNotPaired(aftermarketDeviceNode);
 
@@ -446,8 +492,8 @@ contract AftermarketDevice is
             signer != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
         ) revert Errors.InvalidSigner();
 
-        ms.links[vehicleIdProxyAddress][vehicleNode] = 0;
-        ms.links[adIdProxyAddress][aftermarketDeviceNode] = 0;
+        delete ms.links[vehicleIdProxyAddress][vehicleNode];
+        delete ms.links[adIdProxyAddress][aftermarketDeviceNode];
 
         emit AftermarketDeviceUnpaired(
             aftermarketDeviceNode,
@@ -465,7 +511,7 @@ contract AftermarketDevice is
     function setAftermarketDeviceInfo(
         uint256 tokenId,
         Types.AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(Roles.DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(Roles.SET_AD_INFO_ROLE) {
         address adIdProxy = AftermarketDeviceStorage
             .getStorage()
             .idProxyAddress;
@@ -474,9 +520,11 @@ contract AftermarketDevice is
         _setInfos(tokenId, attrInfo);
     }
 
-    /// @notice Gets the AD Id by the device address
-    /// @dev If the device is not minted it will return 0
-    /// @param addr Address associated with the aftermarket device
+    /**
+     * @notice Gets the AD Id by the device address
+     * @dev If the device is not minted it will return 0
+     * @param addr Address associated with the aftermarket device
+     */
     function getAftermarketDeviceIdByAddress(address addr)
         external
         view
@@ -485,6 +533,33 @@ contract AftermarketDevice is
         nodeId = AftermarketDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
         ];
+    }
+
+    /**
+     * @notice Gets the AD address by the node ID
+     * @dev If the device is not minted it will return 0x00 address
+     * @param nodeId Node ID associated with the aftermarket device
+     */
+    function getAftermarketDeviceAddressById(uint256 nodeId)
+        external
+        view
+        returns (address addr)
+    {
+        addr = AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
+            nodeId
+        ];
+    }
+
+    /**
+     * @notice Checks if an AD has been already claimed or not
+     * @param nodeId Node ID associated with the aftermarket device
+     */
+    function isAftermarketDeviceClaimed(uint256 nodeId)
+        external
+        view
+        returns (bool isClaimed)
+    {
+        isClaimed = AftermarketDeviceStorage.getStorage().deviceClaimed[nodeId];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //

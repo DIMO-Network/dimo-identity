@@ -5,9 +5,11 @@ import "../../libraries/AdLicenseValidatorStorage.sol";
 
 error InvalidLicense();
 
-/// @title AdLicenseValidatorInternal
-/// @notice Contract with internal functions to assist in aftermarket device minting
-/// @dev Stake contract repository https://github.com/DIMO-Network/dimo-staking-contract-license-nft
+/**
+ * @title AdLicenseValidatorInternal
+ * @notice Contract with internal functions to assist in aftermarket device minting
+ * @dev Stake contract repository https://github.com/DIMO-Network/dimo-staking-contract-license-nft
+ */
 contract AdLicenseValidatorInternal {
     /**
      * @notice Validates if the manufacturer has a License

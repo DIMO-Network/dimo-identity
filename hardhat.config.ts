@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 
 import { HardhatUserConfig } from 'hardhat/config';
+import * as tdly from '@tenderly/hardhat-tenderly';
 import '@openzeppelin/hardhat-upgrades';
 import '@nomiclabs/hardhat-etherscan';
 import '@nomiclabs/hardhat-waffle';
@@ -14,6 +15,7 @@ import 'hardhat-abi-exporter';
 // eslint-disable-next-line node/no-unpublished-import
 import './scripts/linearization';
 
+tdly.setup();
 dotenv.config();
 
 // You need to export an object to set up your config
@@ -49,7 +51,16 @@ const config: HardhatUserConfig = {
     mumbai: {
       url: process.env.MUMBAI_URL || '',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+    },
+    tenderly: {
+      url: process.env.TENDERLY_URL || '',
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
+  },
+  tenderly: {
+    username: process.env.TENDERLY_USERNAME || '', // tenderly username (or organization name)
+    project: process.env.TENDERLY_PROJECT_NAME || '', // project name
+    privateVerification: false // if true, contracts will be verified privately, if false, contracts will be verified publicly
   },
   contractSizer: {
     alphaSort: true,
@@ -77,6 +88,8 @@ const config: HardhatUserConfig = {
       ':ManufacturerId$',
       ':AftermarketDeviceId$',
       ':VehicleId$',
+      ':IntegrationId$',
+      ':SyntheticDeviceId$',
       ':DimoForwarder$'
     ],
     format: 'json'

@@ -1,12 +1,16 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-/// @title IDimoRegistry
-/// @notice Interface to interact with external functions of DIMORegistry modules
+/**
+ * @title IDimoRegistry
+ * @notice Interface to interact with external functions of DIMORegistry modules
+ */
 interface IDimoRegistry {
     function updateManufacturerMinted(address from, address to) external;
 
     function updateIntegrationMinted(address from, address to) external;
+
+    function validateBurnAndResetNode(uint256 tokenId) external;
 
     function setAftermarketDeviceBeneficiary(
         uint256 nodeId,
@@ -38,4 +42,15 @@ interface IDimoRegistry {
         address idProxyAddressTarget,
         uint256 sourceNode
     ) external view returns (uint256 targetNode);
+
+    function getDataURI(address idProxyAddress, uint256 tokenId)
+        external
+        view
+        returns (string memory data);
+
+    function getInfo(
+        address idProxyAddress,
+        uint256 tokenId,
+        string calldata attribute
+    ) external view returns (string memory info);
 }

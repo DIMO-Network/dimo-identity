@@ -359,17 +359,17 @@ describe('AftermarketDeviceId', async function () {
 
       expect(definitionUriReturn).to.eq('');
     });
-    it('Should correctly return the definition URI set in the token', async () => {
+    it('Should correctly return the definitionURI set in the token', async () => {
       const customDefinitionUri = 'custom.definition.uri';
 
       await aftermarketDeviceInstance.addAftermarketDeviceAttribute(
-        'Definition URI'
+        'DefinitionURI'
       );
       await aftermarketDeviceInstance
         .connect(admin)
         .setAftermarketDeviceInfo(1, [
           {
-            attribute: 'Definition URI',
+            attribute: 'DefinitionURI',
             info: customDefinitionUri
           }
         ]);

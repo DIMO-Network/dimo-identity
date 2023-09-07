@@ -105,7 +105,7 @@ contract VehicleId is Initializable, MultiPrivilege {
         definitionURI = _dimoRegistry.getInfo(
             address(this),
             tokenId,
-            "Definition URI"
+            "DefinitionURI"
         );
     }
 

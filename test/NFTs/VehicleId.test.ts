@@ -570,10 +570,10 @@ describe('VehicleId', async function () {
     it('Should correctly return the data URI set in the token', async () => {
       const customDataUri = 'custom.data.uri';
 
-      await vehicleInstance.addVehicleAttribute('Data URI');
+      await vehicleInstance.addVehicleAttribute('DataURI');
       await vehicleInstance.connect(admin).setVehicleInfo(1, [
         {
-          attribute: 'Data URI',
+          attribute: 'DataURI',
           info: customDataUri
         }
       ]);
@@ -593,10 +593,10 @@ describe('VehicleId', async function () {
     it('Should correctly return the definition URI set in the token', async () => {
       const customDefinitionUri = 'custom.definition.uri';
 
-      await vehicleInstance.addVehicleAttribute('Definition URI');
+      await vehicleInstance.addVehicleAttribute('DefinitionURI');
       await vehicleInstance.connect(admin).setVehicleInfo(1, [
         {
-          attribute: 'Definition URI',
+          attribute: 'DefinitionURI',
           info: customDefinitionUri
         }
       ]);

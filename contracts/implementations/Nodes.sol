@@ -60,7 +60,7 @@ contract Nodes {
         returns (string memory data)
     {
         data = NodesStorage.getStorage().nodes[idProxyAddress][tokenId].info[
-            "Data URI"
+            "DataURI"
         ];
 
         if (bytes(data).length == 0)

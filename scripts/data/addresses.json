@@ -26,7 +26,7 @@
                 ]
             },
             "Nodes": {
-                "address": "0x2f8320468950e1a933669F4bF9CDb50E79117137",
+                "address": "0x4fAfd447b757a0316B3B1DBd476dDAd4739C1618",
                 "selectors": [
                     "0xbc60a6ba",
                     "0xdce2f860",
@@ -157,11 +157,11 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0x96198B0969ae01D5E8E6A2950772D92a5799635F"
+                "implementation": "0x54E27D28A7518651979fC3010B79A42676C4D44C"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0x0793530DC7c5018388AcEf0A359C51138e7ff5A7"
+                "implementation": "0xD837C5300cFacDBDbD08D44F559f64408E4ac79B"
             },
             "SyntheticDeviceId": {
                 "proxy": "0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D",
@@ -212,7 +212,7 @@
                 ]
             },
             "Nodes": {
-                "address": "0xb09501d6c6676b4D87b2D9C34A372553054FE8a1",
+                "address": "0x655c79d873330D0C9AA82cd23cA7af7A686e00d6",
                 "selectors": [
                     "0xbc60a6ba",
                     "0xdce2f860",

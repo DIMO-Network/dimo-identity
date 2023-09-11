@@ -68,10 +68,10 @@ export const vehicleAttributes = [
   'Make',
   'Model',
   'Year',
-  'Data URI',
-  'Definition URI'
+  'DataURI',
+  'DefinitionURI'
 ];
-export const adAttributes = ['Serial', 'IMEI', 'Definition URI'];
+export const adAttributes = ['Serial', 'IMEI', 'DefinitionURI'];
 export const sdAttributes = [];
 
 export const manufacturerIdArgs = {

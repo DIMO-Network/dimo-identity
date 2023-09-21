@@ -1,27 +1,9 @@
 import { ethers } from 'hardhat';
 
-export function nodeHash(inputName: string) {
-  let node = '00'.repeat(32);
-
-  if (inputName) {
-    const labels = inputName.split('.');
-
-    for (let i = labels.length - 1; i >= 0; i--) {
-      const labelHash = ethers.utils.keccak256(Buffer.from(labels[i]));
-      node = ethers.utils.solidityKeccak256(
-        ['uint256', 'uint256'],
-        [node, labelHash]
-      );
-    }
-  }
-
-  return node;
-}
-
 export function getSelectors(_interface: any): Array<string> {
-  return Object.keys(_interface.functions).map((item) =>
-    _interface.getSighash(item)
-  );
+  return _interface.fragments
+    .filter((frag: any) => frag.type === 'function')
+    .map((frag: any) => ethers.id(frag.format('sighash')).substring(0, 10));
 }
 
 export function bytesToHex(uint8a: Uint8Array): string {

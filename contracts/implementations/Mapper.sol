@@ -48,11 +48,10 @@ contract Mapper {
     /// @notice Gets the link between vehicle and aftermarket device nodes
     /// @param idProxyAddress The address of the NFT proxy
     /// @param sourceNode The source node id to be queried
-    function getLink(address idProxyAddress, uint256 sourceNode)
-        external
-        view
-        returns (uint256 targetNode)
-    {
+    function getLink(
+        address idProxyAddress,
+        uint256 sourceNode
+    ) external view returns (uint256 targetNode) {
         targetNode = MapperStorage.getStorage().links[idProxyAddress][
             sourceNode
         ];
@@ -80,11 +79,10 @@ contract Mapper {
      * @param idProxyAddress The address of the NFT proxy
      * @param nodeId The node Id to be queried
      */
-    function getBeneficiary(address idProxyAddress, uint256 nodeId)
-        external
-        view
-        returns (address beneficiary)
-    {
+    function getBeneficiary(
+        address idProxyAddress,
+        uint256 nodeId
+    ) external view returns (address beneficiary) {
         beneficiary = MapperStorage.getStorage().beneficiaries[idProxyAddress][
             nodeId
         ];

@@ -1,20 +1,23 @@
 import chai from 'chai';
-import { waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
-import { DimoAccessControl, BaseDataURI } from '../../typechain';
+import { DimoAccessControl, BaseDataURI } from '../../typechain-types';
 import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('BaseDataURI', async function () {
   let snapshot: string;
   let dimoAccessControlInstance: DimoAccessControl;
   let baseDataUriInstance: BaseDataURI;
 
-  const [admin, nonAdmin, mockProxy] = provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let nonAdmin: HardhatEthersSigner;
+  let mockProxy: HardhatEthersSigner;
 
   before(async () => {
+    [admin, nonAdmin, mockProxy] = await ethers.getSigners();
+
     const deployments = await setup(admin, {
       modules: ['DimoAccessControl', 'BaseDataURI'],
       nfts: [],

@@ -17,25 +17,22 @@ interface IDimoRegistry {
         address beneficiary
     ) external;
 
-    function isController(address addr)
-        external
-        view
-        returns (bool _isController);
+    function isController(
+        address addr
+    ) external view returns (bool _isController);
 
-    function isManufacturerMinted(address addr)
-        external
-        view
-        returns (bool _isManufacturerMinted);
+    function isManufacturerMinted(
+        address addr
+    ) external view returns (bool _isManufacturerMinted);
 
-    function isAllowedToOwnManufacturerNode(address addr)
-        external
-        view
-        returns (bool _isAllowed);
+    function isAllowedToOwnManufacturerNode(
+        address addr
+    ) external view returns (bool _isAllowed);
 
-    function getLink(address idProxyAddress, uint256 sourceNode)
-        external
-        view
-        returns (uint256 targetNode);
+    function getLink(
+        address idProxyAddress,
+        uint256 sourceNode
+    ) external view returns (uint256 targetNode);
 
     function getNodeLink(
         address idProxyAddressSource,
@@ -43,10 +40,10 @@ interface IDimoRegistry {
         uint256 sourceNode
     ) external view returns (uint256 targetNode);
 
-    function getDataURI(address idProxyAddress, uint256 tokenId)
-        external
-        view
-        returns (string memory data);
+    function getDataURI(
+        address idProxyAddress,
+        uint256 tokenId
+    ) external view returns (string memory data);
 
     function getInfo(
         address idProxyAddress,

@@ -1,7 +1,9 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { EventLog } from 'ethers';
+import { ethers, HardhatEthersSigner } from 'hardhat';
+import { time } from '@nomicfoundation/hardhat-network-helpers';
 
-import { MockMultiPrivilege } from '../../typechain';
+import { MockMultiPrivilege } from '../../typechain-types';
 import {
   deployUpgradeableContracts,
   createSnapshot,
@@ -11,7 +13,6 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('MultiPrivilege', function () {
   let snapshot: string;
@@ -19,13 +20,24 @@ describe('MultiPrivilege', function () {
   let nftTokenId: string;
   let expiresAtDefault: number;
 
-  const [admin, nonAdmin, user1, user2, user3, newOwner] =
-    provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let nonAdmin: HardhatEthersSigner;
+  let user1: HardhatEthersSigner;
+  let user2: HardhatEthersSigner;
+  let user3: HardhatEthersSigner;
+  let newOwner: HardhatEthersSigner;
 
   before(async () => {
-    const blockNumBefore = await ethers.provider.getBlockNumber();
-    const blockBefore = await ethers.provider.getBlock(blockNumBefore);
-    expiresAtDefault = blockBefore.timestamp + 31556926; // + 1 year
+    [
+      admin,
+      nonAdmin,
+      user1,
+      user2,
+      user3,
+      newOwner
+    ] = await ethers.getSigners();
+
+    expiresAtDefault = await time.latest() + 31556926; // + 1 year
 
     const deployments = await deployUpgradeableContracts(admin, [
       {
@@ -51,11 +63,7 @@ describe('MultiPrivilege', function () {
       await multiPrivilegeInstance['safeMint(address)'](user1.address)
     ).wait();
 
-    nftTokenId = receipt.events
-      ?.filter((x: any) => {
-        return x.event === 'Transfer';
-      })[0]
-      .args?.tokenId.toString();
+    nftTokenId = (receipt?.logs[0] as EventLog).args[2].toString()
   });
 
   beforeEach(async () => {
@@ -72,8 +80,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance.connect(nonAdmin).createPrivilege(true, '')
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
         );
       });
@@ -120,8 +127,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance.connect(nonAdmin).enablePrivilege(1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
         );
       });
@@ -183,8 +189,7 @@ describe('MultiPrivilege', function () {
         await expect(
           multiPrivilegeInstance.connect(nonAdmin).disablePrivilege(1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
         );
       });
@@ -299,11 +304,11 @@ describe('MultiPrivilege', function () {
           .grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
         await multiPrivilegeInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            newOwner.address,
-            nftTokenId
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          newOwner.address,
+          nftTokenId
+        );
 
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
 
@@ -324,11 +329,11 @@ describe('MultiPrivilege', function () {
           .grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
         await multiPrivilegeInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            newOwner.address,
-            nftTokenId
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          newOwner.address,
+          nftTokenId
+        );
 
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
 
@@ -357,16 +362,8 @@ describe('MultiPrivilege', function () {
         await multiPrivilegeInstance['safeMint(address)'](user1.address)
       ).wait();
 
-      nftTokenId2 = receipt2.events
-        ?.filter((x: any) => {
-          return x.event === 'Transfer';
-        })[0]
-        .args?.tokenId.toString();
-      nftTokenId3 = receipt3.events
-        ?.filter((x: any) => {
-          return x.event === 'Transfer';
-        })[0]
-        .args?.tokenId.toString();
+      nftTokenId2 = (receipt2?.logs[0] as EventLog).args[2].toString()
+      nftTokenId3 = (receipt3?.logs[0] as EventLog).args[2].toString()
 
       mockSetPrivilegeData = [
         {
@@ -494,11 +491,11 @@ describe('MultiPrivilege', function () {
           .grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
         await multiPrivilegeInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            newOwner.address,
-            nftTokenId
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          newOwner.address,
+          nftTokenId
+        );
 
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
 
@@ -519,11 +516,11 @@ describe('MultiPrivilege', function () {
           .grantRole(C.NFT_TRANSFERER_ROLE, user1.address);
         await multiPrivilegeInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            newOwner.address,
-            nftTokenId
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          newOwner.address,
+          nftTokenId
+        );
 
         await multiPrivilegeInstance.createPrivilege(true, ''); // 1
 
@@ -567,8 +564,9 @@ describe('MultiPrivilege', function () {
       ).to.be.false;
     });
     it('Should return false if privilege is expired', async () => {
-      await provider.send('evm_increaseTime', [expiresAtDefault * 100]);
-      await provider.send('evm_mine', []);
+      await time.increase(expiresAtDefault + 100);
+      // await provider.send('evm_increaseTime', [expiresAtDefault * 100]);
+      // await provider.send('evm_mine', []);
 
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -607,11 +605,11 @@ describe('MultiPrivilege', function () {
 
         await multiPrivilegeInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            newOwner.address,
-            nftTokenId
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          newOwner.address,
+          nftTokenId
+        );
 
         // eslint-disable-next-line no-unused-expressions
         expect(
@@ -634,11 +632,11 @@ describe('MultiPrivilege', function () {
 
         await multiPrivilegeInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            newOwner.address,
-            nftTokenId
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          newOwner.address,
+          nftTokenId
+        );
 
         // eslint-disable-next-line no-unused-expressions
         expect(
@@ -661,11 +659,11 @@ describe('MultiPrivilege', function () {
 
         await multiPrivilegeInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            newOwner.address,
-            nftTokenId
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          newOwner.address,
+          nftTokenId
+        );
 
         // eslint-disable-next-line no-unused-expressions
         expect(

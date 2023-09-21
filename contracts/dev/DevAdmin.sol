@@ -233,10 +233,9 @@ contract DevAdmin is AccessControlInternal {
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenIds List of vehicle node ids
      */
-    function adminBurnVehicles(uint256[] calldata tokenIds)
-        external
-        onlyRole(DEV_VEHICLE_BURN_ROLE)
-    {
+    function adminBurnVehicles(
+        uint256[] calldata tokenIds
+    ) external onlyRole(DEV_VEHICLE_BURN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
 
@@ -282,10 +281,9 @@ contract DevAdmin is AccessControlInternal {
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenIds List of vehicle node ids
      */
-    function adminBurnVehiclesAndDeletePairings(uint256[] calldata tokenIds)
-        external
-        onlyRole(DEV_VEHICLE_BURN_ROLE)
-    {
+    function adminBurnVehiclesAndDeletePairings(
+        uint256[] calldata tokenIds
+    ) external onlyRole(DEV_VEHICLE_BURN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage

@@ -19,11 +19,10 @@ contract Nodes {
      * @param idProxyAddress The address of the proxy associated with the node Id
      * @param tokenId the id associated to the node
      */
-    function getParentNode(address idProxyAddress, uint256 tokenId)
-        external
-        view
-        returns (uint256 parentNode)
-    {
+    function getParentNode(
+        address idProxyAddress,
+        uint256 tokenId
+    ) external view returns (uint256 parentNode) {
         parentNode = NodesStorage
         .getStorage()
         .nodes[idProxyAddress][tokenId].parentNode;
@@ -54,11 +53,10 @@ contract Nodes {
      * @param tokenId Node id from which info will be obtained
      * @return data Data obtained
      */
-    function getDataURI(address idProxyAddress, uint256 tokenId)
-        external
-        view
-        returns (string memory data)
-    {
+    function getDataURI(
+        address idProxyAddress,
+        uint256 tokenId
+    ) external view returns (string memory data) {
         data = NodesStorage.getStorage().nodes[idProxyAddress][tokenId].info[
             "DataURI"
         ];

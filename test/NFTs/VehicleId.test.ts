@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -21,7 +21,7 @@ import {
   Mapper,
   MockDimoToken,
   MockStake
-} from '../../typechain';
+} from '../../typechain-types';
 import {
   setup,
   grantAdminRoles,
@@ -32,7 +32,6 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('VehicleId', async function () {
   let snapshot: string;
@@ -56,18 +55,16 @@ describe('VehicleId', async function () {
   let adIdInstance: AftermarketDeviceId;
   let sdIdInstance: SyntheticDeviceId;
 
-  const [
-    admin,
-    nonAdmin,
-    foundation,
-    manufacturer1,
-    integrationOwner1,
-    user1,
-    user2,
-    adAddress1,
-    adAddress2,
-    sdAddress1
-  ] = provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let nonAdmin: HardhatEthersSigner;
+  let foundation: HardhatEthersSigner;
+  let manufacturer1: HardhatEthersSigner;
+  let integrationOwner1: HardhatEthersSigner;
+  let user1: HardhatEthersSigner;
+  let user2: HardhatEthersSigner;
+  let adAddress1: HardhatEthersSigner;
+  let adAddress2: HardhatEthersSigner;
+  let sdAddress1: HardhatEthersSigner;
 
   const mockAftermarketDeviceInfosList = JSON.parse(
     JSON.stringify(C.mockAftermarketDeviceInfosList)
@@ -75,12 +72,26 @@ describe('VehicleId', async function () {
   const mockAftermarketDeviceInfosListNotWhitelisted = JSON.parse(
     JSON.stringify(C.mockAftermarketDeviceInfosListNotWhitelisted)
   );
-  mockAftermarketDeviceInfosList[0].addr = adAddress1.address;
-  mockAftermarketDeviceInfosList[1].addr = adAddress2.address;
-  mockAftermarketDeviceInfosListNotWhitelisted[0].addr = adAddress1.address;
-  mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
+    [
+      admin,
+      nonAdmin,
+      foundation,
+      manufacturer1,
+      integrationOwner1,
+      user1,
+      user2,
+      adAddress1,
+      adAddress2,
+      sdAddress1
+    ] = await ethers.getSigners();
+
+    mockAftermarketDeviceInfosList[0].addr = adAddress1.address;
+    mockAftermarketDeviceInfosList[1].addr = adAddress2.address;
+    mockAftermarketDeviceInfosListNotWhitelisted[0].addr = adAddress1.address;
+    mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
+
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
@@ -127,42 +138,42 @@ describe('VehicleId', async function () {
 
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await integrationIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await sdIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Set base data URI
     await baseDataUriInstance.setBaseDataURI(
-      vehicleIdInstance.address,
+      await vehicleIdInstance.getAddress(),
       C.BASE_DATA_URI
     );
 
     // Set NFT Proxies
     await manufacturerInstance
       .connect(admin)
-      .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
+      .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress());
     await integrationInstance
       .connect(admin)
-      .setIntegrationIdProxyAddress(integrationIdInstance.address);
+      .setIntegrationIdProxyAddress(await integrationIdInstance.getAddress());
     await vehicleInstance
       .connect(admin)
-      .setVehicleIdProxyAddress(vehicleIdInstance.address);
+      .setVehicleIdProxyAddress(await vehicleIdInstance.getAddress());
     await aftermarketDeviceInstance
       .connect(admin)
-      .setAftermarketDeviceIdProxyAddress(adIdInstance.address);
+      .setAftermarketDeviceIdProxyAddress(await adIdInstance.getAddress());
     await syntheticDeviceInstance
       .connect(admin)
-      .setSyntheticDeviceIdProxyAddress(sdIdInstance.address);
+      .setSyntheticDeviceIdProxyAddress(await sdIdInstance.getAddress());
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -177,12 +188,10 @@ describe('VehicleId', async function () {
     mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
       C.oneBillionE18
     );
-    await mockDimoTokenInstance.deployed();
 
     // Deploy MockStake contract
     const MockStakeFactory = await ethers.getContractFactory('MockStake');
     mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
-    await mockStakeInstance.deployed();
 
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
@@ -190,14 +199,14 @@ describe('VehicleId', async function () {
       .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
     await mockDimoTokenInstance
       .connect(manufacturer1)
-      .approve(dimoRegistryInstance.address, C.manufacturerDimoTokensAmount);
+      .approve(await dimoRegistryInstance.getAddress(), C.manufacturerDimoTokensAmount);
 
     // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
     await adLicenseValidatorInstance.setDimoToken(
-      mockDimoTokenInstance.address
+      await mockDimoTokenInstance.getAddress()
     );
-    await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
+    await adLicenseValidatorInstance.setLicense(await mockStakeInstance.getAddress());
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Whitelist Manufacturer attributes
@@ -263,12 +272,12 @@ describe('VehicleId', async function () {
     // Grant Transferer role to DIMO Registry
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_TRANSFERER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_TRANSFERER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Minting aftermarket devices for testing
     await adIdInstance
       .connect(manufacturer1)
-      .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      .setApprovalForAll(await aftermarketDeviceInstance.getAddress(), true);
 
     await aftermarketDeviceInstance
       .connect(manufacturer1)
@@ -280,18 +289,18 @@ describe('VehicleId', async function () {
     // Setting DimoRegistry address in the Proxy IDs
     await manufacturerIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(dimoRegistryInstance.address);
+      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
     await vehicleIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(dimoRegistryInstance.address);
+      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
     await adIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(dimoRegistryInstance.address);
+      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
 
     const claimOwnerSig1 = await signMessage({
       _signer: user1,
       _primaryType: 'ClaimAftermarketDeviceSign',
-      _verifyingContract: aftermarketDeviceInstance.address,
+      _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '1',
         owner: user1.address
@@ -300,7 +309,7 @@ describe('VehicleId', async function () {
     const claimAdSig1 = await signMessage({
       _signer: adAddress1,
       _primaryType: 'ClaimAftermarketDeviceSign',
-      _verifyingContract: aftermarketDeviceInstance.address,
+      _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '1',
         owner: user1.address
@@ -335,15 +344,14 @@ describe('VehicleId', async function () {
           .connect(nonAdmin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
     it('Should revert if addr is zero address', async () => {
       await expect(
         vehicleIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('ZeroAddress');
+      ).to.be.revertedWithCustomError(vehicleIdInstance, 'ZeroAddress');
     });
   });
 
@@ -354,8 +362,7 @@ describe('VehicleId', async function () {
           .connect(nonAdmin)
           .setSyntheticDeviceIdAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
@@ -383,8 +390,7 @@ describe('VehicleId', async function () {
           .connect(nonAdmin)
           .setTrustedForwarder(C.ZERO_ADDRESS, true)
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
@@ -430,12 +436,12 @@ describe('VehicleId', async function () {
         await expect(
           vehicleIdInstance
             .connect(user2)
-            ['safeTransferFrom(address,address,uint256)'](
-              user1.address,
-              user2.address,
-              1
-            )
-        ).to.be.revertedWith('Unauthorized');
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            1
+          )
+        ).to.be.revertedWithCustomError(vehicleIdInstance, 'Unauthorized');
       });
     });
 
@@ -445,37 +451,37 @@ describe('VehicleId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         expect(await vehicleIdInstance.ownerOf(1)).to.equal(user2.address);
       });
       it('Should keep the same parent node', async () => {
         const parentNode = await nodesInstance.getParentNode(
-          vehicleIdInstance.address,
+          await vehicleIdInstance.getAddress(),
           1
         );
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         expect(
-          await nodesInstance.getParentNode(vehicleIdInstance.address, 1)
+          await nodesInstance.getParentNode(await vehicleIdInstance.getAddress(), 1)
         ).to.equal(parentNode);
       });
       it('Should keep the aftermarket device pairing', async () => {
         const pairSignature = await signMessage({
           _signer: user1,
           _primaryType: 'PairAftermarketDeviceSign',
-          _verifyingContract: aftermarketDeviceInstance.address,
+          _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
             vehicleNode: '1'
@@ -484,41 +490,41 @@ describe('VehicleId', async function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-            1,
-            1,
-            pairSignature
-          );
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+          1,
+          1,
+          pairSignature
+        );
 
         const vehicleIdToAdId = await mapperInstance.getLink(
-          vehicleIdInstance.address,
+          await vehicleIdInstance.getAddress(),
           1
         );
         const adIdToVehicleId = await mapperInstance.getLink(
-          adIdInstance.address,
+          await adIdInstance.getAddress(),
           1
         );
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         expect(
-          await nodesInstance.getParentNode(vehicleIdInstance.address, 1)
+          await nodesInstance.getParentNode(await vehicleIdInstance.getAddress(), 1)
         ).to.equal(vehicleIdToAdId);
         expect(
-          await nodesInstance.getParentNode(adIdInstance.address, 1)
+          await nodesInstance.getParentNode(await adIdInstance.getAddress(), 1)
         ).to.equal(adIdToVehicleId);
       });
       it('Should keep the same infos', async () => {
         for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              vehicleIdInstance.address,
+              await vehicleIdInstance.getAddress(),
               1,
               attrInfoPair.attribute
             )
@@ -527,16 +533,16 @@ describe('VehicleId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              vehicleIdInstance.address,
+              await vehicleIdInstance.getAddress(),
               1,
               attrInfoPair.attribute
             )
@@ -548,14 +554,14 @@ describe('VehicleId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
-          previousVersion.add(1)
+          previousVersion + ethers.toBigInt(1)
         );
       });
     });
@@ -612,7 +618,8 @@ describe('VehicleId', async function () {
       it('Should revert if token is not a Vehicle', async () => {
         await expect(
           vehicleIdInstance.connect(user1).burn(99)
-        ).to.be.revertedWith(`InvalidNode("${vehicleIdInstance.address}", 99)`);
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidNode')
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it('Should revert if caller is not the token owner', async () => {
         await vehicleInstance
@@ -627,7 +634,7 @@ describe('VehicleId', async function () {
         const localPairSignature = await signMessage({
           _signer: user1,
           _primaryType: 'PairAftermarketDeviceSign',
-          _verifyingContract: aftermarketDeviceInstance.address,
+          _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
             vehicleNode: '1'
@@ -636,21 +643,22 @@ describe('VehicleId', async function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-            1,
-            1,
-            localPairSignature
-          );
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+          1,
+          1,
+          localPairSignature
+        );
 
         await expect(
           vehicleIdInstance.connect(user1).burn(1)
-        ).to.be.revertedWith('VehiclePaired(1)');
+        ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
+          .withArgs(1);
       });
       it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
         const localMintVehicleOwnerSig = await signMessage({
           _signer: user1,
           _primaryType: 'MintSyntheticDeviceSign',
-          _verifyingContract: syntheticDeviceInstance.address,
+          _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
             integrationNode: '1',
             vehicleNode: '1'
@@ -659,7 +667,7 @@ describe('VehicleId', async function () {
         const mintSyntheticDeviceSig1 = await signMessage({
           _signer: sdAddress1,
           _primaryType: 'MintSyntheticDeviceSign',
-          _verifyingContract: syntheticDeviceInstance.address,
+          _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
             integrationNode: '1',
             vehicleNode: '1'
@@ -680,7 +688,8 @@ describe('VehicleId', async function () {
 
         await expect(
           vehicleIdInstance.connect(user1).burn(1)
-        ).to.be.revertedWith('VehiclePaired(1)');
+        ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
+          .withArgs(1);
       });
 
       context('State', () => {
@@ -688,7 +697,7 @@ describe('VehicleId', async function () {
           await vehicleIdInstance.connect(user1).burn(1);
 
           const parentNode = await nodesInstance.getParentNode(
-            sdIdInstance.address,
+            await sdIdInstance.getAddress(),
             1
           );
 
@@ -706,14 +715,14 @@ describe('VehicleId', async function () {
 
           expect(
             await nodesInstance.getInfo(
-              sdIdInstance.address,
+              await sdIdInstance.getAddress(),
               1,
               C.mockSyntheticDeviceAttribute1
             )
           ).to.be.equal('');
           expect(
             await nodesInstance.getInfo(
-              sdIdInstance.address,
+              await sdIdInstance.getAddress(),
               1,
               C.mockSyntheticDeviceAttribute2
             )
@@ -725,7 +734,7 @@ describe('VehicleId', async function () {
           await vehicleIdInstance.connect(user1).burn(1);
 
           expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
-            previousVersion.add(1)
+            previousVersion + ethers.toBigInt(1)
           );
         });
       });

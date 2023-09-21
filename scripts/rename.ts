@@ -1,7 +1,6 @@
 import fs from 'fs';
 import * as csv from 'fast-csv';
-import { ethers, network } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { ethers, network, HardhatEthersSigner } from 'hardhat';
 
 import addressesJSON from './data/addresses.json';
 import { AddressesByNetwork, IdManufacturerName } from '../utils';
@@ -78,7 +77,7 @@ async function matchChainWithDb(
 
 // eslint-disable-next-line no-unused-vars
 async function renameManufacturers(
-  signer: SignerWithAddress,
+  signer: HardhatEthersSigner,
   idManufacturerNames: IdManufacturerName[],
   networkName: string
 ) {

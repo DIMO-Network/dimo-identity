@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 
 const _hashRole = (role: string) =>
-  ethers.utils.keccak256(ethers.utils.toUtf8Bytes(role));
+  ethers.keccak256(ethers.toUtf8Bytes(role));
 
 export const roles = {
   DEFAULT_ADMIN_ROLE:
@@ -41,7 +41,7 @@ export const dimoRegistryName = 'DIMORegistry';
 
 export const eip712Name = 'DIMO';
 export const eip712Version = '1';
-export const adMintCost = ethers.utils.parseEther('50');
+export const adMintCost = ethers.parseEther('50');
 
 export const MANUFACTURER_NFT_NAME = 'DIMO Manufacturer ID';
 export const MANUFACTURER_NFT_SYMBOL = 'DIMO/MANUFACTURER';

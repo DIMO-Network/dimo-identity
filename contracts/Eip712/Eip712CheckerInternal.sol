@@ -38,11 +38,10 @@ library Eip712CheckerInternal {
      * @param message Hashed data payload
      * @param signature Signed data payload
      */
-    function _recover(bytes32 message, bytes calldata signature)
-        internal
-        view
-        returns (address signer)
-    {
+    function _recover(
+        bytes32 message,
+        bytes calldata signature
+    ) internal view returns (address signer) {
         bytes32 msgHash = keccak256(
             abi.encodePacked("\x19\x01", _eip712Domain(), message)
         );

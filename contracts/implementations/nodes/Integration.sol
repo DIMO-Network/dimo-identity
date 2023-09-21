@@ -44,10 +44,9 @@ contract Integration is AccessControlInternal {
      * @dev Only an admin can set the address
      * @param addr The address of the proxy
      */
-    function setIntegrationIdProxyAddress(address addr)
-        external
-        onlyRole(Roles.ADMIN_ROLE)
-    {
+    function setIntegrationIdProxyAddress(
+        address addr
+    ) external onlyRole(Roles.ADMIN_ROLE) {
         if (addr == address(0)) revert Errors.ZeroAddress();
         IntegrationStorage.getStorage().idProxyAddress = addr;
 
@@ -59,10 +58,9 @@ contract Integration is AccessControlInternal {
      * @dev Only an admin can add a new attribute
      * @param attribute The attribute to be added
      */
-    function addIntegrationAttribute(string calldata attribute)
-        external
-        onlyRole(Roles.ADMIN_ROLE)
-    {
+    function addIntegrationAttribute(
+        string calldata attribute
+    ) external onlyRole(Roles.ADMIN_ROLE) {
         if (
             !AttributeSet.add(
                 IntegrationStorage.getStorage().whitelistedAttributes,
@@ -78,10 +76,9 @@ contract Integration is AccessControlInternal {
      * @dev Only an admin can set new controllers
      * @param _controller The address of the controller
      */
-    function setIntegrationController(address _controller)
-        external
-        onlyRole(Roles.ADMIN_ROLE)
-    {
+    function setIntegrationController(
+        address _controller
+    ) external onlyRole(Roles.ADMIN_ROLE) {
         IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
         if (_controller == address(0)) revert Errors.ZeroAddress();
         if (s.controllers[_controller].isController)
@@ -101,10 +98,10 @@ contract Integration is AccessControlInternal {
      * @param owner The address of the new owner
      * @param names List of integration names
      */
-    function mintIntegrationBatch(address owner, string[] calldata names)
-        external
-        onlyRole(Roles.MINT_INTEGRATION_ROLE)
-    {
+    function mintIntegrationBatch(
+        address owner,
+        string[] calldata names
+    ) external onlyRole(Roles.MINT_INTEGRATION_ROLE) {
         if (!_hasRole(Roles.ADMIN_ROLE, owner)) revert MustBeAdmin(owner);
 
         IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
@@ -186,10 +183,10 @@ contract Integration is AccessControlInternal {
      * @param from the address to be verified and set
      * @param to the address to be verified
      */
-    function updateIntegrationMinted(address from, address to)
-        external
-        onlyNftProxy
-    {
+    function updateIntegrationMinted(
+        address from,
+        address to
+    ) external onlyNftProxy {
         IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
         if (
             !s.controllers[to].isController ||
@@ -204,11 +201,9 @@ contract Integration is AccessControlInternal {
      * @notice Verify if an address is a controller
      * @param addr the address to be verified
      */
-    function isIntegrationController(address addr)
-        external
-        view
-        returns (bool _isController)
-    {
+    function isIntegrationController(
+        address addr
+    ) external view returns (bool _isController) {
         _isController = IntegrationStorage
             .getStorage()
             .controllers[addr]
@@ -219,11 +214,9 @@ contract Integration is AccessControlInternal {
      * @notice Verify if an address has minted an integration
      * @param addr the address to be verified
      */
-    function isIntegrationMinted(address addr)
-        external
-        view
-        returns (bool _isIntegrationMinted)
-    {
+    function isIntegrationMinted(
+        address addr
+    ) external view returns (bool _isIntegrationMinted) {
         _isIntegrationMinted = IntegrationStorage
             .getStorage()
             .controllers[addr]
@@ -235,11 +228,9 @@ contract Integration is AccessControlInternal {
      * @dev The address must be a controller and not yet minted a node
      * @param addr the address to be verified
      */
-    function isAllowedToOwnIntegrationNode(address addr)
-        external
-        view
-        returns (bool _isAllowed)
-    {
+    function isAllowedToOwnIntegrationNode(
+        address addr
+    ) external view returns (bool _isAllowed) {
         IntegrationStorage.Storage storage ms = IntegrationStorage.getStorage();
         _isAllowed =
             ms.controllers[addr].isController &&
@@ -251,11 +242,9 @@ contract Integration is AccessControlInternal {
      * @dev If the integration is not minted it will return 0
      * @param name Name associated with the integration
      */
-    function getIntegrationIdByName(string calldata name)
-        external
-        view
-        returns (uint256 nodeId)
-    {
+    function getIntegrationIdByName(
+        string calldata name
+    ) external view returns (uint256 nodeId) {
         nodeId = IntegrationStorage.getStorage().integrationNameToNodeId[name];
     }
 
@@ -264,11 +253,9 @@ contract Integration is AccessControlInternal {
      * @dev If the integration is not minted it will return an empty string
      * @param tokenId Token id to get the associated name
      */
-    function getIntegrationNameById(uint256 tokenId)
-        external
-        view
-        returns (string memory name)
-    {
+    function getIntegrationNameById(
+        uint256 tokenId
+    ) external view returns (string memory name) {
         name = IntegrationStorage.getStorage().nodeIdToIntegrationName[tokenId];
     }
 

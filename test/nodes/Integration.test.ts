@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -7,7 +7,7 @@ import {
   Nodes,
   Integration,
   IntegrationId
-} from '../../typechain';
+} from '../../typechain-types';
 import {
   initialize,
   setup,
@@ -18,7 +18,6 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('Integration', async function () {
   let snapshot: string;
@@ -28,10 +27,21 @@ describe('Integration', async function () {
   let integrationInstance: Integration;
   let integrationIdInstance: IntegrationId;
 
-  const [admin, nonAdmin, integrationOwner1, integrationOwner2, nonController] =
-    provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let nonAdmin: HardhatEthersSigner;
+  let integrationOwner1: HardhatEthersSigner;
+  let integrationOwner2: HardhatEthersSigner;
+  let nonController: HardhatEthersSigner;
 
   before(async () => {
+    [
+      admin,
+      nonAdmin,
+      integrationOwner1,
+      integrationOwner2,
+      nonController
+    ] = await ethers.getSigners();
+
     const deployments = await setup(admin, {
       modules: ['DimoAccessControl', 'Nodes', 'Integration'],
       nfts: ['IntegrationId'],
@@ -48,12 +58,12 @@ describe('Integration', async function () {
 
     await integrationIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Set NFT Proxy
     await integrationInstance
       .connect(admin)
-      .setIntegrationIdProxyAddress(integrationIdInstance.address);
+      .setIntegrationIdProxyAddress(await integrationIdInstance.getAddress());
 
     // Whitelist Integration attributes
     await integrationInstance
@@ -94,10 +104,9 @@ describe('Integration', async function () {
         await expect(
           localIntegrationInstance
             .connect(nonAdmin)
-            .setIntegrationIdProxyAddress(integrationIdInstance.address)
+            .setIntegrationIdProxyAddress(await integrationIdInstance.getAddress())
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
         );
       });
@@ -106,7 +115,7 @@ describe('Integration', async function () {
           localIntegrationInstance
             .connect(admin)
             .setIntegrationIdProxyAddress(C.ZERO_ADDRESS)
-        ).to.be.revertedWith('ZeroAddress');
+        ).to.be.revertedWithCustomError(localIntegrationInstance, 'ZeroAddress');
       });
     });
 
@@ -115,10 +124,10 @@ describe('Integration', async function () {
         await expect(
           localIntegrationInstance
             .connect(admin)
-            .setIntegrationIdProxyAddress(integrationIdInstance.address)
+            .setIntegrationIdProxyAddress(await integrationIdInstance.getAddress())
         )
           .to.emit(localIntegrationInstance, 'IntegrationIdProxySet')
-          .withArgs(integrationIdInstance.address);
+          .withArgs(await integrationIdInstance.getAddress());
       });
     });
   });
@@ -131,8 +140,7 @@ describe('Integration', async function () {
             .connect(nonAdmin)
             .addIntegrationAttribute(C.mockIntegrationAttribute1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
         );
       });
@@ -141,9 +149,10 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .addIntegrationAttribute(C.mockIntegrationAttribute1)
-        ).to.be.revertedWith(
-          `AttributeExists("${C.mockIntegrationAttribute1}")`
-        );
+        ).to.be.revertedWithCustomError(
+          integrationInstance,
+          'AttributeExists'
+        ).withArgs(C.mockIntegrationAttribute1);
       });
     });
 
@@ -168,8 +177,7 @@ describe('Integration', async function () {
             .connect(nonAdmin)
             .setIntegrationController(integrationOwner1.address)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
         );
       });
@@ -178,7 +186,7 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .setIntegrationController(C.ZERO_ADDRESS)
-        ).to.be.revertedWith('ZeroAddress');
+        ).to.be.revertedWithCustomError(integrationInstance, 'ZeroAddress');
       });
       it('Should revert if address is already a controller', async () => {
         await integrationInstance
@@ -189,9 +197,10 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .setIntegrationController(integrationOwner1.address)
-        ).to.be.revertedWith(
-          `AlreadyController("${integrationOwner1.address}")`
-        );
+        ).to.be.revertedWithCustomError(
+          integrationInstance,
+          'AlreadyController'
+        ).withArgs(integrationOwner1.address);
       });
     });
 
@@ -216,8 +225,7 @@ describe('Integration', async function () {
             .connect(nonAdmin)
             .mintIntegrationBatch(nonAdmin.address, C.mockIntegrationNames)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.MINT_INTEGRATION_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_INTEGRATION_ROLE
           }`
         );
       });
@@ -226,7 +234,8 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .mintIntegrationBatch(nonAdmin.address, C.mockIntegrationNames)
-        ).to.be.revertedWith(`MustBeAdmin("${nonAdmin.address}")`);
+        ).to.be.revertedWithCustomError(integrationInstance, 'MustBeAdmin')
+          .withArgs(nonAdmin.address);
       });
       it('Should revert if integration name is already registered', async () => {
         await integrationInstance
@@ -237,9 +246,10 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .mintIntegrationBatch(admin.address, C.mockIntegrationNames)
-        ).to.be.revertedWith(
-          `IntegrationNameRegisterd("${C.mockIntegrationNames[0]}")`
-        );
+        ).to.be.revertedWithCustomError(
+          integrationInstance,
+          'IntegrationNameRegisterd'
+        ).withArgs(C.mockIntegrationNames[0]);
       });
     });
 
@@ -250,15 +260,15 @@ describe('Integration', async function () {
           .mintIntegrationBatch(admin.address, C.mockIntegrationNames);
 
         const parentNode1 = await nodesInstance.getParentNode(
-          integrationIdInstance.address,
+          await integrationIdInstance.getAddress(),
           1
         );
         const parentNode2 = await nodesInstance.getParentNode(
-          integrationIdInstance.address,
+          await integrationIdInstance.getAddress(),
           2
         );
         const parentNode3 = await nodesInstance.getParentNode(
-          integrationIdInstance.address,
+          await integrationIdInstance.getAddress(),
           3
         );
 
@@ -285,23 +295,11 @@ describe('Integration', async function () {
           .connect(admin)
           .mintIntegrationBatch(admin.address, C.mockIntegrationNames);
 
-        const id1 = (
-          await integrationInstance.getIntegrationIdByName(
-            C.mockIntegrationNames[0]
-          )
-        ).toNumber();
-        const id2 = (
-          await integrationInstance.getIntegrationIdByName(
-            C.mockIntegrationNames[1]
-          )
-        ).toNumber();
-        const id3 = (
-          await integrationInstance.getIntegrationIdByName(
-            C.mockIntegrationNames[2]
-          )
-        ).toNumber();
+        const id1 = await integrationInstance.getIntegrationIdByName(C.mockIntegrationNames[0]);
+        const id2 = await integrationInstance.getIntegrationIdByName(C.mockIntegrationNames[1]);
+        const id3 = await integrationInstance.getIntegrationIdByName(C.mockIntegrationNames[2]);
 
-        expect([id1, id2, id3]).to.eql([1, 2, 3]);
+        expect([id1, id2, id3]).to.deep.equal([1, 2, 3]);
       });
     });
 
@@ -334,8 +332,7 @@ describe('Integration', async function () {
               C.mockIntegrationAttributeInfoPairs
             )
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.MINT_INTEGRATION_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_INTEGRATION_ROLE
           }`
         );
       });
@@ -356,7 +353,8 @@ describe('Integration', async function () {
               C.mockIntegrationNames[1],
               C.mockIntegrationAttributeInfoPairs
             )
-        ).to.be.revertedWith(`Unauthorized("${integrationOwner1.address}")`);
+        ).to.be.revertedWithCustomError(integrationInstance, 'Unauthorized')
+          .withArgs(integrationOwner1.address);
       });
       it('Should revert if controller has already minted a integration', async () => {
         await integrationInstance
@@ -375,7 +373,8 @@ describe('Integration', async function () {
               C.mockIntegrationNames[1],
               C.mockIntegrationAttributeInfoPairs
             )
-        ).to.be.revertedWith(`Unauthorized("${integrationOwner1.address}")`);
+        ).to.be.revertedWithCustomError(integrationInstance, 'Unauthorized')
+          .withArgs(integrationOwner1.address);
       });
       it('Should revert if integration name is already registered', async () => {
         await integrationInstance
@@ -394,9 +393,10 @@ describe('Integration', async function () {
               C.mockIntegrationNames[0],
               C.mockIntegrationAttributeInfoPairs
             )
-        ).to.be.revertedWith(
-          `IntegrationNameRegisterd("${C.mockIntegrationNames[0]}")`
-        );
+        ).to.be.revertedWithCustomError(
+          integrationInstance,
+          'IntegrationNameRegisterd'
+        ).withArgs(C.mockIntegrationNames[0]);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -407,9 +407,10 @@ describe('Integration', async function () {
               C.mockIntegrationNames[0],
               C.mockIntegrationAttributeInfoPairsNotWhitelisted
             )
-        ).to.be.revertedWith(
-          `AttributeNotWhitelisted("${C.mockIntegrationAttributeInfoPairsNotWhitelisted[1].attribute}")`
-        );
+        ).to.be.revertedWithCustomError(
+          integrationInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockIntegrationAttributeInfoPairsNotWhitelisted[1].attribute);
       });
     });
 
@@ -447,7 +448,7 @@ describe('Integration', async function () {
           );
 
         const parentNode = await nodesInstance.getParentNode(
-          integrationIdInstance.address,
+          await integrationIdInstance.getAddress(),
           1
         );
 
@@ -501,11 +502,7 @@ describe('Integration', async function () {
             C.mockIntegrationAttributeInfoPairs
           );
 
-        const id = (
-          await integrationInstance.getIntegrationIdByName(
-            C.mockIntegrationNames[0]
-          )
-        ).toNumber();
+        const id = await integrationInstance.getIntegrationIdByName(C.mockIntegrationNames[0]);
 
         expect(id).to.be.equal(1);
       });
@@ -520,14 +517,14 @@ describe('Integration', async function () {
 
         expect(
           await nodesInstance.getInfo(
-            integrationIdInstance.address,
+            await integrationIdInstance.getAddress(),
             1,
             C.mockIntegrationAttribute1
           )
         ).to.be.equal(C.mockIntegrationInfo1);
         expect(
           await nodesInstance.getInfo(
-            integrationIdInstance.address,
+            await integrationIdInstance.getAddress(),
             1,
             C.mockIntegrationAttribute2
           )
@@ -593,8 +590,7 @@ describe('Integration', async function () {
             .connect(nonAdmin)
             .setIntegrationInfo(1, C.mockIntegrationAttributeInfoPairs)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.SET_INTEGRATION_INFO_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.SET_INTEGRATION_INFO_ROLE
           }`
         );
       });
@@ -603,9 +599,10 @@ describe('Integration', async function () {
           integrationInstance
             .connect(admin)
             .setIntegrationInfo(99, C.mockIntegrationAttributeInfoPairs)
-        ).to.be.revertedWith(
-          `InvalidNode("${integrationIdInstance.address}", 99)`
-        );
+        ).to.be.revertedWithCustomError(
+          integrationInstance,
+          'InvalidNode'
+        ).withArgs(await integrationIdInstance.getAddress(), 99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -615,9 +612,10 @@ describe('Integration', async function () {
               1,
               C.mockIntegrationAttributeInfoPairsNotWhitelisted
             )
-        ).to.be.revertedWith(
-          `AttributeNotWhitelisted("${C.mockIntegrationAttributeInfoPairsNotWhitelisted[1].attribute}")`
-        );
+        ).to.be.revertedWithCustomError(
+          integrationInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockIntegrationAttributeInfoPairsNotWhitelisted[1].attribute);
       });
     });
 
@@ -631,14 +629,14 @@ describe('Integration', async function () {
 
         expect(
           await nodesInstance.getInfo(
-            integrationIdInstance.address,
+            await integrationIdInstance.getAddress(),
             1,
             C.mockIntegrationAttribute1
           )
         ).to.be.equal(C.mockIntegrationInfo1);
         expect(
           await nodesInstance.getInfo(
-            integrationIdInstance.address,
+            await integrationIdInstance.getAddress(),
             1,
             C.mockIntegrationAttribute2
           )
@@ -650,14 +648,14 @@ describe('Integration', async function () {
 
         expect(
           await nodesInstance.getInfo(
-            integrationIdInstance.address,
+            await integrationIdInstance.getAddress(),
             1,
             C.mockIntegrationAttribute1
           )
         ).to.be.equal(localNewAttributeInfoPairs[0].info);
         expect(
           await nodesInstance.getInfo(
-            integrationIdInstance.address,
+            await integrationIdInstance.getAddress(),
             1,
             C.mockIntegrationAttribute2
           )
@@ -703,7 +701,7 @@ describe('Integration', async function () {
             integrationOwner1.address,
             integrationOwner2.address
           )
-      ).to.be.revertedWith('OnlyNftProxy');
+      ).to.be.revertedWithCustomError(integrationInstance, 'OnlyNftProxy');
     });
   });
 

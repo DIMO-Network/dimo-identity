@@ -86,10 +86,9 @@ contract AftermarketDevice is
      * @dev Only an admin can set the address
      * @param addr The address of the proxy
      */
-    function setAftermarketDeviceIdProxyAddress(address addr)
-        external
-        onlyRole(Roles.ADMIN_ROLE)
-    {
+    function setAftermarketDeviceIdProxyAddress(
+        address addr
+    ) external onlyRole(Roles.ADMIN_ROLE) {
         if (addr == address(0)) revert Errors.ZeroAddress();
         AftermarketDeviceStorage.getStorage().idProxyAddress = addr;
 
@@ -101,10 +100,9 @@ contract AftermarketDevice is
      * @dev Only an admin can add a new attribute
      * @param attribute The attribute to be added
      */
-    function addAftermarketDeviceAttribute(string calldata attribute)
-        external
-        onlyRole(Roles.ADMIN_ROLE)
-    {
+    function addAftermarketDeviceAttribute(
+        string calldata attribute
+    ) external onlyRole(Roles.ADMIN_ROLE) {
         if (
             !AttributeSet.add(
                 AftermarketDeviceStorage.getStorage().whitelistedAttributes,
@@ -525,11 +523,9 @@ contract AftermarketDevice is
      * @dev If the device is not minted it will return 0
      * @param addr Address associated with the aftermarket device
      */
-    function getAftermarketDeviceIdByAddress(address addr)
-        external
-        view
-        returns (uint256 nodeId)
-    {
+    function getAftermarketDeviceIdByAddress(
+        address addr
+    ) external view returns (uint256 nodeId) {
         nodeId = AftermarketDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
         ];
@@ -540,11 +536,9 @@ contract AftermarketDevice is
      * @dev If the device is not minted it will return 0x00 address
      * @param nodeId Node ID associated with the aftermarket device
      */
-    function getAftermarketDeviceAddressById(uint256 nodeId)
-        external
-        view
-        returns (address addr)
-    {
+    function getAftermarketDeviceAddressById(
+        uint256 nodeId
+    ) external view returns (address addr) {
         addr = AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
             nodeId
         ];
@@ -554,11 +548,9 @@ contract AftermarketDevice is
      * @notice Checks if an AD has been already claimed or not
      * @param nodeId Node ID associated with the aftermarket device
      */
-    function isAftermarketDeviceClaimed(uint256 nodeId)
-        external
-        view
-        returns (bool isClaimed)
-    {
+    function isAftermarketDeviceClaimed(
+        uint256 nodeId
+    ) external view returns (bool isClaimed) {
         isClaimed = AftermarketDeviceStorage.getStorage().deviceClaimed[nodeId];
     }
 

@@ -2,24 +2,16 @@ import * as dotenv from 'dotenv';
 
 import { HardhatUserConfig } from 'hardhat/config';
 import * as tdly from '@tenderly/hardhat-tenderly';
+
+import '@nomicfoundation/hardhat-toolbox';
+import "@nomiclabs/hardhat-solhint";
 import '@openzeppelin/hardhat-upgrades';
-import '@nomiclabs/hardhat-etherscan';
-import '@nomiclabs/hardhat-waffle';
-import '@typechain/hardhat';
-import 'hardhat-gas-reporter';
-import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
 import 'hardhat-abi-exporter';
 
-// eslint-disable-next-line node/no-unpublished-import
-import './scripts/linearization';
-
 tdly.setup();
 dotenv.config();
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
 
 const config: HardhatUserConfig = {
   solidity: {

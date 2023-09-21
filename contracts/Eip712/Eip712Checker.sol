@@ -18,10 +18,10 @@ contract Eip712Checker is AccessControlInternal {
      * @param name Domain name
      * @param version Domain version
      */
-    function initialize(string calldata name, string calldata version)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function initialize(
+        string calldata name,
+        string calldata version
+    ) external onlyRole(ADMIN_ROLE) {
         Eip712CheckerStorage.Storage storage s = Eip712CheckerStorage
             .getStorage();
 

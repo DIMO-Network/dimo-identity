@@ -45,10 +45,9 @@ contract VehicleId is Initializable, MultiPrivilege {
      * @dev Only an admin can set the DIMO Registry address
      * @param addr The address to be set
      */
-    function setDimoRegistryAddress(address addr)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setDimoRegistryAddress(
+        address addr
+    ) external onlyRole(ADMIN_ROLE) {
         if (addr == address(0)) revert ZeroAddress();
         _dimoRegistry = IDimoRegistry(addr);
     }
@@ -58,10 +57,9 @@ contract VehicleId is Initializable, MultiPrivilege {
      * @dev Only an admin can set the Synthetic Device Id address
      * @param addr The address to be set
      */
-    function setSyntheticDeviceIdAddress(address addr)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setSyntheticDeviceIdAddress(
+        address addr
+    ) external onlyRole(ADMIN_ROLE) {
         if (addr == address(0)) revert ZeroAddress();
         syntheticDeviceId = addr;
     }
@@ -72,10 +70,10 @@ contract VehicleId is Initializable, MultiPrivilege {
      * @param addr The address to be set
      * @param trusted Whether an address should be trusted or not
      */
-    function setTrustedForwarder(address addr, bool trusted)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setTrustedForwarder(
+        address addr,
+        bool trusted
+    ) external onlyRole(ADMIN_ROLE) {
         trustedForwarders[addr] = trusted;
     }
 
@@ -84,11 +82,9 @@ contract VehicleId is Initializable, MultiPrivilege {
      * @param tokenId Token Id to be checked
      * @return dataURI Data URI
      */
-    function getDataURI(uint256 tokenId)
-        external
-        view
-        returns (string memory dataURI)
-    {
+    function getDataURI(
+        uint256 tokenId
+    ) external view returns (string memory dataURI) {
         dataURI = _dimoRegistry.getDataURI(address(this), tokenId);
     }
 
@@ -97,11 +93,9 @@ contract VehicleId is Initializable, MultiPrivilege {
      * @param tokenId Token Id to be checked
      * @return definitionURI Definition URI
      */
-    function getDefinitionURI(uint256 tokenId)
-        external
-        view
-        returns (string memory definitionURI)
-    {
+    function getDefinitionURI(
+        uint256 tokenId
+    ) external view returns (string memory definitionURI) {
         definitionURI = _dimoRegistry.getInfo(
             address(this),
             tokenId,

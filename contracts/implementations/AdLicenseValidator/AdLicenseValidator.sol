@@ -18,10 +18,9 @@ contract AdLicenseValidator is AccessControlInternal {
      * @dev Only an admin can set the address
      * @param _foundation The foundation address
      */
-    function setFoundationAddress(address _foundation)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setFoundationAddress(
+        address _foundation
+    ) external onlyRole(ADMIN_ROLE) {
         AdLicenseValidatorStorage.getStorage().foundation = _foundation;
     }
 

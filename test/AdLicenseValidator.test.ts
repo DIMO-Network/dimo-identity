@@ -1,16 +1,15 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
-import {
+import type {
   DimoAccessControl,
   AdLicenseValidator,
   MockDimoToken,
   MockStake
-} from '../typechain';
+} from '../typechain-types';
 import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('AdLicenseValidator', function () {
   let snapshot: string;
@@ -19,9 +18,11 @@ describe('AdLicenseValidator', function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
 
-  const [admin, nonAdmin, foundation] = provider.getWallets();
+  let admin: HardhatEthersSigner, nonAdmin: HardhatEthersSigner, foundation: HardhatEthersSigner;
 
   before(async () => {
+    [admin, nonAdmin, foundation] = await ethers.getSigners();
+
     const deployments = await setup(admin, {
       modules: ['DimoAccessControl', 'AdLicenseValidator'],
       nfts: [],
@@ -42,12 +43,10 @@ describe('AdLicenseValidator', function () {
     mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
       C.oneBillionE18
     );
-    await mockDimoTokenInstance.deployed();
 
     // Deploy MockStake contract
     const MockStakeFactory = await ethers.getContractFactory('MockStake');
     mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
-    await mockStakeInstance.deployed();
   });
 
   beforeEach(async () => {
@@ -64,9 +63,8 @@ describe('AdLicenseValidator', function () {
         adLicenseValidatorInstance
           .connect(nonAdmin)
           .setFoundationAddress(foundation.address)
-      ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+      ).to.be.rejectedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
@@ -77,10 +75,9 @@ describe('AdLicenseValidator', function () {
       await expect(
         adLicenseValidatorInstance
           .connect(nonAdmin)
-          .setDimoToken(mockDimoTokenInstance.address)
-      ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+          .setDimoToken(mockDimoTokenInstance.getAddress())
+      ).to.be.rejectedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
@@ -91,10 +88,9 @@ describe('AdLicenseValidator', function () {
       await expect(
         adLicenseValidatorInstance
           .connect(nonAdmin)
-          .setLicense(mockStakeInstance.address)
-      ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+          .setLicense(mockStakeInstance.getAddress())
+      ).to.be.rejectedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
@@ -104,9 +100,8 @@ describe('AdLicenseValidator', function () {
     it('Should revert if caller does not have admin role', async () => {
       await expect(
         adLicenseValidatorInstance.connect(nonAdmin).setAdMintCost(C.adMintCost)
-      ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+      ).to.be.rejectedWith(
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });

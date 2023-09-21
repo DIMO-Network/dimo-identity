@@ -39,10 +39,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
      * @dev Only an admin can set the address
      * @param addr The address of the proxy
      */
-    function setVehicleIdProxyAddress(address addr)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setVehicleIdProxyAddress(
+        address addr
+    ) external onlyRole(ADMIN_ROLE) {
         if (addr == address(0)) revert ZeroAddress();
         VehicleStorage.getStorage().idProxyAddress = addr;
 
@@ -54,10 +53,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
      * @dev Only an admin can add a new attribute
      * @param attribute The attribute to be added
      */
-    function addVehicleAttribute(string calldata attribute)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function addVehicleAttribute(
+        string calldata attribute
+    ) external onlyRole(ADMIN_ROLE) {
         if (
             !AttributeSet.add(
                 VehicleStorage.getStorage().whitelistedAttributes,
@@ -180,10 +178,10 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
      * @param tokenId Vehicle node id
      * @param ownerSig Vehicle owner signature hash
      */
-    function burnVehicleSign(uint256 tokenId, bytes calldata ownerSig)
-        external
-        onlyRole(BURN_VEHICLE_ROLE)
-    {
+    function burnVehicleSign(
+        uint256 tokenId,
+        bytes calldata ownerSig
+    ) external onlyRole(BURN_VEHICLE_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
 
@@ -257,9 +255,10 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
      * @param tokenId Node where the info will be added
      * @param attrInfo List of attribute-info pairs to be added
      */
-    function _setInfos(uint256 tokenId, AttributeInfoPair[] calldata attrInfo)
-        private
-    {
+    function _setInfos(
+        uint256 tokenId,
+        AttributeInfoPair[] calldata attrInfo
+    ) private {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         VehicleStorage.Storage storage s = VehicleStorage.getStorage();
         address idProxyAddress = s.idProxyAddress;

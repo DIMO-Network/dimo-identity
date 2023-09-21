@@ -41,10 +41,9 @@ contract MultipleMinter is
      *  syntheticDeviceAddr -> Address associated with the synthetic device
      *  attrInfoPairsDevice -> List of attribute-info pairs to be added of the synthetic device
      */
-    function mintVehicleAndSdSign(MintVehicleAndSdInput calldata data)
-        external
-        onlyRole(MINT_VEHICLE_SD_ROLE)
-    {
+    function mintVehicleAndSdSign(
+        MintVehicleAndSdInput calldata data
+    ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage

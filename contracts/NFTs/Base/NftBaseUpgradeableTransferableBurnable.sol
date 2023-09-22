@@ -95,7 +95,11 @@ abstract contract NftBaseUpgradeable is
         public
         view
         virtual
-        override(ERC721Upgradeable, AccessControlUpgradeable)
+        override(
+            ERC721Upgradeable,
+            ERC721URIStorageUpgradeable,
+            AccessControlUpgradeable
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

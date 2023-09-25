@@ -437,7 +437,7 @@ describe("DimoForwarder", async function () {
           .withArgs(
             await vehicleIdInstance.getAddress(),
             1,
-            "ERC721: caller is not token owner nor approved",
+            "ERC721: caller is not token owner or approved",
           );
       });
     });

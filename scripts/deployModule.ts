@@ -592,6 +592,8 @@ async function main() {
     networkName,
   );
   writeAddresses(nftInstances, networkName);
+
+  process.exit();
 }
 
 main().catch((error) => {

@@ -121,6 +121,8 @@ async function main() {
   await unpair(deployer, [], networkName);
   await claimByAdmin(deployer, [], networkName);
   await setInfos(deployer, "", [], networkName);
+
+  process.exit();
 }
 
 main().catch((error) => {

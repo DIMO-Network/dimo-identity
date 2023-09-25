@@ -793,6 +793,8 @@ async function main() {
     instances[networkName].misc.Foundation,
     networkName,
   );
+
+  process.exit();
 }
 
 main().catch((error) => {

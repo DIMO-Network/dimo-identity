@@ -1,22 +1,12 @@
 {
-  "env": {
-    "browser": false,
-    "es2021": true,
-    "mocha": true,
-    "node": true
-  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
   "plugins": [
     "@typescript-eslint"
   ],
-  "extends": [
-    "standard",
-    "plugin:prettier/recommended",
-    "plugin:node/recommended"
-  ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": 12
-  },
   "settings": {
     "node": {
       "tryExtensions": [
@@ -28,40 +18,15 @@
       ]
     }
   },
+  "root": true,
   "rules": {
-    "node/no-unsupported-features/es-syntax": [
-      "error",
-      {
-        "ignores": [
-          "modules"
-        ]
-      }
-    ],
-    "prettier/prettier": [
-      "error",
-      {
-        "singleQuote": true,
-        "parser": "flow",
-        "trailingComma": "none"
-      }
-    ],
-    "node/no-unpublished-import": [
-      "error",
-      {
-        "allowModules": [
-          "hardhat",
-          "ethers",
-          "hardhat-tracer",
-          "hardhat-contract-sizer",
-          "hardhat-gas-reporter",
-          "solidity-coverage",
-          "@nomiclabs/hardhat-waffle",
-          "@nomiclabs/hardhat-ethers",
-          "@openzeppelin/hardhat-upgrades",
-          "hardhat-abi-exporter",
-          "@tenderly/hardhat-tenderly"
-        ]
-      }
-    ]
+    "eqeqeq": "error",
+    "no-undef": "off",
+    "no-unused-vars": "off",
+    "no-unexpected-multiline": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": "warn"
   }
 }

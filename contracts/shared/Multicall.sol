@@ -2,10 +2,9 @@
 pragma solidity ^0.8.13;
 
 contract Multicall {
-    function multiDelegateCall(bytes[] calldata data)
-        external
-        returns (bytes[] memory results)
-    {
+    function multiDelegateCall(
+        bytes[] calldata data
+    ) external returns (bytes[] memory results) {
         results = new bytes[](data.length);
         for (uint256 i = 0; i < data.length; i++) {
             (bool success, bytes memory result) = address(this).delegatecall(
@@ -17,11 +16,9 @@ contract Multicall {
         return results;
     }
 
-    function multiStaticCall(bytes[] calldata data)
-        external
-        view
-        returns (bytes[] memory results)
-    {
+    function multiStaticCall(
+        bytes[] calldata data
+    ) external view returns (bytes[] memory results) {
         results = new bytes[](data.length);
         for (uint256 i = 0; i < data.length; i++) {
             (bool success, bytes memory result) = address(this).staticcall(

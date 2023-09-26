@@ -22,10 +22,9 @@ abstract contract ERC2771ContextUpgradeable is
 
     /// @notice Initialize function to be used by contracts that inherit from ERC2771ContextUpgradeable
     /// @param trustedForwarders_ The list of addresses to be set
-    function _erc2771Init(address[] calldata trustedForwarders_)
-        internal
-        onlyInitializing
-    {
+    function _erc2771Init(
+        address[] calldata trustedForwarders_
+    ) internal onlyInitializing {
         for (uint256 i = 0; i < trustedForwarders_.length; i++) {
             trustedForwarders[trustedForwarders_[i]] = true;
         }

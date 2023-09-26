@@ -1,11 +1,11 @@
 import { Wallet } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
+import type { DIMORegistry } from '../typechain-types';
 import { getSelectors, ContractNameArgs, GenericKeyAny } from '.';
 
 export async function initialize(
-  deployer: Wallet | SignerWithAddress,
+  deployer: Wallet,
   ...contracts: string[]
 ): Promise<GenericKeyAny> {
   const instances: GenericKeyAny = {};
@@ -19,18 +19,18 @@ export async function initialize(
   const dimoRegistryImplementation = await DIMORegistry.connect(
     deployer
   ).deploy();
-  await dimoRegistryImplementation.deployed();
+  // await dimoRegistryImplementation.deployed();
 
   const dimoRegistry = await ethers.getContractAt(
     'DIMORegistry',
-    dimoRegistryImplementation.address
-  );
-
-  const contractSelectors = getSelectors(DIMORegistry.interface);
+    await dimoRegistryImplementation.getAddress()
+  ) as DIMORegistry;
+  
+  const contractSelectors = getSelectors(dimoRegistry.interface);
 
   await dimoRegistry
     .connect(deployer)
-    .addModule(dimoRegistryImplementation.address, contractSelectors);
+    .addModule(dimoRegistryImplementation.getAddress(), contractSelectors);
 
   instances.DIMORegistry = dimoRegistry;
 
@@ -39,17 +39,17 @@ export async function initialize(
     const contractImplementation = await ContractFactory.connect(
       deployer
     ).deploy();
-    await contractImplementation.deployed();
+    // await contractImplementation.deployed();
 
     const contractSelectors = getSelectors(ContractFactory.interface);
 
     await dimoRegistry
       .connect(deployer)
-      .addModule(contractImplementation.address, contractSelectors);
+      .addModule(contractImplementation.getAddress(), contractSelectors);
 
     instances[contractName] = await ethers.getContractAt(
       contractName,
-      dimoRegistry.address
+      await dimoRegistry.getAddress()
     );
   }
 
@@ -57,7 +57,7 @@ export async function initialize(
 }
 
 export async function deployUpgradeableContracts(
-  deployer: Wallet | SignerWithAddress,
+  deployer: Wallet,
   contractNameArgs: ContractNameArgs[]
 ): Promise<GenericKeyAny> {
   const instances: GenericKeyAny = {};
@@ -77,8 +77,6 @@ export async function deployUpgradeableContracts(
       contractNameArg.args,
       contractNameArg.opts
     );
-
-    await contractProxy.deployed();
 
     instances[contractNameArg.name] = contractProxy;
   }

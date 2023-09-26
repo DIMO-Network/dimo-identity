@@ -38,10 +38,9 @@ contract SyntheticDeviceId is
     /// @notice Sets the DIMO Registry address
     /// @dev Only an admin can set the DIMO Registry address
     /// @param dimoRegistry_ The address to be set
-    function setDimoRegistryAddress(address dimoRegistry_)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setDimoRegistryAddress(
+        address dimoRegistry_
+    ) external onlyRole(ADMIN_ROLE) {
         if (dimoRegistry_ == address(0)) revert ZeroAddress();
         dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
@@ -50,11 +49,10 @@ contract SyntheticDeviceId is
     /// @dev Only an admin can set a trusted forwarder
     /// @param addr The address to be set
     /// @param trusted Whether an address should be trusted or not
-    function setTrustedForwarder(address addr, bool trusted)
-        public
-        override
-        onlyRole(ADMIN_ROLE)
-    {
+    function setTrustedForwarder(
+        address addr,
+        bool trusted
+    ) public override onlyRole(ADMIN_ROLE) {
         super.setTrustedForwarder(addr, trusted);
     }
 

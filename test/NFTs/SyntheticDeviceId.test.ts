@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -15,7 +15,7 @@ import {
   SyntheticDevice,
   SyntheticDeviceId,
   Mapper
-} from '../../typechain';
+} from '../../typechain-types';
 import {
   setup,
   grantAdminRoles,
@@ -26,7 +26,6 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('SyntheticDeviceId', async function () {
   let snapshot: string;
@@ -44,17 +43,25 @@ describe('SyntheticDeviceId', async function () {
   let vehicleIdInstance: VehicleId;
   let sdIdInstance: SyntheticDeviceId;
 
-  const [
-    admin,
-    nonAdmin,
-    manufacturer1,
-    integrationOwner1,
-    user1,
-    user2,
-    sDAddress1
-  ] = provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let nonAdmin: HardhatEthersSigner;
+  let manufacturer1: HardhatEthersSigner;
+  let integrationOwner1: HardhatEthersSigner;
+  let user1: HardhatEthersSigner;
+  let user2: HardhatEthersSigner;
+  let sDAddress1: HardhatEthersSigner;
 
   before(async () => {
+    [
+      admin,
+      nonAdmin,
+      manufacturer1,
+      integrationOwner1,
+      user1,
+      user2,
+      sDAddress1
+    ] = await ethers.getSigners();
+
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
@@ -94,30 +101,30 @@ describe('SyntheticDeviceId', async function () {
 
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await integrationIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await sdIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Set NFT Proxies
     await manufacturerInstance
       .connect(admin)
-      .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
+      .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress());
     await integrationInstance
       .connect(admin)
-      .setIntegrationIdProxyAddress(integrationIdInstance.address);
+      .setIntegrationIdProxyAddress(await integrationIdInstance.getAddress());
     await vehicleInstance
       .connect(admin)
-      .setVehicleIdProxyAddress(vehicleIdInstance.address);
+      .setVehicleIdProxyAddress(await vehicleIdInstance.getAddress());
     await syntheticDeviceInstance
       .connect(admin)
-      .setSyntheticDeviceIdProxyAddress(sdIdInstance.address);
+      .setSyntheticDeviceIdProxyAddress(await sdIdInstance.getAddress());
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -178,26 +185,26 @@ describe('SyntheticDeviceId', async function () {
     // Set Dimo Registry in the NFTs
     await manufacturerIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(dimoRegistryInstance.address);
+      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
     await vehicleIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(dimoRegistryInstance.address);
+      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
 
     // Set DimoForwarder in the SyntheticDeviceId
     await sdIdInstance
       .connect(admin)
-      .setTrustedForwarder(vehicleIdInstance.address, true);
+      .setTrustedForwarder(await vehicleIdInstance.getAddress(), true);
 
     // Set SyntheticDeviceId in the VehicleId
     await vehicleIdInstance
       .connect(admin)
-      .setSyntheticDeviceIdAddress(sdIdInstance.address);
+      .setSyntheticDeviceIdAddress(await sdIdInstance.getAddress());
 
     // Minting and linking a vehicle to a synthetic device
     const mintSyntheticDeviceSig1 = await signMessage({
       _signer: sDAddress1,
       _primaryType: 'MintSyntheticDeviceSign',
-      _verifyingContract: syntheticDeviceInstance.address,
+      _verifyingContract: await syntheticDeviceInstance.getAddress(),
       message: {
         integrationNode: '1',
         vehicleNode: '1'
@@ -206,7 +213,7 @@ describe('SyntheticDeviceId', async function () {
     const mintVehicleOwnerSig1 = await signMessage({
       _signer: user1,
       _primaryType: 'MintSyntheticDeviceSign',
-      _verifyingContract: syntheticDeviceInstance.address,
+      _verifyingContract: await syntheticDeviceInstance.getAddress(),
       message: {
         integrationNode: '1',
         vehicleNode: '1'
@@ -250,7 +257,7 @@ describe('SyntheticDeviceId', async function () {
     it('Should revert if addr is zero address', async () => {
       await expect(
         sdIdInstance.connect(admin).setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('ZeroAddress');
+      ).to.be.revertedWithCustomError(sdIdInstance, 'ZeroAddress');
     });
   });
 
@@ -310,7 +317,7 @@ describe('SyntheticDeviceId', async function () {
               user2.address,
               1
             )
-        ).to.be.revertedWith('Unauthorized');
+        ).to.be.revertedWithCustomError(sdIdInstance, 'Unauthorized');
       });
     });
 
@@ -344,15 +351,15 @@ describe('SyntheticDeviceId', async function () {
       it('Should keep pairing link between vehicle ID and synthetic device ID', async () => {
         expect(
           await mapperInstance.getNodeLink(
-            vehicleIdInstance.address,
-            sdIdInstance.address,
+            await vehicleIdInstance.getAddress(),
+            await sdIdInstance.getAddress(),
             1
           )
         ).to.equal(1);
         expect(
           await mapperInstance.getNodeLink(
-            sdIdInstance.address,
-            vehicleIdInstance.address,
+            await sdIdInstance.getAddress(),
+            await vehicleIdInstance.getAddress(),
             1
           )
         ).to.equal(1);
@@ -367,22 +374,22 @@ describe('SyntheticDeviceId', async function () {
 
         expect(
           await mapperInstance.getNodeLink(
-            vehicleIdInstance.address,
-            sdIdInstance.address,
+            await vehicleIdInstance.getAddress(),
+            await sdIdInstance.getAddress(),
             1
           )
         ).to.equal(1);
         expect(
           await mapperInstance.getNodeLink(
-            sdIdInstance.address,
-            vehicleIdInstance.address,
+            await sdIdInstance.getAddress(),
+            await vehicleIdInstance.getAddress(),
             1
           )
         ).to.equal(1);
       });
       it('Should keep the synthetic device ID parent node', async () => {
         expect(
-          await nodesInstance.getParentNode(sdIdInstance.address, 1)
+          await nodesInstance.getParentNode(await sdIdInstance.getAddress(), 1)
         ).to.equal(1);
 
         await vehicleIdInstance
@@ -394,14 +401,14 @@ describe('SyntheticDeviceId', async function () {
           );
 
         expect(
-          await nodesInstance.getParentNode(sdIdInstance.address, 1)
+          await nodesInstance.getParentNode(await sdIdInstance.getAddress(), 1)
         ).to.equal(1);
       });
       it('Should keep the same synthetic device ID infos', async () => {
         for (const attrInfoPair of C.mockSyntheticDeviceAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              sdIdInstance.address,
+              await sdIdInstance.getAddress(),
               1,
               attrInfoPair.attribute
             )
@@ -419,7 +426,7 @@ describe('SyntheticDeviceId', async function () {
         for (const attrInfoPair of C.mockSyntheticDeviceAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              sdIdInstance.address,
+              await sdIdInstance.getAddress(),
               1,
               attrInfoPair.attribute
             )

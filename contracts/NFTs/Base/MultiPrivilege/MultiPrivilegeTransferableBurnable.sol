@@ -42,10 +42,10 @@ abstract contract MultiPrivilege is
     /// @dev The privilege Id auto increments
     /// @param enabled Sets new privilege enabled or not
     /// @param description Description of the new privilege
-    function createPrivilege(bool enabled, string calldata description)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function createPrivilege(
+        bool enabled,
+        string calldata description
+    ) external onlyRole(ADMIN_ROLE) {
         _privilegeCounter.increment();
         uint256 privilegeId = _privilegeCounter.current();
 
@@ -145,12 +145,9 @@ abstract contract MultiPrivilege is
         return privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][user];
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override returns (bool) {
         return
             interfaceId == type(IMultiPrivilege).interfaceId ||
             super.supportsInterface(interfaceId);

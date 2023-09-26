@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -17,7 +17,7 @@ import {
   MockDimoToken,
   MockStake,
   Multicall
-} from '../typechain';
+} from '../typechain-types';
 import {
   setup,
   grantAdminRoles,
@@ -28,7 +28,6 @@ import {
 } from '../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('Multicall', function () {
   let snapshot: string;
@@ -48,8 +47,12 @@ describe('Multicall', function () {
   let adIdInstance: AftermarketDeviceId;
   let multicallInstance: Multicall;
 
-  const [admin, foundation, manufacturer1, user1, adAddress1, adAddress2] =
-    provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let foundation: HardhatEthersSigner;
+  let manufacturer1: HardhatEthersSigner;
+  let user1: HardhatEthersSigner;
+  let adAddress1: HardhatEthersSigner;
+  let adAddress2: HardhatEthersSigner;
 
   const mockAftermarketDeviceInfosList = JSON.parse(
     JSON.stringify(C.mockAftermarketDeviceInfosList)
@@ -57,12 +60,22 @@ describe('Multicall', function () {
   const mockAftermarketDeviceInfosListNotWhitelisted = JSON.parse(
     JSON.stringify(C.mockAftermarketDeviceInfosListNotWhitelisted)
   );
-  mockAftermarketDeviceInfosList[0].addr = adAddress1.address;
-  mockAftermarketDeviceInfosList[1].addr = adAddress2.address;
-  mockAftermarketDeviceInfosListNotWhitelisted[0].addr = adAddress1.address;
-  mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
+    [
+      admin,
+      foundation,
+      manufacturer1,
+      user1,
+      adAddress1,
+      adAddress2
+    ] = await ethers.getSigners();
+
+    mockAftermarketDeviceInfosList[0].addr = adAddress1.address;
+    mockAftermarketDeviceInfosList[1].addr = adAddress2.address;
+    mockAftermarketDeviceInfosListNotWhitelisted[0].addr = adAddress1.address;
+    mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
+
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
@@ -97,24 +110,24 @@ describe('Multicall', function () {
 
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Set NFT Proxies
     await manufacturerInstance
       .connect(admin)
-      .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
+      .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress());
     await vehicleInstance
       .connect(admin)
-      .setVehicleIdProxyAddress(vehicleIdInstance.address);
+      .setVehicleIdProxyAddress(await vehicleIdInstance.getAddress());
     await aftermarketDeviceInstance
       .connect(admin)
-      .setAftermarketDeviceIdProxyAddress(adIdInstance.address);
+      .setAftermarketDeviceIdProxyAddress(await adIdInstance.getAddress());
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -129,12 +142,10 @@ describe('Multicall', function () {
     mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
       C.oneBillionE18
     );
-    await mockDimoTokenInstance.deployed();
 
     // Deploy MockStake contract
     const MockStakeFactory = await ethers.getContractFactory('MockStake');
     mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
-    await mockStakeInstance.deployed();
 
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
@@ -142,14 +153,14 @@ describe('Multicall', function () {
       .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
     await mockDimoTokenInstance
       .connect(manufacturer1)
-      .approve(dimoRegistryInstance.address, C.manufacturerDimoTokensAmount);
+      .approve(await dimoRegistryInstance.getAddress(), C.manufacturerDimoTokensAmount);
 
     // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
     await adLicenseValidatorInstance.setDimoToken(
-      mockDimoTokenInstance.address
+      await mockDimoTokenInstance.getAddress()
     );
-    await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
+    await adLicenseValidatorInstance.setLicense(await mockStakeInstance.getAddress());
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Whitelist Manufacturer attributes
@@ -190,16 +201,16 @@ describe('Multicall', function () {
     // Grant Transferer role to DIMO Registry
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_TRANSFERER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_TRANSFERER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Setting DimoRegistry address in the AftermarketDeviceId
     await adIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(dimoRegistryInstance.address);
+      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
 
     await adIdInstance
       .connect(manufacturer1)
-      .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      .setApprovalForAll(await aftermarketDeviceInstance.getAddress(), true);
     await aftermarketDeviceInstance
       .connect(manufacturer1)
       .mintAftermarketDeviceByManufacturerBatch(
@@ -225,7 +236,7 @@ describe('Multicall', function () {
       mintSig = await signMessage({
         _signer: user1,
         _primaryType: 'MintVehicleSign',
-        _verifyingContract: vehicleInstance.address,
+        _verifyingContract: await vehicleInstance.getAddress(),
         message: {
           manufacturerNode: '1',
           owner: user1.address,
@@ -236,7 +247,7 @@ describe('Multicall', function () {
       ownerSig = await signMessage({
         _signer: user1,
         _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
+        _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address
@@ -245,7 +256,7 @@ describe('Multicall', function () {
       adSig = await signMessage({
         _signer: adAddress1,
         _primaryType: 'ClaimAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
+        _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address
@@ -254,7 +265,7 @@ describe('Multicall', function () {
       pairSign = await signMessage({
         _signer: user1,
         _primaryType: 'PairAftermarketDeviceSign',
-        _verifyingContract: aftermarketDeviceInstance.address,
+        _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1'
@@ -264,19 +275,12 @@ describe('Multicall', function () {
 
     context('State', () => {
       it('Should mint vehicle and claim aftermarket device in the same transaction', async () => {
-        const vehicleInterface = ethers.Contract.getInterface(
-          vehicleInstance.interface
-        );
-        const aftermarketDeviceInterface = ethers.Contract.getInterface(
-          aftermarketDeviceInstance.interface
-        );
-
-        const mintVehicleSignEncoded = vehicleInterface.encodeFunctionData(
+        const mintVehicleSignEncoded = vehicleInstance.interface.encodeFunctionData(
           'mintVehicleSign',
           [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
-          aftermarketDeviceInterface.encodeFunctionData(
+        aftermarketDeviceInstance.interface.encodeFunctionData(
             'claimAftermarketDeviceSign',
             [1, user1.address, ownerSig, adSig]
           );
@@ -295,33 +299,26 @@ describe('Multicall', function () {
         expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should mint vehicle, claim aftermarket device and pair them in the same transaction', async () => {
-        const vehicleInterface = ethers.Contract.getInterface(
-          vehicleInstance.interface
-        );
-        const aftermarketDeviceInterface = ethers.Contract.getInterface(
-          aftermarketDeviceInstance.interface
-        );
-
-        const mintVehicleSignEncoded = vehicleInterface.encodeFunctionData(
+        const mintVehicleSignEncoded = vehicleInstance.interface.encodeFunctionData(
           'mintVehicleSign',
           [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
-          aftermarketDeviceInterface.encodeFunctionData(
+        aftermarketDeviceInstance.interface.encodeFunctionData(
             'claimAftermarketDeviceSign',
             [1, user1.address, ownerSig, adSig]
           );
         const pairAftermarketDeviceSignEncoded =
-          aftermarketDeviceInterface.encodeFunctionData(
+          aftermarketDeviceInstance.interface.encodeFunctionData(
             'pairAftermarketDeviceSign(uint256,uint256,bytes)',
             [1, 1, pairSign]
           );
 
         expect(
-          await mapperInstance.getLink(vehicleIdInstance.address, 1)
+          await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1)
         ).to.be.equal(0);
         expect(
-          await mapperInstance.getLink(adIdInstance.address, 1)
+          await mapperInstance.getLink(await adIdInstance.getAddress(), 1)
         ).to.be.equal(0);
 
         await multicallInstance.multiDelegateCall([
@@ -331,10 +328,10 @@ describe('Multicall', function () {
         ]);
 
         expect(
-          await mapperInstance.getLink(vehicleIdInstance.address, 1)
+          await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1)
         ).to.be.equal(1);
         expect(
-          await mapperInstance.getLink(adIdInstance.address, 1)
+          await mapperInstance.getLink(await adIdInstance.getAddress(), 1)
         ).to.be.equal(1);
       });
     });
@@ -342,24 +339,17 @@ describe('Multicall', function () {
 
   describe('multiStaticCall', () => {
     it('Should return information about manufacturer', async () => {
-      const manufacturerInterface = ethers.Contract.getInterface(
-        manufacturerInstance.interface
-      );
-      const nodesInterface = ethers.Contract.getInterface(
-        nodesInstance.interface
-      );
-
-      const getIdByName1 = manufacturerInterface.encodeFunctionData(
+      const getIdByName1 = manufacturerInstance.interface.encodeFunctionData(
         'getManufacturerIdByName',
         [C.mockManufacturerNames[0]]
       );
-      const getInfoEncoded1 = nodesInterface.encodeFunctionData('getInfo', [
-        manufacturerIdInstance.address,
+      const getInfoEncoded1 = nodesInstance.interface.encodeFunctionData('getInfo', [
+        await manufacturerIdInstance.getAddress(),
         1,
         C.mockManufacturerAttribute1
       ]);
-      const getInfoEncoded2 = nodesInterface.encodeFunctionData('getInfo', [
-        manufacturerIdInstance.address,
+      const getInfoEncoded2 = nodesInstance.interface.encodeFunctionData('getInfo', [
+        await manufacturerIdInstance.getAddress(),
         1,
         C.mockManufacturerAttribute2
       ]);
@@ -372,15 +362,15 @@ describe('Multicall', function () {
 
       expect(results.length).to.be.equal(3);
 
-      const id = ethers.utils.defaultAbiCoder.decode(
+      const id = multicallInstance.interface.getAbiCoder().decode(
         ['uint256'],
         results[0]
       )[0];
-      const info1 = ethers.utils.defaultAbiCoder.decode(
+      const info1 = multicallInstance.interface.getAbiCoder().decode(
         ['string'],
         results[1]
       )[0];
-      const info2 = ethers.utils.defaultAbiCoder.decode(
+      const info2 = multicallInstance.interface.getAbiCoder().decode(
         ['string'],
         results[2]
       )[0];
@@ -394,17 +384,13 @@ describe('Multicall', function () {
         .connect(admin)
         .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
 
-      const nodesInterface = ethers.Contract.getInterface(
-        nodesInstance.interface
-      );
-
-      const getInfoEncoded1 = nodesInterface.encodeFunctionData('getInfo', [
-        vehicleIdInstance.address,
+      const getInfoEncoded1 = nodesInstance.interface.encodeFunctionData('getInfo', [
+        await vehicleIdInstance.getAddress(),
         1,
         C.mockVehicleAttribute1
       ]);
-      const getInfoEncoded2 = nodesInterface.encodeFunctionData('getInfo', [
-        vehicleIdInstance.address,
+      const getInfoEncoded2 = nodesInstance.interface.encodeFunctionData('getInfo', [
+        await vehicleIdInstance.getAddress(),
         1,
         C.mockVehicleAttribute2
       ]);
@@ -416,11 +402,11 @@ describe('Multicall', function () {
 
       expect(results.length).to.be.equal(2);
 
-      const info1 = ethers.utils.defaultAbiCoder.decode(
+      const info1 = multicallInstance.interface.getAbiCoder().decode(
         ['string'],
         results[0]
       )[0];
-      const info2 = ethers.utils.defaultAbiCoder.decode(
+      const info2 = multicallInstance.interface.getAbiCoder().decode(
         ['string'],
         results[1]
       )[0];
@@ -429,24 +415,17 @@ describe('Multicall', function () {
       expect(info2).to.be.equal(C.mockVehicleInfo2);
     });
     it('Should return information about aftermarket device', async () => {
-      const aftermarketDeviceInterface = ethers.Contract.getInterface(
-        aftermarketDeviceInstance.interface
-      );
-      const nodesInterface = ethers.Contract.getInterface(
-        nodesInstance.interface
-      );
-
-      const getAdByAddress1 = aftermarketDeviceInterface.encodeFunctionData(
+      const getAdByAddress1 = aftermarketDeviceInstance.interface.encodeFunctionData(
         'getAftermarketDeviceIdByAddress',
         [adAddress1.address]
       );
-      const getInfoEncoded1 = nodesInterface.encodeFunctionData('getInfo', [
-        adIdInstance.address,
+      const getInfoEncoded1 = nodesInstance.interface.encodeFunctionData('getInfo', [
+        await adIdInstance.getAddress(),
         1,
         C.mockAftermarketDeviceAttribute1
       ]);
-      const getInfoEncoded2 = nodesInterface.encodeFunctionData('getInfo', [
-        adIdInstance.address,
+      const getInfoEncoded2 = nodesInstance.interface.encodeFunctionData('getInfo', [
+        await adIdInstance.getAddress(),
         1,
         C.mockAftermarketDeviceAttribute2
       ]);
@@ -459,15 +438,15 @@ describe('Multicall', function () {
 
       expect(results.length).to.be.equal(3);
 
-      const id = ethers.utils.defaultAbiCoder.decode(
+      const id = multicallInstance.interface.getAbiCoder().decode(
         ['uint256'],
         results[0]
       )[0];
-      const info1 = ethers.utils.defaultAbiCoder.decode(
+      const info1 = multicallInstance.interface.getAbiCoder().decode(
         ['string'],
         results[1]
       )[0];
-      const info2 = ethers.utils.defaultAbiCoder.decode(
+      const info2 = multicallInstance.interface.getAbiCoder().decode(
         ['string'],
         results[2]
       )[0];

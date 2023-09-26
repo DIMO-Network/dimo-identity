@@ -31,5 +31,5 @@ export async function signMessage({
     [_primaryType]: C.schemaBase.types[_primaryType]
   };
 
-  return await _signer._signTypedData(domain, types, message);
+  return await _signer.signTypedData(domain, types, message);
 }

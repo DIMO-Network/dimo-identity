@@ -2,8 +2,9 @@
 /* solhint-disable */
 pragma solidity ^0.8.13;
 
-import "../../libraries/tableland/VehicleTableStorage.sol";
 import "../../shared/Roles.sol";
+import "../../libraries/tableland/VehicleTableStorage.sol";
+import "../../libraries/nodes/ManufacturerStorage.sol";
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@tableland/evm/contracts/utils/TablelandDeployments.sol";
@@ -18,34 +19,33 @@ contract VehicleTable is AccessControlInternal {
 
     /// TODO Documentation
     function createVehicleTable(
-        address manufacturer,
-        string calldata prefix
+        address owner,
+        uint256 manufacturerId
     ) external onlyRole(ADMIN_ROLE) {
+        ManufacturerStorage.Storage storage ms = ManufacturerStorage
+            .getStorage();
         VehicleTableStorage.Storage storage vs = VehicleTableStorage
             .getStorage();
 
-        vs.metadataTableId = TablelandDeployments.get().create(
-            manufacturer,
-            SQLHelpers.toCreateFromSchema("id int, x int, y int", prefix)
+        string memory prefix = ms.nodeIdToManufacturerName[manufacturerId];
+
+        string memory statement = SQLHelpers.toCreateFromSchema(
+            "id integer primary key, model text, year integer",
+            prefix
         );
+
+        uint256 tableId = TablelandDeployments.get().create(owner, statement);
         vs.metadataTable = SQLHelpers.toNameFromId(prefix, vs.metadataTableId);
 
+        vs.metadataTableId = tableId;
         console.log(vs.metadataTableId);
         console.log(vs.metadataTable);
 
+        vs.tables[manufacturerId] = tableId;
+
         // VehicleTableStorage.getStorage().tables[tableName] = vs.metadataTableId;
 
-        emit TableCreated(
-            vs.metadataTable,
-            vs.metadataTableId,
-            string.concat(
-                "CREATE TABLE ",
-                prefix,
-                "_",
-                Strings.toString(block.chainid),
-                " (id integer primary key, model text, year integer);"
-            )
-        );
+        emit TableCreated(vs.metadataTable, tableId, statement);
     }
 
     function safeMint(
@@ -86,5 +86,11 @@ contract VehicleTable is AccessControlInternal {
 
     function metadataTable() external view returns (string memory) {
         return VehicleTableStorage.getStorage().metadataTable;
+    }
+
+    function getMaufacturerTable(
+        uint256 manufacturerId
+    ) external view returns (uint256) {
+        return VehicleTableStorage.getStorage().tables[manufacturerId];
     }
 }

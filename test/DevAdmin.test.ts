@@ -505,7 +505,12 @@ describe("DevAdmin", function () {
               claimOwnerSig1,
               claimAdSig1,
             ),
-        ).to.be.rejectedWith("DeviceAlreadyClaimed(1)");
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            "DeviceAlreadyClaimed",
+          )
+          .withArgs(1);
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
@@ -515,7 +520,12 @@ describe("DevAdmin", function () {
               claimOwnerSig2,
               claimAdSig2,
             ),
-        ).to.be.rejectedWith("DeviceAlreadyClaimed(2)");
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            "DeviceAlreadyClaimed",
+          )
+          .withArgs(2);
 
         await devAdminInstance
           .connect(admin)
@@ -1005,11 +1015,9 @@ describe("DevAdmin", function () {
         );
       });
       it("Should revert if node is not a Vehicle", async () => {
-        await expect(
-          devAdminInstance.connect(admin).adminBurnVehicles([1, 99]),
-        ).to.be.rejectedWith(
-          `InvalidNode("${await vehicleIdInstance.getAddress()}", 99)`,
-        );
+        await expect(devAdminInstance.connect(admin).adminBurnVehicles([1, 99]))
+          .to.be.revertedWithCustomError(devAdminInstance, "InvalidNode")
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it("Should revert if Vehicle is paired to an Aftermarket Device", async () => {
         const localClaimOwnerSig = await signMessage({
@@ -1069,9 +1077,9 @@ describe("DevAdmin", function () {
             localPairSignature,
           );
 
-        await expect(
-          devAdminInstance.connect(admin).adminBurnVehicles([1, 2]),
-        ).to.be.rejectedWith("VehiclePaired(1)");
+        await expect(devAdminInstance.connect(admin).adminBurnVehicles([1, 2]))
+          .to.be.revertedWithCustomError(devAdminInstance, "VehiclePaired")
+          .withArgs(1);
       });
       it("Should revert if Vehicle is paired to a Synthetic Device", async () => {
         const localMintVehicleOwnerSig = await signMessage({
@@ -1105,9 +1113,9 @@ describe("DevAdmin", function () {
           .connect(admin)
           .mintSyntheticDeviceSign(localMintSdInput);
 
-        await expect(
-          devAdminInstance.connect(admin).adminBurnVehicles([1, 2]),
-        ).to.be.rejectedWith("VehiclePaired(1)");
+        await expect(devAdminInstance.connect(admin).adminBurnVehicles([1, 2]))
+          .to.be.revertedWithCustomError(devAdminInstance, "VehiclePaired")
+          .withArgs(1);
       });
     });
 
@@ -1233,9 +1241,9 @@ describe("DevAdmin", function () {
           devAdminInstance
             .connect(admin)
             .adminBurnVehiclesAndDeletePairings([1, 99]),
-        ).to.be.rejectedWith(
-          `InvalidNode("${await vehicleIdInstance.getAddress()}", 99)`,
-        );
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, "InvalidNode")
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
     });
 
@@ -1714,28 +1722,32 @@ describe("DevAdmin", function () {
       it("Should revert if node is not a Vehicle", async () => {
         await expect(
           devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 99),
-        ).to.be.rejectedWith(
-          `InvalidNode("${await vehicleIdInstance.getAddress()}", 99)`,
-        );
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, "InvalidNode")
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it("Should revert if node is not an Aftermarket Device", async () => {
         await expect(
           devAdminInstance.connect(admin).adminPairAftermarketDevice(99, 1),
-        ).to.be.rejectedWith(
-          `InvalidNode("${await adIdInstance.getAddress()}", 99)`,
-        );
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, "InvalidNode")
+          .withArgs(await adIdInstance.getAddress(), 99);
       });
       it("Should revert if device is not claimed", async () => {
         await expect(
           devAdminInstance.connect(admin).adminPairAftermarketDevice(2, 1),
-        ).to.be.rejectedWith("AdNotClaimed(2)");
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, "AdNotClaimed")
+          .withArgs(2);
       });
       it("Should revert if vehicle is already paired", async () => {
         await devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 1);
 
         await expect(
           devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 1),
-        ).to.be.rejectedWith("VehiclePaired(1)");
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, "VehiclePaired")
+          .withArgs(1);
       });
       it("Should revert if aftermarket device is already paired", async () => {
         await devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 1);
@@ -1746,7 +1758,9 @@ describe("DevAdmin", function () {
 
         await expect(
           devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 2),
-        ).to.be.rejectedWith("AdPaired(1)");
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, "AdPaired")
+          .withArgs(1);
       });
     });
 

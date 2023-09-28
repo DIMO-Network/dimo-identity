@@ -20,7 +20,7 @@ async function main(contracts: string[]) {
         sighashOutputMarkdown += `| ${selector} | ${sighash} |\n`;
       }
     }
-    sighashOutputMarkdown += `\n`;
+    sighashOutputMarkdown += "\n";
   }
 
   fs.writeFileSync(

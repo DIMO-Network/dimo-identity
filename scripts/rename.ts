@@ -1,9 +1,9 @@
-import fs from "fs";
-import * as csv from "fast-csv";
-import { ethers, network, HardhatEthersSigner } from "hardhat";
+import fs from 'fs';
+import * as csv from 'fast-csv';
+import { ethers, network, HardhatEthersSigner } from 'hardhat';
 
-import addressesJSON from "./data/addresses.json";
-import { AddressesByNetwork, IdManufacturerName } from "../utils";
+import addressesJSON from './data/addresses.json';
+import { AddressesByNetwork, IdManufacturerName } from '../utils';
 
 const contractAddresses: AddressesByNetwork = addressesJSON;
 
@@ -18,11 +18,11 @@ function parseCSV(tokenIdMakeNamePath: string): Promise<any> {
     const output: IdManufacturerName[] = [];
     fs.createReadStream(tokenIdMakeNamePath)
       .pipe(csv.parse({ headers: true }))
-      .on("data", async (row: ManufacturerIdRow) => {
-        if (!row.tids || !row.name) reject(Error("Empty input"));
+      .on('data', async (row: ManufacturerIdRow) => {
+        if (!row.tids || !row.name) reject(Error('Empty input'));
         output.push({ tokenId: row.tids, name: row.name });
       })
-      .on("end", () => {
+      .on('end', () => {
         return resolve(output);
       });
   });
@@ -36,7 +36,7 @@ async function matchVehicleParent(
 ) {
   const VEHICLE_ID_ADDR = contractAddresses[networkName].nfts.VehicleId.proxy;
   const nodes = await ethers.getContractAt(
-    "Nodes",
+    'Nodes',
     contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
@@ -44,12 +44,12 @@ async function matchVehicleParent(
     await nodes.getParentNode(VEHICLE_ID_ADDR, id)
   ).toString();
 
-  if (parentNode === "0") return false;
+  if (parentNode === '0') return false;
 
   const manufName = idManufacturerNames.filter(
     (x: IdManufacturerName) => x.tokenId === parentNode,
   )[0].name;
-  const vehicleMake = await nodes.getInfo(VEHICLE_ID_ADDR, id, "Make");
+  const vehicleMake = await nodes.getInfo(VEHICLE_ID_ADDR, id, 'Make');
 
   return manufName && vehicleMake && manufName === vehicleMake;
 }
@@ -60,7 +60,7 @@ async function matchChainWithDb(
   networkName: string,
 ) {
   const manuf = await ethers.getContractAt(
-    "Manufacturer",
+    'Manufacturer',
     contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
@@ -70,7 +70,7 @@ async function matchChainWithDb(
     const onChainId = (await manuf.getManufacturerIdByName(name)).toString();
 
     console.log(
-      `${id}-${name} ${id === onChainId ? "matched" : "----- NOT MATCHED"}`,
+      `${id}-${name} ${id === onChainId ? 'matched' : '----- NOT MATCHED'}`,
     );
   }
 }
@@ -84,7 +84,7 @@ async function renameManufacturers(
   const batchSize = 50;
   const numOfManufacturers = idManufacturerNames.length;
   const devAdmin = await ethers.getContractAt(
-    "DevAdmin",
+    'DevAdmin',
     contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
@@ -104,7 +104,7 @@ async function renameManufacturers(
     );
   }
 
-  console.log("Manufacturers renamed successfully!");
+  console.log('Manufacturers renamed successfully!');
 }
 
 async function main() {
@@ -113,7 +113,7 @@ async function main() {
   //   '0x1741eC2915Ab71Fc03492715b5640133dA69420B'
   // );
 
-  const idManufacturerNames = await parseCSV("./make_token.csv");
+  const idManufacturerNames = await parseCSV('./make_token.csv');
   await renameManufacturers(signer, idManufacturerNames, network.name);
 
   await matchChainWithDb(idManufacturerNames, network.name);

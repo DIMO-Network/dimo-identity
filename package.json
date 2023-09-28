@@ -8,9 +8,9 @@
     "test": "npx hardhat test --network localhost",
     "lint": "npm run lint:ts && npm run lint:sol",
     "lint:ts": "npx eslint . --ext .ts",
-    "lint:ts:fix": "npx eslint . --fix --ext .ts",
+    "lint:ts:fix": "npx eslint . '**/*.ts' --fix",
     "lint:sol": "npx solhint 'contracts/**/*.sol'",
-    "lint:sol:fix": "npx solhint 'contracts/**/*.sol' --fix",
+    "lint:sol:fix": "npx solhint 'contracts/**/*.sol' --fix && npx prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'",
     "coverage": "npm run build && npx hardhat coverage",
     "gas-report": "REPORT_GAS=true npx hardhat test",
     "contract-sizer": "CONTRACT_SIZER=true npm run build"

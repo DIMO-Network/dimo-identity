@@ -1,6 +1,6 @@
-import fs from "fs";
-import path from "path";
-import hre from "hardhat";
+import fs from 'fs';
+import path from 'path';
+import hre from 'hardhat';
 
 async function main(paths: string[]) {
   const abis: any[] = await Promise.all(
@@ -21,10 +21,10 @@ async function main(paths: string[]) {
   const setParsed = Array.from(set).map((a) => JSON.parse(a));
 
   fs.writeFileSync(
-    path.resolve(__dirname, "..", "abis", "DimoRegistry.json"),
+    path.resolve(__dirname, '..', 'abis', 'DimoRegistry.json'),
     `${JSON.stringify(setParsed, null, 4)}\n`,
     {
-      flag: "w",
+      flag: 'w',
     },
   );
 
@@ -32,21 +32,21 @@ async function main(paths: string[]) {
 }
 
 main([
-  "contracts/DIMORegistry.sol:DIMORegistry",
-  "contracts/dev/DevAdmin.sol:DevAdmin",
-  "contracts/access/DimoAccessControl.sol:DimoAccessControl",
-  "contracts/Eip712/Eip712Checker.sol:Eip712Checker",
-  "contracts/shared/Multicall.sol:Multicall",
-  "contracts/implementations/AdLicenseValidator/AdLicenseValidator.sol:AdLicenseValidator",
-  "contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice",
-  "contracts/implementations/nodes/Manufacturer.sol:Manufacturer",
-  "contracts/implementations/nodes/Integration.sol:Integration",
-  "contracts/implementations/nodes/SyntheticDevice.sol:SyntheticDevice",
-  "contracts/implementations/nodes/Vehicle.sol:Vehicle",
-  "contracts/implementations/Nodes.sol:Nodes",
-  "contracts/implementations/Mapper.sol:Mapper",
-  "contracts/implementations/MultipleMinter.sol:MultipleMinter",
-  "contracts/implementations/BaseDataURI.sol:BaseDataURI",
+  'contracts/DIMORegistry.sol:DIMORegistry',
+  'contracts/dev/DevAdmin.sol:DevAdmin',
+  'contracts/access/DimoAccessControl.sol:DimoAccessControl',
+  'contracts/Eip712/Eip712Checker.sol:Eip712Checker',
+  'contracts/shared/Multicall.sol:Multicall',
+  'contracts/implementations/AdLicenseValidator/AdLicenseValidator.sol:AdLicenseValidator',
+  'contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice',
+  'contracts/implementations/nodes/Manufacturer.sol:Manufacturer',
+  'contracts/implementations/nodes/Integration.sol:Integration',
+  'contracts/implementations/nodes/SyntheticDevice.sol:SyntheticDevice',
+  'contracts/implementations/nodes/Vehicle.sol:Vehicle',
+  'contracts/implementations/Nodes.sol:Nodes',
+  'contracts/implementations/Mapper.sol:Mapper',
+  'contracts/implementations/MultipleMinter.sol:MultipleMinter',
+  'contracts/implementations/BaseDataURI.sol:BaseDataURI',
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

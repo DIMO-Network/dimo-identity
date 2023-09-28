@@ -1,7 +1,6 @@
 {
     "*.ts": [
-        "eslint . '**/*.ts' --fix",
-        "prettier --write"
+        "eslint . '**/*.ts' --fix"
     ],
     "*.sol": [
         "solhint 'contracts/**/*.sol' --fix",

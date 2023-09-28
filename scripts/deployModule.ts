@@ -1,26 +1,26 @@
-import * as fs from "fs";
-import * as path from "path";
-import { ethers, network, upgrades, HardhatEthersSigner } from "hardhat";
+import * as fs from 'fs';
+import * as path from 'path';
+import { ethers, network, upgrades, HardhatEthersSigner } from 'hardhat';
 
-import { DIMORegistry, DimoAccessControl } from "../typechain-types";
-import * as C from "./data/deployArgs";
-import { getSelectors, AddressesByNetwork, NftArgs } from "../utils";
+import { DIMORegistry, DimoAccessControl } from '../typechain-types';
+import * as C from './data/deployArgs';
+import { getSelectors, AddressesByNetwork, NftArgs } from '../utils';
 
 function getAddresses(): AddressesByNetwork {
   return JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, "data", "addresses.json"), "utf8"),
+    fs.readFileSync(path.resolve(__dirname, 'data', 'addresses.json'), 'utf8'),
   );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function writeAddresses(addresses: AddressesByNetwork, networkName: string) {
-  console.log("\n----- Writing addresses to file -----\n");
+  console.log('\n----- Writing addresses to file -----\n');
 
   const currentAddresses: AddressesByNetwork = addresses;
   currentAddresses[networkName] = addresses[networkName];
 
   fs.writeFileSync(
-    path.resolve(__dirname, "data", "addresses.json"),
+    path.resolve(__dirname, 'data', 'addresses.json'),
     JSON.stringify(currentAddresses, null, 4),
   );
 }
@@ -31,7 +31,7 @@ async function deployModules(
   contractNames: string[],
   networkName: string,
 ): Promise<AddressesByNetwork> {
-  console.log("\n----- Deploying contracts -----\n");
+  console.log('\n----- Deploying contracts -----\n');
 
   const instances = getAddresses();
 
@@ -48,7 +48,7 @@ async function deployModules(
       await contractImplementation.getAddress();
   }
 
-  console.log("\n----- Contracts deployed -----");
+  console.log('\n----- Contracts deployed -----');
 
   return instances;
 }
@@ -58,7 +58,7 @@ async function deployNfts(
   deployer: HardhatEthersSigner,
   networkName: string,
 ): Promise<AddressesByNetwork> {
-  console.log("\n----- Deploying NFT contracts -----\n");
+  console.log('\n----- Deploying NFT contracts -----\n');
 
   const currentIntegrationIdArgs: NftArgs = C.integrationIdArgs;
   const currentSdIdArgs: NftArgs = C.sdIdArgs;
@@ -85,15 +85,15 @@ async function deployNfts(
     );
 
     await upgrades.validateImplementation(ContractFactory, {
-      kind: "uups",
+      kind: 'uups',
     });
 
     const contractProxy = await upgrades.deployProxy(
       ContractFactory,
       contractNameArg.args,
       {
-        initializer: "initialize",
-        kind: "uups",
+        initializer: 'initialize',
+        kind: 'uups',
       },
     );
 
@@ -113,7 +113,7 @@ async function deployNfts(
       );
   }
 
-  console.log("\n----- NFT contracts deployed -----");
+  console.log('\n----- NFT contracts deployed -----');
 
   return instances;
 }
@@ -127,7 +127,7 @@ async function addModules(
   const instances = getAddresses();
 
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
-    "DIMORegistry",
+    'DIMORegistry',
     instances[networkName].modules.DIMORegistry.address,
   );
 
@@ -140,7 +140,7 @@ async function addModules(
       };
     });
 
-  console.log("\n----- Adding modules -----\n");
+  console.log('\n----- Adding modules -----\n');
 
   for (const contract of contractsNameImpl) {
     const ContractFactory = await ethers.getContractFactory(contract.name);
@@ -158,7 +158,7 @@ async function addModules(
     console.log(`Module ${contract.name} added`);
   }
 
-  console.log("\n----- Modules Added -----");
+  console.log('\n----- Modules Added -----');
 
   return instances;
 }
@@ -172,7 +172,7 @@ async function removeModule(
   const instances = getAddresses();
 
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
-    "DIMORegistry",
+    'DIMORegistry',
     instances[networkName].modules.DIMORegistry.address,
   );
 
@@ -185,7 +185,7 @@ async function removeModule(
       };
     });
 
-  console.log("\n----- Removing modules -----\n");
+  console.log('\n----- Removing modules -----\n');
 
   for (const contract of contractsNameImpl) {
     const ContractFactory = await ethers.getContractFactory(contract.name);
@@ -203,7 +203,7 @@ async function removeModule(
     console.log(`Module ${contract.name} removed`);
   }
 
-  console.log("\n----- Modules Removed -----");
+  console.log('\n----- Modules Removed -----');
 
   return instances;
 }
@@ -217,7 +217,7 @@ async function updateModule(
   const instances = getAddresses();
 
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
-    "DIMORegistry",
+    'DIMORegistry',
     instances[networkName].modules.DIMORegistry.address,
   );
 
@@ -306,22 +306,22 @@ async function upgradeNft(
     );
 
     await upgrades.forceImport(oldProxyAddress, NftFactoryOld, {
-      kind: "uups",
+      kind: 'uups',
     });
   }
 
   await upgrades.validateImplementation(NftFactory, {
-    kind: "uups",
+    kind: 'uups',
   });
   await upgrades.validateUpgrade(oldProxyAddress, NftFactory, {
-    kind: "uups",
+    kind: 'uups',
   });
 
   const upgradedProxy = await upgrades.upgradeProxy(
     oldProxyAddress,
     NftFactory,
     {
-      kind: "uups",
+      kind: 'uups',
     },
   );
   await upgradedProxy.deployed();
@@ -344,7 +344,7 @@ async function grantNewRoles(
   const instances = getAddresses();
 
   const dimoAccessControl: DimoAccessControl = await ethers.getContractAt(
-    "DimoAccessControl",
+    'DimoAccessControl',
     instances[networkName].modules.DIMORegistry.address,
   );
 
@@ -516,7 +516,7 @@ async function grantAllRoles(
   const instances = getAddresses();
 
   const dimoAccessControl: DimoAccessControl = await ethers.getContractAt(
-    "DimoAccessControl",
+    'DimoAccessControl',
     instances[networkName].modules.DIMORegistry.address,
   );
 
@@ -539,11 +539,11 @@ async function main() {
   let networkName = network.name;
 
   if (
-    network.name === "hardhat" ||
-    network.name === "localhost" ||
-    network.name === "tenderly"
+    network.name === 'hardhat' ||
+    network.name === 'localhost' ||
+    network.name === 'tenderly'
   ) {
-    networkName = "polygon";
+    networkName = 'polygon';
     // console.log(deployer.address);
 
     // 0xCED3c922200559128930180d3f0bfFd4d9f4F123
@@ -553,8 +553,8 @@ async function main() {
     // );
 
     await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: ["0xCED3c922200559128930180d3f0bfFd4d9f4F123"],
+      method: 'hardhat_impersonateAccount',
+      params: ['0xCED3c922200559128930180d3f0bfFd4d9f4F123'],
     });
     // await network.provider.request({
     //   method: 'hardhat_impersonateAccount',
@@ -562,33 +562,33 @@ async function main() {
     // });
 
     deployer = await ethers.getSigner(
-      "0xCED3c922200559128930180d3f0bfFd4d9f4F123",
+      '0xCED3c922200559128930180d3f0bfFd4d9f4F123',
     );
     nodeOwner = await ethers.getSigner(
-      "0xc0f28da7ae009711026c648913eb17962fd96dd7",
+      '0xc0f28da7ae009711026c648913eb17962fd96dd7',
     );
 
     await user1.sendTransaction({
       to: deployer.address,
-      value: ethers.parseEther("100"),
+      value: ethers.parseEther('100'),
     });
     await user1.sendTransaction({
       to: nodeOwner.address,
-      value: ethers.parseEther("100"),
+      value: ethers.parseEther('100'),
     });
   }
 
   // let instances = getAddresses();
 
-  const instances1 = await updateModule(deployer, "DevAdmin", networkName);
+  const instances1 = await updateModule(deployer, 'DevAdmin', networkName);
   writeAddresses(instances1, networkName);
 
-  const instances2 = await updateModule(deployer, "Manufacturer", networkName);
+  const instances2 = await updateModule(deployer, 'Manufacturer', networkName);
   writeAddresses(instances2, networkName);
 
   const nftInstances = await upgradeNft(
     deployer,
-    "ManufacturerId",
+    'ManufacturerId',
     networkName,
   );
   writeAddresses(nftInstances, networkName);

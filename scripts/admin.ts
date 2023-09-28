@@ -1,17 +1,17 @@
-import { EventLog, Log } from "ethers";
-import { ethers, network, HardhatEthersSigner } from "hardhat";
+import { EventLog, Log } from 'ethers';
+import { ethers, network, HardhatEthersSigner } from 'hardhat';
 
 import {
   DevAdmin,
   AftermarketDevice,
   DimoAccessControl,
-} from "../typechain-types";
+} from '../typechain-types';
 import {
   AddressesByNetwork,
   AttributeInfoPair,
   AftermarketDeviceOwnerPair,
-} from "../utils";
-import addressesJSON from "./data/addresses.json";
+} from '../utils';
+import addressesJSON from './data/addresses.json';
 
 const contractAddresses: AddressesByNetwork = addressesJSON;
 
@@ -22,7 +22,7 @@ async function unpair(
   networkName: string,
 ) {
   const devAdminInstance: DevAdmin = await ethers.getContractAt(
-    "DevAdmin",
+    'DevAdmin',
     contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
@@ -43,11 +43,11 @@ async function claimByAdmin(
 ) {
   const batchSize = 50;
   const adInstance: AftermarketDevice = await ethers.getContractAt(
-    "AftermarketDevice",
+    'AftermarketDevice',
     contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
-  console.log("\n----- Claiming devices -----\n");
+  console.log('\n----- Claiming devices -----\n');
 
   for (let i = 0; i < aftermarketDeviceOwnerPairs.length; i += batchSize) {
     const batch = aftermarketDeviceOwnerPairs.slice(i, i + batchSize);
@@ -62,10 +62,10 @@ async function claimByAdmin(
         (eventLog as EventLog).args[0].toString(),
       );
 
-    console.log(`Claimed ids: ${ids?.join(",")}`);
+    console.log(`Claimed ids: ${ids?.join(',')}`);
   }
 
-  console.log("\n----- Devices claimed -----\n");
+  console.log('\n----- Devices claimed -----\n');
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -76,7 +76,7 @@ async function setInfos(
   networkName: string,
 ) {
   const adInstance: AftermarketDevice = await ethers.getContractAt(
-    "AftermarketDevice",
+    'AftermarketDevice',
     contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
@@ -90,7 +90,7 @@ async function setInfos(
       })
   ).wait();
 
-  console.log("\n----- Infos set -----\n");
+  console.log('\n----- Infos set -----\n');
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -101,7 +101,7 @@ async function revokeRole(
   networkName: string,
 ) {
   const accessControlInstance: DimoAccessControl = await ethers.getContractAt(
-    "DimoAccessControl",
+    'DimoAccessControl',
     contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
@@ -120,7 +120,7 @@ async function main() {
 
   await unpair(deployer, [], networkName);
   await claimByAdmin(deployer, [], networkName);
-  await setInfos(deployer, "", [], networkName);
+  await setInfos(deployer, '', [], networkName);
 
   process.exit();
 }

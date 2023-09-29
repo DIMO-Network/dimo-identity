@@ -13,84 +13,95 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 import "hardhat/console.sol";
 
+error InvalidManufacturerId(uint256 id);
+error TableAlreadyExists(uint256 tableId);
+
 /// TODO Documentation
 contract VehicleTable is AccessControlInternal {
-    event TableCreated(string tableName, uint256 tableId, string statement);
+    event VehicleTableCreated(uint256 manufacturerId, uint256 tableId);
 
     /// TODO Documentation
     function createVehicleTable(
         address owner,
         uint256 manufacturerId
     ) external onlyRole(ADMIN_ROLE) {
-        ManufacturerStorage.Storage storage ms = ManufacturerStorage
-            .getStorage();
         VehicleTableStorage.Storage storage vs = VehicleTableStorage
             .getStorage();
 
-        string memory prefix = ms.nodeIdToManufacturerName[manufacturerId];
+        string memory prefix = ManufacturerStorage
+            .getStorage()
+            .nodeIdToManufacturerName[manufacturerId];
+
+        if (bytes(prefix).length == 0) {
+            revert InvalidManufacturerId(manufacturerId);
+        }
+        if (vs.tables[manufacturerId] != 0) {
+            revert TableAlreadyExists(vs.tables[manufacturerId]);
+        }
 
         string memory statement = SQLHelpers.toCreateFromSchema(
-            "id integer primary key, model text, year integer",
+            "id integer primary key, model text not null, year integer not null",
             prefix
         );
-
         uint256 tableId = TablelandDeployments.get().create(owner, statement);
-        vs.metadataTable = SQLHelpers.toNameFromId(prefix, vs.metadataTableId);
-
-        vs.metadataTableId = tableId;
-        console.log(vs.metadataTableId);
-        console.log(vs.metadataTable);
 
         vs.tables[manufacturerId] = tableId;
 
-        // VehicleTableStorage.getStorage().tables[tableName] = vs.metadataTableId;
-
-        emit TableCreated(vs.metadataTable, tableId, statement);
+        emit VehicleTableCreated(manufacturerId, tableId);
     }
 
-    function safeMint(
-        string calldata prefix,
-        address manufacturer,
-        string calldata make,
+    // TODO Documentation
+    function createVehicleDefinition(
+        uint256 manufacturerId,
+        string calldata id,
         string calldata model,
         string calldata year
     ) external {
-        VehicleTableStorage.Storage storage vs = VehicleTableStorage
-            .getStorage();
-        // Insert table values upon minting.
+        uint256 tableId = VehicleTableStorage.getStorage().tables[
+            manufacturerId
+        ];
+        string memory prefix = ManufacturerStorage
+            .getStorage()
+            .nodeIdToManufacturerName[manufacturerId];
+
+        // Insert table values upon minting
         TablelandDeployments.get().mutate(
-            manufacturer,
-            vs.metadataTableId,
+            address(this),
+            tableId,
             SQLHelpers.toInsert(
                 prefix,
-                vs.metadataTableId,
+                tableId,
                 "id,model,year",
-                string.concat(make, ",", model, ",", year)
+                string.concat(
+                    id,
+                    ",",
+                    string(abi.encodePacked("'", model, "'")),
+                    ",",
+                    string(abi.encodePacked("'", year, "'"))
+                )
             )
         );
     }
 
-    function getVehicleDefsTable(
-        string calldata prefix
-    ) external view returns (string memory) {
-        return
-            SQLHelpers.toNameFromId(
-                prefix,
-                VehicleTableStorage.getStorage().metadataTableId
-            );
-    }
-
-    function metadataTableId() external view returns (uint256) {
-        return VehicleTableStorage.getStorage().metadataTableId;
-    }
-
-    function metadataTable() external view returns (string memory) {
-        return VehicleTableStorage.getStorage().metadataTable;
-    }
-
-    function getMaufacturerTable(
+    // TODO Documentation
+    function getVehicleTableName(
         uint256 manufacturerId
-    ) external view returns (uint256) {
-        return VehicleTableStorage.getStorage().tables[manufacturerId];
+    ) external view returns (string memory tableName) {
+        uint256 tableId = VehicleTableStorage.getStorage().tables[
+            manufacturerId
+        ];
+        string memory prefix = ManufacturerStorage
+            .getStorage()
+            .nodeIdToManufacturerName[manufacturerId];
+
+        if (bytes(prefix).length != 0)
+            tableName = SQLHelpers.toNameFromId(prefix, tableId);
+    }
+
+    // TODO Documentation
+    function getVehicleTableId(
+        uint256 manufacturerId
+    ) external view returns (uint256 tableId) {
+        tableId = VehicleTableStorage.getStorage().tables[manufacturerId];
     }
 }

@@ -1,17 +1,16 @@
-import chai from "chai";
-import { ethers, HardhatEthersSigner } from "hardhat";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import chai from 'chai';
+import { ethers, network, HardhatEthersSigner } from 'hardhat';
 
-import { LocalTableland, getAccounts, getDatabase } from "@tableland/local";
-import { Database, Validator } from "@tableland/sdk";
+import { LocalTableland, getAccounts, getRegistry } from '@tableland/local';
+import { Registry } from '@tableland/sdk';
 
 import {
   DimoAccessControl,
   Manufacturer,
   ManufacturerId,
   VehicleTable,
-} from "../../typechain-types";
-import { setup, grantAdminRoles, C } from "../../utils";
+} from '../../typechain-types';
+import { setup, createSnapshot, revertToSnapshot, grantAdminRoles, C } from '../../utils';
 
 const { expect } = chai;
 
@@ -30,10 +29,12 @@ after(async function () {
 
 const accounts = getAccounts();
 
-describe.only("VehicleTable", async function () {
-  // let snapshot: string;
-  let db: Database;
-  // let validator: Validator;
+describe('VehicleTable', async function () {
+  let CURRENT_CHAIN_ID: number;
+  let snapshot: string;
+  // let tablelandDb: Database;
+  // let tablelandValidator: Validator;
+  let tablelandRegistry: Registry;
   let dimoAccessControlInstance: DimoAccessControl;
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
@@ -43,14 +44,16 @@ describe.only("VehicleTable", async function () {
   let nonAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
 
-  async function deployFixture() {
+  before(async () => {
+    CURRENT_CHAIN_ID = network.config.chainId ?? 31337;
     [admin, nonAdmin, manufacturer1] = await ethers.getSigners();
-    db = getDatabase(accounts[0]);
-    // validator = new Validator(db.config);
+    // tablelandDb = getDatabase(accounts[0]);
+    // tablelandValidator = new Validator(tablelandDb.config);
+    tablelandRegistry = getRegistry(accounts[0]);
 
     const deployments = await setup(admin, {
-      modules: ["DimoAccessControl", "Manufacturer", "VehicleTable"],
-      nfts: ["ManufacturerId"],
+      modules: ['DimoAccessControl', 'Manufacturer', 'VehicleTable'],
+      nfts: ['ManufacturerId'],
       upgradeableContracts: [],
     });
 
@@ -86,42 +89,102 @@ describe.only("VehicleTable", async function () {
     await manufacturerInstance
       .connect(admin)
       .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
-  }
+  });
 
-  describe("createVehicleTable", () => {
-    before(async function () {
-      await loadFixture(deployFixture);
-    });
+  beforeEach(async () => {
+    snapshot = await createSnapshot();
+  });
 
-    context("Error handling", () => {
-      it("Should revert if caller does not have admin role", async () => {
+  afterEach(async () => {
+    await revertToSnapshot(snapshot);
+  });
+
+
+  describe('createVehicleTable', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
         await expect(
           vehicleTableInstance
             .connect(nonAdmin)
-            .createVehicleTable(nonAdmin.address, 1),
+            .createVehicleTable(nonAdmin.address, 1)
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`,
         );
       });
-    });
-
-    context("State", () => {
-      it("Test", async () => {
-        const tx = await vehicleTableInstance
+      it('Should revert if manufacturer ID does not exist', async () => {
+        await expect(
+          vehicleTableInstance
+            .connect(admin)
+            .createVehicleTable(manufacturer1.address, 99)
+        ).to.be.revertedWithCustomError(
+          vehicleTableInstance,
+          'InvalidManufacturerId',
+        ).withArgs(99);
+      });
+      it('Should revert if manufacturer table already exists', async () => {
+        await vehicleTableInstance
           .connect(admin)
           .createVehicleTable(manufacturer1.address, 1);
 
-        // console.log((await tx.wait())?.logs);
+        await expect(
+          vehicleTableInstance
+            .connect(admin)
+            .createVehicleTable(manufacturer1.address, 1)
+        ).to.be.revertedWithCustomError(
+          vehicleTableInstance,
+          'TableAlreadyExists',
+        ).withArgs(await vehicleTableInstance.getVehicleTableId(1));
+      });
+    });
 
-        console.log(await vehicleTableInstance.metadataTable());
-        console.log(await vehicleTableInstance.metadataTableId());
-        console.log(await vehicleTableInstance.getMaufacturerTable(1));
+    context('State', () => {
+      it('Should create register a new table to a manufacturer', async () => {
+        expect(await tablelandRegistry.listTables(manufacturer1.address)).to.be.empty;
 
-        // const tx2 = await vehicleTableInstance.connect(admin).safeMint("MockVehicle", await vehicleTableInstance.getAddress(), "Mock", "Model", "2023");
+        await vehicleTableInstance
+          .connect(admin)
+          .createVehicleTable(manufacturer1.address, 1);
 
-        // console.log((await tx2.wait())?.logs)
+        expect(await tablelandRegistry.listTables(manufacturer1.address))
+          .to.deep.include.members([{ tableId: '2', chainId: CURRENT_CHAIN_ID }]);
+      });
+      it('Should correctly map the manufacturer ID to the new table created', async () => {
+        expect(await vehicleTableInstance.getVehicleTableId(1)).to.equal(0);
+
+        await vehicleTableInstance
+          .connect(admin)
+          .createVehicleTable(manufacturer1.address, 1);
+
+        expect(await vehicleTableInstance.getVehicleTableId(1)).to.equal(2);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleTableCreated event with correct params', async () => {
+        await expect(
+          vehicleTableInstance
+            .connect(admin)
+            .createVehicleTable(manufacturer1.address, 1)
+        )
+          .to.emit(vehicleTableInstance, 'VehicleTableCreated')
+          .withArgs(1, 2);
+      });
+    });
+  });
+
+  describe('getVehicleTableName', () => {
+    context('State', () => {
+      it('Should return empty string if there is no table minted to the manufacturer', async () => {
+        expect(await vehicleTableInstance.getVehicleTableName(99)).to.equal('');
+      });
+      it('Should correctly return the table name', async () => {
+        await vehicleTableInstance
+          .connect(admin)
+          .createVehicleTable(manufacturer1.address, 1);
+
+        expect(await vehicleTableInstance.getVehicleTableName(1))
+          .to.equal(`${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_2`);
       });
     });
   });

@@ -7,12 +7,8 @@ library VehicleTableStorage {
         keccak256("DIMORegistry.vehicleTable.storage");
 
     struct Storage {
-        // TODO Rename it?
-        // TODO Can a manufacturer has more than one table?
         // A mapping that holds `manufacturer ID` and its `tableId`
         mapping(uint256 => uint256) tables;
-        string metadataTable;
-        uint256 metadataTableId;
     }
 
     /* solhint-disable no-inline-assembly */

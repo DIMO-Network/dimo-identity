@@ -14,13 +14,21 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 import "hardhat/console.sol";
 
 error InvalidManufacturerId(uint256 id);
-error TableAlreadyExists(uint256 tableId);
+error TableAlreadyExists(uint256 manufacturerId);
 
-/// TODO Documentation
+/**
+ * @title VehicleTable
+ * @notice Contract for interacting with Vehicle tables via Tableland
+ */
 contract VehicleTable is AccessControlInternal {
     event VehicleTableCreated(uint256 manufacturerId, uint256 tableId);
 
-    /// TODO Documentation
+    /**
+     * @notice Creates a new vehicle table associated with a specific manufacturer
+     * @dev This function can only be called by an address with the ADMIN_ROLE
+     * @param owner The address of the table's owner
+     * @param manufacturerId The unique identifier of the manufacturer
+     */
     function createVehicleTable(
         address owner,
         uint256 manufacturerId
@@ -36,7 +44,7 @@ contract VehicleTable is AccessControlInternal {
             revert InvalidManufacturerId(manufacturerId);
         }
         if (vs.tables[manufacturerId] != 0) {
-            revert TableAlreadyExists(vs.tables[manufacturerId]);
+            revert TableAlreadyExists(manufacturerId);
         }
 
         string memory statement = SQLHelpers.toCreateFromSchema(
@@ -50,40 +58,12 @@ contract VehicleTable is AccessControlInternal {
         emit VehicleTableCreated(manufacturerId, tableId);
     }
 
-    // TODO Documentation
-    function createVehicleDefinition(
-        uint256 manufacturerId,
-        string calldata id,
-        string calldata model,
-        string calldata year
-    ) external {
-        uint256 tableId = VehicleTableStorage.getStorage().tables[
-            manufacturerId
-        ];
-        string memory prefix = ManufacturerStorage
-            .getStorage()
-            .nodeIdToManufacturerName[manufacturerId];
-
-        // Insert table values upon minting
-        TablelandDeployments.get().mutate(
-            address(this),
-            tableId,
-            SQLHelpers.toInsert(
-                prefix,
-                tableId,
-                "id,model,year",
-                string.concat(
-                    id,
-                    ",",
-                    string(abi.encodePacked("'", model, "'")),
-                    ",",
-                    string(abi.encodePacked("'", year, "'"))
-                )
-            )
-        );
-    }
-
-    // TODO Documentation
+    /**
+     * @dev Retrieve the name of the vehicle table name associated with a specific manufacturer
+     * @param manufacturerId The unique identifier of the manufacturer
+     * @dev If a matching table does not exist, the function returns an empty string
+     * @return tableName The name of the manufacturer's vehicle table
+     */
     function getVehicleTableName(
         uint256 manufacturerId
     ) external view returns (string memory tableName) {
@@ -98,7 +78,12 @@ contract VehicleTable is AccessControlInternal {
             tableName = SQLHelpers.toNameFromId(prefix, tableId);
     }
 
-    // TODO Documentation
+    /**
+     * @dev Retrieve the vehicle table ID associated with a specific manufacturer
+     * @param manufacturerId The unique identifier of the manufacturer
+     * @dev If a matching table does not exist, the function returns zero
+     * @return tableId The ID of the manufacturer's vehicle table
+     */
     function getVehicleTableId(
         uint256 manufacturerId
     ) external view returns (uint256 tableId) {

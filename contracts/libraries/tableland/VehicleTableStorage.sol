@@ -1,7 +1,10 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-/// TODO Documentation
+/**
+ * @title VehicleTableStorage
+ * @notice Storage of the VehicleTable contract
+ */
 library VehicleTableStorage {
     bytes32 internal constant VEHICLE_TABLE_STORAGE_SLOT =
         keccak256("DIMORegistry.vehicleTable.storage");

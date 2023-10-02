@@ -134,7 +134,7 @@ describe('VehicleTable', async function () {
         ).to.be.revertedWithCustomError(
           vehicleTableInstance,
           'TableAlreadyExists',
-        ).withArgs(await vehicleTableInstance.getVehicleTableId(1));
+        ).withArgs(1);
       });
     });
 

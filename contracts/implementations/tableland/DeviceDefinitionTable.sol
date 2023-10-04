@@ -2,12 +2,17 @@
 /* solhint-disable */
 pragma solidity ^0.8.13;
 
+import "../../interfaces/INFT.sol";
 import "../../shared/Roles.sol";
 import "./DeviceDefinitionTableInternal.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 
+import "@tableland/evm/contracts/utils/TablelandDeployments.sol";
 import "@tableland/evm/contracts/utils/SQLHelpers.sol";
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
+
+error TableDoesNotExist(uint256 manufacturerId);
+error Unauthorized(uint256 tableId, address caller);
 
 /**
  * @title DeviceDefinitionTable
@@ -17,6 +22,13 @@ contract DeviceDefinitionTable is
     AccessControlInternal,
     DeviceDefinitionTableInternal
 {
+    event DeviceDefinitionInserted(
+        uint256 indexed ddId,
+        uint256 indexed manufacturerId,
+        string model,
+        string year
+    );
+
     /**
      * @notice Creates a new definition table associated with a specific manufacturer
      * @dev This function can only be called by an address with the ADMIN_ROLE
@@ -29,6 +41,62 @@ contract DeviceDefinitionTable is
     ) external onlyRole(ADMIN_ROLE) {
         _createDeviceDefinitionTable(owner, manufacturerId);
     }
+
+    // TODO Documentation
+    function createDeviceDefinition(
+        uint256 manufacturerId,
+        string calldata model,
+        string calldata year
+    ) external {
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+        uint256 tableId = dds.tables[manufacturerId];
+        string memory prefix = ManufacturerStorage
+            .getStorage()
+            .nodeIdToManufacturerName[manufacturerId];
+
+        if (bytes(prefix).length == 0) {
+            revert InvalidManufacturerId(manufacturerId);
+        }
+        if (tableId == 0) {
+            revert TableDoesNotExist(manufacturerId);
+        }
+
+        ITablelandTables tablelandTables = TablelandDeployments.get();
+
+        if (INFT(address(tablelandTables)).ownerOf(tableId) != msg.sender) {
+            revert Unauthorized(tableId, msg.sender);
+        }
+
+        tablelandTables.mutate(
+            address(this),
+            tableId,
+            SQLHelpers.toInsert(
+                prefix,
+                tableId,
+                "model,year",
+                string.concat(
+                    string(abi.encodePacked("'", model, "'")),
+                    ",",
+                    string(abi.encodePacked("'", year, "'"))
+                )
+            )
+        );
+
+        dds.ddIds++;
+
+        emit DeviceDefinitionInserted(dds.ddIds, manufacturerId, model, year);
+    }
+
+    // TODO Documentation
+    // TODO Batch insertion
+    // function createDeviceDefinitionBatch(
+    //     uint256 manufacturerId,
+    //     string calldata model,
+    //     string calldata year
+    // ) external {
+
+    // }
 
     /**
      * @dev Retrieve the name of the device definition table name associated with a specific manufacturer

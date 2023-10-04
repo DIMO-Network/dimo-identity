@@ -6,6 +6,7 @@ import * as tdly from '@tenderly/hardhat-tenderly';
 import '@nomicfoundation/hardhat-toolbox';
 import '@nomiclabs/hardhat-solhint';
 import '@openzeppelin/hardhat-upgrades';
+import '@tableland/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
 import 'hardhat-abi-exporter';
@@ -50,6 +51,10 @@ const config: HardhatUserConfig = {
       url: process.env.TENDERLY_URL || '',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
+  },
+  localTableland: {
+    silent: false,
+    verbose: false,
   },
   tenderly: {
     username: process.env.TENDERLY_USERNAME || '', // tenderly username (or organization name)

@@ -2,12 +2,12 @@
 pragma solidity ^0.8.13;
 
 /**
- * @title VehicleTableStorage
- * @notice Storage of the VehicleTable contract
+ * @title DeviceDefinitionTableStorage
+ * @notice Storage of the DeviceDefinitionTable contract
  */
-library VehicleTableStorage {
-    bytes32 internal constant VEHICLE_TABLE_STORAGE_SLOT =
-        keccak256("DIMORegistry.vehicleTable.storage");
+library DeviceDefinitionTableStorage {
+    bytes32 internal constant DEVICE_DEFINITION_TABLE_STORAGE_SLOT =
+        keccak256("DIMORegistry.deviceDefinitionTable.storage");
 
     struct Storage {
         // A mapping that holds `manufacturer ID` and its `tableId`
@@ -16,7 +16,7 @@ library VehicleTableStorage {
 
     /* solhint-disable no-inline-assembly */
     function getStorage() internal pure returns (Storage storage s) {
-        bytes32 slot = VEHICLE_TABLE_STORAGE_SLOT;
+        bytes32 slot = DEVICE_DEFINITION_TABLE_STORAGE_SLOT;
         assembly {
             s.slot := slot
         }

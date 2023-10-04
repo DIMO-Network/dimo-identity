@@ -8,7 +8,7 @@ import {
   DimoAccessControl,
   Manufacturer,
   ManufacturerId,
-  VehicleTable,
+  DeviceDefinitionTable,
 } from '../../typechain-types';
 import { setup, createSnapshot, revertToSnapshot, grantAdminRoles, C } from '../../utils';
 
@@ -29,7 +29,7 @@ after(async function () {
 
 const accounts = getAccounts();
 
-describe('VehicleTable', async function () {
+describe('DeviceDefinitionTable', async function () {
   let CURRENT_CHAIN_ID: number;
   let snapshot: string;
   // let tablelandDb: Database;
@@ -38,7 +38,7 @@ describe('VehicleTable', async function () {
   let dimoAccessControlInstance: DimoAccessControl;
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
-  let vehicleTableInstance: VehicleTable;
+  let ddTableInstance: DeviceDefinitionTable;
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
@@ -52,13 +52,13 @@ describe('VehicleTable', async function () {
     tablelandRegistry = getRegistry(accounts[0]);
 
     const deployments = await setup(admin, {
-      modules: ['DimoAccessControl', 'Manufacturer', 'VehicleTable'],
+      modules: ['DimoAccessControl', 'Manufacturer', 'DeviceDefinitionTable'],
       nfts: ['ManufacturerId'],
       upgradeableContracts: [],
     });
 
     dimoAccessControlInstance = deployments.DimoAccessControl;
-    vehicleTableInstance = deployments.VehicleTable;
+    ddTableInstance = deployments.DeviceDefinitionTable;
     manufacturerInstance = deployments.Manufacturer;
     manufacturerIdInstance = deployments.ManufacturerId;
 
@@ -100,13 +100,13 @@ describe('VehicleTable', async function () {
   });
 
 
-  describe('createVehicleTable', () => {
+  describe('createDeviceDefinitionTable', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
-          vehicleTableInstance
+          ddTableInstance
             .connect(nonAdmin)
-            .createVehicleTable(nonAdmin.address, 1)
+            .createDeviceDefinitionTable(nonAdmin.address, 1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`,
@@ -114,25 +114,25 @@ describe('VehicleTable', async function () {
       });
       it('Should revert if manufacturer ID does not exist', async () => {
         await expect(
-          vehicleTableInstance
+          ddTableInstance
             .connect(admin)
-            .createVehicleTable(manufacturer1.address, 99)
+            .createDeviceDefinitionTable(manufacturer1.address, 99)
         ).to.be.revertedWithCustomError(
-          vehicleTableInstance,
+          ddTableInstance,
           'InvalidManufacturerId',
         ).withArgs(99);
       });
       it('Should revert if manufacturer table already exists', async () => {
-        await vehicleTableInstance
+        await ddTableInstance
           .connect(admin)
-          .createVehicleTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(manufacturer1.address, 1);
 
         await expect(
-          vehicleTableInstance
+          ddTableInstance
             .connect(admin)
-            .createVehicleTable(manufacturer1.address, 1)
+            .createDeviceDefinitionTable(manufacturer1.address, 1)
         ).to.be.revertedWithCustomError(
-          vehicleTableInstance,
+          ddTableInstance,
           'TableAlreadyExists',
         ).withArgs(1);
       });
@@ -142,48 +142,48 @@ describe('VehicleTable', async function () {
       it('Should create register a new table to a manufacturer', async () => {
         expect(await tablelandRegistry.listTables(manufacturer1.address)).to.be.empty;
 
-        await vehicleTableInstance
+        await ddTableInstance
           .connect(admin)
-          .createVehicleTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(manufacturer1.address, 1);
 
         expect(await tablelandRegistry.listTables(manufacturer1.address))
           .to.deep.include.members([{ tableId: '2', chainId: CURRENT_CHAIN_ID }]);
       });
       it('Should correctly map the manufacturer ID to the new table created', async () => {
-        expect(await vehicleTableInstance.getVehicleTableId(1)).to.equal(0);
+        expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(0);
 
-        await vehicleTableInstance
+        await ddTableInstance
           .connect(admin)
-          .createVehicleTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(manufacturer1.address, 1);
 
-        expect(await vehicleTableInstance.getVehicleTableId(1)).to.equal(2);
+        expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
       });
     });
 
     context('Events', () => {
-      it('Should emit VehicleTableCreated event with correct params', async () => {
+      it('Should emit DeviceDefinitionTableCreated event with correct params', async () => {
         await expect(
-          vehicleTableInstance
+          ddTableInstance
             .connect(admin)
-            .createVehicleTable(manufacturer1.address, 1)
+            .createDeviceDefinitionTable(manufacturer1.address, 1)
         )
-          .to.emit(vehicleTableInstance, 'VehicleTableCreated')
+          .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
           .withArgs(1, 2);
       });
     });
   });
 
-  describe('getVehicleTableName', () => {
+  describe('getDeviceDefinitionTableName', () => {
     context('State', () => {
       it('Should return empty string if there is no table minted to the manufacturer', async () => {
-        expect(await vehicleTableInstance.getVehicleTableName(99)).to.equal('');
+        expect(await ddTableInstance.getDeviceDefinitionTableName(99)).to.equal('');
       });
       it('Should correctly return the table name', async () => {
-        await vehicleTableInstance
+        await ddTableInstance
           .connect(admin)
-          .createVehicleTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(manufacturer1.address, 1);
 
-        expect(await vehicleTableInstance.getVehicleTableName(1))
+        expect(await ddTableInstance.getDeviceDefinitionTableName(1))
           .to.equal(`${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_2`);
       });
     });

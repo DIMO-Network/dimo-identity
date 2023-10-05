@@ -1,8 +1,8 @@
 import chai from 'chai';
 import { ethers, network, HardhatEthersSigner } from 'hardhat';
 
-import { LocalTableland, getAccounts, getRegistry } from '@tableland/local';
-import { Registry } from '@tableland/sdk';
+import { LocalTableland, getAccounts, getDatabase, getValidator, getRegistry } from '@tableland/local';
+import { Database, Validator, Registry } from '@tableland/sdk';
 
 import {
   DimoAccessControl,
@@ -29,11 +29,11 @@ after(async function () {
 
 const accounts = getAccounts();
 
-describe('DeviceDefinitionTable', async function () {
+describe.only('DeviceDefinitionTable', async function () {
   let CURRENT_CHAIN_ID: number;
   let snapshot: string;
-  // let tablelandDb: Database;
-  // let tablelandValidator: Validator;
+  let tablelandDb: Database;
+  let tablelandValidator: Validator;
   let tablelandRegistry: Registry;
   let dimoAccessControlInstance: DimoAccessControl;
   let manufacturerInstance: Manufacturer;
@@ -43,12 +43,13 @@ describe('DeviceDefinitionTable', async function () {
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
+  let manufacturer2: HardhatEthersSigner;
 
   before(async () => {
     CURRENT_CHAIN_ID = network.config.chainId ?? 31337;
-    [admin, nonAdmin, manufacturer1] = await ethers.getSigners();
-    // tablelandDb = getDatabase(accounts[0]);
-    // tablelandValidator = new Validator(tablelandDb.config);
+    [admin, nonAdmin, manufacturer1, manufacturer2] = await ethers.getSigners();
+    tablelandDb = getDatabase(accounts[0]);
+    tablelandValidator = getValidator(tablelandDb.config.baseUrl);
     tablelandRegistry = getRegistry(accounts[0]);
 
     const deployments = await setup(admin, {
@@ -122,7 +123,7 @@ describe('DeviceDefinitionTable', async function () {
           'InvalidManufacturerId',
         ).withArgs(99);
       });
-      it('Should revert if manufacturer table already exists', async () => {
+      it('Should revert if Device Definition table already exists', async () => {
         await ddTableInstance
           .connect(admin)
           .createDeviceDefinitionTable(manufacturer1.address, 1);
@@ -169,6 +170,62 @@ describe('DeviceDefinitionTable', async function () {
         )
           .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
           .withArgs(1, 2);
+      });
+    });
+  });
+
+  describe('createDeviceDefinition', () => {
+    beforeEach(async () => {
+      await ddTableInstance
+        .connect(admin)
+        .createDeviceDefinitionTable(manufacturer1.address, 1);
+    });
+
+    context('Error handling', () => {
+      it('Should revert if Device Definition table does not exist', async () => {
+        await expect(
+          ddTableInstance.connect(manufacturer1).createDeviceDefinition(99, C.mockDdModel, C.mockDdYear)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'TableDoesNotExist',
+        ).withArgs(99);
+      });
+      it('Should revert if caller is not the Device Definition table owner', async () => {
+        await expect(
+          ddTableInstance.connect(manufacturer2).createDeviceDefinition(1, C.mockDdModel, C.mockDdYear)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'Unauthorized'
+        ).withArgs(2, manufacturer2.address);
+      });
+    });
+
+    context('State', () => {
+      it.only('test', async () => {
+        const tx = await ddTableInstance.connect(manufacturer1).createDeviceDefinition(1, C.mockDdModel, C.mockDdYear);
+  
+        console.log('here')
+        await tablelandValidator.pollForReceiptByTransactionHash({
+          chainId: 31337,
+          transactionHash: (await tx?.wait())?.hash as string,
+        });
+        console.log('here')
+  
+        console.log(await tablelandDb.prepare(
+          `SELECT id, model, year FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
+        ).first());
+  
+        console.log('here')
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit DeviceDefinitionInserted event with correct params', async () => {
+        await expect(
+          ddTableInstance.connect(manufacturer1).createDeviceDefinition(1, C.mockDdModel, C.mockDdYear)
+        )
+          .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
+          .withArgs(1, 1, C.mockDdModel, C.mockDdYear);
       });
     });
   });

@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
 import "../../shared/Roles.sol";
+import "../../shared/Types.sol";
 import "./DeviceDefinitionTableInternal.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 
@@ -55,9 +56,6 @@ contract DeviceDefinitionTable is
             .getStorage()
             .nodeIdToManufacturerName[manufacturerId];
 
-        if (bytes(prefix).length == 0) {
-            revert InvalidManufacturerId(manufacturerId);
-        }
         if (tableId == 0) {
             revert TableDoesNotExist(manufacturerId);
         }
@@ -89,14 +87,59 @@ contract DeviceDefinitionTable is
     }
 
     // TODO Documentation
-    // TODO Batch insertion
-    // function createDeviceDefinitionBatch(
-    //     uint256 manufacturerId,
-    //     string calldata model,
-    //     string calldata year
-    // ) external {
+    function createDeviceDefinitionBatch(
+        uint256 manufacturerId,
+        DeviceDefinitionInput[] calldata data
+    ) external {
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+        uint256 tableId = dds.tables[manufacturerId];
+        string memory prefix = ManufacturerStorage
+            .getStorage()
+            .nodeIdToManufacturerName[manufacturerId];
 
-    // }
+        if (tableId == 0) {
+            revert TableDoesNotExist(manufacturerId);
+        }
+
+        ITablelandTables tablelandTables = TablelandDeployments.get();
+
+        if (INFT(address(tablelandTables)).ownerOf(tableId) != msg.sender) {
+            revert Unauthorized(tableId, msg.sender);
+        }
+
+        uint256 len = data.length;
+        string[] memory vals = new string[](len);
+        for (uint256 i; i < len; i++) {
+            vals[i] = string.concat(
+                string(abi.encodePacked("'", data[i].model, "'")),
+                ",",
+                string(abi.encodePacked("'", data[i].year, "'"))
+            );
+
+            emit DeviceDefinitionInserted(
+                dds.ddIds,
+                manufacturerId,
+                data[i].model,
+                data[i].year
+            );
+        }
+
+        string memory stmt = SQLHelpers.toBatchInsert(
+            prefix,
+            tableId,
+            "model,year",
+            vals
+        );
+
+        tablelandTables.mutate(
+            address(this),
+            tableId,
+            SQLHelpers.toInsert(prefix, tableId, "model,year", stmt)
+        );
+
+        dds.ddIds += len;
+    }
 
     /**
      * @dev Retrieve the name of the device definition table name associated with a specific manufacturer

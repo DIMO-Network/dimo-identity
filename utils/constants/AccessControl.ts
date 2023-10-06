@@ -66,6 +66,11 @@ export const MINT_VEHICLE_SD_ROLE = ethers.keccak256(
   ethers.toUtf8Bytes('MINT_VEHICLE_SD_ROLE')
 );
 
+// Device Definition roles
+export const INSERT_DEVICE_DEFINITION_ROLE = ethers.keccak256(
+  ethers.toUtf8Bytes('INSERT_DEVICE_DEFINITION_ROLE')
+);
+
 // Developer roles
 export const DEV_AD_TRANSFER_ROLE = ethers.keccak256(
   ethers.toUtf8Bytes('DEV_AD_TRANSFER_ROLE')

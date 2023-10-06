@@ -23,13 +23,9 @@ contract DeviceDefinitionTableInternal {
 
     /**
      * @notice Internal function to create a new definition table associated with a specific manufacturer
-     * @param owner The address of the table's owner
      * @param manufacturerId The unique identifier of the manufacturer
      */
-    function _createDeviceDefinitionTable(
-        address owner,
-        uint256 manufacturerId
-    ) internal {
+    function _createDeviceDefinitionTable(uint256 manufacturerId) internal {
         DeviceDefinitionTableStorage.Storage
             storage vs = DeviceDefinitionTableStorage.getStorage();
 
@@ -48,7 +44,10 @@ contract DeviceDefinitionTableInternal {
             "id integer primary key, model text not null, year integer not null",
             prefix
         );
-        uint256 tableId = TablelandDeployments.get().create(owner, statement);
+        uint256 tableId = TablelandDeployments.get().create(
+            address(this),
+            statement
+        );
 
         vs.tables[manufacturerId] = tableId;
 

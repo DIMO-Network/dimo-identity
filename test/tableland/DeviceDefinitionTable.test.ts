@@ -19,6 +19,7 @@ const lt = new LocalTableland({
 });
 
 before(async function () {
+  this.timeout(30000);
   lt.start();
   await lt.isReady();
 });
@@ -29,7 +30,7 @@ after(async function () {
 
 const accounts = getAccounts();
 
-describe.only('DeviceDefinitionTable', async function () {
+describe('DeviceDefinitionTable', async function () {
   let CURRENT_CHAIN_ID: number;
   let snapshot: string;
   let tablelandDb: Database;
@@ -40,14 +41,27 @@ describe.only('DeviceDefinitionTable', async function () {
   let manufacturerIdInstance: ManufacturerId;
   let ddTableInstance: DeviceDefinitionTable;
 
+  let DIMO_REGISTRY_ADDRESS: string;
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
+  let insertAuthorized: HardhatEthersSigner;
+  let unauthorized: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let manufacturer2: HardhatEthersSigner;
+  let manufacturer3: HardhatEthersSigner;
 
   before(async () => {
     CURRENT_CHAIN_ID = network.config.chainId ?? 31337;
-    [admin, nonAdmin, manufacturer1, manufacturer2] = await ethers.getSigners();
+    [
+      admin,
+      nonAdmin,
+      insertAuthorized,
+      unauthorized,
+      manufacturer1,
+      manufacturer2,
+      manufacturer3
+    ] = await ethers.getSigners();
+
     tablelandDb = getDatabase(accounts[0]);
     tablelandValidator = getValidator(tablelandDb.config.baseUrl);
     tablelandRegistry = getRegistry(accounts[0]);
@@ -58,12 +72,17 @@ describe.only('DeviceDefinitionTable', async function () {
       upgradeableContracts: [],
     });
 
+    DIMO_REGISTRY_ADDRESS = await deployments.DIMORegistry.getAddress();
     dimoAccessControlInstance = deployments.DimoAccessControl;
     ddTableInstance = deployments.DeviceDefinitionTable;
     manufacturerInstance = deployments.Manufacturer;
     manufacturerIdInstance = deployments.ManufacturerId;
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
+
+    await dimoAccessControlInstance
+      .connect(admin)
+      .grantRole(C.INSERT_DEVICE_DEFINITION_ROLE, insertAuthorized.address);
 
     await manufacturerIdInstance
       .connect(admin)
@@ -89,7 +108,13 @@ describe.only('DeviceDefinitionTable', async function () {
 
     await manufacturerInstance
       .connect(admin)
-      .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
+      .mintManufacturer(manufacturer1.address, C.mockManufacturerNames[0], []);
+    await manufacturerInstance
+      .connect(admin)
+      .mintManufacturer(manufacturer2.address, C.mockManufacturerNames[1], []);
+    await manufacturerInstance
+      .connect(admin)
+      .mintManufacturer(manufacturer3.address, C.mockManufacturerNames[2], []);
   });
 
   beforeEach(async () => {
@@ -100,14 +125,13 @@ describe.only('DeviceDefinitionTable', async function () {
     await revertToSnapshot(snapshot);
   });
 
-
   describe('createDeviceDefinitionTable', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
           ddTableInstance
             .connect(nonAdmin)
-            .createDeviceDefinitionTable(nonAdmin.address, 1)
+            .createDeviceDefinitionTable(1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`,
@@ -117,7 +141,7 @@ describe.only('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(admin)
-            .createDeviceDefinitionTable(manufacturer1.address, 99)
+            .createDeviceDefinitionTable(99)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'InvalidManufacturerId',
@@ -126,12 +150,12 @@ describe.only('DeviceDefinitionTable', async function () {
       it('Should revert if Device Definition table already exists', async () => {
         await ddTableInstance
           .connect(admin)
-          .createDeviceDefinitionTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(1);
 
         await expect(
           ddTableInstance
             .connect(admin)
-            .createDeviceDefinitionTable(manufacturer1.address, 1)
+            .createDeviceDefinitionTable(1)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'TableAlreadyExists',
@@ -141,13 +165,13 @@ describe.only('DeviceDefinitionTable', async function () {
 
     context('State', () => {
       it('Should create register a new table to a manufacturer', async () => {
-        expect(await tablelandRegistry.listTables(manufacturer1.address)).to.be.empty;
+        expect(await tablelandRegistry.listTables(DIMO_REGISTRY_ADDRESS)).to.be.empty;
 
         await ddTableInstance
           .connect(admin)
-          .createDeviceDefinitionTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(1);
 
-        expect(await tablelandRegistry.listTables(manufacturer1.address))
+        expect(await tablelandRegistry.listTables(DIMO_REGISTRY_ADDRESS))
           .to.deep.include.members([{ tableId: '2', chainId: CURRENT_CHAIN_ID }]);
       });
       it('Should correctly map the manufacturer ID to the new table created', async () => {
@@ -155,7 +179,7 @@ describe.only('DeviceDefinitionTable', async function () {
 
         await ddTableInstance
           .connect(admin)
-          .createDeviceDefinitionTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(1);
 
         expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
       });
@@ -166,7 +190,7 @@ describe.only('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(admin)
-            .createDeviceDefinitionTable(manufacturer1.address, 1)
+            .createDeviceDefinitionTable(1)
         )
           .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
           .withArgs(1, 2);
@@ -174,58 +198,128 @@ describe.only('DeviceDefinitionTable', async function () {
     });
   });
 
-  describe('createDeviceDefinition', () => {
+  describe.only('insertDeviceDefinition', () => {
     beforeEach(async () => {
-      await ddTableInstance
+      const tx = await ddTableInstance
         .connect(admin)
-        .createDeviceDefinitionTable(manufacturer1.address, 1);
+        .createDeviceDefinitionTable(1);
+
+      await tablelandValidator.pollForReceiptByTransactionHash({
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      });
     });
 
     context('Error handling', () => {
       it('Should revert if Device Definition table does not exist', async () => {
         await expect(
-          ddTableInstance.connect(manufacturer1).createDeviceDefinition(99, C.mockDdModel, C.mockDdYear)
+          ddTableInstance.connect(manufacturer1).insertDeviceDefinition(99, C.mockDdModel, C.mockDdYear)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'TableDoesNotExist',
         ).withArgs(99);
       });
-      it('Should revert if caller is not the Device Definition table owner', async () => {
+      it('Should revert if caller is not the manufacturer ID owner or has the INSERT_DEVICE_DEFINITION_ROLE', async () => {
         await expect(
-          ddTableInstance.connect(manufacturer2).createDeviceDefinition(1, C.mockDdModel, C.mockDdYear)
+          ddTableInstance.connect(unauthorized).insertDeviceDefinition(1, C.mockDdModel, C.mockDdYear)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'Unauthorized'
-        ).withArgs(2, manufacturer2.address);
+        ).withArgs(2, unauthorized.address);
       });
     });
 
-    context('State', () => {
-      it.only('test', async () => {
-        const tx = await ddTableInstance.connect(manufacturer1).createDeviceDefinition(1, C.mockDdModel, C.mockDdYear);
-  
-        console.log('here')
-        await tablelandValidator.pollForReceiptByTransactionHash({
-          chainId: 31337,
-          transactionHash: (await tx?.wait())?.hash as string,
+    context('Manufacturer as caller', () => {
+      context('State', () => {
+        it('Should correctly insert DD into the table', async () => {
+          const tx = await ddTableInstance
+            .connect(manufacturer1)
+            .insertDeviceDefinition(1, C.mockDdModel, C.mockDdYear);
+          console.log('here')
+
+          await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          });
+          console.log('here')
+
+          const count = await tablelandDb.prepare(
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+          ).first<{ total: number }>('total');
+          console.log('here')
+
+          expect(count).to.deep.equal([1]);
+
+          const selectQuery = await tablelandDb.prepare(
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
+          ).first();
+          console.log('here')
+
+          expect(selectQuery).to.deep.include({
+            id: 1,
+            model: C.mockDdModel,
+            year: C.mockDdYear
+          });
         });
-        console.log('here')
-  
-        console.log(await tablelandDb.prepare(
-          `SELECT id, model, year FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
-        ).first());
-  
-        console.log('here')
+      });
+
+      context('Events', () => {
+        it('Should emit DeviceDefinitionInserted event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(manufacturer1)
+              .insertDeviceDefinition(1, C.mockDdModel, C.mockDdYear)
+          )
+            .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
+            .withArgs(1, 1, C.mockDdModel, C.mockDdYear);
+        });
       });
     });
 
-    context('Events', () => {
-      it('Should emit DeviceDefinitionInserted event with correct params', async () => {
-        await expect(
-          ddTableInstance.connect(manufacturer1).createDeviceDefinition(1, C.mockDdModel, C.mockDdYear)
-        )
-          .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-          .withArgs(1, 1, C.mockDdModel, C.mockDdYear);
+    context('Insert role holder as caller', () => {
+      context('State', () => {
+        it('Should correctly insert DD into the table', async () => {
+          const tx = await ddTableInstance
+            .connect(insertAuthorized)
+            .insertDeviceDefinition(1, C.mockDdModel, C.mockDdYear);
+          console.log('here')
+
+          console.log(await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          }));
+          console.log('here')
+
+          const count = await tablelandDb.prepare(
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+          ).first<{ total: number }>('total');
+          console.log('here')
+
+          expect(count).to.deep.equal([1]);
+
+          const selectQuery = await tablelandDb.prepare(
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
+          ).first();
+          console.log('here')
+
+          expect(selectQuery).to.deep.include({
+            id: 1,
+            model: C.mockDdModel,
+            year: C.mockDdYear
+          });
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit DeviceDefinitionInserted event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(insertAuthorized)
+              .insertDeviceDefinition(1, C.mockDdModel, C.mockDdYear)
+          )
+            .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
+            .withArgs(1, 1, C.mockDdModel, C.mockDdYear);
+        });
       });
     });
   });
@@ -238,7 +332,7 @@ describe.only('DeviceDefinitionTable', async function () {
       it('Should correctly return the table name', async () => {
         await ddTableInstance
           .connect(admin)
-          .createDeviceDefinitionTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(1);
 
         expect(await ddTableInstance.getDeviceDefinitionTableName(1))
           .to.equal(`${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_2`);

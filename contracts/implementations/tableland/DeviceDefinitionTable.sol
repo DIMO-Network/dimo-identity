@@ -27,30 +27,34 @@ contract DeviceDefinitionTable is
         uint256 indexed ddId,
         uint256 indexed manufacturerId,
         string model,
-        string year
+        uint256 year
     );
 
     /**
      * @notice Creates a new definition table associated with a specific manufacturer
      * @dev This function can only be called by an address with the ADMIN_ROLE
-     * @param owner The address of the table's owner
+     * @dev The Tableland table NFT is minted to this contract
      * @param manufacturerId The unique identifier of the manufacturer
      */
     function createDeviceDefinitionTable(
-        address owner,
         uint256 manufacturerId
     ) external onlyRole(ADMIN_ROLE) {
-        _createDeviceDefinitionTable(owner, manufacturerId);
+        _createDeviceDefinitionTable(manufacturerId);
     }
 
     // TODO Documentation
-    function createDeviceDefinition(
+    function insertDeviceDefinition(
         uint256 manufacturerId,
         string calldata model,
-        string calldata year
+        uint256 year
     ) external {
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
+        INFT manufacturerIdProxy = INFT(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+
+        ITablelandTables tablelandTables = TablelandDeployments.get();
         uint256 tableId = dds.tables[manufacturerId];
         string memory prefix = ManufacturerStorage
             .getStorage()
@@ -59,10 +63,10 @@ contract DeviceDefinitionTable is
         if (tableId == 0) {
             revert TableDoesNotExist(manufacturerId);
         }
-
-        ITablelandTables tablelandTables = TablelandDeployments.get();
-
-        if (INFT(address(tablelandTables)).ownerOf(tableId) != msg.sender) {
+        if (
+            msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
+            !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
+        ) {
             revert Unauthorized(tableId, msg.sender);
         }
 
@@ -76,7 +80,7 @@ contract DeviceDefinitionTable is
                 string.concat(
                     string(abi.encodePacked("'", model, "'")),
                     ",",
-                    string(abi.encodePacked("'", year, "'"))
+                    Strings.toString(year)
                 )
             )
         );
@@ -87,58 +91,69 @@ contract DeviceDefinitionTable is
     }
 
     // TODO Documentation
-    function createDeviceDefinitionBatch(
-        uint256 manufacturerId,
-        DeviceDefinitionInput[] calldata data
-    ) external {
-        DeviceDefinitionTableStorage.Storage
-            storage dds = DeviceDefinitionTableStorage.getStorage();
-        uint256 tableId = dds.tables[manufacturerId];
-        string memory prefix = ManufacturerStorage
-            .getStorage()
-            .nodeIdToManufacturerName[manufacturerId];
+    // function insertDeviceDefinitionBatch(
+    //     uint256 manufacturerId,
+    //     DeviceDefinitionInput[] calldata data
+    // ) external {
+    //     DeviceDefinitionTableStorage.Storage
+    //         storage dds = DeviceDefinitionTableStorage.getStorage();
+    //     uint256 tableId = dds.tables[manufacturerId];
+    //     string memory prefix = ManufacturerStorage
+    //         .getStorage()
+    //         .nodeIdToManufacturerName[manufacturerId];
 
-        if (tableId == 0) {
-            revert TableDoesNotExist(manufacturerId);
-        }
+    //     if (tableId == 0) {
+    //         revert TableDoesNotExist(manufacturerId);
+    //     }
 
-        ITablelandTables tablelandTables = TablelandDeployments.get();
+    //     ITablelandTables tablelandTables = TablelandDeployments.get();
 
-        if (INFT(address(tablelandTables)).ownerOf(tableId) != msg.sender) {
-            revert Unauthorized(tableId, msg.sender);
-        }
+    //     if (INFT(address(tablelandTables)).ownerOf(tableId) != msg.sender) {
+    //         revert Unauthorized(tableId, msg.sender);
+    //     }
 
-        uint256 len = data.length;
-        string[] memory vals = new string[](len);
-        for (uint256 i; i < len; i++) {
-            vals[i] = string.concat(
-                string(abi.encodePacked("'", data[i].model, "'")),
-                ",",
-                string(abi.encodePacked("'", data[i].year, "'"))
-            );
+    //     uint256 len = data.length;
+    //     string[] memory vals = new string[](len);
+    //     for (uint256 i; i < len; i++) {
+    //         vals[i] = string.concat(
+    //             string(abi.encodePacked("'", data[i].model, "'")),
+    //             ",",
+    //             string(abi.encodePacked("'", data[i].year, "'"))
+    //         );
 
-            emit DeviceDefinitionInserted(
-                dds.ddIds,
-                manufacturerId,
-                data[i].model,
-                data[i].year
-            );
-        }
+    //         emit DeviceDefinitionInserted(
+    //             dds.ddIds,
+    //             manufacturerId,
+    //             data[i].model,
+    //             data[i].year
+    //         );
+    //     }
 
-        string memory stmt = SQLHelpers.toBatchInsert(
-            prefix,
-            tableId,
-            "model,year",
-            vals
-        );
+    //     string memory stmt = SQLHelpers.toBatchInsert(
+    //         prefix,
+    //         tableId,
+    //         "model,year",
+    //         vals
+    //     );
 
-        tablelandTables.mutate(
-            address(this),
-            tableId,
-            SQLHelpers.toInsert(prefix, tableId, "model,year", stmt)
-        );
+    //     tablelandTables.mutate(
+    //         address(this),
+    //         tableId,
+    //         SQLHelpers.toInsert(prefix, tableId, "model,year", stmt)
+    //     );
 
-        dds.ddIds += len;
+    //     dds.ddIds += len;
+    // }
+
+    // TODO Move it to a better place (maybe a separate ERC721Holder module)
+    /// @dev Allows the DIMORegistry to own a Tableland table NFT
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) public pure returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 
     /**

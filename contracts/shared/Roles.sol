@@ -45,3 +45,4 @@ bytes32 constant DEV_RENAME_MANUFACTURERS_ROLE = keccak256(
 );
 bytes32 constant DEV_AD_PAIR_ROLE = keccak256("DEV_AD_PAIR_ROLE");
 bytes32 constant DEV_VEHICLE_BURN_ROLE = keccak256("DEV_VEHICLE_BURN_ROLE");
+bytes32 constant DEV_CHANGE_PARENT_NODE = keccak256("DEV_CHANGE_PARENT_NODE");

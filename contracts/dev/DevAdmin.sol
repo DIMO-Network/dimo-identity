@@ -407,6 +407,38 @@ contract DevAdmin is AccessControlInternal {
     }
 
     /**
+     * @notice Admin function change the parent node of nodes
+     * @dev Caller must have the DEV_CHANGE_PARENT_NODE role
+     * @param newParentNode The new parent node to be applied to all nodes
+     * @param idProxyAddress The NFT proxy address of the nodes to be modified
+     * @param nodeIdList The list of node IDs to be modified
+     */
+    function changeParentNode(
+        uint256 newParentNode,
+        address idProxyAddress,
+        uint256[] calldata nodeIdList
+    ) external onlyRole(DEV_CHANGE_PARENT_NODE) {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        INFT manufacturerIdInstance = INFT(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+        INFT adIdInstance = INFT(
+            AftermarketDeviceStorage.getStorage().idProxyAddress
+        );
+
+        if (!manufacturerIdInstance.exists(newParentNode)) {
+            revert InvalidNode(address(manufacturerIdInstance), newParentNode);
+        }
+
+        for (uint256 i = 0; i < nodeIdList.length; i++) {
+            if (!adIdInstance.exists(nodeIdList[i]))
+                revert InvalidNode(address(adIdInstance), nodeIdList[i]);
+
+            ns.nodes[idProxyAddress][nodeIdList[i]].parentNode = newParentNode;
+        }
+    }
+
+    /**
      * @dev Internal function to reset SD node infos
      * It iterates over all whitelisted attributes to reset each info
      * @param tokenId Node which will have the infos reset

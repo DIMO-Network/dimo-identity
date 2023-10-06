@@ -60,6 +60,7 @@ describe('DevAdmin', function () {
   let nonAdmin: HardhatEthersSigner;
   let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
+  let manufacturer2: HardhatEthersSigner;
   let integrationOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
@@ -80,6 +81,7 @@ describe('DevAdmin', function () {
       nonAdmin,
       foundation,
       manufacturer1,
+      manufacturer2,
       integrationOwner1,
       user1,
       user2,
@@ -361,8 +363,7 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .transferAftermarketDeviceOwnership(1, user2.address),
         ).to.be.rejectedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEV_AD_TRANSFER_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_AD_TRANSFER_ROLE
           }`,
         );
       });
@@ -480,8 +481,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance.connect(nonAdmin).unclaimAftermarketDeviceNode([1]),
         ).to.be.rejectedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEV_AD_UNCLAIM_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_AD_UNCLAIM_ROLE
           }`,
         );
       });
@@ -652,10 +652,10 @@ describe('DevAdmin', function () {
         );
       await aftermarketDeviceInstance
         .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
       await aftermarketDeviceInstance
         .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 2, pairSig2);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 2, pairSig2);
     });
 
     context('Error handling', () => {
@@ -665,8 +665,7 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .unpairAftermarketDeviceByDeviceNode([2]),
         ).to.be.rejectedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEV_AD_UNPAIR_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_AD_UNPAIR_ROLE
           }`,
         );
       });
@@ -830,10 +829,10 @@ describe('DevAdmin', function () {
         );
       await aftermarketDeviceInstance
         .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
       await aftermarketDeviceInstance
         .connect(admin)
-        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 2, pairSig2);
+      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](2, 2, pairSig2);
     });
 
     context('Error handling', () => {
@@ -843,8 +842,7 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .unpairAftermarketDeviceByVehicleNode([4, 5]),
         ).to.be.rejectedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEV_AD_UNPAIR_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_AD_UNPAIR_ROLE
           }`,
         );
       });
@@ -933,8 +931,7 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .renameManufacturers(newIdManufacturerNames),
         ).to.be.rejectedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEV_RENAME_MANUFACTURERS_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_RENAME_MANUFACTURERS_ROLE
           }`,
         );
       });
@@ -999,8 +996,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance.connect(nonAdmin).adminBurnVehicles([1, 2]),
         ).to.be.rejectedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEV_VEHICLE_BURN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_VEHICLE_BURN_ROLE
           }`,
         );
       });
@@ -1063,11 +1059,11 @@ describe('DevAdmin', function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-            1,
-            1,
-            localPairSignature,
-          );
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+          1,
+          1,
+          localPairSignature,
+        );
 
         await expect(
           devAdminInstance.connect(admin).adminBurnVehicles([1, 2]),
@@ -1223,8 +1219,7 @@ describe('DevAdmin', function () {
             .connect(nonAdmin)
             .adminBurnVehiclesAndDeletePairings([1, 2]),
         ).to.be.rejectedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEV_VEHICLE_BURN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_VEHICLE_BURN_ROLE
           }`,
         );
       });
@@ -1292,11 +1287,11 @@ describe('DevAdmin', function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-            1,
-            1,
-            localPairSignature,
-          );
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+          1,
+          1,
+          localPairSignature,
+        );
 
         const localMintVehicleOwnerSig = await signMessage({
           _signer: user2,
@@ -1571,11 +1566,11 @@ describe('DevAdmin', function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-            1,
-            1,
-            localPairSignature,
-          );
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+          1,
+          1,
+          localPairSignature,
+        );
 
         await expect(
           devAdminInstance
@@ -1706,8 +1701,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance.connect(nonAdmin).adminPairAftermarketDevice(1, 1),
         ).to.be.rejectedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.DEV_AD_PAIR_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_AD_PAIR_ROLE
           }`,
         );
       });
@@ -1774,6 +1768,80 @@ describe('DevAdmin', function () {
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDevicePaired')
           .withArgs(1, 1, user1.address);
+      });
+    });
+  });
+
+  describe('changeParentNode', () => {
+    const adIdsList = Array.from({ length: mockAftermarketDeviceInfosList.length }, (_, i) => i + 1)
+    beforeEach(async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .mintManufacturer(
+          manufacturer2.address,
+          C.mockManufacturerNames[1],
+          C.mockManufacturerAttributeInfoPairs,
+        );
+
+      await adIdInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(await aftermarketDeviceInstance.getAddress(), true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList,
+        );
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_CHANGE_PARENT_NODE role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .changeParentNode(2, await adIdInstance.getAddress(), adIdsList),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_CHANGE_PARENT_NODE
+          }`,
+        );
+      });
+      it('Should revert if parent node is not minted', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .changeParentNode(99, await adIdInstance.getAddress(), adIdsList),
+        ).to.be.rejectedWith(
+          `InvalidNode("${await manufacturerIdInstance.getAddress()}", 99)`,
+        );
+      });
+      it('Should revert if node is not minted', async () => {
+        const invalidAdIdList = [...adIdsList, 99];
+
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .changeParentNode(2, await adIdInstance.getAddress(), invalidAdIdList),
+        ).to.be.rejectedWith(
+          `InvalidNode("${await adIdInstance.getAddress()}", 99)`,
+        );
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly change the parent node', async () => {
+        const adProxyAddress = await adIdInstance.getAddress();
+
+        for (const adId of adIdsList) {
+          expect(await nodesInstance.getParentNode(adProxyAddress, adId)).to.equal(1);
+        }
+
+        await devAdminInstance
+          .connect(admin)
+          .changeParentNode(2, await adIdInstance.getAddress(), adIdsList);
+
+        for (const adId of adIdsList) {
+          expect(await nodesInstance.getParentNode(adProxyAddress, adId)).to.equal(2);
+        }
       });
     });
   });

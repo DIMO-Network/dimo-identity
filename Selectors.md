@@ -8,8 +8,10 @@
 ## DevAdmin
 | Selector | Signature |
 |-|-|
+| 0xd7376bae | adminBurnAftermarketDevices(uint256[]) |
 | 0x282eb387 | adminBurnVehicles(uint256[]) |
 | 0x11d679c9 | adminBurnVehiclesAndDeletePairings(uint256[]) |
+| 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
 | 0xf73a8f04 | renameManufacturers((uint256,string)[]) |
 | 0xff96b761 | transferAftermarketDeviceOwnership(uint256,address) |

@@ -91,59 +91,64 @@ contract DeviceDefinitionTable is
     }
 
     // TODO Documentation
-    // function insertDeviceDefinitionBatch(
-    //     uint256 manufacturerId,
-    //     DeviceDefinitionInput[] calldata data
-    // ) external {
-    //     DeviceDefinitionTableStorage.Storage
-    //         storage dds = DeviceDefinitionTableStorage.getStorage();
-    //     uint256 tableId = dds.tables[manufacturerId];
-    //     string memory prefix = ManufacturerStorage
-    //         .getStorage()
-    //         .nodeIdToManufacturerName[manufacturerId];
+    function insertDeviceDefinitionBatch(
+        uint256 manufacturerId,
+        DeviceDefinitionInput[] calldata data
+    ) external {
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+        INFT manufacturerIdProxy = INFT(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
 
-    //     if (tableId == 0) {
-    //         revert TableDoesNotExist(manufacturerId);
-    //     }
+        ITablelandTables tablelandTables = TablelandDeployments.get();
+        uint256 tableId = dds.tables[manufacturerId];
+        string memory prefix = ManufacturerStorage
+            .getStorage()
+            .nodeIdToManufacturerName[manufacturerId];
 
-    //     ITablelandTables tablelandTables = TablelandDeployments.get();
+        if (tableId == 0) {
+            revert TableDoesNotExist(manufacturerId);
+        }
+        if (
+            msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
+            !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
+        ) {
+            revert Unauthorized(tableId, msg.sender);
+        }
 
-    //     if (INFT(address(tablelandTables)).ownerOf(tableId) != msg.sender) {
-    //         revert Unauthorized(tableId, msg.sender);
-    //     }
+        uint256 len = data.length;
+        string[] memory vals = new string[](len);
+        for (uint256 i; i < len; i++) {
+            vals[i] = string.concat(
+                string(abi.encodePacked("'", data[i].model, "'")),
+                ",",
+                Strings.toString(data[i].year)
+            );
 
-    //     uint256 len = data.length;
-    //     string[] memory vals = new string[](len);
-    //     for (uint256 i; i < len; i++) {
-    //         vals[i] = string.concat(
-    //             string(abi.encodePacked("'", data[i].model, "'")),
-    //             ",",
-    //             string(abi.encodePacked("'", data[i].year, "'"))
-    //         );
+            emit DeviceDefinitionInserted(
+                dds.ddIds,
+                manufacturerId,
+                data[i].model,
+                data[i].year
+            );
+        }
 
-    //         emit DeviceDefinitionInserted(
-    //             dds.ddIds,
-    //             manufacturerId,
-    //             data[i].model,
-    //             data[i].year
-    //         );
-    //     }
+        string memory stmt = SQLHelpers.toBatchInsert(
+            prefix,
+            tableId,
+            "model,year",
+            vals
+        );
 
-    //     string memory stmt = SQLHelpers.toBatchInsert(
-    //         prefix,
-    //         tableId,
-    //         "model,year",
-    //         vals
-    //     );
+        tablelandTables.mutate(
+            address(this),
+            tableId,
+            SQLHelpers.toInsert(prefix, tableId, "model,year", stmt)
+        );
 
-    //     tablelandTables.mutate(
-    //         address(this),
-    //         tableId,
-    //         SQLHelpers.toInsert(prefix, tableId, "model,year", stmt)
-    //     );
-
-    //     dds.ddIds += len;
-    // }
+        dds.ddIds += len;
+    }
 
     // TODO Move it to a better place (maybe a separate ERC721Holder module)
     /// @dev Allows the DIMORegistry to own a Tableland table NFT

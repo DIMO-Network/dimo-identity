@@ -46,5 +46,5 @@ struct MintVehicleAndSdInput {
 
 struct DeviceDefinitionInput {
     string model;
-    string year;
+    uint256 year;
 }

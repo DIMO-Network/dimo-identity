@@ -52,6 +52,11 @@ export type MintVehicleAndSdInput = {
   attrInfoPairsDevice: AttributeInfoPair[]
 };
 
+export type DeviceDefinitionInput = {
+  model: string,
+  year: number
+}
+
 export type IdManufacturerName = {
   tokenId: string,
   name: string

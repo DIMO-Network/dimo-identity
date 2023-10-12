@@ -118,6 +118,7 @@ describe.only('DeviceDefinitionTable', async function () {
 
   beforeEach(async () => {
     snapshot = await createSnapshot();
+    await lt.restartValidator();
   });
 
   afterEach(async () => {
@@ -397,11 +398,11 @@ describe.only('DeviceDefinitionTable', async function () {
               .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(1, 1, C.mockDdModel1, C.mockDdYear1)
+            .withArgs(0, 1, C.mockDdModel1, C.mockDdYear1)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(1, 1, C.mockDdModel2, C.mockDdYear2)
+            .withArgs(0, 1, C.mockDdModel2, C.mockDdYear2)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(1, 1, C.mockDdModel3, C.mockDdYear3);
+            .withArgs(0, 1, C.mockDdModel3, C.mockDdYear3);
         });
       });
     });
@@ -448,11 +449,11 @@ describe.only('DeviceDefinitionTable', async function () {
               .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(1, 1, C.mockDdModel1, C.mockDdYear1)
+            .withArgs(0, 1, C.mockDdModel1, C.mockDdYear1)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(1, 1, C.mockDdModel2, C.mockDdYear2)
+            .withArgs(0, 1, C.mockDdModel2, C.mockDdYear2)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(1, 1, C.mockDdModel3, C.mockDdYear3);
+            .withArgs(0, 1, C.mockDdModel3, C.mockDdYear3);
         });
       });
     });

@@ -506,7 +506,7 @@ describe('Manufacturer', async function () {
             )
         )
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(C.mockManufacturerNames[0], 1, admin.address);
+          .withArgs(C.mockManufacturerNames[0], 1, manufacturer1.address);
       });
       it('Should emit ManufacturerAttributeSet events with correct params', async () => {
         await expect(

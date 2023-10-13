@@ -141,11 +141,7 @@ contract DeviceDefinitionTable is
             vals
         );
 
-        tablelandTables.mutate(
-            address(this),
-            tableId,
-            SQLHelpers.toInsert(prefix, tableId, "model,year", stmt)
-        );
+        tablelandTables.mutate(address(this), tableId, stmt);
 
         dds.ddIds += len;
     }

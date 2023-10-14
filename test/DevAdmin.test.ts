@@ -2247,17 +2247,9 @@ describe('DevAdmin', function () {
     });
   });
 
-  describe('changeParentNode', () => {
+  describe('adminChangeParentNode', () => {
     const adIdsList = Array.from({ length: mockAftermarketDeviceInfosList.length }, (_, i) => i + 1)
     beforeEach(async () => {
-      await manufacturerInstance
-        .connect(admin)
-        .mintManufacturer(
-          manufacturer2.address,
-          C.mockManufacturerNames[1],
-          C.mockManufacturerAttributeInfoPairs,
-        );
-
       await adIdInstance
         .connect(manufacturer1)
         .setApprovalForAll(await aftermarketDeviceInstance.getAddress(), true);
@@ -2274,7 +2266,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
-            .changeParentNode(2, await adIdInstance.getAddress(), adIdsList),
+            .adminChangeParentNode(2, await adIdInstance.getAddress(), adIdsList),
         ).to.be.rejectedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_CHANGE_PARENT_NODE
           }`,
@@ -2284,7 +2276,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance
             .connect(admin)
-            .changeParentNode(99, await adIdInstance.getAddress(), adIdsList),
+            .adminChangeParentNode(99, await adIdInstance.getAddress(), adIdsList),
         ).to.be.rejectedWith(
           `InvalidNode("${await manufacturerIdInstance.getAddress()}", 99)`,
         );
@@ -2295,7 +2287,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance
             .connect(admin)
-            .changeParentNode(2, await adIdInstance.getAddress(), invalidAdIdList),
+            .adminChangeParentNode(2, await adIdInstance.getAddress(), invalidAdIdList),
         ).to.be.rejectedWith(
           `InvalidNode("${await adIdInstance.getAddress()}", 99)`,
         );
@@ -2312,7 +2304,7 @@ describe('DevAdmin', function () {
 
         await devAdminInstance
           .connect(admin)
-          .changeParentNode(2, await adIdInstance.getAddress(), adIdsList);
+          .adminChangeParentNode(2, await adIdInstance.getAddress(), adIdsList);
 
         for (const adId of adIdsList) {
           expect(await nodesInstance.getParentNode(adProxyAddress, adId)).to.equal(2);

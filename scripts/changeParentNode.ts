@@ -59,7 +59,7 @@ async function main() {
     arrayRange(41, 46),
     networkName);
 
-  await adminChangeParentNode(
+  await changeParentNode(
     caller,
     145,
     contractAddresses[networkName].nfts.AftermarketDeviceId.proxy,

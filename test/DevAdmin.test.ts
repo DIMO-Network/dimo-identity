@@ -2246,4 +2246,78 @@ describe('DevAdmin', function () {
       });
     });
   });
+
+  describe('changeParentNode', () => {
+    const adIdsList = Array.from({ length: mockAftermarketDeviceInfosList.length }, (_, i) => i + 1)
+    beforeEach(async () => {
+      await manufacturerInstance
+        .connect(admin)
+        .mintManufacturer(
+          manufacturer2.address,
+          C.mockManufacturerNames[1],
+          C.mockManufacturerAttributeInfoPairs,
+        );
+
+      await adIdInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(await aftermarketDeviceInstance.getAddress(), true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList,
+        );
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_CHANGE_PARENT_NODE role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .changeParentNode(2, await adIdInstance.getAddress(), adIdsList),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_CHANGE_PARENT_NODE
+          }`,
+        );
+      });
+      it('Should revert if parent node is not minted', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .changeParentNode(99, await adIdInstance.getAddress(), adIdsList),
+        ).to.be.rejectedWith(
+          `InvalidNode("${await manufacturerIdInstance.getAddress()}", 99)`,
+        );
+      });
+      it('Should revert if node is not minted', async () => {
+        const invalidAdIdList = [...adIdsList, 99];
+
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .changeParentNode(2, await adIdInstance.getAddress(), invalidAdIdList),
+        ).to.be.rejectedWith(
+          `InvalidNode("${await adIdInstance.getAddress()}", 99)`,
+        );
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly change the parent node', async () => {
+        const adProxyAddress = await adIdInstance.getAddress();
+
+        for (const adId of adIdsList) {
+          expect(await nodesInstance.getParentNode(adProxyAddress, adId)).to.equal(1);
+        }
+
+        await devAdminInstance
+          .connect(admin)
+          .changeParentNode(2, await adIdInstance.getAddress(), adIdsList);
+
+        for (const adId of adIdsList) {
+          expect(await nodesInstance.getParentNode(adProxyAddress, adId)).to.equal(2);
+        }
+      });
+    });
+  });
 });

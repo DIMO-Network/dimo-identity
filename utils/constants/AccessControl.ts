@@ -88,3 +88,6 @@ export const DEV_AD_PAIR_ROLE = ethers.keccak256(
 export const DEV_AD_BURN_ROLE = ethers.keccak256(
   ethers.toUtf8Bytes('DEV_AD_BURN_ROLE')
 );
+export const DEV_CHANGE_PARENT_NODE = ethers.keccak256(
+  ethers.toUtf8Bytes('DEV_CHANGE_PARENT_NODE')
+);

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
-import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
+import "./Base/MultiPrivilege/MultiPrivilegeTransferableBurnable.sol";
 
 error ZeroAddress();
 error Unauthorized();
@@ -71,6 +71,19 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
             tokenId,
             "DefinitionURI"
         );
+    }
+
+    /**
+     * @notice Function to burn a token
+     * @dev To be called only by DIMORegistry using an admin function
+     * @param tokenId Token Id to be burned
+     */
+    function burn(uint256 tokenId) public override {
+        if (_msgSender() != address(_dimoRegistry)) {
+            revert Unauthorized();
+        } else {
+            super._burn(tokenId);
+        }
     }
 
     /**

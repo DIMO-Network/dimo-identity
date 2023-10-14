@@ -76,7 +76,7 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @dev Transfers the ownership of an afermarket device
-     * @dev Caller must have the admin role
+     * @dev Caller must have the DEV_AD_TRANSFER_ROLE role
      * @param aftermarketDeviceNode Aftermarket device node id
      * @param newOwner The address of the new owner
      */
@@ -102,7 +102,7 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @dev Sets deviceClaimed to false for each aftermarket device
-     * @dev Caller must have the admin role
+     * @dev Caller must have the DEV_AD_UNCLAIM_ROLE role
      * @param aftermarketDeviceNodes Array of aftermarket device node ids
      */
     function unclaimAftermarketDeviceNode(
@@ -129,7 +129,7 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
-     * @dev Caller must have the admin role
+     * @dev Caller must have the DEV_AD_UNPAIR_ROLE role
      * @param aftermarketDeviceNodes Array of aftermarket device node ids
      */
     function unpairAftermarketDeviceByDeviceNode(
@@ -169,7 +169,7 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @dev Unpairs a list of aftermarket devices from their respective vehicles by the vehicle node ids
-     * @dev Caller must have the admin role
+     * @dev Caller must have the DEV_AD_UNPAIR_ROLE role
      * @param vehicleNodes Array of vehicle node id
      */
     function unpairAftermarketDeviceByVehicleNode(
@@ -238,7 +238,7 @@ contract DevAdmin is AccessControlInternal {
     /**
      * @notice Admin function to burn a list of vehicles and reset all its attributes
      * @dev It reverts if any vehicle doesn't exist or is paired
-     * @dev Caller must have the admin role
+     * @dev Caller must have the DEV_VEHICLE_BURN_ROLE role
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenIds List of vehicle node ids
      */
@@ -286,7 +286,7 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Admin function to burn a list of vehicles and reset all its attributes and links
-     * @dev Caller must have the admin role
+     * @dev Caller must have the DEV_VEHICLE_BURN_ROLE role
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenIds List of vehicle node ids
      */
@@ -309,7 +309,7 @@ contract DevAdmin is AccessControlInternal {
             .idProxyAddress;
 
         uint256 tokenId;
-        uint256 pairedNode;
+        uint256 pairedDeviceNode;
         address owner;
         for (uint256 i = 0; i < tokenIds.length; i++) {
             tokenId = tokenIds[i];
@@ -320,46 +320,46 @@ contract DevAdmin is AccessControlInternal {
             owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
 
             // Check AD pairing
-            pairedNode = ms.links[vehicleIdProxyAddress][tokenId];
-            if (pairedNode != 0) {
+            pairedDeviceNode = ms.links[vehicleIdProxyAddress][tokenId];
+            if (pairedDeviceNode != 0) {
                 delete ms.links[vehicleIdProxyAddress][tokenId];
-                delete ms.links[adIdProxyAddress][pairedNode];
+                delete ms.links[adIdProxyAddress][pairedDeviceNode];
 
                 emit AftermarketDeviceUnpairedDevAdmin(
-                    pairedNode,
+                    pairedDeviceNode,
                     tokenId,
                     owner
                 );
             }
 
             // Check SD pairing
-            pairedNode = ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
-                tokenId
-            ];
-            if (pairedNode != 0) {
-                delete ns.nodes[sdIdProxyAddress][pairedNode].parentNode;
+            pairedDeviceNode = ms.nodeLinks[vehicleIdProxyAddress][
+                sdIdProxyAddress
+            ][tokenId];
+            if (pairedDeviceNode != 0) {
+                delete ns.nodes[sdIdProxyAddress][pairedDeviceNode].parentNode;
 
                 delete ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                     tokenId
                 ];
                 delete ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
-                    pairedNode
+                    pairedDeviceNode
                 ];
 
                 delete sds.deviceAddressToNodeId[
-                    sds.nodeIdToDeviceAddress[pairedNode]
+                    sds.nodeIdToDeviceAddress[pairedDeviceNode]
                 ];
-                delete sds.nodeIdToDeviceAddress[pairedNode];
+                delete sds.nodeIdToDeviceAddress[pairedDeviceNode];
 
-                INFT(sdIdProxyAddress).burn(pairedNode);
+                INFT(sdIdProxyAddress).burn(pairedDeviceNode);
 
                 emit SyntheticDeviceNodeBurnedDevAdmin(
-                    pairedNode,
+                    pairedDeviceNode,
                     tokenId,
                     owner
                 );
 
-                _resetSdInfos(pairedNode);
+                _resetSdInfos(pairedDeviceNode);
             }
 
             delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
@@ -401,6 +401,64 @@ contract DevAdmin is AccessControlInternal {
                 revert AdPaired(tokenId);
 
             owner = INFT(adIdProxyAddress).ownerOf(tokenId);
+
+            delete ns.nodes[adIdProxyAddress][tokenId].parentNode;
+            delete ads.deviceClaimed[tokenId];
+            delete ads.deviceAddressToNodeId[
+                ads.nodeIdToDeviceAddress[tokenId]
+            ];
+            delete ads.nodeIdToDeviceAddress[tokenId];
+
+            emit AftermarketDeviceNodeBurnedDevAdmin(tokenId, owner);
+
+            INFT(adIdProxyAddress).burn(tokenId);
+
+            _resetAdInfos(tokenId);
+        }
+    }
+
+    /**
+     * @notice Admin function to burn a list of aftermarket devices and reset all its attributes and links
+     * @dev It reverts if any aftermarket device doesn't exist
+     * @dev Caller must have the DEV_AD_BURN_ROLE
+     * @param tokenIds List of aftermarket device node ids
+     */
+    function adminBurnAftermarketDevicesAndDeletePairings(
+        uint256[] calldata tokenIds
+    ) external onlyRole(DEV_AD_BURN_ROLE) {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = ads.idProxyAddress;
+
+        uint256 tokenId;
+        uint256 pairedVehicleNode;
+        address owner;
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            tokenId = tokenIds[i];
+
+            if (!INFT(adIdProxyAddress).exists(tokenId))
+                revert InvalidNode(adIdProxyAddress, tokenId);
+
+            owner = INFT(adIdProxyAddress).ownerOf(tokenId);
+
+            // Check Vehicle pairing
+            pairedVehicleNode = ms.links[adIdProxyAddress][tokenId];
+            if (pairedVehicleNode != 0) {
+                delete ms.links[vehicleIdProxyAddress][pairedVehicleNode];
+                delete ms.links[adIdProxyAddress][tokenId];
+
+                emit AftermarketDeviceUnpairedDevAdmin(
+                    tokenId,
+                    pairedVehicleNode,
+                    owner
+                );
+            }
 
             delete ns.nodes[adIdProxyAddress][tokenId].parentNode;
             delete ads.deviceClaimed[tokenId];

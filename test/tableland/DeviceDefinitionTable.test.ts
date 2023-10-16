@@ -119,6 +119,7 @@ describe.only('DeviceDefinitionTable', async function () {
 
   beforeEach(async () => {
     snapshot = await createSnapshot();
+    await lt.restartValidator();
   });
 
   afterEach(async () => {

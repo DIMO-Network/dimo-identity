@@ -118,6 +118,7 @@ contract DeviceDefinitionTable is
         }
 
         uint256 len = data.length;
+        uint256 currentDdId = dds.ddIds + 1;
         string[] memory vals = new string[](len);
         for (uint256 i; i < len; i++) {
             vals[i] = string.concat(
@@ -127,7 +128,7 @@ contract DeviceDefinitionTable is
             );
 
             emit DeviceDefinitionInserted(
-                dds.ddIds,
+                currentDdId + i,
                 manufacturerId,
                 data[i].model,
                 data[i].year

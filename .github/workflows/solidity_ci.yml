@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-      - run: npm i
+      # --force to work around tableland/hardhat and tableland/local ^2.1.0-pre.0 incompatibility
+      - run: npm i --force
       - run: npm run build
       - run: npm run test

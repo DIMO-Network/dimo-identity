@@ -27,10 +27,9 @@ after(async function () {
   await lt.shutdown();
 });
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const accounts = getAccounts();
 
-describe.only('DeviceDefinitionTable', async function () {
+describe('DeviceDefinitionTable', async function () {
   let CURRENT_CHAIN_ID: number;
   let snapshot: string;
   let tablelandDb: Database;
@@ -237,15 +236,14 @@ describe.only('DeviceDefinitionTable', async function () {
     context('Manufacturer as caller', () => {
       context('State', () => {
         it('Should correctly insert DD into the table', async () => {
-          const tx = await (await ddTableInstance
+          const tx = await ddTableInstance
             .connect(manufacturer1)
-            .insertDeviceDefinition(1, C.mockDdModel1, C.mockDdYear1)).wait();
+            .insertDeviceDefinition(1, C.mockDdModel1, C.mockDdYear1);
 
-          await sleep(3000);
-          // await tablelandValidator.pollForReceiptByTransactionHash({
-          //   chainId: CURRENT_CHAIN_ID,
-          //   transactionHash: (await tx.wait())?.hash as string,
-          // });
+          await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          });
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
@@ -281,29 +279,24 @@ describe.only('DeviceDefinitionTable', async function () {
     context('Insert role holder as caller', () => {
       context('State', () => {
         it('Should correctly insert DD into the table', async () => {
-          const tx = await (await ddTableInstance
+          const tx = await ddTableInstance
             .connect(insertAuthorized)
-            .insertDeviceDefinition(1, C.mockDdModel1, C.mockDdYear1)).wait();
-          console.log('here')
+            .insertDeviceDefinition(1, C.mockDdModel1, C.mockDdYear1);
 
-          await sleep(3000);
-          // console.log(await tablelandValidator.pollForReceiptByTransactionHash({
-          //   chainId: CURRENT_CHAIN_ID,
-          //   transactionHash: (await tx.wait())?.hash as string,
-          // }));
-          console.log('here')
+          await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          });
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
           ).first<{ total: number }>('total');
-          console.log('here')
 
           expect(count).to.deep.equal([1]);
 
           const selectQuery = await tablelandDb.prepare(
             `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
           ).first();
-          console.log('here')
 
           expect(selectQuery).to.deep.include({
             id: 1,
@@ -366,15 +359,14 @@ describe.only('DeviceDefinitionTable', async function () {
     context('Manufacturer as caller', () => {
       context('State', () => {
         it('Should correctly insert DD into the table', async () => {
-          const tx = await (await ddTableInstance
+          const tx = await ddTableInstance
             .connect(manufacturer1)
-            .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)).wait();
+            .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
 
-          await sleep(3000);
-          // await tablelandValidator.pollForReceiptByTransactionHash({
-          //   chainId: CURRENT_CHAIN_ID,
-          //   transactionHash: (await tx.wait())?.hash as string,
-          // });
+          await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          });
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
@@ -383,23 +375,30 @@ describe.only('DeviceDefinitionTable', async function () {
           expect(count).to.deep.equal([3]);
 
           const selectQuery = await tablelandDb.prepare(
-            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
-          ).first();
-          // const selectQuery2 = await tablelandDb.prepare(
-          //   `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
-          // ).first();
-          // const selectQuey3 = await tablelandDb.prepare(
-          //   `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
-          // ).first();
-          // console.log(selectQuery);
-          // console.log(selectQuery);
-          // console.log(selectQuery);
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id BETWEEN 1 AND 3`
+          ).all();
 
-          expect(selectQuery).to.deep.include({
-            id: 1,
-            model: C.mockDdModel1,
-            year: C.mockDdYear1
-          });
+
+          expect(selectQuery.results)
+            .to.deep.include.members(
+              [
+                {
+                  id: 1,
+                  model: C.mockDdModel1,
+                  year: C.mockDdYear1
+                },
+                {
+                  id: 2,
+                  model: C.mockDdModel2,
+                  year: C.mockDdYear2
+                },
+                {
+                  id: 3,
+                  model: C.mockDdModel3,
+                  year: C.mockDdYear3
+                }
+              ]
+            );
         });
       });
 
@@ -411,11 +410,11 @@ describe.only('DeviceDefinitionTable', async function () {
               .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(0, 1, C.mockDdModel1, C.mockDdYear1)
+            .withArgs(1, 1, C.mockDdModel1, C.mockDdYear1)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(0, 1, C.mockDdModel2, C.mockDdYear2)
+            .withArgs(2, 1, C.mockDdModel2, C.mockDdYear2)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(0, 1, C.mockDdModel3, C.mockDdYear3);
+            .withArgs(3, 1, C.mockDdModel3, C.mockDdYear3);
         });
       });
     });
@@ -423,39 +422,45 @@ describe.only('DeviceDefinitionTable', async function () {
     context('Insert role holder as caller', () => {
       context('State', () => {
         it('Should correctly insert DD into the table', async () => {
-          console.log(await tablelandDb.prepare(
-            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
-          ).first<{ total: number }>('total'));
-
-          const tx = await (await ddTableInstance
+          const tx = await ddTableInstance
             .connect(insertAuthorized)
-            .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)).wait();
-          console.log('here')
+            .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
 
-          await sleep(3000);
-          // console.log(await tablelandValidator.pollForReceiptByTransactionHash({
-          //   chainId: CURRENT_CHAIN_ID,
-          //   transactionHash: (await tx.wait())?.hash as string,
-          // }));
-          // console.log('here')
+          await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          });
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
           ).first<{ total: number }>('total');
-          console.log('here')
 
           expect(count).to.deep.equal([3]);
 
-          // const selectQuery = await tablelandDb.prepare(
-          //   `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
-          // ).first();
-          // console.log('here')
+          const selectQuery = await tablelandDb.prepare(
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id BETWEEN 1 AND 3`
+          ).all();
 
-          // expect(selectQuery).to.deep.include({
-          //   id: 1,
-          //   model: C.mockDdModel1,
-          //   year: C.mockDdYear1
-          // });
+          expect(selectQuery.results)
+            .to.deep.include.members(
+              [
+                {
+                  id: 1,
+                  model: C.mockDdModel1,
+                  year: C.mockDdYear1
+                },
+                {
+                  id: 2,
+                  model: C.mockDdModel2,
+                  year: C.mockDdYear2
+                },
+                {
+                  id: 3,
+                  model: C.mockDdModel3,
+                  year: C.mockDdYear3
+                }
+              ]
+            );
         });
       });
 
@@ -467,11 +472,11 @@ describe.only('DeviceDefinitionTable', async function () {
               .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(0, 1, C.mockDdModel1, C.mockDdYear1)
+            .withArgs(1, 1, C.mockDdModel1, C.mockDdYear1)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(0, 1, C.mockDdModel2, C.mockDdYear2)
+            .withArgs(2, 1, C.mockDdModel2, C.mockDdYear2)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(0, 1, C.mockDdModel3, C.mockDdYear3);
+            .withArgs(3, 1, C.mockDdModel3, C.mockDdYear3);
         });
       });
     });

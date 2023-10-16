@@ -43,3 +43,8 @@ struct MintVehicleAndSdInput {
     address syntheticDeviceAddr;
     AttributeInfoPair[] attrInfoPairsDevice;
 }
+
+struct DeviceDefinitionInput {
+    string model;
+    uint256 year;
+}

@@ -17,15 +17,20 @@ error TableAlreadyExists(uint256 manufacturerId);
  */
 contract DeviceDefinitionTableInternal {
     event DeviceDefinitionTableCreated(
+        address indexed tableOwner,
         uint256 indexed manufacturerId,
         uint256 indexed tableId
     );
 
     /**
      * @notice Internal function to create a new definition table associated with a specific manufacturer
+     * @param tableOwner The owner of the table to be minted
      * @param manufacturerId The unique identifier of the manufacturer
      */
-    function _createDeviceDefinitionTable(uint256 manufacturerId) internal {
+    function _createDeviceDefinitionTable(
+        address tableOwner,
+        uint256 manufacturerId
+    ) internal {
         DeviceDefinitionTableStorage.Storage
             storage vs = DeviceDefinitionTableStorage.getStorage();
 
@@ -45,12 +50,12 @@ contract DeviceDefinitionTableInternal {
             prefix
         );
         uint256 tableId = TablelandDeployments.get().create(
-            address(this),
+            tableOwner,
             statement
         );
 
         vs.tables[manufacturerId] = tableId;
 
-        emit DeviceDefinitionTableCreated(manufacturerId, tableId);
+        emit DeviceDefinitionTableCreated(tableOwner, manufacturerId, tableId);
     }
 }

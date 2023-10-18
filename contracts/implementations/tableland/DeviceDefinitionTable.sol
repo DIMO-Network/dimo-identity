@@ -13,7 +13,7 @@ import "@tableland/evm/contracts/utils/SQLHelpers.sol";
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 error TableDoesNotExist(uint256 tableId);
-error Unauthorized(uint256 tableId, address caller);
+error Unauthorized(address caller);
 
 /**
  * @title DeviceDefinitionTable
@@ -44,9 +44,15 @@ contract DeviceDefinitionTable is
     function createDeviceDefinitionTable(
         address tableOwner,
         uint256 manufacturerId
-    ) external onlyRole(ADMIN_ROLE) {
-        // TODO check if the caller is a manufacturer, if so, check it if has a table set and if the manufacturerId matches
-        // TODO Also check if ADMIN_ROLE
+    ) external {
+        INFT manufacturerIdProxy = INFT(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+        if (
+            !_hasRole(ADMIN_ROLE, msg.sender) &&
+            msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)
+        ) revert Unauthorized(msg.sender);
+
         _createDeviceDefinitionTable(tableOwner, manufacturerId);
     }
 
@@ -69,7 +75,7 @@ contract DeviceDefinitionTable is
             );
 
             if (msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)) {
-                revert Unauthorized(tableId, msg.sender);
+                revert Unauthorized(msg.sender);
             }
 
             DeviceDefinitionTableStorage.getStorage().tables[
@@ -109,7 +115,7 @@ contract DeviceDefinitionTable is
             msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
             !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
         ) {
-            revert Unauthorized(tableId, msg.sender);
+            revert Unauthorized(msg.sender);
         }
 
         tablelandTables.mutate(
@@ -158,7 +164,7 @@ contract DeviceDefinitionTable is
             msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
             !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
         ) {
-            revert Unauthorized(tableId, msg.sender);
+            revert Unauthorized(msg.sender);
         }
 
         uint256 len = data.length;

@@ -45,6 +45,8 @@ contract DeviceDefinitionTable is
         address tableOwner,
         uint256 manufacturerId
     ) external onlyRole(ADMIN_ROLE) {
+        // TODO check if the caller is a manufacturer, if so, check it if has a table set and if the manufacturerId matches
+        // TODO Also check if ADMIN_ROLE
         _createDeviceDefinitionTable(tableOwner, manufacturerId);
     }
 
@@ -116,7 +118,7 @@ contract DeviceDefinitionTable is
             SQLHelpers.toInsert(
                 prefix,
                 tableId,
-                "model,year",
+                "model,year,metadata",
                 string.concat(
                     string(abi.encodePacked("'", model, "'")),
                     ",",
@@ -180,7 +182,7 @@ contract DeviceDefinitionTable is
         string memory stmt = SQLHelpers.toBatchInsert(
             prefix,
             tableId,
-            "model,year",
+            "model,year,metadata",
             vals
         );
 

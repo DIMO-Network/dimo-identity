@@ -46,7 +46,7 @@ contract DeviceDefinitionTableInternal {
         }
 
         string memory statement = SQLHelpers.toCreateFromSchema(
-            "id integer primary key, model text not null, year integer not null",
+            "id integer primary key, model text not null, year integer not null, metadata text",
             prefix
         );
         uint256 tableId = TablelandDeployments.get().create(

@@ -1,0 +1,99 @@
+{
+    "localhost": {
+        "modules": {
+            "DIMORegistry": {
+                "address": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf",
+                "selectors": [
+                    "0x0df5b997",
+                    "0x9748a762",
+                    "0x06d1d2a1"
+                ]
+            },
+            "Eip712Checker": {
+                "address": "0x9d4454B023096f34B160D6B654540c56A1F81688",
+                "selectors": [
+                    "0x4cd88b76"
+                ]
+            },
+            "DimoAccessControl": {
+                "address": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
+                "selectors": [
+                    "0x248a9ca3",
+                    "0x2f2ff15d",
+                    "0x91d14854",
+                    "0x8bb9c5bf",
+                    "0xd547741f"
+                ]
+            },
+            "Nodes": {
+                "address": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
+                "selectors": [
+                    "0xbc60a6ba",
+                    "0xdce2f860",
+                    "0x82087d24"
+                ]
+            },
+            "Manufacturer": {
+                "address": "0x809d550fca64d94Bd9F66E60752A544199cfAC3D",
+                "selectors": [
+                    "0x50300a3f",
+                    "0xce55aab0",
+                    "0x9109b30b",
+                    "0xd9c27c40",
+                    "0xb429afeb",
+                    "0x456bf169",
+                    "0x5f36da6b",
+                    "0x9abb3000",
+                    "0x92eefe9b",
+                    "0xd159f49a",
+                    "0x63545ffa",
+                    "0x20d60248"
+                ]
+            },
+            "Mapper": {
+                "address": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
+                "selectors": [
+                    "0x0a6cef46",
+                    "0x112e62a2",
+                    "0xbd2b5568",
+                    "0xbebc0bfc"
+                ]
+            },
+            "DevAdmin": {
+                "address": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
+                "selectors": [
+                    "0x282eb387",
+                    "0x11d679c9",
+                    "0x3febacab",
+                    "0xf73a8f04",
+                    "0xff96b761",
+                    "0x5c129493",
+                    "0x71193956",
+                    "0x8c2ee9bb"
+                ]
+            }
+        },
+        "nfts": {
+            "ManufacturerId": {
+                "proxy": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+                "implementation": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
+            }
+        },
+        "misc": {
+            "DimoToken": {
+                "proxy": "",
+                "implementation": ""
+            },
+            "Stake": {
+                "proxy": "",
+                "implementation": ""
+            },
+            "DimoForwarder": {
+                "proxy": "",
+                "implementation": ""
+            },
+            "Foundation": "",
+            "Kms": ""
+        }
+    }
+}

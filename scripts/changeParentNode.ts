@@ -22,7 +22,7 @@ async function changeParentNode(
 
   await (await devAdmin
     .connect(caller)
-    .changeParentNode(newParentNode, idProxyAddress, nodeIds)).wait();
+    .adminChangeParentNode(newParentNode, idProxyAddress, nodeIds)).wait();
 
   console.log(`----- Parent node ${newParentNode} set -----`);
 }

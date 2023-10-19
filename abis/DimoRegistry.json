@@ -274,6 +274,50 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "attribute",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "info",
+                "type": "string"
+            }
+        ],
+        "name": "AftermarketDeviceAttributeSetDevAdmin",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "adNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "AftermarketDeviceNodeBurnedDevAdmin",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": false,
                 "internalType": "uint256",
                 "name": "aftermarketDeviceNode",
@@ -460,6 +504,32 @@
                 "type": "uint256[]"
             }
         ],
+        "name": "adminBurnAftermarketDevices",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "tokenIds",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "adminBurnAftermarketDevicesAndDeletePairings",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "tokenIds",
+                "type": "uint256[]"
+            }
+        ],
         "name": "adminBurnVehicles",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -482,24 +552,6 @@
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "aftermarketDeviceNode",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "vehicleNode",
-                "type": "uint256"
-            }
-        ],
-        "name": "adminPairAftermarketDevice",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
                 "name": "newParentNode",
                 "type": "uint256"
             },
@@ -514,7 +566,25 @@
                 "type": "uint256[]"
             }
         ],
-        "name": "changeParentNode",
+        "name": "adminChangeParentNode",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            }
+        ],
+        "name": "adminPairAftermarketDevice",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

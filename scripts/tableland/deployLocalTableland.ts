@@ -182,11 +182,9 @@ async function addModules(
 
         const contractSelectors = getSelectors(ContractFactory.interface);
 
-        await (
-            await dimoRegistryInstance
-                .connect(deployer)
-                .addModule(contract.implementation, contractSelectors)
-        ).wait();
+        await dimoRegistryInstance
+            .connect(deployer)
+            .addModule(contract.implementation, contractSelectors);
 
         instances[networkName].modules[contract.name].selectors = contractSelectors;
 
@@ -214,22 +212,18 @@ async function setupRegistry(
     );
 
     console.log('\n----- Initializing EIP712 -----\n');
-    await (
-        await eip712CheckerInstance
-            .connect(deployer)
-            .initialize(C.eip712Name, C.eip712Version)
-    ).wait();
+    await eip712CheckerInstance
+        .connect(deployer)
+        .initialize(C.eip712Name, C.eip712Version);
     console.log(`${C.eip712Name} and ${C.eip712Version} set to EIP712Checker`);
     console.log('\n----- EIP712 initialized -----');
 
     console.log('\n----- Setting NFT proxies -----\n');
-    await (
-        await manufacturerInstance
-            .connect(deployer)
-            .setManufacturerIdProxyAddress(
-                instances[networkName].nfts.ManufacturerId.proxy,
-            )
-    ).wait();
+    await manufacturerInstance
+        .connect(deployer)
+        .setManufacturerIdProxyAddress(
+            instances[networkName].nfts.ManufacturerId.proxy,
+        );
     console.log(
         `${instances[networkName].nfts.ManufacturerId.proxy} proxy address set to Manufacturer`,
     );
@@ -254,11 +248,9 @@ async function grantNftRoles(
         `\n----- Granting ${C.roles.nfts.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the ManufacturerId contract -----`,
     );
 
-    await (
-        await manufacturerIdInstance
-            .connect(deployer)
-            .grantRole(C.roles.nfts.MINTER_ROLE, dimoRegistryAddress)
-    ).wait();
+    await manufacturerIdInstance
+        .connect(deployer)
+        .grantRole(C.roles.nfts.MINTER_ROLE, dimoRegistryAddress);
 
     console.log(
         `----- ${C.roles.nfts.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the ManufacturerId contract -----\n`,
@@ -280,9 +272,7 @@ async function grantRole(
 
     console.log(`\n----- Granting ${role} role to ${address} -----`);
 
-    await (
-        await accessControlInstance.connect(deployer).grantRole(role, address)
-    ).wait();
+    await accessControlInstance.connect(deployer).grantRole(role, address);
 
     console.log(`----- ${role} role granted to ${address} -----\n`);
 }
@@ -305,11 +295,10 @@ async function mintBatchManufacturers(
     for (let i = 0; i < makes.length; i += batchSize) {
         const batch = makes.slice(i, i + batchSize);
 
-        const receipt = (await (
-            await manufacturerInstance
-                .connect(deployer)
-                .mintManufacturerBatch(owner, batch)
-        ).wait()) as ContractTransactionReceipt;
+        const tx = await manufacturerInstance
+            .connect(deployer)
+            .mintManufacturerBatch(owner, batch);
+        const receipt = await tx.wait() as ContractTransactionReceipt;
 
         const ids = receipt?.logs
             ?.filter((log: EventLog | Log) => log instanceof EventLog)

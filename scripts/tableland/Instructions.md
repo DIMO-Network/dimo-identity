@@ -19,13 +19,10 @@ npx hardhat run scripts/deployLocalTableland.ts
 
 #### Running tasks
 
-npx hardhat mintManufacturers --help
+npx hardhat mint-manufacturers --help
 
-npx hardhat mintDeviceDefinition --help
+npx hardhat create-dd-table --help
 
 ### :tipping_hand_person: Help links
 - [Node version manager](https://www.npmjs.com/package/n)
 - [Local Tableland Docs](https://docs.tableland.xyz/local-tableland/)
-
-
-// TODO check if tableland.getAccounts and ethers.getSigners return the same addresses. Use getAccount if needed in the deployment script and in the tasks

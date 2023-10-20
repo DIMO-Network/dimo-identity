@@ -26,7 +26,7 @@ task('mint-manufacturer', 'npx hardhat mint-manufacturer <name> --network localh
             instances.localhost.modules.DIMORegistry.address,
         );
 
-        console.log(`Minting manufacturer ${args.name} to ${signer.address}...`);
+        console.log(`Minting manufacturer ${args.name} for ${signer.address}...`);
 
         const tx = await manufacturerInstance
             .connect(signer)
@@ -56,21 +56,19 @@ task('create-dd-table', 'npx hardhat create-dd-table <manufacturerId> --network 
 
         console.log(await tablelandRegistry.listTables(signer.address))
 
-        console.log(`Creating Device Definition table for manufacturer ID ${args.manufacturerId} to ${signer.address}...`);
+        console.log(`Creating Device Definition table for manufacturer ID ${args.manufacturerId} for ${signer.address}...`);
 
         const tx = await ddTableInstance
             .connect(signer)
             .createDeviceDefinitionTable(signer.address, args.manufacturerId);
 
-        const receipt = await tx.wait();
-        console.log(receipt);
-        // TODO Failing here
-        // [Validator] 12:42AM WRN non-200 status code response clientIP=::1 goversion=go1.19.12 severity=Warning statusCode=404 trace_id=5fe6a6d1-e591-46ed-a1dd-75c5e47b1e40 version=n/a
-        console.log(await tablelandValidator.pollForReceiptByTransactionHash({
+        await tablelandValidator.pollForReceiptByTransactionHash({
             chainId: 31337,
-            transactionHash: receipt?.hash as string,
-        }));
-        // const manufacturerId = (receipt?.logs[1] as EventLog).args[1].toString();
+            transactionHash: (await tx.wait())?.hash as string,
+        });
 
-        // console.log(`Device Definition table ${args.manufacturerId} minted with ID: ${manufacturerId}`);
+        const tableId = await ddTableInstance.getDeviceDefinitionTableId(args.manufacturerId);
+        const tableName = await ddTableInstance.getDeviceDefinitionTableName(args.manufacturerId);
+
+        console.log(`Device Definition table created for ${signer.address}\nTable ID: ${tableId}\nTable Name: ${tableName}`);
     });

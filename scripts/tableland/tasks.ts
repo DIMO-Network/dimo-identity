@@ -52,15 +52,12 @@ task('create-dd-table', 'npx hardhat create-dd-table <manufacturerId> --network 
 
         const tablelandDb = getDatabase(getAccounts()[0]);
         const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
-        const tablelandRegistry = getRegistry(getAccounts()[0]);
 
-        console.log(await tablelandRegistry.listTables(signer.address))
-
-        console.log(`Creating Device Definition table for manufacturer ID ${args.manufacturerId} for ${signer.address}...`);
+        console.log(`Creating Device Definition table for manufacturer ID ${args.manufacturerId}...`);
 
         const tx = await ddTableInstance
             .connect(signer)
-            .createDeviceDefinitionTable(signer.address, args.manufacturerId);
+            .createDeviceDefinitionTable(args.manufacturerId);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
             chainId: 31337,
@@ -70,5 +67,5 @@ task('create-dd-table', 'npx hardhat create-dd-table <manufacturerId> --network 
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(args.manufacturerId);
         const tableName = await ddTableInstance.getDeviceDefinitionTableName(args.manufacturerId);
 
-        console.log(`Device Definition table created for ${signer.address}\nTable ID: ${tableId}\nTable Name: ${tableName}`);
+        console.log(`Device Definition table created\nTable ID: ${tableId}\nTable Name: ${tableName}`);
     });

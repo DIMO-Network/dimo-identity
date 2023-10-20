@@ -82,10 +82,10 @@ npx hardhat create-dd-table 142 --network localhost
 You should see an output similar to the following:
 
 ```
-Creating Device Definition table for manufacturer ID 142 for 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266...
-Device Definition table created for 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Creating Device Definition table for manufacturer ID 141...
+Device Definition table created
 Table ID: 2
-Table Name: manufacturerName_31337_2
+Table Name: manufacturerNameExample_31337_2
 ```
 
 ### :tipping_hand_person: Help links

@@ -1,11 +1,3 @@
-// DIMORegistry
-// AccessControl
-// Manufacturer NFT
-// Manufacturer Node
-// DeviceDefinitionTable
-
-// Function to mint mock manufacturers -> create JamesManuf NFT ...
-
 import * as fs from 'fs';
 import * as path from 'path';
 import { Log, EventLog, ContractTransactionReceipt } from 'ethers';

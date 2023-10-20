@@ -2,7 +2,7 @@
     "localhost": {
         "modules": {
             "DIMORegistry": {
-                "address": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf",
+                "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
                 "selectors": [
                     "0x0df5b997",
                     "0x9748a762",
@@ -10,13 +10,13 @@
                 ]
             },
             "Eip712Checker": {
-                "address": "0x9d4454B023096f34B160D6B654540c56A1F81688",
+                "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
                 "selectors": [
                     "0x4cd88b76"
                 ]
             },
             "DimoAccessControl": {
-                "address": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
+                "address": "0x9A676e781A523b5d0C0e43731313A708CB607508",
                 "selectors": [
                     "0x248a9ca3",
                     "0x2f2ff15d",
@@ -26,7 +26,7 @@
                 ]
             },
             "Nodes": {
-                "address": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
+                "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
                 "selectors": [
                     "0xbc60a6ba",
                     "0xdce2f860",
@@ -34,7 +34,7 @@
                 ]
             },
             "Manufacturer": {
-                "address": "0x809d550fca64d94Bd9F66E60752A544199cfAC3D",
+                "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
@@ -51,7 +51,7 @@
                 ]
             },
             "Mapper": {
-                "address": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
+                "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
                 "selectors": [
                     "0x0a6cef46",
                     "0x112e62a2",
@@ -60,7 +60,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
+                "address": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
                 "selectors": [
                     "0x282eb387",
                     "0x11d679c9",
@@ -71,12 +71,23 @@
                     "0x71193956",
                     "0x8c2ee9bb"
                 ]
+            },
+            "DeviceDefinitionTable": {
+                "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+                "selectors": [
+                    "0x20954d21",
+                    "0x396e5987",
+                    "0xa1d17941",
+                    "0x4c6fbdef",
+                    "0x1febf2c9",
+                    "0x088fafdb"
+                ]
             }
         },
         "nfts": {
             "ManufacturerId": {
-                "proxy": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
-                "implementation": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
+                "proxy": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+                "implementation": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d"
             }
         },
         "misc": {

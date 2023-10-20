@@ -70,7 +70,8 @@ async function deployModules(
         { name: 'Nodes', args: [] },
         { name: 'Manufacturer', args: [] },
         { name: 'Mapper', args: [] },
-        { name: 'DevAdmin', args: [] }
+        { name: 'DevAdmin', args: [] },
+        { name: 'DeviceDefinitionTable', args: [] }
     ];
 
     const instances = getAddresses();

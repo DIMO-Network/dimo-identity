@@ -79,10 +79,16 @@ contract MultipleMinter is
             )
         ) revert InvalidSdSignature();
 
+        // ----- START Vehicle mint and attributes -----
         uint256 newTokenIdVehicle = INFT(vehicleIdProxyAddress).safeMint(
             data.owner
         );
-        uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);
+
+        emit VehicleNodeMinted(
+            data.manufacturerNode,
+            newTokenIdVehicle,
+            data.owner
+        );
 
         (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
             newTokenIdVehicle,
@@ -106,7 +112,24 @@ contract MultipleMinter is
                 data.vehicleOwnerSig
             )
         ) revert InvalidOwnerSignature();
+        // ----- END Vehicle mint and attributes -----
 
+        // ----- START Synthetic Device mint and attributes -----
+        uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);
+
+        emit SyntheticDeviceNodeMinted(
+            data.integrationNode,
+            newTokenIdDevice,
+            newTokenIdVehicle,
+            data.syntheticDeviceAddr,
+            data.owner
+        );
+
+        if (data.attrInfoPairsDevice.length > 0)
+            _setInfos(newTokenIdDevice, data.attrInfoPairsDevice);
+        // ----- END Synthetic Device mint and attributes -----
+
+        // ----- Internal contract state change -----
         ns.nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
             .manufacturerNode;
 
@@ -122,22 +145,5 @@ contract MultipleMinter is
 
         sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
-
-        if (data.attrInfoPairsDevice.length > 0)
-            _setInfos(newTokenIdDevice, data.attrInfoPairsDevice);
-
-        emit VehicleNodeMinted(
-            data.manufacturerNode,
-            newTokenIdVehicle,
-            data.owner
-        );
-
-        emit SyntheticDeviceNodeMinted(
-            data.integrationNode,
-            newTokenIdDevice,
-            newTokenIdVehicle,
-            data.syntheticDeviceAddr,
-            data.owner
-        );
     }
 }

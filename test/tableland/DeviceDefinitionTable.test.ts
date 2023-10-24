@@ -29,7 +29,7 @@ after(async function () {
 
 const accounts = getAccounts();
 
-describe.only('DeviceDefinitionTable', async function () {
+describe('DeviceDefinitionTable', async function () {
   let CURRENT_CHAIN_ID: number;
   let snapshot: string;
   let tablelandDb: Database;
@@ -41,7 +41,6 @@ describe.only('DeviceDefinitionTable', async function () {
   let ddTableInstance: DeviceDefinitionTable;
 
   let admin: HardhatEthersSigner;
-  let nonAdmin: HardhatEthersSigner;
   let insertAuthorized: HardhatEthersSigner;
   let unauthorized: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
@@ -52,7 +51,6 @@ describe.only('DeviceDefinitionTable', async function () {
     CURRENT_CHAIN_ID = network.config.chainId ?? 31337;
     [
       admin,
-      nonAdmin,
       insertAuthorized,
       unauthorized,
       manufacturer1,
@@ -65,7 +63,13 @@ describe.only('DeviceDefinitionTable', async function () {
     tablelandRegistry = getRegistry(accounts[0]);
 
     const deployments = await setup(admin, {
-      modules: ['DimoAccessControl', 'Manufacturer', 'DeviceDefinitionTable'],
+      modules: [
+        'DimoAccessControl',
+        'Manufacturer',
+        'DeviceDefinitionTable',
+        'ERC721Holder',
+        'DeviceDefinitionController'
+      ],
       nfts: ['ManufacturerId'],
       upgradeableContracts: [],
     });
@@ -165,21 +169,21 @@ describe.only('DeviceDefinitionTable', async function () {
       context('State', () => {
         it('Should create register a new table to a manufacturer', async () => {
           expect(await tablelandRegistry.listTables(manufacturer1.address)).to.be.empty;
-  
+
           await ddTableInstance
             .connect(admin)
             .createDeviceDefinitionTable(manufacturer1.address, 1);
-  
+
           expect(await tablelandRegistry.listTables(manufacturer1.address))
             .to.deep.include.members([{ tableId: '2', chainId: CURRENT_CHAIN_ID }]);
         });
         it('Should correctly map the manufacturer ID to the new table created', async () => {
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(0);
-  
+
           await ddTableInstance
             .connect(admin)
             .createDeviceDefinitionTable(manufacturer1.address, 1);
-  
+
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
         });
       });
@@ -201,21 +205,21 @@ describe.only('DeviceDefinitionTable', async function () {
       context('State', () => {
         it('Should create register a new table to a manufacturer', async () => {
           expect(await tablelandRegistry.listTables(manufacturer1.address)).to.be.empty;
-  
+
           await ddTableInstance
             .connect(manufacturer1)
             .createDeviceDefinitionTable(manufacturer1.address, 1);
-  
+
           expect(await tablelandRegistry.listTables(manufacturer1.address))
             .to.deep.include.members([{ tableId: '2', chainId: CURRENT_CHAIN_ID }]);
         });
         it('Should correctly map the manufacturer ID to the new table created', async () => {
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(0);
-  
+
           await ddTableInstance
             .connect(manufacturer1)
             .createDeviceDefinitionTable(manufacturer1.address, 1);
-  
+
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
         });
       });
@@ -440,7 +444,7 @@ describe.only('DeviceDefinitionTable', async function () {
     beforeEach(async () => {
       const tx = await ddTableInstance
         .connect(admin)
-        .createDeviceDefinitionTable(1);
+        .createDeviceDefinitionTable(manufacturer1.address, 1);
 
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,

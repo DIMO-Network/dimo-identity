@@ -144,6 +144,14 @@
                     "0x415c2d96",
                     "0x1c0c6e51"
                 ]
+            },
+            "ERC721Holder": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionController": {
+                "address": "",
+                "selectors": []
             }
         },
         "nfts": {
@@ -345,6 +353,14 @@
                     "0x415c2d96",
                     "0x1c0c6e51"
                 ]
+            },
+            "ERC721Holder": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionController": {
+                "address": "",
+                "selectors": []
             }
         },
         "nfts": {
@@ -541,6 +557,14 @@
                     "0x415c2d96",
                     "0x1c0c6e51"
                 ]
+            },
+            "ERC721Holder": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionController": {
+                "address": "",
+                "selectors": []
             }
         },
         "nfts": {
@@ -641,6 +665,14 @@
                 "selectors": []
             },
             "Multicall": {
+                "address": "",
+                "selectors": []
+            },
+            "ERC721Holder": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionController": {
                 "address": "",
                 "selectors": []
             }

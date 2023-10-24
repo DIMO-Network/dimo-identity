@@ -25,7 +25,7 @@
   "author": "DIMO",
   "license": "BUSL-1.1",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-network-helpers": "^1.0.9",

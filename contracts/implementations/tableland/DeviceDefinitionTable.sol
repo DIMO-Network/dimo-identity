@@ -5,33 +5,37 @@ pragma solidity ^0.8.13;
 import "../../interfaces/INFT.sol";
 import "../../shared/Roles.sol";
 import "../../shared/Types.sol";
-import "./DeviceDefinitionTableInternal.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
+import "../../libraries/tableland/DeviceDefinitionTableStorage.sol";
 
 import "@tableland/evm/contracts/utils/TablelandDeployments.sol";
 import "@tableland/evm/contracts/utils/SQLHelpers.sol";
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
+error TableAlreadyExists(uint256 manufacturerId);
 error TableDoesNotExist(uint256 tableId);
 error Unauthorized(address caller);
+error InvalidManufacturerId(uint256 id);
 
 /**
  * @title DeviceDefinitionTable
  * @notice Contract for interacting with Device Definition tables via Tableland
  */
-contract DeviceDefinitionTable is
-    AccessControlInternal,
-    DeviceDefinitionTableInternal
-{
+contract DeviceDefinitionTable is AccessControlInternal {
+    event DeviceDefinitionTableCreated(
+        address indexed tableOwner,
+        uint256 indexed manufacturerId,
+        uint256 indexed tableId
+    );
+    event ManufacturerTableSet(
+        uint256 indexed manufacturerId,
+        uint256 indexed tableId
+    );
     event DeviceDefinitionInserted(
         uint256 indexed ddId,
         uint256 indexed manufacturerId,
         string model,
         uint256 year
-    );
-    event ManufacturerTableSet(
-        uint256 indexed manufacturerId,
-        uint256 indexed tableId
     );
 
     /**
@@ -53,7 +57,37 @@ contract DeviceDefinitionTable is
             msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)
         ) revert Unauthorized(msg.sender);
 
-        _createDeviceDefinitionTable(tableOwner, manufacturerId);
+        DeviceDefinitionTableStorage.Storage
+            storage vs = DeviceDefinitionTableStorage.getStorage();
+        ITablelandTables tablelandTables = TablelandDeployments.get();
+
+        string memory prefix = ManufacturerStorage
+            .getStorage()
+            .nodeIdToManufacturerName[manufacturerId];
+
+        if (bytes(prefix).length == 0) {
+            revert InvalidManufacturerId(manufacturerId);
+        }
+        if (vs.tables[manufacturerId] != 0) {
+            revert TableAlreadyExists(manufacturerId);
+        }
+
+        string memory statement = SQLHelpers.toCreateFromSchema(
+            "id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, UNIQUE(model,year)",
+            prefix
+        );
+        uint256 tableId = tablelandTables.create(address(this), statement);
+
+        tablelandTables.setController(address(this), tableId, address(this));
+        INFT(address(tablelandTables)).safeTransferFrom(
+            address(this),
+            tableOwner,
+            tableId
+        );
+
+        vs.tables[manufacturerId] = tableId;
+
+        emit DeviceDefinitionTableCreated(tableOwner, manufacturerId, tableId);
     }
 
     /**

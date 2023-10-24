@@ -111,6 +111,8 @@ async function deployModules(
     { name: 'MultipleMinter', args: [] },
     { name: 'DevAdmin', args: [] },
     { name: 'Multicall', args: [] },
+    { name: 'ERC721Holder', args: [] },
+    { name: 'DeviceDefinitionController', args: [] }
   ];
 
   const instances = getAddresses();

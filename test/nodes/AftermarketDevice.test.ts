@@ -3512,7 +3512,7 @@ describe('AftermarketDevice', function () {
 
       expect(address).to.equal(C.ZERO_ADDRESS);
     });
-    it('Should return the correct token Id', async () => {
+    it('Should return the correct address', async () => {
       const address =
         await aftermarketDeviceInstance.getAftermarketDeviceAddressById(1);
 

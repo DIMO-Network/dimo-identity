@@ -103,6 +103,7 @@
 |-|-|
 | 0xe1f371df | addSyntheticDeviceAttribute(string) |
 | 0x7c7c9978 | burnSyntheticDeviceSign(uint256,uint256,bytes) |
+| 0x493b27e1 | getSyntheticDeviceAddressById(uint256) |
 | 0x795b910a | getSyntheticDeviceIdByAddress(address) |
 | 0x261d982a | mintSyntheticDeviceBatch(uint256,(uint256,address,(string,string)[])[]) |
 | 0xc624e8a1 | mintSyntheticDeviceSign((uint256,uint256,bytes,bytes,address,(string,string)[])) |

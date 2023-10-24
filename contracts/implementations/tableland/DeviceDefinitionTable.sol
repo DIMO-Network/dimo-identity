@@ -12,7 +12,7 @@ import "@tableland/evm/contracts/utils/TablelandDeployments.sol";
 import "@tableland/evm/contracts/utils/SQLHelpers.sol";
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-error TableDoesNotExist(uint256 manufacturerId);
+error TableDoesNotExist(uint256 tableId);
 error Unauthorized(uint256 tableId, address caller);
 
 /**
@@ -29,17 +29,55 @@ contract DeviceDefinitionTable is
         string model,
         uint256 year
     );
+    event ManufacturerTableSet(
+        uint256 indexed manufacturerId,
+        uint256 indexed tableId
+    );
 
     /**
      * @notice Creates a new definition table associated with a specific manufacturer
      * @dev This function can only be called by an address with the ADMIN_ROLE
      * @dev The Tableland table NFT is minted to this contract
+     * @param tableOwner The owner of the table to be minted
      * @param manufacturerId The unique identifier of the manufacturer
      */
     function createDeviceDefinitionTable(
+        address tableOwner,
         uint256 manufacturerId
     ) external onlyRole(ADMIN_ROLE) {
-        _createDeviceDefinitionTable(manufacturerId);
+        _createDeviceDefinitionTable(tableOwner, manufacturerId);
+    }
+
+    /**
+     * @notice Set the Device Definition Table for a manufacturer
+     * @dev The caller must be the owner of the manufacturer ID
+     * @dev The specified Device Definition Table must exist
+     * @param manufacturerId The unique identifier of the manufacturer
+     * @param tableId The unique identifier of the Device Definition Table to be associated
+     */
+    function setDeviceDefinitionTable(
+        uint256 manufacturerId,
+        uint256 tableId
+    ) external {
+        INFT tablelandTables = INFT(address(TablelandDeployments.get()));
+
+        try tablelandTables.ownerOf(tableId) {
+            INFT manufacturerIdProxy = INFT(
+                ManufacturerStorage.getStorage().idProxyAddress
+            );
+
+            if (msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)) {
+                revert Unauthorized(tableId, msg.sender);
+            }
+
+            DeviceDefinitionTableStorage.getStorage().tables[
+                manufacturerId
+            ] = tableId;
+
+            emit ManufacturerTableSet(manufacturerId, tableId);
+        } catch {
+            revert TableDoesNotExist(tableId);
+        }
     }
 
     // TODO Documentation
@@ -61,8 +99,10 @@ contract DeviceDefinitionTable is
             .nodeIdToManufacturerName[manufacturerId];
 
         if (tableId == 0) {
+            // TODO replace manufacturerId by tableId
             revert TableDoesNotExist(manufacturerId);
         }
+        // TODO Remove INSERT_DEVICE_DEFINITION_ROLE
         if (
             msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
             !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
@@ -108,8 +148,10 @@ contract DeviceDefinitionTable is
             .nodeIdToManufacturerName[manufacturerId];
 
         if (tableId == 0) {
+            // TODO replace manufacturerId by tableId
             revert TableDoesNotExist(manufacturerId);
         }
+        // TODO Remove INSERT_DEVICE_DEFINITION_ROLE
         if (
             msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
             !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
@@ -145,17 +187,6 @@ contract DeviceDefinitionTable is
         tablelandTables.mutate(address(this), tableId, stmt);
 
         dds.ddIds += len;
-    }
-
-    // TODO Move it to a better place (maybe a separate ERC721Holder module)
-    /// @dev Allows the DIMORegistry to own a Tableland table NFT
-    function onERC721Received(
-        address,
-        address,
-        uint256,
-        bytes calldata
-    ) public pure returns (bytes4) {
-        return this.onERC721Received.selector;
     }
 
     /**

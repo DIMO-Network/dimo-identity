@@ -133,7 +133,7 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x3B76075452D8EE8aD8a49b1dC53A15e726D6f10D",
+                "address": "0x30B3CEd3547bD9B8661f6E619772b19a3149a965",
                 "selectors": [
                     "0xfb1a28e8"
                 ]
@@ -321,7 +321,7 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0xd16EfDD9B9f2c7e054935C3483df40CdD4E38c53",
+                "address": "0xefe1eE82fe8D0933ABd0f9a21cB55Db303D759Ff",
                 "selectors": [
                     "0xfb1a28e8"
                 ]

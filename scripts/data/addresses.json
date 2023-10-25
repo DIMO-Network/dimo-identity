@@ -102,10 +102,11 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0xEd8B51a2270ebd5AB1FFA5253937604c2aF68E7C",
+                "address": "0x22e9F325c8d06F6e2F71320b440989254016bf0F",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
+                    "0x493b27e1",
                     "0x795b910a",
                     "0x261d982a",
                     "0xc624e8a1",
@@ -290,10 +291,11 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0xd83Bf6c51ee03f27F453b9a1f1021859a9cD33c6",
+                "address": "0xFE67f4854BFE20E3EFc382f40a656018af544C30",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
+                    "0x493b27e1",
                     "0x795b910a",
                     "0x261d982a",
                     "0xc624e8a1",

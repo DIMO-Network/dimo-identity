@@ -32,8 +32,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 indexed tableId
     );
     event DeviceDefinitionInserted(
-        uint256 indexed ddId,
-        uint256 indexed manufacturerId,
+        uint256 indexed tableId,
+        string ddId,
         string model,
         uint256 year
     );
@@ -86,6 +86,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         );
 
         vs.tables[manufacturerId] = tableId;
+        vs.prefixes[tableId] = prefix;
 
         emit DeviceDefinitionTableCreated(tableOwner, manufacturerId, tableId);
     }
@@ -124,32 +125,22 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
     // TODO Documentation
     function insertDeviceDefinition(
-        uint256 manufacturerId,
-        string calldata model,
-        uint256 year
+        uint256 tableId,
+        DeviceDefinitionInput calldata data
     ) external {
-        DeviceDefinitionTableStorage.Storage
-            storage dds = DeviceDefinitionTableStorage.getStorage();
-        INFT manufacturerIdProxy = INFT(
-            ManufacturerStorage.getStorage().idProxyAddress
-        );
-
         ITablelandTables tablelandTables = TablelandDeployments.get();
-        uint256 tableId = dds.tables[manufacturerId];
-        string memory prefix = ManufacturerStorage
+        string memory prefix = DeviceDefinitionTableStorage
             .getStorage()
-            .nodeIdToManufacturerName[manufacturerId];
+            .prefixes[tableId];
 
-        if (tableId == 0) {
-            // TODO replace manufacturerId by tableId
-            revert TableDoesNotExist(manufacturerId);
-        }
-        // TODO Remove INSERT_DEVICE_DEFINITION_ROLE
-        if (
-            msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
-            !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
+        try INFT(address(tablelandTables)).ownerOf(tableId) returns (
+            address tableIdOwner
         ) {
-            revert Unauthorized(msg.sender);
+            if (msg.sender != tableIdOwner) {
+                revert Unauthorized(msg.sender);
+            }
+        } catch {
+            revert TableDoesNotExist(tableId);
         }
 
         tablelandTables.mutate(
@@ -158,78 +149,75 @@ contract DeviceDefinitionTable is AccessControlInternal {
             SQLHelpers.toInsert(
                 prefix,
                 tableId,
-                "model,year,metadata",
+                "id,model,year,metadata",
                 string.concat(
-                    string(abi.encodePacked("'", model, "'")),
+                    string(abi.encodePacked("'", data.id, "'")),
                     ",",
-                    Strings.toString(year)
+                    string(abi.encodePacked("'", data.model, "'")),
+                    ",",
+                    Strings.toString(data.year),
+                    ",",
+                    string(abi.encodePacked("'", data.metadata, "'"))
                 )
             )
         );
 
-        dds.ddIds++;
-
-        emit DeviceDefinitionInserted(dds.ddIds, manufacturerId, model, year);
+        emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
     }
 
     // TODO Documentation
-    function insertDeviceDefinitionBatch(
-        uint256 manufacturerId,
-        DeviceDefinitionInput[] calldata data
-    ) external {
-        DeviceDefinitionTableStorage.Storage
-            storage dds = DeviceDefinitionTableStorage.getStorage();
-        INFT manufacturerIdProxy = INFT(
-            ManufacturerStorage.getStorage().idProxyAddress
-        );
+    // function insertDeviceDefinitionBatch(
+    //     uint256 manufacturerId,
+    //     DeviceDefinitionInput[] calldata data
+    // ) external {
+    //     DeviceDefinitionTableStorage.Storage
+    //         storage dds = DeviceDefinitionTableStorage.getStorage();
+    //     INFT manufacturerIdProxy = INFT(
+    //         ManufacturerStorage.getStorage().idProxyAddress
+    //     );
 
-        ITablelandTables tablelandTables = TablelandDeployments.get();
-        uint256 tableId = dds.tables[manufacturerId];
-        string memory prefix = ManufacturerStorage
-            .getStorage()
-            .nodeIdToManufacturerName[manufacturerId];
+    //     ITablelandTables tablelandTables = TablelandDeployments.get();
+    //     uint256 tableId = dds.tables[manufacturerId];
+    //     string memory prefix = ManufacturerStorage
+    //         .getStorage()
+    //         .nodeIdToManufacturerName[manufacturerId];
 
-        if (tableId == 0) {
-            // TODO replace manufacturerId by tableId
-            revert TableDoesNotExist(manufacturerId);
-        }
-        // TODO Remove INSERT_DEVICE_DEFINITION_ROLE
-        if (
-            msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
-            !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
-        ) {
-            revert Unauthorized(msg.sender);
-        }
+    //     if (tableId == 0) {
+    //         // TODO replace manufacturerId by tableId
+    //         revert TableDoesNotExist(manufacturerId);
+    //     }
+    //     if (msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)) {
+    //         revert Unauthorized(msg.sender);
+    //     }
 
-        uint256 len = data.length;
-        uint256 currentDdId = dds.ddIds + 1;
-        string[] memory vals = new string[](len);
-        for (uint256 i; i < len; i++) {
-            vals[i] = string.concat(
-                string(abi.encodePacked("'", data[i].model, "'")),
-                ",",
-                Strings.toString(data[i].year)
-            );
+    //     uint256 len = data.length;
+    //     uint256 currentDdId = dds.ddIds + 1;
+    //     string[] memory vals = new string[](len);
+    //     for (uint256 i; i < len; i++) {
+    //         vals[i] = string.concat(
+    //             string(abi.encodePacked("'", data[i].model, "'")),
+    //             ",",
+    //             Strings.toString(data[i].year)
+    //         );
 
-            emit DeviceDefinitionInserted(
-                currentDdId + i,
-                manufacturerId,
-                data[i].model,
-                data[i].year
-            );
-        }
+    //         // TODO emit DeviceDefinitionInserted(tableId, id,  model, year);
+    //         // emit DeviceDefinitionInserted(
+    //         //     currentDdId + i,
+    //         //     manufacturerId,
+    //         //     data[i].model,
+    //         //     data[i].year
+    //         // );
+    //     }
 
-        string memory stmt = SQLHelpers.toBatchInsert(
-            prefix,
-            tableId,
-            "model,year,metadata",
-            vals
-        );
+    //     string memory stmt = SQLHelpers.toBatchInsert(
+    //         prefix,
+    //         tableId,
+    //         "model,year,metadata",
+    //         vals
+    //     );
 
-        tablelandTables.mutate(address(this), tableId, stmt);
-
-        dds.ddIds += len;
-    }
+    //     tablelandTables.mutate(address(this), tableId, stmt);
+    // }
 
     /**
      * @dev Retrieve the name of the device definition table name associated with a specific manufacturer
@@ -263,5 +251,17 @@ contract DeviceDefinitionTable is AccessControlInternal {
         tableId = DeviceDefinitionTableStorage.getStorage().tables[
             manufacturerId
         ];
+    }
+
+    /**
+     * @dev Retrieve the device definition table prefix associated with a specific table ID
+     * @param tableId The ID of the manufacturer's device definition table
+     * @dev If a matching table does not exist, the function returns an empty string
+     * @return prefix The prefix of the manufacturer's device definition table
+     */
+    function getPrefixByTableId(
+        uint256 tableId
+    ) external view returns (string memory prefix) {
+        prefix = DeviceDefinitionTableStorage.getStorage().prefixes[tableId];
     }
 }

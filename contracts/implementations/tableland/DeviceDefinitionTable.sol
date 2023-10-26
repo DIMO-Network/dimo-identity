@@ -58,7 +58,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         ) revert Unauthorized(msg.sender);
 
         DeviceDefinitionTableStorage.Storage
-            storage vs = DeviceDefinitionTableStorage.getStorage();
+            storage dds = DeviceDefinitionTableStorage.getStorage();
         ITablelandTables tablelandTables = TablelandDeployments.get();
 
         string memory prefix = ManufacturerStorage
@@ -68,7 +68,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         if (bytes(prefix).length == 0) {
             revert InvalidManufacturerId(manufacturerId);
         }
-        if (vs.tables[manufacturerId] != 0) {
+        if (dds.tables[manufacturerId] != 0) {
             revert TableAlreadyExists(manufacturerId);
         }
 
@@ -85,8 +85,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
             tableId
         );
 
-        vs.tables[manufacturerId] = tableId;
-        vs.prefixes[tableId] = prefix;
+        dds.tables[manufacturerId] = tableId;
+        dds.prefixes[tableId] = prefix;
 
         emit DeviceDefinitionTableCreated(tableOwner, manufacturerId, tableId);
     }

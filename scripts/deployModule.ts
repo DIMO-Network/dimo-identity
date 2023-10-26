@@ -592,11 +592,11 @@ async function main() {
     networkName,
   );
   writeAddresses(nftInstances, networkName);
-
-  process.exit();
 }
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
+}).finally(() => {
+  process.exit();
 });

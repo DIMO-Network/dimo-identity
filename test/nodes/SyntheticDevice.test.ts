@@ -258,8 +258,7 @@ describe('SyntheticDevice', function () {
             .connect(nonAdmin)
             .setSyntheticDeviceIdProxyAddress(await sdIdInstance.getAddress()),
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`,
         );
       });
@@ -296,8 +295,7 @@ describe('SyntheticDevice', function () {
             .connect(nonAdmin)
             .addSyntheticDeviceAttribute(C.mockSyntheticDeviceAttribute1),
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.ADMIN_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`,
         );
       });
@@ -358,8 +356,7 @@ describe('SyntheticDevice', function () {
             .connect(nonAdmin)
             .mintSyntheticDeviceBatch(1, correctMintInput),
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.MINT_SD_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_SD_ROLE
           }`,
         );
       });
@@ -613,8 +610,7 @@ describe('SyntheticDevice', function () {
             .connect(nonAdmin)
             .mintSyntheticDeviceSign(correctMintInput),
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.MINT_SD_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_SD_ROLE
           }`,
         );
       });
@@ -1192,8 +1188,7 @@ describe('SyntheticDevice', function () {
             .connect(nonAdmin)
             .burnSyntheticDeviceSign(1, 1, burnSyntheticDeviceOwnerSig1),
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.BURN_SD_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.BURN_SD_ROLE
           }`,
         );
       });
@@ -1555,8 +1550,7 @@ describe('SyntheticDevice', function () {
             .connect(nonAdmin)
             .setSyntheticDeviceInfo(1, C.mockSyntheticDeviceAttributeInfoPairs),
         ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-            C.SET_SD_INFO_ROLE
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.SET_SD_INFO_ROLE
           }`,
         );
       });
@@ -1711,6 +1705,58 @@ describe('SyntheticDevice', function () {
         );
 
       expect(tokenId).to.equal(1);
+    });
+  });
+
+  describe('getSyntheticDeviceAddressById', () => {
+    let mintInput: MintSyntheticDeviceInput;
+
+    before(async () => {
+      const mintSyntheticDeviceSig1 = await signMessage({
+        _signer: sdAddress1,
+        _primaryType: 'MintSyntheticDeviceSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+        },
+      });
+      const mintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintSyntheticDeviceSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+        },
+      });
+      mintInput = {
+        integrationNode: '1',
+        vehicleNode: '1',
+        syntheticDeviceSig: mintSyntheticDeviceSig1,
+        vehicleOwnerSig: mintVehicleOwnerSig1,
+        syntheticDeviceAddr: sdAddress1.address,
+        attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs,
+      };
+    });
+
+    beforeEach(async () => {
+      await syntheticDeviceInstance
+        .connect(admin)
+        .mintSyntheticDeviceSign(mintInput);
+    });
+
+    it('Should return 0x00 address if the queried node ID is not associated with any minted device', async () => {
+      const address =
+        await syntheticDeviceInstance.getSyntheticDeviceAddressById(99);
+
+      expect(address).to.equal(C.ZERO_ADDRESS);
+    });
+    it('Should return the correct address', async () => {
+      const address =
+        await syntheticDeviceInstance.getSyntheticDeviceAddressById(1);
+
+      expect(address).to.equal(sdAddress1.address);
     });
   });
 });

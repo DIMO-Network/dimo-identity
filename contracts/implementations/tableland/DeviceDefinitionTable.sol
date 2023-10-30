@@ -5,33 +5,37 @@ pragma solidity ^0.8.13;
 import "../../interfaces/INFT.sol";
 import "../../shared/Roles.sol";
 import "../../shared/Types.sol";
-import "./DeviceDefinitionTableInternal.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
+import "../../libraries/tableland/DeviceDefinitionTableStorage.sol";
 
 import "@tableland/evm/contracts/utils/TablelandDeployments.sol";
 import "@tableland/evm/contracts/utils/SQLHelpers.sol";
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
+error TableAlreadyExists(uint256 manufacturerId);
 error TableDoesNotExist(uint256 tableId);
-error Unauthorized(uint256 tableId, address caller);
+error Unauthorized(address caller);
+error InvalidManufacturerId(uint256 id);
 
 /**
  * @title DeviceDefinitionTable
  * @notice Contract for interacting with Device Definition tables via Tableland
  */
-contract DeviceDefinitionTable is
-    AccessControlInternal,
-    DeviceDefinitionTableInternal
-{
+contract DeviceDefinitionTable is AccessControlInternal {
+    event DeviceDefinitionTableCreated(
+        address indexed tableOwner,
+        uint256 indexed manufacturerId,
+        uint256 indexed tableId
+    );
+    event ManufacturerTableSet(
+        uint256 indexed manufacturerId,
+        uint256 indexed tableId
+    );
     event DeviceDefinitionInserted(
         uint256 indexed ddId,
         uint256 indexed manufacturerId,
         string model,
         uint256 year
-    );
-    event ManufacturerTableSet(
-        uint256 indexed manufacturerId,
-        uint256 indexed tableId
     );
 
     /**
@@ -44,8 +48,46 @@ contract DeviceDefinitionTable is
     function createDeviceDefinitionTable(
         address tableOwner,
         uint256 manufacturerId
-    ) external onlyRole(ADMIN_ROLE) {
-        _createDeviceDefinitionTable(tableOwner, manufacturerId);
+    ) external {
+        INFT manufacturerIdProxy = INFT(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+        if (
+            !_hasRole(ADMIN_ROLE, msg.sender) &&
+            msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)
+        ) revert Unauthorized(msg.sender);
+
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+        ITablelandTables tablelandTables = TablelandDeployments.get();
+
+        string memory prefix = ManufacturerStorage
+            .getStorage()
+            .nodeIdToManufacturerName[manufacturerId];
+
+        if (bytes(prefix).length == 0) {
+            revert InvalidManufacturerId(manufacturerId);
+        }
+        if (dds.tables[manufacturerId] != 0) {
+            revert TableAlreadyExists(manufacturerId);
+        }
+
+        string memory statement = SQLHelpers.toCreateFromSchema(
+            "id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, UNIQUE(model,year)",
+            prefix
+        );
+        uint256 tableId = tablelandTables.create(address(this), statement);
+
+        tablelandTables.setController(address(this), tableId, address(this));
+        INFT(address(tablelandTables)).safeTransferFrom(
+            address(this),
+            tableOwner,
+            tableId
+        );
+
+        dds.tables[manufacturerId] = tableId;
+
+        emit DeviceDefinitionTableCreated(tableOwner, manufacturerId, tableId);
     }
 
     /**
@@ -67,7 +109,7 @@ contract DeviceDefinitionTable is
             );
 
             if (msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)) {
-                revert Unauthorized(tableId, msg.sender);
+                revert Unauthorized(msg.sender);
             }
 
             DeviceDefinitionTableStorage.getStorage().tables[
@@ -107,7 +149,7 @@ contract DeviceDefinitionTable is
             msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
             !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
         ) {
-            revert Unauthorized(tableId, msg.sender);
+            revert Unauthorized(msg.sender);
         }
 
         tablelandTables.mutate(
@@ -116,7 +158,7 @@ contract DeviceDefinitionTable is
             SQLHelpers.toInsert(
                 prefix,
                 tableId,
-                "model,year",
+                "model,year,metadata",
                 string.concat(
                     string(abi.encodePacked("'", model, "'")),
                     ",",
@@ -156,7 +198,7 @@ contract DeviceDefinitionTable is
             msg.sender != manufacturerIdProxy.ownerOf(manufacturerId) &&
             !_hasRole(INSERT_DEVICE_DEFINITION_ROLE, msg.sender)
         ) {
-            revert Unauthorized(tableId, msg.sender);
+            revert Unauthorized(msg.sender);
         }
 
         uint256 len = data.length;
@@ -180,7 +222,7 @@ contract DeviceDefinitionTable is
         string memory stmt = SQLHelpers.toBatchInsert(
             prefix,
             tableId,
-            "model,year",
+            "model,year,metadata",
             vals
         );
 

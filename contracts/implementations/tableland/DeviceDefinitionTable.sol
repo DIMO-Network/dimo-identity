@@ -123,7 +123,18 @@ contract DeviceDefinitionTable is AccessControlInternal {
         }
     }
 
-    // TODO Documentation
+    /**
+     * @notice Insert a Device Definition in an existing table
+     * @dev The caller must be the owner of the manufacturer ID
+     * @dev The specified Device Definition Table must exist
+     * @dev The pair (model,year) must be unique
+     * @param tableId The unique identifier of the Device Definition Table to be associated
+     * @param data Input data with the following fields:
+     *  id -> The alphanumeric ID of the Device Definition
+     *  model -> The model of the Device Definition
+     *  year -> The year of the Device Definition
+     *  metadata -> The metadata stringfied object of the Device Definition
+     */
     function insertDeviceDefinition(
         uint256 tableId,
         DeviceDefinitionInput calldata data
@@ -143,6 +154,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
             revert TableDoesNotExist(tableId);
         }
 
+        emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
+
         tablelandTables.mutate(
             address(this),
             tableId,
@@ -161,63 +174,69 @@ contract DeviceDefinitionTable is AccessControlInternal {
                 )
             )
         );
-
-        emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
     }
 
-    // TODO Documentation
-    // function insertDeviceDefinitionBatch(
-    //     uint256 manufacturerId,
-    //     DeviceDefinitionInput[] calldata data
-    // ) external {
-    //     DeviceDefinitionTableStorage.Storage
-    //         storage dds = DeviceDefinitionTableStorage.getStorage();
-    //     INFT manufacturerIdProxy = INFT(
-    //         ManufacturerStorage.getStorage().idProxyAddress
-    //     );
+    /**
+     * @notice Insert a list of Device Definition in an existing table
+     * @dev The caller must be the owner of the manufacturer ID
+     * @dev The specified Device Definition Table must exist
+     * @dev The pair (model,year) must be unique
+     * @param tableId The unique identifier of the Device Definition Table to be associated
+     * @param data Input data list with the following fields:
+     *  id -> The alphanumeric ID of the Device Definition
+     *  model -> The model of the Device Definition
+     *  year -> The year of the Device Definition
+     *  metadata -> The metadata stringfied object of the Device Definition
+     */
+    function insertDeviceDefinitionBatch(
+        uint256 tableId,
+        DeviceDefinitionInput[] calldata data
+    ) external {
+        ITablelandTables tablelandTables = TablelandDeployments.get();
+        string memory prefix = DeviceDefinitionTableStorage
+            .getStorage()
+            .prefixes[tableId];
 
-    //     ITablelandTables tablelandTables = TablelandDeployments.get();
-    //     uint256 tableId = dds.tables[manufacturerId];
-    //     string memory prefix = ManufacturerStorage
-    //         .getStorage()
-    //         .nodeIdToManufacturerName[manufacturerId];
+        try INFT(address(tablelandTables)).ownerOf(tableId) returns (
+            address tableIdOwner
+        ) {
+            if (msg.sender != tableIdOwner) {
+                revert Unauthorized(msg.sender);
+            }
+        } catch {
+            revert TableDoesNotExist(tableId);
+        }
 
-    //     if (tableId == 0) {
-    //         // TODO replace manufacturerId by tableId
-    //         revert TableDoesNotExist(manufacturerId);
-    //     }
-    //     if (msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)) {
-    //         revert Unauthorized(msg.sender);
-    //     }
+        uint256 len = data.length;
+        string[] memory vals = new string[](len);
+        for (uint256 i; i < len; i++) {
+            vals[i] = string.concat(
+                string(abi.encodePacked("'", data[i].id, "'")),
+                ",",
+                string(abi.encodePacked("'", data[i].model, "'")),
+                ",",
+                Strings.toString(data[i].year),
+                ",",
+                string(abi.encodePacked("'", data[i].metadata, "'"))
+            );
 
-    //     uint256 len = data.length;
-    //     uint256 currentDdId = dds.ddIds + 1;
-    //     string[] memory vals = new string[](len);
-    //     for (uint256 i; i < len; i++) {
-    //         vals[i] = string.concat(
-    //             string(abi.encodePacked("'", data[i].model, "'")),
-    //             ",",
-    //             Strings.toString(data[i].year)
-    //         );
+            emit DeviceDefinitionInserted(
+                tableId,
+                data[i].id,
+                data[i].model,
+                data[i].year
+            );
+        }
 
-    //         // TODO emit DeviceDefinitionInserted(tableId, id,  model, year);
-    //         // emit DeviceDefinitionInserted(
-    //         //     currentDdId + i,
-    //         //     manufacturerId,
-    //         //     data[i].model,
-    //         //     data[i].year
-    //         // );
-    //     }
+        string memory stmt = SQLHelpers.toBatchInsert(
+            prefix,
+            tableId,
+            "id,model,year,metadata",
+            vals
+        );
 
-    //     string memory stmt = SQLHelpers.toBatchInsert(
-    //         prefix,
-    //         tableId,
-    //         "model,year,metadata",
-    //         vals
-    //     );
-
-    //     tablelandTables.mutate(address(this), tableId, stmt);
-    // }
+        tablelandTables.mutate(address(this), tableId, stmt);
+    }
 
     /**
      * @dev Retrieve the name of the device definition table name associated with a specific manufacturer

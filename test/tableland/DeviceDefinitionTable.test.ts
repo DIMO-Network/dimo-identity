@@ -29,7 +29,7 @@ after(async function () {
 
 const accounts = getAccounts();
 
-describe.only('DeviceDefinitionTable', async function () {
+describe('DeviceDefinitionTable', async function () {
   let CURRENT_CHAIN_ID: number;
   let snapshot: string;
   let tablelandDb: Database;
@@ -41,7 +41,6 @@ describe.only('DeviceDefinitionTable', async function () {
   let ddTableInstance: DeviceDefinitionTable;
 
   let admin: HardhatEthersSigner;
-  let insertAuthorized: HardhatEthersSigner;
   let unauthorized: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let manufacturer2: HardhatEthersSigner;
@@ -51,7 +50,6 @@ describe.only('DeviceDefinitionTable', async function () {
     CURRENT_CHAIN_ID = network.config.chainId ?? 31337;
     [
       admin,
-      insertAuthorized,
       unauthorized,
       manufacturer1,
       manufacturer2,
@@ -328,9 +326,7 @@ describe.only('DeviceDefinitionTable', async function () {
     });
   });
 
-  // TODO To be revisited when we have Tableland access control set
-  // TODO Test invalid number of inserted arguments and UNIQUE(model,year)
-  describe.skip('insertDeviceDefinition', () => {
+  describe('insertDeviceDefinition', () => {
     beforeEach(async () => {
       const tx = await ddTableInstance
         .connect(admin)
@@ -353,13 +349,48 @@ describe.only('DeviceDefinitionTable', async function () {
           'TableDoesNotExist',
         ).withArgs(99);
       });
+      it('Should revert if caller is not the table owner', async () => {
+        await expect(
+          ddTableInstance
+            .connect(unauthorized)
+            .insertDeviceDefinition(2, C.mockDdInput1)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'Unauthorized',
+        ).withArgs(unauthorized.address);
+      });
+      it('Should revert if (model,year) pair already exists', async () => {
+        let tx = await ddTableInstance
+          .connect(manufacturer1)
+          .insertDeviceDefinition(2, C.mockDdInput1);
+
+        await tablelandValidator.pollForReceiptByTransactionHash({
+          chainId: CURRENT_CHAIN_ID,
+          transactionHash: (await tx.wait())?.hash as string,
+        });
+
+        tx = await ddTableInstance
+          .connect(manufacturer1)
+          .insertDeviceDefinition(2, C.mockDdInput1);
+
+        const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
+          chainId: CURRENT_CHAIN_ID,
+          transactionHash: (await tx.wait())?.hash as string,
+        });
+
+        const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
+
+        expect(validatorResponse.error).to.be.equal(
+          `db query execution failed (code: SQLITE_UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year)`
+        );
+      });
     });
 
     context('State', () => {
       it('Should correctly insert DD into the table', async () => {
         const tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinition(1, C.mockDdInput1);
+          .insertDeviceDefinition(2, C.mockDdInput1);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -373,13 +404,14 @@ describe.only('DeviceDefinitionTable', async function () {
         expect(count).to.deep.equal([1]);
 
         const selectQuery = await tablelandDb.prepare(
-          `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = 1`
+          `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = "${C.mockDdId1}"`
         ).first();
 
         expect(selectQuery).to.deep.include({
-          id: 1,
+          id: C.mockDdId1,
           model: C.mockDdModel1,
-          year: C.mockDdYear1
+          year: C.mockDdYear1,
+          metadata: C.mockDdMetadata1
         });
       });
     });
@@ -389,104 +421,156 @@ describe.only('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(manufacturer1)
-            .insertDeviceDefinition(1, C.mockDdInput1)
+            .insertDeviceDefinition(2, C.mockDdInput1)
         )
           .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-          .withArgs(1, 1, C.mockDdModel1, C.mockDdYear1);
+          .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
       });
     });
 
   });
 
-  // TODO To be revisited when we have Tableland access control set
-  // TODO Test invalid number of inserted arguments and UNIQUE(model,year)
-  // describe.skip('insertDeviceDefinitionBatch', () => {
-  //   beforeEach(async () => {
-  //     const tx = await ddTableInstance
-  //       .connect(admin)
-  //       .createDeviceDefinitionTable(manufacturer1.address, 1);
+  describe('insertDeviceDefinitionBatch', () => {
+    beforeEach(async () => {
+      const tx = await ddTableInstance
+        .connect(admin)
+        .createDeviceDefinitionTable(manufacturer1.address, 1);
 
-  //     await tablelandValidator.pollForReceiptByTransactionHash({
-  //       chainId: CURRENT_CHAIN_ID,
-  //       transactionHash: (await tx.wait())?.hash as string,
-  //     });
-  //   });
+      await tablelandValidator.pollForReceiptByTransactionHash({
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      });
+    });
 
-  //   context('Error handling', () => {
-  //     it('Should revert if Device Definition table does not exist', async () => {
-  //       await expect(
-  //         ddTableInstance
-  //           .connect(manufacturer1)
-  //           .insertDeviceDefinitionBatch(99, C.mockDdInputBatch)
-  //       ).to.be.revertedWithCustomError(
-  //         ddTableInstance,
-  //         'TableDoesNotExist',
-  //       ).withArgs(99);
-  //     });
-  //   });
+    context('Error handling', () => {
+      it('Should revert if Device Definition table does not exist', async () => {
+        await expect(
+          ddTableInstance
+            .connect(manufacturer1)
+            .insertDeviceDefinitionBatch(99, C.mockDdInputBatch)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'TableDoesNotExist',
+        ).withArgs(99);
+      });
+      it('Should revert if caller is not the table owner', async () => {
+        await expect(
+          ddTableInstance
+            .connect(unauthorized)
+            .insertDeviceDefinitionBatch(2, C.mockDdInputBatch)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'Unauthorized',
+        ).withArgs(unauthorized.address);
+      });
+      it('Should revert if (model,year) pair already exists', async () => {
+        let tx = await ddTableInstance
+          .connect(manufacturer1)
+          .insertDeviceDefinitionBatch(2, C.mockDdInputBatch);
 
-  //   context('State', () => {
-  //     it('Should correctly insert DD into the table', async () => {
-  //       const tx = await ddTableInstance
-  //         .connect(manufacturer1)
-  //         .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
+        await tablelandValidator.pollForReceiptByTransactionHash({
+          chainId: CURRENT_CHAIN_ID,
+          transactionHash: (await tx.wait())?.hash as string,
+        });
 
-  //       await tablelandValidator.pollForReceiptByTransactionHash({
-  //         chainId: CURRENT_CHAIN_ID,
-  //         transactionHash: (await tx.wait())?.hash as string,
-  //       });
+        tx = await ddTableInstance
+          .connect(manufacturer1)
+          .insertDeviceDefinitionBatch(2, C.mockDdInputBatch);
 
-  //       const count = await tablelandDb.prepare(
-  //         `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
-  //       ).first<{ total: number }>('total');
+        const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
+          chainId: CURRENT_CHAIN_ID,
+          transactionHash: (await tx.wait())?.hash as string,
+        });
 
-  //       expect(count).to.deep.equal([3]);
+        const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
-  //       const selectQuery = await tablelandDb.prepare(
-  //         `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id BETWEEN 1 AND 3`
-  //       ).all();
+        expect(validatorResponse.error).to.be.equal(
+          `db query execution failed (code: SQLITE_UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year)`
+        );
+      });
+      it('Should revert if (model,year) pair in the input are not unique', async () => {
+        const tx = await ddTableInstance
+          .connect(manufacturer1)
+          .insertDeviceDefinitionBatch(2, C.mockDdInvalidInputBatch);
+
+        const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
+          chainId: CURRENT_CHAIN_ID,
+          transactionHash: (await tx.wait())?.hash as string,
+        });
+
+        const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
+
+        expect(validatorResponse.error).to.be.equal(
+          `db query execution failed (code: SQLITE_UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year)`
+        );
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly insert DD into the table', async () => {
+        const tx = await ddTableInstance
+          .connect(manufacturer1)
+          .insertDeviceDefinitionBatch(2, C.mockDdInputBatch);
+
+        await tablelandValidator.pollForReceiptByTransactionHash({
+          chainId: CURRENT_CHAIN_ID,
+          transactionHash: (await tx.wait())?.hash as string,
+        });
+
+        const count = await tablelandDb.prepare(
+          `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+        ).first<{ total: number }>('total');
+
+        expect(count).to.deep.equal([3]);
+
+        const selectQuery = await tablelandDb.prepare(
+          `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+        ).all();
 
 
-  //       expect(selectQuery.results)
-  //         .to.deep.include.members(
-  //           [
-  //             {
-  //               id: 1,
-  //               model: C.mockDdModel1,
-  //               year: C.mockDdYear1
-  //             },
-  //             {
-  //               id: 2,
-  //               model: C.mockDdModel2,
-  //               year: C.mockDdYear2
-  //             },
-  //             {
-  //               id: 3,
-  //               model: C.mockDdModel3,
-  //               year: C.mockDdYear3
-  //             }
-  //           ]
-  //         );
-  //     });
-  //   });
+        expect(selectQuery.results)
+          .to.deep.include.members(
+            [
+              {
+                id: C.mockDdId1,
+                model: C.mockDdModel1,
+                year: C.mockDdYear1,
+                metadata: C.mockDdMetadata1
+              },
+              {
+                id: C.mockDdId2,
+                model: C.mockDdModel2,
+                year: C.mockDdYear2,
+                metadata: C.mockDdMetadata2
+              },
+              {
+                id: C.mockDdId3,
+                model: C.mockDdModel3,
+                year: C.mockDdYear3,
+                metadata: C.mockDdMetadata3
+              }
+            ]
+          );
+      });
+    });
 
-  //   context('Events', () => {
-  //     it('Should emit DeviceDefinitionInserted event with correct params', async () => {
-  //       await expect(
-  //         ddTableInstance
-  //           .connect(manufacturer1)
-  //           .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
-  //       )
-  //         .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-  //         .withArgs(1, 1, C.mockDdModel1, C.mockDdYear1)
-  //         .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-  //         .withArgs(2, 1, C.mockDdModel2, C.mockDdYear2)
-  //         .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-  //         .withArgs(3, 1, C.mockDdModel3, C.mockDdYear3);
-  //     });
-  //   });
+    context('Events', () => {
+      it('Should emit DeviceDefinitionInserted event with correct params', async () => {
+        await expect(
+          ddTableInstance
+            .connect(manufacturer1)
+            .insertDeviceDefinitionBatch(2, C.mockDdInputBatch)
+        )
+          .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
+          .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1)
+          .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
+          .withArgs(2, C.mockDdId2, C.mockDdModel2, C.mockDdYear2)
+          .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
+          .withArgs(2, C.mockDdId3, C.mockDdModel3, C.mockDdYear3);
+      });
+    });
 
-  // });
+  });
 
   describe('getDeviceDefinitionTableName', () => {
     context('State', () => {

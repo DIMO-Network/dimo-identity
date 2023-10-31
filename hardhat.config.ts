@@ -12,6 +12,7 @@ import 'hardhat-tracer';
 import 'hardhat-abi-exporter';
 
 import './scripts/linearization';
+import './scripts/tableland/tasks';
 
 tdly.setup();
 dotenv.config();

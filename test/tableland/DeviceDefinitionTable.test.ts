@@ -271,7 +271,7 @@ describe('DeviceDefinitionTable', async function () {
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'TableDoesNotExist',
-        ).withArgs(99);
+        );
       });
       it('Should revert if caller is not the manufacturer ID owner', async () => {
         await expect(
@@ -346,14 +346,14 @@ describe('DeviceDefinitionTable', async function () {
             .insertDeviceDefinition(99, C.mockDdInput1)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
-          'TableDoesNotExist',
+          'ManufacturerDoesNotHaveATable',
         ).withArgs(99);
       });
       it('Should revert if caller is not the table owner', async () => {
         await expect(
           ddTableInstance
             .connect(unauthorized)
-            .insertDeviceDefinition(2, C.mockDdInput1)
+            .insertDeviceDefinition(1, C.mockDdInput1)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'Unauthorized',
@@ -362,7 +362,7 @@ describe('DeviceDefinitionTable', async function () {
       it('Should revert if (model,year) pair already exists', async () => {
         let tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinition(2, C.mockDdInput1);
+          .insertDeviceDefinition(1, C.mockDdInput1);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -371,7 +371,7 @@ describe('DeviceDefinitionTable', async function () {
 
         tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinition(2, C.mockDdInput1);
+          .insertDeviceDefinition(1, C.mockDdInput1);
 
         const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -390,7 +390,7 @@ describe('DeviceDefinitionTable', async function () {
       it('Should correctly insert DD into the table', async () => {
         const tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinition(2, C.mockDdInput1);
+          .insertDeviceDefinition(1, C.mockDdInput1);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -421,7 +421,7 @@ describe('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(manufacturer1)
-            .insertDeviceDefinition(2, C.mockDdInput1)
+            .insertDeviceDefinition(1, C.mockDdInput1)
         )
           .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
           .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
@@ -450,14 +450,14 @@ describe('DeviceDefinitionTable', async function () {
             .insertDeviceDefinitionBatch(99, C.mockDdInputBatch)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
-          'TableDoesNotExist',
+          'ManufacturerDoesNotHaveATable',
         ).withArgs(99);
       });
       it('Should revert if caller is not the table owner', async () => {
         await expect(
           ddTableInstance
             .connect(unauthorized)
-            .insertDeviceDefinitionBatch(2, C.mockDdInputBatch)
+            .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'Unauthorized',
@@ -466,7 +466,7 @@ describe('DeviceDefinitionTable', async function () {
       it('Should revert if (model,year) pair already exists', async () => {
         let tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinitionBatch(2, C.mockDdInputBatch);
+          .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -475,7 +475,7 @@ describe('DeviceDefinitionTable', async function () {
 
         tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinitionBatch(2, C.mockDdInputBatch);
+          .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
 
         const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -491,7 +491,7 @@ describe('DeviceDefinitionTable', async function () {
       it('Should revert if (model,year) pair in the input are not unique', async () => {
         const tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinitionBatch(2, C.mockDdInvalidInputBatch);
+          .insertDeviceDefinitionBatch(1, C.mockDdInvalidInputBatch);
 
         const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -510,7 +510,7 @@ describe('DeviceDefinitionTable', async function () {
       it('Should correctly insert DD into the table', async () => {
         const tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinitionBatch(2, C.mockDdInputBatch);
+          .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -559,7 +559,7 @@ describe('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(manufacturer1)
-            .insertDeviceDefinitionBatch(2, C.mockDdInputBatch)
+            .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
         )
           .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
           .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1)

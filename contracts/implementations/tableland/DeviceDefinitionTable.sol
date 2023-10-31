@@ -3,6 +3,7 @@
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
+import "../../interfaces/INFTMultiPrivilege.sol";
 import "../../shared/Roles.sol";
 import "../../shared/Types.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
@@ -14,6 +15,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 error TableAlreadyExists(uint256 manufacturerId);
 error TableDoesNotExist(uint256 tableId);
+error ManufacturerDoesNotHaveATable(uint256 manufacturerId);
 error Unauthorized(address caller);
 error InvalidManufacturerId(uint256 id);
 
@@ -22,6 +24,8 @@ error InvalidManufacturerId(uint256 id);
  * @notice Contract for interacting with Device Definition tables via Tableland
  */
 contract DeviceDefinitionTable is AccessControlInternal {
+    uint256 private constant MANUFACTURER_INSERT_DD_PRIVILEGE = 3;
+
     event DeviceDefinitionTableCreated(
         address indexed tableOwner,
         uint256 indexed manufacturerId,
@@ -128,7 +132,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
      * @dev The caller must be the owner of the manufacturer ID
      * @dev The specified Device Definition Table must exist
      * @dev The pair (model,year) must be unique
-     * @param tableId The unique identifier of the Device Definition Table to be associated
+     * @param manufacturerId The unique identifier of the manufacturer
      * @param data Input data with the following fields:
      *  id -> The alphanumeric ID of the Device Definition
      *  model -> The model of the Device Definition
@@ -136,22 +140,34 @@ contract DeviceDefinitionTable is AccessControlInternal {
      *  metadata -> The metadata stringfied object of the Device Definition
      */
     function insertDeviceDefinition(
-        uint256 tableId,
+        uint256 manufacturerId,
         DeviceDefinitionInput calldata data
     ) external {
         ITablelandTables tablelandTables = TablelandDeployments.get();
-        string memory prefix = DeviceDefinitionTableStorage
-            .getStorage()
-            .prefixes[tableId];
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+        uint256 tableId = dds.tables[manufacturerId];
+        string memory prefix = dds.prefixes[tableId];
 
         try INFT(address(tablelandTables)).ownerOf(tableId) returns (
             address tableIdOwner
         ) {
-            if (msg.sender != tableIdOwner) {
+            INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+                ManufacturerStorage.getStorage().idProxyAddress
+            );
+
+            if (
+                msg.sender != tableIdOwner &&
+                !manufacturerIdProxy.hasPrivilege(
+                    manufacturerId,
+                    MANUFACTURER_INSERT_DD_PRIVILEGE,
+                    msg.sender
+                )
+            ) {
                 revert Unauthorized(msg.sender);
             }
         } catch {
-            revert TableDoesNotExist(tableId);
+            revert ManufacturerDoesNotHaveATable(manufacturerId);
         }
 
         emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
@@ -181,7 +197,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
      * @dev The caller must be the owner of the manufacturer ID
      * @dev The specified Device Definition Table must exist
      * @dev The pair (model,year) must be unique
-     * @param tableId The unique identifier of the Device Definition Table to be associated
+     * @param manufacturerId The unique identifier of the manufacturer
      * @param data Input data list with the following fields:
      *  id -> The alphanumeric ID of the Device Definition
      *  model -> The model of the Device Definition
@@ -189,22 +205,34 @@ contract DeviceDefinitionTable is AccessControlInternal {
      *  metadata -> The metadata stringfied object of the Device Definition
      */
     function insertDeviceDefinitionBatch(
-        uint256 tableId,
+        uint256 manufacturerId,
         DeviceDefinitionInput[] calldata data
     ) external {
         ITablelandTables tablelandTables = TablelandDeployments.get();
-        string memory prefix = DeviceDefinitionTableStorage
-            .getStorage()
-            .prefixes[tableId];
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+        uint256 tableId = dds.tables[manufacturerId];
+        string memory prefix = dds.prefixes[tableId];
 
         try INFT(address(tablelandTables)).ownerOf(tableId) returns (
             address tableIdOwner
         ) {
-            if (msg.sender != tableIdOwner) {
+            INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+                ManufacturerStorage.getStorage().idProxyAddress
+            );
+
+            if (
+                msg.sender != tableIdOwner &&
+                !manufacturerIdProxy.hasPrivilege(
+                    manufacturerId,
+                    MANUFACTURER_INSERT_DD_PRIVILEGE,
+                    msg.sender
+                )
+            ) {
                 revert Unauthorized(msg.sender);
             }
         } catch {
-            revert TableDoesNotExist(tableId);
+            revert ManufacturerDoesNotHaveATable(manufacturerId);
         }
 
         uint256 len = data.length;
@@ -247,12 +275,11 @@ contract DeviceDefinitionTable is AccessControlInternal {
     function getDeviceDefinitionTableName(
         uint256 manufacturerId
     ) external view returns (string memory tableName) {
-        uint256 tableId = DeviceDefinitionTableStorage.getStorage().tables[
-            manufacturerId
-        ];
-        string memory prefix = ManufacturerStorage
-            .getStorage()
-            .nodeIdToManufacturerName[manufacturerId];
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+
+        uint256 tableId = dds.tables[manufacturerId];
+        string memory prefix = dds.prefixes[tableId];
 
         if (bytes(prefix).length != 0)
             tableName = SQLHelpers.toNameFromId(prefix, tableId);

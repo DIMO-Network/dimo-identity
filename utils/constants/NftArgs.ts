@@ -6,6 +6,7 @@ export const MANUFACTURER_NFT_SYMBOL = 'MNFT';
 export const MANUFACTURER_NFT_BASE_URI = 'https://dimo.zone/manufacturer/';
 export const MANUFACTURER_MINTER_PRIVILEGE = '1';
 export const MANUFACTURER_CLAIMER_PRIVILEGE = '2';
+export const MANUFACTURER_INSERT_DD_PRIVILEGE = '3';
 
 export const INTEGRATION_NFT_NAME = 'Integration NFT';
 export const INTEGRATION_NFT_SYMBOL = 'INFT';

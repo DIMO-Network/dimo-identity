@@ -12,8 +12,8 @@ library DeviceDefinitionTableStorage {
     struct Storage {
         // A mapping that holds `manufacturer ID` and its `tableId`
         mapping(uint256 => uint256) tables;
-        // Device Definition IDs
-        uint256 ddIds;
+        // A mapping that holds `tableId` and its prefix (prefix_chainId_tableId)
+        mapping(uint256 => string) prefixes;
     }
 
     /* solhint-disable no-inline-assembly */

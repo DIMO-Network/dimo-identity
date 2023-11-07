@@ -36,11 +36,6 @@ bytes32 constant SET_VEHICLE_INFO_ROLE = keccak256("SET_VEHICLE_INFO_ROLE");
 // Multiple Minter roles
 bytes32 constant MINT_VEHICLE_SD_ROLE = keccak256("MINT_VEHICLE_SD_ROLE");
 
-// Device Definition roles
-bytes32 constant INSERT_DEVICE_DEFINITION_ROLE = keccak256(
-    "INSERT_DEVICE_DEFINITION_ROLE"
-);
-
 // Developer roles
 bytes32 constant DEV_AD_TRANSFER_ROLE = keccak256("DEV_AD_TRANSFER_ROLE");
 bytes32 constant DEV_AD_UNCLAIM_ROLE = keccak256("DEV_AD_UNCLAIM_ROLE");

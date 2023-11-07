@@ -145,6 +145,10 @@
                     "0x1c0c6e51"
                 ]
             },
+            "DeviceDefinitionTable": {
+                "address": "",
+                "selectors": []
+            },
             "ERC721Holder": {
                 "address": "",
                 "selectors": []
@@ -354,6 +358,10 @@
                     "0x1c0c6e51"
                 ]
             },
+            "DeviceDefinitionTable": {
+                "address": "",
+                "selectors": []
+            },
             "ERC721Holder": {
                 "address": "",
                 "selectors": []
@@ -494,7 +502,9 @@
                     "0x6111afa3",
                     "0x60deec60",
                     "0x89a841bb",
+                    "0x682a25e3",
                     "0x9796cf22",
+                    "0xc6b36f2a",
                     "0x7ba79a39",
                     "0xb50df2f7",
                     "0xcfe642dd",
@@ -544,6 +554,9 @@
             "DevAdmin": {
                 "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
                 "selectors": [
+                    "0x282eb387",
+                    "0x11d679c9",
+                    "0x3febacab",
                     "0xf73a8f04",
                     "0xff96b761",
                     "0x5c129493",
@@ -558,49 +571,65 @@
                     "0x1c0c6e51"
                 ]
             },
+            "DeviceDefinitionTable": {
+                "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "selectors": [
+                    "0x20954d21",
+                    "0x396e5987",
+                    "0xa1d17941",
+                    "0x0ce801ab",
+                    "0x53e7070b",
+                    "0x6928118b",
+                    "0x088fafdb"
+                ]
+            },
             "ERC721Holder": {
-                "address": "",
-                "selectors": []
+                "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+                "selectors": [
+                    "0x150b7a02"
+                ]
             },
             "DeviceDefinitionController": {
-                "address": "",
-                "selectors": []
+                "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+                "selectors": [
+                    "0x66df322e"
+                ]
             }
         },
         "nfts": {
             "ManufacturerId": {
-                "proxy": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
-                "implementation": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE"
+                "proxy": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+                "implementation": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d"
             },
             "IntegrationId": {
-                "proxy": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
-                "implementation": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c"
+                "proxy": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
+                "implementation": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1"
             },
             "VehicleId": {
-                "proxy": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1",
-                "implementation": "0x59b670e9fA9D0A427751Af201D676719a970857b"
+                "proxy": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+                "implementation": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
             },
             "AftermarketDeviceId": {
-                "proxy": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
-                "implementation": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44"
+                "proxy": "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
+                "implementation": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F"
             },
             "SyntheticDeviceId": {
-                "proxy": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
-                "implementation": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319"
+                "proxy": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
+                "implementation": "0xc5a5C42992dECbae36851359345FE25997F5C42d"
             }
         },
         "misc": {
             "DimoToken": {
-                "proxy": "0x9d4454B023096f34B160D6B654540c56A1F81688",
+                "proxy": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
                 "implementation": ""
             },
             "Stake": {
-                "proxy": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
+                "proxy": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
                 "implementation": ""
             },
             "DimoForwarder": {
-                "proxy": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
-                "implementation": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+                "proxy": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+                "implementation": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed"
             },
             "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
             "Kms": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
@@ -665,6 +694,10 @@
                 "selectors": []
             },
             "Multicall": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionTable": {
                 "address": "",
                 "selectors": []
             },

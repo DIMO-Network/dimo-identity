@@ -111,6 +111,7 @@ async function deployModules(
     { name: 'MultipleMinter', args: [] },
     { name: 'DevAdmin', args: [] },
     { name: 'Multicall', args: [] },
+    { name: 'DeviceDefinitionTable', args: [] },
     { name: 'ERC721Holder', args: [] },
     { name: 'DeviceDefinitionController', args: [] }
   ];

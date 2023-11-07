@@ -15,7 +15,6 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 error TableAlreadyExists(uint256 manufacturerId);
 error TableDoesNotExist(uint256 tableId);
-error ManufacturerDoesNotHaveATable(uint256 manufacturerId);
 error Unauthorized(address caller);
 error InvalidManufacturerId(uint256 id);
 
@@ -149,15 +148,12 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 tableId = dds.tables[manufacturerId];
         string memory prefix = dds.prefixes[tableId];
 
-        try INFT(address(tablelandTables)).ownerOf(tableId) returns (
-            address tableIdOwner
-        ) {
+        try INFT(address(tablelandTables)).ownerOf(tableId) {
             INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
                 ManufacturerStorage.getStorage().idProxyAddress
             );
 
             if (
-                msg.sender != tableIdOwner &&
                 !manufacturerIdProxy.hasPrivilege(
                     manufacturerId,
                     MANUFACTURER_INSERT_DD_PRIVILEGE,
@@ -167,7 +163,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
                 revert Unauthorized(msg.sender);
             }
         } catch {
-            revert ManufacturerDoesNotHaveATable(manufacturerId);
+            revert TableDoesNotExist(manufacturerId);
         }
 
         emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
@@ -214,15 +210,12 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 tableId = dds.tables[manufacturerId];
         string memory prefix = dds.prefixes[tableId];
 
-        try INFT(address(tablelandTables)).ownerOf(tableId) returns (
-            address tableIdOwner
-        ) {
+        try INFT(address(tablelandTables)).ownerOf(tableId) {
             INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
                 ManufacturerStorage.getStorage().idProxyAddress
             );
 
             if (
-                msg.sender != tableIdOwner &&
                 !manufacturerIdProxy.hasPrivilege(
                     manufacturerId,
                     MANUFACTURER_INSERT_DD_PRIVILEGE,
@@ -232,7 +225,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
                 revert Unauthorized(msg.sender);
             }
         } catch {
-            revert ManufacturerDoesNotHaveATable(manufacturerId);
+            revert TableDoesNotExist(manufacturerId);
         }
 
         uint256 len = data.length;

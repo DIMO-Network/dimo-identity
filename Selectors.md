@@ -433,7 +433,6 @@
 |-|-|
 | 0x264e42cf | ChainNotSupported(uint256) |
 | 0xa25b0cf9 | InvalidManufacturerId(uint256) |
-| 0x968426ae | ManufacturerDoesNotHaveATable(uint256) |
 | 0x3784d0a9 | TableAlreadyExists(uint256) |
 | 0x45cbe5ec | TableDoesNotExist(uint256) |
 | 0x8e4a23d6 | Unauthorized(address) |

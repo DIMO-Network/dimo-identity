@@ -372,10 +372,10 @@ describe('DeviceDefinitionTable', async function () {
             .insertDeviceDefinition(99, C.mockDdInput1)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
-          'ManufacturerDoesNotHaveATable',
+          'TableDoesNotExist',
         ).withArgs(99);
       });
-      it('Should revert if caller is not the table owner or has the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
+      it('Should revert if caller is not the manufacturer ID owner or has the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
         await expect(
           ddTableInstance
             .connect(unauthorized)
@@ -521,10 +521,10 @@ describe('DeviceDefinitionTable', async function () {
             .insertDeviceDefinitionBatch(99, C.mockDdInputBatch)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
-          'ManufacturerDoesNotHaveATable',
+          'TableDoesNotExist',
         ).withArgs(99);
       });
-      it('Should revert if caller is not the table owner or has the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
+      it('Should revert if caller is not the manufactuer ID owner or has the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
         await expect(
           ddTableInstance
             .connect(unauthorized)

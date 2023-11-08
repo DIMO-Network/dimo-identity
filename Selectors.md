@@ -10,6 +10,7 @@
 |-|-|
 | 0xd7376bae | adminBurnAftermarketDevices(uint256[]) |
 | 0x63dec203 | adminBurnAftermarketDevicesAndDeletePairings(uint256[]) |
+| 0x52878b61 | adminBurnSyntheticDevicesAndDeletePairings(uint256[]) |
 | 0x282eb387 | adminBurnVehicles(uint256[]) |
 | 0x11d679c9 | adminBurnVehiclesAndDeletePairings(uint256[]) |
 | 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |

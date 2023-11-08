@@ -68,6 +68,7 @@ describe('DevAdmin', function () {
   let adAddress1: HardhatEthersSigner;
   let adAddress2: HardhatEthersSigner;
   let sdAddress1: HardhatEthersSigner;
+  let sdAddress2: HardhatEthersSigner;
 
   const mockAftermarketDeviceInfosList = JSON.parse(
     JSON.stringify(C.mockAftermarketDeviceInfosList),
@@ -90,6 +91,7 @@ describe('DevAdmin', function () {
       adAddress1,
       adAddress2,
       sdAddress1,
+      sdAddress2
     ] = await ethers.getSigners();
     mockAftermarketDeviceInfosList[0].addr = adAddress1.address;
     mockAftermarketDeviceInfosList[1].addr = adAddress2.address;
@@ -1482,14 +1484,14 @@ describe('DevAdmin', function () {
           expect(
             await nodesInstance.getInfo(
               await sdIdInstance.getAddress(),
-              2,
+              1,
               C.mockSyntheticDeviceAttribute1,
             ),
           ).to.be.equal('');
           expect(
             await nodesInstance.getInfo(
               await sdIdInstance.getAddress(),
-              2,
+              1,
               C.mockSyntheticDeviceAttribute2,
             ),
           ).to.be.equal('');
@@ -2120,6 +2122,282 @@ describe('DevAdmin', function () {
           .withArgs(2, C.mockAdAttributeInfoPairs[0].attribute, '')
           .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
           .withArgs(2, C.mockAdAttributeInfoPairs[1].attribute, '');
+      });
+    });
+  });
+
+  describe('adminBurnSyntheticDevicesAndDeletePairings', () => {
+    beforeEach(async () => {
+      const localMintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintSyntheticDeviceSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+        },
+      });
+      const localMintVehicleOwnerSig2 = await signMessage({
+        _signer: user2,
+        _primaryType: 'MintSyntheticDeviceSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          integrationNode: '1',
+          vehicleNode: '2',
+        },
+      });
+      const mintSyntheticDeviceSig1 = await signMessage({
+        _signer: sdAddress1,
+        _primaryType: 'MintSyntheticDeviceSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1',
+        },
+      });
+      const mintSyntheticDeviceSig2 = await signMessage({
+        _signer: sdAddress2,
+        _primaryType: 'MintSyntheticDeviceSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          integrationNode: '1',
+          vehicleNode: '2',
+        },
+      });
+      const localMintSdInput1 = {
+        integrationNode: '1',
+        vehicleNode: '1',
+        syntheticDeviceSig: mintSyntheticDeviceSig1,
+        vehicleOwnerSig: localMintVehicleOwnerSig1,
+        syntheticDeviceAddr: sdAddress1.address,
+        attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs,
+      };
+      const localMintSdInput2 = {
+        integrationNode: '1',
+        vehicleNode: '2',
+        syntheticDeviceSig: mintSyntheticDeviceSig2,
+        vehicleOwnerSig: localMintVehicleOwnerSig2,
+        syntheticDeviceAddr: sdAddress2.address,
+        attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs,
+      };
+
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+
+      await syntheticDeviceInstance
+        .connect(admin)
+        .mintSyntheticDeviceSign(localMintSdInput1);
+      await syntheticDeviceInstance
+        .connect(admin)
+        .mintSyntheticDeviceSign(localMintSdInput2);
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_SD_BURN_ROLE', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .adminBurnSyntheticDevicesAndDeletePairings([1, 2]),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_SD_BURN_ROLE
+          }`,
+        );
+      });
+      it('Should revert if node is not a Synthetic Device', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminBurnSyntheticDevicesAndDeletePairings([1, 99]),
+        ).to.be.rejectedWith(
+          `InvalidNode("${await sdIdInstance.getAddress()}", 99)`,
+        );
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly reset synthetic device parent node to 0', async () => {
+        await devAdminInstance
+          .connect(admin)
+          .adminBurnSyntheticDevicesAndDeletePairings([1, 2]);
+
+        const parentNode1 = await nodesInstance.getParentNode(
+          await sdIdInstance.getAddress(),
+          1,
+        );
+        const parentNode2 = await nodesInstance.getParentNode(
+          await sdIdInstance.getAddress(),
+          2,
+        );
+
+        expect(parentNode1).to.be.equal(0);
+        expect(parentNode2).to.be.equal(0);
+      });
+      it('Should correctly reset synthetic device node owner to zero address', async () => {
+        await devAdminInstance
+          .connect(admin)
+          .adminBurnSyntheticDevicesAndDeletePairings([1, 2]);
+
+        await expect(sdIdInstance.ownerOf(1)).to.be.rejectedWith(
+          'ERC721: invalid token ID',
+        );
+        await expect(sdIdInstance.ownerOf(2)).to.be.rejectedWith(
+          'ERC721: invalid token ID',
+        );
+      });
+      it('Should correctly reset synthetic device address do zero address', async () => {
+        await devAdminInstance
+          .connect(admin)
+          .adminBurnSyntheticDevicesAndDeletePairings([1, 2]);
+
+        const id1 =
+          await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
+            sdAddress1.address,
+          );
+        const id2 =
+          await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
+            sdAddress2.address,
+          );
+
+        expect(id1).to.equal(0);
+        expect(id2).to.equal(0);
+      });
+      it('Should correctly reset synthetic device infos to blank', async () => {
+        await devAdminInstance
+          .connect(admin)
+          .adminBurnSyntheticDevicesAndDeletePairings([1, 2]);
+
+        expect(
+          await nodesInstance.getInfo(
+            await sdIdInstance.getAddress(),
+            1,
+            C.mockSyntheticDeviceAttribute1,
+          ),
+        ).to.be.equal('');
+        expect(
+          await nodesInstance.getInfo(
+            await sdIdInstance.getAddress(),
+            1,
+            C.mockSyntheticDeviceAttribute2,
+          ),
+        ).to.be.equal('');
+        expect(
+          await nodesInstance.getInfo(
+            await sdIdInstance.getAddress(),
+            2,
+            C.mockSyntheticDeviceAttribute1,
+          ),
+        ).to.be.equal('');
+        expect(
+          await nodesInstance.getInfo(
+            await sdIdInstance.getAddress(),
+            2,
+            C.mockSyntheticDeviceAttribute2,
+          ),
+        ).to.be.equal('');
+      });
+      it('Should correctly reset mapping the synthetic device to vehicle to 0', async () => {
+        await devAdminInstance
+          .connect(admin)
+          .adminBurnSyntheticDevicesAndDeletePairings([1, 2]);
+
+        expect(
+          await mapperInstance.getNodeLink(
+            await vehicleIdInstance.getAddress(),
+            await sdIdInstance.getAddress(),
+            1,
+          ),
+        ).to.be.equal(0);
+        expect(
+          await mapperInstance.getNodeLink(
+            await vehicleIdInstance.getAddress(),
+            await sdIdInstance.getAddress(),
+            2,
+          ),
+        ).to.be.equal(0);
+      });
+      it('Should correctly reset mapping the vehicle to synthetic device to 0', async () => {
+        await devAdminInstance
+          .connect(admin)
+          .adminBurnSyntheticDevicesAndDeletePairings([1, 2]);
+
+        expect(
+          await mapperInstance.getNodeLink(
+            await sdIdInstance.getAddress(),
+            await vehicleIdInstance.getAddress(),
+            1,
+          ),
+        ).to.be.equal(0);
+        expect(
+          await mapperInstance.getNodeLink(
+            await sdIdInstance.getAddress(),
+            await vehicleIdInstance.getAddress(),
+            2,
+          ),
+        ).to.be.equal(0);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit SyntheticDeviceNodeBurnedDevAdmin event with correct params', async () => {
+        // const localMintVehicleOwnerSig = await signMessage({
+        //   _signer: user2,
+        //   _primaryType: 'MintSyntheticDeviceSign',
+        //   _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        //   message: {
+        //     integrationNode: '1',
+        //     vehicleNode: '2',
+        //   },
+        // });
+        // const mintSyntheticDeviceSig1 = await signMessage({
+        //   _signer: sdAddress1,
+        //   _primaryType: 'MintSyntheticDeviceSign',
+        //   _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        //   message: {
+        //     integrationNode: '1',
+        //     vehicleNode: '2',
+        //   },
+        // });
+        // const localMintSdInput = {
+        //   integrationNode: '1',
+        //   vehicleNode: '2',
+        //   syntheticDeviceSig: mintSyntheticDeviceSig1,
+        //   vehicleOwnerSig: localMintVehicleOwnerSig,
+        //   syntheticDeviceAddr: sdAddress1.address,
+        //   attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs,
+        // };
+
+        // await syntheticDeviceInstance
+        //   .connect(admin)
+        //   .mintSyntheticDeviceSign(localMintSdInput);
+
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminBurnSyntheticDevicesAndDeletePairings([1, 2]),
+        )
+          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurnedDevAdmin')
+          .withArgs(1, 1, user1.address)
+          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurnedDevAdmin')
+          .withArgs(2, 2, user2.address);
+      });
+      it('Should emit SyntheticDeviceAttributeSetDevAdmin events with correct params', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminBurnSyntheticDevicesAndDeletePairings([1, 2]),
+        )
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .withArgs(1, C.mockSyntheticDeviceAttributeInfoPairs[0].attribute, '')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .withArgs(1, C.mockSyntheticDeviceAttributeInfoPairs[1].attribute, '')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .withArgs(2, C.mockSyntheticDeviceAttributeInfoPairs[0].attribute, '')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .withArgs(2, C.mockSyntheticDeviceAttributeInfoPairs[1].attribute, '');
       });
     });
   });

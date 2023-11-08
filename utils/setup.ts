@@ -61,6 +61,7 @@ export async function grantAdminRoles(
     C.DEV_AD_PAIR_ROLE,
     C.DEV_VEHICLE_BURN_ROLE,
     C.DEV_AD_BURN_ROLE,
+    C.DEV_SD_BURN_ROLE,
     C.DEV_CHANGE_PARENT_NODE
   ];
 

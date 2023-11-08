@@ -2343,41 +2343,10 @@ describe('DevAdmin', function () {
 
     context('Events', () => {
       it('Should emit SyntheticDeviceNodeBurnedDevAdmin event with correct params', async () => {
-        // const localMintVehicleOwnerSig = await signMessage({
-        //   _signer: user2,
-        //   _primaryType: 'MintSyntheticDeviceSign',
-        //   _verifyingContract: await syntheticDeviceInstance.getAddress(),
-        //   message: {
-        //     integrationNode: '1',
-        //     vehicleNode: '2',
-        //   },
-        // });
-        // const mintSyntheticDeviceSig1 = await signMessage({
-        //   _signer: sdAddress1,
-        //   _primaryType: 'MintSyntheticDeviceSign',
-        //   _verifyingContract: await syntheticDeviceInstance.getAddress(),
-        //   message: {
-        //     integrationNode: '1',
-        //     vehicleNode: '2',
-        //   },
-        // });
-        // const localMintSdInput = {
-        //   integrationNode: '1',
-        //   vehicleNode: '2',
-        //   syntheticDeviceSig: mintSyntheticDeviceSig1,
-        //   vehicleOwnerSig: localMintVehicleOwnerSig,
-        //   syntheticDeviceAddr: sdAddress1.address,
-        //   attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs,
-        // };
-
-        // await syntheticDeviceInstance
-        //   .connect(admin)
-        //   .mintSyntheticDeviceSign(localMintSdInput);
-
         await expect(
           devAdminInstance
             .connect(admin)
-            .adminBurnSyntheticDevicesAndDeletePairings([1, 2]),
+            .adminBurnSyntheticDevicesAndDeletePairings([1, 2])
         )
           .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurnedDevAdmin')
           .withArgs(1, 1, user1.address)
@@ -2388,7 +2357,7 @@ describe('DevAdmin', function () {
         await expect(
           devAdminInstance
             .connect(admin)
-            .adminBurnSyntheticDevicesAndDeletePairings([1, 2]),
+            .adminBurnSyntheticDevicesAndDeletePairings([1, 2])
         )
           .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
           .withArgs(1, C.mockSyntheticDeviceAttributeInfoPairs[0].attribute, '')

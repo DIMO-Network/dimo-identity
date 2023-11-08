@@ -287,7 +287,7 @@ contract DevAdmin is AccessControlInternal {
     /**
      * @notice Admin function to burn a list of vehicles and reset all its attributes and links
      * @dev Caller must have the DEV_VEHICLE_BURN_ROLE role
-     * @dev This contract has the BURNER_ROLE in the VehicleId
+     * @dev This contract has the BURNER_ROLE in the VehicleId and SyntheticDeviceId
      * @param tokenIds List of vehicle node ids
      */
     function adminBurnVehiclesAndDeletePairings(
@@ -472,6 +472,70 @@ contract DevAdmin is AccessControlInternal {
             INFT(adIdProxyAddress).burn(tokenId);
 
             _resetAdInfos(tokenId);
+        }
+    }
+
+    /**
+     * @notice Admin function to burn a list of synthetic devices and reset all its attributes and links is exist
+     * @dev Caller must have the DEV_SD_BURN_ROLE role
+     * @dev This contract has the BURNER_ROLE in the SyntheticDeviceId
+     * @param tokenIds List of synthetic device ids
+     */
+    function adminBurnSyntheticDevicesAndDeletePairings(
+        uint256[] calldata tokenIds
+    ) external onlyRole(DEV_SD_BURN_ROLE) {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = SyntheticDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        uint256 tokenId;
+        uint256 pairedVehicleNode;
+        address owner;
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            tokenId = tokenIds[i];
+
+            if (!INFT(sdIdProxyAddress).exists(tokenId))
+                revert InvalidNode(sdIdProxyAddress, tokenId);
+
+            owner = INFT(sdIdProxyAddress).ownerOf(tokenId);
+
+            // Check Vehicle pairing
+            pairedVehicleNode = ms.nodeLinks[sdIdProxyAddress][
+                vehicleIdProxyAddress
+            ][tokenId];
+            if (pairedVehicleNode != 0) {
+                delete ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+                    pairedVehicleNode
+                ];
+                delete ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
+                    tokenId
+                ];
+            }
+
+            delete ns.nodes[sdIdProxyAddress][tokenId].parentNode;
+
+            delete sds.deviceAddressToNodeId[
+                sds.nodeIdToDeviceAddress[tokenId]
+            ];
+            delete sds.nodeIdToDeviceAddress[tokenId];
+
+            INFT(sdIdProxyAddress).burn(tokenId);
+
+            emit SyntheticDeviceNodeBurnedDevAdmin(
+                tokenId,
+                pairedVehicleNode,
+                owner
+            );
+
+            _resetSdInfos(tokenId);
         }
     }
 

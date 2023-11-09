@@ -55,6 +55,10 @@ contract DeviceDefinitionTable is AccessControlInternal {
         INFT manufacturerIdProxy = INFT(
             ManufacturerStorage.getStorage().idProxyAddress
         );
+
+        if (!manufacturerIdProxy.exists(manufacturerId)) {
+            revert InvalidManufacturerId(manufacturerId);
+        }
         if (
             !_hasRole(ADMIN_ROLE, msg.sender) &&
             msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)
@@ -62,22 +66,18 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
-        ITablelandTables tablelandTables = TablelandDeployments.get();
+        TablelandTables tablelandTables = TablelandDeployments.get();
 
-        string memory prefix = ManufacturerStorage
-            .getStorage()
-            .nodeIdToManufacturerName[manufacturerId];
-
-        if (bytes(prefix).length == 0) {
-            revert InvalidManufacturerId(manufacturerId);
-        }
         if (dds.tables[manufacturerId] != 0) {
             revert TableAlreadyExists(manufacturerId);
         }
 
-        string memory statement = SQLHelpers.toCreateFromSchema(
-            "id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, UNIQUE(model,year)",
-            prefix
+        string memory statement = string(
+            abi.encodePacked(
+                "CREATE TABLE _",
+                Strings.toString(block.chainid),
+                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, UNIQUE(model,year))"
+            )
         );
         uint256 tableId = tablelandTables.create(address(this), statement);
 
@@ -89,7 +89,6 @@ contract DeviceDefinitionTable is AccessControlInternal {
         );
 
         dds.tables[manufacturerId] = tableId;
-        dds.prefixes[tableId] = prefix;
 
         emit DeviceDefinitionTableCreated(tableOwner, manufacturerId, tableId);
     }
@@ -112,6 +111,9 @@ contract DeviceDefinitionTable is AccessControlInternal {
                 ManufacturerStorage.getStorage().idProxyAddress
             );
 
+            if (!manufacturerIdProxy.exists(manufacturerId)) {
+                revert InvalidManufacturerId(manufacturerId);
+            }
             if (msg.sender != manufacturerIdProxy.ownerOf(manufacturerId)) {
                 revert Unauthorized(msg.sender);
             }
@@ -142,11 +144,10 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 manufacturerId,
         DeviceDefinitionInput calldata data
     ) external {
-        ITablelandTables tablelandTables = TablelandDeployments.get();
+        TablelandTables tablelandTables = TablelandDeployments.get();
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
         uint256 tableId = dds.tables[manufacturerId];
-        string memory prefix = dds.prefixes[tableId];
 
         try INFT(address(tablelandTables)).ownerOf(tableId) {
             INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
@@ -172,7 +173,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
             address(this),
             tableId,
             SQLHelpers.toInsert(
-                prefix,
+                "",
                 tableId,
                 "id,model,year,metadata",
                 string.concat(
@@ -204,11 +205,10 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 manufacturerId,
         DeviceDefinitionInput[] calldata data
     ) external {
-        ITablelandTables tablelandTables = TablelandDeployments.get();
+        TablelandTables tablelandTables = TablelandDeployments.get();
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
         uint256 tableId = dds.tables[manufacturerId];
-        string memory prefix = dds.prefixes[tableId];
 
         try INFT(address(tablelandTables)).ownerOf(tableId) {
             INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
@@ -250,7 +250,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         }
 
         string memory stmt = SQLHelpers.toBatchInsert(
-            prefix,
+            "",
             tableId,
             "id,model,year,metadata",
             vals
@@ -272,10 +272,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
             storage dds = DeviceDefinitionTableStorage.getStorage();
 
         uint256 tableId = dds.tables[manufacturerId];
-        string memory prefix = dds.prefixes[tableId];
 
-        if (bytes(prefix).length != 0)
-            tableName = SQLHelpers.toNameFromId(prefix, tableId);
+        if (tableId != 0) tableName = SQLHelpers.toNameFromId("", tableId);
     }
 
     /**
@@ -290,17 +288,5 @@ contract DeviceDefinitionTable is AccessControlInternal {
         tableId = DeviceDefinitionTableStorage.getStorage().tables[
             manufacturerId
         ];
-    }
-
-    /**
-     * @dev Retrieve the device definition table prefix associated with a specific table ID
-     * @param tableId The ID of the manufacturer's device definition table
-     * @dev If a matching table does not exist, the function returns an empty string
-     * @return prefix The prefix of the manufacturer's device definition table
-     */
-    function getPrefixByTableId(
-        uint256 tableId
-    ) external view returns (string memory prefix) {
-        prefix = DeviceDefinitionTableStorage.getStorage().prefixes[tableId];
     }
 }

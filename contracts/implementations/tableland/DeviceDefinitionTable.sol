@@ -66,7 +66,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
-        ITablelandTables tablelandTables = TablelandDeployments.get();
+        TablelandTables tablelandTables = TablelandDeployments.get();
 
         if (dds.tables[manufacturerId] != 0) {
             revert TableAlreadyExists(manufacturerId);
@@ -144,7 +144,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 manufacturerId,
         DeviceDefinitionInput calldata data
     ) external {
-        ITablelandTables tablelandTables = TablelandDeployments.get();
+        TablelandTables tablelandTables = TablelandDeployments.get();
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
         uint256 tableId = dds.tables[manufacturerId];
@@ -205,7 +205,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 manufacturerId,
         DeviceDefinitionInput[] calldata data
     ) external {
-        ITablelandTables tablelandTables = TablelandDeployments.get();
+        TablelandTables tablelandTables = TablelandDeployments.get();
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
         uint256 tableId = dds.tables[manufacturerId];

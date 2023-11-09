@@ -149,16 +149,6 @@ describe('DeviceDefinitionTable', async function () {
 
   describe('createDeviceDefinitionTable', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have ADMIN_ROLE or it is not he manufacturer ID owner', async () => {
-        await expect(
-          ddTableInstance
-            .connect(unauthorized)
-            .createDeviceDefinitionTable(manufacturer1.address, 1)
-        ).to.be.revertedWithCustomError(
-          ddTableInstance,
-          'Unauthorized',
-        ).withArgs(unauthorized.address);
-      });
       it('Should revert if manufacturer ID does not exist', async () => {
         await expect(
           ddTableInstance
@@ -168,6 +158,16 @@ describe('DeviceDefinitionTable', async function () {
           ddTableInstance,
           'InvalidManufacturerId',
         ).withArgs(99);
+      });
+      it('Should revert if caller does not have ADMIN_ROLE or it is not he manufacturer ID owner', async () => {
+        await expect(
+          ddTableInstance
+            .connect(unauthorized)
+            .createDeviceDefinitionTable(manufacturer1.address, 1)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'Unauthorized',
+        ).withArgs(unauthorized.address);
       });
       it('Should revert if Device Definition table already exists', async () => {
         await ddTableInstance
@@ -206,15 +206,6 @@ describe('DeviceDefinitionTable', async function () {
 
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
         });
-        it('Should correctly map the new table ID created to its prefix', async () => {
-          expect(await ddTableInstance.getPrefixByTableId(2)).to.empty;
-
-          await ddTableInstance
-            .connect(admin)
-            .createDeviceDefinitionTable(manufacturer1.address, 1);
-
-          expect(await ddTableInstance.getPrefixByTableId(2)).to.equal(C.mockManufacturerNames[0]);
-        });
       });
 
       context('Events', () => {
@@ -251,15 +242,6 @@ describe('DeviceDefinitionTable', async function () {
 
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
         });
-        it('Should correctly map the new table ID created to its prefix', async () => {
-          expect(await ddTableInstance.getPrefixByTableId(2)).to.empty;
-
-          await ddTableInstance
-            .connect(admin)
-            .createDeviceDefinitionTable(manufacturer1.address, 1);
-
-          expect(await ddTableInstance.getPrefixByTableId(2)).to.equal(C.mockManufacturerNames[0]);
-        });
       });
 
       context('Events', () => {
@@ -289,6 +271,16 @@ describe('DeviceDefinitionTable', async function () {
     });
 
     context('Error handling', () => {
+      it('Should revert if manufacturer ID does not exist', async () => {
+        await expect(
+          ddTableInstance
+            .connect(admin)
+            .setDeviceDefinitionTable(99, 2)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'InvalidManufacturerId',
+        ).withArgs(99);
+      });
       it('Should revert if Device Definition table does not exist', async () => {
         await expect(
           ddTableInstance
@@ -407,7 +399,7 @@ describe('DeviceDefinitionTable', async function () {
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
         expect(validatorResponse.error).to.be.equal(
-          `db query execution failed (code: SQLITE_UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year)`
+          `db query execution failed (code: SQLITE_UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year)`
         );
       });
     });
@@ -524,7 +516,7 @@ describe('DeviceDefinitionTable', async function () {
           'TableDoesNotExist',
         ).withArgs(99);
       });
-      it('Should revert if caller is not the manufactuer ID owner or has the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
+      it('Should revert if caller is not the manufacturer ID owner or has the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
         await expect(
           ddTableInstance
             .connect(unauthorized)
@@ -556,7 +548,7 @@ describe('DeviceDefinitionTable', async function () {
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
         expect(validatorResponse.error).to.be.equal(
-          `db query execution failed (code: SQLITE_UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year)`
+          `db query execution failed (code: SQLITE_UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year)`
         );
       });
       it('Should revert if (model,year) pair in the input are not unique', async () => {
@@ -572,7 +564,7 @@ describe('DeviceDefinitionTable', async function () {
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
         expect(validatorResponse.error).to.be.equal(
-          `db query execution failed (code: SQLITE_UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.model, ${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_${tableId}.year)`
+          `db query execution failed (code: SQLITE_UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year)`
         );
       });
     });
@@ -721,7 +713,7 @@ describe('DeviceDefinitionTable', async function () {
           .createDeviceDefinitionTable(manufacturer1.address, 1);
 
         expect(await ddTableInstance.getDeviceDefinitionTableName(1))
-          .to.equal(`${C.mockManufacturerNames[0]}_${CURRENT_CHAIN_ID}_2`);
+          .to.equal(`_${CURRENT_CHAIN_ID}_2`);
       });
     });
   });

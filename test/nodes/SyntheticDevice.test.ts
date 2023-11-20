@@ -1571,4 +1571,56 @@ describe('SyntheticDevice', function () {
       expect(tokenId).to.equal(1);
     });
   });
+
+  describe('getSyntheticDeviceAddressById', () => {
+    let mintInput: MintSyntheticDeviceInput;
+
+    before(async () => {
+      const mintSyntheticDeviceSig1 = await signMessage({
+        _signer: sdAddress1,
+        _primaryType: 'MintSyntheticDeviceSign',
+        _verifyingContract: syntheticDeviceInstance.address,
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1'
+        }
+      });
+      const mintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintSyntheticDeviceSign',
+        _verifyingContract: syntheticDeviceInstance.address,
+        message: {
+          integrationNode: '1',
+          vehicleNode: '1'
+        }
+      });
+      mintInput = {
+        integrationNode: '1',
+        vehicleNode: '1',
+        syntheticDeviceSig: mintSyntheticDeviceSig1,
+        vehicleOwnerSig: mintVehicleOwnerSig1,
+        syntheticDeviceAddr: sdAddress1.address,
+        attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
+      };
+    });
+
+    beforeEach(async () => {
+      await syntheticDeviceInstance
+        .connect(admin)
+        .mintSyntheticDeviceSign(mintInput);
+    });
+
+    it('Should return 0x00 address if the queried node ID is not associated with any minted device', async () => {
+      const address =
+        await syntheticDeviceInstance.getSyntheticDeviceAddressById(99);
+
+      expect(address).to.equal(C.ZERO_ADDRESS);
+    });
+    it('Should return the correct address', async () => {
+      const address =
+        await syntheticDeviceInstance.getSyntheticDeviceAddressById(1);
+
+      expect(address).to.equal(sdAddress1.address);
+    });
+  });
 });

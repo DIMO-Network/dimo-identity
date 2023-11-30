@@ -62,6 +62,7 @@
 | 0x7ba79a39 | mintAftermarketDeviceByManufacturerBatch(uint256,(address,(string,string)[])[]) |
 | 0xb50df2f7 | pairAftermarketDeviceSign(uint256,uint256,bytes,bytes) |
 | 0xcfe642dd | pairAftermarketDeviceSign(uint256,uint256,bytes) |
+| 0x955ef777 | setAftermarketDeviceAddressByManufacturerBatch((uint256,address)[]) |
 | 0x4d49d82a | setAftermarketDeviceIdProxyAddress(address) |
 | 0x4d13b709 | setAftermarketDeviceInfo(uint256,(string,string)[]) |
 | 0xee4d9596 | unpairAftermarketDevice(uint256,uint256) |

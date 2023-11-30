@@ -48,6 +48,7 @@ contract AftermarketDevice is
         );
     uint256 private constant MANUFACTURER_MINTER_PRIVILEGE = 1;
     uint256 private constant MANUFACTURER_CLAIMER_PRIVILEGE = 2;
+    uint256 private constant MANUFACTURER_FACTORY_RESET_PRIVILEGE = 3;
 
     event AftermarketDeviceIdProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
@@ -66,17 +67,20 @@ contract AftermarketDevice is
         uint256 aftermarketDeviceNode,
         address indexed owner
     );
-
     event AftermarketDevicePaired(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         address indexed owner
     );
-
     event AftermarketDeviceUnpaired(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         address indexed owner
+    );
+    event AftermarketDeviceAddressReset(
+        uint256 indexed manufacturerId,
+        uint256 indexed tokenId,
+        address indexed aftermarketDeviceAddress
     );
 
     // ***** Admin management ***** //
@@ -516,6 +520,56 @@ contract AftermarketDevice is
         if (!INFT(adIdProxy).exists(tokenId))
             revert Errors.InvalidNode(adIdProxy, tokenId);
         _setInfos(tokenId, attrInfo);
+    }
+
+    /**
+     * @notice Set the device address of a list of aftermarket devices
+     * Caller must be the owner of the aftermarket device's parent manufacturer or an authorized address
+     * The manufacturer node owner must grant the MANUFACTURER_FACTORY_RESET_PRIVILEGE privilege to the authorized address
+     * @param adIdAddrs List of deviceId-deviceAddress pairs to be set
+     */
+    function setAftermarketDeviceAddressByManufacturerBatch(
+        Types.AftermarketDeviceIdAddressPair[] calldata adIdAddrs
+    ) external {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        ManufacturerStorage.Storage storage ms = ManufacturerStorage
+            .getStorage();
+        address adIdProxyAddress = ads.idProxyAddress;
+        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+            ms.idProxyAddress
+        );
+
+        uint256 tokenId;
+        address newDeviceAddress;
+        uint256 manufacturerParentNode;
+        for (uint256 i = 0; i < adIdAddrs.length; i++) {
+            tokenId = adIdAddrs[i].aftermarketDeviceNodeId;
+            newDeviceAddress = adIdAddrs[i].deviceAddress;
+            manufacturerParentNode = ns
+            .nodes[adIdProxyAddress][tokenId].parentNode;
+
+            if (!INFT(adIdProxyAddress).exists(tokenId)) {
+                revert Errors.InvalidNode(adIdProxyAddress, tokenId);
+            }
+            if (
+                !manufacturerIdProxy.hasPrivilege(
+                    manufacturerParentNode,
+                    MANUFACTURER_FACTORY_RESET_PRIVILEGE,
+                    msg.sender
+                )
+            ) revert Errors.Unauthorized(msg.sender);
+
+            ads.deviceAddressToNodeId[newDeviceAddress] = tokenId;
+            ads.nodeIdToDeviceAddress[tokenId] = newDeviceAddress;
+
+            emit AftermarketDeviceAddressReset(
+                manufacturerParentNode,
+                tokenId,
+                newDeviceAddress
+            );
+        }
     }
 
     /**

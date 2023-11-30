@@ -1019,6 +1019,31 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "aftermarketDeviceAddress",
+                "type": "address"
+            }
+        ],
+        "name": "AftermarketDeviceAddressReset",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": false,
                 "internalType": "string",
                 "name": "attribute",
@@ -1358,6 +1383,31 @@
             }
         ],
         "name": "pairAftermarketDeviceSign",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "aftermarketDeviceNodeId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "deviceAddress",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct AftermarketDeviceIdAddressPair[]",
+                "name": "adIdAddrs",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "setAftermarketDeviceAddressByManufacturerBatch",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

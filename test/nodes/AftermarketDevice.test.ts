@@ -3476,7 +3476,7 @@ describe('AftermarketDevice', function () {
     });
   });
 
-  describe('setAftermarketDeviceAddressByManufacturerBatch', () => {
+  describe('resetAftermarketDeviceAddressByManufacturerBatch', () => {
     let mockAftermarketDeviceIdAddressPairs: AftermarketDeviceIdAddressPair[]
     before(async () => {
       mockAftermarketDeviceIdAddressPairs =
@@ -3515,7 +3515,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(manufacturer1)
-              .setAftermarketDeviceAddressByManufacturerBatch(invalidMockAftermarketDeviceIdAddressPairs)
+              .resetAftermarketDeviceAddressByManufacturerBatch(invalidMockAftermarketDeviceIdAddressPairs)
           )
             .to.be.revertedWithCustomError(
               aftermarketDeviceInstance,
@@ -3527,13 +3527,72 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(nonManufacturer)
-              .setAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
+              .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
           )
             .to.be.revertedWithCustomError(
               aftermarketDeviceInstance,
               'Unauthorized'
             )
             .withArgs(nonManufacturer.address);
+        });
+        it('Should revert if aftermarket device is paired', async () => {
+          const claimOwnerSig1 = await signMessage({
+            _signer: user1,
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user1.address,
+            },
+          });
+          const claimAdSig1 = await signMessage({
+            _signer: adAddress1,
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user1.address,
+            },
+          });
+          const pairSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'PairAftermarketDeviceSign',
+            _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1',
+            },
+          });
+
+          await vehicleInstance
+            .connect(admin)
+            .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          await aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(
+              1,
+              user1.address,
+              claimOwnerSig1,
+              claimAdSig1,
+            );
+          await aftermarketDeviceInstance
+            .connect(admin)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature,
+          );
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
+          )
+            .to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'AdPaired'
+            )
+            .withArgs(1);
         });
       });
 
@@ -3546,7 +3605,7 @@ describe('AftermarketDevice', function () {
 
           await aftermarketDeviceInstance
             .connect(manufacturer1)
-            .setAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs);
+            .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs);
 
           const adAddress1After = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(1);
           const adAddress2After = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(2);
@@ -3560,7 +3619,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(manufacturer1)
-              .setAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
+              .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
           )
             .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAddressReset')
             .withArgs(
@@ -3589,7 +3648,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(manufacturerPrivileged1)
-              .setAftermarketDeviceAddressByManufacturerBatch(invalidMockAftermarketDeviceIdAddressPairs)
+              .resetAftermarketDeviceAddressByManufacturerBatch(invalidMockAftermarketDeviceIdAddressPairs)
           )
             .to.be.revertedWithCustomError(
               aftermarketDeviceInstance,
@@ -3608,7 +3667,7 @@ describe('AftermarketDevice', function () {
 
           await aftermarketDeviceInstance
             .connect(manufacturerPrivileged1)
-            .setAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs);
+            .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs);
 
           const adAddress1After = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(1);
           const adAddress2After = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(2);
@@ -3622,7 +3681,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(manufacturerPrivileged1)
-              .setAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
+              .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
           )
             .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAddressReset')
             .withArgs(

@@ -523,22 +523,21 @@ contract AftermarketDevice is
     }
 
     /**
-     * @notice Set the device address of a list of aftermarket devices
+     * @notice Reset the device address of a list of aftermarket devices
      * Caller must be the owner of the aftermarket device's parent manufacturer or an authorized address
      * The manufacturer node owner must grant the MANUFACTURER_FACTORY_RESET_PRIVILEGE privilege to the authorized address
      * @param adIdAddrs List of deviceId-deviceAddress pairs to be set
      */
-    function setAftermarketDeviceAddressByManufacturerBatch(
+    function resetAftermarketDeviceAddressByManufacturerBatch(
         Types.AftermarketDeviceIdAddressPair[] calldata adIdAddrs
     ) external {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-            .getStorage();
-        ManufacturerStorage.Storage storage ms = ManufacturerStorage
             .getStorage();
         address adIdProxyAddress = ads.idProxyAddress;
         INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
-            ms.idProxyAddress
+            ManufacturerStorage.getStorage().idProxyAddress
         );
 
         uint256 tokenId;
@@ -550,9 +549,8 @@ contract AftermarketDevice is
             manufacturerParentNode = ns
             .nodes[adIdProxyAddress][tokenId].parentNode;
 
-            if (!INFT(adIdProxyAddress).exists(tokenId)) {
+            if (!INFT(adIdProxyAddress).exists(tokenId))
                 revert Errors.InvalidNode(adIdProxyAddress, tokenId);
-            }
             if (
                 !manufacturerIdProxy.hasPrivilege(
                     manufacturerParentNode,
@@ -560,6 +558,8 @@ contract AftermarketDevice is
                     msg.sender
                 )
             ) revert Errors.Unauthorized(msg.sender);
+            if (ms.links[adIdProxyAddress][tokenId] != 0)
+                revert AdPaired(tokenId);
 
             ads.deviceAddressToNodeId[newDeviceAddress] = tokenId;
             ads.nodeIdToDeviceAddress[tokenId] = newDeviceAddress;

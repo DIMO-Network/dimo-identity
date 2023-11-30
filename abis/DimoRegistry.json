@@ -1407,7 +1407,7 @@
                 "type": "tuple[]"
             }
         ],
-        "name": "setAftermarketDeviceAddressByManufacturerBatch",
+        "name": "resetAftermarketDeviceAddressByManufacturerBatch",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

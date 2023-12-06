@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../../shared/Roles.sol";
-import "../../libraries/streamr/StreamrStorage.sol";
+import "../../libraries/streamr/StreamrManagerStorage.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
@@ -18,15 +18,7 @@ contract StreamrManager is AccessControlInternal {
     function setStreamrRegistry(
         address streamrRegistry
     ) external onlyRole(ADMIN_ROLE) {
-        StreamrStorage.getStorage().streamrRegistry = streamrRegistry;
+        StreamrManagerStorage.getStorage().streamrRegistry = streamrRegistry;
         emit StreamrRegistrySet(streamrRegistry);
-    }
-
-    // TODO Documentation
-    function setDimoBaseStreamId(
-        string calldata dimoBaseStreamId
-    ) external onlyRole(ADMIN_ROLE) {
-        StreamrStorage.getStorage().dimoBaseStreamId = dimoBaseStreamId;
-        emit DimoBaseStreamIdSet(dimoBaseStreamId);
     }
 }

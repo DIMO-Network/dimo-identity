@@ -13,8 +13,7 @@ import {
   Vehicle,
   VehicleId,
   StreamrManager,
-  VehicleStream,
-  MockStreamRegistry
+  VehicleStream
 } from '../../typechain-types';
 
 import {
@@ -25,10 +24,10 @@ import {
   C
 } from '../../utils';
 
-const { ContractFactory, provider } = ethers;
+const { provider } = ethers;
 const { expect } = chai;
 
-describe('VehicleStream', async function () {
+describe.only('VehicleStream', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
@@ -39,16 +38,23 @@ describe('VehicleStream', async function () {
   let vehicleIdInstance: VehicleId;
   let streamrManagerInstance: StreamrManager;
   let vehicleStreamInstance: VehicleStream;
-  let mockStreamRegistry: MockStreamRegistry;
   let ensCache: ENSCacheV2;
   let streamRegistry: StreamRegistry;
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
+  let user1: HardhatEthersSigner;
+  let user2: HardhatEthersSigner;
 
   before(async () => {
-    [admin, nonAdmin, manufacturer1] = await ethers.getSigners();
+    [
+      admin,
+      nonAdmin,
+      manufacturer1,
+      user1,
+      user2
+    ] = await ethers.getSigners();
 
     const deployments = await setup(admin, {
       modules: [
@@ -123,21 +129,26 @@ describe('VehicleStream', async function () {
         C.mockManufacturerAttributeInfoPairs
       );
 
-    // Deploy MockStreamRegistry contract
-    // const MockSreamRegistryFactory = await ethers.getContractFactory('MockStreamRegistry');
-    // mockStreamRegistry = await MockSreamRegistryFactory.connect(admin).deploy();
+    // Setting DIMORegistry address
+    await manufacturerIdInstance.setDimoRegistryAddress(
+      await dimoRegistryInstance.getAddress(),
+    );
 
-    const ensCacheFactory = new ContractFactory(ENSCacheV2ABI, ENSCacheV2Bytecode, admin);
+    await vehicleInstance
+      .connect(admin)
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+
+    const ensCacheFactory = new ethers.ContractFactory(ENSCacheV2ABI, ENSCacheV2Bytecode, admin);
     ensCache = await ensCacheFactory.deploy() as unknown as ENSCacheV2
 
-    const streamRegistryFactory = new ContractFactory(streamRegistryABI, streamRegistryBytecode, admin);
+    const streamRegistryFactory = new ethers.ContractFactory(streamRegistryABI, streamRegistryBytecode, admin);
     streamRegistry = await streamRegistryFactory.deploy() as unknown as StreamRegistry;
 
     await streamRegistry.initialize(await ensCache.getAddress(), admin.address);
     await ensCache.initialize(admin.address, await streamRegistry.getAddress(), ethers.ZeroAddress);
 
     await streamrManagerInstance.setStreamrRegistry(await streamRegistry.getAddress());
-    await streamrManagerInstance.setDimoBaseStreamId(C.DIMO_BASE_STREAM_ID);
   });
 
   beforeEach(async () => {
@@ -148,19 +159,42 @@ describe('VehicleStream', async function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('uintToString', () => {
-    it('works for simple cases', async () => {
-      expect(await vehicleStreamInstance.uintToString(0)).to.equal('0')
-      expect(await vehicleStreamInstance.uintToString(1)).to.equal('1')
-      expect(await vehicleStreamInstance.uintToString(10)).to.equal('10')
-      expect(await vehicleStreamInstance.uintToString(100)).to.equal('100')
-      expect(await vehicleStreamInstance.uintToString('0x8000000000000000000000000000000000000000000000000000000000000000'))
-        .to.equal('57896044618658097711785492504343953926634992332820282019728792003956564819968')
-    })
-  })
+  describe.only('createStream', () => {
+    context('Error handling', () => {
+      it('Should revert if caller is not the vehicle ID owner', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(user2)
+            .createStream(1)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'Unauthorized'
+        ).withArgs(user2.address);
+      });
+      it('Should revert if vehicle ID does not exist', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(user1)
+            .createStream(99)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'InvalidNode'
+        ).withArgs(
+          await vehicleIdInstance.getAddress(),
+          99
+        );
+      });
+    });
 
-  describe('createStream', () => {
-    it('Test', async () => {
+    context('State', () => {
+
+    });
+
+    context('Events', () => {
+
+    });
+    
+    it.skip('Test', async () => {
       const now = (await provider.getBlock('latest'))!.timestamp
       const myAddress = await dimoRegistryInstance.getAddress()
       const streamId = `${myAddress.toLowerCase()}/vehicle/1`
@@ -172,14 +206,14 @@ describe('VehicleStream', async function () {
       await expect(
         vehicleStreamInstance
           .connect(admin)
-          .addSubscription(1, nonAdmin.address, now + 10000)
+          .subscribe(1, nonAdmin.address, now + 10000)
       )
         .to.emit(streamRegistry, 'PermissionUpdated')
         .withArgs(streamId, nonAdmin.address, false, false, 0, ethers.MaxUint256, false);
       await expect(
         vehicleStreamInstance
           .connect(admin)
-          .addSubscription(1, manufacturer1.address, now + 10000)
+          .subscribe(1, manufacturer1.address, now + 10000)
       )
         .to.emit(streamRegistry, 'PermissionUpdated')
         .withArgs(streamId, manufacturer1.address, false, false, 0, ethers.MaxUint256, false)

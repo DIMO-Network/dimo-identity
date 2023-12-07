@@ -26,6 +26,7 @@ import {
   revertToSnapshot,
   signMessage,
   AftermarketDeviceOwnerPair,
+  AftermarketDeviceIdAddressPair,
   C,
 } from '../../utils';
 
@@ -61,6 +62,8 @@ describe('AftermarketDevice', function () {
   let user2: HardhatEthersSigner;
   let adAddress1: HardhatEthersSigner;
   let adAddress2: HardhatEthersSigner;
+  let newAdAddress1: HardhatEthersSigner;
+  let newAdAddress2: HardhatEthersSigner;
   let notMintedAd: HardhatEthersSigner;
 
   const mockAftermarketDeviceInfosList = JSON.parse(
@@ -84,6 +87,8 @@ describe('AftermarketDevice', function () {
       user2,
       adAddress1,
       adAddress2,
+      newAdAddress1,
+      newAdAddress2,
       notMintedAd,
     ] = await ethers.getSigners();
 
@@ -251,6 +256,7 @@ describe('AftermarketDevice', function () {
       );
     await manufacturerIdInstance.createPrivilege(true, 'Minter');
     await manufacturerIdInstance.createPrivilege(true, 'Claimer');
+    await manufacturerIdInstance.createPrivilege(true, 'Factory Reset');
     await manufacturerIdInstance
       .connect(manufacturer1)
       .setPrivilege(
@@ -264,6 +270,14 @@ describe('AftermarketDevice', function () {
       .setPrivilege(
         1,
         C.MANUFACTURER_CLAIMER_PRIVILEGE,
+        manufacturerPrivileged1.address,
+        expiresAtDefault,
+      );
+    await manufacturerIdInstance
+      .connect(manufacturer1)
+      .setPrivilege(
+        1,
+        C.MANUFACTURER_FACTORY_RESET_PRIVILEGE,
         manufacturerPrivileged1.address,
         expiresAtDefault,
       );
@@ -3458,6 +3472,230 @@ describe('AftermarketDevice', function () {
             C.mockAdAttributeInfoPairs[1].attribute,
             C.mockAdAttributeInfoPairs[1].info,
           );
+      });
+    });
+  });
+
+  describe('resetAftermarketDeviceAddressByManufacturerBatch', () => {
+    let mockAftermarketDeviceIdAddressPairs: AftermarketDeviceIdAddressPair[]
+    before(async () => {
+      mockAftermarketDeviceIdAddressPairs =
+        [
+          {
+            aftermarketDeviceNodeId: '1',
+            deviceAddress: newAdAddress1.address
+          },
+          {
+            aftermarketDeviceNodeId: '2',
+            deviceAddress: newAdAddress2.address
+          }
+        ];
+    });
+
+    beforeEach(async () => {
+      await adIdInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(await aftermarketDeviceInstance.getAddress(), true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList,
+        );
+    });
+
+    context('Manufacturer as minter', () => {
+      context('Error handling', () => {
+        it('Should revert if node is not an Aftermarket Device', async () => {
+          const invalidMockAftermarketDeviceIdAddressPairs = JSON.parse(
+            JSON.stringify(mockAftermarketDeviceIdAddressPairs)
+          );
+          invalidMockAftermarketDeviceIdAddressPairs[1].aftermarketDeviceNodeId = '99';
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .resetAftermarketDeviceAddressByManufacturerBatch(invalidMockAftermarketDeviceIdAddressPairs)
+          )
+            .to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'InvalidNode'
+            )
+            .withArgs(await adIdInstance.getAddress(), 99);
+        });
+        it('Should revert if caller is not the manufacturer node owner or does not have the factory reset privilege', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(nonManufacturer)
+              .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
+          )
+            .to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'Unauthorized'
+            )
+            .withArgs(nonManufacturer.address);
+        });
+        it('Should revert if aftermarket device is paired', async () => {
+          const claimOwnerSig1 = await signMessage({
+            _signer: user1,
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user1.address,
+            },
+          });
+          const claimAdSig1 = await signMessage({
+            _signer: adAddress1,
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user1.address,
+            },
+          });
+          const pairSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'PairAftermarketDeviceSign',
+            _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1',
+            },
+          });
+
+          await vehicleInstance
+            .connect(admin)
+            .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          await aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(
+              1,
+              user1.address,
+              claimOwnerSig1,
+              claimAdSig1,
+            );
+          await aftermarketDeviceInstance
+            .connect(admin)
+          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+            1,
+            1,
+            pairSignature,
+          );
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
+          )
+            .to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'AdPaired'
+            )
+            .withArgs(1);
+        });
+      });
+
+      context('State', () => {
+        it('Should correctly set device address', async () => {
+          const adAddress1Before = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(1);
+          const adAddress2Before = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(2);
+          expect(adAddress1Before).to.be.equal(adAddress1.address);
+          expect(adAddress2Before).to.be.equal(adAddress2.address);
+
+          await aftermarketDeviceInstance
+            .connect(manufacturer1)
+            .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs);
+
+          const adAddress1After = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(1);
+          const adAddress2After = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(2);
+          expect(adAddress1After).to.be.equal(newAdAddress1.address);
+          expect(adAddress2After).to.be.equal(newAdAddress2.address);
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit AftermarketDeviceAddressReset events with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAddressReset')
+            .withArgs(
+              1,
+              1,
+              newAdAddress1.address
+            )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAddressReset')
+            .withArgs(
+              1,
+              2,
+              newAdAddress2.address
+            );
+        });
+      });
+    });
+
+    context('Privileged address as caller', () => {
+      context('Error handling', () => {
+        it('Should revert if node is not an Aftermarket Device', async () => {
+          const invalidMockAftermarketDeviceIdAddressPairs = JSON.parse(
+            JSON.stringify(mockAftermarketDeviceIdAddressPairs)
+          );
+          invalidMockAftermarketDeviceIdAddressPairs[1].aftermarketDeviceNodeId = '99';
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .resetAftermarketDeviceAddressByManufacturerBatch(invalidMockAftermarketDeviceIdAddressPairs)
+          )
+            .to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'InvalidNode'
+            )
+            .withArgs(await adIdInstance.getAddress(), 99);
+        });
+      });
+
+      context('State', () => {
+        it('Should correctly set device address', async () => {
+          const adAddress1Before = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(1);
+          const adAddress2Before = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(2);
+          expect(adAddress1Before).to.be.equal(adAddress1.address);
+          expect(adAddress2Before).to.be.equal(adAddress2.address);
+
+          await aftermarketDeviceInstance
+            .connect(manufacturerPrivileged1)
+            .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs);
+
+          const adAddress1After = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(1);
+          const adAddress2After = await aftermarketDeviceInstance.getAftermarketDeviceAddressById(2);
+          expect(adAddress1After).to.be.equal(newAdAddress1.address);
+          expect(adAddress2After).to.be.equal(newAdAddress2.address);
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit AftermarketDeviceAddressReset events with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .resetAftermarketDeviceAddressByManufacturerBatch(mockAftermarketDeviceIdAddressPairs)
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAddressReset')
+            .withArgs(
+              1,
+              1,
+              newAdAddress1.address
+            )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceAddressReset')
+            .withArgs(
+              1,
+              2,
+              newAdAddress2.address
+            );
+        });
       });
     });
   });

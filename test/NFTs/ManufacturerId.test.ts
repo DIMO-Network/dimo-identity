@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -7,7 +7,7 @@ import {
   Nodes,
   Manufacturer,
   ManufacturerId
-} from '../../typechain';
+} from '../../typechain-types';
 import {
   setup,
   grantAdminRoles,
@@ -17,7 +17,6 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('ManufacturerId', async function () {
   let snapshot: string;
@@ -27,9 +26,19 @@ describe('ManufacturerId', async function () {
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
 
-  const [admin, nonAdmin, manufacturer1, manufacturer2] = provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let nonAdmin: HardhatEthersSigner;
+  let manufacturer1: HardhatEthersSigner;
+  let manufacturer2: HardhatEthersSigner;
 
   before(async () => {
+    [
+      admin,
+      nonAdmin,
+      manufacturer1,
+      manufacturer2
+    ] = await ethers.getSigners();
+
     const deployments = await setup(admin, {
       modules: ['DimoAccessControl', 'Nodes', 'Manufacturer'],
       nfts: ['ManufacturerId'],
@@ -46,12 +55,12 @@ describe('ManufacturerId', async function () {
 
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Set NFT Proxy
     await manufacturerInstance
       .connect(admin)
-      .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
+      .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress());
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -63,7 +72,7 @@ describe('ManufacturerId', async function () {
 
     // Setting DIMORegistry address
     await manufacturerIdInstance.setDimoRegistryAddress(
-      dimoRegistryInstance.address
+      await dimoRegistryInstance.getAddress()
     );
 
     await manufacturerInstance
@@ -96,7 +105,7 @@ describe('ManufacturerId', async function () {
         manufacturerIdInstance
           .connect(admin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('ZeroAddress');
+      ).to.be.revertedWithCustomError(manufacturerIdInstance, 'ZeroAddress');
     });
   });
 
@@ -168,7 +177,7 @@ describe('ManufacturerId', async function () {
 
       it('Should keep parent node as 0', async () => {
         expect(
-          await nodesInstance.getParentNode(manufacturerInstance.address, 1)
+          await nodesInstance.getParentNode(await manufacturerInstance.getAddress(), 1)
         ).to.equal(0);
 
         await manufacturerIdInstance
@@ -180,7 +189,7 @@ describe('ManufacturerId', async function () {
           );
 
         expect(
-          await nodesInstance.getParentNode(manufacturerInstance.address, 1)
+          await nodesInstance.getParentNode(await manufacturerInstance.getAddress(), 1)
         ).to.equal(0);
       });
       it('Should set new owner', async () => {
@@ -223,7 +232,7 @@ describe('ManufacturerId', async function () {
         for (const attrInfoPair of C.mockManufacturerAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              manufacturerIdInstance.address,
+              await manufacturerIdInstance.getAddress(),
               1,
               attrInfoPair.attribute
             )
@@ -241,7 +250,7 @@ describe('ManufacturerId', async function () {
         for (const attrInfoPair of C.mockManufacturerAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              manufacturerIdInstance.address,
+              await manufacturerIdInstance.getAddress(),
               1,
               attrInfoPair.attribute
             )

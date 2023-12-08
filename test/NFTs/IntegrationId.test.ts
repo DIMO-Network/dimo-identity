@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -7,7 +7,7 @@ import {
   Nodes,
   Integration,
   IntegrationId
-} from '../../typechain';
+} from '../../typechain-types';
 import {
   setup,
   grantAdminRoles,
@@ -17,7 +17,6 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('IntegrationId', async function () {
   let snapshot: string;
@@ -27,10 +26,21 @@ describe('IntegrationId', async function () {
   let integrationInstance: Integration;
   let integrationIdInstance: IntegrationId;
 
-  const [admin, nonAdmin, integrationOwner1, integrationOwner2, nonController] =
-    provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let nonAdmin: HardhatEthersSigner;
+  let integrationOwner1: HardhatEthersSigner;
+  let integrationOwner2: HardhatEthersSigner;
+  let nonController: HardhatEthersSigner;
 
   before(async () => {
+    [
+      admin,
+      nonAdmin,
+      integrationOwner1,
+      integrationOwner2,
+      nonController
+    ] = await ethers.getSigners();
+
     const deployments = await setup(admin, {
       modules: ['DimoAccessControl', 'Nodes', 'Integration'],
       nfts: ['IntegrationId'],
@@ -47,12 +57,12 @@ describe('IntegrationId', async function () {
 
     await integrationIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Set NFT Proxy
     await integrationInstance
       .connect(admin)
-      .setIntegrationIdProxyAddress(integrationIdInstance.address);
+      .setIntegrationIdProxyAddress(await integrationIdInstance.getAddress());
 
     // Whitelist Integration attributes
     await integrationInstance
@@ -64,7 +74,7 @@ describe('IntegrationId', async function () {
 
     // Setting DIMORegistry address
     await integrationIdInstance.setDimoRegistryAddress(
-      dimoRegistryInstance.address
+      await dimoRegistryInstance.getAddress()
     );
 
     await integrationInstance
@@ -91,8 +101,7 @@ describe('IntegrationId', async function () {
           .connect(nonAdmin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
@@ -101,7 +110,7 @@ describe('IntegrationId', async function () {
         integrationIdInstance
           .connect(admin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS)
-      ).to.be.revertedWith('ZeroAddress');
+      ).to.be.revertedWithCustomError(integrationIdInstance, 'ZeroAddress');
     });
   });
 
@@ -112,8 +121,7 @@ describe('IntegrationId', async function () {
           .connect(nonAdmin)
           .setTrustedForwarder(C.ZERO_ADDRESS, true)
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
@@ -162,12 +170,13 @@ describe('IntegrationId', async function () {
         await expect(
           integrationIdInstance
             .connect(integrationOwner1)
-            ['safeTransferFrom(address,address,uint256)'](
-              integrationOwner1.address,
-              nonController.address,
-              1
-            )
-        ).to.be.revertedWith(`NotAllowed("${nonController.address}")`);
+          ['safeTransferFrom(address,address,uint256)'](
+            integrationOwner1.address,
+            nonController.address,
+            1
+          )
+        ).to.be.revertedWithCustomError(integrationInstance, 'NotAllowed')
+          .withArgs(nonController.address);
       });
       it('Should revert if the new owner has already minted', async () => {
         await integrationInstance
@@ -181,12 +190,13 @@ describe('IntegrationId', async function () {
         await expect(
           integrationIdInstance
             .connect(integrationOwner1)
-            ['safeTransferFrom(address,address,uint256)'](
-              admin.address,
-              integrationOwner2.address,
-              1
-            )
-        ).to.be.revertedWith(`NotAllowed("${integrationOwner2.address}")`);
+          ['safeTransferFrom(address,address,uint256)'](
+            admin.address,
+            integrationOwner2.address,
+            1
+          )
+        ).to.be.revertedWithCustomError(integrationInstance, 'NotAllowed')
+          .withArgs(integrationOwner2.address);
       });
       it('Should revert if caller does not have transferer role', async () => {
         await integrationInstance
@@ -196,14 +206,13 @@ describe('IntegrationId', async function () {
         await expect(
           integrationIdInstance
             .connect(integrationOwner1)
-            ['safeTransferFrom(address,address,uint256)'](
-              integrationOwner1.address,
-              integrationOwner2.address,
-              1
-            )
+          ['safeTransferFrom(address,address,uint256)'](
+            integrationOwner1.address,
+            integrationOwner2.address,
+            1
+          )
         ).to.be.revertedWith(
-          `AccessControl: account ${integrationOwner1.address.toLowerCase()} is missing role ${
-            C.NFT_TRANSFERER_ROLE
+          `AccessControl: account ${integrationOwner1.address.toLowerCase()} is missing role ${C.NFT_TRANSFERER_ROLE
           }`
         );
       });
@@ -224,19 +233,19 @@ describe('IntegrationId', async function () {
 
       it('Should keep parent node as 0', async () => {
         expect(
-          await nodesInstance.getParentNode(integrationInstance.address, 1)
+          await nodesInstance.getParentNode(await integrationInstance.getAddress(), 1)
         ).to.equal(0);
 
         await integrationIdInstance
           .connect(integrationOwner1)
-          ['safeTransferFrom(address,address,uint256)'](
-            integrationOwner1.address,
-            integrationOwner2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          integrationOwner1.address,
+          integrationOwner2.address,
+          1
+        );
 
         expect(
-          await nodesInstance.getParentNode(integrationInstance.address, 1)
+          await nodesInstance.getParentNode(await integrationInstance.getAddress(), 1)
         ).to.equal(0);
       });
       it('Should set new owner', async () => {
@@ -246,11 +255,11 @@ describe('IntegrationId', async function () {
 
         await integrationIdInstance
           .connect(integrationOwner1)
-          ['safeTransferFrom(address,address,uint256)'](
-            integrationOwner1.address,
-            integrationOwner2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          integrationOwner1.address,
+          integrationOwner2.address,
+          1
+        );
 
         expect(await integrationIdInstance.ownerOf(1)).to.equal(
           integrationOwner2.address
@@ -265,11 +274,11 @@ describe('IntegrationId', async function () {
 
         await integrationIdInstance
           .connect(integrationOwner1)
-          ['safeTransferFrom(address,address,uint256)'](
-            integrationOwner1.address,
-            integrationOwner2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          integrationOwner1.address,
+          integrationOwner2.address,
+          1
+        );
 
         expect(
           await integrationInstance.getIntegrationIdByName(
@@ -281,7 +290,7 @@ describe('IntegrationId', async function () {
         for (const attrInfoPair of C.mockIntegrationAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              integrationIdInstance.address,
+              await integrationIdInstance.getAddress(),
               1,
               attrInfoPair.attribute
             )
@@ -290,16 +299,16 @@ describe('IntegrationId', async function () {
 
         await integrationIdInstance
           .connect(integrationOwner1)
-          ['safeTransferFrom(address,address,uint256)'](
-            integrationOwner1.address,
-            integrationOwner2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          integrationOwner1.address,
+          integrationOwner2.address,
+          1
+        );
 
         for (const attrInfoPair of C.mockIntegrationAttributeInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              integrationIdInstance.address,
+              await integrationIdInstance.getAddress(),
               1,
               attrInfoPair.attribute
             )
@@ -323,11 +332,11 @@ describe('IntegrationId', async function () {
 
         await integrationIdInstance
           .connect(integrationOwner1)
-          ['safeTransferFrom(address,address,uint256)'](
-            integrationOwner1.address,
-            integrationOwner2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          integrationOwner1.address,
+          integrationOwner2.address,
+          1
+        );
 
         const isIntegrationMintedAfter1 =
           await integrationInstance.isIntegrationMinted(

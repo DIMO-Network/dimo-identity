@@ -44,10 +44,9 @@ contract Manufacturer is AccessControlInternal {
      * @dev Only an admin can set the address
      * @param addr The address of the proxy
      */
-    function setManufacturerIdProxyAddress(address addr)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setManufacturerIdProxyAddress(
+        address addr
+    ) external onlyRole(ADMIN_ROLE) {
         require(addr != address(0), "Non zero address");
         ManufacturerStorage.getStorage().idProxyAddress = addr;
 
@@ -59,10 +58,9 @@ contract Manufacturer is AccessControlInternal {
      * @dev Only an admin can add a new attribute
      * @param attribute The attribute to be added
      */
-    function addManufacturerAttribute(string calldata attribute)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function addManufacturerAttribute(
+        string calldata attribute
+    ) external onlyRole(ADMIN_ROLE) {
         require(
             AttributeSet.add(
                 ManufacturerStorage.getStorage().whitelistedAttributes,
@@ -102,10 +100,10 @@ contract Manufacturer is AccessControlInternal {
      * @param owner The address of the new owner
      * @param names List of manufacturer names
      */
-    function mintManufacturerBatch(address owner, string[] calldata names)
-        external
-        onlyRole(MINT_MANUFACTURER_ROLE)
-    {
+    function mintManufacturerBatch(
+        address owner,
+        string[] calldata names
+    ) external onlyRole(MINT_MANUFACTURER_ROLE) {
         require(_hasRole(ADMIN_ROLE, owner), "Owner must be an admin");
 
         ManufacturerStorage.Storage storage s = ManufacturerStorage
@@ -160,7 +158,7 @@ contract Manufacturer is AccessControlInternal {
         s.manufacturerNameToNodeId[name] = newTokenId;
         s.nodeIdToManufacturerName[newTokenId] = name;
 
-        emit ManufacturerNodeMinted(name, newTokenId, msg.sender);
+        emit ManufacturerNodeMinted(name, newTokenId, owner);
 
         if (attrInfoPairList.length > 0)
             _setInfos(newTokenId, attrInfoPairList);
@@ -193,10 +191,10 @@ contract Manufacturer is AccessControlInternal {
      * @param from the address to be verified and set
      * @param to the address to be verified
      */
-    function updateManufacturerMinted(address from, address to)
-        external
-        onlyNftProxy
-    {
+    function updateManufacturerMinted(
+        address from,
+        address to
+    ) external onlyNftProxy {
         ManufacturerStorage.Storage storage s = ManufacturerStorage
             .getStorage();
         require(
@@ -213,11 +211,9 @@ contract Manufacturer is AccessControlInternal {
      * @notice Verify if an address is a controller
      * @param addr the address to be verified
      */
-    function isController(address addr)
-        external
-        view
-        returns (bool _isController)
-    {
+    function isController(
+        address addr
+    ) external view returns (bool _isController) {
         _isController = ManufacturerStorage
             .getStorage()
             .controllers[addr]
@@ -228,11 +224,9 @@ contract Manufacturer is AccessControlInternal {
      * @notice Verify if an address has minted a manufacturer
      * @param addr the address to be verified
      */
-    function isManufacturerMinted(address addr)
-        external
-        view
-        returns (bool _isManufacturerMinted)
-    {
+    function isManufacturerMinted(
+        address addr
+    ) external view returns (bool _isManufacturerMinted) {
         _isManufacturerMinted = ManufacturerStorage
             .getStorage()
             .controllers[addr]
@@ -244,11 +238,9 @@ contract Manufacturer is AccessControlInternal {
      * @dev The address must be a controller and not yet minted a node
      * @param addr the address to be verified
      */
-    function isAllowedToOwnManufacturerNode(address addr)
-        external
-        view
-        returns (bool _isAllowed)
-    {
+    function isAllowedToOwnManufacturerNode(
+        address addr
+    ) external view returns (bool _isAllowed) {
         ManufacturerStorage.Storage storage ms = ManufacturerStorage
             .getStorage();
         _isAllowed =
@@ -261,11 +253,9 @@ contract Manufacturer is AccessControlInternal {
      * @dev If the manufacturer is not minted it will return 0
      * @param name Name associated with the manufacturer
      */
-    function getManufacturerIdByName(string calldata name)
-        external
-        view
-        returns (uint256 nodeId)
-    {
+    function getManufacturerIdByName(
+        string calldata name
+    ) external view returns (uint256 nodeId) {
         nodeId = ManufacturerStorage.getStorage().manufacturerNameToNodeId[
             name
         ];
@@ -276,11 +266,9 @@ contract Manufacturer is AccessControlInternal {
      * @dev If the manufacturer is not minted it will return an empty string
      * @param tokenId Token id to get the associated name
      */
-    function getManufacturerNameById(uint256 tokenId)
-        external
-        view
-        returns (string memory name)
-    {
+    function getManufacturerNameById(
+        uint256 tokenId
+    ) external view returns (string memory name) {
         name = ManufacturerStorage.getStorage().nodeIdToManufacturerName[
             tokenId
         ];

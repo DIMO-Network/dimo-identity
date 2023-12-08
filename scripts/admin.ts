@@ -1,25 +1,29 @@
-import { ethers, network } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { EventLog, Log } from 'ethers';
+import { ethers, network, HardhatEthersSigner } from 'hardhat';
 
-import { DevAdmin, AftermarketDevice, DimoAccessControl } from '../typechain';
+import {
+  DevAdmin,
+  AftermarketDevice,
+  DimoAccessControl,
+} from '../typechain-types';
 import {
   AddressesByNetwork,
   AttributeInfoPair,
-  AftermarketDeviceOwnerPair
+  AftermarketDeviceOwnerPair,
 } from '../utils';
 import addressesJSON from './data/addresses.json';
 
 const contractAddresses: AddressesByNetwork = addressesJSON;
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function unpair(
-  deployer: SignerWithAddress,
+  deployer: HardhatEthersSigner,
   devices: string[],
-  networkName: string
+  networkName: string,
 ) {
   const devAdminInstance: DevAdmin = await ethers.getContractAt(
     'DevAdmin',
-    contractAddresses[networkName].modules.DIMORegistry.address
+    contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
   console.log(`\n----- Unpairing ${devices} device -----\n`);
@@ -31,49 +35,49 @@ async function unpair(
   console.log(`----- Device ${devices} unpaired -----`);
 }
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function claimByAdmin(
-  deployer: SignerWithAddress,
+  deployer: HardhatEthersSigner,
   aftermarketDeviceOwnerPairs: AftermarketDeviceOwnerPair[],
-  networkName: string
+  networkName: string,
 ) {
   const batchSize = 50;
   const adInstance: AftermarketDevice = await ethers.getContractAt(
     'AftermarketDevice',
-    contractAddresses[networkName].modules.DIMORegistry.address
+    contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
-  console.log(`\n----- Claiming devices -----\n`);
+  console.log('\n----- Claiming devices -----\n');
 
   for (let i = 0; i < aftermarketDeviceOwnerPairs.length; i += batchSize) {
     const batch = aftermarketDeviceOwnerPairs.slice(i, i + batchSize);
 
     const receipt = await (
-      await adInstance.connect(deployer).claimAftermarketDeviceBatch(1, batch, {
-        gasPrice: process.env.GAS_PRICE
-      })
+      await adInstance.connect(deployer).claimAftermarketDeviceBatch(1, batch)
     ).wait();
 
-    const ids = receipt.events
-      ?.filter((e: any) => e.event === 'AftermarketDeviceClaimed')
-      .map((e: any) => e.args.aftermarketDeviceNode);
+    const ids = receipt?.logs
+      ?.filter((log: EventLog | Log) => log instanceof EventLog)
+      .map((eventLog: EventLog | Log) =>
+        (eventLog as EventLog).args[0].toString(),
+      );
 
     console.log(`Claimed ids: ${ids?.join(',')}`);
   }
 
-  console.log(`\n----- Devices claimed -----\n`);
+  console.log('\n----- Devices claimed -----\n');
 }
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function setInfos(
-  deployer: SignerWithAddress,
+  deployer: HardhatEthersSigner,
   tokenId: string,
   attributeInfoPairs: AttributeInfoPair[],
-  networkName: string
+  networkName: string,
 ) {
   const adInstance: AftermarketDevice = await ethers.getContractAt(
     'AftermarketDevice',
-    contractAddresses[networkName].modules.DIMORegistry.address
+    contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
   console.log(`\n----- Setting infos to device ${tokenId} -----\n`);
@@ -82,23 +86,23 @@ async function setInfos(
     await adInstance
       .connect(deployer)
       .setAftermarketDeviceInfo(tokenId, attributeInfoPairs, {
-        gasPrice: process.env.GAS_PRICE
+        gasPrice: process.env.GAS_PRICE,
       })
   ).wait();
 
-  console.log(`\n----- Infos set -----\n`);
+  console.log('\n----- Infos set -----\n');
 }
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function revokeRole(
-  deployer: SignerWithAddress,
+  deployer: HardhatEthersSigner,
   role: string,
   address: string,
-  networkName: string
+  networkName: string,
 ) {
   const accessControlInstance: DimoAccessControl = await ethers.getContractAt(
     'DimoAccessControl',
-    contractAddresses[networkName].modules.DIMORegistry.address
+    contractAddresses[networkName].modules.DIMORegistry.address,
   );
 
   console.log(`\n----- Revoking ${role} role to ${address} -----`);
@@ -117,6 +121,8 @@ async function main() {
   await unpair(deployer, [], networkName);
   await claimByAdmin(deployer, [], networkName);
   await setInfos(deployer, '', [], networkName);
+
+  process.exit();
 }
 
 main().catch((error) => {

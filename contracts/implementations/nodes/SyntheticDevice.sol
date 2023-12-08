@@ -53,10 +53,9 @@ contract SyntheticDevice is
      * @dev Only an admin can set the address
      * @param addr The address of the proxy
      */
-    function setSyntheticDeviceIdProxyAddress(address addr)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setSyntheticDeviceIdProxyAddress(
+        address addr
+    ) external onlyRole(ADMIN_ROLE) {
         if (addr == address(0)) revert ZeroAddress();
         SyntheticDeviceStorage.getStorage().idProxyAddress = addr;
 
@@ -68,10 +67,9 @@ contract SyntheticDevice is
      * @dev Only an admin can add a new attribute
      * @param attribute The attribute to be added
      */
-    function addSyntheticDeviceAttribute(string calldata attribute)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function addSyntheticDeviceAttribute(
+        string calldata attribute
+    ) external onlyRole(ADMIN_ROLE) {
         if (
             !AttributeSet.add(
                 SyntheticDeviceStorage.getStorage().whitelistedAttributes,
@@ -167,10 +165,9 @@ contract SyntheticDevice is
      *  syntheticDeviceAddr -> Address associated with the synthetic device
      *  attrInfoPairs -> List of attribute-info pairs to be added
      */
-    function mintSyntheticDeviceSign(MintSyntheticDeviceInput calldata data)
-        external
-        onlyRole(MINT_SD_ROLE)
-    {
+    function mintSyntheticDeviceSign(
+        MintSyntheticDeviceInput calldata data
+    ) external onlyRole(MINT_SD_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
@@ -325,11 +322,9 @@ contract SyntheticDevice is
      * @dev If the device is not minted it will return 0
      * @param addr Address associated with the synthetic device
      */
-    function getSyntheticDeviceIdByAddress(address addr)
-        external
-        view
-        returns (uint256 nodeId)
-    {
+    function getSyntheticDeviceIdByAddress(
+        address addr
+    ) external view returns (uint256 nodeId) {
         nodeId = SyntheticDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
         ];
@@ -340,11 +335,9 @@ contract SyntheticDevice is
      * @dev If the device is not minted it will return 0x00 address
      * @param nodeId Node ID associated with the synthetic device
      */
-    function getSyntheticDeviceAddressById(uint256 nodeId)
-        external
-        view
-        returns (address addr)
-    {
+    function getSyntheticDeviceAddressById(
+        uint256 nodeId
+    ) external view returns (address addr) {
         addr = SyntheticDeviceStorage.getStorage().nodeIdToDeviceAddress[
             nodeId
         ];

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { ethers, network, upgrades } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { Log, EventLog, ContractTransactionReceipt } from 'ethers';
+import { ethers, network, upgrades, HardhatEthersSigner } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -17,8 +17,9 @@ import {
   AdLicenseValidator,
   SyntheticDevice,
   SyntheticDeviceId,
-  DimoForwarder
-} from '../typechain';
+  DimoForwarder,
+  NftBaseUpgradeable,
+} from '../typechain-types';
 import { getSelectors, AddressesByNetwork, NftArgs } from '../utils';
 import * as C from './data/deployArgs';
 import { makes } from './data/Makes';
@@ -26,7 +27,7 @@ import { integrations } from './data/Integrations';
 
 function getAddresses(): AddressesByNetwork {
   return JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, 'data', 'addresses.json'), 'utf8')
+    fs.readFileSync(path.resolve(__dirname, 'data', 'addresses.json'), 'utf8'),
   );
 }
 
@@ -38,7 +39,7 @@ function writeAddresses(addresses: AddressesByNetwork, networkName: string) {
 
   fs.writeFileSync(
     path.resolve(__dirname, 'data', 'addresses.json'),
-    JSON.stringify(currentAddresses, null, 4)
+    JSON.stringify(currentAddresses, null, 4),
   );
 
   console.log('----- Addresses written to file -----\n');
@@ -46,7 +47,7 @@ function writeAddresses(addresses: AddressesByNetwork, networkName: string) {
 
 function buildNftArgs(
   instances: AddressesByNetwork,
-  networkName: string
+  networkName: string,
 ): NftArgs[] {
   const currentManufacturerIdArgs: NftArgs = C.manufacturerIdArgs;
   const currentIntegrationIdArgs: NftArgs = C.integrationIdArgs;
@@ -56,28 +57,28 @@ function buildNftArgs(
 
   currentManufacturerIdArgs.args = [
     ...C.manufacturerIdArgs.args,
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   ];
   currentIntegrationIdArgs.args = [
     ...C.integrationIdArgs.args,
     instances[networkName].modules.DIMORegistry.address,
-    []
+    [],
   ];
   currentVehicleIdArgs.args = [
     ...C.vehicleIdArgs.args,
     instances[networkName].modules.DIMORegistry.address,
-    ethers.constants.AddressZero,
-    [instances[networkName].misc.DimoForwarder.proxy]
+    ethers.ZeroAddress,
+    [instances[networkName].misc.DimoForwarder.proxy],
   ];
   currentAdIdArgs.args = [
     ...C.adIdArgs.args,
     instances[networkName].modules.DIMORegistry.address,
-    [instances[networkName].misc.DimoForwarder.proxy]
+    [instances[networkName].misc.DimoForwarder.proxy],
   ];
   currentSdIdArgs.args = [
     ...C.sdIdArgs.args,
     instances[networkName].modules.DIMORegistry.address,
-    [instances[networkName].misc.DimoForwarder.proxy]
+    [instances[networkName].misc.DimoForwarder.proxy],
   ];
 
   return [
@@ -85,13 +86,13 @@ function buildNftArgs(
     currentIntegrationIdArgs,
     currentVehicleIdArgs,
     currentAdIdArgs,
-    currentSdIdArgs
+    currentSdIdArgs,
   ];
 }
 
 async function deployModules(
-  deployer: SignerWithAddress,
-  networkName: string
+  deployer: HardhatEthersSigner,
+  networkName: string,
 ): Promise<AddressesByNetwork> {
   console.log('\n----- Deploying contracts -----\n');
 
@@ -109,40 +110,41 @@ async function deployModules(
     { name: 'Mapper', args: [] },
     { name: 'MultipleMinter', args: [] },
     { name: 'DevAdmin', args: [] },
-    { name: 'Multicall', args: [] }
+    { name: 'Multicall', args: [] },
   ];
 
   const instances = getAddresses();
 
   // Deploy DIMORegistry Implementation
   const DIMORegistry = await ethers.getContractFactory(C.dimoRegistryName);
-  const dimoRegistryImplementation = await DIMORegistry.connect(
-    deployer
-  ).deploy();
-  await dimoRegistryImplementation.deployed();
+  const dimoRegistryImplementation =
+    await DIMORegistry.connect(deployer).deploy();
 
   console.log(
-    `Contract ${C.dimoRegistryName} deployed to ${dimoRegistryImplementation.address}`
+    `Contract ${
+      C.dimoRegistryName
+    } deployed to ${await dimoRegistryImplementation.getAddress()}`,
   );
 
   instances[networkName].modules[C.dimoRegistryName].address =
-    dimoRegistryImplementation.address;
+    await dimoRegistryImplementation.getAddress();
 
   for (const contractNameArg of contractNameArgs) {
     const ContractFactory = await ethers.getContractFactory(
-      contractNameArg.name
+      contractNameArg.name,
     );
     const contractImplementation = await ContractFactory.connect(
-      deployer
+      deployer,
     ).deploy(...contractNameArg.args);
-    await contractImplementation.deployed();
 
     console.log(
-      `Contract ${contractNameArg.name} deployed to ${contractImplementation.address}`
+      `Contract ${
+        contractNameArg.name
+      } deployed to ${await contractImplementation.getAddress()}`,
     );
 
     instances[networkName].modules[contractNameArg.name].address =
-      contractImplementation.address;
+      await contractImplementation.getAddress();
   }
 
   console.log('\n----- Contracts deployed -----');
@@ -151,8 +153,8 @@ async function deployModules(
 }
 
 async function deployNfts(
-  deployer: SignerWithAddress,
-  networkName: string
+  deployer: HardhatEthersSigner,
+  networkName: string,
 ): Promise<AddressesByNetwork> {
   console.log('\n----- Deploying NFT contracts -----\n');
 
@@ -161,11 +163,11 @@ async function deployNfts(
   for (const contractNameArg of buildNftArgs(instances, networkName)) {
     const ContractFactory = await ethers.getContractFactory(
       contractNameArg.name,
-      deployer
+      deployer,
     );
 
     await upgrades.validateImplementation(ContractFactory, {
-      kind: 'uups'
+      kind: 'uups',
     });
 
     const contractProxy = await upgrades.deployProxy(
@@ -173,20 +175,22 @@ async function deployNfts(
       contractNameArg.args,
       {
         initializer: 'initialize',
-        kind: 'uups'
-      }
+        kind: 'uups',
+      },
     );
 
-    await contractProxy.deployed();
-
     console.log(
-      `NFT contract ${contractNameArg.name} deployed to ${contractProxy.address}`
+      `NFT contract ${
+        contractNameArg.name
+      } deployed to ${await contractProxy.getAddress()}`,
     );
 
     instances[networkName].nfts[contractNameArg.name].proxy =
-      contractProxy.address;
+      await contractProxy.getAddress();
     instances[networkName].nfts[contractNameArg.name].implementation =
-      await upgrades.erc1967.getImplementationAddress(contractProxy.address);
+      await upgrades.erc1967.getImplementationAddress(
+        await contractProxy.getAddress(),
+      );
   }
 
   console.log('\n----- NFT contracts deployed -----');
@@ -195,8 +199,8 @@ async function deployNfts(
 }
 
 async function deployDimoForwarder(
-  deployer: SignerWithAddress,
-  networkName: string
+  deployer: HardhatEthersSigner,
+  networkName: string,
 ): Promise<AddressesByNetwork> {
   console.log('\n----- Deploying Dimo Forwarder -----\n');
 
@@ -204,46 +208,47 @@ async function deployDimoForwarder(
 
   const DimoForwarderFactory = await ethers.getContractFactory(
     'DimoForwarder',
-    deployer
+    deployer,
   );
 
   await upgrades.validateImplementation(DimoForwarderFactory, {
-    kind: 'uups'
+    kind: 'uups',
   });
 
   const contractProxy = await upgrades.deployProxy(
     DimoForwarderFactory,
     [
       instances[networkName].modules.DIMORegistry.address,
-      ethers.constants.AddressZero,
-      ethers.constants.AddressZero
+      ethers.ZeroAddress,
+      ethers.ZeroAddress,
     ],
     {
       initializer: 'initialize',
-      kind: 'uups'
-    }
+      kind: 'uups',
+    },
   );
 
-  await contractProxy.deployed();
-
-  instances[networkName].misc.DimoForwarder.proxy = contractProxy.address;
+  instances[networkName].misc.DimoForwarder.proxy =
+    await contractProxy.getAddress();
   instances[networkName].misc.DimoForwarder.implementation =
-    await upgrades.erc1967.getImplementationAddress(contractProxy.address);
+    await upgrades.erc1967.getImplementationAddress(
+      await contractProxy.getAddress(),
+    );
 
-  console.log(`DimoForwarder deployed to ${contractProxy.address}`);
+  console.log(`DimoForwarder deployed to ${await contractProxy.getAddress()}`);
 
   return instances;
 }
 
 async function setupVehicleId(
-  deployer: SignerWithAddress,
-  networkName: string
+  deployer: HardhatEthersSigner,
+  networkName: string,
 ) {
   const instances = getAddresses();
 
   const vehicleIdInstance: VehicleId = await ethers.getContractAt(
     'VehicleId',
-    instances[networkName].nfts.VehicleId.proxy
+    instances[networkName].nfts.VehicleId.proxy,
   );
 
   console.log('\n----- Setting up Vehicle ID -----\n');
@@ -251,23 +256,23 @@ async function setupVehicleId(
   await vehicleIdInstance
     .connect(deployer)
     .setSyntheticDeviceIdAddress(
-      instances[networkName].nfts.SyntheticDeviceId.proxy
+      instances[networkName].nfts.SyntheticDeviceId.proxy,
     );
   console.log(
-    `Aftermarket Device ID ${instances[networkName].nfts.AftermarketDeviceId.proxy} set to Vehicle ID`
+    `Aftermarket Device ID ${instances[networkName].nfts.AftermarketDeviceId.proxy} set to Vehicle ID`,
   );
   console.log('\n----- Vehicle ID setup -----\n');
 }
 
 async function setupDimoForwarder(
-  deployer: SignerWithAddress,
-  networkName: string
+  deployer: HardhatEthersSigner,
+  networkName: string,
 ) {
   const instances = getAddresses();
 
   const dimoForwarderInstance: DimoForwarder = await ethers.getContractAt(
     'DimoForwarder',
-    instances[networkName].misc.DimoForwarder.proxy
+    instances[networkName].misc.DimoForwarder.proxy,
   );
 
   console.log('\n----- Setting up Dimo Forwader -----\n');
@@ -276,39 +281,39 @@ async function setupDimoForwarder(
     .connect(deployer)
     .setVehicleIdProxyAddress(instances[networkName].nfts.VehicleId.proxy);
   console.log(
-    `Vehicle ID ${instances[networkName].nfts.VehicleId.proxy} set to Dimo Forwarder`
+    `Vehicle ID ${instances[networkName].nfts.VehicleId.proxy} set to Dimo Forwarder`,
   );
 
   await dimoForwarderInstance
     .connect(deployer)
     .setAftermarketDeviceIdProxyAddress(
-      instances[networkName].nfts.AftermarketDeviceId.proxy
+      instances[networkName].nfts.AftermarketDeviceId.proxy,
     );
   console.log(
-    `Aftermarket Device ID ${instances[networkName].nfts.AftermarketDeviceId.proxy} set to Dimo Forwarder`
+    `Aftermarket Device ID ${instances[networkName].nfts.AftermarketDeviceId.proxy} set to Dimo Forwarder`,
   );
 
   console.log('\n----- Dimo Forwarder setup -----');
 }
 
 async function addModules(
-  deployer: SignerWithAddress,
-  networkName: string
+  deployer: HardhatEthersSigner,
+  networkName: string,
 ): Promise<AddressesByNetwork> {
   const instances = getAddresses();
 
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
     'DIMORegistry',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
 
   const contractsNameImpl = Object.keys(instances[networkName].modules).map(
     (contractName) => {
       return {
         name: contractName,
-        implementation: instances[networkName].modules[contractName].address
+        implementation: instances[networkName].modules[contractName].address,
       };
-    }
+    },
   );
 
   console.log('\n----- Adding modules -----\n');
@@ -334,47 +339,50 @@ async function addModules(
   return instances;
 }
 
-async function setupRegistry(deployer: SignerWithAddress, networkName: string) {
+async function setupRegistry(
+  deployer: HardhatEthersSigner,
+  networkName: string,
+) {
   const instances = getAddresses();
 
   const eip712CheckerInstance: Eip712Checker = await ethers.getContractAt(
     'Eip712Checker',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
   const adLicenseValidatorInstance: AdLicenseValidator =
     await ethers.getContractAt(
       'AdLicenseValidator',
-      instances[networkName].modules.DIMORegistry.address
+      instances[networkName].modules.DIMORegistry.address,
     );
   const manufacturerInstance: Manufacturer = await ethers.getContractAt(
     'Manufacturer',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
   const integrationInstance: Integration = await ethers.getContractAt(
     'Integration',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
   const vehicleInstance: Vehicle = await ethers.getContractAt(
     'Vehicle',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
   const aftermarketDeviceInstance: AftermarketDevice =
     await ethers.getContractAt(
       'AftermarketDevice',
-      instances[networkName].modules.DIMORegistry.address
+      instances[networkName].modules.DIMORegistry.address,
     );
   const aftermarketDeviceIdInstance: AftermarketDeviceId =
     await ethers.getContractAt(
       'AftermarketDeviceId',
-      instances[networkName].nfts.AftermarketDeviceId.proxy
+      instances[networkName].nfts.AftermarketDeviceId.proxy,
     );
   const syntheticDeviceInstance: SyntheticDevice = await ethers.getContractAt(
     'SyntheticDevice',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
   const baseDataUriInstance: BaseDataURI = await ethers.getContractAt(
     'BaseDataURI',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
 
   console.log('\n----- Initializing EIP712 -----\n');
@@ -389,27 +397,27 @@ async function setupRegistry(deployer: SignerWithAddress, networkName: string) {
   console.log('\n----- Setting up AdLicenseValidator -----\n');
   await (
     await adLicenseValidatorInstance.setFoundationAddress(
-      instances[networkName].misc.Foundation
+      instances[networkName].misc.Foundation,
     )
   ).wait();
   console.log(
-    `${instances[networkName].misc.Foundation} set as Foundation address`
+    `${instances[networkName].misc.Foundation} set as Foundation address`,
   );
   await (
     await adLicenseValidatorInstance.setDimoToken(
-      instances[networkName].misc.DimoToken.proxy
+      instances[networkName].misc.DimoToken.proxy,
     )
   ).wait();
   console.log(
-    `${instances[networkName].misc.DimoToken.proxy} set as DIMO token address`
+    `${instances[networkName].misc.DimoToken.proxy} set as DIMO token address`,
   );
   await (
     await adLicenseValidatorInstance.setLicense(
-      instances[networkName].misc.Stake.proxy
+      instances[networkName].misc.Stake.proxy,
     )
   ).wait();
   console.log(
-    `${instances[networkName].misc.Stake.proxy} set as License contract address`
+    `${instances[networkName].misc.Stake.proxy} set as License contract address`,
   );
   await (await adLicenseValidatorInstance.setAdMintCost(C.adMintCost)).wait();
   console.log(`${C.adMintCost} set as aftermarket device mint cost`);
@@ -420,21 +428,21 @@ async function setupRegistry(deployer: SignerWithAddress, networkName: string) {
     await manufacturerInstance
       .connect(deployer)
       .setManufacturerIdProxyAddress(
-        instances[networkName].nfts.ManufacturerId.proxy
+        instances[networkName].nfts.ManufacturerId.proxy,
       )
   ).wait();
   console.log(
-    `${instances[networkName].nfts.ManufacturerId.proxy} proxy address set to Manufacturer`
+    `${instances[networkName].nfts.ManufacturerId.proxy} proxy address set to Manufacturer`,
   );
   await (
     await integrationInstance
       .connect(deployer)
       .setIntegrationIdProxyAddress(
-        instances[networkName].nfts.IntegrationId.proxy
+        instances[networkName].nfts.IntegrationId.proxy,
       )
   ).wait();
   console.log(
-    `${instances[networkName].nfts.IntegrationId.proxy} proxy address set to Integration`
+    `${instances[networkName].nfts.IntegrationId.proxy} proxy address set to Integration`,
   );
   await (
     await vehicleInstance
@@ -442,27 +450,27 @@ async function setupRegistry(deployer: SignerWithAddress, networkName: string) {
       .setVehicleIdProxyAddress(instances[networkName].nfts.VehicleId.proxy)
   ).wait();
   console.log(
-    `${instances[networkName].nfts.VehicleId.proxy} proxy address set to Vehicle`
+    `${instances[networkName].nfts.VehicleId.proxy} proxy address set to Vehicle`,
   );
   await (
     await aftermarketDeviceInstance
       .connect(deployer)
       .setAftermarketDeviceIdProxyAddress(
-        instances[networkName].nfts.AftermarketDeviceId.proxy
+        instances[networkName].nfts.AftermarketDeviceId.proxy,
       )
   ).wait();
   console.log(
-    `${instances[networkName].nfts.AftermarketDeviceId.proxy} proxy address set to Aftermarket Device`
+    `${instances[networkName].nfts.AftermarketDeviceId.proxy} proxy address set to Aftermarket Device`,
   );
   await (
     await syntheticDeviceInstance
       .connect(deployer)
       .setSyntheticDeviceIdProxyAddress(
-        instances[networkName].nfts.SyntheticDeviceId.proxy
+        instances[networkName].nfts.SyntheticDeviceId.proxy,
       )
   ).wait();
   console.log(
-    `${instances[networkName].nfts.SyntheticDeviceId.proxy} proxy address set to Synthetic Device`
+    `${instances[networkName].nfts.SyntheticDeviceId.proxy} proxy address set to Synthetic Device`,
   );
   console.log('\n----- NFT proxies set -----');
 
@@ -487,14 +495,14 @@ async function setupRegistry(deployer: SignerWithAddress, networkName: string) {
   console.log('\n----- Attributes added -----');
 
   console.log(
-    '\n----- Aftermarket Device NFT setting approval for all to DIMO Registry -----'
+    '\n----- Aftermarket Device NFT setting approval for all to DIMO Registry -----',
   );
   await (
     await aftermarketDeviceIdInstance
       .connect(deployer)
       .setApprovalForAll(
         instances[networkName].modules.DIMORegistry.address,
-        true
+        true,
       )
   ).wait();
   console.log('----- Approval set -----');
@@ -505,13 +513,16 @@ async function setupRegistry(deployer: SignerWithAddress, networkName: string) {
       .connect(deployer)
       .setBaseDataURI(
         instances[networkName].nfts.VehicleId.proxy,
-        C.BASE_DATA_URI
+        C.BASE_DATA_URI,
       )
   ).wait();
   console.log('----- Base Data URI set -----');
 }
 
-async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {
+async function grantNftRoles(
+  deployer: HardhatEthersSigner,
+  networkName: string,
+) {
   const instances = getAddresses();
 
   const dimoRegistryAddress =
@@ -522,15 +533,15 @@ async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {
     'IntegrationId',
     'VehicleId',
     'AftermarketDeviceId',
-    'SyntheticDeviceId'
+    'SyntheticDeviceId',
   ]) {
-    const contractInstance = await ethers.getContractAt(
+    const contractInstance = (await ethers.getContractAt(
       contractName,
-      instances[networkName].nfts[contractName].proxy
-    );
+      instances[networkName].nfts[contractName].proxy,
+    )) as unknown as NftBaseUpgradeable;
 
     console.log(
-      `\n----- Granting ${C.roles.nfts.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the ${contractName} contract -----`
+      `\n----- Granting ${C.roles.nfts.MINTER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the ${contractName} contract -----`,
     );
 
     await (
@@ -540,18 +551,18 @@ async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {
     ).wait();
 
     console.log(
-      `----- ${C.roles.nfts.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the ${contractName} contract -----\n`
+      `----- ${C.roles.nfts.MINTER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the ${contractName} contract -----\n`,
     );
   }
 
   const aftermarketDeviceIdInstance: AftermarketDeviceId =
     await ethers.getContractAt(
       'AftermarketDeviceId',
-      instances[networkName].nfts.AftermarketDeviceId.proxy
+      instances[networkName].nfts.AftermarketDeviceId.proxy,
     );
 
   console.log(
-    `\n----- Granting ${C.roles.nfts.TRANSFERER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----`
+    `\n----- Granting ${C.roles.nfts.TRANSFERER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----`,
   );
 
   await (
@@ -561,17 +572,17 @@ async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {
   ).wait();
 
   console.log(
-    `----- ${C.roles.nfts.TRANSFERER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----\n`
+    `----- ${C.roles.nfts.TRANSFERER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the AftermarketDeviceId contract -----\n`,
   );
 
   const syntheticDeviceIdInstance: SyntheticDeviceId =
     await ethers.getContractAt(
       'SyntheticDeviceId',
-      instances[networkName].nfts.SyntheticDeviceId.proxy
+      instances[networkName].nfts.SyntheticDeviceId.proxy,
     );
 
   console.log(
-    `\n----- Granting ${C.roles.nfts.BURNER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----`
+    `\n----- Granting ${C.roles.nfts.BURNER_ROLE} role to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----`,
   );
 
   await (
@@ -581,21 +592,21 @@ async function grantNftRoles(deployer: SignerWithAddress, networkName: string) {
   ).wait();
 
   console.log(
-    `----- ${C.roles.nfts.BURNER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----\n`
+    `----- ${C.roles.nfts.BURNER_ROLE} role granted to DIMO Registry ${dimoRegistryAddress} in the SyntheticDeviceId contract -----\n`,
   );
 }
 
 async function grantRole(
-  deployer: SignerWithAddress,
+  deployer: HardhatEthersSigner,
   role: string,
   address: string,
-  networkName: string
+  networkName: string,
 ) {
   const instances = getAddresses();
 
   const accessControlInstance: DimoAccessControl = await ethers.getContractAt(
     'DimoAccessControl',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
 
   console.log(`\n----- Granting ${role} role to ${address} -----`);
@@ -608,95 +619,99 @@ async function grantRole(
 }
 
 async function mintBatchManufacturers(
-  deployer: SignerWithAddress,
+  deployer: HardhatEthersSigner,
   owner: string,
-  networkName: string
+  networkName: string,
 ) {
   const instances = getAddresses();
 
   const batchSize = 50;
   const manufacturerInstance: Manufacturer = await ethers.getContractAt(
     'Manufacturer',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
 
-  console.log(`\n----- Minting manufacturers -----\n`);
+  console.log('\n----- Minting manufacturers -----\n');
 
   for (let i = 0; i < makes.length; i += batchSize) {
     const batch = makes.slice(i, i + batchSize);
 
-    const receipt = await (
+    const receipt = (await (
       await manufacturerInstance
         .connect(deployer)
         .mintManufacturerBatch(owner, batch)
-    ).wait();
+    ).wait()) as ContractTransactionReceipt;
 
-    const ids = receipt.events
-      ?.filter((e: any) => e.event === 'ManufacturerNodeMinted')
-      .map((e: any) => e.args.tokenId);
+    const ids = receipt?.logs
+      ?.filter((log: EventLog | Log) => log instanceof EventLog)
+      .map((eventLog: EventLog | Log) =>
+        (eventLog as EventLog).args[1].toString(),
+      );
 
     console.log(`Minted ids: ${ids?.join(',')}`);
   }
 
-  console.log(`\n----- Manufacturers minted -----\n`);
+  console.log('\n----- Manufacturers minted -----\n');
 }
 
 async function mintBatchIntegrations(
-  deployer: SignerWithAddress,
+  deployer: HardhatEthersSigner,
   owner: string,
-  networkName: string
+  networkName: string,
 ) {
   const instances = getAddresses();
 
   const batchSize = 50;
   const integrationInstance: Integration = await ethers.getContractAt(
     'Integration',
-    instances[networkName].modules.DIMORegistry.address
+    instances[networkName].modules.DIMORegistry.address,
   );
 
-  console.log(`\n----- Minting integrations -----\n`);
+  console.log('\n----- Minting integrations -----\n');
 
   for (let i = 0; i < integrations.length; i += batchSize) {
     const batch = integrations.slice(i, i + batchSize);
 
-    const receipt = await (
+    const receipt = (await (
       await integrationInstance
         .connect(deployer)
         .mintIntegrationBatch(owner, batch)
-    ).wait();
+    ).wait()) as ContractTransactionReceipt;
 
-    const ids = receipt.events
-      ?.filter((e: any) => e.event === 'IntegrationNodeMinted')
-      .map((e: any) => e.args.tokenId);
+    const ids = receipt?.logs
+      ?.filter((log: EventLog | Log) => log instanceof EventLog)
+      .map((eventLog: EventLog | Log) =>
+        (eventLog as EventLog).args[0].toString(),
+      );
 
     console.log(`Minted ids: ${ids?.join(',')}`);
   }
 
-  console.log(`\n----- Integrations minted -----\n`);
+  console.log('\n----- Integrations minted -----\n');
 }
 
 async function buildMocks(
-  deployer: SignerWithAddress,
-  mockFoundation: SignerWithAddress,
-  mockKms: SignerWithAddress,
-  networkName: string
+  deployer: HardhatEthersSigner,
+  mockFoundation: HardhatEthersSigner,
+  mockKms: HardhatEthersSigner,
+  networkName: string,
 ): Promise<AddressesByNetwork> {
   const instances = getAddresses();
 
   // Deploy MockDimoToken contract
   const MockDimoTokenFactory = await ethers.getContractFactory('MockDimoToken');
   const mockDimoTokenInstance = await MockDimoTokenFactory.connect(
-    deployer
-  ).deploy(ethers.utils.parseEther('1000000000'));
-  await mockDimoTokenInstance.deployed();
+    deployer,
+  ).deploy(ethers.parseEther('1000000000'));
 
   // Deploy MockStake contract
   const MockStakeFactory = await ethers.getContractFactory('MockStake');
   const mockStakeInstance = await MockStakeFactory.connect(deployer).deploy();
-  await mockStakeInstance.deployed();
 
-  instances[networkName].misc.DimoToken.proxy = mockDimoTokenInstance.address;
-  instances[networkName].misc.Stake.proxy = mockStakeInstance.address;
+  instances[networkName].misc.DimoToken.proxy =
+    await mockDimoTokenInstance.getAddress();
+  instances[networkName].misc.Stake.proxy =
+    await mockStakeInstance.getAddress();
   instances[networkName].misc.Foundation = mockFoundation.address;
   instances[networkName].misc.Kms = mockKms.address;
 
@@ -711,7 +726,7 @@ async function main() {
   writeAddresses(moduleInstances, networkName);
   const DimoForwarderInstance = await deployDimoForwarder(
     deployer,
-    networkName
+    networkName,
   );
   writeAddresses(DimoForwarderInstance, networkName);
   const nftInstances = await deployNfts(deployer, networkName);
@@ -728,7 +743,7 @@ async function main() {
       deployer,
       mockFoundation,
       mockKms,
-      networkName
+      networkName,
     );
     writeAddresses(mockInstances, networkName);
   }
@@ -740,44 +755,46 @@ async function main() {
     deployer,
     C.roles.modules.MINT_MANUFACTURER_ROLE,
     deployer.address,
-    networkName
+    networkName,
   );
   await grantRole(
     deployer,
     C.roles.modules.MINT_INTEGRATION_ROLE,
     deployer.address,
-    networkName
+    networkName,
   );
   await grantRole(
     deployer,
     C.roles.DEFAULT_ADMIN_ROLE,
     instances[networkName].misc.Kms,
-    networkName
+    networkName,
   );
   await grantRole(
     deployer,
     C.roles.DEFAULT_ADMIN_ROLE,
     instances[networkName].misc.Foundation,
-    networkName
+    networkName,
   );
   await grantRole(
     deployer,
     C.roles.ADMIN_ROLE,
     instances[networkName].misc.Foundation,
-    networkName
+    networkName,
   );
   await setupRegistry(deployer, networkName);
   await grantNftRoles(deployer, networkName);
   await mintBatchManufacturers(
     deployer,
     instances[networkName].misc.Foundation,
-    networkName
+    networkName,
   );
   await mintBatchIntegrations(
     deployer,
     instances[networkName].misc.Foundation,
-    networkName
+    networkName,
   );
+
+  process.exit();
 }
 
 main().catch((error) => {

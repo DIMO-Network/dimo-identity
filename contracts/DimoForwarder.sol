@@ -55,10 +55,9 @@ contract DimoForwarder is
     /// @notice Sets the DIMO Registry address
     /// @dev Only an admin can set the DIMO Registry address
     /// @param dimoRegistry_ The address to be set
-    function setDimoRegistryAddress(address dimoRegistry_)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setDimoRegistryAddress(
+        address dimoRegistry_
+    ) external onlyRole(ADMIN_ROLE) {
         if (dimoRegistry_ == address(0)) revert ZeroAddress();
         dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
@@ -66,20 +65,18 @@ contract DimoForwarder is
     /// @notice Sets the Vehicle ID proxy address
     /// @dev Only an admin can set the Vehicle ID proxy address
     /// @param vehicleIdProxyAddress_ The address to be set
-    function setVehicleIdProxyAddress(address vehicleIdProxyAddress_)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setVehicleIdProxyAddress(
+        address vehicleIdProxyAddress_
+    ) external onlyRole(ADMIN_ROLE) {
         vehicleIdProxyAddress = vehicleIdProxyAddress_;
     }
 
     /// @notice Sets the Aftermarket Device ID proxy address
     /// @dev Only an admin can set the Aftermarket Device ID proxy address
     /// @param adIdProxyAddress_ The address to be set
-    function setAftermarketDeviceIdProxyAddress(address adIdProxyAddress_)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setAftermarketDeviceIdProxyAddress(
+        address adIdProxyAddress_
+    ) external onlyRole(ADMIN_ROLE) {
         adIdProxyAddress = adIdProxyAddress_;
     }
 
@@ -112,11 +109,9 @@ contract DimoForwarder is
     /// @notice Internal function to authorize contract upgrade
     /// @dev Caller must have the upgrader role
     /// @param newImplementation New contract implementation address
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyRole(UPGRADER_ROLE)
-    {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**
      * @dev Executes a call encoding a safeTransferFrom from a ERC-721 proxy
@@ -124,11 +119,7 @@ contract DimoForwarder is
      * @param to The address to send the token
      * @param id The token id
      */
-    function _execTransfer(
-        address proxy,
-        address to,
-        uint256 id
-    ) private {
+    function _execTransfer(address proxy, address to, uint256 id) private {
         (bool success, bytes memory data) = proxy.call(
             abi.encodePacked(
                 abi.encodeWithSelector(SAFE_TRANSFER_FROM, msg.sender, to, id),

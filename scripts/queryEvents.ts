@@ -8,14 +8,14 @@ const contractAddresses: AddressesByNetwork = addressesJSON;
 async function main() {
   const dimoRegistryInstance = await ethers.getContractAt(
     'DIMORegistry',
-    contractAddresses[network.name].modules.DIMORegistry.address
+    contractAddresses[network.name].modules.DIMORegistry.address,
   );
   const eventFilter = dimoRegistryInstance.filters.ModuleUpdated();
 
   const events = await dimoRegistryInstance.queryFilter(
     eventFilter,
     25389115,
-    35489115
+    35489115,
   );
 
   // const filtered = events.map((e) => {
@@ -24,10 +24,12 @@ async function main() {
 
   // console.log(events[2].args.oldSelectors);
   // console.log(events[2].args.newSelectors);
-  console.log(events);
+  console.log(events);  
 }
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
-});
+}).finally(() => {
+  process.exit();
+})

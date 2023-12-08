@@ -7,7 +7,7 @@ async function main(paths: string[]) {
     paths.map(async (p) => {
       const { abi } = await hre.artifacts.readArtifact(p);
       return abi;
-    })
+    }),
   );
 
   const merged = abis
@@ -24,9 +24,11 @@ async function main(paths: string[]) {
     path.resolve(__dirname, '..', 'abis', 'DimoRegistry.json'),
     `${JSON.stringify(setParsed, null, 4)}\n`,
     {
-      flag: 'w'
-    }
+      flag: 'w',
+    },
   );
+
+  process.exit();
 }
 
 main([
@@ -44,7 +46,7 @@ main([
   'contracts/implementations/Nodes.sol:Nodes',
   'contracts/implementations/Mapper.sol:Mapper',
   'contracts/implementations/MultipleMinter.sol:MultipleMinter',
-  'contracts/implementations/BaseDataURI.sol:BaseDataURI'
+  'contracts/implementations/BaseDataURI.sol:BaseDataURI',
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

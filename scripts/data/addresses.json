@@ -26,7 +26,7 @@
                 ]
             },
             "Nodes": {
-                "address": "0x2f8320468950e1a933669F4bF9CDb50E79117137",
+                "address": "0x4fAfd447b757a0316B3B1DBd476dDAd4739C1618",
                 "selectors": [
                     "0xbc60a6ba",
                     "0xdce2f860",
@@ -84,7 +84,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0xe17abb835338E5A389f6a4b11c61F773a69d1B38",
+                "address": "0x86b10DB61C0deC9A3e8FBF3dC7b1ae8c33b74B3c",
                 "selectors": [
                     "0x6111afa3",
                     "0x60deec60",
@@ -95,6 +95,7 @@
                     "0x7ba79a39",
                     "0xb50df2f7",
                     "0xcfe642dd",
+                    "0x9d0b139b",
                     "0x4d49d82a",
                     "0x4d13b709",
                     "0xee4d9596",
@@ -134,7 +135,7 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x3B76075452D8EE8aD8a49b1dC53A15e726D6f10D",
+                "address": "0x30B3CEd3547bD9B8661f6E619772b19a3149a965",
                 "selectors": [
                     "0xfb1a28e8"
                 ]
@@ -158,11 +159,11 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0x96198B0969ae01D5E8E6A2950772D92a5799635F"
+                "implementation": "0x54E27D28A7518651979fC3010B79A42676C4D44C"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0x0793530DC7c5018388AcEf0A359C51138e7ff5A7"
+                "implementation": "0xD837C5300cFacDBDbD08D44F559f64408E4ac79B"
             },
             "SyntheticDeviceId": {
                 "proxy": "0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D",
@@ -213,7 +214,7 @@
                 ]
             },
             "Nodes": {
-                "address": "0xb09501d6c6676b4D87b2D9C34A372553054FE8a1",
+                "address": "0x655c79d873330D0C9AA82cd23cA7af7A686e00d6",
                 "selectors": [
                     "0xbc60a6ba",
                     "0xdce2f860",
@@ -273,7 +274,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0xB0D3403f83a9FCC8d85E7a4ab374cfe62f625952",
+                "address": "0x6057FBbDc72cAF3dA15264B784c4FA387F2727d2",
                 "selectors": [
                     "0x6111afa3",
                     "0x60deec60",
@@ -284,6 +285,7 @@
                     "0x7ba79a39",
                     "0xb50df2f7",
                     "0xcfe642dd",
+                    "0x9d0b139b",
                     "0x4d49d82a",
                     "0x4d13b709",
                     "0xee4d9596",
@@ -323,16 +325,20 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0xd16EfDD9B9f2c7e054935C3483df40CdD4E38c53",
+                "address": "0xefe1eE82fe8D0933ABd0f9a21cB55Db303D759Ff",
                 "selectors": [
                     "0xfb1a28e8"
                 ]
             },
             "DevAdmin": {
-                "address": "0xb3e48567837f3428D28E964305E1cA4cd67E6F14",
+                "address": "0x5cAC07CDD87aA6076e74fb4c4abc22a1e291771b",
                 "selectors": [
+                    "0xd7376bae",
+                    "0x63dec203",
+                    "0x52878b61",
                     "0x282eb387",
                     "0x11d679c9",
+                    "0x56936962",
                     "0x3febacab",
                     "0xf73a8f04",
                     "0xff96b761",

@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 
 const _hashRole = (role: string) =>
-  ethers.utils.keccak256(ethers.utils.toUtf8Bytes(role));
+  ethers.keccak256(ethers.toUtf8Bytes(role));
 
 export const roles = {
   DEFAULT_ADMIN_ROLE:
@@ -27,7 +27,10 @@ export const roles = {
     DEV_AD_UNCLAIM_ROLE: _hashRole('DEV_AD_UNCLAIM_ROLE'),
     DEV_AD_UNPAIR_ROLE: _hashRole('DEV_AD_UNPAIR_ROLE'),
     DEV_RENAME_MANUFACTURERS_ROLE: _hashRole('DEV_RENAME_MANUFACTURERS_ROLE'),
-    DEV_VEHICLE_BURN_ROLE: _hashRole('DEV_VEHICLE_BURN_ROLE')
+    DEV_VEHICLE_BURN_ROLE: _hashRole('DEV_VEHICLE_BURN_ROLE'),
+    DEV_AD_BURN_ROLE: _hashRole('DEV_AD_BURN_ROLE'),
+    DEV_SD_BURN_ROLE: _hashRole('DEV_SD_BURN_ROLE'),
+    DEV_CHANGE_PARENT_NODE: _hashRole('DEV_CHANGE_PARENT_NODE')
   },
   nfts: {
     MINTER_ROLE: _hashRole('MINTER_ROLE'),
@@ -41,7 +44,7 @@ export const dimoRegistryName = 'DIMORegistry';
 
 export const eip712Name = 'DIMO';
 export const eip712Version = '1';
-export const adMintCost = ethers.utils.parseEther('50');
+export const adMintCost = ethers.parseEther('50');
 
 export const MANUFACTURER_NFT_NAME = 'DIMO Manufacturer ID';
 export const MANUFACTURER_NFT_SYMBOL = 'DIMO/MANUFACTURER';
@@ -68,10 +71,10 @@ export const vehicleAttributes = [
   'Make',
   'Model',
   'Year',
-  'Data URI',
-  'Definition URI'
+  'DataURI',
+  'DefinitionURI'
 ];
-export const adAttributes = ['Serial', 'IMEI', 'Definition URI'];
+export const adAttributes = ['Serial', 'IMEI', 'DefinitionURI'];
 export const sdAttributes = [];
 
 export const manufacturerIdArgs = {

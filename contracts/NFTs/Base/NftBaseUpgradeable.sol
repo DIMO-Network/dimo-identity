@@ -32,11 +32,9 @@ abstract contract NftBaseUpgradeable is
     /// @notice Sets the base URI
     /// @dev Caller must have the admin role
     /// @param baseURI_ Base URI to be set
-    function setBaseURI(string calldata baseURI_)
-        external
-        virtual
-        onlyRole(ADMIN_ROLE)
-    {
+    function setBaseURI(
+        string calldata baseURI_
+    ) external virtual onlyRole(ADMIN_ROLE) {
         baseURI = baseURI_;
     }
 
@@ -45,12 +43,9 @@ abstract contract NftBaseUpgradeable is
     /// @dev Token Id auto increments
     /// @param to Token owner
     /// @return tokenId Minted token Id
-    function safeMint(address to)
-        external
-        virtual
-        onlyRole(MINTER_ROLE)
-        returns (uint256 tokenId)
-    {
+    function safeMint(
+        address to
+    ) external virtual onlyRole(MINTER_ROLE) returns (uint256 tokenId) {
         _tokenIdCounter.increment();
         tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
@@ -62,12 +57,10 @@ abstract contract NftBaseUpgradeable is
     /// @param to Token owner
     /// @param uri Individual token URI
     /// @return tokenId Minted token Id
-    function safeMint(address to, string calldata uri)
-        external
-        virtual
-        onlyRole(MINTER_ROLE)
-        returns (uint256 tokenId)
-    {
+    function safeMint(
+        address to,
+        string calldata uri
+    ) external virtual onlyRole(MINTER_ROLE) returns (uint256 tokenId) {
         _tokenIdCounter.increment();
         tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
@@ -84,7 +77,9 @@ abstract contract NftBaseUpgradeable is
     /// @notice Gets the token URI associated to a token
     /// @param tokenId Token Id to be checked
     /// @return string
-    function tokenURI(uint256 tokenId)
+    function tokenURI(
+        uint256 tokenId
+    )
         public
         view
         virtual
@@ -94,11 +89,17 @@ abstract contract NftBaseUpgradeable is
         return super.tokenURI(tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
-        override(ERC721Upgradeable, AccessControlUpgradeable)
+        override(
+            ERC721Upgradeable,
+            ERC721URIStorageUpgradeable,
+            AccessControlUpgradeable
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -136,12 +137,9 @@ abstract contract NftBaseUpgradeable is
     /// @notice Internal function to authorize contract upgrade
     /// @dev Caller must have the upgrader role
     /// @param newImplementation New contract implementation address
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        virtual
-        override
-        onlyRole(UPGRADER_ROLE)
-    {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal virtual override onlyRole(UPGRADER_ROLE) {}
 
     /// @notice Internal function to transfer a token
     /// @dev Caller must have the transferer role
@@ -159,7 +157,9 @@ abstract contract NftBaseUpgradeable is
     /// @notice Internal function to burn a token
     /// @dev Caller must have the burner role
     /// @param tokenId Token Id to be burned
-    function _burn(uint256 tokenId)
+    function _burn(
+        uint256 tokenId
+    )
         internal
         virtual
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)

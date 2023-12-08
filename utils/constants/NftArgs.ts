@@ -6,6 +6,7 @@ export const MANUFACTURER_NFT_SYMBOL = 'MNFT';
 export const MANUFACTURER_NFT_BASE_URI = 'https://dimo.zone/manufacturer/';
 export const MANUFACTURER_MINTER_PRIVILEGE = '1';
 export const MANUFACTURER_CLAIMER_PRIVILEGE = '2';
+export const MANUFACTURER_FACTORY_RESET_PRIVILEGE = '3';
 
 export const INTEGRATION_NFT_NAME = 'Integration NFT';
 export const INTEGRATION_NFT_SYMBOL = 'INFT';
@@ -21,7 +22,8 @@ export const AD_NFT_BASE_URI = 'https://dimo.zone/aftermarketDevice/';
 
 export const SYNTHETIC_DEVICE_NFT_NAME = 'Synthetic Device NFT';
 export const SYNTHETIC_DEVICE_NFT_SYMBOL = 'SDNFT';
-export const SYNTHETIC_DEVICE_NFT_BASE_URI = 'https://dimo.zone/syntheticDevice/';
+export const SYNTHETIC_DEVICE_NFT_BASE_URI =
+  'https://dimo.zone/syntheticDevice/';
 
 export const nftArgs: ContractNameArgsByNetwork = {
   ManufacturerId: {
@@ -30,13 +32,12 @@ export const nftArgs: ContractNameArgsByNetwork = {
       MANUFACTURER_NFT_NAME,
       MANUFACTURER_NFT_SYMBOL,
       MANUFACTURER_NFT_BASE_URI,
-      ZERO_ADDRESS
+      ZERO_ADDRESS,
     ],
     opts: {
       initializer: 'initialize',
-      // eslint-disable-next-line prettier/prettier
-      kind: 'uups' as const
-    }
+      kind: 'uups' as const,
+    },
   },
   IntegrationId: {
     name: 'IntegrationId',
@@ -45,13 +46,12 @@ export const nftArgs: ContractNameArgsByNetwork = {
       INTEGRATION_NFT_SYMBOL,
       INTEGRATION_NFT_BASE_URI,
       ZERO_ADDRESS,
-      []
+      [],
     ],
     opts: {
       initializer: 'initialize',
-      // eslint-disable-next-line prettier/prettier
-      kind: 'uups' as const
-    }
+      kind: 'uups' as const,
+    },
   },
   VehicleId: {
     name: 'VehicleId',
@@ -61,28 +61,20 @@ export const nftArgs: ContractNameArgsByNetwork = {
       VEHICLE_NFT_BASE_URI,
       ZERO_ADDRESS,
       ZERO_ADDRESS,
-      []
+      [],
     ],
     opts: {
       initializer: 'initialize',
-      // eslint-disable-next-line prettier/prettier
-      kind: 'uups' as const
-    }
+      kind: 'uups' as const,
+    },
   },
   AftermarketDeviceId: {
     name: 'AftermarketDeviceId',
-    args: [
-      AD_NFT_NAME,
-      AD_NFT_SYMBOL,
-      AD_NFT_BASE_URI,
-      ZERO_ADDRESS,
-      []
-    ],
+    args: [AD_NFT_NAME, AD_NFT_SYMBOL, AD_NFT_BASE_URI, ZERO_ADDRESS, []],
     opts: {
       initializer: 'initialize',
-      // eslint-disable-next-line prettier/prettier
-      kind: 'uups' as const
-    }
+      kind: 'uups' as const,
+    },
   },
   SyntheticDeviceId: {
     name: 'SyntheticDeviceId',
@@ -91,12 +83,11 @@ export const nftArgs: ContractNameArgsByNetwork = {
       SYNTHETIC_DEVICE_NFT_SYMBOL,
       SYNTHETIC_DEVICE_NFT_BASE_URI,
       ZERO_ADDRESS,
-      []
+      [],
     ],
     opts: {
       initializer: 'initialize',
-      // eslint-disable-next-line prettier/prettier
-      kind: 'uups' as const
-    }
-  }
+      kind: 'uups' as const,
+    },
+  },
 };

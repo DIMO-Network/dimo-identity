@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ethers, waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -13,7 +13,7 @@ import {
   Mapper,
   MockDimoToken,
   MockStake
-} from '../typechain';
+} from '../typechain-types';
 import {
   setup,
   grantAdminRoles,
@@ -23,7 +23,6 @@ import {
 } from '../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('Mapper', function () {
   let snapshot: string;
@@ -39,15 +38,13 @@ describe('Mapper', function () {
   let manufacturerIdInstance: ManufacturerId;
   let adIdInstance: AftermarketDeviceId;
 
-  const [
-    admin,
-    foundation,
-    manufacturer1,
-    user1,
-    beneficiary1,
-    adAddress1,
-    adAddress2
-  ] = provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let foundation: HardhatEthersSigner;
+  let manufacturer1: HardhatEthersSigner;
+  let user1: HardhatEthersSigner;
+  let beneficiary1: HardhatEthersSigner;
+  let adAddress1: HardhatEthersSigner;
+  let adAddress2: HardhatEthersSigner;
 
   const mockAftermarketDeviceInfosList = JSON.parse(
     JSON.stringify(C.mockAftermarketDeviceInfosList)
@@ -55,12 +52,23 @@ describe('Mapper', function () {
   const mockAftermarketDeviceInfosListNotWhitelisted = JSON.parse(
     JSON.stringify(C.mockAftermarketDeviceInfosListNotWhitelisted)
   );
-  mockAftermarketDeviceInfosList[0].addr = adAddress1.address;
-  mockAftermarketDeviceInfosList[1].addr = adAddress2.address;
-  mockAftermarketDeviceInfosListNotWhitelisted[0].addr = adAddress1.address;
-  mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
 
   before(async () => {
+    [
+      admin,
+      foundation,
+      manufacturer1,
+      user1,
+      beneficiary1,
+      adAddress1,
+      adAddress2
+    ] = await ethers.getSigners();
+
+    mockAftermarketDeviceInfosList[0].addr = adAddress1.address;
+    mockAftermarketDeviceInfosList[1].addr = adAddress2.address;
+    mockAftermarketDeviceInfosListNotWhitelisted[0].addr = adAddress1.address;
+    mockAftermarketDeviceInfosListNotWhitelisted[1].addr = adAddress2.address;
+
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
@@ -89,18 +97,18 @@ describe('Mapper', function () {
 
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Set NFT Proxies
     await manufacturerInstance
       .connect(admin)
-      .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
+      .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress());
     await aftermarketDeviceInstance
       .connect(admin)
-      .setAftermarketDeviceIdProxyAddress(adIdInstance.address);
+      .setAftermarketDeviceIdProxyAddress(await adIdInstance.getAddress());
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -115,12 +123,10 @@ describe('Mapper', function () {
     mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
       C.oneBillionE18
     );
-    await mockDimoTokenInstance.deployed();
 
     // Deploy MockStake contract
     const MockStakeFactory = await ethers.getContractFactory('MockStake');
     mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
-    await mockStakeInstance.deployed();
 
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
@@ -128,14 +134,14 @@ describe('Mapper', function () {
       .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
     await mockDimoTokenInstance
       .connect(manufacturer1)
-      .approve(dimoRegistryInstance.address, C.manufacturerDimoTokensAmount);
+      .approve(await dimoRegistryInstance.getAddress(), C.manufacturerDimoTokensAmount);
 
     // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
     await adLicenseValidatorInstance.setDimoToken(
-      mockDimoTokenInstance.address
+      await mockDimoTokenInstance.getAddress()
     );
-    await adLicenseValidatorInstance.setLicense(mockStakeInstance.address);
+    await adLicenseValidatorInstance.setLicense(await mockStakeInstance.getAddress());
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Whitelist Manufacturer attributes
@@ -168,16 +174,16 @@ describe('Mapper', function () {
     // Grant Transferer role to DIMO Registry
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_TRANSFERER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_TRANSFERER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Setting DimoRegistry address in the AftermarketDeviceId
     await adIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(dimoRegistryInstance.address);
+      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
 
     await adIdInstance
       .connect(manufacturer1)
-      .setApprovalForAll(aftermarketDeviceInstance.address, true);
+      .setApprovalForAll(await aftermarketDeviceInstance.getAddress(), true);
     await aftermarketDeviceInstance
       .connect(manufacturer1)
       .mintAftermarketDeviceByManufacturerBatch(
@@ -206,7 +212,7 @@ describe('Mapper', function () {
           mapperInstance
             .connect(beneficiary1)
             .setAftermarketDeviceBeneficiary(1, beneficiary1.address)
-        ).to.be.revertedWith('Only owner');
+        ).to.be.revertedWith('Only owner or proxy');
       });
       it('Should revert if beneficiary is equal to owner', async () => {
         await expect(
@@ -220,7 +226,7 @@ describe('Mapper', function () {
     context('State', () => {
       it('Should return the node owner if no beneficiary is set', async () => {
         expect(
-          await mapperInstance.getBeneficiary(adIdInstance.address, 1)
+          await mapperInstance.getBeneficiary(await adIdInstance.getAddress(), 1)
         ).to.be.equal(user1.address);
       });
       it('Should correctly set beneficiary', async () => {
@@ -229,7 +235,7 @@ describe('Mapper', function () {
           .setAftermarketDeviceBeneficiary(1, beneficiary1.address);
 
         expect(
-          await mapperInstance.getBeneficiary(adIdInstance.address, 1)
+          await mapperInstance.getBeneficiary(await adIdInstance.getAddress(), 1)
         ).to.be.equal(beneficiary1.address);
       });
     });
@@ -242,7 +248,7 @@ describe('Mapper', function () {
             .setAftermarketDeviceBeneficiary(1, beneficiary1.address)
         )
           .to.emit(mapperInstance, 'BeneficiarySet')
-          .withArgs(adIdInstance.address, 1, beneficiary1.address);
+          .withArgs(await adIdInstance.getAddress(), 1, beneficiary1.address);
       });
     });
   });

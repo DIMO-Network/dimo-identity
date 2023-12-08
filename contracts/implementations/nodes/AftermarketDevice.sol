@@ -48,6 +48,7 @@ contract AftermarketDevice is
         );
     uint256 private constant MANUFACTURER_MINTER_PRIVILEGE = 1;
     uint256 private constant MANUFACTURER_CLAIMER_PRIVILEGE = 2;
+    uint256 private constant MANUFACTURER_FACTORY_RESET_PRIVILEGE = 3;
 
     event AftermarketDeviceIdProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
@@ -66,17 +67,20 @@ contract AftermarketDevice is
         uint256 aftermarketDeviceNode,
         address indexed owner
     );
-
     event AftermarketDevicePaired(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         address indexed owner
     );
-
     event AftermarketDeviceUnpaired(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode,
         address indexed owner
+    );
+    event AftermarketDeviceAddressReset(
+        uint256 indexed manufacturerId,
+        uint256 indexed tokenId,
+        address indexed aftermarketDeviceAddress
     );
 
     // ***** Admin management ***** //
@@ -86,10 +90,9 @@ contract AftermarketDevice is
      * @dev Only an admin can set the address
      * @param addr The address of the proxy
      */
-    function setAftermarketDeviceIdProxyAddress(address addr)
-        external
-        onlyRole(Roles.ADMIN_ROLE)
-    {
+    function setAftermarketDeviceIdProxyAddress(
+        address addr
+    ) external onlyRole(Roles.ADMIN_ROLE) {
         if (addr == address(0)) revert Errors.ZeroAddress();
         AftermarketDeviceStorage.getStorage().idProxyAddress = addr;
 
@@ -101,10 +104,9 @@ contract AftermarketDevice is
      * @dev Only an admin can add a new attribute
      * @param attribute The attribute to be added
      */
-    function addAftermarketDeviceAttribute(string calldata attribute)
-        external
-        onlyRole(Roles.ADMIN_ROLE)
-    {
+    function addAftermarketDeviceAttribute(
+        string calldata attribute
+    ) external onlyRole(Roles.ADMIN_ROLE) {
         if (
             !AttributeSet.add(
                 AftermarketDeviceStorage.getStorage().whitelistedAttributes,
@@ -521,15 +523,63 @@ contract AftermarketDevice is
     }
 
     /**
+     * @notice Reset the device address of a list of aftermarket devices
+     * Caller must be the owner of the aftermarket device's parent manufacturer or an authorized address
+     * The manufacturer node owner must grant the MANUFACTURER_FACTORY_RESET_PRIVILEGE privilege to the authorized address
+     * @param adIdAddrs List of deviceId-deviceAddress pairs to be set
+     */
+    function resetAftermarketDeviceAddressByManufacturerBatch(
+        Types.AftermarketDeviceIdAddressPair[] calldata adIdAddrs
+    ) external {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        address adIdProxyAddress = ads.idProxyAddress;
+        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+
+        uint256 tokenId;
+        address newDeviceAddress;
+        uint256 manufacturerParentNode;
+        for (uint256 i = 0; i < adIdAddrs.length; i++) {
+            tokenId = adIdAddrs[i].aftermarketDeviceNodeId;
+            newDeviceAddress = adIdAddrs[i].deviceAddress;
+            manufacturerParentNode = ns
+            .nodes[adIdProxyAddress][tokenId].parentNode;
+
+            if (!INFT(adIdProxyAddress).exists(tokenId))
+                revert Errors.InvalidNode(adIdProxyAddress, tokenId);
+            if (
+                !manufacturerIdProxy.hasPrivilege(
+                    manufacturerParentNode,
+                    MANUFACTURER_FACTORY_RESET_PRIVILEGE,
+                    msg.sender
+                )
+            ) revert Errors.Unauthorized(msg.sender);
+            if (ms.links[adIdProxyAddress][tokenId] != 0)
+                revert AdPaired(tokenId);
+
+            ads.deviceAddressToNodeId[newDeviceAddress] = tokenId;
+            ads.nodeIdToDeviceAddress[tokenId] = newDeviceAddress;
+
+            emit AftermarketDeviceAddressReset(
+                manufacturerParentNode,
+                tokenId,
+                newDeviceAddress
+            );
+        }
+    }
+
+    /**
      * @notice Gets the AD Id by the device address
      * @dev If the device is not minted it will return 0
      * @param addr Address associated with the aftermarket device
      */
-    function getAftermarketDeviceIdByAddress(address addr)
-        external
-        view
-        returns (uint256 nodeId)
-    {
+    function getAftermarketDeviceIdByAddress(
+        address addr
+    ) external view returns (uint256 nodeId) {
         nodeId = AftermarketDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
         ];
@@ -540,11 +590,9 @@ contract AftermarketDevice is
      * @dev If the device is not minted it will return 0x00 address
      * @param nodeId Node ID associated with the aftermarket device
      */
-    function getAftermarketDeviceAddressById(uint256 nodeId)
-        external
-        view
-        returns (address addr)
-    {
+    function getAftermarketDeviceAddressById(
+        uint256 nodeId
+    ) external view returns (address addr) {
         addr = AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
             nodeId
         ];
@@ -554,11 +602,9 @@ contract AftermarketDevice is
      * @notice Checks if an AD has been already claimed or not
      * @param nodeId Node ID associated with the aftermarket device
      */
-    function isAftermarketDeviceClaimed(uint256 nodeId)
-        external
-        view
-        returns (bool isClaimed)
-    {
+    function isAftermarketDeviceClaimed(
+        uint256 nodeId
+    ) external view returns (bool isClaimed) {
         isClaimed = AftermarketDeviceStorage.getStorage().deviceClaimed[nodeId];
     }
 

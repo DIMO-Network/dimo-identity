@@ -57,10 +57,9 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     /// @notice Sets the DIMO Registry address
     /// @dev Only an admin can set the DIMO Registry address
     /// @param addr The address to be set
-    function setDimoRegistryAddress(address addr)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function setDimoRegistryAddress(
+        address addr
+    ) external onlyRole(ADMIN_ROLE) {
         if (addr == address(0)) revert ZeroAddress();
         _dimoRegistry = IDimoRegistry(addr);
     }
@@ -70,10 +69,10 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
     /// @dev The privilege Id auto increments
     /// @param enabled Sets new privilege enabled or not
     /// @param description Description of the new privilege
-    function createPrivilege(bool enabled, string calldata description)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
+    function createPrivilege(
+        bool enabled,
+        string calldata description
+    ) external onlyRole(ADMIN_ROLE) {
         _privilegeCounter.increment();
         uint256 privilegeId = _privilegeCounter.current();
 
@@ -173,12 +172,9 @@ contract ManufacturerId is Initializable, NftBaseUpgradeable, IMultiPrivilege {
         return privilegeEntry[tokenId][tokenIdToVersion[tokenId]][privId][user];
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override returns (bool) {
         return
             interfaceId == type(IMultiPrivilege).interfaceId ||
             super.supportsInterface(interfaceId);

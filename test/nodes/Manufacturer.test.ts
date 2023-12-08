@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { waffle } from 'hardhat';
+import { ethers, HardhatEthersSigner } from 'hardhat';
 
 import {
   DIMORegistry,
@@ -7,7 +7,7 @@ import {
   Nodes,
   Manufacturer,
   ManufacturerId
-} from '../../typechain';
+} from '../../typechain-types';
 import {
   initialize,
   setup,
@@ -18,7 +18,6 @@ import {
 } from '../../utils';
 
 const { expect } = chai;
-const provider = waffle.provider;
 
 describe('Manufacturer', async function () {
   let snapshot: string;
@@ -28,10 +27,21 @@ describe('Manufacturer', async function () {
   let manufacturerInstance: Manufacturer;
   let manufacturerIdInstance: ManufacturerId;
 
-  const [admin, nonAdmin, manufacturer1, manufacturer2, nonController] =
-    provider.getWallets();
+  let admin: HardhatEthersSigner;
+  let nonAdmin: HardhatEthersSigner;
+  let manufacturer1: HardhatEthersSigner;
+  let manufacturer2: HardhatEthersSigner;
+  let nonController: HardhatEthersSigner;
 
   before(async () => {
+    [
+      admin,
+      nonAdmin,
+      manufacturer1,
+      manufacturer2,
+      nonController
+    ] = await ethers.getSigners();
+
     const deployments = await setup(admin, {
       modules: ['DimoAccessControl', 'Nodes', 'Manufacturer'],
       nfts: ['ManufacturerId'],
@@ -48,12 +58,12 @@ describe('Manufacturer', async function () {
 
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, dimoRegistryInstance.address);
+      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
 
     // Set NFT Proxy
     await manufacturerInstance
       .connect(admin)
-      .setManufacturerIdProxyAddress(manufacturerIdInstance.address);
+      .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress());
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -94,7 +104,7 @@ describe('Manufacturer', async function () {
         await expect(
           localManufacturerInstance
             .connect(nonAdmin)
-            .setManufacturerIdProxyAddress(manufacturerIdInstance.address)
+            .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress())
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
             C.ADMIN_ROLE
@@ -115,10 +125,10 @@ describe('Manufacturer', async function () {
         await expect(
           localManufacturerInstance
             .connect(admin)
-            .setManufacturerIdProxyAddress(manufacturerIdInstance.address)
+            .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress())
         )
           .to.emit(localManufacturerInstance, 'ManufacturerIdProxySet')
-          .withArgs(manufacturerIdInstance.address);
+          .withArgs(await manufacturerIdInstance.getAddress());
       });
     });
   });
@@ -242,15 +252,15 @@ describe('Manufacturer', async function () {
           .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
 
         const parentNode1 = await nodesInstance.getParentNode(
-          manufacturerIdInstance.address,
+          await manufacturerIdInstance.getAddress(),
           1
         );
         const parentNode2 = await nodesInstance.getParentNode(
-          manufacturerIdInstance.address,
+          await manufacturerIdInstance.getAddress(),
           2
         );
         const parentNode3 = await nodesInstance.getParentNode(
-          manufacturerIdInstance.address,
+          await manufacturerIdInstance.getAddress(),
           3
         );
 
@@ -277,23 +287,11 @@ describe('Manufacturer', async function () {
           .connect(admin)
           .mintManufacturerBatch(admin.address, C.mockManufacturerNames);
 
-        const id1 = (
-          await manufacturerInstance.getManufacturerIdByName(
-            C.mockManufacturerNames[0]
-          )
-        ).toNumber();
-        const id2 = (
-          await manufacturerInstance.getManufacturerIdByName(
-            C.mockManufacturerNames[1]
-          )
-        ).toNumber();
-        const id3 = (
-          await manufacturerInstance.getManufacturerIdByName(
-            C.mockManufacturerNames[2]
-          )
-        ).toNumber();
+        const id1 = await manufacturerInstance.getManufacturerIdByName(C.mockManufacturerNames[0]);
+        const id2 = await manufacturerInstance.getManufacturerIdByName(C.mockManufacturerNames[1]);
+        const id3 = await manufacturerInstance.getManufacturerIdByName(C.mockManufacturerNames[2]);
 
-        expect([id1, id2, id3]).to.eql([1, 2, 3]);
+        expect([id1, id2, id3]).to.deep.equal([1, 2, 3]);
       });
     });
 
@@ -412,7 +410,7 @@ describe('Manufacturer', async function () {
           );
 
         const parentNode = await nodesInstance.getParentNode(
-          manufacturerIdInstance.address,
+          await manufacturerIdInstance.getAddress(),
           1
         );
 
@@ -466,11 +464,7 @@ describe('Manufacturer', async function () {
             C.mockManufacturerAttributeInfoPairs
           );
 
-        const id = (
-          await manufacturerInstance.getManufacturerIdByName(
-            C.mockManufacturerNames[0]
-          )
-        ).toNumber();
+        const id = await manufacturerInstance.getManufacturerIdByName(C.mockManufacturerNames[0]);
 
         expect(id).to.be.equal(1);
       });
@@ -485,14 +479,14 @@ describe('Manufacturer', async function () {
 
         expect(
           await nodesInstance.getInfo(
-            manufacturerIdInstance.address,
+            await manufacturerIdInstance.getAddress(),
             1,
             C.mockManufacturerAttribute1
           )
         ).to.be.equal(C.mockManufacturerInfo1);
         expect(
           await nodesInstance.getInfo(
-            manufacturerIdInstance.address,
+            await manufacturerIdInstance.getAddress(),
             1,
             C.mockManufacturerAttribute2
           )
@@ -512,7 +506,7 @@ describe('Manufacturer', async function () {
             )
         )
           .to.emit(manufacturerInstance, 'ManufacturerNodeMinted')
-          .withArgs(C.mockManufacturerNames[0], 1, admin.address);
+          .withArgs(C.mockManufacturerNames[0], 1, manufacturer1.address);
       });
       it('Should emit ManufacturerAttributeSet events with correct params', async () => {
         await expect(
@@ -592,14 +586,14 @@ describe('Manufacturer', async function () {
 
         expect(
           await nodesInstance.getInfo(
-            manufacturerIdInstance.address,
+            await manufacturerIdInstance.getAddress(),
             1,
             C.mockManufacturerAttribute1
           )
         ).to.be.equal(C.mockManufacturerInfo1);
         expect(
           await nodesInstance.getInfo(
-            manufacturerIdInstance.address,
+            await manufacturerIdInstance.getAddress(),
             1,
             C.mockManufacturerAttribute2
           )
@@ -611,14 +605,14 @@ describe('Manufacturer', async function () {
 
         expect(
           await nodesInstance.getInfo(
-            manufacturerIdInstance.address,
+            await manufacturerIdInstance.getAddress(),
             1,
             C.mockManufacturerAttribute1
           )
         ).to.be.equal(localNewAttributeInfoPairs[0].info);
         expect(
           await nodesInstance.getInfo(
-            manufacturerIdInstance.address,
+            await manufacturerIdInstance.getAddress(),
             1,
             C.mockManufacturerAttribute2
           )

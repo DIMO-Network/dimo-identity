@@ -5,7 +5,6 @@ import "../../interfaces/INFT.sol";
 import "../../interfaces/IStreamRegistry.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/streamr/StreamrManagerStorage.sol";
-import "../../libraries/streamr/VehicleStreamStorage.sol";
 
 import "../../shared/Errors.sol" as Errors;
 
@@ -17,8 +16,16 @@ contract VehicleStream is AccessControlInternal {
     string constant DIMO_STREAM_ENS = "streams.dimo.eth";
     string constant DIMO_STREAM_ENS_VEHICLE = "streams.dimo.eth/vehicle/";
 
+    event VehicleStreamAssociated(uint256 indexed vehicleId, string streamId);
+    event VehicleStreamDissociated(uint256 indexed vehicleId, string streamId);
+    event SubscribedToVehicleStream(
+        string streamId,
+        address indexed subscriber,
+        uint256 subscribeExpiration
+    );
+
     // TODO Documentation
-    function createStream(uint256 vehicleId) external {
+    function createVehicleStream(uint256 vehicleId) external {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
@@ -40,19 +47,6 @@ contract VehicleStream is AccessControlInternal {
             abi.encodePacked("/vehicle/", Strings.toString(vehicleId))
         );
         streamRegistry.createStreamWithENS(DIMO_STREAM_ENS, streamPath, "{}");
-    }
-
-    // TODO Documentation
-    function subscribe(
-        uint256 vehicleId,
-        address subscriber,
-        uint256 expirationTimestamp
-    ) public {
-        StreamrManagerStorage.Storage storage ss = StreamrManagerStorage
-            .getStorage();
-        VehicleStreamStorage.Storage storage vss = VehicleStreamStorage
-            .getStorage(vehicleId);
-        IStreamRegistry streamRegistry = IStreamRegistry(ss.streamrRegistry);
 
         string memory streamId = string(
             abi.encodePacked(
@@ -61,42 +55,55 @@ contract VehicleStream is AccessControlInternal {
             )
         );
 
-        streamRegistry.grantPermission(
-            streamId,
-            subscriber,
-            IStreamRegistry.PermissionType.Subscribe
-        );
-        streamRegistry.setExpirationTime(
-            streamId,
-            subscriber,
-            IStreamRegistry.PermissionType.Subscribe,
-            expirationTimestamp
-        );
-
-        vss.subscribers.push(subscriber);
+        emit VehicleStreamAssociated(vehicleId, streamId);
     }
 
     // TODO Documentation
-    function onTransfer(
-        address /* from */,
-        address /* to */,
-        uint256 vehicleId
-    ) public {
+    function subscribeToVehicleStream(
+        uint256 vehicleId,
+        address subscriber,
+        uint256 subscribeExpiration
+    ) external {
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
         StreamrManagerStorage.Storage storage ss = StreamrManagerStorage
             .getStorage();
-        VehicleStreamStorage.Storage storage vss = VehicleStreamStorage
-            .getStorage(vehicleId);
         IStreamRegistry streamRegistry = IStreamRegistry(ss.streamrRegistry);
 
-        string memory streamId = vss.streamId;
-
-        for (uint i = 0; i < vss.subscribers.length; i++) {
-            address subscriber = vss.subscribers[i];
-            streamRegistry.revokePermission(
-                streamId,
-                subscriber,
-                IStreamRegistry.PermissionType.Subscribe
-            );
+        // TODO To be possibly replaced by signature verification (like permit)
+        try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
+            address vehicleOwner
+        ) {
+            if (vehicleOwner != msg.sender) {
+                revert Errors.Unauthorized(msg.sender);
+            }
+        } catch {
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleId);
         }
+
+        string memory streamId = string(
+            abi.encodePacked(
+                DIMO_STREAM_ENS_VEHICLE,
+                Strings.toString(vehicleId)
+            )
+        );
+
+        // Creates the subscription permission setting subscribeExpiration > 0
+        streamRegistry.setPermissionsForUser(
+            streamId,
+            subscriber,
+            false,
+            false,
+            0,
+            subscribeExpiration,
+            false
+        );
+
+        emit SubscribedToVehicleStream(
+            streamId,
+            subscriber,
+            subscribeExpiration
+        );
     }
 }

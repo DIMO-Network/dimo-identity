@@ -1,11 +1,28 @@
 ## DIMORegistry
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0x0df5b997 | addModule(address,bytes4[]) |
 | 0x9748a762 | removeModule(address,bytes4[]) |
 | 0x06d1d2a1 | updateModule(address,address,bytes4[],bytes4[]) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x02d0c334 | ModuleAdded(address,bytes4[]) |
+| 0x7c3eb4f9 | ModuleRemoved(address,bytes4[]) |
+| 0xa062c2c0 | ModuleUpdated(address,address,bytes4[],bytes4[]) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
 ## DevAdmin
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0xd7376bae | adminBurnAftermarketDevices(uint256[]) |
@@ -21,7 +38,34 @@
 | 0x71193956 | unpairAftermarketDeviceByDeviceNode(uint256[]) |
 | 0x8c2ee9bb | unpairAftermarketDeviceByVehicleNode(uint256[]) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x000d5c45 | AftermarketDeviceAttributeSetDevAdmin(uint256,string,string) |
+| 0xb33f329d | AftermarketDeviceNodeBurnedDevAdmin(uint256,address) |
+| 0x89ec1328 | AftermarketDevicePaired(uint256,uint256,address) |
+| 0xaabf86a9 | AftermarketDeviceTransferredDevAdmin(uint256,address,address) |
+| 0xd2a3fcd4 | AftermarketDeviceUnclaimedDevAdmin(uint256) |
+| 0x1ba4ec81 | AftermarketDeviceUnpairedDevAdmin(uint256,uint256,address) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x8ad18187 | SyntheticDeviceAttributeSetDevAdmin(uint256,string,string) |
+| 0x81741fdd | SyntheticDeviceNodeBurnedDevAdmin(uint256,uint256,address) |
+| 0x1d91e00c | VehicleAttributeSetDevAdmin(uint256,string,string) |
+| 0xb956d027 | VehicleNodeBurnedDevAdmin(uint256,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0x15bdaac1 | AdNotClaimed(uint256) |
+| 0x762116ae | AdPaired(uint256) |
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+| 0xc46a5168 | VehiclePaired(uint256) |
+
 ## DimoAccessControl
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0x248a9ca3 | getRoleAdmin(bytes32) |
@@ -30,18 +74,45 @@
 | 0x8bb9c5bf | renounceRole(bytes32) |
 | 0xd547741f | revokeRole(bytes32,address) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
 ## Eip712Checker
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0x4cd88b76 | initialize(string,string) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
 ## Multicall
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0x415c2d96 | multiDelegateCall(bytes[]) |
 | 0x1c0c6e51 | multiStaticCall(bytes[]) |
 
 ## AdLicenseValidator
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0x46946743 | getAdMintCost() |
@@ -50,7 +121,20 @@
 | 0xf41377ca | setFoundationAddress(address) |
 | 0x0fd21c17 | setLicense(address) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
 ## AftermarketDevice
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0x6111afa3 | addAftermarketDeviceAttribute(string) |
@@ -67,7 +151,45 @@
 | 0xee4d9596 | unpairAftermarketDevice(uint256,uint256) |
 | 0x3f65997a | unpairAftermarketDeviceSign(uint256,uint256,bytes) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x3ef2473c | AftermarketDeviceAttributeAdded(string) |
+| 0x977fe0dd | AftermarketDeviceAttributeSet(uint256,string,string) |
+| 0x8468d811 | AftermarketDeviceClaimed(uint256,address) |
+| 0xe2daa727 | AftermarketDeviceIdProxySet(address) |
+| 0xd624fd4c | AftermarketDeviceNodeMinted(uint256,uint256,address,address) |
+| 0x89ec1328 | AftermarketDevicePaired(uint256,uint256,address) |
+| 0xd9135724 | AftermarketDeviceUnpaired(uint256,uint256,address) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0x15bdaac1 | AdNotClaimed(uint256) |
+| 0xd11e35b4 | AdNotPaired(uint256) |
+| 0x762116ae | AdPaired(uint256) |
+| 0x130e2668 | AttributeExists(string) |
+| 0x1c48d49e | AttributeNotWhitelisted(string) |
+| 0x4dec88eb | DeviceAlreadyClaimed(uint256) |
+| 0xcd76e845 | DeviceAlreadyRegistered(address) |
+| 0xdbe5383b | InvalidAdSignature() |
+| 0x5d608519 | InvalidLicense() |
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0x38a85a8d | InvalidOwnerSignature() |
+| 0x5299bab7 | InvalidParentNode(uint256) |
+| 0x815e1d64 | InvalidSigner() |
+| 0x4fc280ab | OwnersDoNotMatch() |
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+| 0x8e4a23d6 | Unauthorized(address) |
+| 0x2d91fcb5 | VehicleNotPaired(uint256) |
+| 0xc46a5168 | VehiclePaired(uint256) |
+| 0xd92e233d | ZeroAddress() |
+
 ## Manufacturer
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0x50300a3f | addManufacturerAttribute(string) |
@@ -83,7 +205,25 @@
 | 0x63545ffa | setManufacturerInfo(uint256,(string,string)[]) |
 | 0x20d60248 | updateManufacturerMinted(address,address) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x79f74fd5 | ControllerSet(address) |
+| 0x47ff34ba | ManufacturerAttributeAdded(string) |
+| 0xb81a4ce1 | ManufacturerAttributeSet(uint256,string,string) |
+| 0xf9bca5f2 | ManufacturerIdProxySet(address) |
+| 0xc1279f9a | ManufacturerNodeMinted(string,uint256,address) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
 ## Integration
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0x044d2498 | addIntegrationAttribute(string) |
@@ -99,7 +239,35 @@
 | 0x8d7e6001 | setIntegrationInfo(uint256,(string,string)[]) |
 | 0x440707b5 | updateIntegrationMinted(address,address) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x79f74fd5 | ControllerSet(address) |
+| 0x8a60d58f | IntegrationAttributeAdded(string) |
+| 0x7ad258fa | IntegrationAttributeSet(uint256,string,string) |
+| 0x25dd5f73 | IntegrationIdProxySet(address) |
+| 0x98490372 | IntegrationNodeMinted(uint256,address) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xb9f36dab | AlreadyController(address) |
+| 0x130e2668 | AttributeExists(string) |
+| 0x1c48d49e | AttributeNotWhitelisted(string) |
+| 0xb9cb244b | IntegrationNameRegisterd(string) |
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0x33c5677b | MustBeAdmin(address) |
+| 0xfa5cd00f | NotAllowed(address) |
+| 0x87e6ac10 | OnlyNftProxy() |
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+| 0x8e4a23d6 | Unauthorized(address) |
+| 0xd92e233d | ZeroAddress() |
+
 ## SyntheticDevice
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0xe1f371df | addSyntheticDeviceAttribute(string) |
@@ -111,7 +279,37 @@
 | 0xecf452d7 | setSyntheticDeviceIdProxyAddress(address) |
 | 0x80430e0d | setSyntheticDeviceInfo(uint256,(string,string)[]) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x6e358be2 | SyntheticDeviceAttributeAdded(string) |
+| 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
+| 0x03f4b74a | SyntheticDeviceIdProxySet(address) |
+| 0xe4edc3c1 | SyntheticDeviceNodeBurned(uint256,uint256,address) |
+| 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
+| 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
+| 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0x130e2668 | AttributeExists(string) |
+| 0x1c48d49e | AttributeNotWhitelisted(string) |
+| 0xcd76e845 | DeviceAlreadyRegistered(address) |
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0x38a85a8d | InvalidOwnerSignature() |
+| 0x5299bab7 | InvalidParentNode(uint256) |
+| 0xf8e95d55 | InvalidSdSignature() |
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+| 0x2d91fcb5 | VehicleNotPaired(uint256) |
+| 0xc46a5168 | VehiclePaired(uint256) |
+| 0xd92e233d | ZeroAddress() |
+
 ## Vehicle
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0xf0d1a557 | addVehicleAttribute(string) |
@@ -122,7 +320,33 @@
 | 0xd9c3ae61 | setVehicleInfo(uint256,(string,string)[]) |
 | 0xea0e7d3a | validateBurnAndResetNode(uint256) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x2b7d41dc | VehicleAttributeAdded(string) |
+| 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
+| 0x3e7484c4 | VehicleIdProxySet(address) |
+| 0x7b36384f | VehicleNodeBurned(uint256,address) |
+| 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0x130e2668 | AttributeExists(string) |
+| 0x1c48d49e | AttributeNotWhitelisted(string) |
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0x38a85a8d | InvalidOwnerSignature() |
+| 0x5299bab7 | InvalidParentNode(uint256) |
+| 0x87e6ac10 | OnlyNftProxy() |
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+| 0xc46a5168 | VehiclePaired(uint256) |
+| 0xd92e233d | ZeroAddress() |
+
 ## Nodes
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0xbc60a6ba | getDataURI(address,uint256) |
@@ -130,6 +354,7 @@
 | 0x82087d24 | getParentNode(address,uint256) |
 
 ## Mapper
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0x0a6cef46 | getBeneficiary(address,uint256) |
@@ -137,13 +362,97 @@
 | 0xbd2b5568 | getNodeLink(address,address,uint256) |
 | 0xbebc0bfc | setAftermarketDeviceBeneficiary(uint256,address) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xf6f6de47 | BeneficiarySet(address,uint256,address) |
+
 ## MultipleMinter
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0xfb1a28e8 | mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
 
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
+| 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
+| 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
+| 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0x1c48d49e | AttributeNotWhitelisted(string) |
+| 0xcd76e845 | DeviceAlreadyRegistered(address) |
+| 0x38a85a8d | InvalidOwnerSignature() |
+| 0x5299bab7 | InvalidParentNode(uint256) |
+| 0xf8e95d55 | InvalidSdSignature() |
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
 ## BaseDataURI
+#### Functions
 | Selector | Signature |
 |-|-|
 | 0xe324093f | setBaseDataURI(address,string) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x9f53d8a6 | BaseDataURISet(address,string) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
+## StreamrManager
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x2d40a5d8 | setStreamrRegistry(address) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x55a04a1d | DimoBaseStreamIdSet(string) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0xca46e5c5 | StreamrRegistrySet(address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
+## VehicleStream
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x497323c8 | createVehicleStream(uint256) |
+| 0x4337a026 | subscribeToVehicleStream(uint256,address,uint256) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x316c9677 | SubscribedToVehicleStream(string,address,uint256) |
+| 0xd35b1157 | VehicleStreamAssociated(uint256,string) |
+| 0xa4ca91c7 | VehicleStreamDissociated(uint256,string) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0x8e4a23d6 | Unauthorized(address) |
 

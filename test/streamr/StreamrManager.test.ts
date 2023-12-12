@@ -9,7 +9,7 @@ import type { StreamRegistry } from '@streamr/network-contracts'
 
 const { expect } = chai;
 
-describe.only('StreamrManager', async function () {
+describe('StreamrManager', async function () {
   let snapshot: string;
   let dimoAccessControlInstance: DimoAccessControl;
   let streamrManagerInstance: StreamrManager;

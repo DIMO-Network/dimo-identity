@@ -2,28 +2,24 @@
 pragma solidity ^0.8.13;
 
 /**
+ * @dev We don't need this storage yet
  * @title VehicleStream
  * @notice Storage of the VehicleStream contract
  */
 library VehicleStreamStorage {
-    string internal constant VEHICLE_STREAM_STORAGE_SLOT =
-        "DIMORegistry.vehicleStream.storage";
+    bytes32 internal constant VEHICLE_STREAM_STORAGE_SLOT =
+        keccak256("DIMORegistry.vehicleStream.storage");
 
-    struct Storage {
-        string streamId;
-        address[] subscribers;
-    }
+    // struct Storage {
+    //     uint256 test;
+    // }
 
-    /* solhint-disable no-inline-assembly */
-    function getStorage(
-        uint vehicleId
-    ) internal pure returns (Storage storage s) {
-        bytes32 slot = keccak256(
-            abi.encodePacked(VEHICLE_STREAM_STORAGE_SLOT, vehicleId)
-        );
-        assembly {
-            s.slot := slot
-        }
-    }
-    /* solhint-enable no-inline-assembly */
+    // /* solhint-disable no-inline-assembly */
+    // function getStorage() internal pure returns (Storage storage s) {
+    //     bytes32 slot = VEHICLE_STREAM_STORAGE_SLOT;
+    //     assembly {
+    //         s.slot := slot
+    //     }
+    // }
+    // /* solhint-enable no-inline-assembly */
 }

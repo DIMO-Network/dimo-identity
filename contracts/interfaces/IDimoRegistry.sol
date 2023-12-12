@@ -50,6 +50,4 @@ interface IDimoRegistry {
         uint256 tokenId,
         string calldata attribute
     ) external view returns (string memory info);
-
-    function onTransfer(address from, address to, uint256 vehicleId) external;
 }

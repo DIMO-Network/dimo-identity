@@ -1,8 +1,14 @@
 import chai from 'chai';
 import { ethers, HardhatEthersSigner } from 'hardhat';
+import { time } from '@nomicfoundation/hardhat-network-helpers';
 
-import { streamRegistryABI, streamRegistryBytecode, ENSCacheV2ABI, ENSCacheV2Bytecode } from '@streamr/network-contracts'
-import type { StreamRegistry, ENSCacheV2 } from '@streamr/network-contracts'
+import {
+  streamRegistryABI,
+  streamRegistryBytecode,
+  ENSCacheV2ABI,
+  ENSCacheV2Bytecode
+} from '@streamr/network-contracts';
+import type { StreamRegistry, ENSCacheV2 } from '@streamr/network-contracts';
 
 import {
   DIMORegistry,
@@ -24,11 +30,11 @@ import {
   C
 } from '../../utils';
 
-const { provider } = ethers;
 const { expect } = chai;
 
-describe.only('VehicleStream', async function () {
+describe('VehicleStream', async function () {
   let snapshot: string;
+  let subscriptionExpiresDefault: number;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
   let dimoAccessControlInstance: DimoAccessControl;
@@ -41,20 +47,48 @@ describe.only('VehicleStream', async function () {
   let ensCache: ENSCacheV2;
   let streamRegistry: StreamRegistry;
 
+  let DIMO_REGISTRY_ADDRESS: string;
+
   let admin: HardhatEthersSigner;
-  let nonAdmin: HardhatEthersSigner;
+  let streamrAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
+  let subscriber: HardhatEthersSigner;
+
+  async function setupStreamr(dimoRegistryAddress: string) {
+    const ensCacheFactory = new ethers.ContractFactory(ENSCacheV2ABI, ENSCacheV2Bytecode, streamrAdmin);
+    ensCache = await ensCacheFactory.deploy() as unknown as ENSCacheV2
+    const streamRegistryFactory = new ethers.ContractFactory(streamRegistryABI, streamRegistryBytecode, streamrAdmin);
+    streamRegistry = await streamRegistryFactory.deploy() as unknown as StreamRegistry;
+
+    await streamRegistry
+      .connect(streamrAdmin)
+      .initialize(await ensCache.getAddress(), ethers.ZeroAddress);
+    await ensCache
+      .connect(streamrAdmin)
+      .initialize(streamrAdmin.address, await streamRegistry.getAddress(), ethers.ZeroAddress);
+    await streamRegistry
+      .connect(streamrAdmin)
+      .grantRole(C.TRUSTED_ROLE, await ensCache.getAddress());
+
+    // Fill Streamr ENSCache with the dimo ENS and vehicle path streams.dimo.eth/vehicle/
+    await ensCache
+      .connect(streamrAdmin)
+      .fulfillENSOwner(C.DIMO_STREAM_ENS, '/vehicle/', '{}', dimoRegistryAddress);
+  }
 
   before(async () => {
     [
       admin,
-      nonAdmin,
+      streamrAdmin,
       manufacturer1,
       user1,
-      user2
+      user2,
+      subscriber
     ] = await ethers.getSigners();
+
+    subscriptionExpiresDefault = await time.latest() + 31556926; // + 1 year
 
     const deployments = await setup(admin, {
       modules: [
@@ -81,14 +115,16 @@ describe.only('VehicleStream', async function () {
     streamrManagerInstance = deployments.StreamrManager;
     vehicleStreamInstance = deployments.VehicleStream;
 
+    DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -131,24 +167,18 @@ describe.only('VehicleStream', async function () {
 
     // Setting DIMORegistry address
     await manufacturerIdInstance.setDimoRegistryAddress(
-      await dimoRegistryInstance.getAddress(),
+      DIMO_REGISTRY_ADDRESS,
     );
 
     await vehicleInstance
       .connect(admin)
       .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
 
+    await setupStreamr(DIMO_REGISTRY_ADDRESS);
 
-    const ensCacheFactory = new ethers.ContractFactory(ENSCacheV2ABI, ENSCacheV2Bytecode, admin);
-    ensCache = await ensCacheFactory.deploy() as unknown as ENSCacheV2
-
-    const streamRegistryFactory = new ethers.ContractFactory(streamRegistryABI, streamRegistryBytecode, admin);
-    streamRegistry = await streamRegistryFactory.deploy() as unknown as StreamRegistry;
-
-    await streamRegistry.initialize(await ensCache.getAddress(), admin.address);
-    await ensCache.initialize(admin.address, await streamRegistry.getAddress(), ethers.ZeroAddress);
-
-    await streamrManagerInstance.setStreamrRegistry(await streamRegistry.getAddress());
+    await streamrManagerInstance
+      .connect(admin)
+      .setStreamrRegistry(await streamRegistry.getAddress());
   });
 
   beforeEach(async () => {
@@ -159,13 +189,13 @@ describe.only('VehicleStream', async function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe.only('createStream', () => {
+  describe('createVehicleStream', () => {
     context('Error handling', () => {
       it('Should revert if caller is not the vehicle ID owner', async () => {
         await expect(
           vehicleStreamInstance
             .connect(user2)
-            .createStream(1)
+            .createVehicleStream(1)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'Unauthorized'
@@ -175,7 +205,7 @@ describe.only('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user1)
-            .createStream(99)
+            .createVehicleStream(99)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'InvalidNode'
@@ -186,41 +216,70 @@ describe.only('VehicleStream', async function () {
       });
     });
 
-    context('State', () => {
-
-    });
+    // TODO Test streamr state set (metadata, permissions)
+    context('State', () => {});
 
     context('Events', () => {
+      it('Should emit VehicleStreamAssociated event with correct params', async () => {
+        const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
 
+        await expect(
+          vehicleStreamInstance
+            .connect(user1)
+            .createVehicleStream(1)
+        ).to.emit(vehicleStreamInstance, 'VehicleStreamAssociated')
+          .withArgs(1, streamId);
+      });
     });
-    
-    it.skip('Test', async () => {
-      const now = (await provider.getBlock('latest'))!.timestamp
-      const myAddress = await dimoRegistryInstance.getAddress()
-      const streamId = `${myAddress.toLowerCase()}/vehicle/1`
-      await expect(vehicleStreamInstance.connect(admin).createStream(1))
+  });
 
-      // await ensCache.fulfillENSOwner('dimo.eth', '/vehicle/1', '{}', admin.address)
-      //   .to.emit(streamRegistry, 'StreamCreated').withArgs(streamId, '{}')
+  describe('subscribeToVehicleStream', () => {
+    beforeEach(async () => {
+      await vehicleStreamInstance
+        .connect(user1)
+        .createVehicleStream(1);
+    });
 
-      await expect(
-        vehicleStreamInstance
-          .connect(admin)
-          .subscribe(1, nonAdmin.address, now + 10000)
-      )
-        .to.emit(streamRegistry, 'PermissionUpdated')
-        .withArgs(streamId, nonAdmin.address, false, false, 0, ethers.MaxUint256, false);
-      await expect(
-        vehicleStreamInstance
-          .connect(admin)
-          .subscribe(1, manufacturer1.address, now + 10000)
-      )
-        .to.emit(streamRegistry, 'PermissionUpdated')
-        .withArgs(streamId, manufacturer1.address, false, false, 0, ethers.MaxUint256, false)
+    context('Error Handling', () => {
+      it('Should revert if caller is not the vehicle ID owner', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(user2)
+            .subscribeToVehicleStream(1, subscriber.address, subscriptionExpiresDefault)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'Unauthorized'
+        ).withArgs(user2.address);
+      });
+      it('Should revert if vehicle ID does not exist', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(user1)
+            .subscribeToVehicleStream(99, subscriber.address, subscriptionExpiresDefault)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'InvalidNode'
+        ).withArgs(
+          await vehicleIdInstance.getAddress(),
+          99
+        );
+      });
 
-      // TODO: replace with nft transfer
-      await expect(vehicleStreamInstance.connect(admin).onTransfer(admin.address, admin.address, 1))
-        .to.emit(streamRegistry, 'PermissionUpdated').withArgs(streamId, nonAdmin.address, false, false, 0, 0, false)
+      // TODO Test streamr state set (permissions)
+      context('State', () => {});
+
+      context('Events', () => {
+        it('Should emit SubscribedToVehicleStream event with correct params', async () => {
+          const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
+
+          await expect(
+            vehicleStreamInstance
+              .connect(user1)
+              .subscribeToVehicleStream(1, subscriber.address, subscriptionExpiresDefault)
+          ).to.emit(vehicleStreamInstance, 'SubscribedToVehicleStream')
+            .withArgs(streamId, subscriber.address, subscriptionExpiresDefault);
+        });
+      });
     });
   });
 });

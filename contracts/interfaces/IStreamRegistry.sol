@@ -32,6 +32,18 @@ interface IStreamRegistry {
         string calldata metadata
     ) external;
 
+    function setPermissionsForUser(
+        string calldata streamId,
+        address user,
+        bool canEdit,
+        bool deletePerm,
+        uint256 publishExpiration,
+        uint256 subscribeExpiration,
+        bool canGrant
+    ) external;
+
+    function deleteStream(string calldata streamId) external;
+
     function grantPublicPermission(
         string calldata streamId,
         PermissionType permissionType

@@ -2,15 +2,15 @@
 pragma solidity ^0.8.13;
 
 /**
- * @title StreamrStorage
- * @notice Storage of the StreamrStorage contract
+ * @title StreamrManagerStorage
+ * @notice Storage of the StreamrManager contract
  */
 library StreamrManagerStorage {
     bytes32 internal constant STREAMR_MANAGER_STORAGE_SLOT =
         keccak256("DIMORegistry.streamrManager.storage");
 
     struct Storage {
-        address streamrRegistry;
+        address streamRegistry;
     }
 
     /* solhint-disable no-inline-assembly */

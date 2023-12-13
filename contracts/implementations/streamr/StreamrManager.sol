@@ -6,19 +6,22 @@ import "../../libraries/streamr/StreamrManagerStorage.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-// TODO Documentation
 /**
  * @title StreamrManager
+ * @notice Contract to manage information related to Streamr
  */
 contract StreamrManager is AccessControlInternal {
-    event StreamrRegistrySet(address streamrRegistry);
-    event DimoBaseStreamIdSet(string baseStreamId);
+    event StreamRegistrySet(address streamRegistry);
 
-    // TODO Documentation
-    function setStreamrRegistry(
-        address streamrRegistry
+    /**
+     * @notice Sets the StreamRegistry contract address
+     * @dev Caller must have the ADMIN_ROLE
+     * @param streamRegistry The StreamRegistry contract address
+     */
+    function setStreamRegistry(
+        address streamRegistry
     ) external onlyRole(ADMIN_ROLE) {
-        StreamrManagerStorage.getStorage().streamrRegistry = streamrRegistry;
-        emit StreamrRegistrySet(streamrRegistry);
+        StreamrManagerStorage.getStorage().streamRegistry = streamRegistry;
+        emit StreamRegistrySet(streamRegistry);
     }
 }

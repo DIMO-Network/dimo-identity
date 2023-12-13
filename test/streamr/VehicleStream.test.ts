@@ -178,7 +178,7 @@ describe('VehicleStream', async function () {
 
     await streamrManagerInstance
       .connect(admin)
-      .setStreamrRegistry(await streamRegistry.getAddress());
+      .setStreamRegistry(await streamRegistry.getAddress());
   });
 
   beforeEach(async () => {
@@ -216,8 +216,34 @@ describe('VehicleStream', async function () {
       });
     });
 
-    // TODO Test streamr state set (metadata, permissions)
-    context('State', () => {});
+    context('State', () => {
+      it('Should correctly set vehicle stream metadata', async () => {
+        const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
+
+        await vehicleStreamInstance
+          .connect(user1)
+          .createVehicleStream(1);
+
+        expect(await streamRegistry.getStreamMetadata(streamId)).to.be.equal('{}');
+      });
+      it('Should correctly set all permissions to DIMORegistry', async () => {
+        const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
+
+        await vehicleStreamInstance
+          .connect(user1)
+          .createVehicleStream(1);
+
+        const permissions = await streamRegistry.getPermissionsForUser(streamId, DIMO_REGISTRY_ADDRESS);
+
+        expect(permissions).to.eql([
+          true,
+          true,
+          ethers.MaxUint256,
+          ethers.MaxUint256,
+          true
+        ]);
+      });
+    });
 
     context('Events', () => {
       it('Should emit VehicleStreamAssociated event with correct params', async () => {
@@ -228,7 +254,7 @@ describe('VehicleStream', async function () {
             .connect(user1)
             .createVehicleStream(1)
         ).to.emit(vehicleStreamInstance, 'VehicleStreamAssociated')
-          .withArgs(1, streamId);
+          .withArgs(streamId, 1);
       });
     });
   });
@@ -265,8 +291,23 @@ describe('VehicleStream', async function () {
         );
       });
 
-      // TODO Test streamr state set (permissions)
-      context('State', () => {});
+      context('State', () => {
+        it('Should correctly set only subscription', async () => {
+          const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
+
+          await vehicleStreamInstance
+            .connect(user1)
+            .subscribeToVehicleStream(1, subscriber.address, subscriptionExpiresDefault)
+
+          const permissions = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+
+          expect(permissions[0]).to.eql(false);
+          expect(permissions[1]).to.eql(false);
+          expect(permissions[2]).to.equal('0');
+          expect(permissions[3]).to.equal(subscriptionExpiresDefault.toString());
+          expect(permissions[4]).to.eql(false);
+        });
+      });
 
       context('Events', () => {
         it('Should emit SubscribedToVehicleStream event with correct params', async () => {

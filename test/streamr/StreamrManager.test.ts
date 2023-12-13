@@ -47,13 +47,13 @@ describe('StreamrManager', async function () {
     await revertToSnapshot(snapshot);
   });
 
-  describe('setStreamrRegistry', () => {
+  describe('setStreamRegistry', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
           streamrManagerInstance
             .connect(nonAdmin)
-            .setStreamrRegistry(await streamRegistry.getAddress())
+            .setStreamRegistry(await streamRegistry.getAddress())
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
@@ -62,13 +62,13 @@ describe('StreamrManager', async function () {
     });
 
     context('Events', () => {
-      it('Should emit StreamrRegistrySet event with correct params', async () => {
+      it('Should emit StreamRegistrySet event with correct params', async () => {
         await expect(
           streamrManagerInstance
             .connect(admin)
-            .setStreamrRegistry(await streamRegistry.getAddress())
+            .setStreamRegistry(await streamRegistry.getAddress())
         )
-          .to.emit(streamrManagerInstance, 'StreamrRegistrySet')
+          .to.emit(streamrManagerInstance, 'StreamRegistrySet')
           .withArgs(await streamRegistry.getAddress());
       });
     });

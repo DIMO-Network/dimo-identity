@@ -11,26 +11,33 @@ import "../../shared/Errors.sol" as Errors;
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-/// TODO Documentation
+/**
+ * @title VehicleStream
+ * @notice Contract to handle vehicle streams
+ */
 contract VehicleStream is AccessControlInternal {
     string constant DIMO_STREAM_ENS = "streams.dimo.eth";
     string constant DIMO_STREAM_ENS_VEHICLE = "streams.dimo.eth/vehicle/";
 
-    event VehicleStreamAssociated(uint256 indexed vehicleId, string streamId);
-    event VehicleStreamDissociated(uint256 indexed vehicleId, string streamId);
+    event VehicleStreamAssociated(string streamId, uint256 indexed vehicleId);
     event SubscribedToVehicleStream(
         string streamId,
         address indexed subscriber,
         uint256 subscribeExpiration
     );
 
-    // TODO Documentation
+    /**
+     * @notice Creates a vehicle stream associated with a vehicle id
+     * @dev Stream is is in format streams.dimo.eth/vehicle/<vehicleId>
+     * @dev Reverts if vehicle id does not exist or caller is not the owner
+     * @param vehicleId Vehicle node Id
+     */
     function createVehicleStream(uint256 vehicleId) external {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
         IStreamRegistry streamRegistry = IStreamRegistry(
-            StreamrManagerStorage.getStorage().streamrRegistry
+            StreamrManagerStorage.getStorage().streamRegistry
         );
 
         try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
@@ -55,10 +62,16 @@ contract VehicleStream is AccessControlInternal {
             )
         );
 
-        emit VehicleStreamAssociated(vehicleId, streamId);
+        emit VehicleStreamAssociated(streamId, vehicleId);
     }
 
-    // TODO Documentation
+    /**
+     * @notice Set a subcription permission for a user
+     * @dev Only the vehicle id owner can add new subscribers to their stream
+     * @param vehicleId Vehicle node id
+     * @param subscriber Vehicle stream subscriber
+     * @param subscribeExpiration Subscription expiraton timestamp
+     */
     function subscribeToVehicleStream(
         uint256 vehicleId,
         address subscriber,
@@ -67,9 +80,9 @@ contract VehicleStream is AccessControlInternal {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
-        StreamrManagerStorage.Storage storage ss = StreamrManagerStorage
+        StreamrManagerStorage.Storage storage sms = StreamrManagerStorage
             .getStorage();
-        IStreamRegistry streamRegistry = IStreamRegistry(ss.streamrRegistry);
+        IStreamRegistry streamRegistry = IStreamRegistry(sms.streamRegistry);
 
         // TODO To be possibly replaced by signature verification (like permit)
         try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
@@ -89,7 +102,7 @@ contract VehicleStream is AccessControlInternal {
             )
         );
 
-        // Creates the subscription permission setting subscribeExpiration > 0
+        // Creates the subscription permission setting subscribeExpiration
         streamRegistry.setPermissionsForUser(
             streamId,
             subscriber,

@@ -23,7 +23,7 @@ contract VehicleStream is AccessControlInternal {
     event SubscribedToVehicleStream(
         string streamId,
         address indexed subscriber,
-        uint256 subscribeExpiration
+        uint256 expirationTime
     );
 
     /**
@@ -66,16 +66,16 @@ contract VehicleStream is AccessControlInternal {
     }
 
     /**
-     * @notice Set a subcription permission for a user
+     * @notice Set a subscription permission for a user
      * @dev Only the vehicle id owner can add new subscribers to their stream
      * @param vehicleId Vehicle node id
      * @param subscriber Vehicle stream subscriber
-     * @param subscribeExpiration Subscription expiraton timestamp
+     * @param expirationTime Subscription expiration timestamp
      */
     function subscribeToVehicleStream(
         uint256 vehicleId,
         address subscriber,
-        uint256 subscribeExpiration
+        uint256 expirationTime
     ) external {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -102,21 +102,19 @@ contract VehicleStream is AccessControlInternal {
             )
         );
 
-        // Creates the subscription permission setting subscribeExpiration
-        streamRegistry.setPermissionsForUser(
+        streamRegistry.grantPermission(
             streamId,
             subscriber,
-            false,
-            false,
-            0,
-            subscribeExpiration,
-            false
+            IStreamRegistry.PermissionType.Subscribe
         );
 
-        emit SubscribedToVehicleStream(
+        streamRegistry.setExpirationTime(
             streamId,
             subscriber,
-            subscribeExpiration
+            IStreamRegistry.PermissionType.Subscribe,
+            expirationTime
         );
+
+        emit SubscribedToVehicleStream(streamId, subscriber, expirationTime);
     }
 }

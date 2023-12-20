@@ -18,7 +18,7 @@ import {
   ManufacturerId,
   Vehicle,
   VehicleId,
-  StreamrManager,
+  StreamrConfigurator,
   VehicleStream
 } from '../../typechain-types';
 
@@ -42,7 +42,7 @@ describe('VehicleStream', async function () {
   let vehicleInstance: Vehicle;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
-  let streamrManagerInstance: StreamrManager;
+  let streamrConfiguratorInstance: StreamrConfigurator;
   let vehicleStreamInstance: VehicleStream;
   let ensCache: ENSCacheV2;
   let streamRegistry: StreamRegistry;
@@ -98,7 +98,7 @@ describe('VehicleStream', async function () {
         'Manufacturer',
         'Vehicle',
         'Mapper',
-        'StreamrManager',
+        'StreamrConfigurator',
         'VehicleStream'
       ],
       nfts: ['ManufacturerId', 'VehicleId'],
@@ -112,7 +112,7 @@ describe('VehicleStream', async function () {
     vehicleInstance = deployments.Vehicle;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
-    streamrManagerInstance = deployments.StreamrManager;
+    streamrConfiguratorInstance = deployments.StreamrConfigurator;
     vehicleStreamInstance = deployments.VehicleStream;
 
     DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
@@ -176,7 +176,7 @@ describe('VehicleStream', async function () {
 
     await setupStreamr(DIMO_REGISTRY_ADDRESS);
 
-    await streamrManagerInstance
+    await streamrConfiguratorInstance
       .connect(admin)
       .setStreamRegistry(await streamRegistry.getAddress());
   });

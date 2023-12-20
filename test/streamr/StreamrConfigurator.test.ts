@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { ethers, HardhatEthersSigner } from 'hardhat';
 
-import { DimoAccessControl, StreamrManager } from '../../typechain-types';
+import { DimoAccessControl, StreamrConfigurator } from '../../typechain-types';
 import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';
 
 import { streamRegistryABI, streamRegistryBytecode } from '@streamr/network-contracts'
@@ -9,10 +9,10 @@ import type { StreamRegistry } from '@streamr/network-contracts'
 
 const { expect } = chai;
 
-describe('StreamrManager', async function () {
+describe('StreamrConfigurator', async function () {
   let snapshot: string;
   let dimoAccessControlInstance: DimoAccessControl;
-  let streamrManagerInstance: StreamrManager;
+  let streamrConfiguratorInstance: StreamrConfigurator;
   let streamRegistry: StreamRegistry;
 
   let admin: HardhatEthersSigner;
@@ -22,13 +22,13 @@ describe('StreamrManager', async function () {
     [admin, nonAdmin] = await ethers.getSigners();
 
     const deployments = await setup(admin, {
-      modules: ['DimoAccessControl', 'StreamrManager'],
+      modules: ['DimoAccessControl', 'StreamrConfigurator'],
       nfts: [],
       upgradeableContracts: []
     });
 
     dimoAccessControlInstance = deployments.DimoAccessControl;
-    streamrManagerInstance = deployments.StreamrManager;
+    streamrConfiguratorInstance = deployments.StreamrConfigurator;
 
     await dimoAccessControlInstance
       .connect(admin)
@@ -51,7 +51,7 @@ describe('StreamrManager', async function () {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
-          streamrManagerInstance
+          streamrConfiguratorInstance
             .connect(nonAdmin)
             .setStreamRegistry(await streamRegistry.getAddress())
         ).to.be.revertedWith(
@@ -64,11 +64,11 @@ describe('StreamrManager', async function () {
     context('Events', () => {
       it('Should emit StreamRegistrySet event with correct params', async () => {
         await expect(
-          streamrManagerInstance
+          streamrConfiguratorInstance
             .connect(admin)
             .setStreamRegistry(await streamRegistry.getAddress())
         )
-          .to.emit(streamrManagerInstance, 'StreamRegistrySet')
+          .to.emit(streamrConfiguratorInstance, 'StreamRegistrySet')
           .withArgs(await streamRegistry.getAddress());
       });
     });

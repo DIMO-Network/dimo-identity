@@ -2,15 +2,15 @@
 pragma solidity ^0.8.13;
 
 import "../../shared/Roles.sol";
-import "../../libraries/streamr/StreamrManagerStorage.sol";
+import "../../libraries/streamr/StreamrConfiguratorStorage.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 /**
- * @title StreamrManager
+ * @title StreamrConfigurator
  * @notice Contract to manage information related to Streamr
  */
-contract StreamrManager is AccessControlInternal {
+contract StreamrConfigurator is AccessControlInternal {
     event StreamRegistrySet(address streamRegistry);
 
     /**
@@ -21,7 +21,7 @@ contract StreamrManager is AccessControlInternal {
     function setStreamRegistry(
         address streamRegistry
     ) external onlyRole(ADMIN_ROLE) {
-        StreamrManagerStorage.getStorage().streamRegistry = streamRegistry;
+        StreamrConfiguratorStorage.getStorage().streamRegistry = streamRegistry;
         emit StreamRegistrySet(streamRegistry);
     }
 }

@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "../../interfaces/INFT.sol";
 import "../../interfaces/IStreamRegistry.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
-import "../../libraries/streamr/StreamrManagerStorage.sol";
+import "../../libraries/streamr/StreamrConfiguratorStorage.sol";
 
 import "../../shared/Errors.sol" as Errors;
 
@@ -37,7 +37,7 @@ contract VehicleStream is AccessControlInternal {
             .getStorage()
             .idProxyAddress;
         IStreamRegistry streamRegistry = IStreamRegistry(
-            StreamrManagerStorage.getStorage().streamRegistry
+            StreamrConfiguratorStorage.getStorage().streamRegistry
         );
 
         try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
@@ -80,8 +80,8 @@ contract VehicleStream is AccessControlInternal {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
-        StreamrManagerStorage.Storage storage sms = StreamrManagerStorage
-            .getStorage();
+        StreamrConfiguratorStorage.Storage
+            storage sms = StreamrConfiguratorStorage.getStorage();
         IStreamRegistry streamRegistry = IStreamRegistry(sms.streamRegistry);
 
         // TODO To be possibly replaced by signature verification (like permit)

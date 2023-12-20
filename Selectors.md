@@ -413,7 +413,7 @@
 |-|-|
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 
-## StreamrManager
+## StreamrConfigurator
 #### Functions
 | Selector | Signature |
 |-|-|

@@ -79,7 +79,7 @@ main([
   'Mapper',
   'MultipleMinter',
   'BaseDataURI',
-  'StreamrManager',
+  'StreamrConfigurator',
   'VehicleStream'
 ]).catch((error) => {
   console.error(error);

@@ -5,11 +5,19 @@ import "../../interfaces/INFT.sol";
 import "../../interfaces/IStreamRegistry.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/streamr/StreamrConfiguratorStorage.sol";
+import "../../libraries/streamr/VehicleStreamStorage.sol";
 
 import "../../shared/Errors.sol" as Errors;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+
+error StreamDoesNotExist(string streamId);
+error VehicleStreamNotSet(uint256 vehicleId);
+error NoStreamrPermission(
+    address user,
+    IStreamRegistry.PermissionType permissionType
+);
 
 /**
  * @title VehicleStream
@@ -19,7 +27,8 @@ contract VehicleStream is AccessControlInternal {
     string constant DIMO_STREAM_ENS = "streams.dimo.eth";
     string constant DIMO_STREAM_ENS_VEHICLE = "streams.dimo.eth/vehicle/";
 
-    event VehicleStreamAssociated(string streamId, uint256 indexed vehicleId);
+    event VehicleStreamAssociated(uint256 indexed vehicleId, string streamId);
+    event VehicleStreamDissociated(uint256 indexed vehicleId, string streamId);
     event SubscribedToVehicleStream(
         string streamId,
         address indexed subscriber,
@@ -28,6 +37,7 @@ contract VehicleStream is AccessControlInternal {
 
     /**
      * @notice Creates a vehicle stream associated with a vehicle id
+     * Grants publishing permission to the DIMO Streamr Node
      * @dev Stream is is in format streams.dimo.eth/vehicle/<vehicleId>
      * @dev Reverts if vehicle id does not exist or caller is not the owner
      * @param vehicleId Vehicle node Id
@@ -39,6 +49,8 @@ contract VehicleStream is AccessControlInternal {
         IStreamRegistry streamRegistry = IStreamRegistry(
             StreamrConfiguratorStorage.getStorage().streamRegistry
         );
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
 
         try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
             address vehicleOwner
@@ -62,7 +74,121 @@ contract VehicleStream is AccessControlInternal {
             )
         );
 
-        emit VehicleStreamAssociated(streamId, vehicleId);
+        string memory oldStreamId = vs.streams[vehicleId];
+        if (bytes(oldStreamId).length != 0) {
+            emit VehicleStreamDissociated(vehicleId, oldStreamId);
+        }
+
+        vs.streams[vehicleId] = streamId;
+
+        emit VehicleStreamAssociated(vehicleId, streamId);
+
+        streamRegistry.grantPermission(
+            streamId,
+            StreamrConfiguratorStorage.getStorage().dimoStreamrNode,
+            IStreamRegistry.PermissionType.Publish
+        );
+    }
+
+    /**
+     * @notice Allows a vehicle owner to associate an existing stream Id from their vehicle Id
+     * @dev This contract must have Publish and Grant Streamr permissions
+     * @dev Reverts if vehicle id does not exist, caller is not the owner,
+     * stream Id does not exist, DIMO Registry does not have grant permission or DIMO Streamr Node the publish permission
+     * @param vehicleId Vehicle node Id
+     */
+    function setVehicleStream(
+        uint256 vehicleId,
+        string calldata streamId
+    ) external {
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        StreamrConfiguratorStorage.Storage
+            storage scs = StreamrConfiguratorStorage.getStorage();
+        IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
+
+        try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
+            address vehicleOwner
+        ) {
+            if (vehicleOwner != msg.sender) {
+                revert Errors.Unauthorized(msg.sender);
+            }
+        } catch {
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleId);
+        }
+
+        if (!streamRegistry.exists(streamId)) {
+            revert StreamDoesNotExist(streamId);
+        }
+
+        if (
+            !streamRegistry.hasPermission(
+                streamId,
+                scs.dimoStreamrNode,
+                IStreamRegistry.PermissionType.Publish
+            )
+        ) {
+            revert NoStreamrPermission(
+                scs.dimoStreamrNode,
+                IStreamRegistry.PermissionType.Publish
+            );
+        }
+        if (
+            !streamRegistry.hasPermission(
+                streamId,
+                address(this),
+                IStreamRegistry.PermissionType.Grant
+            )
+        ) {
+            revert NoStreamrPermission(
+                address(this),
+                IStreamRegistry.PermissionType.Grant
+            );
+        }
+
+        string memory oldStreamId = vs.streams[vehicleId];
+        if (bytes(oldStreamId).length != 0) {
+            emit VehicleStreamDissociated(vehicleId, oldStreamId);
+        }
+
+        vs.streams[vehicleId] = streamId;
+
+        emit VehicleStreamAssociated(vehicleId, streamId);
+    }
+
+    /**
+     * @notice Allows a vehicle owner to dissociate the stream Id from their vehicle Id
+     * @dev Reverts if vehicle id does not exist or caller is not the owner
+     * @param vehicleId Vehicle node Id
+     */
+    function dissociateVehicleStream(uint256 vehicleId) external {
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
+
+        try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
+            address vehicleOwner
+        ) {
+            if (vehicleOwner != msg.sender) {
+                revert Errors.Unauthorized(msg.sender);
+            }
+        } catch {
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleId);
+        }
+
+        string memory oldStreamId = vs.streams[vehicleId];
+        if (bytes(oldStreamId).length == 0) {
+            revert VehicleStreamNotSet(vehicleId);
+        }
+
+        delete vs.streams[vehicleId];
+
+        emit VehicleStreamDissociated(vehicleId, oldStreamId);
     }
 
     /**
@@ -81,8 +207,8 @@ contract VehicleStream is AccessControlInternal {
             .getStorage()
             .idProxyAddress;
         StreamrConfiguratorStorage.Storage
-            storage sms = StreamrConfiguratorStorage.getStorage();
-        IStreamRegistry streamRegistry = IStreamRegistry(sms.streamRegistry);
+            storage scs = StreamrConfiguratorStorage.getStorage();
+        IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
 
         // TODO To be possibly replaced by signature verification (like permit)
         try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
@@ -116,5 +242,16 @@ contract VehicleStream is AccessControlInternal {
         );
 
         emit SubscribedToVehicleStream(streamId, subscriber, expirationTime);
+    }
+
+    /**
+     * @notice Gets the stream Id by the vehicle Id
+     * @dev If there is not stream Id associated to the vehicle Id, it will return an empty string
+     * @param vehicleId Vehicle node Id
+     */
+    function getVehicleStream(
+        uint256 vehicleId
+    ) external view returns (string memory streamId) {
+        streamId = VehicleStreamStorage.getStorage().streams[vehicleId];
     }
 }

@@ -146,6 +146,7 @@
 | 0x7ba79a39 | mintAftermarketDeviceByManufacturerBatch(uint256,(address,(string,string)[])[]) |
 | 0xb50df2f7 | pairAftermarketDeviceSign(uint256,uint256,bytes,bytes) |
 | 0xcfe642dd | pairAftermarketDeviceSign(uint256,uint256,bytes) |
+| 0x9d0b139b | resetAftermarketDeviceAddressByManufacturerBatch((uint256,address)[]) |
 | 0x4d49d82a | setAftermarketDeviceIdProxyAddress(address) |
 | 0x4d13b709 | setAftermarketDeviceInfo(uint256,(string,string)[]) |
 | 0xee4d9596 | unpairAftermarketDevice(uint256,uint256) |
@@ -154,6 +155,7 @@
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x4993b53b | AftermarketDeviceAddressReset(uint256,uint256,address) |
 | 0x3ef2473c | AftermarketDeviceAttributeAdded(string) |
 | 0x977fe0dd | AftermarketDeviceAttributeSet(uint256,string,string) |
 | 0x8468d811 | AftermarketDeviceClaimed(uint256,address) |

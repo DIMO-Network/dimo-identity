@@ -415,3 +415,44 @@
 |-|-|
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 
+## StreamrConfigurator
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x0c3cac3b | setStreamRegistry(address) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x42d068f4 | StreamRegistrySet(address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
+## VehicleStream
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x497323c8 | createVehicleStream(uint256) |
+| 0x4337a026 | subscribeToVehicleStream(uint256,address,uint256) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x316c9677 | SubscribedToVehicleStream(string,address,uint256) |
+| 0x228a7421 | VehicleStreamAssociated(string,uint256) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0x8e4a23d6 | Unauthorized(address) |
+

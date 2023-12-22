@@ -12,3 +12,4 @@ artifacts
 
 # OpenZeppelin
 .openzeppelin/unknown-*.json
+scripts/script.ts

@@ -16,9 +16,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * @notice Contract to handle vehicle streams
  */
 contract VehicleStream is AccessControlInternal {
-    string constant DIMO_STREAM_ENS = "streams.dimo.eth";
-    string constant DIMO_STREAM_ENS_VEHICLE = "streams.dimo.eth/vehicle/";
-
     event VehicleStreamAssociated(string streamId, uint256 indexed vehicleId);
     event SubscribedToVehicleStream(
         string streamId,
@@ -36,6 +33,9 @@ contract VehicleStream is AccessControlInternal {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
+        string memory dimoStreamrEns = StreamrConfiguratorStorage
+            .getStorage()
+            .dimoStreamrEns;
         IStreamRegistry streamRegistry = IStreamRegistry(
             StreamrConfiguratorStorage.getStorage().streamRegistry
         );
@@ -53,11 +53,12 @@ contract VehicleStream is AccessControlInternal {
         string memory streamPath = string(
             abi.encodePacked("/vehicle/", Strings.toString(vehicleId))
         );
-        streamRegistry.createStreamWithENS(DIMO_STREAM_ENS, streamPath, "{}");
+        streamRegistry.createStreamWithENS(dimoStreamrEns, streamPath, "{}");
 
         string memory streamId = string(
             abi.encodePacked(
-                DIMO_STREAM_ENS_VEHICLE,
+                dimoStreamrEns,
+                "/vehicle/",
                 Strings.toString(vehicleId)
             )
         );
@@ -97,7 +98,8 @@ contract VehicleStream is AccessControlInternal {
 
         string memory streamId = string(
             abi.encodePacked(
-                DIMO_STREAM_ENS_VEHICLE,
+                sms.dimoStreamrEns,
+                "/vehicle/",
                 Strings.toString(vehicleId)
             )
         );

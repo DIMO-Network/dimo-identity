@@ -419,11 +419,13 @@
 #### Functions
 | Selector | Signature |
 |-|-|
+| 0x9e594424 | setDimoBaseStreamId(string) |
 | 0x0c3cac3b | setStreamRegistry(address) |
 
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x5c6e4ce4 | DimoStreamrEnsSet(string) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |

@@ -13,6 +13,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 contract StreamrConfigurator is AccessControlInternal {
     event StreamRegistrySet(address streamRegistry);
     event DimoStreamrNodeSet(address dimoStreamrNode);
+    event DimoStreamrEnsSet(string dimoStreamrEns);
 
     /**
      * @notice Sets the StreamRegistry contract address
@@ -38,5 +39,17 @@ contract StreamrConfigurator is AccessControlInternal {
             .getStorage()
             .dimoStreamrNode = dimoStreamrNode;
         emit DimoStreamrNodeSet(dimoStreamrNode);
+    }
+
+    /**
+     * @notice Sets the base Streamr ENS
+     * @dev Caller must have the ADMIN_ROLE
+     * @param dimoStreamrEns The base Streamr ENS
+     */
+    function setDimoBaseStreamId(
+        string calldata dimoStreamrEns
+    ) external onlyRole(ADMIN_ROLE) {
+        StreamrConfiguratorStorage.getStorage().dimoStreamrEns = dimoStreamrEns;
+        emit DimoStreamrEnsSet(dimoStreamrEns);
     }
 }

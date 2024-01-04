@@ -11,6 +11,7 @@ library StreamrConfiguratorStorage {
 
     struct Storage {
         address streamRegistry;
+        string dimoStreamrEns;
     }
 
     /* solhint-disable no-inline-assembly */

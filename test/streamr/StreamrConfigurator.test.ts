@@ -72,5 +72,32 @@ describe('StreamrConfigurator', async function () {
           .withArgs(await streamRegistry.getAddress());
       });
     });
+
+    describe('setDimoBaseStreamId', () => {
+      context('Error handling', () => {
+        it('Should revert if caller does not have admin role', async () => {
+          await expect(
+            streamrConfiguratorInstance
+              .connect(nonAdmin)
+              .setDimoBaseStreamId(C.DIMO_STREAMR_ENS)
+          ).to.be.revertedWith(
+            `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
+            }`
+          );
+        });
+      });
+  
+      context('Events', () => {
+        it('Should emit DimoStreamrEnsSet event with correct params', async () => {
+          await expect(
+            streamrConfiguratorInstance
+              .connect(admin)
+              .setDimoBaseStreamId(C.DIMO_STREAMR_ENS)
+          )
+            .to.emit(streamrConfiguratorInstance, 'DimoStreamrEnsSet')
+            .withArgs(C.DIMO_STREAMR_ENS);
+        });
+      });
+    });
   });
 });

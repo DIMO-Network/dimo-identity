@@ -75,7 +75,7 @@ describe('VehicleStream', async function () {
     // Fill Streamr ENSCache with the dimo ENS and vehicle path streams.dimo.eth/vehicle/
     await ensCache
       .connect(streamrAdmin)
-      .fulfillENSOwner(C.DIMO_STREAM_ENS, '/vehicle/', '{}', dimoRegistryAddress);
+      .fulfillENSOwner(C.DIMO_STREAMR_ENS, '/vehicle/', '{}', dimoRegistryAddress);
   }
 
   before(async () => {
@@ -179,6 +179,9 @@ describe('VehicleStream', async function () {
     await streamrConfiguratorInstance
       .connect(admin)
       .setStreamRegistry(await streamRegistry.getAddress());
+    await streamrConfiguratorInstance
+      .connect(admin)
+      .setDimoBaseStreamId(C.DIMO_STREAMR_ENS);
   });
 
   beforeEach(async () => {
@@ -218,7 +221,7 @@ describe('VehicleStream', async function () {
 
     context('State', () => {
       it('Should correctly set vehicle stream metadata', async () => {
-        const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
+        const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
 
         await vehicleStreamInstance
           .connect(user1)
@@ -227,7 +230,7 @@ describe('VehicleStream', async function () {
         expect(await streamRegistry.getStreamMetadata(streamId)).to.be.equal('{}');
       });
       it('Should correctly set all permissions to DIMORegistry', async () => {
-        const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
+        const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
 
         await vehicleStreamInstance
           .connect(user1)
@@ -247,7 +250,7 @@ describe('VehicleStream', async function () {
 
     context('Events', () => {
       it('Should emit VehicleStreamAssociated event with correct params', async () => {
-        const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
+        const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
 
         await expect(
           vehicleStreamInstance
@@ -293,7 +296,7 @@ describe('VehicleStream', async function () {
 
       context('State', () => {
         it('Should correctly set only subscription', async () => {
-          const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
+          const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
 
           await vehicleStreamInstance
             .connect(user1)
@@ -311,7 +314,7 @@ describe('VehicleStream', async function () {
 
       context('Events', () => {
         it('Should emit SubscribedToVehicleStream event with correct params', async () => {
-          const streamId = `${C.DIMO_STREAM_ENS}/vehicle/1`;
+          const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
 
           await expect(
             vehicleStreamInstance

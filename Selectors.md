@@ -443,10 +443,10 @@
 | Selector | Signature |
 |-|-|
 | 0x497323c8 | createVehicleStream(uint256) |
-| 0x460fa987 | dissociateVehicleStream(uint256) |
 | 0x180e469a | getVehicleStream(uint256) |
 | 0x6f58f093 | setVehicleStream(uint256,string) |
 | 0x4337a026 | subscribeToVehicleStream(uint256,address,uint256) |
+| 0xcd90df7e | unsetVehicleStream(uint256) |
 
 #### Events
 | Selector | Signature |
@@ -455,8 +455,8 @@
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
 | 0x316c9677 | SubscribedToVehicleStream(string,address,uint256) |
-| 0xd35b1157 | VehicleStreamAssociated(uint256,string) |
-| 0xa4ca91c7 | VehicleStreamDissociated(uint256,string) |
+| 0x09d0a780 | VehicleStreamSet(uint256,string) |
+| 0x14692607 | VehicleStreamUnset(uint256,string) |
 
 #### Errors
 | Selector | Signature |
@@ -465,5 +465,6 @@
 | 0xc8093930 | NoStreamrPermission(address,uint8) |
 | 0xa3f1925a | StreamDoesNotExist(string) |
 | 0x8e4a23d6 | Unauthorized(address) |
+| 0xf7959f9e | VehicleStreamAlreadySet(uint256,string) |
 | 0x42e5dbbe | VehicleStreamNotSet(uint256) |
 

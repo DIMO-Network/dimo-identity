@@ -12,6 +12,7 @@ import "../../shared/Errors.sol" as Errors;
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
+error VehicleStreamAlreadySet(uint256 vehicleId, string streamId);
 error StreamDoesNotExist(string streamId);
 error VehicleStreamNotSet(uint256 vehicleId);
 error NoStreamrPermission(
@@ -24,8 +25,8 @@ error NoStreamrPermission(
  * @notice Contract to handle vehicle streams
  */
 contract VehicleStream is AccessControlInternal {
-    event VehicleStreamAssociated(uint256 indexed vehicleId, string streamId);
-    event VehicleStreamDissociated(uint256 indexed vehicleId, string streamId);
+    event VehicleStreamSet(uint256 indexed vehicleId, string streamId);
+    event VehicleStreamUnset(uint256 indexed vehicleId, string streamId);
     event SubscribedToVehicleStream(
         string streamId,
         address indexed subscriber,
@@ -77,12 +78,12 @@ contract VehicleStream is AccessControlInternal {
 
         string memory oldStreamId = vs.streams[vehicleId];
         if (bytes(oldStreamId).length != 0) {
-            emit VehicleStreamDissociated(vehicleId, oldStreamId);
+            revert VehicleStreamAlreadySet(vehicleId, oldStreamId);
         }
 
         vs.streams[vehicleId] = streamId;
 
-        emit VehicleStreamAssociated(vehicleId, streamId);
+        emit VehicleStreamSet(vehicleId, streamId);
 
         streamRegistry.grantPermission(
             streamId,
@@ -97,6 +98,7 @@ contract VehicleStream is AccessControlInternal {
      * @dev Reverts if vehicle id does not exist, caller is not the owner,
      * stream Id does not exist, DIMO Registry does not have grant permission or DIMO Streamr Node the publish permission
      * @param vehicleId Vehicle node Id
+     * @param streamId The stream Id
      */
     function setVehicleStream(
         uint256 vehicleId,
@@ -152,12 +154,12 @@ contract VehicleStream is AccessControlInternal {
 
         string memory oldStreamId = vs.streams[vehicleId];
         if (bytes(oldStreamId).length != 0) {
-            emit VehicleStreamDissociated(vehicleId, oldStreamId);
+            emit VehicleStreamUnset(vehicleId, oldStreamId);
         }
 
         vs.streams[vehicleId] = streamId;
 
-        emit VehicleStreamAssociated(vehicleId, streamId);
+        emit VehicleStreamSet(vehicleId, streamId);
     }
 
     /**
@@ -165,7 +167,7 @@ contract VehicleStream is AccessControlInternal {
      * @dev Reverts if vehicle id does not exist or caller is not the owner
      * @param vehicleId Vehicle node Id
      */
-    function dissociateVehicleStream(uint256 vehicleId) external {
+    function unsetVehicleStream(uint256 vehicleId) external {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
@@ -189,7 +191,7 @@ contract VehicleStream is AccessControlInternal {
 
         delete vs.streams[vehicleId];
 
-        emit VehicleStreamDissociated(vehicleId, oldStreamId);
+        emit VehicleStreamUnset(vehicleId, oldStreamId);
     }
 
     /**

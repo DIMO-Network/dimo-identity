@@ -222,6 +222,31 @@ describe('VehicleStream', async function () {
           99
         );
       });
+      it('Should revert if vehicle ID was already associated with a stream ID', async () => {
+        const oldStreamId = `${await user1.address.toString().toLowerCase()}${C.MOCK_STREAM_PATH}`;
+
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(oldStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(oldStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
+        await vehicleStreamInstance
+          .connect(user1)
+          .setVehicleStream(1, oldStreamId);
+
+        await expect(
+          vehicleStreamInstance
+            .connect(user1)
+            .createVehicleStream(1)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'VehicleStreamAlreadySet'
+        ).withArgs(1, oldStreamId);
+      });
     });
 
     context('State', () => {
@@ -278,34 +303,12 @@ describe('VehicleStream', async function () {
     });
 
     context('Events', () => {
-      it('Should emit VehicleStreamDissociated event with correct params when vehicle ID was already associated with a stream ID', async () => {
-        const oldStreamId = `${await user1.address.toString().toLowerCase()}${C.MOCK_STREAM_PATH}`;
-        await streamRegistry
-          .connect(user1)
-          .createStream(C.MOCK_STREAM_PATH, '{}');
-        await streamRegistry
-          .connect(user1)
-          .grantPermission(oldStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
-        await streamRegistry
-          .connect(user1)
-          .grantPermission(oldStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
-        await vehicleStreamInstance
-          .connect(user1)
-          .setVehicleStream(1, oldStreamId);
-
+      it('Should emit VehicleStreamSet event with correct params', async () => {
         await expect(
           vehicleStreamInstance
             .connect(user1)
             .createVehicleStream(1)
-        ).to.emit(vehicleStreamInstance, 'VehicleStreamDissociated')
-          .withArgs(1, oldStreamId);
-      });
-      it('Should emit VehicleStreamAssociated event with correct params', async () => {
-        await expect(
-          vehicleStreamInstance
-            .connect(user1)
-            .createVehicleStream(1)
-        ).to.emit(vehicleStreamInstance, 'VehicleStreamAssociated')
+        ).to.emit(vehicleStreamInstance, 'VehicleStreamSet')
           .withArgs(1, streamId);
       });
     });
@@ -416,7 +419,7 @@ describe('VehicleStream', async function () {
     });
 
     context('Events', () => {
-      it('Should emit VehicleStreamDissociated event with correct params when vehicle ID was already associated with a stream ID', async () => {
+      it('Should emit VehicleStreamUnset event with correct params when vehicle ID was already associated with a stream ID', async () => {
         const oldStreamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
 
         await vehicleStreamInstance
@@ -427,21 +430,21 @@ describe('VehicleStream', async function () {
           vehicleStreamInstance
             .connect(user1)
             .setVehicleStream(1, mockStreamId)
-        ).to.emit(vehicleStreamInstance, 'VehicleStreamDissociated')
+        ).to.emit(vehicleStreamInstance, 'VehicleStreamUnset')
           .withArgs(1, oldStreamId);
       });
-      it('Should emit VehicleStreamAssociated event with correct params', async () => {
+      it('Should emit VehicleStreamSet event with correct params', async () => {
         await expect(
           vehicleStreamInstance
             .connect(user1)
             .setVehicleStream(1, mockStreamId)
-        ).to.emit(vehicleStreamInstance, 'VehicleStreamAssociated')
+        ).to.emit(vehicleStreamInstance, 'VehicleStreamSet')
           .withArgs(1, mockStreamId);
       });
     });
   });
 
-  describe('dissociateVehicleStream', () => {
+  describe('unsetVehicleStream', () => {
     let mockStreamId: string;
     beforeEach(async () => {
       await vehicleStreamInstance
@@ -456,7 +459,7 @@ describe('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user2)
-            .dissociateVehicleStream(1)
+            .unsetVehicleStream(1)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'Unauthorized'
@@ -466,7 +469,7 @@ describe('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user1)
-            .dissociateVehicleStream(99)
+            .unsetVehicleStream(99)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'InvalidNode'
@@ -483,7 +486,7 @@ describe('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user2)
-            .dissociateVehicleStream(2)
+            .unsetVehicleStream(2)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'VehicleStreamNotSet'
@@ -500,7 +503,7 @@ describe('VehicleStream', async function () {
 
         await vehicleStreamInstance
           .connect(user1)
-          .dissociateVehicleStream(1);
+          .unsetVehicleStream(1);
 
         const streamIdAfter = await vehicleStreamInstance.getVehicleStream(1);
         expect(streamIdAfter).to.be.empty;
@@ -508,12 +511,12 @@ describe('VehicleStream', async function () {
     });
 
     context('Events', () => {
-      it('Should emit VehicleStreamDissociated event with correct params', async () => {
+      it('Should emit VehicleStreamUnset event with correct params', async () => {
         await expect(
           vehicleStreamInstance
             .connect(user1)
-            .dissociateVehicleStream(1)
-        ).to.emit(vehicleStreamInstance, 'VehicleStreamDissociated')
+            .unsetVehicleStream(1)
+        ).to.emit(vehicleStreamInstance, 'VehicleStreamUnset')
           .withArgs(1, mockStreamId);
       });
     });

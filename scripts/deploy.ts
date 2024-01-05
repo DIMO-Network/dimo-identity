@@ -17,6 +17,7 @@ import {
   AdLicenseValidator,
   SyntheticDevice,
   SyntheticDeviceId,
+  StreamrConfigurator,
   DimoForwarder,
   NftBaseUpgradeable,
 } from '../typechain-types';
@@ -109,6 +110,8 @@ async function deployModules(
     { name: 'AdLicenseValidator', args: [] },
     { name: 'Mapper', args: [] },
     { name: 'MultipleMinter', args: [] },
+    { name: 'StreamrConfigurator', args: [] },
+    { name: 'VehicleStream', args: [] },
     { name: 'DevAdmin', args: [] },
     { name: 'Multicall', args: [] },
   ];
@@ -121,8 +124,7 @@ async function deployModules(
     await DIMORegistry.connect(deployer).deploy();
 
   console.log(
-    `Contract ${
-      C.dimoRegistryName
+    `Contract ${C.dimoRegistryName
     } deployed to ${await dimoRegistryImplementation.getAddress()}`,
   );
 
@@ -138,8 +140,7 @@ async function deployModules(
     ).deploy(...contractNameArg.args);
 
     console.log(
-      `Contract ${
-        contractNameArg.name
+      `Contract ${contractNameArg.name
       } deployed to ${await contractImplementation.getAddress()}`,
     );
 
@@ -180,8 +181,7 @@ async function deployNfts(
     );
 
     console.log(
-      `NFT contract ${
-        contractNameArg.name
+      `NFT contract ${contractNameArg.name
       } deployed to ${await contractProxy.getAddress()}`,
     );
 
@@ -690,11 +690,43 @@ async function mintBatchIntegrations(
   console.log('\n----- Integrations minted -----\n');
 }
 
+async function setupStreamr(
+  deployer: HardhatEthersSigner,
+  networkName: string,
+) {
+  const instances = getAddresses();
+
+  const streamrConfiguratorInstance: StreamrConfigurator = await ethers.getContractAt(
+    'StreamrConfigurator',
+    instances[networkName].modules.DIMORegistry.address,
+  );
+
+  console.log(`\n----- Setting StreamRegistry ${instances[networkName].misc.StreamRegistry} -----\n`);
+
+  await streamrConfiguratorInstance
+    .connect(deployer)
+    .setStreamRegistry(
+      instances[networkName].misc.StreamRegistry
+    );
+
+  console.log('\n----- StreamRegistry set -----\n');
+
+  console.log(`\n----- Setting DIMO Base StreamId (ENS) ${C.dimoStreamrEns[networkName]} -----\n`);
+
+  await streamrConfiguratorInstance
+    .connect(deployer)
+    .setDimoBaseStreamId(
+      C.dimoStreamrEns[networkName]
+    );
+
+  console.log('\n----- DIMO Base StreamId set -----\n');
+}
+
 async function buildMocks(
   deployer: HardhatEthersSigner,
   mockFoundation: HardhatEthersSigner,
   mockKms: HardhatEthersSigner,
-  networkName: string,
+  networkName: string
 ): Promise<AddressesByNetwork> {
   const instances = getAddresses();
 
@@ -794,10 +826,12 @@ async function main() {
     networkName,
   );
 
-  process.exit();
+  await setupStreamr(deployer, networkName);
 }
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
+}).finally(() => {
+  process.exit();
 });

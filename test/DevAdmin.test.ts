@@ -1,5 +1,14 @@
 import chai from 'chai';
+import { EventLog } from 'ethers';
 import { ethers, HardhatEthersSigner } from 'hardhat';
+
+import {
+  streamRegistryABI,
+  streamRegistryBytecode,
+  ENSCacheV2ABI,
+  ENSCacheV2Bytecode
+} from '@streamr/network-contracts';
+import type { StreamRegistry, ENSCacheV2 } from '@streamr/network-contracts';
 
 import {
   DIMORegistry,
@@ -18,6 +27,7 @@ import {
   SyntheticDeviceId,
   AdLicenseValidator,
   Mapper,
+  StreamrConfigurator,
   MockDimoToken,
   MockStake,
   DevAdmin,
@@ -55,10 +65,16 @@ describe('DevAdmin', function () {
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
   let sdIdInstance: SyntheticDeviceId;
+  let streamrConfiguratorInstance: StreamrConfigurator;
+  let ensCache: ENSCacheV2;
+  let streamRegistry: StreamRegistry;
+
+  let DIMO_REGISTRY_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
   let foundation: HardhatEthersSigner;
+  let streamrAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let manufacturer2: HardhatEthersSigner;
   let manufacturer3: HardhatEthersSigner;
@@ -77,11 +93,29 @@ describe('DevAdmin', function () {
     JSON.stringify(C.mockAftermarketDeviceInfosListNotWhitelisted),
   );
 
+  async function setupStreamr() {
+    const ensCacheFactory = new ethers.ContractFactory(ENSCacheV2ABI, ENSCacheV2Bytecode, streamrAdmin);
+    ensCache = await ensCacheFactory.deploy() as unknown as ENSCacheV2
+    const streamRegistryFactory = new ethers.ContractFactory(streamRegistryABI, streamRegistryBytecode, streamrAdmin);
+    streamRegistry = await streamRegistryFactory.deploy() as unknown as StreamRegistry;
+
+    await streamRegistry
+      .connect(streamrAdmin)
+      .initialize(await ensCache.getAddress(), ethers.ZeroAddress);
+    await ensCache
+      .connect(streamrAdmin)
+      .initialize(streamrAdmin.address, await streamRegistry.getAddress(), ethers.ZeroAddress);
+    await streamRegistry
+      .connect(streamrAdmin)
+      .grantRole(C.TRUSTED_ROLE, await ensCache.getAddress());
+  }
+
   before(async () => {
     [
       admin,
       nonAdmin,
       foundation,
+      streamrAdmin,
       manufacturer1,
       manufacturer2,
       manufacturer3,
@@ -110,7 +144,8 @@ describe('DevAdmin', function () {
         'SyntheticDevice',
         'AdLicenseValidator',
         'Mapper',
-        'DevAdmin',
+        'StreamrConfigurator',
+        'DevAdmin'
       ],
       nfts: [
         'ManufacturerId',
@@ -139,27 +174,30 @@ describe('DevAdmin', function () {
     vehicleIdInstance = deployments.VehicleId;
     adIdInstance = deployments.AftermarketDeviceId;
     sdIdInstance = deployments.SyntheticDeviceId;
+    streamrConfiguratorInstance = deployments.StreamrConfigurator;
+
+    DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await integrationIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await sdIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await sdIdInstance
       .connect(admin)
-      .grantRole(C.NFT_BURNER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -202,7 +240,7 @@ describe('DevAdmin', function () {
     await mockDimoTokenInstance
       .connect(manufacturer1)
       .approve(
-        await dimoRegistryInstance.getAddress(),
+        DIMO_REGISTRY_ADDRESS,
         C.manufacturerDimoTokensAmount,
       );
 
@@ -294,7 +332,7 @@ describe('DevAdmin', function () {
       .connect(admin)
       .grantRole(
         C.NFT_TRANSFERER_ROLE,
-        await dimoRegistryInstance.getAddress(),
+        DIMO_REGISTRY_ADDRESS,
       );
 
     // Approve DIMO Registry to spend manufacturer1's tokens
@@ -310,24 +348,33 @@ describe('DevAdmin', function () {
     // Setting DimoRegistry address in the Proxy IDs
     await manufacturerIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await integrationIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await sdIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
 
     // Setting DimoRegistry address in the AftermarketDeviceId
     await sdIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
+
+    await setupStreamr();
+
+    await streamrConfiguratorInstance
+      .connect(admin)
+      .setStreamRegistry(await streamRegistry.getAddress());
+    await streamrConfiguratorInstance
+      .connect(admin)
+      .setDimoBaseStreamId(C.DIMO_STREAMR_ENS);
   });
 
   beforeEach(async () => {
@@ -2556,6 +2603,33 @@ describe('DevAdmin', function () {
         for (const adId of adIdsList) {
           expect(await nodesInstance.getParentNode(adProxyAddress, adId)).to.equal(2);
         }
+      });
+    });
+  });
+
+  describe('adminCacheDimoStreamrEns', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_CACHE_ENS role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .adminCacheDimoStreamrEns(),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_CACHE_ENS
+          }`,
+        );
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit RequestENSOwnerAndCreateStream (ENSCacheV2Streamr) event with correct params', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminCacheDimoStreamrEns()
+        )
+          .to.emit(ensCache, 'RequestENSOwnerAndCreateStream')
+          .withArgs(C.DIMO_STREAMR_ENS, '/vehicle/', '{}', DIMO_REGISTRY_ADDRESS);
       });
     });
   });

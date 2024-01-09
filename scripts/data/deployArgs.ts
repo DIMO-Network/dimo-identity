@@ -1,5 +1,7 @@
 import { ethers } from 'hardhat';
 
+import { GenericKeyAny } from '../../utils';
+
 const _hashRole = (role: string) =>
   ethers.keccak256(ethers.toUtf8Bytes(role));
 
@@ -97,3 +99,9 @@ export const sdIdArgs = {
   name: 'SyntheticDeviceId',
   args: [SD_NFT_NAME, SD_NFT_SYMBOL, SD_NFT_URI]
 };
+
+export const dimoStreamrEns: GenericKeyAny = {
+  polygon: 'streams.dimo.eth',
+  mumbai: 'streams.dev.dimo.eth',
+  hardhat: 'streams.hardhat.dimo.eth'
+}

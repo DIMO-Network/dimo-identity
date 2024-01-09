@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 /**
- * @title VechielStreamStorage
+ * @title VehicleStreamStorage
  * @notice Storage of the VechielStream contract
  */
 library VehicleStreamStorage {

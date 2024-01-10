@@ -258,4 +258,44 @@ contract VehicleStream is AccessControlInternal {
     ) external view returns (string memory streamId) {
         streamId = VehicleStreamStorage.getStorage().streams[vehicleId];
     }
+
+    /**
+     * @notice Transfers stream Id for the new vehicle Id owner
+     * @dev Can only be called by the VehicleId contract
+     * @dev Deletes the existing stream Id and recreates it to reset existing permissions
+     * @param vehicleId Vehicle node Id
+     */
+    function transferVehicleStream(uint256 vehicleId) external {
+        if (msg.sender != VehicleStorage.getStorage().idProxyAddress) {
+            revert Errors.Unauthorized(msg.sender);
+        }
+
+        string memory dimoStreamrEns = StreamrConfiguratorStorage
+            .getStorage()
+            .dimoStreamrEns;
+        StreamrConfiguratorStorage.Storage
+            storage scs = StreamrConfiguratorStorage.getStorage();
+        IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
+
+        string memory streamId = vs.streams[vehicleId];
+        if (bytes(streamId).length != 0) return;
+
+        string memory streamPath = string(
+            abi.encodePacked("/vehicle/", Strings.toString(vehicleId))
+        );
+
+        streamRegistry.deleteStream(streamId);
+        emit VehicleStreamUnset(vehicleId, streamId);
+
+        streamRegistry.createStreamWithENS(dimoStreamrEns, streamPath, "{}");
+        emit VehicleStreamSet(vehicleId, streamId);
+
+        streamRegistry.grantPermission(
+            streamId,
+            StreamrConfiguratorStorage.getStorage().dimoStreamrNode,
+            IStreamRegistry.PermissionType.Publish
+        );
+    }
 }

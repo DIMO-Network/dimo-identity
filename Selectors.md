@@ -446,6 +446,7 @@
 | 0x180e469a | getVehicleStream(uint256) |
 | 0x6f58f093 | setVehicleStream(uint256,string) |
 | 0x4337a026 | subscribeToVehicleStream(uint256,address,uint256) |
+| 0xbc5beade | transferVehicleStream(uint256) |
 | 0xcd90df7e | unsetVehicleStream(uint256) |
 
 #### Events

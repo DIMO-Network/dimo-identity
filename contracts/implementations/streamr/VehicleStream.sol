@@ -151,6 +151,18 @@ contract VehicleStream is AccessControlInternal {
                 IStreamRegistry.PermissionType.Grant
             );
         }
+        if (
+            !streamRegistry.hasPermission(
+                streamId,
+                address(this),
+                IStreamRegistry.PermissionType.Delete
+            )
+        ) {
+            revert NoStreamrPermission(
+                address(this),
+                IStreamRegistry.PermissionType.Delete
+            );
+        }
 
         string memory oldStreamId = vs.streams[vehicleId];
         if (bytes(oldStreamId).length != 0) {
@@ -280,7 +292,7 @@ contract VehicleStream is AccessControlInternal {
             .getStorage();
 
         string memory streamId = vs.streams[vehicleId];
-        if (bytes(streamId).length != 0) return;
+        if (bytes(streamId).length == 0) return;
 
         string memory streamPath = string(
             abi.encodePacked("/vehicle/", Strings.toString(vehicleId))

@@ -340,17 +340,21 @@
                 ]
             },
             "StreamrConfigurator": {
-                "address": "0xe8F12CBEbCF8e35d877ad892d304cC13ee743b71",
+                "address": "0xAfded80D163479554568C54C1b29613e6545D70D",
                 "selectors": [
                     "0x9e594424",
+                    "0x5f450e29",
                     "0x0c3cac3b"
                 ]
             },
             "VehicleStream": {
-                "address": "0xaEd2a4b05a77F2e72660D599461eC9eAf936b6A9",
+                "address": "0x922Cc4767dA60C98569Afb2ec291c1214F372da7",
                 "selectors": [
                     "0x497323c8",
-                    "0x4337a026"
+                    "0x180e469a",
+                    "0x6f58f093",
+                    "0x4337a026",
+                    "0xcd90df7e"
                 ]
             },
             "DevAdmin": {

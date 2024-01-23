@@ -21,6 +21,14 @@ interface IStreamRegistry {
         string calldata metadataJsonString
     ) external;
 
+    function exists(string calldata streamId) external returns (bool);
+
+    function hasPermission(
+        string calldata streamId,
+        address user,
+        PermissionType permissionType
+    ) external returns (bool);
+
     function grantPermission(
         string calldata streamId,
         address user,

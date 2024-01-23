@@ -11,6 +11,7 @@ library StreamrConfiguratorStorage {
 
     struct Storage {
         address streamRegistry;
+        address dimoStreamrNode;
         string dimoStreamrEns;
     }
 

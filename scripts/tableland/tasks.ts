@@ -2,10 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { task } from 'hardhat/config';
 import { EventLog } from 'ethers';
-import { getAccounts, getDatabase, getValidator, getRegistry } from '@tableland/local';
+import { getAccounts, getDatabase, getValidator } from '@tableland/local';
 
 import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
-import { AddressesByNetwork } from '../../utils';
+import { AddressesByNetwork, C } from '../../utils';
 
 function getAddresses(): AddressesByNetwork {
     return JSON.parse(
@@ -13,7 +13,7 @@ function getAddresses(): AddressesByNetwork {
     );
 }
 
-task('mint-manufacturer', 'npx hardhat mint-manufacturer <name> --network localhost')
+task('mint-manufacturer', 'Mints a new Manufacturer')
     .addPositionalParam('name', 'The name of the manufacturer to be minted')
     .setAction(async (args: { name: string; }, hre) => {
         if (hre.network.name !== 'localhost') {
@@ -37,14 +37,16 @@ task('mint-manufacturer', 'npx hardhat mint-manufacturer <name> --network localh
         console.log(`Manufacturer ${args.name} minted with ID: ${manufacturerId}`);
     });
 
-task('create-dd-table', 'npx hardhat create-dd-table <manufacturerId> --network localhost')
+task('create-dd-table', 'Creates a Device Definition table related to a Manufacturer ID')
     .addPositionalParam('manufacturerId', 'The ID of the manufacturer')
-    .setAction(async (args: { manufacturerId: string; }, hre) => {
+    .addOptionalParam('tableOwner', 'The address to which the table will be transferred after creation')
+    .setAction(async (args: { manufacturerId: string; tableOwner: string | undefined }, hre) => {
         if (hre.network.name !== 'localhost') {
             throw new Error(`Invalid network <${hre.network.name}>\nMake sure to add the flag "--network localhost"\n`)
         }
         const instances = getAddresses();
         const [signer] = await hre.ethers.getSigners();
+        const tableOwner = args.tableOwner ?? signer.address;
         const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
             'DeviceDefinitionTable',
             instances.localhost.modules.DIMORegistry.address,
@@ -57,7 +59,7 @@ task('create-dd-table', 'npx hardhat create-dd-table <manufacturerId> --network 
 
         const tx = await ddTableInstance
             .connect(signer)
-            .createDeviceDefinitionTable(args.manufacturerId);
+            .createDeviceDefinitionTable(tableOwner, args.manufacturerId);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
             chainId: 31337,
@@ -67,5 +69,5 @@ task('create-dd-table', 'npx hardhat create-dd-table <manufacturerId> --network 
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(args.manufacturerId);
         const tableName = await ddTableInstance.getDeviceDefinitionTableName(args.manufacturerId);
 
-        console.log(`Device Definition table created\nTable ID: ${tableId}\nTable Name: ${tableName}`);
+        console.log(`Device Definition table created\nTable ID: ${tableId}\nTable Name: ${tableName}\nTable Owner: ${tableOwner}`);
     });

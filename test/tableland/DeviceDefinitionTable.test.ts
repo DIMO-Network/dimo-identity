@@ -367,7 +367,7 @@ describe('DeviceDefinitionTable', async function () {
           'TableDoesNotExist',
         ).withArgs(99);
       });
-      it('Should revert if caller is not the manufacturer ID owner or has the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
+      it('Should revert if caller is not the manufacturer ID owner or has not the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
         await expect(
           ddTableInstance
             .connect(unauthorized)
@@ -516,7 +516,7 @@ describe('DeviceDefinitionTable', async function () {
           'TableDoesNotExist',
         ).withArgs(99);
       });
-      it('Should revert if caller is not the manufacturer ID owner or has the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
+      it('Should revert if caller is not the manufacturer ID owner or has not the MANUFACTURER_INSERT_DD_PRIVILEGE', async () => {
         await expect(
           ddTableInstance
             .connect(unauthorized)

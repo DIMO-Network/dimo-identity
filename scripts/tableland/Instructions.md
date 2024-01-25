@@ -5,9 +5,9 @@ Make sure you have the node lts version. The current version is not caompatible 
 npm --version
 ```
 
-Install the dependencies. We need to force here due to some compatibility issues with the `@tableland/local ^2.1.0-pre.0` version
+Install the dependencies.
 ```bash
-npm install --force
+npm install
 ```
 
 #### :slightly_smiling_face: Making sure everything is fine
@@ -52,7 +52,7 @@ Now, in a second terminal, you can run the deploy script to setup everything you
 npx hardhat run scripts/tableland/deployLocalTableland.ts --network localhost
 ```
 
-It will deploy a couple of contracts, grant some roles and mint several manufacturers. You should see some outputs both in the tableland terminal and the on you ran the command. All deployed contracts addresses and selectors will written in `/scripts/tableland/addresses.json`, please don't modify this file. 
+It will deploy a couple of contracts, grant some roles and mint several manufacturers. You should see some outputs both in the tableland terminal and the on you ran the command. All deployed contracts addresses and selectors will written in `/scripts/tableland/addresses.json`, **please don't modify this file**. 
 
 #### :pick: Running tasks
 
@@ -62,7 +62,7 @@ You can mint as many manufacturers you want
 
 ```bash
 npx hardhat mint-manufacturers --help # To output some help infos
-npx hardhat mint-manufacturer manufacturerNameExample --network localhost
+npx hardhat --network localhost mint-manufacturer manufacturerNameExample
 ```
 
 You should see an output similar to the following:
@@ -76,16 +76,18 @@ Then, you can create a Device Definition table for any minted manufacturer using
 
 ```bash
 npx hardhat create-dd-table --help # To output some help infos
-npx hardhat create-dd-table 142 --network localhost
+npx hardhat --network localhost create-dd-table 142 # The table owner will be the caller
+npx hardhat --network localhost create-dd-table 142 --table-owner 0xffffffffffffffffffffffffffffffffffffffff # Specify table owner
 ```
 
 You should see an output similar to the following:
 
 ```
-Creating Device Definition table for manufacturer ID 141...
+Creating Device Definition table for manufacturer ID 142...
 Device Definition table created
 Table ID: 2
-Table Name: manufacturerNameExample_31337_2
+Table Name: _31337_2
+Table Owner: 0xffffffffffffffffffffffffffffffffffffffff
 ```
 
 ### :tipping_hand_person: Help links

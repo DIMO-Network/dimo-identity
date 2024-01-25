@@ -63,7 +63,8 @@ async function deployModules(
         { name: 'Manufacturer', args: [] },
         { name: 'Mapper', args: [] },
         { name: 'DevAdmin', args: [] },
-        { name: 'DeviceDefinitionTable', args: [] }
+        { name: 'DeviceDefinitionTable', args: [] },
+        { name: 'ERC721Holder', args: [] }
     ];
 
     const instances = getAddresses();

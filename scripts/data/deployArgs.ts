@@ -32,7 +32,8 @@ export const roles = {
     DEV_VEHICLE_BURN_ROLE: _hashRole('DEV_VEHICLE_BURN_ROLE'),
     DEV_AD_BURN_ROLE: _hashRole('DEV_AD_BURN_ROLE'),
     DEV_SD_BURN_ROLE: _hashRole('DEV_SD_BURN_ROLE'),
-    DEV_CHANGE_PARENT_NODE: _hashRole('DEV_CHANGE_PARENT_NODE')
+    DEV_CHANGE_PARENT_NODE: _hashRole('DEV_CHANGE_PARENT_NODE'),
+    DEV_CACHE_ENS: _hashRole('DEV_CACHE_ENS')
   },
   nfts: {
     MINTER_ROLE: _hashRole('MINTER_ROLE'),

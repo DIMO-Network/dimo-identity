@@ -2,12 +2,14 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/INFT.sol";
+import "../interfaces/IStreamRegistry.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/NodesStorage.sol";
 import "../libraries/nodes/ManufacturerStorage.sol";
 import "../libraries/nodes/VehicleStorage.sol";
 import "../libraries/nodes/AftermarketDeviceStorage.sol";
 import "../libraries/nodes/SyntheticDeviceStorage.sol";
+import "../libraries/streamr/StreamrConfiguratorStorage.sol";
 
 import "../shared/Roles.sol";
 import "../shared/Errors.sol";
@@ -612,6 +614,21 @@ contract DevAdmin is AccessControlInternal {
 
             ns.nodes[idProxyAddress][nodeIdList[i]].parentNode = newParentNode;
         }
+    }
+
+    /**
+     * @notice Admin function to create the base stream on Streamr network and populates their ENS cache
+     * @dev Caller must have the DEV_CACHE_ENS role
+     */
+    function adminCacheDimoStreamrEns() external onlyRole(DEV_CACHE_ENS) {
+        string memory dimoStreamrEns = StreamrConfiguratorStorage
+            .getStorage()
+            .dimoStreamrEns;
+        IStreamRegistry streamRegistry = IStreamRegistry(
+            StreamrConfiguratorStorage.getStorage().streamRegistry
+        );
+
+        streamRegistry.createStreamWithENS(dimoStreamrEns, "/vehicle/", "{}");
     }
 
     /**

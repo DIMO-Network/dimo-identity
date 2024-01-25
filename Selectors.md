@@ -30,6 +30,7 @@
 | 0x52878b61 | adminBurnSyntheticDevicesAndDeletePairings(uint256[]) |
 | 0x282eb387 | adminBurnVehicles(uint256[]) |
 | 0x11d679c9 | adminBurnVehiclesAndDeletePairings(uint256[]) |
+| 0xb17b974b | adminCacheDimoStreamrEns() |
 | 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
 | 0xf73a8f04 | renameManufacturers((uint256,string)[]) |

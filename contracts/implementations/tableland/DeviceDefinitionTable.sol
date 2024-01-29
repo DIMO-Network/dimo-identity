@@ -154,31 +154,31 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 manufacturerId,
         string memory manufacturerName,
         DeviceDefinitionInput calldata data
-    ) external {
+    ) public payable {
         TablelandTables tablelandTables = TablelandDeployments.get();
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
         uint256 tableId = dds.tables[manufacturerId];
 
-        // try INFT(address(tablelandTables)).ownerOf(tableId) {
-        //     INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
-        //         ManufacturerStorage.getStorage().idProxyAddress
-        //     );
+        try INFT(address(tablelandTables)).ownerOf(tableId) {
+            INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+                ManufacturerStorage.getStorage().idProxyAddress
+            );
 
-        //     if (
-        //         !manufacturerIdProxy.hasPrivilege(
-        //             manufacturerId,
-        //             MANUFACTURER_INSERT_DD_PRIVILEGE,
-        //             msg.sender
-        //         )
-        //     ) {
-        //         revert Unauthorized(msg.sender);
-        //     }
-        // } catch {
-        //     revert TableDoesNotExist(manufacturerId);
-        // }
+            if (
+                !manufacturerIdProxy.hasPrivilege(
+                    manufacturerId,
+                    MANUFACTURER_INSERT_DD_PRIVILEGE,
+                    msg.sender
+                )
+            ) {
+                revert Unauthorized(msg.sender);
+            }
+        } catch {
+            revert TableDoesNotExist(manufacturerId);
+        }
 
-        // emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
+        emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
 
         tablelandTables.mutate(
             address(this),

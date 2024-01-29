@@ -101,8 +101,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
         let devices = (await getDeviceDefinitions()).data.device_definitions;
         console.log(`Total device definitions ${devices.length}...`);
 
-        manufacturers = manufacturers.slice(0, 5);
-        console.log(manufacturers)
+        // manufacturers = manufacturers.slice(0, 5);
         for await (const element of manufacturers) {
             const name = `${element.name_slug}`;
 
@@ -141,7 +140,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             let deviceDefinitionByManufacturers = devices.filter((c)=> c.make.name_slug == element.name_slug && c.type.year > 2006);
             console.log(`Get Device Definition By Manufacturer [${element.name}] total => ${deviceDefinitionByManufacturers.length}`);
 
-            deviceDefinitionByManufacturers = deviceDefinitionByManufacturers.slice(0, 5);
+            // deviceDefinitionByManufacturers = deviceDefinitionByManufacturers.slice(0, 5);
             for await (const dd of deviceDefinitionByManufacturers) {
                 
                 const deviceDefinitionInput : DeviceDefinitionInput = {
@@ -155,9 +154,10 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                     metadata: ''
                 };
 
-                console.log(manufacturerId, deviceDefinitionInput);
-
                 await ddTableInstance.insertDeviceDefinition(manufacturerId, name, deviceDefinitionInput);
+                // console.log(manufacturerId, deviceDefinitionInput);
+                console.info(`insert [${ddTableName}] => ${dd.device_definition_id} - ${dd.name} - ${dd.make.name} ${dd.type.model} - ${dd.type.year}`);
+
             }
 
         }

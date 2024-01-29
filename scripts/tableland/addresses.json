@@ -88,12 +88,18 @@
                 "selectors": [
                     "0x150b7a02"
                 ]
+            },
+            "DeviceDefinitionController": {
+                "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+                "selectors": [
+                    "0x66df322e"
+                ]
             }
         },
         "nfts": {
             "ManufacturerId": {
-                "proxy": "0x9A676e781A523b5d0C0e43731313A708CB607508",
-                "implementation": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
+                "proxy": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "implementation": "0x9A676e781A523b5d0C0e43731313A708CB607508"
             }
         },
         "misc": {

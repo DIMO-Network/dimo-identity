@@ -50,3 +50,9 @@ struct DeviceDefinitionInput {
     uint256 year;
     string metadata;
 }
+
+struct ManufacturerInput {
+  string id;
+  string name;
+  string slug;
+}

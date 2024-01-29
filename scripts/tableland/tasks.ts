@@ -95,13 +95,18 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
         console.log(`Get manufacturers...`);
         let manufacturers = (await getDeviceMakes()).data.device_makes;
+        console.log(`Total manufacturers ${manufacturers.length}...`);
 
         console.log(`Get device definitions...`);
         let devices = (await getDeviceDefinitions()).data.device_definitions;
+        console.log(`Total device definitions ${devices.length}...`);
 
         manufacturers = manufacturers.slice(0, 5);
+        console.log(manufacturers)
         for await (const element of manufacturers) {
             const name = `${element.name_slug}`;
+
+            console.log(`Creating Manufacturer ${name} ...`);
 
             const tx = await manufacturerInstance
                 .connect(signer)
@@ -121,7 +126,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
             const dTx = await ddTableInstance
                 .connect(signer)
-                .createDeviceDefinitionTable(tableOwner, manufacturerId);
+                .createDeviceDefinitionTable(tableOwner, manufacturerId, name);
 
             await tablelandValidator.pollForReceiptByTransactionHash({
                 chainId: 31337,
@@ -129,7 +134,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             });
 
             const ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
-            const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
+            const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId, name);
 
             console.log(`Device Definition table created\nTable ID: ${ddTableId}\nTable Name: ${ddTableName}`);
 
@@ -152,7 +157,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
                 console.log(manufacturerId, deviceDefinitionInput);
 
-                await ddTableInstance.insertDeviceDefinition(manufacturerId, deviceDefinitionInput);
+                await ddTableInstance.insertDeviceDefinition(manufacturerId, name, deviceDefinitionInput);
             }
 
         }
@@ -162,9 +167,9 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
 
 async function getDeviceMakes() {
-    return await axios.get('https://device-definitions-api.dev.dimo.zone/device-makes');
+    return await axios.get('https://device-definitions-api.dimo.zone/device-makes');
 }
 
 async function getDeviceDefinitions() {
-    return await axios.get('https://device-definitions-api.dev.dimo.zone/device-definitions/all');
+    return await axios.get('https://device-definitions-api.dimo.zone/device-definitions/all');
 }

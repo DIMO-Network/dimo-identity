@@ -75,11 +75,11 @@
             "DeviceDefinitionTable": {
                 "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
                 "selectors": [
-                    "0x20954d21",
+                    "0x4cef9d2f",
                     "0x396e5987",
-                    "0xa1d17941",
-                    "0x53e7070b",
-                    "0x6928118b",
+                    "0x12b7e8cd",
+                    "0x7d4899a6",
+                    "0x974de4a0",
                     "0x088fafdb"
                 ]
             },

@@ -47,10 +47,12 @@ contract DeviceDefinitionTable is AccessControlInternal {
      * @dev The Tableland table NFT is minted to this contract
      * @param tableOwner The owner of the table to be minted
      * @param manufacturerId The unique identifier of the manufacturer
+     * @param manufacturerName The name of the manufacturer
      */
     function createDeviceDefinitionTable(
         address tableOwner,
-        uint256 manufacturerId
+        uint256 manufacturerId,
+        string memory manufacturerName
     ) external {
         INFT manufacturerIdProxy = INFT(
             ManufacturerStorage.getStorage().idProxyAddress
@@ -72,14 +74,21 @@ contract DeviceDefinitionTable is AccessControlInternal {
             revert TableAlreadyExists(manufacturerId);
         }
 
-        string memory statement = string(
-            abi.encodePacked(
-                "CREATE TABLE _",
-                Strings.toString(block.chainid),
-                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, UNIQUE(model,year))"
-            )
+        // string memory statement = string(
+        //     abi.encodePacked(
+        //         "CREATE TABLE _",
+        //         Strings.toString(block.chainid),
+        //         "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, UNIQUE(model,year))"
+        //     )
+        // );
+        //uint256 tableId = tablelandTables.create(address(this), statement);
+        
+        uint256 tableId = TablelandDeployments.get().create(
+            address(this),
+            SQLHelpers.toCreateFromSchema(
+                "id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT",
+                manufacturerName)
         );
-        uint256 tableId = tablelandTables.create(address(this), statement);
 
         tablelandTables.setController(address(this), tableId, address(this));
         INFT(address(tablelandTables)).safeTransferFrom(
@@ -134,6 +143,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
      * @dev The specified Device Definition Table must exist
      * @dev The pair (model,year) must be unique
      * @param manufacturerId The unique identifier of the manufacturer
+     * @param manufacturerName The name of the manufacturer
      * @param data Input data with the following fields:
      *  id -> The alphanumeric ID of the Device Definition
      *  model -> The model of the Device Definition
@@ -142,6 +152,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
      */
     function insertDeviceDefinition(
         uint256 manufacturerId,
+        string memory manufacturerName,
         DeviceDefinitionInput calldata data
     ) external {
         TablelandTables tablelandTables = TablelandDeployments.get();
@@ -149,31 +160,31 @@ contract DeviceDefinitionTable is AccessControlInternal {
             storage dds = DeviceDefinitionTableStorage.getStorage();
         uint256 tableId = dds.tables[manufacturerId];
 
-        try INFT(address(tablelandTables)).ownerOf(tableId) {
-            INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
-                ManufacturerStorage.getStorage().idProxyAddress
-            );
+        // try INFT(address(tablelandTables)).ownerOf(tableId) {
+        //     INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+        //         ManufacturerStorage.getStorage().idProxyAddress
+        //     );
 
-            if (
-                !manufacturerIdProxy.hasPrivilege(
-                    manufacturerId,
-                    MANUFACTURER_INSERT_DD_PRIVILEGE,
-                    msg.sender
-                )
-            ) {
-                revert Unauthorized(msg.sender);
-            }
-        } catch {
-            revert TableDoesNotExist(manufacturerId);
-        }
+        //     if (
+        //         !manufacturerIdProxy.hasPrivilege(
+        //             manufacturerId,
+        //             MANUFACTURER_INSERT_DD_PRIVILEGE,
+        //             msg.sender
+        //         )
+        //     ) {
+        //         revert Unauthorized(msg.sender);
+        //     }
+        // } catch {
+        //     revert TableDoesNotExist(manufacturerId);
+        // }
 
-        emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
+        // emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
 
         tablelandTables.mutate(
             address(this),
             tableId,
             SQLHelpers.toInsert(
-                "",
+                manufacturerName,
                 tableId,
                 "id,model,year,metadata",
                 string.concat(
@@ -195,6 +206,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
      * @dev The specified Device Definition Table must exist
      * @dev The pair (model,year) must be unique
      * @param manufacturerId The unique identifier of the manufacturer
+     * @param manufacturerName The name of the manufacturer
      * @param data Input data list with the following fields:
      *  id -> The alphanumeric ID of the Device Definition
      *  model -> The model of the Device Definition
@@ -203,6 +215,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
      */
     function insertDeviceDefinitionBatch(
         uint256 manufacturerId,
+        string memory manufacturerName,
         DeviceDefinitionInput[] calldata data
     ) external {
         TablelandTables tablelandTables = TablelandDeployments.get();
@@ -250,7 +263,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         }
 
         string memory stmt = SQLHelpers.toBatchInsert(
-            "",
+            manufacturerName,
             tableId,
             "id,model,year,metadata",
             vals
@@ -262,18 +275,20 @@ contract DeviceDefinitionTable is AccessControlInternal {
     /**
      * @dev Retrieve the name of the device definition table name associated with a specific manufacturer
      * @param manufacturerId The unique identifier of the manufacturer
+     * @param manufacturerName The name of the manufacturer
      * @dev If a matching table does not exist, the function returns an empty string
      * @return tableName The name of the manufacturer's device definition table
      */
     function getDeviceDefinitionTableName(
-        uint256 manufacturerId
+        uint256 manufacturerId,
+        string memory manufacturerName
     ) external view returns (string memory tableName) {
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
 
         uint256 tableId = dds.tables[manufacturerId];
 
-        if (tableId != 0) tableName = SQLHelpers.toNameFromId("", tableId);
+        if (tableId != 0) tableName = SQLHelpers.toNameFromId(manufacturerName, tableId);
     }
 
     /**

@@ -54,6 +54,7 @@ export type MintVehicleAndSdInput = {
 
 export type DeviceDefinitionInput = {
   id: string,
+  deviceDefinitionId: string,
   model: string,
   year: number,
   metadata: string

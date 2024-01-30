@@ -82,12 +82,13 @@ contract DeviceDefinitionTable is AccessControlInternal {
         //     )
         // );
         //uint256 tableId = tablelandTables.create(address(this), statement);
-        
+
         uint256 tableId = TablelandDeployments.get().create(
             address(this),
             SQLHelpers.toCreateFromSchema(
                 "id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, UNIQUE(model,year)",
-                manufacturerName)
+                manufacturerName
+            )
         );
 
         tablelandTables.setController(address(this), tableId, address(this));
@@ -288,7 +289,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
         uint256 tableId = dds.tables[manufacturerId];
 
-        if (tableId != 0) tableName = SQLHelpers.toNameFromId(manufacturerName, tableId);
+        if (tableId != 0)
+            tableName = SQLHelpers.toNameFromId(manufacturerName, tableId);
     }
 
     /**

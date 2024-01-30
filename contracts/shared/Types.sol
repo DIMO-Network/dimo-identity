@@ -52,7 +52,7 @@ struct DeviceDefinitionInput {
 }
 
 struct ManufacturerInput {
-  string id;
-  string name;
-  string slug;
+    string id;
+    string name;
+    string slug;
 }

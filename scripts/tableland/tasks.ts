@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { task } from 'hardhat/config';
 import { EventLog } from 'ethers';
-import { getAccounts, getDatabase, getValidator, getRegistry } from '@tableland/local';
+import { getAccounts, getDatabase, getValidator } from '@tableland/local';
 
-import { Manufacturer, DeviceDefinitionTable, ManufacturerTable } from '../../typechain-types';
+import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
 import { AddressesByNetwork } from '../../utils';
 import axios from 'axios';
 
@@ -93,12 +93,12 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
         console.log(`Minting manufacturers for ${signer.address}...`);
 
-        console.log(`Get manufacturers...`);
-        let manufacturers = (await getDeviceMakes()).data.device_makes;
+        console.log('Get manufacturers');
+        const manufacturers = (await getDeviceMakes()).data.device_makes;
         console.log(`Total manufacturers ${manufacturers.length}...`);
 
-        console.log(`Get device definitions...`);
-        let devices = (await getDeviceDefinitions()).data.device_definitions;
+        console.log('Get device definitions...');
+        const devices = (await getDeviceDefinitions()).data.device_definitions;
         console.log(`Total device definitions ${devices.length}...`);
 
         // manufacturers = manufacturers.slice(0, 5);
@@ -137,7 +137,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
             console.log(`Device Definition table created\nTable ID: ${ddTableId}\nTable Name: ${ddTableName}`);
 
-            let deviceDefinitionByManufacturers = devices.filter((c)=> c.make.name_slug == element.name_slug && c.type.year > 2006);
+            const deviceDefinitionByManufacturers = devices.filter((c)=> c.make.name_slug === element.name_slug && c.type.year > 2006);
             console.log(`Get Device Definition By Manufacturer [${element.name}] total => ${deviceDefinitionByManufacturers.length}`);
 
             // deviceDefinitionByManufacturers = deviceDefinitionByManufacturers.slice(0, 5);

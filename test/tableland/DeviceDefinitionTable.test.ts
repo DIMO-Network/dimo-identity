@@ -32,6 +32,7 @@ const accounts = getAccounts();
 
 describe('DeviceDefinitionTable', async function () {
   let CURRENT_CHAIN_ID: number;
+  let MANUFACTURER_NAME: string;
   let snapshot: string;
   let tablelandDb: Database;
   let tablelandValidator: Validator;
@@ -51,6 +52,7 @@ describe('DeviceDefinitionTable', async function () {
 
   before(async () => {
     CURRENT_CHAIN_ID = network.config.chainId ?? 31337;
+    MANUFACTURER_NAME = 'ford';
     [
       admin,
       unauthorized,
@@ -153,7 +155,7 @@ describe('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(admin)
-            .createDeviceDefinitionTable(manufacturer1.address, 99)
+            .createDeviceDefinitionTable(manufacturer1.address, 99, MANUFACTURER_NAME)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'InvalidManufacturerId',
@@ -163,7 +165,7 @@ describe('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(unauthorized)
-            .createDeviceDefinitionTable(manufacturer1.address, 1)
+            .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'Unauthorized',
@@ -172,12 +174,12 @@ describe('DeviceDefinitionTable', async function () {
       it('Should revert if Device Definition table already exists', async () => {
         await ddTableInstance
           .connect(admin)
-          .createDeviceDefinitionTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME);
 
         await expect(
           ddTableInstance
             .connect(admin)
-            .createDeviceDefinitionTable(manufacturer1.address, 1)
+            .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'TableAlreadyExists',
@@ -192,7 +194,7 @@ describe('DeviceDefinitionTable', async function () {
 
           await ddTableInstance
             .connect(admin)
-            .createDeviceDefinitionTable(manufacturer1.address, 1);
+            .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME);
 
           expect(await tablelandRegistry.listTables(manufacturer1.address))
             .to.deep.include.members([{ tableId: '2', chainId: CURRENT_CHAIN_ID }]);
@@ -202,7 +204,7 @@ describe('DeviceDefinitionTable', async function () {
 
           await ddTableInstance
             .connect(admin)
-            .createDeviceDefinitionTable(manufacturer1.address, 1);
+            .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME);
 
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
         });
@@ -213,7 +215,7 @@ describe('DeviceDefinitionTable', async function () {
           await expect(
             ddTableInstance
               .connect(admin)
-              .createDeviceDefinitionTable(manufacturer1.address, 1)
+              .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
             .withArgs(manufacturer1.address, 1, 2);
@@ -228,7 +230,7 @@ describe('DeviceDefinitionTable', async function () {
 
           await ddTableInstance
             .connect(manufacturer1)
-            .createDeviceDefinitionTable(manufacturer1.address, 1);
+            .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME);
 
           expect(await tablelandRegistry.listTables(manufacturer1.address))
             .to.deep.include.members([{ tableId: '2', chainId: CURRENT_CHAIN_ID }]);
@@ -238,7 +240,7 @@ describe('DeviceDefinitionTable', async function () {
 
           await ddTableInstance
             .connect(manufacturer1)
-            .createDeviceDefinitionTable(manufacturer1.address, 1);
+            .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME);
 
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
         });
@@ -249,7 +251,7 @@ describe('DeviceDefinitionTable', async function () {
           await expect(
             ddTableInstance
               .connect(manufacturer1)
-              .createDeviceDefinitionTable(manufacturer1.address, 1)
+              .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
             .withArgs(manufacturer1.address, 1, 2);
@@ -262,7 +264,7 @@ describe('DeviceDefinitionTable', async function () {
     beforeEach(async () => {
       const tx = await ddTableInstance
         .connect(admin)
-        .createDeviceDefinitionTable(manufacturer1.address, 1);
+        .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME);
 
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
@@ -307,7 +309,7 @@ describe('DeviceDefinitionTable', async function () {
       it('Should correctly set the Device Definition table', async () => {
         let tx = await ddTableInstance
           .connect(admin)
-          .createDeviceDefinitionTable(manufacturer2.address, 2);
+          .createDeviceDefinitionTable(manufacturer2.address, 2, MANUFACTURER_NAME);
         await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
           transactionHash: (await tx.wait())?.hash as string,
@@ -327,7 +329,7 @@ describe('DeviceDefinitionTable', async function () {
       it('Should emit ManufacturerTableSet event with correct params', async () => {
         const tx = await ddTableInstance
           .connect(admin)
-          .createDeviceDefinitionTable(manufacturer2.address, 2);
+          .createDeviceDefinitionTable(manufacturer2.address, 2, MANUFACTURER_NAME);
         await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
           transactionHash: (await tx.wait())?.hash as string,
@@ -348,7 +350,7 @@ describe('DeviceDefinitionTable', async function () {
     beforeEach(async () => {
       const tx = await ddTableInstance
         .connect(admin)
-        .createDeviceDefinitionTable(manufacturer1.address, 1);
+        .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME);
 
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
@@ -361,7 +363,7 @@ describe('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(manufacturer1)
-            .insertDeviceDefinition(99, C.mockDdInput1)
+            .insertDeviceDefinition(99, MANUFACTURER_NAME, C.mockDdInput1)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'TableDoesNotExist',
@@ -371,7 +373,7 @@ describe('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(unauthorized)
-            .insertDeviceDefinition(1, C.mockDdInput1)
+            .insertDeviceDefinition(1, MANUFACTURER_NAME, C.mockDdInput1)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'Unauthorized',
@@ -380,7 +382,7 @@ describe('DeviceDefinitionTable', async function () {
       it('Should revert if (model,year) pair already exists', async () => {
         let tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinition(1, C.mockDdInput1);
+          .insertDeviceDefinition(1, MANUFACTURER_NAME, C.mockDdInput1);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -389,7 +391,7 @@ describe('DeviceDefinitionTable', async function () {
 
         tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinition(1, C.mockDdInput1);
+          .insertDeviceDefinition(1, MANUFACTURER_NAME, C.mockDdInput1);
 
         const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -399,7 +401,7 @@ describe('DeviceDefinitionTable', async function () {
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
         expect(validatorResponse.error).to.be.equal(
-          `db query execution failed (code: SQLITE_UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year)`
+          `db query execution failed (code: SQLITE_UNIQUE constraint failed: ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.model, ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.model, ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.year)`
         );
       });
     });
@@ -409,7 +411,7 @@ describe('DeviceDefinitionTable', async function () {
         it('Should correctly insert DD into the table', async () => {
           const tx = await ddTableInstance
             .connect(manufacturer1)
-            .insertDeviceDefinition(1, C.mockDdInput1);
+            .insertDeviceDefinition(1, MANUFACTURER_NAME, C.mockDdInput1);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
             chainId: CURRENT_CHAIN_ID,
@@ -417,13 +419,13 @@ describe('DeviceDefinitionTable', async function () {
           });
 
           const count = await tablelandDb.prepare(
-            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1, MANUFACTURER_NAME)}`
           ).first<{ total: number }>('total');
 
           expect(count).to.deep.equal([1]);
 
           const selectQuery = await tablelandDb.prepare(
-            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = "${C.mockDdId1}"`
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1, MANUFACTURER_NAME)} WHERE id = "${C.mockDdId1}"`
           ).first();
 
           expect(selectQuery).to.deep.include({
@@ -440,7 +442,7 @@ describe('DeviceDefinitionTable', async function () {
           await expect(
             ddTableInstance
               .connect(manufacturer1)
-              .insertDeviceDefinition(1, C.mockDdInput1)
+              .insertDeviceDefinition(1, MANUFACTURER_NAME, C.mockDdInput1)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
             .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
@@ -453,7 +455,7 @@ describe('DeviceDefinitionTable', async function () {
         it('Should correctly insert DD into the table', async () => {
           const tx = await ddTableInstance
             .connect(privilegedUser1)
-            .insertDeviceDefinition(1, C.mockDdInput1);
+            .insertDeviceDefinition(1, MANUFACTURER_NAME, C.mockDdInput1);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
             chainId: CURRENT_CHAIN_ID,
@@ -461,13 +463,13 @@ describe('DeviceDefinitionTable', async function () {
           });
 
           const count = await tablelandDb.prepare(
-            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1, MANUFACTURER_NAME)}`
           ).first<{ total: number }>('total');
 
           expect(count).to.deep.equal([1]);
 
           const selectQuery = await tablelandDb.prepare(
-            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = "${C.mockDdId1}"`
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1, MANUFACTURER_NAME)} WHERE id = "${C.mockDdId1}"`
           ).first();
 
           expect(selectQuery).to.deep.include({
@@ -484,7 +486,7 @@ describe('DeviceDefinitionTable', async function () {
           await expect(
             ddTableInstance
               .connect(privilegedUser1)
-              .insertDeviceDefinition(1, C.mockDdInput1)
+              .insertDeviceDefinition(1, MANUFACTURER_NAME, C.mockDdInput1)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
             .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
@@ -497,7 +499,7 @@ describe('DeviceDefinitionTable', async function () {
     beforeEach(async () => {
       const tx = await ddTableInstance
         .connect(admin)
-        .createDeviceDefinitionTable(manufacturer1.address, 1);
+        .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME);
 
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
@@ -510,7 +512,7 @@ describe('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(manufacturer1)
-            .insertDeviceDefinitionBatch(99, C.mockDdInputBatch)
+            .insertDeviceDefinitionBatch(99, MANUFACTURER_NAME, C.mockDdInputBatch)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'TableDoesNotExist',
@@ -520,7 +522,7 @@ describe('DeviceDefinitionTable', async function () {
         await expect(
           ddTableInstance
             .connect(unauthorized)
-            .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
+            .insertDeviceDefinitionBatch(1, MANUFACTURER_NAME, C.mockDdInputBatch)
         ).to.be.revertedWithCustomError(
           ddTableInstance,
           'Unauthorized',
@@ -529,7 +531,7 @@ describe('DeviceDefinitionTable', async function () {
       it('Should revert if (model,year) pair already exists', async () => {
         let tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
+          .insertDeviceDefinitionBatch(1, MANUFACTURER_NAME, C.mockDdInputBatch);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -538,7 +540,7 @@ describe('DeviceDefinitionTable', async function () {
 
         tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
+          .insertDeviceDefinitionBatch(1, MANUFACTURER_NAME, C.mockDdInputBatch);
 
         const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -548,13 +550,13 @@ describe('DeviceDefinitionTable', async function () {
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
         expect(validatorResponse.error).to.be.equal(
-          `db query execution failed (code: SQLITE_UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year)`
+          `db query execution failed (code: SQLITE_UNIQUE constraint failed: ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.model, ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.model, ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.year)`
         );
       });
       it('Should revert if (model,year) pair in the input are not unique', async () => {
         const tx = await ddTableInstance
           .connect(manufacturer1)
-          .insertDeviceDefinitionBatch(1, C.mockDdInvalidInputBatch);
+          .insertDeviceDefinitionBatch(1, MANUFACTURER_NAME, C.mockDdInvalidInputBatch);
 
         const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
           chainId: CURRENT_CHAIN_ID,
@@ -564,7 +566,7 @@ describe('DeviceDefinitionTable', async function () {
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
         expect(validatorResponse.error).to.be.equal(
-          `db query execution failed (code: SQLITE_UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: _${CURRENT_CHAIN_ID}_${tableId}.model, _${CURRENT_CHAIN_ID}_${tableId}.year)`
+          `db query execution failed (code: SQLITE_UNIQUE constraint failed: ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.model, ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.year, msg: UNIQUE constraint failed: ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.model, ${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_${tableId}.year)`
         );
       });
     });
@@ -574,7 +576,7 @@ describe('DeviceDefinitionTable', async function () {
         it('Should correctly insert DD into the table', async () => {
           const tx = await ddTableInstance
             .connect(manufacturer1)
-            .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
+            .insertDeviceDefinitionBatch(1, MANUFACTURER_NAME, C.mockDdInputBatch);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
             chainId: CURRENT_CHAIN_ID,
@@ -582,13 +584,13 @@ describe('DeviceDefinitionTable', async function () {
           });
 
           const count = await tablelandDb.prepare(
-            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1, MANUFACTURER_NAME)}`
           ).first<{ total: number }>('total');
 
           expect(count).to.deep.equal([3]);
 
           const selectQuery = await tablelandDb.prepare(
-            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1, MANUFACTURER_NAME)}`
           ).all();
 
 
@@ -623,7 +625,7 @@ describe('DeviceDefinitionTable', async function () {
           await expect(
             ddTableInstance
               .connect(manufacturer1)
-              .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
+              .insertDeviceDefinitionBatch(1, MANUFACTURER_NAME, C.mockDdInputBatch)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
             .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1)
@@ -640,7 +642,7 @@ describe('DeviceDefinitionTable', async function () {
         it('Should correctly insert DD into the table', async () => {
           const tx = await ddTableInstance
             .connect(privilegedUser1)
-            .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
+            .insertDeviceDefinitionBatch(1, MANUFACTURER_NAME, C.mockDdInputBatch);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
             chainId: CURRENT_CHAIN_ID,
@@ -648,13 +650,13 @@ describe('DeviceDefinitionTable', async function () {
           });
 
           const count = await tablelandDb.prepare(
-            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1, MANUFACTURER_NAME)}`
           ).first<{ total: number }>('total');
 
           expect(count).to.deep.equal([3]);
 
           const selectQuery = await tablelandDb.prepare(
-            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1, MANUFACTURER_NAME)}`
           ).all();
 
 
@@ -689,7 +691,7 @@ describe('DeviceDefinitionTable', async function () {
           await expect(
             ddTableInstance
               .connect(privilegedUser1)
-              .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
+              .insertDeviceDefinitionBatch(1, MANUFACTURER_NAME, C.mockDdInputBatch)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
             .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1)
@@ -705,15 +707,15 @@ describe('DeviceDefinitionTable', async function () {
   describe('getDeviceDefinitionTableName', () => {
     context('State', () => {
       it('Should return empty string if there is no table minted to the manufacturer', async () => {
-        expect(await ddTableInstance.getDeviceDefinitionTableName(99)).to.equal('');
+        expect(await ddTableInstance.getDeviceDefinitionTableName(99, MANUFACTURER_NAME)).to.equal('');
       });
       it('Should correctly return the table name', async () => {
         await ddTableInstance
           .connect(admin)
-          .createDeviceDefinitionTable(manufacturer1.address, 1);
+          .createDeviceDefinitionTable(manufacturer1.address, 1, MANUFACTURER_NAME);
 
-        expect(await ddTableInstance.getDeviceDefinitionTableName(1))
-          .to.equal(`_${CURRENT_CHAIN_ID}_2`);
+        expect(await ddTableInstance.getDeviceDefinitionTableName(1, MANUFACTURER_NAME))
+          .to.equal(`${MANUFACTURER_NAME}_${CURRENT_CHAIN_ID}_2`);
       });
     });
   });

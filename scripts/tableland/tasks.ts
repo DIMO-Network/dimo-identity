@@ -144,12 +144,14 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             for await (const dd of deviceDefinitionByManufacturers) {
                 
                 const deviceDefinitionInput : DeviceDefinitionInput = {
-                    id: dd.device_definition_id,
+                    id: `${dd.make.name_slug}-${dd.type.model_slug}-${dd.type.year}`,
+                    deviceDefinitionId: dd.device_definition_id,
                     model: dd.type.model,
                     year: dd.type.year,
                     metadata: JSON.stringify({
                         vehicle_data: dd.vehicle_data,
-                        device_attributes: dd.device_attributes
+                        device_attributes: dd.device_attributes,
+                        device_integrations: dd.device_integrations
                     })
                 };
 

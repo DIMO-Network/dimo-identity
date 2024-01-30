@@ -147,11 +147,10 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                     id: dd.device_definition_id,
                     model: dd.type.model,
                     year: dd.type.year,
-                    // metadata: {
-                    //     vehicle_data: dd.vehicle_data,
-                    //     device_attributes: dd.device_attributes
-                    // }
-                    metadata: ''
+                    metadata: JSON.stringify({
+                        vehicle_data: dd.vehicle_data,
+                        device_attributes: dd.device_attributes
+                    })
                 };
 
                 await ddTableInstance.insertDeviceDefinition(manufacturerId, name, deviceDefinitionInput);

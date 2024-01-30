@@ -86,7 +86,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 tableId = TablelandDeployments.get().create(
             address(this),
             SQLHelpers.toCreateFromSchema(
-                "id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT",
+                "id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, UNIQUE(model,year)",
                 manufacturerName)
         );
 

@@ -410,11 +410,11 @@
 #### Functions
 | Selector | Signature |
 |-|-|
-| 0x4cef9d2f | createDeviceDefinitionTable(address,uint256,string) |
+| 0x20954d21 | createDeviceDefinitionTable(address,uint256) |
 | 0x396e5987 | getDeviceDefinitionTableId(uint256) |
-| 0x12b7e8cd | getDeviceDefinitionTableName(uint256,string) |
-| 0x7d4899a6 | insertDeviceDefinition(uint256,string,(string,string,uint256,string)) |
-| 0x974de4a0 | insertDeviceDefinitionBatch(uint256,string,(string,string,uint256,string)[]) |
+| 0xa1d17941 | getDeviceDefinitionTableName(uint256) |
+| 0x53e7070b | insertDeviceDefinition(uint256,(string,string,uint256,string)) |
+| 0x6928118b | insertDeviceDefinitionBatch(uint256,(string,string,uint256,string)[]) |
 | 0x088fafdb | setDeviceDefinitionTable(uint256,uint256) |
 
 #### Events

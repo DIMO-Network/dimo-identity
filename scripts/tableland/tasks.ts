@@ -7,6 +7,7 @@ import { getAccounts, getDatabase, getValidator } from '@tableland/local';
 import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
 import { AddressesByNetwork } from '../../utils';
 import axios from 'axios';
+import { makes } from '../data/Makes';
 
 function getAddresses(): AddressesByNetwork {
     return JSON.parse(
@@ -94,38 +95,27 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
         console.log(`Minting manufacturers for ${signer.address}...`);
 
         console.log('Get manufacturers');
-        const manufacturers = (await getDeviceMakes()).data.device_makes;
-        console.log(`Total manufacturers ${manufacturers.length}...`);
+        console.log(`Total manufacturers ${makes.length}...`);
 
         console.log('Get device definitions...');
         const devices = (await getDeviceDefinitions()).data.device_definitions;
         console.log(`Total device definitions ${devices.length}...`);
 
-        // manufacturers = manufacturers.slice(0, 5);
-        for await (const element of manufacturers) {
-            const name = `${element.name_slug}`;
+        const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
+            'DeviceDefinitionTable',
+            instances.localhost.modules.DIMORegistry.address,
+        );
 
-            console.log(`Creating Manufacturer ${name} ...`);
-
-            const tx = await manufacturerInstance
+        for await (const element of makes) {
+            const manufacturerId = await manufacturerInstance
                 .connect(signer)
-                .mintManufacturerBatch(signer.address, [name]);
+                .getManufacturerIdByName(element);
 
-            const receipt = await tx.wait();
-            const manufacturerId = (receipt?.logs[1] as EventLog).args[1].toString();
-
-            console.log(`Manufacturer ${name} minted with ID: ${manufacturerId}`);
-
-            const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
-                'DeviceDefinitionTable',
-                instances.localhost.modules.DIMORegistry.address,
-            );
-
-            console.log(`Creating Device Definition table for manufacturer ${name} with ID  ${manufacturerId}...`);
+            console.log(`Creating Device Definition table for manufacturer ${element} with ID  ${manufacturerId}...`);
 
             const dTx = await ddTableInstance
                 .connect(signer)
-                .createDeviceDefinitionTable(tableOwner, manufacturerId, name);
+                .createDeviceDefinitionTable(tableOwner, manufacturerId);
 
             await tablelandValidator.pollForReceiptByTransactionHash({
                 chainId: 31337,
@@ -133,38 +123,38 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             });
 
             const ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
-            const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId, name);
+            const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
 
             console.log(`Device Definition table created\nTable ID: ${ddTableId}\nTable Name: ${ddTableName}`);
 
-            const deviceDefinitionByManufacturers = devices.filter((c)=> c.make.name_slug === element.name_slug && c.type.year > 2006);
-            console.log(`Get Device Definition By Manufacturer [${element.name}] total => ${deviceDefinitionByManufacturers.length}`);
+            const deviceDefinitionByManufacturers = devices.filter((c)=> c.make.name === element && c.type.year > 2006);
+            console.log(`Get Device Definition By Manufacturer [${element}] total => ${deviceDefinitionByManufacturers.length}`);
 
-            // deviceDefinitionByManufacturers = deviceDefinitionByManufacturers.slice(0, 5);
-            for await (const dd of deviceDefinitionByManufacturers) {
-                
-                const deviceDefinitionInput : DeviceDefinitionInput = {
-                    id: `${dd.make.name_slug}-${dd.type.model_slug}-${dd.type.year}`,
-                    deviceDefinitionId: dd.device_definition_id,
-                    model: dd.type.model,
-                    year: dd.type.year,
-                    metadata: JSON.stringify({
-                        vehicle_data: dd.vehicle_data,
-                        device_attributes: dd.device_attributes,
-                        device_integrations: dd.device_integrations
-                    })
-                };
+            const batchSize = 50;
+            for (let i = 0; i < deviceDefinitionByManufacturers.length; i += batchSize) {
+                const batch = deviceDefinitionByManufacturers.slice(i, i + batchSize).map(function(dd) {
+                    const deviceDefinitionInput : DeviceDefinitionInput = {
+                        id: `${dd.make.name_slug}_${dd.type.model_slug}_${dd.type.year}`,
+                        deviceDefinitionId: dd.device_definition_id,
+                        model: dd.type.model,
+                        year: dd.type.year,
+                        metadata: JSON.stringify({})
+                        // metadata: JSON.stringify({
+                        //     device_attributes: dd.device_attributes
+                        // })
+                    };
+                    return deviceDefinitionInput;
+                });
 
-                await ddTableInstance.insertDeviceDefinition(manufacturerId, name, deviceDefinitionInput);
-                // console.log(manufacturerId, deviceDefinitionInput);
-                console.info(`insert [${ddTableName}] => ${dd.device_definition_id} - ${dd.name} - ${dd.make.name} ${dd.type.model} - ${dd.type.year}`);
+                await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch);
 
             }
+
+            
 
         }
         
 });
-
 
 
 async function getDeviceMakes() {

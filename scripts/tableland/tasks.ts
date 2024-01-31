@@ -134,14 +134,14 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             for (let i = 0; i < deviceDefinitionByManufacturers.length; i += batchSize) {
                 const batch = deviceDefinitionByManufacturers.slice(i, i + batchSize).map(function(dd) {
                     const deviceDefinitionInput : DeviceDefinitionInput = {
-                        id: `${dd.make.name_slug}_${dd.type.model_slug}_${dd.type.year}`,
+                        id: `${dd.type.model_slug}_${dd.type.year}`,
                         deviceDefinitionId: dd.device_definition_id,
                         model: dd.type.model,
                         year: dd.type.year,
-                        metadata: JSON.stringify({})
-                        // metadata: JSON.stringify({
-                        //     device_attributes: dd.device_attributes
-                        // })
+                        //metadata: JSON.stringify({})
+                        metadata: JSON.stringify({
+                            device_attributes: dd.device_attributes
+                        })
                     };
                     return deviceDefinitionInput;
                 });

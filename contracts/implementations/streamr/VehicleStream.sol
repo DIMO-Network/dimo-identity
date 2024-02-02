@@ -211,6 +211,8 @@ contract VehicleStream is AccessControlInternal {
             .idProxyAddress;
         StreamrConfiguratorStorage.Storage
             storage scs = StreamrConfiguratorStorage.getStorage();
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
         IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
 
         // TODO To be possibly replaced by signature verification (like permit)
@@ -224,13 +226,10 @@ contract VehicleStream is AccessControlInternal {
             revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleId);
         }
 
-        string memory streamId = string(
-            abi.encodePacked(
-                scs.dimoStreamrEns,
-                "/vehicle/",
-                Strings.toString(vehicleId)
-            )
-        );
+        string memory streamId = vs.streams[vehicleId];
+        if (bytes(streamId).length == 0) {
+            revert VehicleStreamNotSet(vehicleId);
+        }
 
         streamRegistry.grantPermission(
             streamId,

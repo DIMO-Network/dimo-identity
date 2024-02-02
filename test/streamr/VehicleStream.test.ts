@@ -555,6 +555,22 @@ describe('VehicleStream', async function () {
           99
         );
       });
+      it('Should revert if there is no stream ID associated to the vehicle ID', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+
+        await expect(
+          vehicleStreamInstance
+            .connect(user2)
+            .subscribeToVehicleStream(2, subscriber.address, subscriptionExpiresDefault)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'VehicleStreamNotSet'
+        ).withArgs(
+          2
+        );
+      });
     });
 
     context('State', () => {

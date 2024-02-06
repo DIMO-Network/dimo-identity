@@ -3366,6 +3366,19 @@
                 "type": "uint256"
             }
         ],
+        "name": "transferVehicleStream",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
+            }
+        ],
         "name": "unsetVehicleStream",
         "outputs": [],
         "stateMutability": "nonpayable",

@@ -23,6 +23,8 @@ interface IStreamRegistry {
 
     function exists(string calldata streamId) external returns (bool);
 
+    function deleteStream(string calldata streamId) external;
+
     function hasPermission(
         string calldata streamId,
         address user,

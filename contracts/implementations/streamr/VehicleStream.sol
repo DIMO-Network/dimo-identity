@@ -36,8 +36,8 @@ contract VehicleStream is AccessControlInternal {
     /**
      * @notice Creates a vehicle stream associated with a vehicle id
      * Grants publishing permission to the DIMO Streamr Node
-     * @dev Stream is is in format streams.dimo.eth/vehicle/<vehicleId>
-     * @dev Reverts if vehicle id does not exist or caller is not the owner
+     * @dev Stream is in the format streams.dimo.eth/vehicle/<vehicleId>
+     *  - Reverts if vehicle id does not exist or caller is not the owner
      * @param vehicleId Vehicle node Id
      */
     function createVehicleStream(uint256 vehicleId) external {
@@ -63,6 +63,11 @@ contract VehicleStream is AccessControlInternal {
             revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleId);
         }
 
+        string memory oldStreamId = vs.streams[vehicleId];
+        if (bytes(oldStreamId).length != 0) {
+            revert VehicleStreamAlreadySet(vehicleId, oldStreamId);
+        }
+
         string memory streamPath = string(
             abi.encodePacked("/vehicle/", Strings.toString(vehicleId))
         );
@@ -76,12 +81,8 @@ contract VehicleStream is AccessControlInternal {
             )
         );
 
-        string memory oldStreamId = vs.streams[vehicleId];
-        if (bytes(oldStreamId).length != 0) {
-            revert VehicleStreamAlreadySet(vehicleId, oldStreamId);
-        }
-
         vs.streams[vehicleId] = streamId;
+        vs.isInternalStreamId[streamId] = true;
 
         emit VehicleStreamSet(vehicleId, streamId);
 
@@ -94,9 +95,11 @@ contract VehicleStream is AccessControlInternal {
 
     /**
      * @notice Allows a vehicle owner to associate an existing stream Id from their vehicle Id
-     * @dev This contract must have Publish and Grant Streamr permissions
-     * @dev Reverts if vehicle id does not exist, caller is not the owner,
-     * stream Id does not exist, DIMO Registry does not have grant permission or DIMO Streamr Node the publish permission
+     * @dev This contract must have the Grant Streamr permission
+     *  - Reverts if vehicle id does not exist, caller is not the owner,
+     *    stream Id does not exist, DIMO Registry does not have grant permission or DIMO Streamr Node the publish permission
+     *  - If there is an existing stream Id associated to the vehicle Id,
+     *    and it was created by this contract, it will be deleted
      * @param vehicleId Vehicle node Id
      * @param streamId The stream Id
      */
@@ -151,21 +154,13 @@ contract VehicleStream is AccessControlInternal {
                 IStreamRegistry.PermissionType.Grant
             );
         }
-        if (
-            !streamRegistry.hasPermission(
-                streamId,
-                address(this),
-                IStreamRegistry.PermissionType.Delete
-            )
-        ) {
-            revert NoStreamrPermission(
-                address(this),
-                IStreamRegistry.PermissionType.Delete
-            );
-        }
 
         string memory oldStreamId = vs.streams[vehicleId];
         if (bytes(oldStreamId).length != 0) {
+            if (vs.isInternalStreamId[oldStreamId]) {
+                vs.isInternalStreamId[oldStreamId] = false;
+                streamRegistry.deleteStream(oldStreamId);
+            }
             emit VehicleStreamUnset(vehicleId, oldStreamId);
         }
 
@@ -185,6 +180,9 @@ contract VehicleStream is AccessControlInternal {
             .idProxyAddress;
         VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
             .getStorage();
+        IStreamRegistry streamRegistry = IStreamRegistry(
+            StreamrConfiguratorStorage.getStorage().streamRegistry
+        );
 
         try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
             address vehicleOwner
@@ -199,6 +197,11 @@ contract VehicleStream is AccessControlInternal {
         string memory oldStreamId = vs.streams[vehicleId];
         if (bytes(oldStreamId).length == 0) {
             revert VehicleStreamNotSet(vehicleId);
+        }
+
+        if (vs.isInternalStreamId[oldStreamId]) {
+            vs.isInternalStreamId[oldStreamId] = false;
+            streamRegistry.deleteStream(oldStreamId);
         }
 
         delete vs.streams[vehicleId];
@@ -261,20 +264,9 @@ contract VehicleStream is AccessControlInternal {
     }
 
     /**
-     * @notice Gets the stream Id by the vehicle Id
-     * @dev If there is not stream Id associated to the vehicle Id, it will return an empty string
-     * @param vehicleId Vehicle node Id
-     */
-    function getVehicleStream(
-        uint256 vehicleId
-    ) external view returns (string memory streamId) {
-        streamId = VehicleStreamStorage.getStorage().streams[vehicleId];
-    }
-
-    /**
      * @notice Transfers stream Id for the new vehicle Id owner
      * @dev Can only be called by the VehicleId contract
-     * @dev Deletes the existing stream Id and recreates it to reset existing permissions
+     *  - Deletes the existing stream Id and recreates it to reset existing permissions
      * @param vehicleId Vehicle node Id
      */
     function transferVehicleStream(uint256 vehicleId) external {
@@ -292,7 +284,8 @@ contract VehicleStream is AccessControlInternal {
             .getStorage();
 
         string memory streamId = vs.streams[vehicleId];
-        if (bytes(streamId).length == 0) return;
+        if (bytes(streamId).length == 0 || !vs.isInternalStreamId[streamId])
+            return;
 
         string memory streamPath = string(
             abi.encodePacked("/vehicle/", Strings.toString(vehicleId))
@@ -309,5 +302,16 @@ contract VehicleStream is AccessControlInternal {
             StreamrConfiguratorStorage.getStorage().dimoStreamrNode,
             IStreamRegistry.PermissionType.Publish
         );
+    }
+
+    /**
+     * @notice Gets the stream Id by the vehicle Id
+     * @dev If there is not stream Id associated to the vehicle Id, it will return an empty string
+     * @param vehicleId Vehicle node Id
+     */
+    function getVehicleStream(
+        uint256 vehicleId
+    ) external view returns (string memory streamId) {
+        streamId = VehicleStreamStorage.getStorage().streams[vehicleId];
     }
 }

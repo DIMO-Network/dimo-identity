@@ -54,7 +54,6 @@ describe('VehicleStream', async function () {
   let manufacturer1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
-  let user3: HardhatEthersSigner;
   let subscriber: HardhatEthersSigner;
 
   async function setupStreamr(dimoRegistryAddress: string) {
@@ -86,7 +85,6 @@ describe('VehicleStream', async function () {
       manufacturer1,
       user1,
       user2,
-      user3,
       subscriber
     ] = await ethers.getSigners();
 
@@ -335,9 +333,6 @@ describe('VehicleStream', async function () {
       await streamRegistry
         .connect(user1)
         .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
-      await streamRegistry
-        .connect(user1)
-        .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Delete);
     });
 
     context('Error Handling', () => {
@@ -411,23 +406,6 @@ describe('VehicleStream', async function () {
           C.StreamrPermissionType.Grant
         );
       });
-      it('Should revert if DIMO Registry does not have Delete permission', async () => {
-        await streamRegistry
-          .connect(user1)
-          .revokePermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Delete);
-
-        await expect(
-          vehicleStreamInstance
-            .connect(user1)
-            .setVehicleStream(1, mockStreamId)
-        ).to.be.revertedWithCustomError(
-          vehicleStreamInstance,
-          'NoStreamrPermission'
-        ).withArgs(
-          DIMO_REGISTRY_ADDRESS,
-          C.StreamrPermissionType.Delete
-        );
-      });
     });
 
     context('State', () => {
@@ -441,6 +419,21 @@ describe('VehicleStream', async function () {
 
         const streamIdAfter = await vehicleStreamInstance.getVehicleStream(1);
         expect(streamIdAfter).to.eql(mockStreamId);
+      });
+      it('Should delete current stream ID if it was created by DIMO Registry', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .createVehicleStream(1);
+
+        const oldStreamId = vehicleStreamInstance.getVehicleStream(1);
+
+        expect(await streamRegistry.exists(oldStreamId)).to.be.true;
+
+        await vehicleStreamInstance
+          .connect(user1)
+          .setVehicleStream(1, mockStreamId);
+
+        expect(await streamRegistry.exists(oldStreamId)).to.be.false;
       });
     });
 
@@ -533,6 +526,17 @@ describe('VehicleStream', async function () {
 
         const streamIdAfter = await vehicleStreamInstance.getVehicleStream(1);
         expect(streamIdAfter).to.be.empty;
+      });
+      it('Should delete current stream ID if it was created by DIMO Registry', async () => {
+         const oldStreamId = vehicleStreamInstance.getVehicleStream(1);
+
+        expect(await streamRegistry.exists(oldStreamId)).to.be.true;
+
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+
+        expect(await streamRegistry.exists(oldStreamId)).to.be.false;
       });
     });
 
@@ -627,7 +631,7 @@ describe('VehicleStream', async function () {
     });
   });
 
-  context.only('On transfer', () => {
+  context('On transfer', () => {
     let streamId: string;
     beforeEach(async () => {
       await vehicleStreamInstance.connect(user1).createVehicleStream(1);
@@ -635,7 +639,7 @@ describe('VehicleStream', async function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller is approved, but not the token owner', async () => {
+      it('Should revert if transfer function is not called by the Vehicle Id contract', async () => {
         await expect(
           vehicleStreamInstance
             .connect(user1)
@@ -665,67 +669,8 @@ describe('VehicleStream', async function () {
         expect(permissions[3]).to.equal('0');
         expect(permissions[4]).to.eql(false);
       });
-      it.skip('Should reset arbitrary existing permissions', async () => {
-        const mockStreamId = `${await user1.address.toString().toLowerCase()}${C.MOCK_STREAM_PATH}`;
-
-        await streamRegistry
-          .connect(user1)
-          .createStream(C.MOCK_STREAM_PATH, '{}');
-        await streamRegistry
-          .connect(user1)
-          .grantPermission(mockStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
-        await streamRegistry
-          .connect(user1)
-          .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
-        await streamRegistry
-          .connect(user1)
-          .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Delete);
-        await vehicleStreamInstance
-          .connect(user1)
-          .setVehicleStream(1, mockStreamId);
-
-        const publishExpiresDefault = await time.latest() + 31556926; // + 1 year
-
-        await streamRegistry
-          .connect(user1)
-          .setPermissions(
-            mockStreamId,
-            [
-              user2.address,
-              user3.address
-            ],
-            [
-              {
-                canEdit: true,
-                canDelete: true,
-                publishExpiration: publishExpiresDefault,
-                subscribeExpiration: subscriptionExpiresDefault,
-                canGrant: true
-              },
-              {
-                canEdit: true,
-                canDelete: false,
-                publishExpiration: publishExpiresDefault,
-                subscribeExpiration: subscriptionExpiresDefault,
-                canGrant: false
-              }
-            ]
-          );
-
-        const permissionsUser2Before = await streamRegistry.getPermissionsForUser(mockStreamId, user2.address);
-        const permissionsUser3Before = await streamRegistry.getPermissionsForUser(mockStreamId, user3.address);
-
-        expect(permissionsUser2Before[0]).to.eql(true);
-        expect(permissionsUser2Before[1]).to.eql(true);
-        expect(permissionsUser2Before[2]).to.equal(publishExpiresDefault);
-        expect(permissionsUser2Before[3]).to.equal(subscriptionExpiresDefault);
-        expect(permissionsUser2Before[4]).to.eql(true);
-
-        expect(permissionsUser3Before[0]).to.eql(true);
-        expect(permissionsUser3Before[1]).to.eql(false);
-        expect(permissionsUser3Before[2]).to.equal(publishExpiresDefault);
-        expect(permissionsUser3Before[3]).to.equal(subscriptionExpiresDefault);
-        expect(permissionsUser3Before[4]).to.eql(false);
+      it('Should transfer vehicle ID to the new owner', async () => {
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
 
         await vehicleIdInstance
           .connect(user1)
@@ -735,47 +680,8 @@ describe('VehicleStream', async function () {
           1
         );
 
-        const permissionsUser2After = await streamRegistry.getPermissionsForUser(mockStreamId, user2.address);
-        const permissionsUser3After = await streamRegistry.getPermissionsForUser(mockStreamId, user3.address);
-
-        expect(permissionsUser2After[0]).to.eql(true);
-        expect(permissionsUser2After[1]).to.eql(true);
-        expect(permissionsUser2After[2]).to.equal(publishExpiresDefault);
-        expect(permissionsUser2After[3]).to.equal(subscriptionExpiresDefault);
-        expect(permissionsUser2After[4]).to.eql(true);
-
-        expect(permissionsUser3After[0]).to.eql(true);
-        expect(permissionsUser3After[1]).to.eql(false);
-        expect(permissionsUser3After[2]).to.equal(publishExpiresDefault);
-        expect(permissionsUser3After[3]).to.equal(subscriptionExpiresDefault);
-        expect(permissionsUser3After[4]).to.eql(false);
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
-      // it('Should transfer vehicle ID to the new owner', async () => {
-      //   expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
-
-      //   await vehicleIdInstance
-      //     .connect(user1)
-      //   ['safeTransferFrom(address,address,uint256)'](
-      //     user1.address,
-      //     user2.address,
-      //     1
-      //   );
-
-      //   expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
-      // });
-      // it('Should transfer synthetic device ID to the new owner', async () => {
-      //   expect(await sdIdInstance.ownerOf(1)).to.be.equal(user1.address);
-
-      //   await vehicleIdInstance
-      //     .connect(user1)
-      //   ['safeTransferFrom(address,address,uint256)'](
-      //     user1.address,
-      //     user2.address,
-      //     1
-      //   );
-
-      //   expect(await sdIdInstance.ownerOf(1)).to.be.equal(user2.address);
-      // });
     });
 
     context('Events', () => {
@@ -794,10 +700,48 @@ describe('VehicleStream', async function () {
           )
         ).to.not.emit(vehicleStreamInstance, 'VehicleStreamUnset');
       });
+      it('Should not emit VehicleStreamUnset event if there is a external stream Id associated with vehicle Id', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+        
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+
+        await expect(
+          vehicleIdInstance
+            .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            1
+          )
+        ).to.not.emit(vehicleStreamInstance, 'VehicleStreamUnset');
+      });
       it('Should not emit VehicleStreamSet event if there is not stream Id associated with vehicle Id', async () => {
         await vehicleStreamInstance
           .connect(user1)
           .unsetVehicleStream(1);
+
+        await expect(
+          vehicleIdInstance
+            .connect(user1)
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            1
+          )
+        ).to.not.emit(vehicleStreamInstance, 'VehicleStreamSet');
+      });
+      it('Should not emit VehicleStreamSet event if there is a external stream Id associated with vehicle Id', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+        
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
 
         await expect(
           vehicleIdInstance

@@ -82,9 +82,15 @@ contract VehicleStream is AccessControlInternal {
         );
 
         vs.streams[vehicleId] = streamId;
-        vs.isInternalStreamId[streamId] = true;
+        vs.isOfficialStreamId[streamId] = true;
 
         emit VehicleStreamSet(vehicleId, streamId);
+
+        streamRegistry.grantPermission(
+            streamId,
+            msg.sender,
+            IStreamRegistry.PermissionType.Subscribe
+        );
 
         streamRegistry.grantPermission(
             streamId,
@@ -145,6 +151,18 @@ contract VehicleStream is AccessControlInternal {
         if (
             !streamRegistry.hasPermission(
                 streamId,
+                msg.sender,
+                IStreamRegistry.PermissionType.Grant
+            )
+        ) {
+            revert NoStreamrPermission(
+                msg.sender,
+                IStreamRegistry.PermissionType.Grant
+            );
+        }
+        if (
+            !streamRegistry.hasPermission(
+                streamId,
                 address(this),
                 IStreamRegistry.PermissionType.Grant
             )
@@ -157,8 +175,8 @@ contract VehicleStream is AccessControlInternal {
 
         string memory oldStreamId = vs.streams[vehicleId];
         if (bytes(oldStreamId).length != 0) {
-            if (vs.isInternalStreamId[oldStreamId]) {
-                vs.isInternalStreamId[oldStreamId] = false;
+            if (vs.isOfficialStreamId[oldStreamId]) {
+                vs.isOfficialStreamId[oldStreamId] = false;
                 streamRegistry.deleteStream(oldStreamId);
             }
             emit VehicleStreamUnset(vehicleId, oldStreamId);
@@ -199,8 +217,8 @@ contract VehicleStream is AccessControlInternal {
             revert VehicleStreamNotSet(vehicleId);
         }
 
-        if (vs.isInternalStreamId[oldStreamId]) {
-            vs.isInternalStreamId[oldStreamId] = false;
+        if (vs.isOfficialStreamId[oldStreamId]) {
+            vs.isOfficialStreamId[oldStreamId] = false;
             streamRegistry.deleteStream(oldStreamId);
         }
 
@@ -266,12 +284,23 @@ contract VehicleStream is AccessControlInternal {
      * @notice Transfers stream Id for the new vehicle Id owner
      * @dev Can only be called by the VehicleId contract
      *  - Deletes the existing stream Id and recreates it to reset existing permissions
+     * @param to New vehicle Id owner
      * @param vehicleId Vehicle node Id
      */
-    function transferVehicleStream(uint256 vehicleId) external {
+    function transferVehicleStream(address to, uint256 vehicleId) external {
         if (msg.sender != VehicleStorage.getStorage().idProxyAddress) {
             revert Errors.Unauthorized(msg.sender);
         }
+
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
+
+        string memory streamId = vs.streams[vehicleId];
+        if (!vs.isOfficialStreamId[streamId]) {
+            delete vs.streams[vehicleId];
+            return;
+        }
+        if (bytes(streamId).length == 0) return;
 
         string memory dimoStreamrEns = StreamrConfiguratorStorage
             .getStorage()
@@ -279,12 +308,6 @@ contract VehicleStream is AccessControlInternal {
         StreamrConfiguratorStorage.Storage
             storage scs = StreamrConfiguratorStorage.getStorage();
         IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
-        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
-            .getStorage();
-
-        string memory streamId = vs.streams[vehicleId];
-        if (bytes(streamId).length == 0 || !vs.isInternalStreamId[streamId])
-            return;
 
         string memory streamPath = string(
             abi.encodePacked("/vehicle/", Strings.toString(vehicleId))
@@ -295,6 +318,12 @@ contract VehicleStream is AccessControlInternal {
 
         streamRegistry.createStreamWithENS(dimoStreamrEns, streamPath, "{}");
         emit VehicleStreamSet(vehicleId, streamId);
+
+        streamRegistry.grantPermission(
+            streamId,
+            to,
+            IStreamRegistry.PermissionType.Subscribe
+        );
 
         streamRegistry.grantPermission(
             streamId,

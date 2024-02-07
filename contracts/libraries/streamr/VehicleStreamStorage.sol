@@ -11,7 +11,7 @@ library VehicleStreamStorage {
 
     struct Storage {
         mapping(uint256 => string) streams;
-        mapping(string => bool) isInternalStreamId;
+        mapping(string => bool) isOfficialStreamId;
     }
 
     /* solhint-disable no-inline-assembly */

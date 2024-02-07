@@ -170,7 +170,7 @@ contract VehicleId is Initializable, MultiPrivilege {
             }
         }
 
-        _dimoRegistry.transferVehicleStream(tokenId);
+        _dimoRegistry.transferVehicleStream(to, tokenId);
 
         super._transfer(from, to, tokenId);
     }

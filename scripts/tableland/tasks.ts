@@ -111,18 +111,23 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                 .connect(signer)
                 .getManufacturerIdByName(element);
 
-            console.log(`Creating Device Definition table for manufacturer ${element} with ID  ${manufacturerId}...`);
+            let ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
 
-            const dTx = await ddTableInstance
-                .connect(signer)
-                .createDeviceDefinitionTable(tableOwner, manufacturerId);
+            if (ddTableId == 0) {
+                console.log(`Creating Device Definition table for manufacturer ${element} with ID  ${manufacturerId}...`);
 
-            await tablelandValidator.pollForReceiptByTransactionHash({
-                chainId: 31337,
-                transactionHash: (await dTx.wait())?.hash as string,
-            });
-
-            const ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
+                const dTx = await ddTableInstance
+                    .connect(signer)
+                    .createDeviceDefinitionTable(tableOwner, manufacturerId);
+    
+                await tablelandValidator.pollForReceiptByTransactionHash({
+                    chainId: 31337,
+                    transactionHash: (await dTx.wait())?.hash as string,
+                });
+    
+                ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
+            }
+            
             const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
 
             console.log(`Device Definition table created\nTable ID: ${ddTableId}\nTable Name: ${ddTableName}`);
@@ -131,6 +136,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             console.log(`Get Device Definition By Manufacturer [${element}] total => ${deviceDefinitionByManufacturers.length}`);
 
             const batchSize = 50;
+            let items = 0;
             for (let i = 0; i < deviceDefinitionByManufacturers.length; i += batchSize) {
                 const batch = deviceDefinitionByManufacturers.slice(i, i + batchSize).map(function(dd) {
                     const deviceDefinitionInput : DeviceDefinitionInput = {
@@ -146,11 +152,18 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                     return deviceDefinitionInput;
                 });
 
-                await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch);
+                items += batch.length;
 
+                console.log(`Creating [${deviceDefinitionByManufacturers.length}/${items}] ...`);
+                await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch);
             }
 
-            
+            const count = await tablelandDb.prepare(
+                `SELECT COUNT(*) AS total FROM ${ddTableName}`
+              ).first<{ total: number }>('total');
+
+            console.log(`${element} => ${ddTableName} total rows: ${count}`);
+            console.log(`${element} => ${ddTableName} total upload: ${deviceDefinitionByManufacturers.length}`);
 
         }
         
@@ -163,4 +176,10 @@ async function getDeviceMakes() {
 
 async function getDeviceDefinitions() {
     return await axios.get('https://device-definitions-api.dimo.zone/device-definitions/all');
+}
+
+function delay(time) {
+    return new Promise((resolve) => {
+        setTimeout(() => resolve(), time);
+    });
 }

@@ -112,7 +112,8 @@ async function deployModules(
     { name: 'DevAdmin', args: [] },
     { name: 'Multicall', args: [] },
     { name: 'DeviceDefinitionTable', args: [] },
-    { name: 'ERC721Holder', args: [] }
+    { name: 'ERC721Holder', args: [] },
+    { name: 'DeviceDefinitionController', args: [] },
   ];
 
   const instances = getAddresses();

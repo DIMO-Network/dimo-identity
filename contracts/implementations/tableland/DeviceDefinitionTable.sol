@@ -76,7 +76,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
             abi.encodePacked(
                 "CREATE TABLE _",
                 Strings.toString(block.chainid),
-                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, UNIQUE(model,year))"
+                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, legacy_id TEXT, UNIQUE(model,year))"
             )
         );
         uint256 tableId = tablelandTables.create(address(this), statement);
@@ -143,7 +143,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
     function insertDeviceDefinition(
         uint256 manufacturerId,
         DeviceDefinitionInput calldata data
-    ) public payable {
+    ) external {
         TablelandTables tablelandTables = TablelandDeployments.get();
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
@@ -175,7 +175,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
             SQLHelpers.toInsert(
                 "",
                 tableId,
-                "id,model,year,metadata",
+                "id,model,year,metadata,legacy_id",
                 string.concat(
                     string(abi.encodePacked("'", data.id, "'")),
                     ",",
@@ -183,7 +183,9 @@ contract DeviceDefinitionTable is AccessControlInternal {
                     ",",
                     Strings.toString(data.year),
                     ",",
-                    string(abi.encodePacked("'", data.metadata, "'"))
+                    string(abi.encodePacked("'", data.metadata, "'")),
+                    ",",
+                    string(abi.encodePacked("'", data.legacyId, "'"))
                 )
             )
         );
@@ -238,7 +240,9 @@ contract DeviceDefinitionTable is AccessControlInternal {
                 ",",
                 Strings.toString(data[i].year),
                 ",",
-                string(abi.encodePacked("'", data[i].metadata, "'"))
+                string(abi.encodePacked("'", data[i].metadata, "'")),
+                ",",
+                string(abi.encodePacked("'", data[i].legacyId, "'"))
             );
 
             emit DeviceDefinitionInserted(
@@ -252,7 +256,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         string memory stmt = SQLHelpers.toBatchInsert(
             "",
             tableId,
-            "id,model,year,metadata",
+            "id,model,year,metadata,legacy_id",
             vals
         );
 

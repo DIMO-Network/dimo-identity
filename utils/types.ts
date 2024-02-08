@@ -57,7 +57,8 @@ export type DeviceDefinitionInput = {
   deviceDefinitionId: string,
   model: string,
   year: number,
-  metadata: string
+  metadata: string,
+  legacyId: string,
 }
 
 export type IdManufacturerName = {

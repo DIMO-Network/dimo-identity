@@ -92,9 +92,6 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
         const tablelandDb = getDatabase(getAccounts()[0]);
         const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
 
-        console.log(`Minting manufacturers for ${signer.address}...`);
-
-        console.log('Get manufacturers');
         console.log(`Total manufacturers ${makes.length}...`);
 
         console.log('Get device definitions...');
@@ -141,10 +138,9 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                 const batch = deviceDefinitionByManufacturers.slice(i, i + batchSize).map(function(dd) {
                     const deviceDefinitionInput : DeviceDefinitionInput = {
                         id: `${dd.type.model_slug}_${dd.type.year}`,
-                        deviceDefinitionId: dd.device_definition_id,
+                        legacyId: dd.device_definition_id,
                         model: dd.type.model,
                         year: dd.type.year,
-                        //metadata: JSON.stringify({})
                         metadata: JSON.stringify({
                             device_attributes: dd.device_attributes
                         })
@@ -153,6 +149,8 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                 });
 
                 items += batch.length;
+
+                console.log(batch);
 
                 console.log(`Creating [${deviceDefinitionByManufacturers.length}/${items}] ...`);
                 await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch);
@@ -170,7 +168,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 });
 
 
-task('query-tableland', 'npx hardhat query-tableland <name> <filter> <limit> --network localhost')
+task('query-tableland', 'npx hardhat query-tableland <name> --network localhost')
     .addPositionalParam('name', 'The name of the manufacturer table')
     .addPositionalParam('filter', 'The filter to query device definition table', '')
     .addOptionalParam('limit', 'The limit to query device definition table', 'LIMIT 10')

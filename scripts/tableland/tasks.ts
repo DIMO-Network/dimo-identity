@@ -170,6 +170,54 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 });
 
 
+task('query-tableland', 'npx hardhat query-tableland <name> <filter> <limit> --network localhost')
+    .addPositionalParam('name', 'The name of the manufacturer table')
+    .addPositionalParam('filter', 'The filter to query device definition table', '')
+    .addOptionalParam('limit', 'The limit to query device definition table', 'LIMIT 10')
+    .setAction(async (args, hre) => {
+        
+        if (hre.network.name !== 'localhost') {
+            throw new Error(`Invalid network <${hre.network.name}>\nMake sure to add the flag "--network localhost"\n`)
+        }
+        const instances = getAddresses();
+        const [signer] = await hre.ethers.getSigners();
+        const tableOwner = await signer.getAddress(); 
+
+        const manufacturerInstance: Manufacturer = await hre.ethers.getContractAt(
+            'Manufacturer',
+            instances.localhost.modules.DIMORegistry.address,
+        );
+
+        const tablelandDb = getDatabase(getAccounts()[0]);
+        const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
+        
+        console.log(`Query to manufacturer table [${args.name}] for ${signer.address}...`);
+
+        const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
+            'DeviceDefinitionTable',
+            instances.localhost.modules.DIMORegistry.address,
+        );
+
+        const manufacturerId = await manufacturerInstance
+                .connect(signer)
+                .getManufacturerIdByName(args.name);
+
+        const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
+                
+        const where = args.filter ? `WHERE id='${args.filter}'` : '';
+        const script = `SELECT * FROM ${ddTableName} ${where} ${args.limit}`;
+        console.log(script);
+
+        const query = await tablelandDb.prepare(
+            script
+          ).all();
+
+        console.log(`Duration: ${query.meta.duration}`);
+        console.log(`Total rows: ${query.results.length}`);
+        console.table(query.results);
+
+});
+
 async function getDeviceMakes() {
     return await axios.get('https://device-definitions-api.dimo.zone/device-makes');
 }

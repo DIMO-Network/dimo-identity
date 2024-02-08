@@ -3323,6 +3323,37 @@
                 "internalType": "uint256",
                 "name": "vehicleId",
                 "type": "uint256"
+            }
+        ],
+        "name": "onBurnVehicleStream",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
+            }
+        ],
+        "name": "onTransferVehicleStream",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
             },
             {
                 "internalType": "string",
@@ -3354,24 +3385,6 @@
             }
         ],
         "name": "subscribeToVehicleStream",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "to",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "vehicleId",
-                "type": "uint256"
-            }
-        ],
-        "name": "transferVehicleStream",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

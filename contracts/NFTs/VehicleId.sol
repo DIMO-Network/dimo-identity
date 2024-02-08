@@ -106,11 +106,13 @@ contract VehicleId is Initializable, MultiPrivilege {
     /**
      * @notice Function to burn a token
      * @dev To be called by DIMORegistry or a token owner
-     * DIMORegistry calls this function in burnVehicleSign function
-     * When a user calls it, burning is validated in the DIMORegistry
+     *  - DIMORegistry calls this function in burnVehicleSign function
+     *  - When a user calls it, burning is validated in the DIMORegistry
      * @param tokenId Token Id to be burned
      */
     function burn(uint256 tokenId) public override {
+        _dimoRegistry.onBurnVehicleStream(tokenId);
+
         if (_msgSender() != address(_dimoRegistry)) {
             _dimoRegistry.validateBurnAndResetNode(tokenId);
             ERC721BurnableUpgradeable.burn(tokenId);
@@ -170,7 +172,7 @@ contract VehicleId is Initializable, MultiPrivilege {
             }
         }
 
-        _dimoRegistry.transferVehicleStream(to, tokenId);
+        _dimoRegistry.onTransferVehicleStream(to, tokenId);
 
         super._transfer(from, to, tokenId);
     }

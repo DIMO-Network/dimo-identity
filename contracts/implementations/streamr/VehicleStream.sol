@@ -287,7 +287,7 @@ contract VehicleStream is AccessControlInternal {
      * @param to New vehicle Id owner
      * @param vehicleId Vehicle node Id
      */
-    function transferVehicleStream(address to, uint256 vehicleId) external {
+    function onTransferVehicleStream(address to, uint256 vehicleId) external {
         if (msg.sender != VehicleStorage.getStorage().idProxyAddress) {
             revert Errors.Unauthorized(msg.sender);
         }
@@ -330,6 +330,38 @@ contract VehicleStream is AccessControlInternal {
             StreamrConfiguratorStorage.getStorage().dimoStreamrNode,
             IStreamRegistry.PermissionType.Publish
         );
+    }
+
+    /**
+     * @notice Dissociates stream Id from the vehicle Id when burned
+     * @dev Can only be called by the VehicleId contract
+     *  - If official, also deletes stream Id
+     * @param vehicleId Vehicle node Id
+     */
+    function onBurnVehicleStream(uint256 vehicleId) external {
+        if (msg.sender != VehicleStorage.getStorage().idProxyAddress) {
+            revert Errors.Unauthorized(msg.sender);
+        }
+
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
+
+        string memory streamId = vs.streams[vehicleId];
+        if (bytes(streamId).length != 0) {
+            delete vs.streams[vehicleId];
+            if (vs.isOfficialStreamId[streamId]) {
+                StreamrConfiguratorStorage.Storage
+                    storage scs = StreamrConfiguratorStorage.getStorage();
+                IStreamRegistry streamRegistry = IStreamRegistry(
+                    scs.streamRegistry
+                );
+
+                vs.isOfficialStreamId[streamId] = false;
+                streamRegistry.deleteStream(streamId);
+            }
+
+            emit VehicleStreamUnset(vehicleId, streamId);
+        }
     }
 
     /**

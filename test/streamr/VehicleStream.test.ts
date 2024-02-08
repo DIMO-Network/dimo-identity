@@ -689,7 +689,7 @@ describe('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user1)
-            .transferVehicleStream(user2.address, 1)
+            .onTransferVehicleStream(user2.address, 1)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'Unauthorized'
@@ -719,7 +719,7 @@ describe('VehicleStream', async function () {
 
         expect(afterStreamId).to.be.empty;
       });
-      it('Should keep stream ID associated with vehicle ID if stream ID iis official', async () => {
+      it('Should keep stream ID associated with vehicle ID if stream ID is official', async () => {
         await vehicleIdInstance
           .connect(user1)
         ['safeTransferFrom(address,address,uint256)'](
@@ -889,6 +889,76 @@ describe('VehicleStream', async function () {
             1
           )
         ).to.emit(vehicleStreamInstance, 'VehicleStreamSet')
+          .withArgs(1, streamId);
+      });
+    });
+  });
+
+  context('On burn', () => {
+    let streamId: string;
+    beforeEach(async () => {
+      await vehicleStreamInstance.connect(user1).createVehicleStream(1);
+      streamId = await vehicleStreamInstance.getVehicleStream(1);
+    });
+
+    context('Error handling', () => {
+      it('Should revert if burn function is not called by the Vehicle Id contract', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(user1)
+            .onBurnVehicleStream(1)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'Unauthorized'
+        ).withArgs(user1.address);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly dissociate stream ID from vehicle ID if stream ID is a third party stream', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+
+        await vehicleIdInstance
+          .connect(user1)
+          .burn(1);
+
+        const afterStreamId = await vehicleStreamInstance.getVehicleStream(1);
+
+        expect(afterStreamId).to.be.empty;
+      });
+      it('Should correctly dissociate stream ID from vehicle ID if stream ID is official', async () => {
+        await vehicleIdInstance
+          .connect(user1)
+          .burn(1);
+
+        const afterStreamId = await vehicleStreamInstance.getVehicleStream(1);
+
+        expect(afterStreamId).to.be.empty;
+      });
+      it('Should delete current stream ID if it was created by DIMO Registry', async () => {
+        expect(await streamRegistry.exists(streamId)).to.be.true;
+
+        await vehicleIdInstance
+          .connect(user1)
+          .burn(1);
+
+        expect(await streamRegistry.exists(streamId)).to.be.false;
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleStreamUnset event with correct params', async () => {
+        await expect(
+          vehicleIdInstance
+          .connect(user1)
+          .burn(1)
+        ).to.emit(vehicleStreamInstance, 'VehicleStreamUnset')
           .withArgs(1, streamId);
       });
     });

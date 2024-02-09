@@ -146,6 +146,7 @@
 | 0x7ba79a39 | mintAftermarketDeviceByManufacturerBatch(uint256,(address,(string,string)[])[]) |
 | 0xb50df2f7 | pairAftermarketDeviceSign(uint256,uint256,bytes,bytes) |
 | 0xcfe642dd | pairAftermarketDeviceSign(uint256,uint256,bytes) |
+| 0x9b3abd48 | reprovisionAftermarketDeviceByManufacturerBatch(uint256[]) |
 | 0x9d0b139b | resetAftermarketDeviceAddressByManufacturerBatch((uint256,address)[]) |
 | 0x4d49d82a | setAftermarketDeviceIdProxyAddress(address) |
 | 0x4d13b709 | setAftermarketDeviceInfo(uint256,(string,string)[]) |
@@ -160,6 +161,7 @@
 | 0x977fe0dd | AftermarketDeviceAttributeSet(uint256,string,string) |
 | 0x8468d811 | AftermarketDeviceClaimed(uint256,address) |
 | 0xe2daa727 | AftermarketDeviceIdProxySet(address) |
+| 0xc4d38c0a | AftermarketDeviceNodeBurned(uint256,address) |
 | 0xd624fd4c | AftermarketDeviceNodeMinted(uint256,uint256,address,address) |
 | 0x89ec1328 | AftermarketDevicePaired(uint256,uint256,address) |
 | 0xd9135724 | AftermarketDeviceUnpaired(uint256,uint256,address) |

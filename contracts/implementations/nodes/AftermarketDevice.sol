@@ -49,6 +49,7 @@ contract AftermarketDevice is
     uint256 private constant MANUFACTURER_MINTER_PRIVILEGE = 1;
     uint256 private constant MANUFACTURER_CLAIMER_PRIVILEGE = 2;
     uint256 private constant MANUFACTURER_FACTORY_RESET_PRIVILEGE = 3;
+    uint256 private constant MANUFACTURER_REPROVISION_PRIVILEGE = 4;
 
     event AftermarketDeviceIdProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
@@ -81,6 +82,10 @@ contract AftermarketDevice is
         uint256 indexed manufacturerId,
         uint256 indexed tokenId,
         address indexed aftermarketDeviceAddress
+    );
+    event AftermarketDeviceNodeBurned(
+        uint256 indexed tokenId,
+        address indexed owner
     );
 
     // ***** Admin management ***** //
@@ -524,15 +529,14 @@ contract AftermarketDevice is
 
     /**
      * @notice Reset the device address of a list of aftermarket devices
-     * Caller must be the owner of the aftermarket device's parent manufacturer or an authorized address
-     * The manufacturer node owner must grant the MANUFACTURER_FACTORY_RESET_PRIVILEGE privilege to the authorized address
+     *  - Caller must be the owner of the aftermarket device's parent manufacturer or an authorized address
+     *  - The manufacturer node owner must grant the MANUFACTURER_FACTORY_RESET_PRIVILEGE privilege to the authorized address
      * @param adIdAddrs List of deviceId-deviceAddress pairs to be set
      */
     function resetAftermarketDeviceAddressByManufacturerBatch(
         Types.AftermarketDeviceIdAddressPair[] calldata adIdAddrs
     ) external {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        MapperStorage.Storage storage ms = MapperStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         address adIdProxyAddress = ads.idProxyAddress;
@@ -558,8 +562,6 @@ contract AftermarketDevice is
                     msg.sender
                 )
             ) revert Errors.Unauthorized(msg.sender);
-            if (ms.links[adIdProxyAddress][tokenId] != 0)
-                revert AdPaired(tokenId);
 
             ads.deviceAddressToNodeId[newDeviceAddress] = tokenId;
             ads.nodeIdToDeviceAddress[tokenId] = newDeviceAddress;
@@ -569,6 +571,104 @@ contract AftermarketDevice is
                 tokenId,
                 newDeviceAddress
             );
+        }
+    }
+
+    /**
+     * @notice Reprovision a list of aftermarket devices
+     *  - The list of ADs will be burned and reminted
+     *  - All attributes and device addresses will be transferred to the new devices
+     *  - Paired ADs are unpaired
+     *  - Caller must be the owner of the aftermarket device's parent manufacturer or an authorized address
+     *  - The manufacturer node owner must grant the MANUFACTURER_REPROVISION_PRIVILEGE privilege to the authorized address
+     * @param aftermarketDeviceNodeList List of deviceId-deviceAddress pairs to be reprovisioned
+     */
+    function reprovisionAftermarketDeviceByManufacturerBatch(
+        uint256[] calldata aftermarketDeviceNodeList
+    ) external {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        address adIdProxyAddress = ads.idProxyAddress;
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+
+        uint256 oldTokenId;
+        uint256 newTokenId;
+        uint256 manufacturerParentNode;
+        uint256 pairedVehicle;
+        address oldAdOwner;
+        address deviceAddress;
+        address manufacturerNodeOwner;
+        for (uint256 i = 0; i < aftermarketDeviceNodeList.length; i++) {
+            oldTokenId = aftermarketDeviceNodeList[i];
+
+            if (!INFT(adIdProxyAddress).exists(oldTokenId))
+                revert Errors.InvalidNode(adIdProxyAddress, oldTokenId);
+
+            manufacturerParentNode = ns
+            .nodes[adIdProxyAddress][oldTokenId].parentNode;
+            manufacturerNodeOwner = manufacturerIdProxy.ownerOf(
+                manufacturerParentNode
+            );
+
+            if (
+                !manufacturerIdProxy.hasPrivilege(
+                    manufacturerParentNode,
+                    MANUFACTURER_REPROVISION_PRIVILEGE,
+                    msg.sender
+                )
+            ) revert Errors.Unauthorized(msg.sender);
+
+            oldAdOwner = INFT(adIdProxyAddress).ownerOf(oldTokenId);
+            deviceAddress = ads.nodeIdToDeviceAddress[oldTokenId];
+
+            // Unpair if needed
+            if (ms.links[adIdProxyAddress][oldTokenId] != 0) {
+                pairedVehicle = ms.links[adIdProxyAddress][oldTokenId];
+                delete ms.links[adIdProxyAddress][oldTokenId];
+                delete ms.links[vehicleIdProxyAddress][pairedVehicle];
+
+                emit AftermarketDeviceUnpaired(
+                    oldTokenId,
+                    pairedVehicle,
+                    oldAdOwner
+                );
+            }
+
+            // Burn old token Id
+            INFT(adIdProxyAddress).burn(oldTokenId);
+            emit AftermarketDeviceNodeBurned(oldTokenId, oldAdOwner);
+
+            // Mint new device
+            newTokenId = INFT(adIdProxyAddress).safeMint(manufacturerNodeOwner);
+            emit AftermarketDeviceNodeMinted(
+                manufacturerParentNode,
+                newTokenId,
+                deviceAddress,
+                manufacturerNodeOwner
+            );
+
+            // Set old token Id as not claimed
+            ads.deviceClaimed[oldTokenId] = false;
+
+            // Delete old token Id parent node and address mapping
+            delete ns.nodes[adIdProxyAddress][oldTokenId].parentNode;
+            delete ads.nodeIdToDeviceAddress[oldTokenId];
+
+            // Map the new token Id to the parent node and device address
+            ns
+            .nodes[adIdProxyAddress][newTokenId]
+                .parentNode = manufacturerParentNode;
+            ads.deviceAddressToNodeId[deviceAddress] = newTokenId;
+            ads.nodeIdToDeviceAddress[newTokenId] = deviceAddress;
+
+            _resetAdInfos(oldTokenId, newTokenId);
         }
     }
 
@@ -642,6 +742,38 @@ contract AftermarketDevice is
                 attrInfo[i].attribute,
                 attrInfo[i].info
             );
+        }
+    }
+
+    /**
+     * @dev Internal function to reset old AD node infos and transfer it to the new one
+     *  - It iterates over all whitelisted attributes to reset each info
+     * @param oldTokenId Node which will have the infos reset
+     * @param newTokenId Node which will receive the infos from the oldTokenId
+     */
+    function _resetAdInfos(uint256 oldTokenId, uint256 newTokenId) private {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        AftermarketDeviceStorage.Storage storage vds = AftermarketDeviceStorage
+            .getStorage();
+        address idProxyAddress = vds.idProxyAddress;
+        string[] memory attributes = AttributeSet.values(
+            vds.whitelistedAttributes
+        );
+
+        string memory info;
+        for (
+            uint256 i = 0;
+            i < AttributeSet.count(vds.whitelistedAttributes);
+            i++
+        ) {
+            info = ns.nodes[idProxyAddress][oldTokenId].info[attributes[i]];
+
+            ns.nodes[idProxyAddress][newTokenId].info[attributes[i]] = info;
+
+            delete ns.nodes[idProxyAddress][oldTokenId].info[attributes[i]];
+
+            emit AftermarketDeviceAttributeSet(oldTokenId, attributes[i], "");
+            emit AftermarketDeviceAttributeSet(newTokenId, attributes[i], info);
         }
     }
 }

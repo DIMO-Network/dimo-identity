@@ -1123,6 +1123,25 @@
             {
                 "indexed": true,
                 "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "AftermarketDeviceNodeBurned",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
                 "name": "manufacturerId",
                 "type": "uint256"
             },
@@ -1390,6 +1409,19 @@
             }
         ],
         "name": "pairAftermarketDeviceSign",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "aftermarketDeviceNodeList",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "reprovisionAftermarketDeviceByManufacturerBatch",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

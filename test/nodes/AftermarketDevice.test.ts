@@ -254,9 +254,9 @@ describe('AftermarketDevice', function () {
         await dimoRegistryInstance.getAddress(),
         C.manufacturerDimoTokensAmount,
       );
-    await manufacturerIdInstance.createPrivilege(true, 'Minter');
-    await manufacturerIdInstance.createPrivilege(true, 'Claimer');
-    await manufacturerIdInstance.createPrivilege(true, 'Factory Reset');
+    await manufacturerIdInstance.createPrivilege(true, C.MANUFACTURER_MINTER_PRIVILEGE);
+    await manufacturerIdInstance.createPrivilege(true, C.MANUFACTURER_CLAIMER_PRIVILEGE);
+    await manufacturerIdInstance.createPrivilege(true, C.MANUFACTURER_FACTORY_RESET_PRIVILEGE);
     await manufacturerIdInstance
       .connect(manufacturer1)
       .setPrivilege(

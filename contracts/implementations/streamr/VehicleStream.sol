@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
+import "../../interfaces/INFTMultiPrivilege.sol";
 import "../../interfaces/IStreamRegistry.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/streamr/StreamrConfiguratorStorage.sol";
@@ -25,6 +26,8 @@ error NoStreamrPermission(
  * @notice Contract to handle vehicle streams
  */
 contract VehicleStream is AccessControlInternal {
+    uint256 private constant VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE = 6;
+
     event VehicleStreamSet(uint256 indexed vehicleId, string streamId);
     event VehicleStreamUnset(uint256 indexed vehicleId, string streamId);
     event SubscribedToVehicleStream(
@@ -228,13 +231,41 @@ contract VehicleStream is AccessControlInternal {
     }
 
     /**
+     * @notice Allows a user to subscribe to a vehicle stream
+     * @dev The vehicle owner must grant the subscribe live data privilege to the msg.sender
+     * @param vehicleId Vehicle node id
+     * @param expirationTime Subscription expiration timestamp
+     */
+    function subscribeToVehicleStream(
+        uint256 vehicleId,
+        uint256 expirationTime
+    ) external {
+        INFTMultiPrivilege vehicleIdProxy = INFTMultiPrivilege(
+            VehicleStorage.getStorage().idProxyAddress
+        );
+
+        if (!vehicleIdProxy.exists(vehicleId))
+            revert Errors.InvalidNode(address(vehicleIdProxy), vehicleId);
+
+        if (
+            !vehicleIdProxy.hasPrivilege(
+                vehicleId,
+                VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE,
+                msg.sender
+            )
+        ) revert Errors.Unauthorized(msg.sender);
+
+        _subscribeToVehicleStream(vehicleId, msg.sender, expirationTime);
+    }
+
+    /**
      * @notice Set a subscription permission for a user
      * @dev Only the vehicle id owner can add new subscribers to their stream
      * @param vehicleId Vehicle node id
      * @param subscriber Vehicle stream subscriber
      * @param expirationTime Subscription expiration timestamp
      */
-    function subscribeToVehicleStream(
+    function setSubscriptionToVehicleStream(
         uint256 vehicleId,
         address subscriber,
         uint256 expirationTime
@@ -242,11 +273,6 @@ contract VehicleStream is AccessControlInternal {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
-        StreamrConfiguratorStorage.Storage
-            storage scs = StreamrConfiguratorStorage.getStorage();
-        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
-            .getStorage();
-        IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
 
         // TODO To be possibly replaced by signature verification (like permit)
         try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
@@ -259,25 +285,7 @@ contract VehicleStream is AccessControlInternal {
             revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleId);
         }
 
-        string memory streamId = vs.streams[vehicleId];
-        if (bytes(streamId).length == 0) {
-            revert VehicleStreamNotSet(vehicleId);
-        }
-
-        streamRegistry.grantPermission(
-            streamId,
-            subscriber,
-            IStreamRegistry.PermissionType.Subscribe
-        );
-
-        streamRegistry.setExpirationTime(
-            streamId,
-            subscriber,
-            IStreamRegistry.PermissionType.Subscribe,
-            expirationTime
-        );
-
-        emit SubscribedToVehicleStream(streamId, subscriber, expirationTime);
+        _subscribeToVehicleStream(vehicleId, subscriber, expirationTime);
     }
 
     /**
@@ -373,5 +381,43 @@ contract VehicleStream is AccessControlInternal {
         uint256 vehicleId
     ) external view returns (string memory streamId) {
         streamId = VehicleStreamStorage.getStorage().streams[vehicleId];
+    }
+
+    /**
+     * @notice Private function to set a subscription permission for a subscriber
+     * @param vehicleId Vehicle node id
+     * @param subscriber Vehicle stream subscriber
+     * @param expirationTime Subscription expiration timestamp
+     */
+    function _subscribeToVehicleStream(
+        uint256 vehicleId,
+        address subscriber,
+        uint256 expirationTime
+    ) private {
+        StreamrConfiguratorStorage.Storage
+            storage scs = StreamrConfiguratorStorage.getStorage();
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
+        IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
+
+        string memory streamId = vs.streams[vehicleId];
+        if (bytes(streamId).length == 0) {
+            revert VehicleStreamNotSet(vehicleId);
+        }
+
+        streamRegistry.grantPermission(
+            streamId,
+            subscriber,
+            IStreamRegistry.PermissionType.Subscribe
+        );
+
+        streamRegistry.setExpirationTime(
+            streamId,
+            subscriber,
+            IStreamRegistry.PermissionType.Subscribe,
+            expirationTime
+        );
+
+        emit SubscribedToVehicleStream(streamId, subscriber, expirationTime);
     }
 }

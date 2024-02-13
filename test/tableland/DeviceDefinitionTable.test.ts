@@ -423,14 +423,15 @@ describe('DeviceDefinitionTable', async function () {
           expect(count).to.deep.equal([1]);
 
           const selectQuery = await tablelandDb.prepare(
-            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = "${C.mockDdId1}"`
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = "${C.mockId1}"`
           ).first();
 
           expect(selectQuery).to.deep.include({
-            id: C.mockDdId1,
+            id: C.mockId1,
             model: C.mockDdModel1,
             year: C.mockDdYear1,
-            metadata: C.mockDdMetadata1
+            metadata: C.mockDdMetadata1,
+            ksuid: C.mockKsuid1
           });
         });
       });
@@ -443,7 +444,7 @@ describe('DeviceDefinitionTable', async function () {
               .insertDeviceDefinition(1, C.mockDdInput1)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
+            .withArgs(2, C.mockId1, C.mockDdModel1, C.mockDdYear1);
         });
       });
     });
@@ -467,14 +468,15 @@ describe('DeviceDefinitionTable', async function () {
           expect(count).to.deep.equal([1]);
 
           const selectQuery = await tablelandDb.prepare(
-            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = "${C.mockDdId1}"`
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = "${C.mockId1}"`
           ).first();
 
           expect(selectQuery).to.deep.include({
-            id: C.mockDdId1,
+            id: C.mockId1,
             model: C.mockDdModel1,
             year: C.mockDdYear1,
-            metadata: C.mockDdMetadata1
+            metadata: C.mockDdMetadata1,
+            ksuid: C.mockKsuid1
           });
         });
       });
@@ -487,7 +489,7 @@ describe('DeviceDefinitionTable', async function () {
               .insertDeviceDefinition(1, C.mockDdInput1)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
+            .withArgs(2, C.mockId1, C.mockDdModel1, C.mockDdYear1);
         });
       });
     });
@@ -596,22 +598,25 @@ describe('DeviceDefinitionTable', async function () {
             .to.deep.include.members(
               [
                 {
-                  id: C.mockDdId1,
+                  id: C.mockId1,
                   model: C.mockDdModel1,
                   year: C.mockDdYear1,
-                  metadata: C.mockDdMetadata1
+                  metadata: C.mockDdMetadata1,
+                  ksuid: C.mockKsuid1
                 },
                 {
-                  id: C.mockDdId2,
+                  id: C.mockId2,
                   model: C.mockDdModel2,
                   year: C.mockDdYear2,
-                  metadata: C.mockDdMetadata2
+                  metadata: C.mockDdMetadata2,
+                  ksuid: C.mockKsuid2
                 },
                 {
-                  id: C.mockDdId3,
+                  id: C.mockId3,
                   model: C.mockDdModel3,
                   year: C.mockDdYear3,
-                  metadata: C.mockDdMetadata3
+                  metadata: C.mockDdMetadata3,
+                  ksuid: C.mockKsuid3
                 }
               ]
             );
@@ -626,11 +631,11 @@ describe('DeviceDefinitionTable', async function () {
               .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1)
+            .withArgs(2, C.mockId1, C.mockDdModel1, C.mockDdYear1)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(2, C.mockDdId2, C.mockDdModel2, C.mockDdYear2)
+            .withArgs(2, C.mockId2, C.mockDdModel2, C.mockDdYear2)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(2, C.mockDdId3, C.mockDdModel3, C.mockDdYear3);
+            .withArgs(2, C.mockId3, C.mockDdModel3, C.mockDdYear3);
         });
       });
     });
@@ -662,22 +667,25 @@ describe('DeviceDefinitionTable', async function () {
             .to.deep.include.members(
               [
                 {
-                  id: C.mockDdId1,
+                  id: C.mockId1,
                   model: C.mockDdModel1,
                   year: C.mockDdYear1,
-                  metadata: C.mockDdMetadata1
+                  metadata: C.mockDdMetadata1,
+                  ksuid: C.mockKsuid1
                 },
                 {
-                  id: C.mockDdId2,
+                  id: C.mockId2,
                   model: C.mockDdModel2,
                   year: C.mockDdYear2,
-                  metadata: C.mockDdMetadata2
+                  metadata: C.mockDdMetadata2,
+                  ksuid: C.mockKsuid2
                 },
                 {
-                  id: C.mockDdId3,
+                  id: C.mockId3,
                   model: C.mockDdModel3,
                   year: C.mockDdYear3,
-                  metadata: C.mockDdMetadata3
+                  metadata: C.mockDdMetadata3,
+                  ksuid: C.mockKsuid3
                 }
               ]
             );
@@ -692,11 +700,11 @@ describe('DeviceDefinitionTable', async function () {
               .insertDeviceDefinitionBatch(1, C.mockDdInputBatch)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1)
+            .withArgs(2, C.mockId1, C.mockDdModel1, C.mockDdYear1)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(2, C.mockDdId2, C.mockDdModel2, C.mockDdYear2)
+            .withArgs(2, C.mockId2, C.mockDdModel2, C.mockDdYear2)
             .to.emit(ddTableInstance, 'DeviceDefinitionInserted')
-            .withArgs(2, C.mockDdId3, C.mockDdModel3, C.mockDdYear3);
+            .withArgs(2, C.mockId3, C.mockDdModel3, C.mockDdYear3);
         });
       });
     });

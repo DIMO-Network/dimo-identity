@@ -36,7 +36,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
     );
     event DeviceDefinitionInserted(
         uint256 indexed tableId,
-        string ddId,
+        string id,
         string model,
         uint256 year
     );
@@ -66,7 +66,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
-        TablelandTables tablelandTables = TablelandDeployments.get();
+        TablelandTablesImpl tablelandTables = TablelandDeployments.get();
 
         if (dds.tables[manufacturerId] != 0) {
             revert TableAlreadyExists(manufacturerId);
@@ -76,7 +76,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
             abi.encodePacked(
                 "CREATE TABLE _",
                 Strings.toString(block.chainid),
-                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, legacy_id TEXT, UNIQUE(model,year))"
+                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, ksuid TEXT, UNIQUE(model,year))"
             )
         );
         uint256 tableId = tablelandTables.create(address(this), statement);
@@ -144,7 +144,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 manufacturerId,
         DeviceDefinitionInput calldata data
     ) external {
-        TablelandTables tablelandTables = TablelandDeployments.get();
+        TablelandTablesImpl tablelandTables = TablelandDeployments.get();
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
         uint256 tableId = dds.tables[manufacturerId];
@@ -175,7 +175,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
             SQLHelpers.toInsert(
                 "",
                 tableId,
-                "id,model,year,metadata,legacy_id",
+                "id,model,year,metadata,ksuid",
                 string.concat(
                     string(abi.encodePacked("'", data.id, "'")),
                     ",",
@@ -185,7 +185,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
                     ",",
                     string(abi.encodePacked("'", data.metadata, "'")),
                     ",",
-                    string(abi.encodePacked("'", data.legacyId, "'"))
+                    string(abi.encodePacked("'", data.ksuid, "'"))
                 )
             )
         );
@@ -207,7 +207,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 manufacturerId,
         DeviceDefinitionInput[] calldata data
     ) external {
-        TablelandTables tablelandTables = TablelandDeployments.get();
+        TablelandTablesImpl tablelandTables = TablelandDeployments.get();
         DeviceDefinitionTableStorage.Storage
             storage dds = DeviceDefinitionTableStorage.getStorage();
         uint256 tableId = dds.tables[manufacturerId];
@@ -242,7 +242,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
                 ",",
                 string(abi.encodePacked("'", data[i].metadata, "'")),
                 ",",
-                string(abi.encodePacked("'", data[i].legacyId, "'"))
+                string(abi.encodePacked("'", data[i].ksuid, "'"))
             );
 
             emit DeviceDefinitionInserted(
@@ -256,7 +256,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         string memory stmt = SQLHelpers.toBatchInsert(
             "",
             tableId,
-            "id,model,year,metadata,legacy_id",
+            "id,model,year,metadata,ksuid",
             vals
         );
 
@@ -277,8 +277,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
         uint256 tableId = dds.tables[manufacturerId];
 
-        if (tableId != 0)
-            tableName = SQLHelpers.toNameFromId("", tableId);
+        if (tableId != 0) tableName = SQLHelpers.toNameFromId("", tableId);
     }
 
     /**

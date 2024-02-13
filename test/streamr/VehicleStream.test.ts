@@ -34,7 +34,7 @@ const { expect } = chai;
 
 describe('VehicleStream', async function () {
   let snapshot: string;
-  let subscriptionExpiresDefault: number;
+  let expiresDefault: number;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
   let dimoAccessControlInstance: DimoAccessControl;
@@ -48,12 +48,16 @@ describe('VehicleStream', async function () {
   let streamRegistry: StreamRegistry;
 
   let DIMO_REGISTRY_ADDRESS: string;
+  let VEHICLE_ID_ADDRESS: string;
+  let STREAM_REGISTRY_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
   let streamrAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
+  let userPrivileged1: HardhatEthersSigner;
+  let nonUserPrivilged: HardhatEthersSigner;
   let subscriber: HardhatEthersSigner;
 
   async function setupStreamr(dimoRegistryAddress: string) {
@@ -61,13 +65,14 @@ describe('VehicleStream', async function () {
     ensCache = await ensCacheFactory.deploy() as unknown as ENSCacheV2
     const streamRegistryFactory = new ethers.ContractFactory(streamRegistryABI, streamRegistryBytecode, streamrAdmin);
     streamRegistry = await streamRegistryFactory.deploy() as unknown as StreamRegistry;
+    STREAM_REGISTRY_ADDRESS = await streamRegistry.getAddress();
 
     await streamRegistry
       .connect(streamrAdmin)
       .initialize(await ensCache.getAddress(), ethers.ZeroAddress);
     await ensCache
       .connect(streamrAdmin)
-      .initialize(streamrAdmin.address, await streamRegistry.getAddress(), ethers.ZeroAddress);
+      .initialize(streamrAdmin.address, STREAM_REGISTRY_ADDRESS, ethers.ZeroAddress);
     await streamRegistry
       .connect(streamrAdmin)
       .grantRole(C.TRUSTED_ROLE, await ensCache.getAddress());
@@ -85,10 +90,12 @@ describe('VehicleStream', async function () {
       manufacturer1,
       user1,
       user2,
+      userPrivileged1,
+      nonUserPrivilged,
       subscriber
     ] = await ethers.getSigners();
 
-    subscriptionExpiresDefault = await time.latest() + 31556926; // + 1 year
+    expiresDefault = await time.latest() + 31556926; // + 1 year
 
     const deployments = await setup(admin, {
       modules: [
@@ -116,6 +123,7 @@ describe('VehicleStream', async function () {
     vehicleStreamInstance = deployments.VehicleStream;
 
     DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
+    VEHICLE_ID_ADDRESS = await vehicleIdInstance.getAddress();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -132,7 +140,7 @@ describe('VehicleStream', async function () {
       .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress());
     await vehicleInstance
       .connect(admin)
-      .setVehicleIdProxyAddress(await vehicleIdInstance.getAddress());
+      .setVehicleIdProxyAddress(VEHICLE_ID_ADDRESS);
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -173,6 +181,13 @@ describe('VehicleStream', async function () {
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
 
+    // Create and set Vehicle privileges
+    await vehicleIdInstance.createPrivilege(true, C.VEHICLE_ALL_TIME_NON_LOCATION_DATA_PRIVILEGE);
+    await vehicleIdInstance.createPrivilege(true, C.VEHICLE_COMANDS_PRIVILEGE);
+    await vehicleIdInstance.createPrivilege(true, C.VEHICLE_CURRENT_LOCATION_PRIVILEGE);
+    await vehicleIdInstance.createPrivilege(true, C.VEHICLE_ALL_TIME_LOCATION_PRIVILEGE);
+    await vehicleIdInstance.createPrivilege(true, C.VEHICLE_VIEW_VIN_CREDENTIAL_PRIVILEGE);
+    await vehicleIdInstance.createPrivilege(true, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE);
 
     await vehicleInstance
       .connect(admin)
@@ -182,7 +197,7 @@ describe('VehicleStream', async function () {
 
     await streamrConfiguratorInstance
       .connect(admin)
-      .setStreamRegistry(await streamRegistry.getAddress());
+      .setStreamRegistry(STREAM_REGISTRY_ADDRESS);
     await streamrConfiguratorInstance
       .connect(admin)
       .setDimoStreamrNode(C.DIMO_STREAMR_NODE);
@@ -222,7 +237,7 @@ describe('VehicleStream', async function () {
           vehicleStreamInstance,
           'InvalidNode'
         ).withArgs(
-          await vehicleIdInstance.getAddress(),
+          VEHICLE_ID_ADDRESS,
           99
         );
       });
@@ -368,7 +383,7 @@ describe('VehicleStream', async function () {
           vehicleStreamInstance,
           'InvalidNode'
         ).withArgs(
-          await vehicleIdInstance.getAddress(),
+          VEHICLE_ID_ADDRESS,
           99
         );
       });
@@ -523,7 +538,7 @@ describe('VehicleStream', async function () {
           vehicleStreamInstance,
           'InvalidNode'
         ).withArgs(
-          await vehicleIdInstance.getAddress(),
+          VEHICLE_ID_ADDRESS,
           99
         );
       });
@@ -582,7 +597,124 @@ describe('VehicleStream', async function () {
     });
   });
 
+
   describe('subscribeToVehicleStream', () => {
+    const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
+
+    beforeEach(async () => {
+      await vehicleStreamInstance
+        .connect(user1)
+        .createVehicleStream(1);
+      await vehicleIdInstance
+        .connect(user1)
+        .setPrivilege(
+          1,
+          C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE,
+          userPrivileged1.address,
+          expiresDefault,
+        );
+    });
+
+    context('Error Handling', () => {
+      it('Should revert if vehicle ID does not exist', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(userPrivileged1)
+            .subscribeToVehicleStream(99, expiresDefault)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'InvalidNode'
+        ).withArgs(
+          VEHICLE_ID_ADDRESS,
+          99
+        );
+      });
+      it('Should revert caller does not have subscribe live data privilege', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(nonUserPrivilged)
+            .subscribeToVehicleStream(1, expiresDefault)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'Unauthorized'
+        ).withArgs(nonUserPrivilged.address);
+      });
+      it('Should revert if there is no stream ID associated to the vehicle ID', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+
+        await expect(
+          vehicleStreamInstance
+            .connect(userPrivileged1)
+            .subscribeToVehicleStream(1, expiresDefault)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'VehicleStreamNotSet'
+        ).withArgs(1);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set only subscription if stream ID is official', async () => {
+        await vehicleStreamInstance
+          .connect(userPrivileged1)
+          .subscribeToVehicleStream(1, expiresDefault)
+
+        const permissions = await streamRegistry.getPermissionsForUser(streamId, userPrivileged1.address);
+
+        expect(permissions[0]).to.eql(false);
+        expect(permissions[1]).to.eql(false);
+        expect(permissions[2]).to.equal('0');
+        expect(permissions[3]).to.equal(expiresDefault.toString());
+        expect(permissions[4]).to.eql(false);
+      });
+      it('Should correctly set only subscription if stream ID is a third party stream', async () => {
+        const mockStreamId = `${await user1.address.toString().toLowerCase()}${C.MOCK_STREAM_PATH}`;
+
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
+        await vehicleStreamInstance
+          .connect(user1)
+          .setVehicleStream(1, mockStreamId);
+
+        await vehicleStreamInstance
+          .connect(userPrivileged1)
+          .subscribeToVehicleStream(1, expiresDefault)
+
+        const permissions = await streamRegistry.getPermissionsForUser(mockStreamId, userPrivileged1.address);
+
+        expect(permissions[0]).to.eql(false);
+        expect(permissions[1]).to.eql(false);
+        expect(permissions[2]).to.equal('0');
+        expect(permissions[3]).to.equal(expiresDefault.toString());
+        expect(permissions[4]).to.eql(false);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit SubscribedToVehicleStream event with correct params', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(userPrivileged1)
+            .subscribeToVehicleStream(1, expiresDefault)
+        ).to.emit(vehicleStreamInstance, 'SubscribedToVehicleStream')
+          .withArgs(streamId, userPrivileged1.address, expiresDefault);
+      });
+    });
+  });
+
+  describe('setSubscriptionToVehicleStream', () => {
     const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
 
     beforeEach(async () => {
@@ -596,7 +728,7 @@ describe('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user2)
-            .subscribeToVehicleStream(1, subscriber.address, subscriptionExpiresDefault)
+            .setSubscriptionToVehicleStream(1, subscriber.address, expiresDefault)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'Unauthorized'
@@ -606,12 +738,12 @@ describe('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user1)
-            .subscribeToVehicleStream(99, subscriber.address, subscriptionExpiresDefault)
+            .setSubscriptionToVehicleStream(99, subscriber.address, expiresDefault)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'InvalidNode'
         ).withArgs(
-          await vehicleIdInstance.getAddress(),
+          VEHICLE_ID_ADDRESS,
           99
         );
       });
@@ -623,7 +755,7 @@ describe('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user2)
-            .subscribeToVehicleStream(2, subscriber.address, subscriptionExpiresDefault)
+            .setSubscriptionToVehicleStream(2, subscriber.address, expiresDefault)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'VehicleStreamNotSet'
@@ -637,14 +769,14 @@ describe('VehicleStream', async function () {
       it('Should correctly set only subscription', async () => {
         await vehicleStreamInstance
           .connect(user1)
-          .subscribeToVehicleStream(1, subscriber.address, subscriptionExpiresDefault)
+          .setSubscriptionToVehicleStream(1, subscriber.address, expiresDefault)
 
         const permissions = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
 
         expect(permissions[0]).to.eql(false);
         expect(permissions[1]).to.eql(false);
         expect(permissions[2]).to.equal('0');
-        expect(permissions[3]).to.equal(subscriptionExpiresDefault.toString());
+        expect(permissions[3]).to.equal(expiresDefault.toString());
         expect(permissions[4]).to.eql(false);
       });
     });
@@ -654,25 +786,9 @@ describe('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user1)
-            .subscribeToVehicleStream(1, subscriber.address, subscriptionExpiresDefault)
+            .setSubscriptionToVehicleStream(1, subscriber.address, expiresDefault)
         ).to.emit(vehicleStreamInstance, 'SubscribedToVehicleStream')
-          .withArgs(streamId, subscriber.address, subscriptionExpiresDefault);
-
-        const permissions = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
-
-        expect(permissions[0]).to.eql(false);
-        expect(permissions[1]).to.eql(false);
-        expect(permissions[2]).to.equal('0');
-        expect(permissions[3]).to.equal(subscriptionExpiresDefault.toString());
-        expect(permissions[4]).to.eql(false);
-      });
-      it('Should emit SubscribedToVehicleStream event with correct params', async () => {
-        await expect(
-          vehicleStreamInstance
-            .connect(user1)
-            .subscribeToVehicleStream(1, subscriber.address, subscriptionExpiresDefault)
-        ).to.emit(vehicleStreamInstance, 'SubscribedToVehicleStream')
-          .withArgs(streamId, subscriber.address, subscriptionExpiresDefault);
+          .withArgs(streamId, subscriber.address, expiresDefault);
       });
     });
   });
@@ -689,7 +805,7 @@ describe('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user1)
-            .transferVehicleStream(user2.address, 1)
+            .onTransferVehicleStream(user2.address, 1)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'Unauthorized'
@@ -719,7 +835,7 @@ describe('VehicleStream', async function () {
 
         expect(afterStreamId).to.be.empty;
       });
-      it('Should keep stream ID associated with vehicle ID if stream ID iis official', async () => {
+      it('Should keep stream ID associated with vehicle ID if stream ID is official', async () => {
         await vehicleIdInstance
           .connect(user1)
         ['safeTransferFrom(address,address,uint256)'](
@@ -889,6 +1005,76 @@ describe('VehicleStream', async function () {
             1
           )
         ).to.emit(vehicleStreamInstance, 'VehicleStreamSet')
+          .withArgs(1, streamId);
+      });
+    });
+  });
+
+  context('On burn', () => {
+    let streamId: string;
+    beforeEach(async () => {
+      await vehicleStreamInstance.connect(user1).createVehicleStream(1);
+      streamId = await vehicleStreamInstance.getVehicleStream(1);
+    });
+
+    context('Error handling', () => {
+      it('Should revert if burn function is not called by the Vehicle Id contract', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(user1)
+            .onBurnVehicleStream(1)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'Unauthorized'
+        ).withArgs(user1.address);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly dissociate stream ID from vehicle ID if stream ID is a third party stream', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+
+        await vehicleIdInstance
+          .connect(user1)
+          .burn(1);
+
+        const afterStreamId = await vehicleStreamInstance.getVehicleStream(1);
+
+        expect(afterStreamId).to.be.empty;
+      });
+      it('Should correctly dissociate stream ID from vehicle ID if stream ID is official', async () => {
+        await vehicleIdInstance
+          .connect(user1)
+          .burn(1);
+
+        const afterStreamId = await vehicleStreamInstance.getVehicleStream(1);
+
+        expect(afterStreamId).to.be.empty;
+      });
+      it('Should delete current stream ID if it was created by DIMO Registry', async () => {
+        expect(await streamRegistry.exists(streamId)).to.be.true;
+
+        await vehicleIdInstance
+          .connect(user1)
+          .burn(1);
+
+        expect(await streamRegistry.exists(streamId)).to.be.false;
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleStreamUnset event with correct params', async () => {
+        await expect(
+          vehicleIdInstance
+            .connect(user1)
+            .burn(1)
+        ).to.emit(vehicleStreamInstance, 'VehicleStreamUnset')
           .withArgs(1, streamId);
       });
     });

@@ -262,6 +262,7 @@ describe('AftermarketDevice', function () {
         DIMO_REGISTRY_ADDRESS,
         C.manufacturerDimoTokensAmount,
       );
+    
     await manufacturerIdInstance.createPrivilege(true, 'Minter');
     await manufacturerIdInstance.createPrivilege(true, 'Claimer');
     await manufacturerIdInstance.createPrivilege(true, 'Manufacturer Factory Reset');

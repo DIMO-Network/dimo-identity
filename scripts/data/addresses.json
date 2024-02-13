@@ -350,12 +350,15 @@
                 ]
             },
             "VehicleStream": {
-                "address": "0x922Cc4767dA60C98569Afb2ec291c1214F372da7",
+                "address": "0x897EfC122d82154Dc7E9320850196a9c4dc6880e",
                 "selectors": [
                     "0x497323c8",
                     "0x180e469a",
+                    "0xa91ec798",
+                    "0x1882b263",
+                    "0xbb44bb75",
                     "0x6f58f093",
-                    "0x4337a026",
+                    "0x37479f7e",
                     "0xcd90df7e"
                 ]
             },
@@ -396,7 +399,7 @@
             },
             "VehicleId": {
                 "proxy": "0x90C4D6113Ec88dd4BDf12f26DB2b3998fd13A144",
-                "implementation": "0x42645A114330fac1f29444BAEC30EB1c33AdC9d3"
+                "implementation": "0x4Bbac3C2f7Fa9711d0056496E01806a6372c6362"
             },
             "AftermarketDeviceId": {
                 "proxy": "0xcf9Af64522162da85164a714c23a7705E6e466b3",

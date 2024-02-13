@@ -447,9 +447,11 @@
 |-|-|
 | 0x497323c8 | createVehicleStream(uint256) |
 | 0x180e469a | getVehicleStream(uint256) |
+| 0xa91ec798 | onBurnVehicleStream(uint256) |
+| 0x1882b263 | onTransferVehicleStream(address,uint256) |
+| 0xbb44bb75 | setSubscriptionToVehicleStream(uint256,address,uint256) |
 | 0x6f58f093 | setVehicleStream(uint256,string) |
-| 0x4337a026 | subscribeToVehicleStream(uint256,address,uint256) |
-| 0x49613f59 | transferVehicleStream(address,uint256) |
+| 0x37479f7e | subscribeToVehicleStream(uint256,uint256) |
 | 0xcd90df7e | unsetVehicleStream(uint256) |
 
 #### Events

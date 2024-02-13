@@ -4,6 +4,8 @@ import { ContractNameArgsByNetwork } from '../types';
 export const MANUFACTURER_NFT_NAME = 'Manufacturer NFT';
 export const MANUFACTURER_NFT_SYMBOL = 'MNFT';
 export const MANUFACTURER_NFT_BASE_URI = 'https://dimo.zone/manufacturer/';
+
+// Manufacturer privileges
 export const MANUFACTURER_MINTER_PRIVILEGE = '1';
 export const MANUFACTURER_CLAIMER_PRIVILEGE = '2';
 export const MANUFACTURER_FACTORY_RESET_PRIVILEGE = '3';
@@ -16,6 +18,14 @@ export const INTEGRATION_NFT_BASE_URI = 'https://dimo.zone/integration/';
 export const VEHICLE_NFT_NAME = 'Vehicle NFT';
 export const VEHICLE_NFT_SYMBOL = 'VNFT';
 export const VEHICLE_NFT_BASE_URI = 'https://dimo.zone/vehicle/';
+
+// Vehicle privileges
+export const VEHICLE_ALL_TIME_NON_LOCATION_DATA_PRIVILEGE = '1';
+export const VEHICLE_COMANDS_PRIVILEGE = '2';
+export const VEHICLE_CURRENT_LOCATION_PRIVILEGE = '3';
+export const VEHICLE_ALL_TIME_LOCATION_PRIVILEGE = '4';
+export const VEHICLE_VIEW_VIN_CREDENTIAL_PRIVILEGE = '5';
+export const VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE = '6';
 
 export const AD_NFT_NAME = 'Aftermarket Device NFT';
 export const AD_NFT_SYMBOL = 'ADNFT';

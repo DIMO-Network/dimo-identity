@@ -56,7 +56,8 @@ export type DeviceDefinitionInput = {
   id: string,
   model: string,
   year: number,
-  metadata: string
+  metadata: string,
+  ksuid: string
 }
 
 export type IdManufacturerName = {

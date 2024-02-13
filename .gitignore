@@ -4,6 +4,7 @@ coverage
 coverage.json
 typechain-types
 .vscode/settings.json
+*_old.sol
 
 #Hardhat files
 cache
@@ -12,3 +13,4 @@ artifacts
 
 # OpenZeppelin
 .openzeppelin/unknown-*.json
+*.idea

@@ -413,8 +413,8 @@
 | 0x20954d21 | createDeviceDefinitionTable(address,uint256) |
 | 0x396e5987 | getDeviceDefinitionTableId(uint256) |
 | 0xa1d17941 | getDeviceDefinitionTableName(uint256) |
-| 0x53e7070b | insertDeviceDefinition(uint256,(string,string,uint256,string)) |
-| 0x6928118b | insertDeviceDefinitionBatch(uint256,(string,string,uint256,string)[]) |
+| 0x811eed42 | insertDeviceDefinition(uint256,(string,string,uint256,string,string)) |
+| 0xb91b4303 | insertDeviceDefinitionBatch(uint256,(string,string,uint256,string,string)[]) |
 | 0x088fafdb | setDeviceDefinitionTable(uint256,uint256) |
 
 #### Events

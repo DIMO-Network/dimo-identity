@@ -49,4 +49,5 @@ struct DeviceDefinitionInput {
     string model;
     uint256 year;
     string metadata;
+    string ksuid;
 }

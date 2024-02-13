@@ -3,11 +3,14 @@ import * as path from 'path';
 import axios from 'axios';
 import { task } from 'hardhat/config';
 import { EventLog } from 'ethers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { getAccounts, getDatabase, getValidator } from '@tableland/local';
 
 import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
 import { AddressesByNetwork, DeviceDefinitionInput } from '../../utils';
 import { makes } from '../data/Makes';
+
+const VALID_NETWORKS = ['localhost', 'mumbai']
 
 function getAddresses(): AddressesByNetwork {
     return JSON.parse(
@@ -15,12 +18,17 @@ function getAddresses(): AddressesByNetwork {
     );
 }
 
+function validateNetwork(hre: HardhatRuntimeEnvironment) {
+    if (!VALID_NETWORKS.includes(hre.network.name)) {
+        throw new Error(`Invalid network <${hre.network.name}>\nMake sure to add the flag "--network [${VALID_NETWORKS}]"\n`)
+    }
+}
+
 task('mint-manufacturer', 'Mints a new Manufacturer')
     .addPositionalParam('name', 'The name of the manufacturer to be minted')
     .setAction(async (args: { name: string; }, hre) => {
-        if (hre.network.name !== 'localhost') {
-            throw new Error(`Invalid network <${hre.network.name}>\nMake sure to add the flag "--network localhost"\n`)
-        }
+        validateNetwork(hre);
+
         const instances = getAddresses();
         const [signer] = await hre.ethers.getSigners();
         const manufacturerInstance: Manufacturer = await hre.ethers.getContractAt(
@@ -44,9 +52,8 @@ task('create-dd-table', 'Creates a Device Definition table related to a Manufact
     .addPositionalParam('manufacturerId', 'The ID of the manufacturer')
     .addOptionalParam('tableOwner', 'The address to which the table will be transferred after creation')
     .setAction(async (args: { manufacturerId: string; tableOwner: string | undefined }, hre) => {
-        if (hre.network.name !== 'localhost') {
-            throw new Error(`Invalid network <${hre.network.name}>\nMake sure to add the flag "--network localhost"\n`)
-        }
+        validateNetwork(hre);
+        
         const instances = getAddresses();
         const [signer] = await hre.ethers.getSigners();
         const tableOwner = args.tableOwner ?? signer.address;
@@ -78,10 +85,8 @@ task('create-dd-table', 'Creates a Device Definition table related to a Manufact
 
 task('migration-tableland', 'npx hardhat migration-tableland --network localhost')
     .setAction(async (args, hre) => {
-        
-        if (hre.network.name !== 'localhost') {
-            throw new Error(`Invalid network <${hre.network.name}>\nMake sure to add the flag "--network localhost"\n`)
-        }
+        validateNetwork(hre);
+
         const instances = getAddresses();
         const [signer] = await hre.ethers.getSigners();
         const tableOwner = await signer.getAddress(); 
@@ -173,10 +178,8 @@ task('query-tableland', 'npx hardhat query-tableland <name> --network localhost'
     .addPositionalParam('filter', 'The filter to query device definition table', '')
     .addOptionalParam('limit', 'The limit to query device definition table', 'LIMIT 10')
     .setAction(async (args, hre) => {
-        
-        if (hre.network.name !== 'localhost') {
-            throw new Error(`Invalid network <${hre.network.name}>\nMake sure to add the flag "--network localhost"\n`)
-        }
+        validateNetwork(hre);
+
         const instances = getAddresses();
         const [signer] = await hre.ethers.getSigners();
 

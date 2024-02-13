@@ -3356,6 +3356,29 @@
                 "type": "uint256"
             },
             {
+                "internalType": "address",
+                "name": "subscriber",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expirationTime",
+                "type": "uint256"
+            }
+        ],
+        "name": "setSubscriptionToVehicleStream",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
+            },
+            {
                 "internalType": "string",
                 "name": "streamId",
                 "type": "string"
@@ -3372,11 +3395,6 @@
                 "internalType": "uint256",
                 "name": "vehicleId",
                 "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "subscriber",
-                "type": "address"
             },
             {
                 "internalType": "uint256",

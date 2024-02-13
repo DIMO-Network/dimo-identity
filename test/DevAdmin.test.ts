@@ -744,7 +744,7 @@ describe('DevAdmin', function () {
     });
 
     context('State', () => {
-      it('Should correctly map the aftermarket device to the vehicle', async () => {
+      it('Should correctly delete mapping of the aftermarket device to the vehicle', async () => {
         expect(
           await mapperInstance.getLink(await adIdInstance.getAddress(), 1),
         ).to.be.equal(1);
@@ -763,7 +763,7 @@ describe('DevAdmin', function () {
           await mapperInstance.getLink(await adIdInstance.getAddress(), 2),
         ).to.be.equal(0);
       });
-      it('Should correctly map the vehicle to the aftermarket device', async () => {
+      it('Should correctly delete mapping of the vehicle to the aftermarket device', async () => {
         expect(
           await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1),
         ).to.be.equal(1);

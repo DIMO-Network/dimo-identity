@@ -238,7 +238,7 @@
                 ]
             },
             "Manufacturer": {
-                "address": "0x30C7669d7EA03db8FEc90247F30cA24480598c9b",
+                "address": "0xdE729C6dAd5Ddc04c99ad4d057290436c12Db27d",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",

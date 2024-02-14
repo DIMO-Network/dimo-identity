@@ -113,6 +113,10 @@ export type GenericKeyAny = {
   [index: string]: any
 };
 
+export type StringNumber = {
+  [index: string]: number
+};
+
 export type ContractsSetup = {
   modules: string[],
   nfts: string[],

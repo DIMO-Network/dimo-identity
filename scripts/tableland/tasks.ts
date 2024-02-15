@@ -3,6 +3,7 @@ import * as path from 'path';
 import axios from 'axios';
 import { task } from 'hardhat/config';
 import { EventLog } from 'ethers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { getAccounts, getDatabase, getValidator } from '@tableland/local';
 
 import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
@@ -31,12 +32,19 @@ function validateNetwork(currentNetwork: string) {
     }
 }
 
+async function getGasPrice(hre: HardhatRuntimeEnvironment, bump: bigint = 20n): Promise<string> {
+    const price = (await hre.ethers.provider.getFeeData()).gasPrice as bigint;
+
+    return (price * bump / 100n + price).toString();
+}
+
 task('mint-manufacturer', 'Mints a new Manufacturer')
     .addPositionalParam('name', 'The name of the manufacturer to be minted')
     .setAction(async (args: { name: string; }, hre) => {
         const currentNetwork = hre.network.name;
         validateNetwork(currentNetwork);
 
+        const _gasPrice = await getGasPrice(hre);
         const instances = getAddresses(currentNetwork);
         const [signer] = await hre.ethers.getSigners();
         const manufacturerInstance: Manufacturer = await hre.ethers.getContractAt(
@@ -48,7 +56,7 @@ task('mint-manufacturer', 'Mints a new Manufacturer')
 
         const tx = await manufacturerInstance
             .connect(signer)
-            .mintManufacturerBatch(signer.address, [args.name]);
+            .mintManufacturerBatch(signer.address, [args.name], { gasPrice: _gasPrice });
         const receipt = await tx.wait();
         const manufacturerId = (receipt?.logs[1] as EventLog).args[1].toString();
 
@@ -63,6 +71,7 @@ task('create-dd-table', 'Creates a Device Definition table related to a Manufact
         const currentNetwork = hre.network.name;
         validateNetwork(currentNetwork);
 
+        const _gasPrice = await getGasPrice(hre);
         const instances = getAddresses(currentNetwork);
         const [signer] = await hre.ethers.getSigners();
         const tableOwner = args.tableOwner ?? signer.address;
@@ -78,7 +87,7 @@ task('create-dd-table', 'Creates a Device Definition table related to a Manufact
 
         const tx = await ddTableInstance
             .connect(signer)
-            .createDeviceDefinitionTable(tableOwner, args.manufacturerId);
+            .createDeviceDefinitionTable(tableOwner, args.manufacturerId, { gasPrice: _gasPrice });
 
         await tablelandValidator.pollForReceiptByTransactionHash({
             chainId: CHAIN_ID[currentNetwork],
@@ -95,8 +104,10 @@ task('create-dd-table', 'Creates a Device Definition table related to a Manufact
 task('migration-tableland', 'npx hardhat migration-tableland --network localhost')
     .setAction(async (args, hre) => {
         const currentNetwork = hre.network.name;
+        hre.ethers.provider
         validateNetwork(currentNetwork);
 
+        let _gasPrice;
         const instances = getAddresses(currentNetwork);
         const [signer] = await hre.ethers.getSigners();
         const tableOwner = await signer.getAddress();
@@ -130,9 +141,10 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             if (ddTableId.toString() === '0') {
                 console.log(`Creating Device Definition table for manufacturer ${element} with ID  ${manufacturerId}...`);
 
+                _gasPrice = await getGasPrice(hre);
                 const dTx = await ddTableInstance
                     .connect(signer)
-                    .createDeviceDefinitionTable(tableOwner, manufacturerId);
+                    .createDeviceDefinitionTable(tableOwner, manufacturerId, { gasPrice: _gasPrice });
 
                 await tablelandValidator.pollForReceiptByTransactionHash({
                     chainId: CHAIN_ID[currentNetwork],
@@ -169,8 +181,9 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
                 console.log(batch);
 
+                _gasPrice = await getGasPrice(hre);
                 console.log(`Creating [${deviceDefinitionByManufacturers.length}/${items}] ...`);
-                await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch);
+                await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch, { gasPrice: _gasPrice });
             }
 
             const count = await tablelandDb.prepare(

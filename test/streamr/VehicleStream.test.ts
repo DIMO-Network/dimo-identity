@@ -77,10 +77,10 @@ describe('VehicleStream', async function () {
       .connect(streamrAdmin)
       .grantRole(C.TRUSTED_ROLE, await ensCache.getAddress());
 
-    // Fill Streamr ENSCache with the dimo ENS and vehicle path streams.dimo.eth/vehicle/
+    // Fill Streamr ENSCache with the dimo ENS and vehicle path streams.dimo.eth/vehicles/
     await ensCache
       .connect(streamrAdmin)
-      .fulfillENSOwner(C.DIMO_STREAMR_ENS, '/vehicle/', '{}', dimoRegistryAddress);
+      .fulfillENSOwner(C.DIMO_STREAMR_ENS, '/vehicles/', '{}', dimoRegistryAddress);
   }
 
   before(async () => {
@@ -215,7 +215,7 @@ describe('VehicleStream', async function () {
   });
 
   describe('createVehicleStream', () => {
-    const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
+    const streamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;
 
     context('Error handling', () => {
       it('Should revert if caller is not the vehicle ID owner', async () => {
@@ -281,7 +281,7 @@ describe('VehicleStream', async function () {
         expect(streamIdAfter).to.eql(streamId);
       });
       it('Should correctly set vehicle stream metadata', async () => {
-        const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
+        const streamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;
 
         await vehicleStreamInstance
           .connect(user1)
@@ -290,7 +290,7 @@ describe('VehicleStream', async function () {
         expect(await streamRegistry.getStreamMetadata(streamId)).to.be.equal('{}');
       });
       it('Should correctly set all permissions to DIMORegistry', async () => {
-        const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
+        const streamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;
 
         await vehicleStreamInstance
           .connect(user1)
@@ -484,7 +484,7 @@ describe('VehicleStream', async function () {
 
     context('Events', () => {
       it('Should emit VehicleStreamUnset event with correct params when vehicle ID was already associated with a stream ID', async () => {
-        const oldStreamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
+        const oldStreamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;
 
         await vehicleStreamInstance
           .connect(user1)
@@ -515,7 +515,7 @@ describe('VehicleStream', async function () {
         .connect(user1)
         .createVehicleStream(1);
 
-      mockStreamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
+      mockStreamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;
     });
 
     context('Error Handling', () => {
@@ -599,7 +599,7 @@ describe('VehicleStream', async function () {
 
 
   describe('subscribeToVehicleStream', () => {
-    const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
+    const streamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;
 
     beforeEach(async () => {
       await vehicleStreamInstance
@@ -715,7 +715,7 @@ describe('VehicleStream', async function () {
   });
 
   describe('setSubscriptionToVehicleStream', () => {
-    const streamId = `${C.DIMO_STREAMR_ENS}/vehicle/1`;
+    const streamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;
 
     beforeEach(async () => {
       await vehicleStreamInstance

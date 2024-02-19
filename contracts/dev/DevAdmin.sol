@@ -628,7 +628,7 @@ contract DevAdmin is AccessControlInternal {
             StreamrConfiguratorStorage.getStorage().streamRegistry
         );
 
-        streamRegistry.createStreamWithENS(dimoStreamrEns, "/vehicle/", "{}");
+        streamRegistry.createStreamWithENS(dimoStreamrEns, "/vehicles/", "{}");
     }
 
     /**

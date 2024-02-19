@@ -17,7 +17,7 @@ export const INTEGRATION_NFT_BASE_URI = 'https://dimo.zone/integration/';
 
 export const VEHICLE_NFT_NAME = 'Vehicle NFT';
 export const VEHICLE_NFT_SYMBOL = 'VNFT';
-export const VEHICLE_NFT_BASE_URI = 'https://dimo.zone/vehicle/';
+export const VEHICLE_NFT_BASE_URI = 'https://dimo.zone/vehicles/';
 
 // Vehicle privileges
 export const VEHICLE_ALL_TIME_NON_LOCATION_DATA_PRIVILEGE = '1';

@@ -59,7 +59,7 @@ export const INTEGRATION_NFT_URI =
   'https://devices-api.dimo.zone/v1/integration/';
 export const VEHICLE_NFT_NAME = 'DIMO Vehicle ID';
 export const VEHICLE_NFT_SYMBOL = 'DIMO/VEHICLE';
-export const VEHICLE_NFT_URI = 'https://devices-api.dimo.zone/v1/vehicle/';
+export const VEHICLE_NFT_URI = 'https://devices-api.dimo.zone/v1/vehicles/';
 export const AD_NFT_NAME = 'DIMO Aftermarket Device ID';
 export const AD_NFT_SYMBOL = 'DIMO/AFTERMARKET/DEVICE';
 export const AD_NFT_URI =

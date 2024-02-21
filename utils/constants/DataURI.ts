@@ -1,1 +1,1 @@
-export const BASE_DATA_URI = 'https://dimo.zone/vehicle/status/';
+export const BASE_DATA_URI = 'https://dimo.zone/vehicles/status/';

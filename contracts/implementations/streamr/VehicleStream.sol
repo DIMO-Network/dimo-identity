@@ -39,7 +39,7 @@ contract VehicleStream is AccessControlInternal {
     /**
      * @notice Creates a vehicle stream associated with a vehicle id
      * Grants publishing permission to the DIMO Streamr Node
-     * @dev Stream is in the format streams.dimo.eth/vehicle/<vehicleId>
+     * @dev Stream is in the format streams.dimo.eth/vehicles/<vehicleId>
      *  - Reverts if vehicle id does not exist or caller is not the owner
      * @param vehicleId Vehicle node Id
      */
@@ -72,14 +72,14 @@ contract VehicleStream is AccessControlInternal {
         }
 
         string memory streamPath = string(
-            abi.encodePacked("/vehicle/", Strings.toString(vehicleId))
+            abi.encodePacked("/vehicles/", Strings.toString(vehicleId))
         );
         streamRegistry.createStreamWithENS(dimoStreamrEns, streamPath, "{}");
 
         string memory streamId = string(
             abi.encodePacked(
                 dimoStreamrEns,
-                "/vehicle/",
+                "/vehicles/",
                 Strings.toString(vehicleId)
             )
         );
@@ -318,7 +318,7 @@ contract VehicleStream is AccessControlInternal {
         IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
 
         string memory streamPath = string(
-            abi.encodePacked("/vehicle/", Strings.toString(vehicleId))
+            abi.encodePacked("/vehicles/", Strings.toString(vehicleId))
         );
 
         streamRegistry.deleteStream(streamId);

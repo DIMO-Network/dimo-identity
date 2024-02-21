@@ -2629,7 +2629,7 @@ describe('DevAdmin', function () {
             .adminCacheDimoStreamrEns()
         )
           .to.emit(ensCache, 'RequestENSOwnerAndCreateStream')
-          .withArgs(C.DIMO_STREAMR_ENS, '/vehicle/', '{}', DIMO_REGISTRY_ADDRESS);
+          .withArgs(C.DIMO_STREAMR_ENS, '/vehicles/', '{}', DIMO_REGISTRY_ADDRESS);
       });
     });
   });

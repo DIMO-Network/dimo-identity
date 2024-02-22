@@ -27,12 +27,13 @@ import {
   createSnapshot,
   revertToSnapshot,
   grantAdminRoles,
+  dimoStreamMetadata,
   C
 } from '../../utils';
 
 const { expect } = chai;
 
-describe('VehicleStream', async function () {
+describe.only('VehicleStream', async function () {
   let snapshot: string;
   let expiresDefault: number;
   let dimoRegistryInstance: DIMORegistry;
@@ -287,7 +288,7 @@ describe('VehicleStream', async function () {
           .connect(user1)
           .createVehicleStream(1);
 
-        expect(await streamRegistry.getStreamMetadata(streamId)).to.be.equal('{}');
+        expect(await streamRegistry.getStreamMetadata(streamId)).to.be.equal(dimoStreamMetadata(1));
       });
       it('Should correctly set all permissions to DIMORegistry', async () => {
         const streamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;

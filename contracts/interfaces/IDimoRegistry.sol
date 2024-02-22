@@ -54,4 +54,9 @@ interface IDimoRegistry {
     function onTransferVehicleStream(address to, uint256 vehicleId) external;
 
     function onBurnVehicleStream(uint256 vehicleId) external;
+
+    function onSetSubscribePrivilege(
+        uint256 vehicleId,
+        address subscriber
+    ) external;
 }

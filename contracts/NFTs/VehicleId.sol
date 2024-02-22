@@ -9,6 +9,8 @@ error Unauthorized();
 error TransferFailed(address idProxy, uint256 id, string errorMessage);
 
 contract VehicleId is Initializable, MultiPrivilege {
+    uint256 private constant VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE = 6;
+
     IDimoRegistry public _dimoRegistry;
     address public syntheticDeviceId;
     mapping(address => bool) public trustedForwarders;
@@ -125,9 +127,9 @@ contract VehicleId is Initializable, MultiPrivilege {
      * @notice Internal function to transfer a token. If the vehicle is
      * paired to a synthetic device, the corresponding token is also transferred.
      * @dev Only the token owner can transfer (no approvals)
-     * @dev Pairings are maintained
-     * @dev Clears all privileges
-     * @dev 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
+     *  - Pairings are maintained
+     *  - Clears all privileges
+     *  - 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
      * @param from Old owner
      * @param to New owner
      * @param tokenId Token Id to be transferred
@@ -175,6 +177,24 @@ contract VehicleId is Initializable, MultiPrivilege {
         _dimoRegistry.onTransferVehicleStream(to, tokenId);
 
         super._transfer(from, to, tokenId);
+    }
+
+    /**
+     * @notice If the privilege set is to subscribe to live data,
+     * it subscribes the user to the vehicle Id data if the stream exists
+     * @dev Override hook from MultiPrivilege parent contract
+     * @param tokenId Token Id associated with the privilege
+     * @param privId Privilege Id to be set
+     * @param user User address that will receive the privilege
+     */
+    function _afterPrivilegeSet(
+        uint256 tokenId,
+        uint256 privId,
+        address user
+    ) internal override {
+        if (privId == VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE) {
+            _dimoRegistry.onSetSubscribePrivilege(tokenId, user);
+        }
     }
 
     /// @dev Based on the ERC-2771 to allow trusted relayers to call the contract

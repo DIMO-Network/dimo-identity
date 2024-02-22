@@ -27,6 +27,7 @@ error NoStreamrPermission(
  */
 contract VehicleStream is AccessControlInternal {
     uint256 private constant VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE = 6;
+    uint256 private constant MAX_UINT = 2 ** 256 - 1;
 
     event VehicleStreamSet(uint256 indexed vehicleId, string streamId);
     event VehicleStreamUnset(uint256 indexed vehicleId, string streamId);
@@ -370,6 +371,50 @@ contract VehicleStream is AccessControlInternal {
 
             emit VehicleStreamUnset(vehicleId, streamId);
         }
+    }
+
+    /**
+     * @notice Set a subscription permission for a user when
+     * the privilege to subscribe to live data is set in the VehicleId contract
+     * @dev Can only be called by the VehicleId contract
+     * @param vehicleId Vehicle node Id
+     * @param subscriber Vehicle stream subscriber
+     */
+    function onSetSubscribePrivilege(
+        uint256 vehicleId,
+        address subscriber
+    ) external {
+        if (msg.sender != VehicleStorage.getStorage().idProxyAddress) {
+            revert Errors.Unauthorized(msg.sender);
+        }
+
+        StreamrConfiguratorStorage.Storage
+            storage scs = StreamrConfiguratorStorage.getStorage();
+        IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
+
+        string memory streamId = vs.streams[vehicleId];
+        if (bytes(streamId).length == 0) {
+            return;
+        }
+        if (
+            !streamRegistry.hasPermission(
+                streamId,
+                address(this),
+                IStreamRegistry.PermissionType.Grant
+            )
+        ) {
+            return;
+        }
+
+        streamRegistry.grantPermission(
+            streamId,
+            subscriber,
+            IStreamRegistry.PermissionType.Subscribe
+        );
+
+        emit SubscribedToVehicleStream(streamId, subscriber, MAX_UINT);
     }
 
     /**

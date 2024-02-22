@@ -142,12 +142,25 @@
                 ]
             },
             "StreamrConfigurator": {
-                "address": "",
-                "selectors": []
+                "address": "0xf61A840e86c6C70E6A547CEa62F9680e5c15fC63",
+                "selectors": [
+                    "0x9e594424",
+                    "0x5f450e29",
+                    "0x0c3cac3b"
+                ]
             },
             "VehicleStream": {
-                "address": "",
-                "selectors": []
+                "address": "0x65382d178bB72982bedF9d35daECb89a9076d37e",
+                "selectors": [
+                    "0x497323c8",
+                    "0x180e469a",
+                    "0xa91ec798",
+                    "0x1882b263",
+                    "0xbb44bb75",
+                    "0x6f58f093",
+                    "0x37479f7e",
+                    "0xcd90df7e"
+                ]
             },
             "Multicall": {
                 "address": "0x4dc23B40c952aBc34344c4dCDF9d8f5777DA2b0c",
@@ -168,7 +181,7 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0x54E27D28A7518651979fC3010B79A42676C4D44C"
+                "implementation": "0x709203089063a03FC5b1d6b93598ccf5aECF8eF8"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",

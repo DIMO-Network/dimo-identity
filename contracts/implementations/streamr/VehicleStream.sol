@@ -75,7 +75,18 @@ contract VehicleStream is AccessControlInternal {
         string memory streamPath = string(
             abi.encodePacked("/vehicles/", Strings.toString(vehicleId))
         );
-        streamRegistry.createStreamWithENS(dimoStreamrEns, streamPath, "{}");
+        string memory metadata = string(
+            abi.encodePacked(
+                '{"partitions":1,"description":"DIMO Vehicle Stream for Vehicle ',
+                Strings.toString(vehicleId),
+                '","config":{"fields":[]}}'
+            )
+        );
+        streamRegistry.createStreamWithENS(
+            dimoStreamrEns,
+            streamPath,
+            metadata
+        );
 
         string memory streamId = string(
             abi.encodePacked(

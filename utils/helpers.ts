@@ -17,3 +17,7 @@ export function bytesToHex(uint8a: Uint8Array): string {
   }
   return hex;
 }
+
+export function dimoStreamMetadata(vehicleId: number | string) {
+  return `{"partitions":1,"description":"DIMO Vehicle Stream for Vehicle ${vehicleId}","config":{"fields":[]}}`;
+}

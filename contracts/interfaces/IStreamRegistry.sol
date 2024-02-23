@@ -37,6 +37,12 @@ interface IStreamRegistry {
         PermissionType permissionType
     ) external;
 
+    function revokePermission(
+        string calldata streamId,
+        address user,
+        PermissionType permissionType
+    ) external;
+
     function setExpirationTime(
         string calldata streamId,
         address user,

@@ -186,14 +186,16 @@ contract VehicleId is Initializable, MultiPrivilege {
      * @param tokenId Token Id associated with the privilege
      * @param privId Privilege Id to be set
      * @param user User address that will receive the privilege
+     * @param expires Expiration of the privilege
      */
     function _afterPrivilegeSet(
         uint256 tokenId,
         uint256 privId,
-        address user
+        address user,
+        uint256 expires
     ) internal override {
         if (privId == VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE) {
-            _dimoRegistry.onSetSubscribePrivilege(tokenId, user);
+            _dimoRegistry.onSetSubscribePrivilege(tokenId, user, expires);
         }
     }
 

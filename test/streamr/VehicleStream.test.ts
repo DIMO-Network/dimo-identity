@@ -33,7 +33,7 @@ import {
 
 const { expect } = chai;
 
-describe.only('VehicleStream', async function () {
+describe('VehicleStream', async function () {
   let snapshot: string;
   let expiresDefault: number;
   let dimoRegistryInstance: DIMORegistry;
@@ -1095,7 +1095,7 @@ describe.only('VehicleStream', async function () {
         await expect(
           vehicleStreamInstance
             .connect(user1)
-            .onSetSubscribePrivilege(1, subscriber.address)
+            .onSetSubscribePrivilege(1, subscriber.address, expiresDefault)
         ).to.be.revertedWithCustomError(
           vehicleStreamInstance,
           'Unauthorized'
@@ -1122,7 +1122,32 @@ describe.only('VehicleStream', async function () {
         expect(permissionsAfter[0]).to.eql(false);
         expect(permissionsAfter[1]).to.eql(false);
         expect(permissionsAfter[2]).to.equal('0');
-        expect(permissionsAfter[3]).to.equal(ethers.MaxUint256);
+        expect(permissionsAfter[3]).to.equal(expiresDefault);
+        expect(permissionsAfter[4]).to.eql(false);
+      });
+      it('Should correctly revoke subscription permission for an official stream Id when expiration is 0', async () => {
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault);
+
+        const permissionsBefore = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+
+        expect(permissionsBefore[0]).to.eql(false);
+        expect(permissionsBefore[1]).to.eql(false);
+        expect(permissionsBefore[2]).to.equal('0');
+        expect(permissionsBefore[3]).to.equal(expiresDefault);
+        expect(permissionsBefore[4]).to.eql(false);
+
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, 0);
+
+        const permissionsAfter = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+
+        expect(permissionsAfter[0]).to.eql(false);
+        expect(permissionsAfter[1]).to.eql(false);
+        expect(permissionsAfter[2]).to.equal('0');
+        expect(permissionsAfter[3]).to.equal('0');
         expect(permissionsAfter[4]).to.eql(false);
       });
       it('Should correctly set subscribe permission to the subscriber for a third party stream Id', async () => {
@@ -1159,7 +1184,48 @@ describe.only('VehicleStream', async function () {
         expect(permissionsAfter[0]).to.eql(false);
         expect(permissionsAfter[1]).to.eql(false);
         expect(permissionsAfter[2]).to.equal('0');
-        expect(permissionsAfter[3]).to.equal(ethers.MaxUint256);
+        expect(permissionsAfter[3]).to.equal(expiresDefault);
+        expect(permissionsAfter[4]).to.eql(false);
+      });
+      it('Should correctly revoke subscription permission for a third party stream Id when expiration is 0', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
+        await vehicleStreamInstance
+          .connect(user1)
+          .setVehicleStream(1, mockStreamId);
+
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault);
+
+        const permissionsBefore = await streamRegistry.getPermissionsForUser(mockStreamId, subscriber.address);
+
+        expect(permissionsBefore[0]).to.eql(false);
+        expect(permissionsBefore[1]).to.eql(false);
+        expect(permissionsBefore[2]).to.equal('0');
+        expect(permissionsBefore[3]).to.equal(expiresDefault);
+        expect(permissionsBefore[4]).to.eql(false);
+
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, 0);
+
+        const permissionsAfter = await streamRegistry.getPermissionsForUser(mockStreamId, subscriber.address);
+
+        expect(permissionsAfter[0]).to.eql(false);
+        expect(permissionsAfter[1]).to.eql(false);
+        expect(permissionsAfter[2]).to.equal('0');
+        expect(permissionsAfter[3]).to.equal('0');
         expect(permissionsAfter[4]).to.eql(false);
       });
     });
@@ -1208,7 +1274,7 @@ describe.only('VehicleStream', async function () {
             .connect(user1)
             .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault)
         ).to.emit(vehicleStreamInstance, 'SubscribedToVehicleStream')
-          .withArgs(streamId, subscriber.address, ethers.MaxUint256);
+          .withArgs(streamId, subscriber.address, expiresDefault);
       });
       it('Should emit SubscribedToVehicleStream event with correct params if there is a third party stream Id associated with the vehicle Id', async () => {
         await vehicleStreamInstance
@@ -1232,7 +1298,7 @@ describe.only('VehicleStream', async function () {
             .connect(user1)
             .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault)
         ).to.emit(vehicleStreamInstance, 'SubscribedToVehicleStream')
-          .withArgs(mockStreamId, subscriber.address, ethers.MaxUint256);
+          .withArgs(mockStreamId, subscriber.address, expiresDefault);
       });
     });
   });

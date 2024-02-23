@@ -57,6 +57,7 @@ interface IDimoRegistry {
 
     function onSetSubscribePrivilege(
         uint256 vehicleId,
-        address subscriber
+        address subscriber,
+        uint256 expirationTime
     ) external;
 }

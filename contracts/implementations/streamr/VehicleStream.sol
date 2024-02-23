@@ -74,7 +74,18 @@ contract VehicleStream is AccessControlInternal {
         string memory streamPath = string(
             abi.encodePacked("/vehicles/", Strings.toString(vehicleId))
         );
-        streamRegistry.createStreamWithENS(dimoStreamrEns, streamPath, "{}");
+        string memory metadata = string(
+            abi.encodePacked(
+                '{"partitions":1,"description":"DIMO Vehicle Stream for Vehicle ',
+                Strings.toString(vehicleId),
+                '","config":{"fields":[]}}'
+            )
+        );
+        streamRegistry.createStreamWithENS(
+            dimoStreamrEns,
+            streamPath,
+            metadata
+        );
 
         string memory streamId = string(
             abi.encodePacked(
@@ -370,6 +381,67 @@ contract VehicleStream is AccessControlInternal {
 
             emit VehicleStreamUnset(vehicleId, streamId);
         }
+    }
+
+    /**
+     * @notice Set a subscription permission for a user when
+     * the privilege to subscribe to live data is set in the VehicleId contract
+     * @dev Can only be called by the VehicleId contract
+     * @param vehicleId Vehicle node Id
+     * @param subscriber Vehicle stream subscriber
+     * @param expirationTime Subscription expiration timestamp
+     */
+    function onSetSubscribePrivilege(
+        uint256 vehicleId,
+        address subscriber,
+        uint256 expirationTime
+    ) external {
+        if (msg.sender != VehicleStorage.getStorage().idProxyAddress) {
+            revert Errors.Unauthorized(msg.sender);
+        }
+
+        StreamrConfiguratorStorage.Storage
+            storage scs = StreamrConfiguratorStorage.getStorage();
+        IStreamRegistry streamRegistry = IStreamRegistry(scs.streamRegistry);
+        VehicleStreamStorage.Storage storage vs = VehicleStreamStorage
+            .getStorage();
+
+        string memory streamId = vs.streams[vehicleId];
+        if (bytes(streamId).length == 0) {
+            return;
+        }
+        if (
+            !streamRegistry.hasPermission(
+                streamId,
+                address(this),
+                IStreamRegistry.PermissionType.Grant
+            )
+        ) {
+            return;
+        }
+
+        if (expirationTime == 0) {
+            streamRegistry.revokePermission(
+                streamId,
+                subscriber,
+                IStreamRegistry.PermissionType.Subscribe
+            );
+        } else {
+            streamRegistry.setExpirationTime(
+                streamId,
+                subscriber,
+                IStreamRegistry.PermissionType.Subscribe,
+                expirationTime
+            );
+            streamRegistry.setExpirationTime(
+                streamId,
+                subscriber,
+                IStreamRegistry.PermissionType.Subscribe,
+                expirationTime
+            );
+        }
+
+        emit SubscribedToVehicleStream(streamId, subscriber, expirationTime);
     }
 
     /**

@@ -363,11 +363,12 @@
                 ]
             },
             "VehicleStream": {
-                "address": "0x897EfC122d82154Dc7E9320850196a9c4dc6880e",
+                "address": "0x3A5f5acF3cdAF6147Bb9465968B50E3b209b9EB2",
                 "selectors": [
                     "0x497323c8",
                     "0x180e469a",
                     "0xa91ec798",
+                    "0x5c0885db",
                     "0x1882b263",
                     "0xbb44bb75",
                     "0x6f58f093",
@@ -376,7 +377,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0x45b4164B23AA1de9221E65dd355DB52FB57c0b2D",
+                "address": "0xc8eeDE43610aAD1E3e3895DBE1A656E00D04Bbd9",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -412,7 +413,7 @@
             },
             "VehicleId": {
                 "proxy": "0x90C4D6113Ec88dd4BDf12f26DB2b3998fd13A144",
-                "implementation": "0x4Bbac3C2f7Fa9711d0056496E01806a6372c6362"
+                "implementation": "0x172633c625ea9fBa443F40Cd46d7f6b7d1EC986B"
             },
             "AftermarketDeviceId": {
                 "proxy": "0xcf9Af64522162da85164a714c23a7705E6e466b3",

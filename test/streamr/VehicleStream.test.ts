@@ -27,6 +27,7 @@ import {
   createSnapshot,
   revertToSnapshot,
   grantAdminRoles,
+  dimoStreamMetadata,
   C
 } from '../../utils';
 
@@ -287,7 +288,7 @@ describe('VehicleStream', async function () {
           .connect(user1)
           .createVehicleStream(1);
 
-        expect(await streamRegistry.getStreamMetadata(streamId)).to.be.equal('{}');
+        expect(await streamRegistry.getStreamMetadata(streamId)).to.be.equal(dimoStreamMetadata(1));
       });
       it('Should correctly set all permissions to DIMORegistry', async () => {
         const streamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;
@@ -596,7 +597,6 @@ describe('VehicleStream', async function () {
       });
     });
   });
-
 
   describe('subscribeToVehicleStream', () => {
     const streamId = `${C.DIMO_STREAMR_ENS}/vehicles/1`;
@@ -915,7 +915,7 @@ describe('VehicleStream', async function () {
     });
 
     context('Events', () => {
-      it('Should not emit VehicleStreamUnset event if there is not stream Id associated with vehicle Id', async () => {
+      it('Should not emit VehicleStreamUnset event if there is no stream Id associated with vehicle Id', async () => {
         await vehicleStreamInstance
           .connect(user1)
           .unsetVehicleStream(1);
@@ -930,7 +930,7 @@ describe('VehicleStream', async function () {
           )
         ).to.not.emit(vehicleStreamInstance, 'VehicleStreamUnset');
       });
-      it('Should not emit VehicleStreamUnset event if there is a external stream Id associated with vehicle Id', async () => {
+      it('Should not emit VehicleStreamUnset event if there is a third party stream Id associated with vehicle Id', async () => {
         await vehicleStreamInstance
           .connect(user1)
           .unsetVehicleStream(1);
@@ -949,7 +949,7 @@ describe('VehicleStream', async function () {
           )
         ).to.not.emit(vehicleStreamInstance, 'VehicleStreamUnset');
       });
-      it('Should not emit VehicleStreamSet event if there is not stream Id associated with vehicle Id', async () => {
+      it('Should not emit VehicleStreamSet event if there is no stream Id associated with vehicle Id', async () => {
         await vehicleStreamInstance
           .connect(user1)
           .unsetVehicleStream(1);
@@ -964,7 +964,7 @@ describe('VehicleStream', async function () {
           )
         ).to.not.emit(vehicleStreamInstance, 'VehicleStreamSet');
       });
-      it('Should not emit VehicleStreamSet event if there is a external stream Id associated with vehicle Id', async () => {
+      it('Should not emit VehicleStreamSet event if there is a third party stream Id associated with vehicle Id', async () => {
         await vehicleStreamInstance
           .connect(user1)
           .unsetVehicleStream(1);
@@ -1076,6 +1076,229 @@ describe('VehicleStream', async function () {
             .burn(1)
         ).to.emit(vehicleStreamInstance, 'VehicleStreamUnset')
           .withArgs(1, streamId);
+      });
+    });
+  });
+
+  context('On set subscribe data privilege', () => {
+    let streamId: string;
+    let mockStreamId: string;
+    beforeEach(async () => {
+      await vehicleStreamInstance.connect(user1).createVehicleStream(1);
+      streamId = await vehicleStreamInstance.getVehicleStream(1);
+
+      mockStreamId = `${await user1.address.toString().toLowerCase()}${C.MOCK_STREAM_PATH}`;
+    });
+
+    context('Error handling', () => {
+      it('Should revert if transfer function is not called by the Vehicle Id contract', async () => {
+        await expect(
+          vehicleStreamInstance
+            .connect(user1)
+            .onSetSubscribePrivilege(1, subscriber.address, expiresDefault)
+        ).to.be.revertedWithCustomError(
+          vehicleStreamInstance,
+          'Unauthorized'
+        ).withArgs(user1.address);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set subscribe permission to the subscriber for an official stream Id', async () => {
+        const permissionsBefore = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+
+        expect(permissionsBefore[0]).to.eql(false);
+        expect(permissionsBefore[1]).to.eql(false);
+        expect(permissionsBefore[2]).to.equal('0');
+        expect(permissionsBefore[3]).to.equal('0');
+        expect(permissionsBefore[4]).to.eql(false);
+
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault);
+
+        const permissionsAfter = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+
+        expect(permissionsAfter[0]).to.eql(false);
+        expect(permissionsAfter[1]).to.eql(false);
+        expect(permissionsAfter[2]).to.equal('0');
+        expect(permissionsAfter[3]).to.equal(expiresDefault);
+        expect(permissionsAfter[4]).to.eql(false);
+      });
+      it('Should correctly revoke subscription permission for an official stream Id when expiration is 0', async () => {
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault);
+
+        const permissionsBefore = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+
+        expect(permissionsBefore[0]).to.eql(false);
+        expect(permissionsBefore[1]).to.eql(false);
+        expect(permissionsBefore[2]).to.equal('0');
+        expect(permissionsBefore[3]).to.equal(expiresDefault);
+        expect(permissionsBefore[4]).to.eql(false);
+
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, 0);
+
+        const permissionsAfter = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+
+        expect(permissionsAfter[0]).to.eql(false);
+        expect(permissionsAfter[1]).to.eql(false);
+        expect(permissionsAfter[2]).to.equal('0');
+        expect(permissionsAfter[3]).to.equal('0');
+        expect(permissionsAfter[4]).to.eql(false);
+      });
+      it('Should correctly set subscribe permission to the subscriber for a third party stream Id', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
+        await vehicleStreamInstance
+          .connect(user1)
+          .setVehicleStream(1, mockStreamId);
+
+        const permissionsBefore = await streamRegistry.getPermissionsForUser(mockStreamId, subscriber.address);
+
+        expect(permissionsBefore[0]).to.eql(false);
+        expect(permissionsBefore[1]).to.eql(false);
+        expect(permissionsBefore[2]).to.equal('0');
+        expect(permissionsBefore[3]).to.equal('0');
+        expect(permissionsBefore[4]).to.eql(false);
+
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault);
+
+        const permissionsAfter = await streamRegistry.getPermissionsForUser(mockStreamId, subscriber.address);
+
+        expect(permissionsAfter[0]).to.eql(false);
+        expect(permissionsAfter[1]).to.eql(false);
+        expect(permissionsAfter[2]).to.equal('0');
+        expect(permissionsAfter[3]).to.equal(expiresDefault);
+        expect(permissionsAfter[4]).to.eql(false);
+      });
+      it('Should correctly revoke subscription permission for a third party stream Id when expiration is 0', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
+        await vehicleStreamInstance
+          .connect(user1)
+          .setVehicleStream(1, mockStreamId);
+
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault);
+
+        const permissionsBefore = await streamRegistry.getPermissionsForUser(mockStreamId, subscriber.address);
+
+        expect(permissionsBefore[0]).to.eql(false);
+        expect(permissionsBefore[1]).to.eql(false);
+        expect(permissionsBefore[2]).to.equal('0');
+        expect(permissionsBefore[3]).to.equal(expiresDefault);
+        expect(permissionsBefore[4]).to.eql(false);
+
+        await vehicleIdInstance
+          .connect(user1)
+          .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, 0);
+
+        const permissionsAfter = await streamRegistry.getPermissionsForUser(mockStreamId, subscriber.address);
+
+        expect(permissionsAfter[0]).to.eql(false);
+        expect(permissionsAfter[1]).to.eql(false);
+        expect(permissionsAfter[2]).to.equal('0');
+        expect(permissionsAfter[3]).to.equal('0');
+        expect(permissionsAfter[4]).to.eql(false);
+      });
+    });
+
+    context('Events', () => {
+      it('Should not emit SubscribedToVehicleStream event if there is no stream Id associated with vehicle Id', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+
+        await expect(
+          vehicleIdInstance
+            .connect(user1)
+            .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault)
+        ).to.not.emit(vehicleStreamInstance, 'SubscribedToVehicleStream');
+      });
+      it('Should not emit SubscribedToVehicleStream event if DIMO Registry does not have Grant permission for a third party stream Id', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
+        await vehicleStreamInstance
+          .connect(user1)
+          .setVehicleStream(1, mockStreamId);
+        await streamRegistry
+          .connect(user1)
+          .revokePermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
+
+        await expect(
+          vehicleIdInstance
+            .connect(user1)
+            .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault)
+        ).to.not.emit(vehicleStreamInstance, 'SubscribedToVehicleStream');
+      });
+      it('Should emit SubscribedToVehicleStream event with correct params if there is an official stream Id associated with the vehicle Id', async () => {
+        await expect(
+          vehicleIdInstance
+            .connect(user1)
+            .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault)
+        ).to.emit(vehicleStreamInstance, 'SubscribedToVehicleStream')
+          .withArgs(streamId, subscriber.address, expiresDefault);
+      });
+      it('Should emit SubscribedToVehicleStream event with correct params if there is a third party stream Id associated with the vehicle Id', async () => {
+        await vehicleStreamInstance
+          .connect(user1)
+          .unsetVehicleStream(1);
+        await streamRegistry
+          .connect(user1)
+          .createStream(C.MOCK_STREAM_PATH, '{}');
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
+        await streamRegistry
+          .connect(user1)
+          .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
+        await vehicleStreamInstance
+          .connect(user1)
+          .setVehicleStream(1, mockStreamId);
+
+        await expect(
+          vehicleIdInstance
+            .connect(user1)
+            .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault)
+        ).to.emit(vehicleStreamInstance, 'SubscribedToVehicleStream')
+          .withArgs(mockStreamId, subscriber.address, expiresDefault);
       });
     });
   });

@@ -150,11 +150,12 @@
                 ]
             },
             "VehicleStream": {
-                "address": "0x65382d178bB72982bedF9d35daECb89a9076d37e",
+                "address": "0x6CbDbA34070448A2397C2813595d653eD7Bd559e",
                 "selectors": [
                     "0x497323c8",
                     "0x180e469a",
                     "0xa91ec798",
+                    "0xc8f11a06",
                     "0x1882b263",
                     "0xbb44bb75",
                     "0x6f58f093",
@@ -181,7 +182,7 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0x709203089063a03FC5b1d6b93598ccf5aECF8eF8"
+                "implementation": "0xA95F69F7D84E10ec9e77Da34b1E4253DD91B0265"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
@@ -207,7 +208,8 @@
             },
             "Foundation": "0xCED3c922200559128930180d3f0bfFd4d9f4F123",
             "Kms": "0xcce4eF41A67E28C3CF3dbc51a6CD3d004F53aCBd",
-            "StreamRegistry": "0x0D483E10612F327FC11965Fc82E90dC19b141641"
+            "StreamRegistry": "0x0D483E10612F327FC11965Fc82E90dC19b141641",
+            "DimoStreamrNode": "0x3F3ab5A20F704D6e7299EdEE84200fDA5d849BE7"
         }
     },
     "mumbai": {
@@ -363,12 +365,12 @@
                 ]
             },
             "VehicleStream": {
-                "address": "0x3A5f5acF3cdAF6147Bb9465968B50E3b209b9EB2",
+                "address": "0x64C65101ebB797529f3AfAa3243FfF0d5E709366",
                 "selectors": [
                     "0x497323c8",
                     "0x180e469a",
                     "0xa91ec798",
-                    "0x5c0885db",
+                    "0xc8f11a06",
                     "0x1882b263",
                     "0xbb44bb75",
                     "0x6f58f093",
@@ -439,7 +441,8 @@
             },
             "Foundation": "0x1741ec2915ab71fc03492715b5640133da69420b",
             "Kms": "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
-            "StreamRegistry": "0x4F0779292bd0aB33B9EBC1DBE8e0868f3940E3F2"
+            "StreamRegistry": "0x4F0779292bd0aB33B9EBC1DBE8e0868f3940E3F2",
+            "DimoStreamrNode": "0x577f22f5369046B7eF09B6b01424fA860533d243"
         }
     },
     "hardhat": {
@@ -661,7 +664,8 @@
             },
             "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
             "Kms": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-            "StreamRegistry": "0x0000000000000000000000000000000000000000"
+            "StreamRegistry": "0x0000000000000000000000000000000000000000",
+            "DimoStreamrNode": "0x0000000000000000000000000000000000000000"
         }
     },
     "localhost": {
@@ -772,7 +776,8 @@
             },
             "Foundation": "",
             "Kms": "",
-            "StreamRegistry": ""
+            "StreamRegistry": "",
+            "DimoStreamrNode": ""
         }
     }
 }

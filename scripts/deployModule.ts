@@ -97,8 +97,6 @@ async function deployNfts(
       },
     );
 
-    await contractProxy.deployed();
-
     console.log(
       `NFT contract ${
         contractNameArg.name
@@ -324,7 +322,6 @@ async function upgradeNft(
       kind: 'uups',
     },
   );
-  await upgradedProxy.deployed();
 
   console.log(`----- NFT ${nftName} upgraded -----`);
 

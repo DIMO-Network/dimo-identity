@@ -78,7 +78,9 @@ main([
   'Nodes',
   'Mapper',
   'MultipleMinter',
-  'BaseDataURI'
+  'BaseDataURI',
+  'StreamrConfigurator',
+  'VehicleStream'
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

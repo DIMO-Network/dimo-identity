@@ -1,5 +1,7 @@
 import { ethers } from 'hardhat';
 
+import { GenericKeyAny } from '../../utils';
+
 const _hashRole = (role: string) =>
   ethers.keccak256(ethers.toUtf8Bytes(role));
 
@@ -30,7 +32,8 @@ export const roles = {
     DEV_VEHICLE_BURN_ROLE: _hashRole('DEV_VEHICLE_BURN_ROLE'),
     DEV_AD_BURN_ROLE: _hashRole('DEV_AD_BURN_ROLE'),
     DEV_SD_BURN_ROLE: _hashRole('DEV_SD_BURN_ROLE'),
-    DEV_CHANGE_PARENT_NODE: _hashRole('DEV_CHANGE_PARENT_NODE')
+    DEV_CHANGE_PARENT_NODE: _hashRole('DEV_CHANGE_PARENT_NODE'),
+    DEV_CACHE_ENS: _hashRole('DEV_CACHE_ENS')
   },
   nfts: {
     MINTER_ROLE: _hashRole('MINTER_ROLE'),
@@ -56,7 +59,7 @@ export const INTEGRATION_NFT_URI =
   'https://devices-api.dimo.zone/v1/integration/';
 export const VEHICLE_NFT_NAME = 'DIMO Vehicle ID';
 export const VEHICLE_NFT_SYMBOL = 'DIMO/VEHICLE';
-export const VEHICLE_NFT_URI = 'https://devices-api.dimo.zone/v1/vehicle/';
+export const VEHICLE_NFT_URI = 'https://devices-api.dimo.zone/v1/vehicles/';
 export const AD_NFT_NAME = 'DIMO Aftermarket Device ID';
 export const AD_NFT_SYMBOL = 'DIMO/AFTERMARKET/DEVICE';
 export const AD_NFT_URI =
@@ -97,3 +100,9 @@ export const sdIdArgs = {
   name: 'SyntheticDeviceId',
   args: [SD_NFT_NAME, SD_NFT_SYMBOL, SD_NFT_URI]
 };
+
+export const dimoStreamrEns: GenericKeyAny = {
+  polygon: 'streams.dimo.eth',
+  mumbai: 'streams.dev.dimo.eth',
+  hardhat: 'streams.hardhat.dimo.eth'
+}

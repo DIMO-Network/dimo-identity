@@ -30,6 +30,7 @@
 | 0x52878b61 | adminBurnSyntheticDevicesAndDeletePairings(uint256[]) |
 | 0x282eb387 | adminBurnVehicles(uint256[]) |
 | 0x11d679c9 | adminBurnVehiclesAndDeletePairings(uint256[]) |
+| 0xb17b974b | adminCacheDimoStreamrEns() |
 | 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
 | 0xf73a8f04 | renameManufacturers((uint256,string)[]) |
@@ -416,4 +417,61 @@
 | Selector | Signature |
 |-|-|
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
+
+## StreamrConfigurator
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x9e594424 | setDimoBaseStreamId(string) |
+| 0x5f450e29 | setDimoStreamrNode(address) |
+| 0x0c3cac3b | setStreamRegistry(address) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x5c6e4ce4 | DimoStreamrEnsSet(string) |
+| 0x49a3b2d5 | DimoStreamrNodeSet(address) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x42d068f4 | StreamRegistrySet(address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
+## VehicleStream
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x497323c8 | createVehicleStream(uint256) |
+| 0x180e469a | getVehicleStream(uint256) |
+| 0xa91ec798 | onBurnVehicleStream(uint256) |
+| 0xc8f11a06 | onSetSubscribePrivilege(uint256,address,uint256) |
+| 0x1882b263 | onTransferVehicleStream(address,uint256) |
+| 0xbb44bb75 | setSubscriptionToVehicleStream(uint256,address,uint256) |
+| 0x6f58f093 | setVehicleStream(uint256,string) |
+| 0x37479f7e | subscribeToVehicleStream(uint256,uint256) |
+| 0xcd90df7e | unsetVehicleStream(uint256) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x316c9677 | SubscribedToVehicleStream(string,address,uint256) |
+| 0x09d0a780 | VehicleStreamSet(uint256,string) |
+| 0x14692607 | VehicleStreamUnset(uint256,string) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0xc8093930 | NoStreamrPermission(address,uint8) |
+| 0xa3f1925a | StreamDoesNotExist(string) |
+| 0x8e4a23d6 | Unauthorized(address) |
+| 0xf7959f9e | VehicleStreamAlreadySet(uint256,string) |
+| 0x42e5dbbe | VehicleStreamNotSet(uint256) |
 

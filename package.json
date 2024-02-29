@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.5.0",
-    "@openzeppelin/contracts-upgradeable": "^4.7.3",
+    "@openzeppelin/contracts-upgradeable": "^4.9.6",
     "@solidstate/contracts": "^0.0.48",
     "dotenv": "^16.3.1"
   }

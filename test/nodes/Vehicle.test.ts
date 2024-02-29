@@ -352,7 +352,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .addVehicleAttribute(C.mockVehicleAttribute1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'AttributeExists')
-        .withArgs(C.mockVehicleAttribute1);
+          .withArgs(C.mockVehicleAttribute1);
       });
     });
 
@@ -369,13 +369,69 @@ describe('Vehicle', function () {
     });
   });
 
-  describe('mintVehicle', () => {
+  describe('mintVehicle(uint256,address,string)', () => {
+    context('Error handling', () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,string)'](99, user1.address, C.mockDdId1)
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,string)'](1, user1.address, C.mockDdId1);
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,string)'](1, user1.address, C.mockDdId1);
+
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should correctly set Device Definition Id', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,string)'](1, user1.address, C.mockDdId1);
+
+        expect(
+          await vehicleInstance
+            .getDeviceDefinitionIdByVehicleId(1)
+        ).to.be.equal(C.mockDdId1);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeAndDdMinted event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,string)'](1, user1.address, C.mockDdId1)
+        )
+          .to.emit(vehicleInstance, 'VehicleNodeAndDdMinted')
+          .withArgs(1, 1, user1.address, C.mockDdId1);
+      });
+    });
+  });
+
+  describe('mintVehicle(uint256,address,(string,string)[])', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
         await expect(
           vehicleInstance
             .connect(nonAdmin)
-            .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_ROLE
           }`
@@ -385,19 +441,19 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicle(99, user1.address, C.mockVehicleAttributeInfoPairs)
+          ['mintVehicle(uint256,address,(string,string)[])'](99, user1.address, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
-        .withArgs(99);
+          .withArgs(99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicle(
-              1,
-              user1.address,
-              C.mockVehicleAttributeInfoPairsNotWhitelisted
-            )
+          ['mintVehicle(uint256,address,(string,string)[])'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairsNotWhitelisted
+          )
         ).to.be.revertedWithCustomError(
           vehicleInstance,
           'AttributeNotWhitelisted'
@@ -409,7 +465,7 @@ describe('Vehicle', function () {
       it('Should correctly set parent node', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
 
         const parentNode = await nodesInstance.getParentNode(
           await vehicleIdInstance.getAddress(),
@@ -420,14 +476,14 @@ describe('Vehicle', function () {
       it('Should correctly set node owner', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
 
         expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should correctly set infos', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
 
         expect(
           await nodesInstance.getInfo(
@@ -451,7 +507,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs)
         )
           .to.emit(vehicleInstance, 'VehicleNodeMinted')
           .withArgs(1, 1, user1.address);
@@ -460,7 +516,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs)
         )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
           .withArgs(
@@ -521,7 +577,7 @@ describe('Vehicle', function () {
               signature
             )
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
-        .withArgs(99);
+          .withArgs(99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -829,7 +885,7 @@ describe('Vehicle', function () {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
@@ -845,7 +901,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance.connect(admin).burnVehicleSign(99, burnVehicleSig)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidNode')
-        .withArgs(await vehicleIdInstance.getAddress(), 99);
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
         const localClaimOwnerSig = await signMessage({
@@ -905,7 +961,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig)
         ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
-        .withArgs(1);
+          .withArgs(1);
       });
       it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
         const localMintVehicleOwnerSig = await signMessage({
@@ -942,7 +998,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig)
         ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
-        .withArgs(1);
+          .withArgs(1);
       });
 
       context('Wrong signature', () => {
@@ -1093,7 +1149,7 @@ describe('Vehicle', function () {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
@@ -1113,7 +1169,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .setVehicleInfo(99, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidNode')
-        .withArgs(await vehicleIdInstance.getAddress(), 99);
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -1204,7 +1260,7 @@ describe('Vehicle', function () {
     it('Should revert if caller is not the NFT Proxy', async () => {
       await expect(
         vehicleInstance.connect(nonAdmin).validateBurnAndResetNode(1)
-      ).to.be.revertedWithCustomError(vehicleInstance,'OnlyNftProxy');
+      ).to.be.revertedWithCustomError(vehicleInstance, 'OnlyNftProxy');
     });
   });
 });

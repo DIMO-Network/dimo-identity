@@ -230,7 +230,7 @@ describe('SyntheticDeviceId', async function () {
 
     await vehicleInstance
       .connect(admin)
-      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
     await syntheticDeviceInstance
       .connect(admin)
       .mintSyntheticDeviceSign(correctMintInput1);

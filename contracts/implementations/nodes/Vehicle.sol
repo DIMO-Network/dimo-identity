@@ -22,6 +22,12 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     bytes32 private constant BURN_TYPEHASH =
         keccak256("BurnVehicleSign(uint256 vehicleNode)");
 
+    event VehicleNodeAndDdMinted(
+        uint256 indexed manufacturerId,
+        uint256 indexed vehicleId,
+        address indexed owner,
+        string deviceDefinitionId
+    );
     event VehicleIdProxySet(address indexed proxy);
     event VehicleAttributeAdded(string attribute);
     event VehicleNodeBurned(uint256 indexed vehicleNode, address indexed owner);
@@ -99,6 +105,42 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+    }
+
+    /**
+     * @notice Public funtion to mint a vehicle
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param deviceDefinitionId The Device Definition Id
+     */
+    function mintVehicle(
+        uint256 manufacturerNode,
+        address owner,
+        string calldata deviceDefinitionId
+    ) external {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        ns
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        // TODO Maybe just set it after verifying the DD
+        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
+
+        emit VehicleNodeAndDdMinted(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
     }
 
     /**
@@ -245,6 +287,19 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         _resetInfos(tokenId);
 
         emit VehicleNodeBurned(tokenId, owner);
+    }
+
+    /**
+     * @notice Gets the Device Definition Id associated to a Vehicle Id
+     * @dev If there is no ddId associated, it returns 0
+     * @param vehicleId Vehicle Id
+     */
+    function getDeviceDefinitionIdByVehicleId(
+        uint256 vehicleId
+    ) external view returns (string memory ddId) {
+        ddId = VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
+            vehicleId
+        ];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //

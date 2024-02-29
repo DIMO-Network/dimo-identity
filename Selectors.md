@@ -319,6 +319,8 @@
 |-|-|
 | 0xf0d1a557 | addVehicleAttribute(string) |
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
+| 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
+| 0x1f2c0128 | mintVehicle(uint256,address,string) |
 | 0x3da44e56 | mintVehicle(uint256,address,(string,string)[]) |
 | 0x1b1a82c8 | mintVehicleSign(uint256,address,(string,string)[],bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
@@ -334,6 +336,7 @@
 | 0x2b7d41dc | VehicleAttributeAdded(string) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0x3e7484c4 | VehicleIdProxySet(address) |
+| 0x263be727 | VehicleNodeAndDdMinted(uint256,uint256,address,string) |
 | 0x7b36384f | VehicleNodeBurned(uint256,address) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
 

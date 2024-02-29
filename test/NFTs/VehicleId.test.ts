@@ -325,7 +325,7 @@ describe('VehicleId', async function () {
 
     await vehicleInstance
       .connect(admin)
-      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
     await aftermarketDeviceInstance
       .connect(admin)
       .claimAftermarketDeviceSign(
@@ -639,7 +639,7 @@ describe('VehicleId', async function () {
       it('Should revert if caller is not the token owner', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user2.address, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleIdInstance.connect(user1).burn(2),

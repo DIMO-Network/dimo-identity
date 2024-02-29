@@ -519,10 +519,10 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -695,10 +695,10 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -872,10 +872,10 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -1044,10 +1044,10 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user2.address, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
@@ -1265,10 +1265,10 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user2.address, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
@@ -1747,7 +1747,7 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
         await aftermarketDeviceInstance
           .connect(admin)
           .claimAftermarketDeviceBatch(1, [{ aftermarketDeviceNodeId: '1', owner: await user1.address }]);
@@ -1937,10 +1937,10 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(2, user2.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,(string,string)[])'](2, user2.address, C.mockVehicleAttributeInfoPairs);
 
         await aftermarketDeviceInstance
           .connect(admin)
@@ -2120,10 +2120,10 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(2, user2.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,(string,string)[])'](2, user2.address, C.mockVehicleAttributeInfoPairs);
 
         await aftermarketDeviceInstance
           .connect(admin)
@@ -2230,10 +2230,10 @@ describe('DevAdmin', function () {
 
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user2.address, C.mockVehicleAttributeInfoPairs);
 
       await syntheticDeviceInstance
         .connect(admin)
@@ -2454,7 +2454,7 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -2505,7 +2505,7 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 2),

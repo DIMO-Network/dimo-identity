@@ -192,7 +192,7 @@ describe('VehicleStream', async function () {
 
     await vehicleInstance
       .connect(admin)
-      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
 
     await setupStreamr(DIMO_REGISTRY_ADDRESS);
 
@@ -546,7 +546,7 @@ describe('VehicleStream', async function () {
       it('Should revert if there is no stream ID associated to the vehicle ID', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user2.address, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleStreamInstance
@@ -750,7 +750,7 @@ describe('VehicleStream', async function () {
       it('Should revert if there is no stream ID associated to the vehicle ID', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,(string,string)[])'](1, user2.address, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleStreamInstance

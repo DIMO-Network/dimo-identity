@@ -382,7 +382,7 @@ describe('Multicall', function () {
     it('Should return information about vehicle', async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
 
       const getInfoEncoded1 = nodesInstance.interface.encodeFunctionData('getInfo', [
         await vehicleIdInstance.getAddress(),

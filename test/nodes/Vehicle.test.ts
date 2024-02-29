@@ -413,13 +413,13 @@ describe('Vehicle', function () {
     });
 
     context('Events', () => {
-      it('Should emit VehicleNodeAndDdMinted event with correct params', async () => {
+      it('Should emit VehicleNodeMinted event with correct params', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
           ['mintVehicle(uint256,address,string)'](1, user1.address, C.mockDdId1)
         )
-          .to.emit(vehicleInstance, 'VehicleNodeAndDdMinted')
+          .to.emit(vehicleInstance, 'VehicleNodeMinted(uint256,uint256,address,string)')
           .withArgs(1, 1, user1.address, C.mockDdId1);
       });
     });
@@ -509,7 +509,7 @@ describe('Vehicle', function () {
             .connect(admin)
           ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs)
         )
-          .to.emit(vehicleInstance, 'VehicleNodeMinted')
+          .to.emit(vehicleInstance, 'VehicleNodeMinted(uint256,uint256,address)')
           .withArgs(1, 1, user1.address);
       });
       it('Should emit VehicleAttributeSet events with correct params', async () => {
@@ -838,7 +838,7 @@ describe('Vehicle', function () {
               signature
             )
         )
-          .to.emit(vehicleInstance, 'VehicleNodeMinted')
+          .to.emit(vehicleInstance, 'VehicleNodeMinted(uint256,uint256,address)')
           .withArgs(1, 1, user1.address);
       });
       it('Should emit VehicleAttributeSet events with correct params', async () => {

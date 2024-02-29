@@ -730,7 +730,7 @@ describe('MultipleMinter', function () {
             .connect(admin)
             .mintVehicleAndSdSign(correctMintInput)
         )
-          .to.emit(multipleMinterInstance, 'VehicleNodeMinted')
+          .to.emit(multipleMinterInstance, 'VehicleNodeMinted(uint256,uint256,address)')
           .withArgs(1, 3, user1.address);
       });
       it('Should emit VehicleAttributeSet events with correct params', async () => {

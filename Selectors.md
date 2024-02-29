@@ -297,6 +297,7 @@
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+| 0x6d4f2963 | VehicleNodeMinted(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -336,9 +337,9 @@
 | 0x2b7d41dc | VehicleAttributeAdded(string) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0x3e7484c4 | VehicleIdProxySet(address) |
-| 0x263be727 | VehicleNodeAndDdMinted(uint256,uint256,address,string) |
 | 0x7b36384f | VehicleNodeBurned(uint256,address) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+| 0x6d4f2963 | VehicleNodeMinted(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -391,6 +392,7 @@
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+| 0x6d4f2963 | VehicleNodeMinted(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |

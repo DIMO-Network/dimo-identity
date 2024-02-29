@@ -22,12 +22,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     bytes32 private constant BURN_TYPEHASH =
         keccak256("BurnVehicleSign(uint256 vehicleNode)");
 
-    event VehicleNodeAndDdMinted(
-        uint256 indexed manufacturerId,
-        uint256 indexed vehicleId,
-        address indexed owner,
-        string deviceDefinitionId
-    );
     event VehicleIdProxySet(address indexed proxy);
     event VehicleAttributeAdded(string attribute);
     event VehicleNodeBurned(uint256 indexed vehicleNode, address indexed owner);
@@ -135,7 +129,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         // TODO Maybe just set it after verifying the DD
         vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
 
-        emit VehicleNodeAndDdMinted(
+        emit VehicleNodeMinted(
             manufacturerNode,
             newTokenId,
             owner,

@@ -19,10 +19,6 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
  * @notice Contract that represents the Vehicle node
  */
 contract Vehicle is AccessControlInternal, VehicleInternal {
-    bytes32 internal constant MINT_VEHICLE_WITH_DD_TYPEHASH =
-        keccak256(
-            "MintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode,address owner,string deviceDefinitionId)"
-        );
     bytes32 private constant BURN_TYPEHASH =
         keccak256("BurnVehicleSign(uint256 vehicleNode)");
 
@@ -143,6 +139,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Mint a vehicle with a Device Definition Id through a metatransaction
+     * @dev Caller must have the minter role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id

@@ -216,10 +216,10 @@ describe('MultipleMinter', function () {
 
     await vehicleInstance
       .connect(admin)
-      ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
     await vehicleInstance
       .connect(admin)
-      ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
   });
 
   beforeEach(async () => {
@@ -730,7 +730,7 @@ describe('MultipleMinter', function () {
             .connect(admin)
             .mintVehicleAndSdSign(correctMintInput)
         )
-          .to.emit(multipleMinterInstance, 'VehicleNodeMinted(uint256,uint256,address)')
+          .to.emit(multipleMinterInstance, 'VehicleNodeMinted')
           .withArgs(1, 3, user1.address);
       });
       it('Should emit VehicleAttributeSet events with correct params', async () => {

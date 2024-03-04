@@ -220,10 +220,10 @@ describe('SyntheticDevice', function () {
 
     await vehicleInstance
       .connect(admin)
-      ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
     await vehicleInstance
       .connect(admin)
-      ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
   });
 
   beforeEach(async () => {
@@ -388,7 +388,7 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
           .connect(admin)
           .mintSyntheticDeviceBatch(1, correctMintInput);
@@ -644,7 +644,7 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
           .connect(admin)
           .mintSyntheticDeviceSign(correctMintInput);
@@ -665,7 +665,7 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicle(uint256,address,(string,string)[])'](1, user2.address, C.mockVehicleAttributeInfoPairs);
+          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           syntheticDeviceInstance
@@ -1223,7 +1223,7 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
           .connect(admin)
           .mintSyntheticDeviceSign(mintInput2);
@@ -1252,7 +1252,7 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicle(uint256,address,(string,string)[])'](1, user1.address, C.mockVehicleAttributeInfoPairs);
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
           .connect(admin)
           .mintSyntheticDeviceSign(mintInput2);

@@ -23,7 +23,7 @@ contract VehicleInternal {
         uint256 tokenId,
         address owner
     );
-    event VehicleNodeMinted(
+    event VehicleNodeMintedWithDeviceDefinition(
         uint256 indexed manufacturerId,
         uint256 indexed vehicleId,
         address indexed owner,

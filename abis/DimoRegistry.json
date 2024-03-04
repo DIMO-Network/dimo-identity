@@ -2409,7 +2409,7 @@
                 "type": "string"
             }
         ],
-        "name": "VehicleNodeMinted",
+        "name": "VehicleNodeMintedWithDeviceDefinition",
         "type": "event"
     },
     {
@@ -2741,29 +2741,6 @@
                 "type": "address"
             },
             {
-                "internalType": "string",
-                "name": "deviceDefinitionId",
-                "type": "string"
-            }
-        ],
-        "name": "mintVehicle",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "manufacturerNode",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
-            {
                 "components": [
                     {
                         "internalType": "string",
@@ -2822,6 +2799,57 @@
             }
         ],
         "name": "mintVehicleSign",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "deviceDefinitionId",
+                "type": "string"
+            }
+        ],
+        "name": "mintVehicleWithDeviceDefinition",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "deviceDefinitionId",
+                "type": "string"
+            },
+            {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+            }
+        ],
+        "name": "mintVehicleWithDeviceDefinitionSign",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

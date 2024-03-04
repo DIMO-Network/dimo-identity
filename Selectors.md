@@ -297,7 +297,7 @@
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
-| 0x6d4f2963 | VehicleNodeMinted(uint256,uint256,address,string) |
+| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -321,9 +321,10 @@
 | 0xf0d1a557 | addVehicleAttribute(string) |
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
-| 0x1f2c0128 | mintVehicle(uint256,address,string) |
 | 0x3da44e56 | mintVehicle(uint256,address,(string,string)[]) |
 | 0x1b1a82c8 | mintVehicleSign(uint256,address,(string,string)[],bytes) |
+| 0xf8ddeada | mintVehicleWithDeviceDefinition(uint256,address,string) |
+| 0xd3b47405 | mintVehicleWithDeviceDefinitionSign(uint256,address,string,bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
 | 0xd9c3ae61 | setVehicleInfo(uint256,(string,string)[]) |
 | 0xea0e7d3a | validateBurnAndResetNode(uint256) |
@@ -339,7 +340,7 @@
 | 0x3e7484c4 | VehicleIdProxySet(address) |
 | 0x7b36384f | VehicleNodeBurned(uint256,address) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
-| 0x6d4f2963 | VehicleNodeMinted(uint256,uint256,address,string) |
+| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -392,7 +393,7 @@
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
-| 0x6d4f2963 | VehicleNodeMinted(uint256,uint256,address,string) |
+| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |

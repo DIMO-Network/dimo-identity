@@ -19,6 +19,10 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
  * @notice Contract that represents the Vehicle node
  */
 contract Vehicle is AccessControlInternal, VehicleInternal {
+    bytes32 internal constant MINT_VEHICLE_WITH_DD_TYPEHASH =
+        keccak256(
+            "MintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode,address owner,string deviceDefinitionId)"
+        );
     bytes32 private constant BURN_TYPEHASH =
         keccak256("BurnVehicleSign(uint256 vehicleNode)");
 
@@ -102,12 +106,12 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     }
 
     /**
-     * @notice Public funtion to mint a vehicle
+     * @notice Public funtion to mint a vehicle with a Device Definition Id
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
      */
-    function mintVehicle(
+    function mintVehicleWithDeviceDefinition(
         uint256 manufacturerNode,
         address owner,
         string calldata deviceDefinitionId
@@ -129,7 +133,57 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         // TODO Maybe just set it after verifying the DD
         vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
 
-        emit VehicleNodeMinted(
+        emit VehicleNodeMintedWithDeviceDefinition(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
+    }
+
+    /**
+     * @notice Mint a vehicle with a Device Definition Id through a metatransaction
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param deviceDefinitionId The Device Definition Id
+     * @param signature User's signature hash
+     */
+    function mintVehicleWithDeviceDefinitionSign(
+        uint256 manufacturerNode,
+        address owner,
+        string calldata deviceDefinitionId,
+        bytes calldata signature
+    ) external onlyRole(MINT_VEHICLE_ROLE) {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        bytes32 message = keccak256(
+            abi.encode(
+                MINT_VEHICLE_WITH_DD_TYPEHASH,
+                manufacturerNode,
+                owner,
+                keccak256(bytes(deviceDefinitionId))
+            )
+        );
+
+        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
+            revert InvalidOwnerSignature();
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        ns
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        // TODO Maybe just set it after verifying the DD
+        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
+
+        emit VehicleNodeMintedWithDeviceDefinition(
             manufacturerNode,
             newTokenId,
             owner,
@@ -285,7 +339,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Gets the Device Definition Id associated to a Vehicle Id
-     * @dev If there is no ddId associated, it returns 0
+     * @dev If there is no ddId associated, it returns an empty string
      * @param vehicleId Vehicle Id
      */
     function getDeviceDefinitionIdByVehicleId(

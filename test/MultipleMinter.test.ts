@@ -827,8 +827,6 @@ describe('MultipleMinter', function () {
           deviceDefinitionId: C.mockDdId1
         }
       });
-      console.log(mintSyntheticDeviceSig1)
-      console.log(mintVehicleOwnerSig1)
       correctMintInput = {
         manufacturerNode: '1',
         owner: user1.address,
@@ -1237,14 +1235,14 @@ describe('MultipleMinter', function () {
     });
 
     context('Events', () => {
-      it('Should emit VehicleNodeMinted event with correct params', async () => {
+      it('Should emit VehicleNodeMintedWithDeviceDefinition event with correct params', async () => {
         await expect(
           multipleMinterInstance
             .connect(admin)
             .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
         )
-          .to.emit(multipleMinterInstance, 'VehicleNodeMinted')
-          .withArgs(1, 3, user1.address);
+          .to.emit(multipleMinterInstance, 'VehicleNodeMintedWithDeviceDefinition')
+          .withArgs(1, 3, user1.address, C.mockDdId1);
       });
       it('Should emit SyntheticDeviceNodeMinted event with correct params', async () => {
         await expect(

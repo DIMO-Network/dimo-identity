@@ -198,15 +198,16 @@ contract MultipleMinter is
             )
         ) revert InvalidSdSignature();
 
-        // ----- START Vehicle mint and attributes -----
+        // ----- START Vehicle mint -----
         uint256 newTokenIdVehicle = INFT(vehicleIdProxyAddress).safeMint(
             data.owner
         );
 
-        emit VehicleNodeMinted(
+        emit VehicleNodeMintedWithDeviceDefinition(
             data.manufacturerNode,
             newTokenIdVehicle,
-            data.owner
+            data.owner,
+            data.deviceDefinitionId
         );
 
         message = keccak256(
@@ -225,7 +226,7 @@ contract MultipleMinter is
                 data.vehicleOwnerSig
             )
         ) revert InvalidOwnerSignature();
-        // ----- END Vehicle mint and attributes -----
+        // ----- END Vehicle mint -----
 
         // ----- START Synthetic Device mint and attributes -----
         uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);

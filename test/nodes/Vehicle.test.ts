@@ -1320,6 +1320,26 @@ describe('Vehicle', function () {
           'ERC721: invalid token ID'
         );
       });
+      it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
+        burnVehicleSig = await signMessage({
+          _signer: user1,
+          _primaryType: 'BurnVehicleSign',
+          _verifyingContract: await vehicleInstance.getAddress(),
+          message: {
+            vehicleNode: '2'
+          }
+        });
+
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId2);
+
+        expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.equal(C.mockDdId2);
+
+        await vehicleInstance.connect(admin).burnVehicleSign(2, burnVehicleSig);
+
+        expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.empty;
+      });
       it('Should correctly reset infos to blank', async () => {
         await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig);
 

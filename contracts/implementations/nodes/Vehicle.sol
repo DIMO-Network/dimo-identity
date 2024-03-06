@@ -271,10 +271,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     ) external onlyRole(BURN_VEHICLE_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
+        address vehicleIdProxyAddress = vs.idProxyAddress;
         address sdIdProxyAddress = SyntheticDeviceStorage
             .getStorage()
             .idProxyAddress;
@@ -293,6 +292,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             revert InvalidOwnerSignature();
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+        delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
         emit VehicleNodeBurned(tokenId, owner);
 
@@ -310,10 +310,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     function validateBurnAndResetNode(uint256 tokenId) external onlyNftProxy {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
+        address vehicleIdProxyAddress = vs.idProxyAddress;
         address sdIdProxyAddress = SyntheticDeviceStorage
             .getStorage()
             .idProxyAddress;
@@ -328,6 +327,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+        delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
         _resetInfos(tokenId);
 

@@ -425,6 +425,36 @@
 |-|-|
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 
+## DeviceDefinitionTable
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x20954d21 | createDeviceDefinitionTable(address,uint256) |
+| 0x396e5987 | getDeviceDefinitionTableId(uint256) |
+| 0xa1d17941 | getDeviceDefinitionTableName(uint256) |
+| 0x811eed42 | insertDeviceDefinition(uint256,(string,string,uint256,string,string)) |
+| 0xb91b4303 | insertDeviceDefinitionBatch(uint256,(string,string,uint256,string,string)[]) |
+| 0x088fafdb | setDeviceDefinitionTable(uint256,uint256) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x462ef08c | DeviceDefinitionInserted(uint256,string,string,uint256) |
+| 0x34045c03 | DeviceDefinitionTableCreated(address,uint256,uint256) |
+| 0x753affc1 | ManufacturerTableSet(uint256,uint256) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0x264e42cf | ChainNotSupported(uint256) |
+| 0xa25b0cf9 | InvalidManufacturerId(uint256) |
+| 0x3784d0a9 | TableAlreadyExists(uint256) |
+| 0x45cbe5ec | TableDoesNotExist(uint256) |
+| 0x8e4a23d6 | Unauthorized(address) |
+
 ## StreamrConfigurator
 #### Functions
 | Selector | Signature |

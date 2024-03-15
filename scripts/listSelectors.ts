@@ -79,6 +79,7 @@ main([
   'Mapper',
   'MultipleMinter',
   'BaseDataURI',
+  'DeviceDefinitionTable',
   'StreamrConfigurator',
   'VehicleStream'
 ]).catch((error) => {

@@ -49,6 +49,14 @@ struct MintVehicleAndSdInput {
     AttributeInfoPair[] attrInfoPairsDevice;
 }
 
+struct DeviceDefinitionInput {
+    string id;
+    string model;
+    uint256 year;
+    string metadata;
+    string ksuid;
+}
+
 struct MintVehicleAndSdWithDdInput {
     uint256 manufacturerNode;
     address owner;

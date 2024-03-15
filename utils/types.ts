@@ -57,6 +57,14 @@ export type MintVehicleAndSdInput = {
   attrInfoPairsDevice: AttributeInfoPair[]
 };
 
+export type DeviceDefinitionInput = {
+  id: string,
+  model: string,
+  year: number,
+  metadata: string,
+  ksuid: string
+};
+
 export type MintVehicleAndSdWithDdInput = {
   manufacturerNode: string,
   owner: string,
@@ -119,6 +127,10 @@ export type NetworkValue = {
 
 export type GenericKeyAny = {
   [index: string]: any
+};
+
+export type StringNumber = {
+  [index: string]: number
 };
 
 export type ContractsSetup = {

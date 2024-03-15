@@ -238,7 +238,7 @@
                 ]
             },
             "Manufacturer": {
-                "address": "0x30C7669d7EA03db8FEc90247F30cA24480598c9b",
+                "address": "0xdE729C6dAd5Ddc04c99ad4d057290436c12Db27d",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
@@ -359,16 +359,27 @@
                 ]
             },
             "DeviceDefinitionTable": {
-                "address": "",
-                "selectors": []
+                "address": "0xefC1Bf45Dc953B57468bD9AF2f0F2D90EE10ABB5",
+                "selectors": [
+                    "0x20954d21",
+                    "0x396e5987",
+                    "0xa1d17941",
+                    "0x811eed42",
+                    "0xb91b4303",
+                    "0x088fafdb"
+                ]
             },
             "ERC721Holder": {
-                "address": "",
-                "selectors": []
+                "address": "0x89701AA4Feb42224eeAA5e9e592400FBc2dB4069",
+                "selectors": [
+                    "0x150b7a02"
+                ]
             },
             "DeviceDefinitionController": {
-                "address": "",
-                "selectors": []
+                "address": "0x3289b5AcdD140BeDab63b1F911e70720395cAC0f",
+                "selectors": [
+                    "0x66df322e"
+                ]
             }
         },
         "nfts": {

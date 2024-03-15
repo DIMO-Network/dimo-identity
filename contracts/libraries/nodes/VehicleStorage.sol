@@ -17,8 +17,6 @@ library VehicleStorage {
         address idProxyAddress;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
-        // Vehicle Id to Device Definition Id
-        mapping(uint256 => string) vehicleIdToDeviceDefinitionId;
     }
 
     /* solhint-disable no-inline-assembly */

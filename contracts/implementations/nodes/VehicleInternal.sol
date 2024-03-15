@@ -16,6 +16,10 @@ contract VehicleInternal {
         keccak256(
             "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"
         );
+    bytes32 internal constant MINT_VEHICLE_WITH_DD_TYPEHASH =
+        keccak256(
+            "MintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode,address owner,string deviceDefinitionId)"
+        );
 
     event VehicleAttributeSet(uint256 tokenId, string attribute, string info);
     event VehicleNodeMinted(

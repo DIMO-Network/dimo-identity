@@ -19,10 +19,6 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
  * @notice Contract that represents the Vehicle node
  */
 contract Vehicle is AccessControlInternal, VehicleInternal {
-    bytes32 internal constant MINT_VEHICLE_WITH_DD_TYPEHASH =
-        keccak256(
-            "MintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode,address owner,string deviceDefinitionId)"
-        );
     bytes32 private constant BURN_TYPEHASH =
         keccak256("BurnVehicleSign(uint256 vehicleNode)");
 
@@ -143,6 +139,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Mint a vehicle with a Device Definition Id through a metatransaction
+     * @dev Caller must have the minter role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
@@ -274,10 +271,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     ) external onlyRole(BURN_VEHICLE_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
+        address vehicleIdProxyAddress = vs.idProxyAddress;
         address sdIdProxyAddress = SyntheticDeviceStorage
             .getStorage()
             .idProxyAddress;
@@ -296,6 +292,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             revert InvalidOwnerSignature();
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+        delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
         emit VehicleNodeBurned(tokenId, owner);
 
@@ -313,10 +310,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     function validateBurnAndResetNode(uint256 tokenId) external onlyNftProxy {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
+        address vehicleIdProxyAddress = vs.idProxyAddress;
         address sdIdProxyAddress = SyntheticDeviceStorage
             .getStorage()
             .idProxyAddress;
@@ -331,6 +327,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+        delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
         _resetInfos(tokenId);
 

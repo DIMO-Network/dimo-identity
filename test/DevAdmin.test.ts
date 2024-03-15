@@ -1192,6 +1192,22 @@ describe('DevAdmin', function () {
           'ERC721: invalid token ID',
         );
       });
+      it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId1);
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId2);
+
+        expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(3)).to.be.equal(C.mockDdId1);
+        expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(4)).to.be.equal(C.mockDdId2);
+
+        await devAdminInstance.connect(admin).adminBurnVehicles([3, 4]);
+
+        expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(3)).to.be.empty;
+        expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(4)).to.be.empty;
+      });
       it('Should correctly reset vehicle infos to blank', async () => {
         await devAdminInstance.connect(admin).adminBurnVehicles([1, 2]);
 
@@ -1413,6 +1429,22 @@ describe('DevAdmin', function () {
           await expect(vehicleIdInstance.ownerOf(2)).to.be.rejectedWith(
             'ERC721: invalid token ID',
           );
+        });
+        it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
+          await vehicleInstance
+            .connect(admin)
+            .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId1);
+          await vehicleInstance
+            .connect(admin)
+            .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId2);
+  
+          expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(3)).to.be.equal(C.mockDdId1);
+          expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(4)).to.be.equal(C.mockDdId2);
+  
+          await devAdminInstance.connect(admin).adminBurnVehiclesAndDeletePairings([3, 4]);
+  
+          expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(3)).to.be.empty;
+          expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(4)).to.be.empty;
         });
         it('Should correctly reset vehicle infos to blank', async () => {
           await devAdminInstance

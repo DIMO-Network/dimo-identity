@@ -117,11 +117,11 @@ async function main() {
   await renameManufacturers(signer, idManufacturerNames, network.name);
 
   await matchChainWithDb(idManufacturerNames, network.name);
-
-  process.exit();
 }
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
+}).finally(() => {
+  process.exit();
 });

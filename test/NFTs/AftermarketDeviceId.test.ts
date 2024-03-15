@@ -513,4 +513,13 @@ describe('AftermarketDeviceId', async function () {
       });
     });
   });
+
+  describe('burn', () => {
+    context('Error handling', () => {
+      it('Should revert if caller is not the DIMORegistry', async () => {
+        await expect(adIdInstance.connect(user1).burn(1))
+          .to.be.revertedWithCustomError(adIdInstance, 'Unauthorized');
+      });
+    });
+  });
 });

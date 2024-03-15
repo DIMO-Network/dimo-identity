@@ -352,7 +352,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .addVehicleAttribute(C.mockVehicleAttribute1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'AttributeExists')
-        .withArgs(C.mockVehicleAttribute1);
+          .withArgs(C.mockVehicleAttribute1);
       });
     });
 
@@ -365,6 +365,286 @@ describe('Vehicle', function () {
         )
           .to.emit(vehicleInstance, 'VehicleAttributeAdded')
           .withArgs(C.mockVehicleAttribute3);
+      });
+    });
+  });
+
+  describe('mintVehicleWithDeviceDefinition', () => {
+    context('Error handling', () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleWithDeviceDefinition(99, user1.address, C.mockDdId1)
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId1);
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId1);
+
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should correctly set Device Definition Id', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId1);
+
+        expect(
+          await vehicleInstance
+            .getDeviceDefinitionIdByVehicleId(1)
+        ).to.be.equal(C.mockDdId1);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMintedWithDeviceDefinition event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId1)
+        )
+          .to.emit(vehicleInstance, 'VehicleNodeMintedWithDeviceDefinition')
+          .withArgs(1, 1, user1.address, C.mockDdId1);
+      });
+    });
+  });
+
+  describe('mintVehicleWithDeviceDefinitionSign', () => {
+    let signature: string;
+    before(async () => {
+      signature = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVehicleWithDeviceDefinitionSign',
+        _verifyingContract: await vehicleInstance.getAddress(),
+        message: {
+          manufacturerNode: '1',
+          owner: user1.address,
+          deviceDefinitionId: C.mockDdId1
+        }
+      });
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
+        await expect(
+          vehicleInstance
+            .connect(nonAdmin)
+            .mintVehicleWithDeviceDefinitionSign(99, user1.address, C.mockDdId1, signature)
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_ROLE
+          }`
+        );
+      });
+      it('Should revert if parent node is not a manufacturer node', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleWithDeviceDefinitionSign(99, user1.address, C.mockDdId1, signature)
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+
+      context('Wrong signature', () => {
+        it('Should revert if domain name is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _domainName: 'Wrong domain',
+            _primaryType: 'MintVehicleWithDeviceDefinitionSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              owner: user1.address,
+              deviceDefinitionId: C.mockDdId1
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(admin)
+              .mintVehicleWithDeviceDefinitionSign(
+                1,
+                user1.address,
+                C.mockDdId1,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if domain version is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _domainVersion: '99',
+            _primaryType: 'MintVehicleWithDeviceDefinitionSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              owner: user1.address,
+              deviceDefinitionId: C.mockDdId1
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(admin)
+              .mintVehicleWithDeviceDefinitionSign(
+                1,
+                user1.address,
+                C.mockDdId1,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if domain chain ID is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _chainId: 99,
+            _primaryType: 'MintVehicleWithDeviceDefinitionSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              owner: user1.address,
+              deviceDefinitionId: C.mockDdId1
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(admin)
+              .mintVehicleWithDeviceDefinitionSign(
+                1,
+                user1.address,
+                C.mockDdId1,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if manufactuer node is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'MintVehicleWithDeviceDefinitionSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '99',
+              owner: user1.address,
+              deviceDefinitionId: C.mockDdId1
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(admin)
+              .mintVehicleWithDeviceDefinitionSign(
+                1,
+                user1.address,
+                C.mockDdId1,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if deviceDefinitionId is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'MintVehicleWithDeviceDefinitionSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              owner: user1.address,
+              deviceDefinitionId: C.mockDdId2
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(admin)
+              .mintVehicleWithDeviceDefinitionSign(
+                1,
+                user1.address,
+                C.mockDdId1,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if owner does not match signer', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'MintVehicleWithDeviceDefinitionSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              owner: user2.address,
+              deviceDefinitionId: C.mockDdId1
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(admin)
+              .mintVehicleWithDeviceDefinitionSign(
+                1,
+                user1.address,
+                C.mockDdId1,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinitionSign(1, user1.address, C.mockDdId1, signature);
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinitionSign(1, user1.address, C.mockDdId1, signature);
+
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should correctly set Device Definition Id', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinitionSign(1, user1.address, C.mockDdId1, signature);
+
+        expect(
+          await vehicleInstance
+            .getDeviceDefinitionIdByVehicleId(1)
+        ).to.be.equal(C.mockDdId1);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMintedWithDeviceDefinition event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleWithDeviceDefinitionSign(1, user1.address, C.mockDdId1, signature)
+        )
+          .to.emit(vehicleInstance, 'VehicleNodeMintedWithDeviceDefinition')
+          .withArgs(1, 1, user1.address, C.mockDdId1);
       });
     });
   });
@@ -387,7 +667,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .mintVehicle(99, user1.address, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
-        .withArgs(99);
+          .withArgs(99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -521,7 +801,7 @@ describe('Vehicle', function () {
               signature
             )
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
-        .withArgs(99);
+          .withArgs(99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -813,15 +1093,24 @@ describe('Vehicle', function () {
   });
 
   describe('burnVehicleSign', () => {
-    let burnVehicleSig: string;
+    let burnVehicleSig1: string;
+    let burnVehicleSig2: string;
 
     before(async () => {
-      burnVehicleSig = await signMessage({
+      burnVehicleSig1 = await signMessage({
         _signer: user1,
         _primaryType: 'BurnVehicleSign',
         _verifyingContract: await vehicleInstance.getAddress(),
         message: {
           vehicleNode: '1'
+        }
+      });
+      burnVehicleSig2 = await signMessage({
+        _signer: user1,
+        _primaryType: 'BurnVehicleSign',
+        _verifyingContract: await vehicleInstance.getAddress(),
+        message: {
+          vehicleNode: '2'
         }
       });
     });
@@ -835,7 +1124,7 @@ describe('Vehicle', function () {
     context('Error handling', () => {
       it('Should revert if caller does not have BURN_VEHICLE_ROLE', async () => {
         await expect(
-          vehicleInstance.connect(nonAdmin).burnVehicleSign(1, burnVehicleSig)
+          vehicleInstance.connect(nonAdmin).burnVehicleSign(1, burnVehicleSig1)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.BURN_VEHICLE_ROLE
           }`
@@ -843,9 +1132,9 @@ describe('Vehicle', function () {
       });
       it('Should revert if node is not a Vehicle', async () => {
         await expect(
-          vehicleInstance.connect(admin).burnVehicleSign(99, burnVehicleSig)
+          vehicleInstance.connect(admin).burnVehicleSign(99, burnVehicleSig1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidNode')
-        .withArgs(await vehicleIdInstance.getAddress(), 99);
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
         const localClaimOwnerSig = await signMessage({
@@ -903,9 +1192,9 @@ describe('Vehicle', function () {
         );
 
         await expect(
-          vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig)
+          vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
-        .withArgs(1);
+          .withArgs(1);
       });
       it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
         const localMintVehicleOwnerSig = await signMessage({
@@ -940,9 +1229,9 @@ describe('Vehicle', function () {
           .mintSyntheticDeviceSign(localMintSdInput);
 
         await expect(
-          vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig)
+          vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
-        .withArgs(1);
+          .withArgs(1);
       });
 
       context('Wrong signature', () => {
@@ -1024,7 +1313,7 @@ describe('Vehicle', function () {
 
     context('State', () => {
       it('Should correctly reset parent node to 0', async () => {
-        await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig);
+        await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1);
 
         const parentNode = await nodesInstance.getParentNode(
           await sdIdInstance.getAddress(),
@@ -1034,14 +1323,25 @@ describe('Vehicle', function () {
         expect(parentNode).to.be.equal(0);
       });
       it('Should correctly reset node owner to zero address', async () => {
-        await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig);
+        await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1);
 
         await expect(sdIdInstance.ownerOf(1)).to.be.revertedWith(
           'ERC721: invalid token ID'
         );
       });
+      it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId2);
+
+        expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.equal(C.mockDdId2);
+
+        await vehicleInstance.connect(admin).burnVehicleSign(2, burnVehicleSig2);
+
+        expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.empty;
+      });
       it('Should correctly reset infos to blank', async () => {
-        await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig);
+        await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1);
 
         expect(
           await nodesInstance.getInfo(
@@ -1061,7 +1361,7 @@ describe('Vehicle', function () {
       it('Should update multi-privilege token version', async () => {
         const previousVersion = await vehicleIdInstance.tokenIdToVersion(1);
 
-        await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig);
+        await vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1);
 
         expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
           previousVersion + ethers.toBigInt(1)
@@ -1072,14 +1372,14 @@ describe('Vehicle', function () {
     context('Events', () => {
       it('Should emit VehicleNodeBurned event with correct params', async () => {
         await expect(
-          vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig)
+          vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1)
         )
           .to.emit(vehicleInstance, 'VehicleNodeBurned')
           .withArgs(1, user1.address);
       });
       it('Should emit VehicleAttributeSet events with correct params', async () => {
         await expect(
-          vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig)
+          vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1)
         )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
           .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, '')
@@ -1113,7 +1413,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .setVehicleInfo(99, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidNode')
-        .withArgs(await vehicleIdInstance.getAddress(), 99);
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -1204,7 +1504,7 @@ describe('Vehicle', function () {
     it('Should revert if caller is not the NFT Proxy', async () => {
       await expect(
         vehicleInstance.connect(nonAdmin).validateBurnAndResetNode(1)
-      ).to.be.revertedWithCustomError(vehicleInstance,'OnlyNftProxy');
+      ).to.be.revertedWithCustomError(vehicleInstance, 'OnlyNftProxy');
     });
   });
 });

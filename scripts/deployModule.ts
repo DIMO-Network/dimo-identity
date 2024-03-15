@@ -97,8 +97,6 @@ async function deployNfts(
       },
     );
 
-    await contractProxy.deployed();
-
     console.log(
       `NFT contract ${
         contractNameArg.name
@@ -324,7 +322,6 @@ async function upgradeNft(
       kind: 'uups',
     },
   );
-  await upgradedProxy.deployed();
 
   console.log(`----- NFT ${nftName} upgraded -----`);
 
@@ -592,11 +589,11 @@ async function main() {
     networkName,
   );
   writeAddresses(nftInstances, networkName);
-
-  process.exit();
 }
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
+}).finally(() => {
+  process.exit();
 });

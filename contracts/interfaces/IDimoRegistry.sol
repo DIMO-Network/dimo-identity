@@ -50,4 +50,14 @@ interface IDimoRegistry {
         uint256 tokenId,
         string calldata attribute
     ) external view returns (string memory info);
+
+    function onTransferVehicleStream(address to, uint256 vehicleId) external;
+
+    function onBurnVehicleStream(uint256 vehicleId) external;
+
+    function onSetSubscribePrivilege(
+        uint256 vehicleId,
+        address subscriber,
+        uint256 expirationTime
+    ) external;
 }

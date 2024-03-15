@@ -24,12 +24,12 @@ async function main() {
 
   // console.log(events[2].args.oldSelectors);
   // console.log(events[2].args.newSelectors);
-  console.log(events);
-
-  process.exit();
+  console.log(events);  
 }
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
-});
+}).finally(() => {
+  process.exit();
+})

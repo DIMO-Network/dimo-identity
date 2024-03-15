@@ -84,7 +84,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0xe17abb835338E5A389f6a4b11c61F773a69d1B38",
+                "address": "0x6397e67AC10D7cC53DCFC34e1ef578E05B2C6D53",
                 "selectors": [
                     "0x6111afa3",
                     "0x60deec60",
@@ -95,6 +95,8 @@
                     "0x7ba79a39",
                     "0xb50df2f7",
                     "0xcfe642dd",
+                    "0x9b3abd48",
+                    "0x9d0b139b",
                     "0x4d49d82a",
                     "0x4d13b709",
                     "0xee4d9596",
@@ -102,10 +104,11 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0xEd8B51a2270ebd5AB1FFA5253937604c2aF68E7C",
+                "address": "0x22e9F325c8d06F6e2F71320b440989254016bf0F",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
+                    "0x493b27e1",
                     "0x795b910a",
                     "0x261d982a",
                     "0xc624e8a1",
@@ -133,9 +136,31 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x3B76075452D8EE8aD8a49b1dC53A15e726D6f10D",
+                "address": "0x30B3CEd3547bD9B8661f6E619772b19a3149a965",
                 "selectors": [
                     "0xfb1a28e8"
+                ]
+            },
+            "StreamrConfigurator": {
+                "address": "0xf61A840e86c6C70E6A547CEa62F9680e5c15fC63",
+                "selectors": [
+                    "0x9e594424",
+                    "0x5f450e29",
+                    "0x0c3cac3b"
+                ]
+            },
+            "VehicleStream": {
+                "address": "0x6CbDbA34070448A2397C2813595d653eD7Bd559e",
+                "selectors": [
+                    "0x497323c8",
+                    "0x180e469a",
+                    "0xa91ec798",
+                    "0xc8f11a06",
+                    "0x1882b263",
+                    "0xbb44bb75",
+                    "0x6f58f093",
+                    "0x37479f7e",
+                    "0xcd90df7e"
                 ]
             },
             "Multicall": {
@@ -169,11 +194,11 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0x54E27D28A7518651979fC3010B79A42676C4D44C"
+                "implementation": "0xA95F69F7D84E10ec9e77Da34b1E4253DD91B0265"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
-                "implementation": "0xD837C5300cFacDBDbD08D44F559f64408E4ac79B"
+                "implementation": "0xB20c246761157F970a8B75743beCF63868528B3E"
             },
             "SyntheticDeviceId": {
                 "proxy": "0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D",
@@ -194,7 +219,9 @@
                 "implementation": "0xA6c4e0938835cb6d66074833737A87Fc1400533b"
             },
             "Foundation": "0xCED3c922200559128930180d3f0bfFd4d9f4F123",
-            "Kms": "0xcce4eF41A67E28C3CF3dbc51a6CD3d004F53aCBd"
+            "Kms": "0xcce4eF41A67E28C3CF3dbc51a6CD3d004F53aCBd",
+            "StreamRegistry": "0x0D483E10612F327FC11965Fc82E90dC19b141641",
+            "DimoStreamrNode": "0x3F3ab5A20F704D6e7299EdEE84200fDA5d849BE7"
         }
     },
     "mumbai": {
@@ -284,7 +311,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0xB0D3403f83a9FCC8d85E7a4ab374cfe62f625952",
+                "address": "0x216f6e4e9ddF79992CbA690b35FB78d56F7532D6",
                 "selectors": [
                     "0x6111afa3",
                     "0x60deec60",
@@ -295,6 +322,8 @@
                     "0x7ba79a39",
                     "0xb50df2f7",
                     "0xcfe642dd",
+                    "0x9b3abd48",
+                    "0x9d0b139b",
                     "0x4d49d82a",
                     "0x4d13b709",
                     "0xee4d9596",
@@ -302,10 +331,11 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0xd83Bf6c51ee03f27F453b9a1f1021859a9cD33c6",
+                "address": "0xFE67f4854BFE20E3EFc382f40a656018af544C30",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
+                    "0x493b27e1",
                     "0x795b910a",
                     "0x261d982a",
                     "0xc624e8a1",
@@ -333,16 +363,43 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0xd16EfDD9B9f2c7e054935C3483df40CdD4E38c53",
+                "address": "0xefe1eE82fe8D0933ABd0f9a21cB55Db303D759Ff",
                 "selectors": [
                     "0xfb1a28e8"
                 ]
             },
-            "DevAdmin": {
-                "address": "0xb3e48567837f3428D28E964305E1cA4cd67E6F14",
+            "StreamrConfigurator": {
+                "address": "0xAfded80D163479554568C54C1b29613e6545D70D",
                 "selectors": [
+                    "0x9e594424",
+                    "0x5f450e29",
+                    "0x0c3cac3b"
+                ]
+            },
+            "VehicleStream": {
+                "address": "0x64C65101ebB797529f3AfAa3243FfF0d5E709366",
+                "selectors": [
+                    "0x497323c8",
+                    "0x180e469a",
+                    "0xa91ec798",
+                    "0xc8f11a06",
+                    "0x1882b263",
+                    "0xbb44bb75",
+                    "0x6f58f093",
+                    "0x37479f7e",
+                    "0xcd90df7e"
+                ]
+            },
+            "DevAdmin": {
+                "address": "0xc8eeDE43610aAD1E3e3895DBE1A656E00D04Bbd9",
+                "selectors": [
+                    "0xd7376bae",
+                    "0x63dec203",
+                    "0x52878b61",
                     "0x282eb387",
                     "0x11d679c9",
+                    "0xb17b974b",
+                    "0x56936962",
                     "0x3febacab",
                     "0xf73a8f04",
                     "0xff96b761",
@@ -393,7 +450,7 @@
             },
             "VehicleId": {
                 "proxy": "0x90C4D6113Ec88dd4BDf12f26DB2b3998fd13A144",
-                "implementation": "0x42645A114330fac1f29444BAEC30EB1c33AdC9d3"
+                "implementation": "0x172633c625ea9fBa443F40Cd46d7f6b7d1EC986B"
             },
             "AftermarketDeviceId": {
                 "proxy": "0xcf9Af64522162da85164a714c23a7705E6e466b3",
@@ -418,7 +475,9 @@
                 "implementation": "0x38ddD442FE4F7D9d65112DE0f659e12aaD2aB3C4"
             },
             "Foundation": "0x1741ec2915ab71fc03492715b5640133da69420b",
-            "Kms": "0x74cb2b8ed0c1789d84ef701921d1152e592c330c"
+            "Kms": "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
+            "StreamRegistry": "0x4F0779292bd0aB33B9EBC1DBE8e0868f3940E3F2",
+            "DimoStreamrNode": "0x577f22f5369046B7eF09B6b01424fA860533d243"
         }
     },
     "hardhat": {
@@ -519,6 +578,7 @@
                     "0x7ba79a39",
                     "0xb50df2f7",
                     "0xcfe642dd",
+                    "0x9d0b139b",
                     "0x4d49d82a",
                     "0x4d13b709",
                     "0xee4d9596",
@@ -530,6 +590,7 @@
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
+                    "0x493b27e1",
                     "0x795b910a",
                     "0x261d982a",
                     "0xc624e8a1",
@@ -562,11 +623,31 @@
                     "0xfb1a28e8"
                 ]
             },
-            "DevAdmin": {
+            "StreamrConfigurator": {
                 "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
                 "selectors": [
                     "0x282eb387",
                     "0x11d679c9",
+                    "0x9e594424",
+                    "0x0c3cac3b"
+                ]
+            },
+            "VehicleStream": {
+                "address": "0x9A676e781A523b5d0C0e43731313A708CB607508",
+                "selectors": [
+                    "0x497323c8",
+                    "0x4337a026"
+                ]
+            },
+            "DevAdmin": {
+                "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "selectors": [
+                    "0xd7376bae",
+                    "0x63dec203",
+                    "0x52878b61",
+                    "0x282eb387",
+                    "0x11d679c9",
+                    "0x56936962",
                     "0x3febacab",
                     "0xf73a8f04",
                     "0xff96b761",
@@ -576,7 +657,7 @@
                 ]
             },
             "Multicall": {
-                "address": "0x9A676e781A523b5d0C0e43731313A708CB607508",
+                "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
                 "selectors": [
                     "0x415c2d96",
                     "0x1c0c6e51"
@@ -643,7 +724,9 @@
                 "implementation": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed"
             },
             "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-            "Kms": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+            "Kms": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+            "StreamRegistry": "0x0000000000000000000000000000000000000000",
+            "DimoStreamrNode": "0x0000000000000000000000000000000000000000"
         }
     },
     "localhost": {
@@ -697,6 +780,14 @@
                 "selectors": []
             },
             "MultipleMinter": {
+                "address": "",
+                "selectors": []
+            },
+            "StreamrConfigurator": {
+                "address": "",
+                "selectors": []
+            },
+            "VehicleStream": {
                 "address": "",
                 "selectors": []
             },
@@ -757,7 +848,9 @@
                 "implementation": ""
             },
             "Foundation": "",
-            "Kms": ""
+            "Kms": "",
+            "StreamRegistry": "",
+            "DimoStreamrNode": ""
         }
     }
 }

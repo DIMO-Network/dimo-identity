@@ -23,7 +23,7 @@ error InvalidManufacturerId(uint256 id);
  * @notice Contract for interacting with Device Definition tables via Tableland
  */
 contract DeviceDefinitionTable is AccessControlInternal {
-    uint256 private constant MANUFACTURER_INSERT_DD_PRIVILEGE = 3;
+    uint256 private constant MANUFACTURER_INSERT_DD_PRIVILEGE = 5;
 
     event DeviceDefinitionTableCreated(
         address indexed tableOwner,

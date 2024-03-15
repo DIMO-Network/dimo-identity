@@ -317,14 +317,29 @@ contract SyntheticDevice is
         _setInfos(tokenId, attrInfo);
     }
 
-    /// @notice Gets the Synthetic Device Id by the device address
-    /// @dev If the device is not minted it will return 0
-    /// @param addr Address associated with the synthetic device
+    /**
+     * @notice Gets the Synthetic Device Id by the device address
+     * @dev If the device is not minted it will return 0
+     * @param addr Address associated with the synthetic device
+     */
     function getSyntheticDeviceIdByAddress(
         address addr
     ) external view returns (uint256 nodeId) {
         nodeId = SyntheticDeviceStorage.getStorage().deviceAddressToNodeId[
             addr
+        ];
+    }
+
+    /**
+     * @notice Gets the SD address by the node ID
+     * @dev If the device is not minted it will return 0x00 address
+     * @param nodeId Node ID associated with the synthetic device
+     */
+    function getSyntheticDeviceAddressById(
+        uint256 nodeId
+    ) external view returns (address addr) {
+        addr = SyntheticDeviceStorage.getStorage().nodeIdToDeviceAddress[
+            nodeId
         ];
     }
 

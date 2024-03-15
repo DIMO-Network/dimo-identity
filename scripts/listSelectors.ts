@@ -79,7 +79,9 @@ main([
   'Mapper',
   'MultipleMinter',
   'BaseDataURI',
-  'DeviceDefinitionTable'
+  'DeviceDefinitionTable',
+  'StreamrConfigurator',
+  'VehicleStream'
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

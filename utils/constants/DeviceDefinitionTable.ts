@@ -1,8 +1,8 @@
 import { DeviceDefinitionInput } from '../types';
 
-export const mockId1 = 'mockDdModel1_2021';
-export const mockId2 = 'mockDdModel2_2022';
-export const mockId3 = 'mockDdModel3_2023';
+export const mockDdId1 = 'mockDdModel1_2021';
+export const mockDdId2 = 'mockDdModel2_2022';
+export const mockDdId3 = 'mockDdModel3_2023';
 
 export const mockDdModel1 = 'mockDdModel1';
 export const mockDdModel2 = 'mockDdModel2';
@@ -63,21 +63,21 @@ export const mockDdMetadata3 = {
 }
 
 export const mockDdInput1: DeviceDefinitionInput = {
-    id: mockId1,
+    id: mockDdId1,
     model: mockDdModel1,
     year: mockDdYear1,
     metadata: JSON.stringify(mockDdMetadata1),
     ksuid: mockKsuid1
 }
 export const mockDdInput2: DeviceDefinitionInput = {
-    id: mockId2,
+    id: mockDdId2,
     model: mockDdModel2,
     year: mockDdYear2,
     metadata: JSON.stringify(mockDdMetadata2),
     ksuid: mockKsuid2
 }
 export const mockDdInput3: DeviceDefinitionInput = {
-    id: mockId3,
+    id: mockDdId3,
     model: mockDdModel3,
     year: mockDdYear3,
     metadata: JSON.stringify(mockDdMetadata3),

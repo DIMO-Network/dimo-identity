@@ -25,8 +25,13 @@
 #### Functions
 | Selector | Signature |
 |-|-|
+| 0xd7376bae | adminBurnAftermarketDevices(uint256[]) |
+| 0x63dec203 | adminBurnAftermarketDevicesAndDeletePairings(uint256[]) |
+| 0x52878b61 | adminBurnSyntheticDevicesAndDeletePairings(uint256[]) |
 | 0x282eb387 | adminBurnVehicles(uint256[]) |
 | 0x11d679c9 | adminBurnVehiclesAndDeletePairings(uint256[]) |
+| 0xb17b974b | adminCacheDimoStreamrEns() |
+| 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
 | 0xf73a8f04 | renameManufacturers((uint256,string)[]) |
 | 0xff96b761 | transferAftermarketDeviceOwnership(uint256,address) |
@@ -37,6 +42,8 @@
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x000d5c45 | AftermarketDeviceAttributeSetDevAdmin(uint256,string,string) |
+| 0xb33f329d | AftermarketDeviceNodeBurnedDevAdmin(uint256,address) |
 | 0x89ec1328 | AftermarketDevicePaired(uint256,uint256,address) |
 | 0xaabf86a9 | AftermarketDeviceTransferredDevAdmin(uint256,address,address) |
 | 0xd2a3fcd4 | AftermarketDeviceUnclaimedDevAdmin(uint256) |
@@ -140,6 +147,8 @@
 | 0x7ba79a39 | mintAftermarketDeviceByManufacturerBatch(uint256,(address,(string,string)[])[]) |
 | 0xb50df2f7 | pairAftermarketDeviceSign(uint256,uint256,bytes,bytes) |
 | 0xcfe642dd | pairAftermarketDeviceSign(uint256,uint256,bytes) |
+| 0x9b3abd48 | reprovisionAftermarketDeviceByManufacturerBatch(uint256[]) |
+| 0x9d0b139b | resetAftermarketDeviceAddressByManufacturerBatch((uint256,address)[]) |
 | 0x4d49d82a | setAftermarketDeviceIdProxyAddress(address) |
 | 0x4d13b709 | setAftermarketDeviceInfo(uint256,(string,string)[]) |
 | 0xee4d9596 | unpairAftermarketDevice(uint256,uint256) |
@@ -148,10 +157,12 @@
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x4993b53b | AftermarketDeviceAddressReset(uint256,uint256,address) |
 | 0x3ef2473c | AftermarketDeviceAttributeAdded(string) |
 | 0x977fe0dd | AftermarketDeviceAttributeSet(uint256,string,string) |
 | 0x8468d811 | AftermarketDeviceClaimed(uint256,address) |
 | 0xe2daa727 | AftermarketDeviceIdProxySet(address) |
+| 0xc4d38c0a | AftermarketDeviceNodeBurned(uint256,address) |
 | 0xd624fd4c | AftermarketDeviceNodeMinted(uint256,uint256,address,address) |
 | 0x89ec1328 | AftermarketDevicePaired(uint256,uint256,address) |
 | 0xd9135724 | AftermarketDeviceUnpaired(uint256,uint256,address) |
@@ -266,6 +277,7 @@
 |-|-|
 | 0xe1f371df | addSyntheticDeviceAttribute(string) |
 | 0x7c7c9978 | burnSyntheticDeviceSign(uint256,uint256,bytes) |
+| 0x493b27e1 | getSyntheticDeviceAddressById(uint256) |
 | 0x795b910a | getSyntheticDeviceIdByAddress(address) |
 | 0x261d982a | mintSyntheticDeviceBatch(uint256,(uint256,address,(string,string)[])[]) |
 | 0xc624e8a1 | mintSyntheticDeviceSign((uint256,uint256,bytes,bytes,address,(string,string)[])) |
@@ -285,6 +297,7 @@
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -307,8 +320,11 @@
 |-|-|
 | 0xf0d1a557 | addVehicleAttribute(string) |
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
+| 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
 | 0x3da44e56 | mintVehicle(uint256,address,(string,string)[]) |
 | 0x1b1a82c8 | mintVehicleSign(uint256,address,(string,string)[],bytes) |
+| 0xf8ddeada | mintVehicleWithDeviceDefinition(uint256,address,string) |
+| 0xd3b47405 | mintVehicleWithDeviceDefinitionSign(uint256,address,string,bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
 | 0xd9c3ae61 | setVehicleInfo(uint256,(string,string)[]) |
 | 0xea0e7d3a | validateBurnAndResetNode(uint256) |
@@ -324,6 +340,7 @@
 | 0x3e7484c4 | VehicleIdProxySet(address) |
 | 0x7b36384f | VehicleNodeBurned(uint256,address) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -365,6 +382,7 @@
 | Selector | Signature |
 |-|-|
 | 0xfb1a28e8 | mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
+| 0x191292f8 | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,bytes,bytes,address,(string,string)[])) |
 
 #### Events
 | Selector | Signature |
@@ -376,6 +394,7 @@
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -435,4 +454,61 @@
 | 0x3784d0a9 | TableAlreadyExists(uint256) |
 | 0x45cbe5ec | TableDoesNotExist(uint256) |
 | 0x8e4a23d6 | Unauthorized(address) |
+
+## StreamrConfigurator
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x9e594424 | setDimoBaseStreamId(string) |
+| 0x5f450e29 | setDimoStreamrNode(address) |
+| 0x0c3cac3b | setStreamRegistry(address) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x5c6e4ce4 | DimoStreamrEnsSet(string) |
+| 0x49a3b2d5 | DimoStreamrNodeSet(address) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x42d068f4 | StreamRegistrySet(address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
+## VehicleStream
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x497323c8 | createVehicleStream(uint256) |
+| 0x180e469a | getVehicleStream(uint256) |
+| 0xa91ec798 | onBurnVehicleStream(uint256) |
+| 0xc8f11a06 | onSetSubscribePrivilege(uint256,address,uint256) |
+| 0x1882b263 | onTransferVehicleStream(address,uint256) |
+| 0xbb44bb75 | setSubscriptionToVehicleStream(uint256,address,uint256) |
+| 0x6f58f093 | setVehicleStream(uint256,string) |
+| 0x37479f7e | subscribeToVehicleStream(uint256,uint256) |
+| 0xcd90df7e | unsetVehicleStream(uint256) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x316c9677 | SubscribedToVehicleStream(string,address,uint256) |
+| 0x09d0a780 | VehicleStreamSet(uint256,string) |
+| 0x14692607 | VehicleStreamUnset(uint256,string) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0xc8093930 | NoStreamrPermission(address,uint8) |
+| 0xa3f1925a | StreamDoesNotExist(string) |
+| 0x8e4a23d6 | Unauthorized(address) |
+| 0xf7959f9e | VehicleStreamAlreadySet(uint256,string) |
+| 0x42e5dbbe | VehicleStreamNotSet(uint256) |
 

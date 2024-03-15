@@ -26,6 +26,11 @@ export type AftermarketDeviceOwnerPair = {
   owner: string
 };
 
+export type AftermarketDeviceIdAddressPair = {
+  aftermarketDeviceNodeId: string,
+  deviceAddress: string
+};
+
 export type MintSyntheticDeviceBatchInput = {
   vehicleNode: string,
   syntheticDeviceAddr: string,
@@ -58,7 +63,18 @@ export type DeviceDefinitionInput = {
   year: number,
   metadata: string,
   ksuid: string
-}
+};
+
+export type MintVehicleAndSdWithDdInput = {
+  manufacturerNode: string,
+  owner: string,
+  deviceDefinitionId: string,
+  integrationNode: string,
+  vehicleOwnerSig: string,
+  syntheticDeviceSig: string,
+  syntheticDeviceAddr: string,
+  attrInfoPairsDevice: AttributeInfoPair[]
+};
 
 export type IdManufacturerName = {
   tokenId: string,

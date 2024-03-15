@@ -44,14 +44,13 @@ export const mockAftermarketDeviceInfosList: AftermarketDeviceInfos[] = [
     attrInfoPairs: mockAdAttributeInfoPairs
   }
 ];
-export const mockAftermarketDeviceInfosListNotWhitelisted: AftermarketDeviceInfos[] =
-  [
-    {
-      addr: '',
-      attrInfoPairs: mockAdAttributeInfoPairs
-    },
-    {
-      addr: '',
-      attrInfoPairs: mockAdAttributeInfoPairsNotWhitelisted
-    }
-  ];
+export const mockAftermarketDeviceInfosListNotWhitelisted: AftermarketDeviceInfos[] = [
+  {
+    addr: '',
+    attrInfoPairs: mockAdAttributeInfoPairs
+  },
+  {
+    addr: '',
+    attrInfoPairs: mockAdAttributeInfoPairsNotWhitelisted
+  }
+];

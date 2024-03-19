@@ -169,6 +169,18 @@
                     "0x415c2d96",
                     "0x1c0c6e51"
                 ]
+            },
+            "DeviceDefinitionTable": {
+                "address": "",
+                "selectors": []
+            },
+            "ERC721Holder": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionController": {
+                "address": "",
+                "selectors": []
             }
         },
         "nfts": {
@@ -253,7 +265,7 @@
                 ]
             },
             "Manufacturer": {
-                "address": "0x30C7669d7EA03db8FEc90247F30cA24480598c9b",
+                "address": "0xdE729C6dAd5Ddc04c99ad4d057290436c12Db27d",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
@@ -287,12 +299,15 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x729aD3F72Cd88743e954229897406eB5046eEcF9",
+                "address": "0xe515194BcC8e3624B10Fc077c0c310aA1D06e746",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
+                    "0xb7bded95",
                     "0x3da44e56",
                     "0x1b1a82c8",
+                    "0xf8ddeada",
+                    "0xd3b47405",
                     "0x9bfae6da",
                     "0xd9c3ae61",
                     "0xea0e7d3a"
@@ -351,9 +366,10 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0xefe1eE82fe8D0933ABd0f9a21cB55Db303D759Ff",
+                "address": "0xEAE0B5CecB16C443DC36Df01158DDc176502ccd7",
                 "selectors": [
-                    "0xfb1a28e8"
+                    "0xfb1a28e8",
+                    "0x191292f8"
                 ]
             },
             "StreamrConfigurator": {
@@ -379,7 +395,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0xc8eeDE43610aAD1E3e3895DBE1A656E00D04Bbd9",
+                "address": "0x2E77D085c7DbC314F253857ED2bbB84f34296ee5",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -401,6 +417,29 @@
                 "selectors": [
                     "0x415c2d96",
                     "0x1c0c6e51"
+                ]
+            },
+            "DeviceDefinitionTable": {
+                "address": "0xEFE51fD602A358E3906cC12184099f040aE1e43F",
+                "selectors": [
+                    "0x20954d21",
+                    "0x396e5987",
+                    "0xa1d17941",
+                    "0x811eed42",
+                    "0xb91b4303",
+                    "0x088fafdb"
+                ]
+            },
+            "ERC721Holder": {
+                "address": "0x89701AA4Feb42224eeAA5e9e592400FBc2dB4069",
+                "selectors": [
+                    "0x150b7a02"
+                ]
+            },
+            "DeviceDefinitionController": {
+                "address": "0x3289b5AcdD140BeDab63b1F911e70720395cAC0f",
+                "selectors": [
+                    "0x66df322e"
                 ]
             }
         },
@@ -591,6 +630,8 @@
             "StreamrConfigurator": {
                 "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
                 "selectors": [
+                    "0x282eb387",
+                    "0x11d679c9",
                     "0x9e594424",
                     "0x0c3cac3b"
                 ]
@@ -625,42 +666,66 @@
                     "0x415c2d96",
                     "0x1c0c6e51"
                 ]
+            },
+            "DeviceDefinitionTable": {
+                "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "selectors": [
+                    "0x20954d21",
+                    "0x396e5987",
+                    "0xa1d17941",
+                    "0x0ce801ab",
+                    "0x53e7070b",
+                    "0x6928118b",
+                    "0x088fafdb"
+                ]
+            },
+            "ERC721Holder": {
+                "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+                "selectors": [
+                    "0x150b7a02"
+                ]
+            },
+            "DeviceDefinitionController": {
+                "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+                "selectors": [
+                    "0x66df322e"
+                ]
             }
         },
         "nfts": {
             "ManufacturerId": {
-                "proxy": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
-                "implementation": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c"
+                "proxy": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+                "implementation": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d"
             },
             "IntegrationId": {
-                "proxy": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1",
-                "implementation": "0x59b670e9fA9D0A427751Af201D676719a970857b"
+                "proxy": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
+                "implementation": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1"
             },
             "VehicleId": {
-                "proxy": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
-                "implementation": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44"
+                "proxy": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+                "implementation": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
             },
             "AftermarketDeviceId": {
-                "proxy": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
-                "implementation": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319"
+                "proxy": "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
+                "implementation": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F"
             },
             "SyntheticDeviceId": {
-                "proxy": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
-                "implementation": "0x09635F643e140090A9A8Dcd712eD6285858ceBef"
+                "proxy": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
+                "implementation": "0xc5a5C42992dECbae36851359345FE25997F5C42d"
             }
         },
         "misc": {
             "DimoToken": {
-                "proxy": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
+                "proxy": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
                 "implementation": ""
             },
             "Stake": {
-                "proxy": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
+                "proxy": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
                 "implementation": ""
             },
             "DimoForwarder": {
-                "proxy": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
-                "implementation": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE"
+                "proxy": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+                "implementation": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed"
             },
             "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
             "Kms": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
@@ -735,6 +800,18 @@
                 "selectors": []
             },
             "Multicall": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionTable": {
+                "address": "",
+                "selectors": []
+            },
+            "ERC721Holder": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionController": {
                 "address": "",
                 "selectors": []
             }

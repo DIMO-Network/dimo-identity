@@ -446,7 +446,7 @@
         "nfts": {
             "ManufacturerId": {
                 "proxy": "0x3082cBCb476443923ff4d915Acc31217c9c3C6D5",
-                "implementation": "0xE792a7bfF15FF6E5c1169Ef1253f338a4915dcEc"
+                "implementation": "0x6e299F0B64A8202043d23368d65236140474406e"
             },
             "IntegrationId": {
                 "proxy": "0x44f2d6184E4F57b5d358d7D311c6909e2BFb1fdc",

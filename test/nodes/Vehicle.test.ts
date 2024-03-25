@@ -1092,6 +1092,367 @@ describe('Vehicle', function () {
     });
   });
 
+  describe('openMintVehicleSign', () => {
+    let signature: string;
+    before(async () => {
+      signature = await signMessage({
+        _signer: user1,
+        _primaryType: 'OpenMintVehicleSign',
+        _verifyingContract: await vehicleInstance.getAddress(),
+        message: {
+          manufacturerNode: '1',
+          attributes: C.mockVehicleAttributes,
+          infos: C.mockVehicleInfos,
+          nonce: 0
+        }
+      });
+    });
+
+    context('Error handling', () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
+        await expect(
+          vehicleInstance
+            .connect(user1)
+            .openMintVehicleSign(
+              99,
+              C.mockVehicleAttributeInfoPairs,
+              1,
+              signature
+            )
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if attribute is not whitelisted', async () => {
+        await expect(
+          vehicleInstance
+            .connect(user1)
+            .openMintVehicleSign(
+              1,
+              C.mockVehicleAttributeInfoPairsNotWhitelisted,
+              0,
+              signature
+            )
+        ).to.be.revertedWithCustomError(
+          vehicleInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+      it('Should revert if nonce is invalid', async () => {
+        await expect(
+          vehicleInstance
+            .connect(user1)
+            .openMintVehicleSign(
+              1,
+              C.mockVehicleAttributeInfoPairs,
+              99,
+              signature
+            )
+        ).to.be.revertedWithCustomError(
+          vehicleInstance,
+          'InvalidAccountNonce'
+        ).withArgs(C.OPEN_MINT_VEHICLE_TYPEHASH, user1.address, 0);
+      });
+
+      context('Wrong signature', () => {
+        it('Should revert if domain name is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _domainName: 'Wrong domain',
+            _primaryType: 'OpenMintVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              attributes: C.mockVehicleAttributes,
+              infos: C.mockVehicleInfos,
+              nonce: 0
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(user1)
+              .openMintVehicleSign(
+                1,
+                C.mockVehicleAttributeInfoPairs,
+                0,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if domain version is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _domainVersion: '99',
+            _primaryType: 'OpenMintVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              attributes: C.mockVehicleAttributes,
+              infos: C.mockVehicleInfos,
+              nonce: 0
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(user1)
+              .openMintVehicleSign(
+                1,
+                C.mockVehicleAttributeInfoPairs,
+                0,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if domain chain ID is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _chainId: 99,
+            _primaryType: 'OpenMintVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              attributes: C.mockVehicleAttributes,
+              infos: C.mockVehicleInfos,
+              nonce: 0
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(user1)
+              .openMintVehicleSign(
+                1,
+                C.mockVehicleAttributeInfoPairs,
+                0,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if manufactuer node is incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _chainId: 99,
+            _primaryType: 'OpenMintVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '99',
+              attributes: C.mockVehicleAttributes,
+              infos: C.mockVehicleInfos,
+              nonce: 0
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(user1)
+              .openMintVehicleSign(
+                1,
+                C.mockVehicleAttributeInfoPairs,
+                0,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if attributes are incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _chainId: 99,
+            _primaryType: 'OpenMintVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              attributes: C.mockVehicleAttributes.slice(1),
+              infos: C.mockVehicleInfos,
+              nonce: 0
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(user1)
+              .openMintVehicleSign(
+                1,
+                C.mockVehicleAttributeInfoPairs,
+                0,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if infos are incorrect', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _chainId: 99,
+            _primaryType: 'OpenMintVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              attributes: C.mockVehicleAttributes,
+              infos: C.mockVehicleInfosWrongSize,
+              nonce: 0
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(user1)
+              .openMintVehicleSign(
+                1,
+                C.mockVehicleAttributeInfoPairs,
+                0,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if owner does not match signer', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'OpenMintVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              attributes: C.mockVehicleAttributes,
+              infos: C.mockVehicleInfos,
+              nonce: 0
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(user2)
+              .openMintVehicleSign(
+                1,
+                C.mockVehicleAttributeInfoPairs,
+                0,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'OpenMintVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              attributes: C.mockVehicleAttributes,
+              infos: C.mockVehicleInfos,
+              nonce: 99
+            }
+          });
+
+          await expect(
+            vehicleInstance
+              .connect(user1)
+              .openMintVehicleSign(
+                1,
+                C.mockVehicleAttributeInfoPairs,
+                0,
+                invalidSignature
+              )
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(user1)
+          .openMintVehicleSign(
+            1,            
+            C.mockVehicleAttributeInfoPairs,
+            0,
+            signature
+          );
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set node owner', async () => {
+        await vehicleInstance
+          .connect(user1)
+          .openMintVehicleSign(
+            1,
+            C.mockVehicleAttributeInfoPairs,
+            0,
+            signature
+          );
+
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should correctly set infos', async () => {
+        await vehicleInstance
+          .connect(user1)
+          .openMintVehicleSign(
+            1,            
+            C.mockVehicleAttributeInfoPairs,
+            0,
+            signature
+          );
+
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute1
+          )
+        ).to.be.equal(C.mockVehicleInfo1);
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute2
+          )
+        ).to.be.equal(C.mockVehicleInfo2);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMinted event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(user1)
+            .openMintVehicleSign(
+              1,
+              C.mockVehicleAttributeInfoPairs,
+              0,
+              signature
+            )
+        )
+          .to.emit(vehicleInstance, 'VehicleNodeMinted')
+          .withArgs(1, 1, user1.address);
+      });
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(user1)
+            .openMintVehicleSign(
+              1,
+              C.mockVehicleAttributeInfoPairs,
+              0,
+              signature
+            )
+        )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[0].attribute,
+            C.mockVehicleAttributeInfoPairs[0].info
+          )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[1].attribute,
+            C.mockVehicleAttributeInfoPairs[1].info
+          );
+      });
+    });
+  });
+
   describe('burnVehicleSign', () => {
     let burnVehicleSig1: string;
     let burnVehicleSig2: string;

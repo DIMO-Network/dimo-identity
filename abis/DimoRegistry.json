@@ -224,6 +224,98 @@
     {
         "inputs": [
             {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            }
+        ],
+        "name": "getRoleAdmin",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "grantRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "hasRole",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            }
+        ],
+        "name": "renounceRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "revokeRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256",
                 "name": "id",
                 "type": "uint256"
@@ -694,98 +786,6 @@
     {
         "inputs": [
             {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            }
-        ],
-        "name": "getRoleAdmin",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            }
-        ],
-        "name": "grantRole",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            }
-        ],
-        "name": "hasRole",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            }
-        ],
-        "name": "renounceRole",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            }
-        ],
-        "name": "revokeRole",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "string",
                 "name": "name",
                 "type": "string"
@@ -799,6 +799,30 @@
         "name": "initialize",
         "outputs": [],
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "typehash",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "nonces",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -2634,6 +2658,27 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "typehash",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "currentNonce",
+                "type": "uint256"
+            }
+        ],
+        "name": "InvalidAccountNonce",
+        "type": "error"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -2850,6 +2895,46 @@
             }
         ],
         "name": "mintVehicleWithDeviceDefinitionSign",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "attribute",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "info",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct AttributeInfoPair[]",
+                "name": "attrInfo",
+                "type": "tuple[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+            }
+        ],
+        "name": "openMintVehicleSign",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

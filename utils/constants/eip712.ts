@@ -1,3 +1,5 @@
+import { ethers } from 'hardhat';
+
 import { TypedData } from '../types';
 
 export const defaultDomainName = 'DIMO';
@@ -15,6 +17,12 @@ export const schemaBase: TypedData = {
       { name: 'owner', type: 'address' },
       { name: 'attributes', type: 'string[]' },
       { name: 'infos', type: 'string[]' }
+    ],
+    OpenMintVehicleSign: [
+      { name: 'manufacturerNode', type: 'uint256' },
+      { name: 'attributes', type: 'string[]' },
+      { name: 'infos', type: 'string[]' },
+      { name: 'nonce', type: 'uint256' }
     ],
     ClaimAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
@@ -48,3 +56,7 @@ export const schemaBase: TypedData = {
   domain: {},
   message: {}
 };
+
+export const OPEN_MINT_VEHICLE_TYPEHASH = ethers.keccak256(
+  ethers.toUtf8Bytes('OpenMintVehicleSign(uint256 manufacturerNode,string[] attributes,string[] infos,uint256 nonce)')
+);

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./VehicleInternal.sol";
+import "../../nonces/NoncesInternal.sol";
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
@@ -18,7 +19,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
  * @title Vehicle
  * @notice Contract that represents the Vehicle node
  */
-contract Vehicle is AccessControlInternal, VehicleInternal {
+contract Vehicle is AccessControlInternal, VehicleInternal, NoncesInternal {
     bytes32 private constant BURN_TYPEHASH =
         keccak256("BurnVehicleSign(uint256 vehicleNode)");
 
@@ -238,6 +239,55 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
             revert InvalidOwnerSignature();
+    }
+
+    /// TODO Documentation
+    function openMintVehicleSign(
+        uint256 manufacturerNode,
+        AttributeInfoPair[] calldata attrInfo,
+        uint256 nonce,
+        bytes calldata signature
+    ) external {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(msg.sender);
+
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, msg.sender);
+
+        ns
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+
+        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
+            newTokenId,
+            attrInfo
+        );
+
+        bytes32 message = keccak256(
+            abi.encode(
+                OPEN_MINT_VEHICLE_TYPEHASH,
+                manufacturerNode,
+                attributesHash,
+                infosHash,
+                _useCheckedNonce(OPEN_MINT_VEHICLE_TYPEHASH, msg.sender, nonce)
+            )
+        );
+
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                msg.sender,
+                message,
+                signature
+            )
+        ) revert InvalidOwnerSignature();
     }
 
     /**

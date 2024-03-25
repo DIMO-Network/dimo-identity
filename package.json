@@ -6,7 +6,8 @@
   "scripts": {
     "build": "npx hardhat clean && npx hardhat compile && npx hardhat run scripts/abiGenerator.ts && npx hardhat run scripts/listSelectors.ts",
     "test": "npx hardhat test --network localhost",
-    "test-parallel": "npx hardhat test --parallel",
+    "test-parallel": "npx hardhat test --parallel ./test/NFTs/* ./test/nodes/* ./test/streamr/* ./test/*.test.ts",
+    "test-tableland": "npx hardhat test ./test/tableland/* --network localhost  ",
     "lint": "npm run lint:ts && npm run lint:sol",
     "lint:ts": "npx eslint . --ext .ts",
     "lint:ts:fix": "npx eslint . '**/*.ts' --fix",

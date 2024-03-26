@@ -2658,27 +2658,6 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "typehash",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "currentNonce",
-                "type": "uint256"
-            }
-        ],
-        "name": "InvalidAccountNonce",
-        "type": "error"
-    },
-    {
         "anonymous": false,
         "inputs": [
             {
@@ -2907,6 +2886,11 @@
                 "type": "uint256"
             },
             {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
                 "components": [
                     {
                         "internalType": "string",
@@ -2922,11 +2906,6 @@
                 "internalType": "struct AttributeInfoPair[]",
                 "name": "attrInfo",
                 "type": "tuple[]"
-            },
-            {
-                "internalType": "uint256",
-                "name": "nonce",
-                "type": "uint256"
             },
             {
                 "internalType": "bytes",

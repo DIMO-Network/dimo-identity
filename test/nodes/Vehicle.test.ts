@@ -1115,8 +1115,8 @@ describe('Vehicle', function () {
             .connect(user1)
             .openMintVehicleSign(
               99,
+              user1.address,
               C.mockVehicleAttributeInfoPairs,
-              1,
               signature
             )
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
@@ -1128,29 +1128,14 @@ describe('Vehicle', function () {
             .connect(user1)
             .openMintVehicleSign(
               1,
+              user1.address,
               C.mockVehicleAttributeInfoPairsNotWhitelisted,
-              0,
               signature
             )
         ).to.be.revertedWithCustomError(
           vehicleInstance,
           'AttributeNotWhitelisted'
         ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
-      });
-      it('Should revert if nonce is invalid', async () => {
-        await expect(
-          vehicleInstance
-            .connect(user1)
-            .openMintVehicleSign(
-              1,
-              C.mockVehicleAttributeInfoPairs,
-              99,
-              signature
-            )
-        ).to.be.revertedWithCustomError(
-          vehicleInstance,
-          'InvalidAccountNonce'
-        ).withArgs(C.OPEN_MINT_VEHICLE_TYPEHASH, user1.address, 0);
       });
 
       context('Wrong signature', () => {
@@ -1173,8 +1158,8 @@ describe('Vehicle', function () {
               .connect(user1)
               .openMintVehicleSign(
                 1,
+                user1.address,
                 C.mockVehicleAttributeInfoPairs,
-                0,
                 invalidSignature
               )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
@@ -1198,8 +1183,8 @@ describe('Vehicle', function () {
               .connect(user1)
               .openMintVehicleSign(
                 1,
+                user1.address,
                 C.mockVehicleAttributeInfoPairs,
-                0,
                 invalidSignature
               )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
@@ -1223,8 +1208,8 @@ describe('Vehicle', function () {
               .connect(user1)
               .openMintVehicleSign(
                 1,
+                user1.address,
                 C.mockVehicleAttributeInfoPairs,
-                0,
                 invalidSignature
               )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
@@ -1248,8 +1233,8 @@ describe('Vehicle', function () {
               .connect(user1)
               .openMintVehicleSign(
                 1,
+                user1.address,
                 C.mockVehicleAttributeInfoPairs,
-                0,
                 invalidSignature
               )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
@@ -1273,8 +1258,8 @@ describe('Vehicle', function () {
               .connect(user1)
               .openMintVehicleSign(
                 1,
+                user1.address,
                 C.mockVehicleAttributeInfoPairs,
-                0,
                 invalidSignature
               )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
@@ -1298,32 +1283,8 @@ describe('Vehicle', function () {
               .connect(user1)
               .openMintVehicleSign(
                 1,
+                user1.address,
                 C.mockVehicleAttributeInfoPairs,
-                0,
-                invalidSignature
-              )
-          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
-        });
-        it('Should revert if owner does not match signer', async () => {
-          const invalidSignature = await signMessage({
-            _signer: user1,
-            _primaryType: 'OpenMintVehicleSign',
-            _verifyingContract: await vehicleInstance.getAddress(),
-            message: {
-              manufacturerNode: '1',
-              attributes: C.mockVehicleAttributes,
-              infos: C.mockVehicleInfos,
-              nonce: 0
-            }
-          });
-
-          await expect(
-            vehicleInstance
-              .connect(user2)
-              .openMintVehicleSign(
-                1,
-                C.mockVehicleAttributeInfoPairs,
-                0,
                 invalidSignature
               )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
@@ -1346,8 +1307,8 @@ describe('Vehicle', function () {
               .connect(user1)
               .openMintVehicleSign(
                 1,
+                user1.address,
                 C.mockVehicleAttributeInfoPairs,
-                0,
                 invalidSignature
               )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
@@ -1361,8 +1322,8 @@ describe('Vehicle', function () {
           .connect(user1)
           .openMintVehicleSign(
             1,            
+            user1.address,
             C.mockVehicleAttributeInfoPairs,
-            0,
             signature
           );
 
@@ -1377,8 +1338,8 @@ describe('Vehicle', function () {
           .connect(user1)
           .openMintVehicleSign(
             1,
+            user1.address,
             C.mockVehicleAttributeInfoPairs,
-            0,
             signature
           );
 
@@ -1389,8 +1350,8 @@ describe('Vehicle', function () {
           .connect(user1)
           .openMintVehicleSign(
             1,            
+            user1.address,
             C.mockVehicleAttributeInfoPairs,
-            0,
             signature
           );
 
@@ -1418,8 +1379,8 @@ describe('Vehicle', function () {
             .connect(user1)
             .openMintVehicleSign(
               1,
+              user1.address,
               C.mockVehicleAttributeInfoPairs,
-              0,
               signature
             )
         )
@@ -1432,8 +1393,8 @@ describe('Vehicle', function () {
             .connect(user1)
             .openMintVehicleSign(
               1,
+              user1.address,
               C.mockVehicleAttributeInfoPairs,
-              0,
               signature
             )
         )

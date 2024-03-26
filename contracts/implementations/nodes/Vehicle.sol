@@ -244,11 +244,10 @@ contract Vehicle is AccessControlInternal, VehicleInternal, NoncesInternal {
     /// TODO Documentation
     function openMintVehicleSign(
         uint256 manufacturerNode,
+        address owner,
         AttributeInfoPair[] calldata attrInfo,
-        uint256 nonce,
         bytes calldata signature
     ) external {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
@@ -259,11 +258,12 @@ contract Vehicle is AccessControlInternal, VehicleInternal, NoncesInternal {
             )
         ) revert InvalidParentNode(manufacturerNode);
 
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(msg.sender);
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
-        emit VehicleNodeMinted(manufacturerNode, newTokenId, msg.sender);
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
-        ns
+        NodesStorage
+        .getStorage()
         .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
 
         (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
@@ -277,17 +277,12 @@ contract Vehicle is AccessControlInternal, VehicleInternal, NoncesInternal {
                 manufacturerNode,
                 attributesHash,
                 infosHash,
-                _useCheckedNonce(OPEN_MINT_VEHICLE_TYPEHASH, msg.sender, nonce)
+                _useNonce(OPEN_MINT_VEHICLE_TYPEHASH, owner)
             )
         );
 
-        if (
-            !Eip712CheckerInternal._verifySignature(
-                msg.sender,
-                message,
-                signature
-            )
-        ) revert InvalidOwnerSignature();
+        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
+            revert InvalidOwnerSignature();
     }
 
     /**

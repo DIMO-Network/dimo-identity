@@ -49,6 +49,8 @@ main([
   'contracts/implementations/BaseDataURI.sol:BaseDataURI',
   'contracts/implementations/streamr/StreamrConfigurator.sol:StreamrConfigurator',
   'contracts/implementations/streamr/VehicleStream.sol:VehicleStream',
+  'contracts/implementations/tableland/DeviceDefinitionTable.sol:DeviceDefinitionTable',
+  'contracts/implementations/tableland/DeviceDefinitionController.sol:DeviceDefinitionController',
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

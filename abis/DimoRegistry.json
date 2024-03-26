@@ -3642,5 +3642,355 @@
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "chainid",
+                "type": "uint256"
+            }
+        ],
+        "name": "ChainNotSupported",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "InvalidManufacturerId",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            }
+        ],
+        "name": "TableAlreadyExists",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "tableId",
+                "type": "uint256"
+            }
+        ],
+        "name": "TableDoesNotExist",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "caller",
+                "type": "address"
+            }
+        ],
+        "name": "Unauthorized",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "tableId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "id",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "year",
+                "type": "uint256"
+            }
+        ],
+        "name": "DeviceDefinitionInserted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "tableOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "tableId",
+                "type": "uint256"
+            }
+        ],
+        "name": "DeviceDefinitionTableCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "tableId",
+                "type": "uint256"
+            }
+        ],
+        "name": "ManufacturerTableSet",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "tableOwner",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            }
+        ],
+        "name": "createDeviceDefinitionTable",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getDeviceDefinitionTableId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "tableId",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getDeviceDefinitionTableName",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "tableName",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "id",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "model",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "year",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "metadata",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "ksuid",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct DeviceDefinitionInput",
+                "name": "data",
+                "type": "tuple"
+            }
+        ],
+        "name": "insertDeviceDefinition",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "id",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "model",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "year",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "metadata",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "ksuid",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct DeviceDefinitionInput[]",
+                "name": "data",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "insertDeviceDefinitionBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tableId",
+                "type": "uint256"
+            }
+        ],
+        "name": "setDeviceDefinitionTable",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "caller",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "getPolicy",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "bool",
+                        "name": "allowInsert",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "allowUpdate",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "allowDelete",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "whereClause",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "withCheck",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string[]",
+                        "name": "updatableColumns",
+                        "type": "string[]"
+                    }
+                ],
+                "internalType": "struct TablelandPolicy",
+                "name": "policy",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "payable",
+        "type": "function"
     }
 ]

@@ -33,9 +33,10 @@ async function main(paths: string[]) {
 
 main([
   'contracts/DIMORegistry.sol:DIMORegistry',
-  'contracts/dev/DevAdmin.sol:DevAdmin',
   'contracts/access/DimoAccessControl.sol:DimoAccessControl',
+  'contracts/dev/DevAdmin.sol:DevAdmin',
   'contracts/Eip712/Eip712Checker.sol:Eip712Checker',
+  'contracts/nonces/Nonces.sol:Nonces',
   'contracts/shared/Multicall.sol:Multicall',
   'contracts/implementations/AdLicenseValidator/AdLicenseValidator.sol:AdLicenseValidator',
   'contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice',
@@ -48,7 +49,7 @@ main([
   'contracts/implementations/MultipleMinter.sol:MultipleMinter',
   'contracts/implementations/BaseDataURI.sol:BaseDataURI',
   'contracts/implementations/streamr/StreamrConfigurator.sol:StreamrConfigurator',
-  'contracts/implementations/streamr/VehicleStream.sol:VehicleStream',
+  'contracts/implementations/streamr/VehicleStream.sol:VehicleStream'
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

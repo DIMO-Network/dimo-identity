@@ -427,11 +427,10 @@ contract VehicleStream is AccessControlInternal {
                 IStreamRegistry.PermissionType.Subscribe
             );
         } else {
-            streamRegistry.setExpirationTime(
+            streamRegistry.grantPermission(
                 streamId,
                 subscriber,
-                IStreamRegistry.PermissionType.Subscribe,
-                expirationTime
+                IStreamRegistry.PermissionType.Subscribe
             );
             streamRegistry.setExpirationTime(
                 streamId,

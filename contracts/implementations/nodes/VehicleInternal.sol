@@ -14,7 +14,7 @@ import "../../shared/Errors.sol";
 contract VehicleInternal {
     bytes32 internal constant MINT_VEHICLE_TYPEHASH =
         keccak256(
-            "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"
+            "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos,uint256 nonce)"
         );
     bytes32 internal constant OPEN_MINT_VEHICLE_TYPEHASH =
         keccak256(

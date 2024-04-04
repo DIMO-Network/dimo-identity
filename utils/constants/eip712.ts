@@ -16,7 +16,8 @@ export const schemaBase: TypedData = {
       { name: 'manufacturerNode', type: 'uint256' },
       { name: 'owner', type: 'address' },
       { name: 'attributes', type: 'string[]' },
-      { name: 'infos', type: 'string[]' }
+      { name: 'infos', type: 'string[]' },
+      { name: 'nonce', type: 'uint256' }
     ],
     OpenMintVehicleSign: [
       { name: 'manufacturerNode', type: 'uint256' },

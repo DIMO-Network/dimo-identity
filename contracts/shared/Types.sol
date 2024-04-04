@@ -38,6 +38,13 @@ struct MintSyntheticDeviceInput {
     AttributeInfoPair[] attrInfoPairs;
 }
 
+struct MintVehicleInput {
+    uint256 manufacturerNode;
+    address owner;
+    AttributeInfoPair[] attrInfo;
+    bytes signature;
+}
+
 struct MintVehicleAndSdInput {
     uint256 manufacturerNode;
     address owner;

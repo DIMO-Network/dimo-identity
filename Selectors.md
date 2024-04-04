@@ -322,7 +322,7 @@
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
 | 0x3da44e56 | mintVehicle(uint256,address,(string,string)[]) |
-| 0x1b1a82c8 | mintVehicleSign(uint256,address,(string,string)[],bytes) |
+| 0x9c70326b | mintVehicleSign((uint256,address,(string,string)[],bytes)) |
 | 0xf8ddeada | mintVehicleWithDeviceDefinition(uint256,address,string) |
 | 0xd3b47405 | mintVehicleWithDeviceDefinitionSign(uint256,address,string,bytes) |
 | 0x35eaf68d | openMintVehicleSign(uint256,address,(string,string)[],bytes) |

@@ -27,6 +27,7 @@ import {
   createSnapshot,
   revertToSnapshot,
   signMessage,
+  MintVehicleInput,
   C
 } from '../../utils';
 
@@ -100,7 +101,8 @@ describe('Vehicle', function () {
         'AftermarketDevice',
         'SyntheticDevice',
         'AdLicenseValidator',
-        'Mapper'
+        'Mapper',
+        'Nonces'
       ],
       nfts: [
         'ManufacturerId',
@@ -760,6 +762,9 @@ describe('Vehicle', function () {
 
   describe('mintVehicleSign', () => {
     let signature: string;
+    let correctMintInput: MintVehicleInput;
+    let incorrectMintInput: MintVehicleInput;
+    
     before(async () => {
       signature = await signMessage({
         _signer: user1,
@@ -769,50 +774,49 @@ describe('Vehicle', function () {
           manufacturerNode: '1',
           owner: user1.address,
           attributes: C.mockVehicleAttributes,
-          infos: C.mockVehicleInfos
+          infos: C.mockVehicleInfos,
+          nonce: 0
         }
       });
+
+      correctMintInput = {
+        manufacturerNode: '1',
+        owner: user1.address,
+        attrInfo: C.mockVehicleAttributeInfoPairs,
+        signature: signature
+      }
     });
 
     context('Error handling', () => {
+      beforeEach(() => {
+        incorrectMintInput = { ...correctMintInput };
+      });
+
       it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
         await expect(
           vehicleInstance
             .connect(nonAdmin)
-            .mintVehicleSign(
-              1,
-              user1.address,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
+            .mintVehicleSign(correctMintInput)
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_ROLE
           }`
         );
       });
       it('Should revert if parent node is not a manufacturer node', async () => {
+        incorrectMintInput.manufacturerNode = '99';
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicleSign(
-              99,
-              user1.address,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
+            .mintVehicleSign(incorrectMintInput)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
           .withArgs(99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
+        incorrectMintInput.attrInfo = C.mockVehicleAttributeInfoPairsNotWhitelisted;
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicleSign(
-              1,
-              user1.address,
-              C.mockVehicleAttributeInfoPairsNotWhitelisted,
-              signature
-            )
+            .mintVehicleSign(incorrectMintInput)
         ).to.be.revertedWithCustomError(
           vehicleInstance,
           'AttributeNotWhitelisted'
@@ -830,19 +834,16 @@ describe('Vehicle', function () {
               manufacturerNode: '1',
               owner: user1.address,
               attributes: C.mockVehicleAttributes,
-              infos: C.mockVehicleInfos
+              infos: C.mockVehicleInfos,
+              nonce: 0
             }
           });
+          incorrectMintInput.signature = invalidSignature;
 
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleSign(
-                1,
-                user1.address,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+              .mintVehicleSign(incorrectMintInput)
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if domain version is incorrect', async () => {
@@ -855,19 +856,16 @@ describe('Vehicle', function () {
               manufacturerNode: '1',
               owner: user1.address,
               attributes: C.mockVehicleAttributes,
-              infos: C.mockVehicleInfos
+              infos: C.mockVehicleInfos,
+              nonce: 0
             }
           });
+          incorrectMintInput.signature = invalidSignature;
 
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleSign(
-                1,
-                user1.address,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+              .mintVehicleSign(incorrectMintInput)
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
@@ -880,19 +878,16 @@ describe('Vehicle', function () {
               manufacturerNode: '1',
               owner: user1.address,
               attributes: C.mockVehicleAttributes,
-              infos: C.mockVehicleInfos
+              infos: C.mockVehicleInfos,
+              nonce: 0
             }
           });
+          incorrectMintInput.signature = invalidSignature;
 
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleSign(
-                1,
-                user1.address,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+              .mintVehicleSign(incorrectMintInput)
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if manufactuer node is incorrect', async () => {
@@ -904,19 +899,16 @@ describe('Vehicle', function () {
               manufacturerNode: '99',
               owner: user1.address,
               attributes: C.mockVehicleAttributes,
-              infos: C.mockVehicleInfos
+              infos: C.mockVehicleInfos,
+              nonce: 0
             }
           });
+          incorrectMintInput.signature = invalidSignature;
 
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleSign(
-                1,
-                user1.address,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+              .mintVehicleSign(incorrectMintInput)
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if attributes are incorrect', async () => {
@@ -928,19 +920,16 @@ describe('Vehicle', function () {
               manufacturerNode: '1',
               owner: user1.address,
               attributes: C.mockVehicleAttributes.slice(1),
-              infos: C.mockVehicleInfos
+              infos: C.mockVehicleInfos,
+              nonce: 0
             }
           });
+          incorrectMintInput.signature = invalidSignature;
 
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleSign(
-                1,
-                user1.address,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+              .mintVehicleSign(incorrectMintInput)
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if infos are incorrect', async () => {
@@ -952,19 +941,16 @@ describe('Vehicle', function () {
               manufacturerNode: '1',
               owner: user1.address,
               attributes: C.mockVehicleAttributes,
-              infos: C.mockVehicleInfosWrongSize
+              infos: C.mockVehicleInfosWrongSize,
+              nonce: 0
             }
           });
+          incorrectMintInput.signature = invalidSignature;
 
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleSign(
-                1,
-                user1.address,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+              .mintVehicleSign(incorrectMintInput)
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if owner does not match signer', async () => {
@@ -976,19 +962,37 @@ describe('Vehicle', function () {
               manufacturerNode: '1',
               owner: user2.address,
               attributes: C.mockVehicleAttributes,
-              infos: C.mockVehicleInfos
+              infos: C.mockVehicleInfos,
+              nonce: 0
             }
           });
+          incorrectMintInput.signature = invalidSignature;
 
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleSign(
-                1,
-                user1.address,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+              .mintVehicleSign(incorrectMintInput)
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'MintVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              manufacturerNode: '1',
+              owner: user2.address,
+              attributes: C.mockVehicleAttributes,
+              infos: C.mockVehicleInfos,
+              nonce: 99
+            }
+          });
+          incorrectMintInput.signature = invalidSignature;
+
+          await expect(
+            vehicleInstance
+              .connect(admin)
+              .mintVehicleSign(incorrectMintInput)
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
       });
@@ -998,12 +1002,7 @@ describe('Vehicle', function () {
       it('Should correctly set parent node', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicleSign(
-            1,
-            user1.address,
-            C.mockVehicleAttributeInfoPairs,
-            signature
-          );
+          .mintVehicleSign(correctMintInput);
 
         const parentNode = await nodesInstance.getParentNode(
           await vehicleIdInstance.getAddress(),
@@ -1014,24 +1013,14 @@ describe('Vehicle', function () {
       it('Should correctly set node owner', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicleSign(
-            1,
-            user1.address,
-            C.mockVehicleAttributeInfoPairs,
-            signature
-          );
+          .mintVehicleSign(correctMintInput);
 
         expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should correctly set infos', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicleSign(
-            1,
-            user1.address,
-            C.mockVehicleAttributeInfoPairs,
-            signature
-          );
+          .mintVehicleSign(correctMintInput);
 
         expect(
           await nodesInstance.getInfo(
@@ -1055,12 +1044,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicleSign(
-              1,
-              user1.address,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
+            .mintVehicleSign(correctMintInput)
         )
           .to.emit(vehicleInstance, 'VehicleNodeMinted')
           .withArgs(1, 1, user1.address);
@@ -1069,12 +1053,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicleSign(
-              1,
-              user1.address,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
+            .mintVehicleSign(correctMintInput)
         )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
           .withArgs(

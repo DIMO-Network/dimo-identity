@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./nodes/VehicleInternal.sol";
 import "./nodes/SyntheticDeviceInternal.sol";
+import "../nonces/NoncesInternal.sol";
 import "../interfaces/INFT.sol";
 import "../Eip712/Eip712CheckerInternal.sol";
 import "../libraries/NodesStorage.sol";
@@ -22,7 +23,8 @@ error InvalidSdSignature();
 contract MultipleMinter is
     AccessControlInternal,
     VehicleInternal,
-    SyntheticDeviceInternal
+    SyntheticDeviceInternal,
+    NoncesInternal
 {
     bytes32 private constant MINT_VEHICLE_SD_TYPEHASH =
         keccak256("MintVehicleAndSdSign(uint256 integrationNode)");
@@ -44,8 +46,6 @@ contract MultipleMinter is
     function mintVehicleAndSdSign(
         MintVehicleAndSdInput calldata data
     ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
             .getStorage();
 
@@ -101,7 +101,8 @@ contract MultipleMinter is
                 data.manufacturerNode,
                 data.owner,
                 attributesHash,
-                infosHash
+                infosHash,
+                _useNonce(MINT_VEHICLE_TYPEHASH, data.owner)
             )
         );
 
@@ -130,18 +131,21 @@ contract MultipleMinter is
         // ----- END Synthetic Device mint and attributes -----
 
         // ----- Internal contract state change -----
-        ns.nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
             .manufacturerNode;
-
-        ns.nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
+        NodesStorage
+        .getStorage()
+        .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
             .integrationNode;
 
-        ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
-            newTokenIdVehicle
-        ] = newTokenIdDevice;
-        ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
-            newTokenIdDevice
-        ] = newTokenIdVehicle;
+        MapperStorage.getStorage().nodeLinks[vehicleIdProxyAddress][
+            sdIdProxyAddress
+        ][newTokenIdVehicle] = newTokenIdDevice;
+        MapperStorage.getStorage().nodeLinks[sdIdProxyAddress][
+            vehicleIdProxyAddress
+        ][newTokenIdDevice] = newTokenIdVehicle;
 
         sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;

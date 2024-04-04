@@ -2790,36 +2790,43 @@
     {
         "inputs": [
             {
-                "internalType": "uint256",
-                "name": "manufacturerNode",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
-            {
                 "components": [
                     {
-                        "internalType": "string",
-                        "name": "attribute",
-                        "type": "string"
+                        "internalType": "uint256",
+                        "name": "manufacturerNode",
+                        "type": "uint256"
                     },
                     {
-                        "internalType": "string",
-                        "name": "info",
-                        "type": "string"
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "attribute",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "info",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct AttributeInfoPair[]",
+                        "name": "attrInfo",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "signature",
+                        "type": "bytes"
                     }
                 ],
-                "internalType": "struct AttributeInfoPair[]",
-                "name": "attrInfo",
-                "type": "tuple[]"
-            },
-            {
-                "internalType": "bytes",
-                "name": "signature",
-                "type": "bytes"
+                "internalType": "struct MintVehicleInput",
+                "name": "data",
+                "type": "tuple"
             }
         ],
         "name": "mintVehicleSign",

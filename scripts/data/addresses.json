@@ -181,6 +181,10 @@
             "DeviceDefinitionController": {
                 "address": "",
                 "selectors": []
+            },
+            "Nonces": {
+                "address": "",
+                "selectors": []
             }
         },
         "nfts": {
@@ -441,6 +445,10 @@
                 "selectors": [
                     "0x66df322e"
                 ]
+            },
+            "Nonces": {
+                "address": "",
+                "selectors": []
             }
         },
         "nfts": {
@@ -690,6 +698,10 @@
                 "selectors": [
                     "0x66df322e"
                 ]
+            },
+            "Nonces": {
+                "address": "",
+                "selectors": []
             }
         },
         "nfts": {
@@ -812,6 +824,10 @@
                 "selectors": []
             },
             "DeviceDefinitionController": {
+                "address": "",
+                "selectors": []
+            },
+            "Nonces": {
                 "address": "",
                 "selectors": []
             }

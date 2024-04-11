@@ -243,6 +243,7 @@ async function deployDimoForwarder(
   return instances;
 }
 
+// Sets SyntheticDeviceId contract address after deployment NFTs deployment
 async function setupVehicleId(
   deployer: HardhatEthersSigner,
   networkName: string,
@@ -262,7 +263,7 @@ async function setupVehicleId(
       instances[networkName].nfts.SyntheticDeviceId.proxy,
     );
   console.log(
-    `Aftermarket Device ID ${instances[networkName].nfts.AftermarketDeviceId.proxy} set to Vehicle ID`,
+    `Synthetic Device ID ${instances[networkName].nfts.SyntheticDeviceId.proxy} set to Vehicle ID`,
   );
   console.log('\n----- Vehicle ID setup -----\n');
 }
@@ -621,6 +622,31 @@ async function grantRole(
   console.log(`----- ${role} role granted to ${address} -----\n`);
 }
 
+async function grantAllRoles(
+  deployer: HardhatEthersSigner,
+  address: string,
+  networkName: string,
+) {
+  const instances = getAddresses();
+
+  const accessControlInstance: DimoAccessControl = await ethers.getContractAt(
+    'DimoAccessControl',
+    instances[networkName].modules.DIMORegistry.address,
+  );
+
+  console.log(`\n----- Granting all reles to ${address} -----\n`);
+
+  for (const [roleName, role] of Object.entries(C.roles.modules)) {
+    await (
+      await accessControlInstance.connect(deployer).grantRole(role, address)
+    ).wait();
+
+    console.log(`${roleName}: ${role} role granted to ${address}`);
+  }
+
+  console.log(`\n----- All roles granted to ${address} -----\n`);
+}
+
 async function mintBatchManufacturers(
   deployer: HardhatEthersSigner,
   owner: string,
@@ -773,63 +799,65 @@ async function main() {
   const instancesWithSelectors = await addModules(deployer, networkName);
   writeAddresses(instancesWithSelectors, networkName);
 
-  if (networkName === 'hardhat' || networkName === 'localhost') {
-    const mockInstances = await buildMocks(
-      deployer,
-      mockFoundation,
-      mockKms,
-      networkName,
-    );
-    writeAddresses(mockInstances, networkName);
-  }
+  // if (networkName === 'hardhat' || networkName === 'localhost') {
+  //   const mockInstances = await buildMocks(
+  //     deployer,
+  //     mockFoundation,
+  //     mockKms,
+  //     networkName,
+  //   );
+  //   writeAddresses(mockInstances, networkName);
+  // }
 
   const instances = getAddresses();
 
-  await grantRole(deployer, C.roles.ADMIN_ROLE, deployer.address, networkName);
-  await grantRole(
-    deployer,
-    C.roles.modules.MINT_MANUFACTURER_ROLE,
-    deployer.address,
-    networkName,
-  );
-  await grantRole(
-    deployer,
-    C.roles.modules.MINT_INTEGRATION_ROLE,
-    deployer.address,
-    networkName,
-  );
-  await grantRole(
-    deployer,
-    C.roles.DEFAULT_ADMIN_ROLE,
-    instances[networkName].misc.Kms,
-    networkName,
-  );
-  await grantRole(
-    deployer,
-    C.roles.DEFAULT_ADMIN_ROLE,
-    instances[networkName].misc.Foundation,
-    networkName,
-  );
-  await grantRole(
-    deployer,
-    C.roles.ADMIN_ROLE,
-    instances[networkName].misc.Foundation,
-    networkName,
-  );
-  await setupRegistry(deployer, networkName);
-  await grantNftRoles(deployer, networkName);
-  await mintBatchManufacturers(
-    deployer,
-    instances[networkName].misc.Foundation,
-    networkName,
-  );
-  await mintBatchIntegrations(
-    deployer,
-    instances[networkName].misc.Foundation,
-    networkName,
-  );
+  await grantAllRoles(deployer, deployer.address, networkName);
 
-  await setupStreamr(deployer, networkName);
+  // await grantRole(deployer, C.roles.ADMIN_ROLE, deployer.address, networkName);
+  // await grantRole(
+  //   deployer,
+  //   C.roles.modules.MINT_MANUFACTURER_ROLE,
+  //   deployer.address,
+  //   networkName,
+  // );
+  // await grantRole(
+  //   deployer,
+  //   C.roles.modules.MINT_INTEGRATION_ROLE,
+  //   deployer.address,
+  //   networkName,
+  // );
+  // await grantRole(
+  //   deployer,
+  //   C.roles.DEFAULT_ADMIN_ROLE,
+  //   instances[networkName].misc.Kms,
+  //   networkName,
+  // );
+  // await grantRole(
+  //   deployer,
+  //   C.roles.DEFAULT_ADMIN_ROLE,
+  //   instances[networkName].misc.Foundation,
+  //   networkName,
+  // );
+  // await grantRole(
+  //   deployer,
+  //   C.roles.ADMIN_ROLE,
+  //   instances[networkName].misc.Foundation,
+  //   networkName,
+  // );
+  // await setupRegistry(deployer, networkName);
+  // await grantNftRoles(deployer, networkName);
+  // await mintBatchManufacturers(
+  //   deployer,
+  //   instances[networkName].misc.Foundation,
+  //   networkName,
+  // );
+  // await mintBatchIntegrations(
+  //   deployer,
+  //   instances[networkName].misc.Foundation,
+  //   networkName,
+  // );
+
+  // await setupStreamr(deployer, networkName);
 }
 
 main().catch((error) => {

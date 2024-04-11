@@ -484,6 +484,130 @@
             "DimoStreamrNode": "0x577f22f5369046B7eF09B6b01424fA860533d243"
         }
     },
+    "amoy": {
+        "modules": {
+            "DIMORegistry": {
+                "address": "",
+                "selectors": []
+            },
+            "Eip712Checker": {
+                "address": "",
+                "selectors": []
+            },
+            "DimoAccessControl": {
+                "address": "",
+                "selectors": []
+            },
+            "Nodes": {
+                "address": "",
+                "selectors": []
+            },
+            "BaseDataURI": {
+                "address": "",
+                "selectors": []
+            },
+            "Manufacturer": {
+                "address": "",
+                "selectors": []
+            },
+            "Integration": {
+                "address": "",
+                "selectors": []
+            },
+            "Vehicle": {
+                "address": "",
+                "selectors": []
+            },
+            "AftermarketDevice": {
+                "address": "",
+                "selectors": []
+            },
+            "SyntheticDevice": {
+                "address": "",
+                "selectors": []
+            },
+            "AdLicenseValidator": {
+                "address": "",
+                "selectors": []
+            },
+            "Mapper": {
+                "address": "",
+                "selectors": []
+            },
+            "MultipleMinter": {
+                "address": "",
+                "selectors": []
+            },
+            "StreamrConfigurator": {
+                "address": "",
+                "selectors": []
+            },
+            "VehicleStream": {
+                "address": "",
+                "selectors": []
+            },
+            "DevAdmin": {
+                "address": "",
+                "selectors": []
+            },
+            "Multicall": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionTable": {
+                "address": "",
+                "selectors": []
+            },
+            "ERC721Holder": {
+                "address": "",
+                "selectors": []
+            },
+            "DeviceDefinitionController": {
+                "address": "",
+                "selectors": []
+            }
+        },
+        "nfts": {
+            "ManufacturerId": {
+                "proxy": "",
+                "implementation": ""
+            },
+            "IntegrationId": {
+                "proxy": "",
+                "implementation": ""
+            },
+            "VehicleId": {
+                "proxy": "",
+                "implementation": ""
+            },
+            "AftermarketDeviceId": {
+                "proxy": "",
+                "implementation": ""
+            },
+            "SyntheticDeviceId": {
+                "proxy": "",
+                "implementation": ""
+            }
+        },
+        "misc": {
+            "DimoToken": {
+                "proxy": "0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10",
+                "implementation": "0x05e044bC83B1D2158dBd31ECAfC9210319fb742d"
+            },
+            "Stake": {
+                "proxy": "",
+                "implementation": ""
+            },
+            "DimoForwarder": {
+                "proxy": "",
+                "implementation": ""
+            },
+            "Foundation": "0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b",
+            "Kms": "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
+            "StreamRegistry": "",
+            "DimoStreamrNode": ""
+        }
+    },
     "hardhat": {
         "modules": {
             "DIMORegistry": {
@@ -736,123 +860,259 @@
     "localhost": {
         "modules": {
             "DIMORegistry": {
-                "address": "",
-                "selectors": []
+                "address": "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
+                "selectors": [
+                    "0x0df5b997",
+                    "0x9748a762",
+                    "0x06d1d2a1"
+                ]
             },
             "Eip712Checker": {
-                "address": "",
-                "selectors": []
+                "address": "0xB0D4afd8879eD9F52b28595d31B441D079B2Ca07",
+                "selectors": [
+                    "0x4cd88b76"
+                ]
             },
             "DimoAccessControl": {
-                "address": "",
-                "selectors": []
+                "address": "0x162A433068F51e18b7d13932F27e66a3f99E6890",
+                "selectors": [
+                    "0x248a9ca3",
+                    "0x2f2ff15d",
+                    "0x91d14854",
+                    "0x8bb9c5bf",
+                    "0xd547741f"
+                ]
             },
             "Nodes": {
-                "address": "",
-                "selectors": []
+                "address": "0x922D6956C99E12DFeB3224DEA977D0939758A1Fe",
+                "selectors": [
+                    "0xbc60a6ba",
+                    "0xdce2f860",
+                    "0x82087d24"
+                ]
             },
             "BaseDataURI": {
-                "address": "",
-                "selectors": []
+                "address": "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
+                "selectors": [
+                    "0xe324093f"
+                ]
             },
             "Manufacturer": {
-                "address": "",
-                "selectors": []
+                "address": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+                "selectors": [
+                    "0x50300a3f",
+                    "0xce55aab0",
+                    "0x9109b30b",
+                    "0xd9c27c40",
+                    "0xb429afeb",
+                    "0x456bf169",
+                    "0x5f36da6b",
+                    "0x9abb3000",
+                    "0x92eefe9b",
+                    "0xd159f49a",
+                    "0x63545ffa",
+                    "0x20d60248"
+                ]
             },
             "Integration": {
-                "address": "",
-                "selectors": []
+                "address": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
+                "selectors": [
+                    "0x044d2498",
+                    "0x714b7cfb",
+                    "0x123141bd",
+                    "0xbc8002f0",
+                    "0xe21f68b7",
+                    "0x603dd1db",
+                    "0xd6739004",
+                    "0x653af271",
+                    "0x106129aa",
+                    "0x636c1d1b",
+                    "0x8d7e6001",
+                    "0x440707b5"
+                ]
             },
             "Vehicle": {
-                "address": "",
-                "selectors": []
+                "address": "0x04C89607413713Ec9775E14b954286519d836FEf",
+                "selectors": [
+                    "0xf0d1a557",
+                    "0xd0b61156",
+                    "0xb7bded95",
+                    "0x3da44e56",
+                    "0x1b1a82c8",
+                    "0xf8ddeada",
+                    "0xd3b47405",
+                    "0x9bfae6da",
+                    "0xd9c3ae61",
+                    "0xea0e7d3a"
+                ]
             },
             "AftermarketDevice": {
-                "address": "",
-                "selectors": []
+                "address": "0x4C4a2f8c81640e47606d3fd77B353E87Ba015584",
+                "selectors": [
+                    "0x6111afa3",
+                    "0x60deec60",
+                    "0x89a841bb",
+                    "0x682a25e3",
+                    "0x9796cf22",
+                    "0xc6b36f2a",
+                    "0x7ba79a39",
+                    "0xb50df2f7",
+                    "0xcfe642dd",
+                    "0x9b3abd48",
+                    "0x9d0b139b",
+                    "0x4d49d82a",
+                    "0x4d13b709",
+                    "0xee4d9596",
+                    "0x3f65997a"
+                ]
             },
             "SyntheticDevice": {
-                "address": "",
-                "selectors": []
+                "address": "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
+                "selectors": [
+                    "0xe1f371df",
+                    "0x7c7c9978",
+                    "0x493b27e1",
+                    "0x795b910a",
+                    "0x261d982a",
+                    "0xc624e8a1",
+                    "0xecf452d7",
+                    "0x80430e0d"
+                ]
             },
             "AdLicenseValidator": {
-                "address": "",
-                "selectors": []
+                "address": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+                "selectors": [
+                    "0x46946743",
+                    "0x2390baa8",
+                    "0x5b6c1979",
+                    "0xf41377ca",
+                    "0x0fd21c17"
+                ]
             },
             "Mapper": {
-                "address": "",
-                "selectors": []
+                "address": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+                "selectors": [
+                    "0x0a6cef46",
+                    "0x112e62a2",
+                    "0xbd2b5568",
+                    "0xbebc0bfc"
+                ]
             },
             "MultipleMinter": {
-                "address": "",
-                "selectors": []
+                "address": "0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD",
+                "selectors": [
+                    "0xfb1a28e8",
+                    "0x191292f8"
+                ]
             },
             "StreamrConfigurator": {
-                "address": "",
-                "selectors": []
+                "address": "0x51A1ceB83B83F1985a81C295d1fF28Afef186E02",
+                "selectors": [
+                    "0x9e594424",
+                    "0x5f450e29",
+                    "0x0c3cac3b"
+                ]
             },
             "VehicleStream": {
-                "address": "",
-                "selectors": []
+                "address": "0x36b58F5C1969B7b6591D752ea6F5486D069010AB",
+                "selectors": [
+                    "0x497323c8",
+                    "0x180e469a",
+                    "0xa91ec798",
+                    "0xc8f11a06",
+                    "0x1882b263",
+                    "0xbb44bb75",
+                    "0x6f58f093",
+                    "0x37479f7e",
+                    "0xcd90df7e"
+                ]
             },
             "DevAdmin": {
-                "address": "",
-                "selectors": []
+                "address": "0x8198f5d8F8CfFE8f9C413d98a0A55aEB8ab9FbB7",
+                "selectors": [
+                    "0xd7376bae",
+                    "0x63dec203",
+                    "0x52878b61",
+                    "0x282eb387",
+                    "0x11d679c9",
+                    "0xb17b974b",
+                    "0x56936962",
+                    "0x3febacab",
+                    "0xf73a8f04",
+                    "0xff96b761",
+                    "0x5c129493",
+                    "0x71193956",
+                    "0x8c2ee9bb"
+                ]
             },
             "Multicall": {
-                "address": "",
-                "selectors": []
+                "address": "0x0355B7B8cb128fA5692729Ab3AAa199C1753f726",
+                "selectors": [
+                    "0x415c2d96",
+                    "0x1c0c6e51"
+                ]
             },
             "DeviceDefinitionTable": {
-                "address": "",
-                "selectors": []
+                "address": "0x202CCe504e04bEd6fC0521238dDf04Bc9E8E15aB",
+                "selectors": [
+                    "0x20954d21",
+                    "0x396e5987",
+                    "0xa1d17941",
+                    "0x811eed42",
+                    "0xb91b4303",
+                    "0x088fafdb"
+                ]
             },
             "ERC721Holder": {
-                "address": "",
-                "selectors": []
+                "address": "0xf4B146FbA71F41E0592668ffbF264F1D186b2Ca8",
+                "selectors": [
+                    "0x150b7a02"
+                ]
             },
             "DeviceDefinitionController": {
-                "address": "",
-                "selectors": []
+                "address": "0x172076E0166D1F9Cc711C77Adf8488051744980C",
+                "selectors": [
+                    "0x66df322e"
+                ]
             }
         },
         "nfts": {
             "ManufacturerId": {
-                "proxy": "",
-                "implementation": ""
+                "proxy": "0x2B0d36FACD61B71CC05ab8F3D2355ec3631C0dd5",
+                "implementation": "0xD84379CEae14AA33C123Af12424A37803F885889"
             },
             "IntegrationId": {
-                "proxy": "",
-                "implementation": ""
+                "proxy": "0x46b142DD1E924FAb83eCc3c08e4D46E82f005e0E",
+                "implementation": "0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d"
             },
             "VehicleId": {
-                "proxy": "",
-                "implementation": ""
+                "proxy": "0x1c85638e118b37167e9298c2268758e058DdfDA0",
+                "implementation": "0xC9a43158891282A2B1475592D5719c001986Aaec"
             },
             "AftermarketDeviceId": {
-                "proxy": "",
-                "implementation": ""
+                "proxy": "0x4C2F7092C2aE51D986bEFEe378e50BD4dB99C901",
+                "implementation": "0x367761085BF3C12e5DA2Df99AC6E1a824612b8fb"
             },
             "SyntheticDeviceId": {
-                "proxy": "",
-                "implementation": ""
+                "proxy": "0x49fd2BE640DB2910c2fAb69bB8531Ab6E76127ff",
+                "implementation": "0x7A9Ec1d04904907De0ED7b6839CcdD59c3716AC9"
             }
         },
         "misc": {
             "DimoToken": {
-                "proxy": "",
+                "proxy": "0x3347B4d90ebe72BeFb30444C9966B2B990aE9FcB",
                 "implementation": ""
             },
             "Stake": {
-                "proxy": "",
+                "proxy": "0x3155755b79aA083bd953911C92705B7aA82a18F9",
                 "implementation": ""
             },
             "DimoForwarder": {
-                "proxy": "",
-                "implementation": ""
+                "proxy": "0xBEc49fA140aCaA83533fB00A2BB19bDdd0290f25",
+                "implementation": "0x4EE6eCAD1c2Dae9f525404De8555724e3c35d07B"
             },
-            "Foundation": "",
-            "Kms": "",
+            "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "Kms": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
             "StreamRegistry": "",
             "DimoStreamrNode": ""
         }

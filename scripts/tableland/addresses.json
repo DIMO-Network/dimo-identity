@@ -2,7 +2,7 @@
     "localhost": {
         "modules": {
             "DIMORegistry": {
-                "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+                "address": "0xF97f395dAb1F8f5936d51770F277c42a86DC1B99",
                 "selectors": [
                     "0x0df5b997",
                     "0x9748a762",
@@ -10,13 +10,13 @@
                 ]
             },
             "Eip712Checker": {
-                "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+                "address": "0x0fC6E11087EaAC6c564856aBfA901CDAd69eF5a9",
                 "selectors": [
                     "0x4cd88b76"
                 ]
             },
             "DimoAccessControl": {
-                "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+                "address": "0x0f3519FF027eD7e934F2b1Fc0cd8fe3bc44c7310",
                 "selectors": [
                     "0x248a9ca3",
                     "0x2f2ff15d",
@@ -26,7 +26,7 @@
                 ]
             },
             "Nodes": {
-                "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+                "address": "0x7188450134eFbda4591D303dA02BE644Bb4B63Fb",
                 "selectors": [
                     "0xbc60a6ba",
                     "0xdce2f860",
@@ -34,7 +34,7 @@
                 ]
             },
             "Manufacturer": {
-                "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+                "address": "0x488b54Cf1b3F65Fa0cf76889ccb78afD2a054f4E",
                 "selectors": [
                     "0x50300a3f",
                     "0xce55aab0",
@@ -51,7 +51,7 @@
                 ]
             },
             "Mapper": {
-                "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+                "address": "0x31C89d6188b169aDCC7f6002d9cBAB605B67fd6d",
                 "selectors": [
                     "0x0a6cef46",
                     "0x112e62a2",
@@ -60,7 +60,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+                "address": "0x656eef60fFA6c3b984E199d29443b885c51A6200",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -78,24 +78,25 @@
                 ]
             },
             "DeviceDefinitionTable": {
-                "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+                "address": "0x94a4d8C45FBaC4cCDD0afAebD0C006d97cfA8b6c",
                 "selectors": [
+                    "0x0ebd9c91",
                     "0x20954d21",
                     "0x396e5987",
                     "0xa1d17941",
-                    "0x811eed42",
-                    "0xb91b4303",
+                    "0x23536c5f",
+                    "0x80d50451",
                     "0x088fafdb"
                 ]
             },
             "ERC721Holder": {
-                "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+                "address": "0xd6A0A8E18934Bb04eb1787De1C7bD48013579935",
                 "selectors": [
                     "0x150b7a02"
                 ]
             },
             "DeviceDefinitionController": {
-                "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+                "address": "0x263f307a067B559972302ED69A68f7a2FfBb7639",
                 "selectors": [
                     "0x66df322e"
                 ]
@@ -103,7 +104,7 @@
         },
         "nfts": {
             "ManufacturerId": {
-                "proxy": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "proxy": "0x17b6BBD34266Ed4d6770D9Ed643Fc24eE1a1197B",
                 "implementation": "0x9A676e781A523b5d0C0e43731313A708CB607508"
             }
         },

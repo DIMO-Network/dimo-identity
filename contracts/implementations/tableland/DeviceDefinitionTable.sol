@@ -76,9 +76,10 @@ contract DeviceDefinitionTable is AccessControlInternal {
             abi.encodePacked(
                 "CREATE TABLE _",
                 Strings.toString(block.chainid),
-                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, ksuid TEXT, UNIQUE(model,year))"
+                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, ksuid TEXT, devicetype TEXT, imageuri TEXT, UNIQUE(model,year))"
             )
         );
+
         uint256 tableId = tablelandTables.create(address(this), statement);
 
         tablelandTables.setController(address(this), tableId, address(this));
@@ -139,6 +140,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
      *  model -> The model of the Device Definition
      *  year -> The year of the Device Definition
      *  metadata -> The metadata stringfied object of the Device Definition
+     *  devicetype -> The deviceType stringfied object of the Device Definition
+     *  imageuri -> The image uri stringfied object of the Device Definition
      */
     function insertDeviceDefinition(
         uint256 manufacturerId,
@@ -185,7 +188,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
                     ",",
                     string(abi.encodePacked("'", data.metadata, "'")),
                     ",",
-                    string(abi.encodePacked("'", data.ksuid, "'"))
+                    string(abi.encodePacked("'", data.ksuid, "'")),
+                    ","
                 )
             )
         );
@@ -202,6 +206,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
      *  model -> The model of the Device Definition
      *  year -> The year of the Device Definition
      *  metadata -> The metadata stringfied object of the Device Definition
+     *  devicetype -> The deviceType stringfied object of the Device Definition
+     *  imageuri -> The image uri stringfied object of the Device Definition
      */
     function insertDeviceDefinitionBatch(
         uint256 manufacturerId,
@@ -242,7 +248,11 @@ contract DeviceDefinitionTable is AccessControlInternal {
                 ",",
                 string(abi.encodePacked("'", data[i].metadata, "'")),
                 ",",
-                string(abi.encodePacked("'", data[i].ksuid, "'"))
+                string(abi.encodePacked("'", data[i].ksuid, "'")),
+                ",",
+                string(abi.encodePacked("'", data[i].devicetype, "'")),
+                ",",
+                string(abi.encodePacked("'", data[i].imageuri, "'"))
             );
 
             emit DeviceDefinitionInserted(
@@ -256,7 +266,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         string memory stmt = SQLHelpers.toBatchInsert(
             "",
             tableId,
-            "id,model,year,metadata,ksuid",
+            "id,model,year,metadata,ksuid,devicetype,imageuri",
             vals
         );
 

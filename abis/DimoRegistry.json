@@ -3776,6 +3776,19 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            }
+        ],
+        "name": "alterDeviceDefinitionTable",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address",
                 "name": "tableOwner",
                 "type": "address"
@@ -3862,6 +3875,16 @@
                         "internalType": "string",
                         "name": "ksuid",
                         "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "devicetype",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "imageuri",
+                        "type": "string"
                     }
                 ],
                 "internalType": "struct DeviceDefinitionInput",
@@ -3906,6 +3929,16 @@
                     {
                         "internalType": "string",
                         "name": "ksuid",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "devicetype",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "imageuri",
                         "type": "string"
                     }
                 ],

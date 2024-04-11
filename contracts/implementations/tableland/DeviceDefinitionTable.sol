@@ -172,13 +172,19 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
         emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
 
+        this.insertDeviceDefinitionData(tablelandTables, tableId, data);
+    }
+
+    function insertDeviceDefinitionData(TablelandTablesImpl tablelandTables, uint256 tableId, DeviceDefinitionInput calldata data
+    ) external {
+        
         tablelandTables.mutate(
             address(this),
             tableId,
             SQLHelpers.toInsert(
                 "",
                 tableId,
-                "id,model,year,metadata,ksuid",
+                "id,model,year,metadata,ksuid,devicetype,imageuri",
                 string.concat(
                     string(abi.encodePacked("'", data.id, "'")),
                     ",",
@@ -189,7 +195,10 @@ contract DeviceDefinitionTable is AccessControlInternal {
                     string(abi.encodePacked("'", data.metadata, "'")),
                     ",",
                     string(abi.encodePacked("'", data.ksuid, "'")),
-                    ","
+                    ",",
+                    string(abi.encodePacked("'", data.devicetype, "'")),
+                    ",",
+                    string(abi.encodePacked("'", data.imageuri, "'"))
                 )
             )
         );

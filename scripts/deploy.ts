@@ -182,6 +182,7 @@ async function deployNfts(
         kind: 'uups',
       },
     );
+    await contractProxy.waitForDeployment();
 
     console.log(
       `NFT contract ${contractNameArg.name
@@ -230,6 +231,7 @@ async function deployDimoForwarder(
       kind: 'uups',
     },
   );
+  await contractProxy.waitForDeployment();
 
   instances[networkName].misc.DimoForwarder.proxy =
     await contractProxy.getAddress();
@@ -243,6 +245,7 @@ async function deployDimoForwarder(
   return instances;
 }
 
+// Sets SyntheticDeviceId contract address after deployment NFTs deployment
 async function setupVehicleId(
   deployer: HardhatEthersSigner,
   networkName: string,
@@ -262,7 +265,7 @@ async function setupVehicleId(
       instances[networkName].nfts.SyntheticDeviceId.proxy,
     );
   console.log(
-    `Aftermarket Device ID ${instances[networkName].nfts.AftermarketDeviceId.proxy} set to Vehicle ID`,
+    `Synthetic Device ID ${instances[networkName].nfts.SyntheticDeviceId.proxy} set to Vehicle ID`,
   );
   console.log('\n----- Vehicle ID setup -----\n');
 }
@@ -599,10 +602,10 @@ async function grantNftRoles(
   );
 }
 
-async function grantRole(
+async function grantRoles(
   deployer: HardhatEthersSigner,
-  role: string,
   address: string,
+  roles: object,
   networkName: string,
 ) {
   const instances = getAddresses();
@@ -612,14 +615,19 @@ async function grantRole(
     instances[networkName].modules.DIMORegistry.address,
   );
 
-  console.log(`\n----- Granting ${role} role to ${address} -----`);
+  console.log(`\n----- Granting roles to ${address} -----\n`);
 
-  await (
-    await accessControlInstance.connect(deployer).grantRole(role, address)
-  ).wait();
+  for (const [roleName, role] of Object.entries(roles)) {
+    await (
+      await accessControlInstance.connect(deployer).grantRole(role, address)
+    ).wait();
 
-  console.log(`----- ${role} role granted to ${address} -----\n`);
+    console.log(`${roleName}: ${role} role granted to ${address}`);
+  }
+
+  console.log(`\n----- Roles granted to ${address} -----\n`);
 }
+
 
 async function mintBatchManufacturers(
   deployer: HardhatEthersSigner,
@@ -759,6 +767,9 @@ async function main() {
 
   const moduleInstances = await deployModules(deployer, networkName);
   writeAddresses(moduleInstances, networkName);
+  const instancesWithSelectors = await addModules(deployer, networkName);
+  writeAddresses(instancesWithSelectors, networkName);
+
   const DimoForwarderInstance = await deployDimoForwarder(
     deployer,
     networkName,
@@ -769,9 +780,7 @@ async function main() {
 
   await setupVehicleId(deployer, networkName);
   await setupDimoForwarder(deployer, networkName);
-
-  const instancesWithSelectors = await addModules(deployer, networkName);
-  writeAddresses(instancesWithSelectors, networkName);
+  await grantNftRoles(deployer, networkName);
 
   if (networkName === 'hardhat' || networkName === 'localhost') {
     const mockInstances = await buildMocks(
@@ -785,39 +794,45 @@ async function main() {
 
   const instances = getAddresses();
 
-  await grantRole(deployer, C.roles.ADMIN_ROLE, deployer.address, networkName);
-  await grantRole(
+  // Deployer roles
+  await grantRoles(
     deployer,
-    C.roles.modules.MINT_MANUFACTURER_ROLE,
     deployer.address,
-    networkName,
+    {
+      DEFAULT_ADMIN_ROLE: C.roles.DEFAULT_ADMIN_ROLE,
+      ADMIN_ROLE: C.roles.ADMIN_ROLE,
+      ...C.roles.modules
+    },
+    networkName
   );
-  await grantRole(
+  // Foundation roles
+  await grantRoles(
     deployer,
-    C.roles.modules.MINT_INTEGRATION_ROLE,
-    deployer.address,
-    networkName,
+    instances[networkName].misc.Foundation,
+    {
+      DEFAULT_ADMIN_ROLE: C.roles.DEFAULT_ADMIN_ROLE,
+      ADMIN_ROLE: C.roles.ADMIN_ROLE,
+    },
+    networkName
   );
-  await grantRole(
+  // KMS roles
+  await grantRoles(
     deployer,
-    C.roles.DEFAULT_ADMIN_ROLE,
     instances[networkName].misc.Kms,
-    networkName,
+    {
+      CLAIM_AD_ROLE: C.roles.modules.CLAIM_AD_ROLE,
+      PAIR_AD_ROLE: C.roles.modules.PAIR_AD_ROLE,
+      UNPAIR_AD_ROLE: C.roles.modules.UNPAIR_AD_ROLE,
+      MINT_SD_ROLE: C.roles.modules.MINT_SD_ROLE,
+      BURN_SD_ROLE: C.roles.modules.BURN_SD_ROLE,
+      MINT_VEHICLE_ROLE: C.roles.modules.MINT_VEHICLE_ROLE,
+      BURN_VEHICLE_ROLE: C.roles.modules.BURN_VEHICLE_ROLE,
+      MINT_VEHICLE_SD_ROLE: C.roles.modules.MINT_VEHICLE_SD_ROLE
+    },
+    networkName
   );
-  await grantRole(
-    deployer,
-    C.roles.DEFAULT_ADMIN_ROLE,
-    instances[networkName].misc.Foundation,
-    networkName,
-  );
-  await grantRole(
-    deployer,
-    C.roles.ADMIN_ROLE,
-    instances[networkName].misc.Foundation,
-    networkName,
-  );
+
   await setupRegistry(deployer, networkName);
-  await grantNftRoles(deployer, networkName);
   await mintBatchManufacturers(
     deployer,
     instances[networkName].misc.Foundation,

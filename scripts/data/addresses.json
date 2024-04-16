@@ -739,7 +739,8 @@
                 "implementation": "0x7dc21878C58BDbC8E07d7DEC09c94E0d9a2972E8"
             },
             "Foundation": "0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b",
-            "Kms": "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
+            "Kms1": "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
+            "Kms2": "0x6903B9cE4bFAf9D900E40B9dd2F486a4530cA74f",
             "StreamRegistry": "",
             "DimoStreamrNode": ""
         }

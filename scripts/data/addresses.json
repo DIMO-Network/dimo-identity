@@ -680,7 +680,7 @@
                 ]
             },
             "DeviceDefinitionTable": {
-                "address": "0x974a12649a9eB54C6AB5BDb81C462aC5f9622B9d",
+                "address": "0xF42fc8F13EB5cb1BC54C9002baC400E4F4549ae2",
                 "selectors": [
                     "0x20954d21",
                     "0x396e5987",

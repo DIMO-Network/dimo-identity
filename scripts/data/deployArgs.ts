@@ -76,7 +76,8 @@ export const vehicleAttributes = [
   'Model',
   'Year',
   'DataURI',
-  'DefinitionURI'
+  'DefinitionURI',
+  'ImageUri'
 ];
 export const adAttributes = ['Serial', 'IMEI', 'DefinitionURI','HardwareRevision','DevEUI'];
 export const sdAttributes = [];

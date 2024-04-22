@@ -3865,12 +3865,12 @@
                     },
                     {
                         "internalType": "string",
-                        "name": "devicetype",
+                        "name": "deviceType",
                         "type": "string"
                     },
                     {
                         "internalType": "string",
-                        "name": "imageuri",
+                        "name": "imageURI",
                         "type": "string"
                     }
                 ],
@@ -3920,12 +3920,12 @@
                     },
                     {
                         "internalType": "string",
-                        "name": "devicetype",
+                        "name": "deviceType",
                         "type": "string"
                     },
                     {
                         "internalType": "string",
-                        "name": "imageuri",
+                        "name": "imageURI",
                         "type": "string"
                     }
                 ],
@@ -3935,66 +3935,6 @@
             }
         ],
         "name": "insertDeviceDefinitionBatch",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "contract TablelandTablesImpl",
-                "name": "tablelandTables",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tableId",
-                "type": "uint256"
-            },
-            {
-                "components": [
-                    {
-                        "internalType": "string",
-                        "name": "id",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "model",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "year",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "metadata",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "ksuid",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "devicetype",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "imageuri",
-                        "type": "string"
-                    }
-                ],
-                "internalType": "struct DeviceDefinitionInput",
-                "name": "data",
-                "type": "tuple"
-            }
-        ],
-        "name": "insertDeviceDefinitionData",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

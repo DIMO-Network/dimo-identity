@@ -434,7 +434,6 @@
 | 0xa1d17941 | getDeviceDefinitionTableName(uint256) |
 | 0x23536c5f | insertDeviceDefinition(uint256,(string,string,uint256,string,string,string,string)) |
 | 0x80d50451 | insertDeviceDefinitionBatch(uint256,(string,string,uint256,string,string,string,string)[]) |
-| 0x39438f38 | insertDeviceDefinitionData(address,uint256,(string,string,uint256,string,string,string,string)) |
 | 0x088fafdb | setDeviceDefinitionTable(uint256,uint256) |
 
 #### Events

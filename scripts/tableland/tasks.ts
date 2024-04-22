@@ -174,8 +174,8 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                         metadata: JSON.stringify({
                             device_attributes: dd.device_attributes
                         }),
-                        devicetype: dd.type.type,
-                        imageuri: dd.imageUrl == undefined ? "": dd.imageUrl
+                        deviceType: dd.type.type,
+                        imageURI: dd.imageUrl == undefined ? "": dd.imageUrl
                     };
                     return deviceDefinitionInput;
                 });
@@ -216,6 +216,9 @@ task('query-tableland', 'npx hardhat query-tableland <name> --network localhost'
 
         const tablelandDb = getDatabase(getAccounts()[0]);
 
+        console.log(`Manufacturer address [${instances[currentNetwork].modules.DIMORegistry.address}]`);
+        console.log('Signer', signer);
+        console.log('GetAccounts', getAccounts()[0]);
         console.log(`Query to manufacturer table [${args.name}] for ${signer.address}...`);
 
         const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
@@ -227,6 +230,7 @@ task('query-tableland', 'npx hardhat query-tableland <name> --network localhost'
             .connect(signer)
             .getManufacturerIdByName(args.name);
 
+        console.log(`Manufacturer ID => ${manufacturerId}...`);
         const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
 
         const where = args.filter ? `WHERE id='${args.filter}'` : '';
@@ -300,53 +304,6 @@ task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-
                 const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
 
                 console.log(`Device Definition table created\nTable ID: ${ddTableId}\nTable Name: ${ddTableName}`);
-            }
-
-        }
-});
-
-task('update-manufacturer-table-schema', 'npx hardhat update-manufacturer-table-schema --network localhost')
-    .setAction(async (args, hre) => {
-        const currentNetwork = hre.network.name;
-        hre.ethers.provider
-        validateNetwork(currentNetwork);
-
-        let _gasPrice;
-        const instances = getAddresses(currentNetwork);
-        const [signer] = await hre.ethers.getSigners();
-        const tableOwner = await signer.getAddress();
-
-        const manufacturerInstance: Manufacturer = await hre.ethers.getContractAt(
-            'Manufacturer',
-            instances[currentNetwork].modules.DIMORegistry.address,
-        );
-
-        const tablelandDb = getDatabase(getAccounts()[0]);
-        const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
-
-        console.log(`Total manufacturers ${makes.length}...`);
-
-        const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
-            'DeviceDefinitionTable',
-            instances[currentNetwork].modules.DIMORegistry.address,
-        );
-
-        for await (const element of makes) {
-            const manufacturerId = await manufacturerInstance
-                .connect(signer)
-                .getManufacturerIdByName(element);
-
-            let ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
-
-            if (ddTableId.toString() !== '0') {
-                const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
-
-                console.log(`Altering Definition table \nTable ID: ${ddTableId}\nTable Name: ${ddTableName}`);
-                
-                _gasPrice = await getGasPrice(hre);
-                const query = await tablelandDb.prepare(
-                    `ALTER TABLE ? ADD COLUMN devicetype TEXT`
-                ).bind(ddTableName);
             }
 
         }

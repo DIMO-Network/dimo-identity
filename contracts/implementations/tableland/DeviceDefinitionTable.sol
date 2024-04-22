@@ -140,8 +140,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
      *  model -> The model of the Device Definition
      *  year -> The year of the Device Definition
      *  metadata -> The metadata stringfied object of the Device Definition
-     *  devicetype -> The deviceType stringfied object of the Device Definition
-     *  imageuri -> The image uri stringfied object of the Device Definition
+     *  deviceType -> The deviceType of the Device Definition
+     *  imageURI -> The image uri of the Device Definition
      */
     function insertDeviceDefinition(
         uint256 manufacturerId,
@@ -172,36 +172,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
         emit DeviceDefinitionInserted(tableId, data.id, data.model, data.year);
 
-        this.insertDeviceDefinitionData(tablelandTables, tableId, data);
-    }
-
-    function insertDeviceDefinitionData(TablelandTablesImpl tablelandTables, uint256 tableId, DeviceDefinitionInput calldata data
-    ) external {
-        
-        tablelandTables.mutate(
-            address(this),
-            tableId,
-            SQLHelpers.toInsert(
-                "",
-                tableId,
-                "id,model,year,metadata,ksuid,devicetype,imageuri",
-                string.concat(
-                    string(abi.encodePacked("'", data.id, "'")),
-                    ",",
-                    string(abi.encodePacked("'", data.model, "'")),
-                    ",",
-                    Strings.toString(data.year),
-                    ",",
-                    string(abi.encodePacked("'", data.metadata, "'")),
-                    ",",
-                    string(abi.encodePacked("'", data.ksuid, "'")),
-                    ",",
-                    string(abi.encodePacked("'", data.devicetype, "'")),
-                    ",",
-                    string(abi.encodePacked("'", data.imageuri, "'"))
-                )
-            )
-        );
+        _insertDeviceDefinitionData(tablelandTables, tableId, data);
     }
 
     /**
@@ -215,8 +186,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
      *  model -> The model of the Device Definition
      *  year -> The year of the Device Definition
      *  metadata -> The metadata stringfied object of the Device Definition
-     *  devicetype -> The deviceType stringfied object of the Device Definition
-     *  imageuri -> The image uri stringfied object of the Device Definition
+     *  deviceType -> The deviceType of the Device Definition
+     *  imageURI -> The image uri of the Device Definition
      */
     function insertDeviceDefinitionBatch(
         uint256 manufacturerId,
@@ -248,21 +219,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         uint256 len = data.length;
         string[] memory vals = new string[](len);
         for (uint256 i; i < len; i++) {
-            vals[i] = string.concat(
-                string(abi.encodePacked("'", data[i].id, "'")),
-                ",",
-                string(abi.encodePacked("'", data[i].model, "'")),
-                ",",
-                Strings.toString(data[i].year),
-                ",",
-                string(abi.encodePacked("'", data[i].metadata, "'")),
-                ",",
-                string(abi.encodePacked("'", data[i].ksuid, "'")),
-                ",",
-                string(abi.encodePacked("'", data[i].devicetype, "'")),
-                ",",
-                string(abi.encodePacked("'", data[i].imageuri, "'"))
-            );
+            vals[i] = _convertDeviceDefinitionToString(data[i]);
 
             emit DeviceDefinitionInserted(
                 tableId,
@@ -311,5 +268,40 @@ contract DeviceDefinitionTable is AccessControlInternal {
         tableId = DeviceDefinitionTableStorage.getStorage().tables[
             manufacturerId
         ];
+    }
+
+    function _insertDeviceDefinitionData(TablelandTablesImpl tablelandTables, uint256 tableId, DeviceDefinitionInput calldata data
+    ) private {
+        
+        tablelandTables.mutate(
+            address(this),
+            tableId,
+            SQLHelpers.toInsert(
+                "",
+                tableId,
+                "id,model,year,metadata,ksuid,devicetype,imageuri",
+                _convertDeviceDefinitionToString(data)
+            )
+        );
+    }
+
+    function _convertDeviceDefinitionToString(DeviceDefinitionInput calldata data) private pure returns (string memory) {
+        string memory concatenatedData = string.concat(
+                    string(abi.encodePacked("'", data.id, "'")),
+                    ",",
+                    string(abi.encodePacked("'", data.model, "'")),
+                    ",",
+                    Strings.toString(data.year),
+                    ",",
+                    string(abi.encodePacked("'", data.metadata, "'")),
+                    ",",
+                    string(abi.encodePacked("'", data.ksuid, "'")),
+                    ",",
+                    string(abi.encodePacked("'", data.deviceType, "'")),
+                    ",",
+                    string(abi.encodePacked("'", data.imageURI, "'"))
+                );
+
+        return concatenatedData;
     }
 }

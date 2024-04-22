@@ -76,7 +76,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
             abi.encodePacked(
                 "CREATE TABLE _",
                 Strings.toString(block.chainid),
-                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, ksuid TEXT, devicetype TEXT, imageuri TEXT, UNIQUE(model,year))"
+                "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, ksuid TEXT, deviceType TEXT, imageURI TEXT, UNIQUE(model,year))"
             )
         );
 
@@ -232,7 +232,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         string memory stmt = SQLHelpers.toBatchInsert(
             "",
             tableId,
-            "id,model,year,metadata,ksuid,devicetype,imageuri",
+            "id,model,year,metadata,ksuid,deviceType,imageURI",
             vals
         );
 
@@ -279,7 +279,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
             SQLHelpers.toInsert(
                 "",
                 tableId,
-                "id,model,year,metadata,ksuid,devicetype,imageuri",
+                "id,model,year,metadata,ksuid,deviceType,imageURI",
                 _convertDeviceDefinitionToString(data)
             )
         );

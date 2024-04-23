@@ -3862,6 +3862,16 @@
                         "internalType": "string",
                         "name": "ksuid",
                         "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "deviceType",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "imageURI",
+                        "type": "string"
                     }
                 ],
                 "internalType": "struct DeviceDefinitionInput",
@@ -3906,6 +3916,16 @@
                     {
                         "internalType": "string",
                         "name": "ksuid",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "deviceType",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "imageURI",
                         "type": "string"
                     }
                 ],

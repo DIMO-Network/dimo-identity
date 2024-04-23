@@ -16,6 +16,14 @@ export const mockKsuid1 = '111AAA111aaa111AAA111aaa111';
 export const mockKsuid2 = '222BBB222bbb222BBB222bbb222';
 export const mockKsuid3 = '333CCC333ccc333CCC333ccc333';
 
+export const mockDdDeviceType1 = 'vechicle1';
+export const mockDdDeviceType2 = 'vechicle3';
+export const mockDdDeviceType3 = 'vechicle2';
+
+export const mockDdImageURI1 = 'http://image.link';
+export const mockDdImageURI2 = 'http://image.link';
+export const mockDdImageURI3 = 'http://image.link';
+
 export const mockDdMetadata1 = {
     mpg: '20',
     mpg_city: '17',
@@ -67,21 +75,27 @@ export const mockDdInput1: DeviceDefinitionInput = {
     model: mockDdModel1,
     year: mockDdYear1,
     metadata: JSON.stringify(mockDdMetadata1),
-    ksuid: mockKsuid1
+    ksuid: mockKsuid1,
+    deviceType: mockDdDeviceType1,
+    imageURI: mockDdImageURI1
 }
 export const mockDdInput2: DeviceDefinitionInput = {
     id: mockDdId2,
     model: mockDdModel2,
     year: mockDdYear2,
     metadata: JSON.stringify(mockDdMetadata2),
-    ksuid: mockKsuid2
+    ksuid: mockKsuid2,
+    deviceType: mockDdDeviceType2,
+    imageURI: mockDdImageURI2
 }
 export const mockDdInput3: DeviceDefinitionInput = {
     id: mockDdId3,
     model: mockDdModel3,
     year: mockDdYear3,
     metadata: JSON.stringify(mockDdMetadata3),
-    ksuid: mockKsuid3
+    ksuid: mockKsuid3,
+    deviceType: mockDdDeviceType3,
+    imageURI: mockDdImageURI3
 }
 
 export const mockDdInputBatch: DeviceDefinitionInput[] = [

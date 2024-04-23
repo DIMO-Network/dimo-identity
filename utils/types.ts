@@ -62,7 +62,9 @@ export type DeviceDefinitionInput = {
   model: string,
   year: number,
   metadata: string,
-  ksuid: string
+  ksuid: string,
+  deviceType: string;
+  imageURI: string;
 };
 
 export type MintVehicleAndSdWithDdInput = {

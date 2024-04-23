@@ -437,7 +437,9 @@ describe('DeviceDefinitionTable', async function () {
             model: C.mockDdModel1,
             year: C.mockDdYear1,
             metadata: C.mockDdMetadata1,
-            ksuid: C.mockKsuid1
+            ksuid: C.mockKsuid1,
+            deviceType: C.mockDdDeviceType1,
+            imageURI: C.mockDdImageURI1
           });
         });
       });
@@ -482,7 +484,9 @@ describe('DeviceDefinitionTable', async function () {
             model: C.mockDdModel1,
             year: C.mockDdYear1,
             metadata: C.mockDdMetadata1,
-            ksuid: C.mockKsuid1
+            ksuid: C.mockKsuid1,
+            deviceType: C.mockDdDeviceType1,
+            imageURI: C.mockDdImageURI1,
           });
         });
       });
@@ -608,21 +612,27 @@ describe('DeviceDefinitionTable', async function () {
                   model: C.mockDdModel1,
                   year: C.mockDdYear1,
                   metadata: C.mockDdMetadata1,
-                  ksuid: C.mockKsuid1
+                  ksuid: C.mockKsuid1,
+                  deviceType: C.mockDdDeviceType1,
+                  imageURI: C.mockDdImageURI1
                 },
                 {
                   id: C.mockDdId2,
                   model: C.mockDdModel2,
                   year: C.mockDdYear2,
                   metadata: C.mockDdMetadata2,
-                  ksuid: C.mockKsuid2
+                  ksuid: C.mockKsuid2,
+                  deviceType: C.mockDdDeviceType2,
+                  imageURI: C.mockDdImageURI2
                 },
                 {
                   id: C.mockDdId3,
                   model: C.mockDdModel3,
                   year: C.mockDdYear3,
                   metadata: C.mockDdMetadata3,
-                  ksuid: C.mockKsuid3
+                  ksuid: C.mockKsuid3,
+                  deviceType: C.mockDdDeviceType3,
+                  imageURI: C.mockDdImageURI3
                 }
               ]
             );
@@ -677,21 +687,27 @@ describe('DeviceDefinitionTable', async function () {
                   model: C.mockDdModel1,
                   year: C.mockDdYear1,
                   metadata: C.mockDdMetadata1,
-                  ksuid: C.mockKsuid1
+                  ksuid: C.mockKsuid1,
+                  deviceType: C.mockDdDeviceType1,
+                  imageURI: C.mockDdImageURI1
                 },
                 {
                   id: C.mockDdId2,
                   model: C.mockDdModel2,
                   year: C.mockDdYear2,
                   metadata: C.mockDdMetadata2,
-                  ksuid: C.mockKsuid2
+                  ksuid: C.mockKsuid2,
+                  deviceType: C.mockDdDeviceType2,
+                  imageURI: C.mockDdImageURI2
                 },
                 {
                   id: C.mockDdId3,
                   model: C.mockDdModel3,
                   year: C.mockDdYear3,
                   metadata: C.mockDdMetadata3,
-                  ksuid: C.mockKsuid3
+                  ksuid: C.mockKsuid3,
+                  deviceType: C.mockDdDeviceType3,
+                  imageURI: C.mockDdImageURI3
                 }
               ]
             );

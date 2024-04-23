@@ -55,6 +55,8 @@ struct DeviceDefinitionInput {
     uint256 year;
     string metadata;
     string ksuid;
+    string deviceType;
+    string imageURI;
 }
 
 struct MintVehicleAndSdWithDdInput {

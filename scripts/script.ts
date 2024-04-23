@@ -32,7 +32,7 @@ async function main() {
   if (
     network.name === 'hardhat' ||
     network.name === 'localhost' ||
-    network.name === 'tenderly'
+    network.name === 'tenderly' 
   ) {
     currentNetwork = 'mumbai';
 

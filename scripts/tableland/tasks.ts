@@ -10,10 +10,11 @@ import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
 import { AddressesByNetwork, DeviceDefinitionInput, StringNumber } from '../../utils';
 import { makes } from '../data/Makes';
 
-const VALID_NETWORKS = ['localhost', 'mumbai']
+const VALID_NETWORKS = ['localhost', 'mumbai', 'amoy']
 const CHAIN_ID: StringNumber = {
     'localhost': 31337,
-    'mumbai': 80001
+    'mumbai': 80001,
+    'amoy': 80002
 }
 
 function getAddresses(currentNetwork: string): AddressesByNetwork {

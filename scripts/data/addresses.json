@@ -680,13 +680,13 @@
                 ]
             },
             "DeviceDefinitionTable": {
-                "address": "0xF42fc8F13EB5cb1BC54C9002baC400E4F4549ae2",
+                "address": "0xA6d16B6E2B150CD859D333491b58505394aB647d",
                 "selectors": [
                     "0x20954d21",
                     "0x396e5987",
                     "0xa1d17941",
-                    "0x811eed42",
-                    "0xb91b4303",
+                    "0x23536c5f",
+                    "0x80d50451",
                     "0x088fafdb"
                 ]
             },

@@ -10,10 +10,9 @@ import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
 import { AddressesByNetwork, DeviceDefinitionInput, StringNumber } from '../../utils';
 import { makes } from '../data/Makes';
 
-const VALID_NETWORKS = ['localhost', 'mumbai', 'amoy']
+const VALID_NETWORKS = ['localhost', 'amoy']
 const CHAIN_ID: StringNumber = {
     'localhost': 31337,
-    'mumbai': 80001,
     'amoy': 80002
 }
 
@@ -31,6 +30,22 @@ function validateNetwork(currentNetwork: string) {
     if (!VALID_NETWORKS.includes(currentNetwork)) {
         throw new Error(`Invalid network <${currentNetwork}>\nMake sure to add the flag "--network [${VALID_NETWORKS}]"\n`)
     }
+}
+
+function validateStringArrayInput(stringArray: string) {
+    let array;
+
+    try {
+        array = stringArray.split(',').map(a => parseInt(a.trim()));
+        const isValid = array.every(a => a && typeof a === 'number');
+        if (!isValid) {
+            throw new Error('Invalid array input. It must be in the format "1,2,3,4,5"');
+        }
+    } catch {
+        throw new Error('Invalid array input. It must be in the format "1,2,3,4,5"');
+    }
+
+    return array;
 }
 
 async function getGasPrice(hre: HardhatRuntimeEnvironment, bump: bigint = 20n): Promise<string> {
@@ -101,6 +116,44 @@ task('create-dd-table', 'Creates a Device Definition table related to a Manufact
         console.log(`Device Definition table created\nTable ID: ${tableId}\nTable Name: ${tableName}\nTable Owner: ${tableOwner}`);
     });
 
+task('create-dd-tables', 'Creates Device Definition tables related to s list of Manufacturer IDs')
+    .addPositionalParam('manufacturerIds', 'The list of IDs of the manufacturers')
+    .addOptionalParam('tableOwner', 'The address to which the table will be transferred after creation')
+    .setAction(async (args: { manufacturerIds: string, tableOwner: string | undefined }, hre) => {
+        const currentNetwork = hre.network.name;
+        validateNetwork(currentNetwork);
+
+        const instances = getAddresses(currentNetwork);
+        const [signer] = await hre.ethers.getSigners();
+        const tableOwner = args.tableOwner ?? signer.address;
+        const manufacturerIds = validateStringArrayInput(args.manufacturerIds);
+        const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
+            'DeviceDefinitionTable',
+            instances[currentNetwork].modules.DIMORegistry.address,
+        );
+        const tablelandDb = getDatabase(getAccounts()[0]);
+        const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
+
+        for (const manufacturerId of manufacturerIds) {
+            const _gasPrice = await getGasPrice(hre);
+
+            console.log(`Creating Device Definition table for manufacturer ID ${manufacturerId}...`);
+
+            const tx = await ddTableInstance
+                .connect(signer)
+                .createDeviceDefinitionTable(tableOwner, manufacturerId, { gasPrice: _gasPrice });
+
+            await tablelandValidator.pollForReceiptByTransactionHash({
+                chainId: CHAIN_ID[currentNetwork],
+                transactionHash: (await tx.wait())?.hash as string,
+            });
+
+            const tableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
+            const tableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
+
+            console.log(`Device Definition table created\nTable ID: ${tableId}\nTable Name: ${tableName}\nTable Owner: ${tableOwner}`);
+        }
+    });
 
 task('migration-tableland', 'npx hardhat migration-tableland --network localhost')
     .setAction(async (args, hre) => {
@@ -176,7 +229,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                             device_attributes: dd.device_attributes
                         }),
                         deviceType: dd.type.type,
-                        imageURI: dd.imageUrl == undefined ? "": dd.imageUrl
+                        imageURI: dd.imageUrl ?? ''
                     };
                     return deviceDefinitionInput;
                 });
@@ -197,7 +250,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             console.log(`${element} => ${ddTableName} total rows: ${count}`);
             console.log(`${element} => ${ddTableName} total upload: ${deviceDefinitionByManufacturers.length}`);
         }
-});
+    });
 
 task('query-tableland', 'npx hardhat query-tableland <name> --network localhost')
     .addPositionalParam('name', 'The name of the manufacturer table')
@@ -246,7 +299,7 @@ task('query-tableland', 'npx hardhat query-tableland <name> --network localhost'
         console.log(`Total rows: ${query.results.length}`);
         console.table(query.results);
 
-});
+    });
 
 task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-schema --network localhost')
     .setAction(async (args, hre) => {
@@ -308,7 +361,7 @@ task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-
             }
 
         }
-});
+    });
 
 async function getDeviceMakes() {
     return await axios.get('https://device-definitions-api.dimo.zone/device-makes');

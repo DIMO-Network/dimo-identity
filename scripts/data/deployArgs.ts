@@ -104,5 +104,7 @@ export const sdIdArgs = {
 export const dimoStreamrEns: GenericKeyAny = {
   polygon: 'streams.dimo.eth',
   mumbai: 'streams.dev.dimo.eth',
-  hardhat: 'streams.hardhat.dimo.eth'
+  amoy: 'streams.dev.dimo.eth',
+  hardhat: 'streams.hardhat.dimo.eth',
+  localhost: 'streams.localhost.dimo.eth'
 }

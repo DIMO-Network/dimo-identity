@@ -51,6 +51,8 @@ function validateStringArrayInput(stringArray: string) {
 async function getGasPrice(hre: HardhatRuntimeEnvironment, bump: bigint = 20n): Promise<string> {
     const price = (await hre.ethers.provider.getFeeData()).gasPrice as bigint;
 
+    console.log(`getGasPrice => ${price} bump => ${bump}`);
+    
     return (price * bump / 100n + price).toString();
 }
 
@@ -165,7 +167,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
         const instances = getAddresses(currentNetwork);
         const [signer] = await hre.ethers.getSigners();
         const tableOwner = await signer.getAddress();
-
+        
         const manufacturerInstance: Manufacturer = await hre.ethers.getContractAt(
             'Manufacturer',
             instances[currentNetwork].modules.DIMORegistry.address,
@@ -173,6 +175,74 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
         const tablelandDb = getDatabase(getAccounts()[0]);
         const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
+
+        var excludedMakes = [
+            'Mercury',
+            'MG',
+            'MIA',
+            'Microcar',
+            'MINI',
+            'Mitsubishi',
+            'MOKE',
+            'Morgan',
+            'Nissan',
+            'Noble',
+            'Oldsmobile',
+            'Opel',
+            'Panoz',
+            'Perodua',
+            'Peugeot',
+            'PGO',
+            'Plymouth',
+            'Polestar',
+            'Pontiac',
+            'Porsche',
+            'Proton',
+            'Ram',
+            'Reliant',
+            'Renault',
+            'Rivian',
+            'Rolls-Royce',
+            'Rover',
+            'Saab',
+            'San',
+            'SAO',
+            'Saturn',
+            'Scion',
+            'SEAT',
+            'Skoda',
+            'Slingshot',
+            'Smart',
+            'Spyker',
+            'SsangYong',
+            'Subaru',
+            'Suzuki',
+            'Talbot',
+            'Tata',
+            'TD Cars',
+            'Tesla',
+            'Toyota',
+            'TVR',
+            'Vanderhall',
+            'Vauxhall',
+            'VinFast',
+            'Volkswagen',
+            'Volvo',
+            'Westfield',
+            'Yugo',
+            'AutoPi',
+            'DAF',
+            'HINO',
+            'Scania',
+            'International',
+            'Hashdog',
+            'Chery'
+        ];
+        
+        makes = makes.reverse();
+        makes = makes.filter(function(element) {
+            return !excludedMakes.includes(element);
+        });
 
         console.log(`Total manufacturers ${makes.length}...`);
 
@@ -191,7 +261,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                 .getManufacturerIdByName(element);
 
             let ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
-
+            
             if (ddTableId.toString() === '0') {
                 console.log(`Creating Device Definition table for manufacturer ${element} with ID  ${manufacturerId}...`);
 
@@ -215,13 +285,13 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             const deviceDefinitionByManufacturers = devices.filter((c) => c.make.name === element && c.type.year > 2006);
             console.log(`Get Device Definition By Manufacturer [${element}] total => ${deviceDefinitionByManufacturers.length}`);
 
-            const batchSize = 50;
+            const batchSize = 10;
             let items = 0;
 
             for (let i = 0; i < deviceDefinitionByManufacturers.length; i += batchSize) {
                 const batch = deviceDefinitionByManufacturers.slice(i, i + batchSize).map(function (dd) {
                     const deviceDefinitionInput: DeviceDefinitionInput = {
-                        id: `${dd.type.make_slug}_${dd.type.model_slug}_${dd.type.year}`,
+                        id: GenerateSlug(`${dd.type.make_slug}_${dd.type.model_slug}_${dd.type.year}`),
                         ksuid: dd.device_definition_id,
                         model: dd.type.model,
                         year: dd.type.year,
@@ -236,19 +306,23 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
                 items += batch.length;
 
-                console.log(batch);
+                if (_gasPrice == undefined){
+                    _gasPrice = await getGasPrice(hre);
+                }
 
-                _gasPrice = await getGasPrice(hre);
+                console.log(batch)
                 console.log(`Creating [${deviceDefinitionByManufacturers.length}/${items}] ...`);
+                console.log(`Gas Price => ${_gasPrice}`)
                 await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch, { gasPrice: _gasPrice });
+                await Delay();
             }
 
-            const count = await tablelandDb.prepare(
-                `SELECT COUNT(*) AS total FROM ${ddTableName}`
-            ).first<{ total: number }>('total');
+            // const count = await tablelandDb.prepare(
+            //     `SELECT COUNT(*) AS total FROM ${ddTableName}`
+            // ).first<{ total: number }>('total');
 
-            console.log(`${element} => ${ddTableName} total rows: ${count}`);
-            console.log(`${element} => ${ddTableName} total upload: ${deviceDefinitionByManufacturers.length}`);
+            // console.log(`${element} => ${ddTableName} total rows: ${count}`);
+            // console.log(`${element} => ${ddTableName} total upload: ${deviceDefinitionByManufacturers.length}`);
         }
     });
 
@@ -321,6 +395,7 @@ task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-
         const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
 
         console.log(`Total manufacturers ${makes.length}...`);
+        
 
         const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
             'DeviceDefinitionTable',
@@ -369,4 +444,16 @@ async function getDeviceMakes() {
 
 async function getDeviceDefinitions() {
     return await axios.get('https://device-definitions-api.dimo.zone/device-definitions/all');
+}
+
+function Delay() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 5000); 
+    });
+}
+
+function GenerateSlug(str) {
+    return str.replace(/\//g, "-");
 }

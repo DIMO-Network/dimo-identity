@@ -80,6 +80,11 @@ const config: HardhatUserConfig = {
       polygon: process.env.POLYGONSCAN_API_KEY || '',
     },
   },
+  namedAccounts: {
+    deployer: {
+      default: "0x49291691f96c54220bf1de8EfBbf00106d64CB8C"
+    },
+  },
   abiExporter: {
     path: './abis',
     runOnCompile: true,

@@ -219,7 +219,10 @@
                 "implementation": "0xA6c4e0938835cb6d66074833737A87Fc1400533b"
             },
             "Foundation": "0xCED3c922200559128930180d3f0bfFd4d9f4F123",
-            "Kms": "0xcce4eF41A67E28C3CF3dbc51a6CD3d004F53aCBd",
+            "Kms": [
+                "0xcce4eF41A67E28C3CF3dbc51a6CD3d004F53aCBd",
+                "0xE92a1B8078EBc01412ba6Ef878425f35B32D6bBb"
+            ],
             "StreamRegistry": "0x0D483E10612F327FC11965Fc82E90dC19b141641",
             "DimoStreamrNode": "0x3F3ab5A20F704D6e7299EdEE84200fDA5d849BE7"
         }
@@ -479,7 +482,9 @@
                 "implementation": "0x38ddD442FE4F7D9d65112DE0f659e12aaD2aB3C4"
             },
             "Foundation": "0x1741ec2915ab71fc03492715b5640133da69420b",
-            "Kms": "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
+            "Kms": [
+                "0x74cb2b8ed0c1789d84ef701921d1152e592c330c"
+            ],
             "StreamRegistry": "0x4F0779292bd0aB33B9EBC1DBE8e0868f3940E3F2",
             "DimoStreamrNode": "0x577f22f5369046B7eF09B6b01424fA860533d243"
         }
@@ -739,8 +744,10 @@
                 "implementation": "0x7dc21878C58BDbC8E07d7DEC09c94E0d9a2972E8"
             },
             "Foundation": "0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b",
-            "Kms1": "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
-            "Kms2": "0x6903B9cE4bFAf9D900E40B9dd2F486a4530cA74f",
+            "Kms": [
+                "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
+                "0x6903B9cE4bFAf9D900E40B9dd2F486a4530cA74f"
+            ],
             "StreamRegistry": "",
             "DimoStreamrNode": ""
         }
@@ -946,8 +953,8 @@
                     "0x20954d21",
                     "0x396e5987",
                     "0xa1d17941",
-                    "0x811eed42",
-                    "0xb91b4303",
+                    "0x23536c5f",
+                    "0x80d50451",
                     "0x088fafdb"
                 ]
             },
@@ -988,11 +995,11 @@
         },
         "misc": {
             "DimoToken": {
-                "proxy": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+                "proxy": "0xB0D4afd8879eD9F52b28595d31B441D079B2Ca07",
                 "implementation": ""
             },
             "Stake": {
-                "proxy": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
+                "proxy": "0x162A433068F51e18b7d13932F27e66a3f99E6890",
                 "implementation": ""
             },
             "DimoForwarder": {
@@ -1000,7 +1007,9 @@
                 "implementation": "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49"
             },
             "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-            "Kms": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+            "Kms": [
+                "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+            ],
             "StreamRegistry": "0x0000000000000000000000000000000000000000",
             "DimoStreamrNode": "0x0000000000000000000000000000000000000000"
         }
@@ -1260,9 +1269,11 @@
                 "implementation": "0x3347B4d90ebe72BeFb30444C9966B2B990aE9FcB"
             },
             "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-            "Kms": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-            "StreamRegistry": "",
-            "DimoStreamrNode": ""
+            "Kms": [
+                "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+            ],
+            "StreamRegistry": "0x0000000000000000000000000000000000000000",
+            "DimoStreamrNode": "0x0000000000000000000000000000000000000000"
         }
     }
 }

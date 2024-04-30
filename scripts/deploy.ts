@@ -756,7 +756,7 @@ async function buildMocks(
   instances[networkName].misc.Stake.proxy =
     await mockStakeInstance.getAddress();
   instances[networkName].misc.Foundation = mockFoundation.address;
-  instances[networkName].misc.Kms = mockKms.address;
+  instances[networkName].misc.Kms = [mockKms.address];
 
   return instances;
 }
@@ -816,21 +816,23 @@ async function main() {
     networkName
   );
   // KMS roles
-  await grantRoles(
-    deployer,
-    instances[networkName].misc.Kms,
-    {
-      CLAIM_AD_ROLE: C.roles.modules.CLAIM_AD_ROLE,
-      PAIR_AD_ROLE: C.roles.modules.PAIR_AD_ROLE,
-      UNPAIR_AD_ROLE: C.roles.modules.UNPAIR_AD_ROLE,
-      MINT_SD_ROLE: C.roles.modules.MINT_SD_ROLE,
-      BURN_SD_ROLE: C.roles.modules.BURN_SD_ROLE,
-      MINT_VEHICLE_ROLE: C.roles.modules.MINT_VEHICLE_ROLE,
-      BURN_VEHICLE_ROLE: C.roles.modules.BURN_VEHICLE_ROLE,
-      MINT_VEHICLE_SD_ROLE: C.roles.modules.MINT_VEHICLE_SD_ROLE
-    },
-    networkName
-  );
+  for (const kmsAddres of instances[networkName].misc.Kms) {
+    await grantRoles(
+      deployer,
+      kmsAddres,
+      {
+        CLAIM_AD_ROLE: C.roles.modules.CLAIM_AD_ROLE,
+        PAIR_AD_ROLE: C.roles.modules.PAIR_AD_ROLE,
+        UNPAIR_AD_ROLE: C.roles.modules.UNPAIR_AD_ROLE,
+        MINT_SD_ROLE: C.roles.modules.MINT_SD_ROLE,
+        BURN_SD_ROLE: C.roles.modules.BURN_SD_ROLE,
+        MINT_VEHICLE_ROLE: C.roles.modules.MINT_VEHICLE_ROLE,
+        BURN_VEHICLE_ROLE: C.roles.modules.BURN_VEHICLE_ROLE,
+        MINT_VEHICLE_SD_ROLE: C.roles.modules.MINT_VEHICLE_SD_ROLE
+      },
+      networkName
+    );
+  }
 
   await setupRegistry(deployer, networkName);
   await mintBatchManufacturers(

@@ -299,7 +299,7 @@ async function upgradeNft(
 
   if (forceImport) {
     const NftFactoryOld = await ethers.getContractFactory(
-      `${nftName}Old`,
+      `${nftName}_old`,
       deployer,
     );
 
@@ -587,6 +587,7 @@ async function main() {
     deployer,
     'ManufacturerId',
     networkName,
+    true
   );
   writeAddresses(nftInstances, networkName);
 }

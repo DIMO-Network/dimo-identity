@@ -214,6 +214,15 @@ describe('DeviceDefinitionTable', async function () {
 
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
         });
+        it('Should set DIMO Registry as controller', async () => {
+          await ddTableInstance
+            .connect(admin)
+            .createDeviceDefinitionTable(manufacturer1.address, 1);
+
+          const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(1);
+
+          expect(await tablelandRegistry.getController(ddTableName)).to.equal(await ddTableInstance.getAddress());
+        });
       });
 
       context('Events', () => {
@@ -249,6 +258,15 @@ describe('DeviceDefinitionTable', async function () {
             .createDeviceDefinitionTable(manufacturer1.address, 1);
 
           expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
+        });
+        it('Should set DIMO Registry as controller', async () => {
+          await ddTableInstance
+            .connect(manufacturer1)
+            .createDeviceDefinitionTable(manufacturer1.address, 1);
+
+          const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(1);
+
+          expect(await tablelandRegistry.getController(ddTableName)).to.equal(await ddTableInstance.getAddress());
         });
       });
 
@@ -333,6 +351,19 @@ describe('DeviceDefinitionTable', async function () {
           expect(await ddTableInstance.getDeviceDefinitionTableId(2)).to.equal(3);
           expect(await ddTableInstance.getDeviceDefinitionTableId(3)).to.equal(4);
         });
+        it('Should set DIMO Registry as controller', async () => {
+          await ddTableInstance
+            .connect(admin)
+            .createDeviceDefinitionTableBatch(admin.address, [1, 2, 3]);
+
+          const ddTableName1 = await ddTableInstance.getDeviceDefinitionTableName(1);
+          const ddTableName2 = await ddTableInstance.getDeviceDefinitionTableName(2);
+          const ddTableName3 = await ddTableInstance.getDeviceDefinitionTableName(3);
+
+          expect(await tablelandRegistry.getController(ddTableName1)).to.equal(await ddTableInstance.getAddress());
+          expect(await tablelandRegistry.getController(ddTableName2)).to.equal(await ddTableInstance.getAddress());
+          expect(await tablelandRegistry.getController(ddTableName3)).to.equal(await ddTableInstance.getAddress());
+        });
       });
 
       context('Events', () => {
@@ -398,6 +429,19 @@ describe('DeviceDefinitionTable', async function () {
           expect(await ddTableInstance.getDeviceDefinitionTableId(4)).to.equal(2);
           expect(await ddTableInstance.getDeviceDefinitionTableId(5)).to.equal(3);
           expect(await ddTableInstance.getDeviceDefinitionTableId(6)).to.equal(4);
+        });
+        it('Should set DIMO Registry as controller', async () => {
+          await ddTableInstance
+            .connect(manufacturerAdmin)
+            .createDeviceDefinitionTableBatch(manufacturerAdmin.address, [1, 2, 3]);
+
+          const ddTableName1 = await ddTableInstance.getDeviceDefinitionTableName(1);
+          const ddTableName2 = await ddTableInstance.getDeviceDefinitionTableName(2);
+          const ddTableName3 = await ddTableInstance.getDeviceDefinitionTableName(3);
+
+          expect(await tablelandRegistry.getController(ddTableName1)).to.equal(await ddTableInstance.getAddress());
+          expect(await tablelandRegistry.getController(ddTableName2)).to.equal(await ddTableInstance.getAddress());
+          expect(await tablelandRegistry.getController(ddTableName3)).to.equal(await ddTableInstance.getAddress());
         });
       });
 

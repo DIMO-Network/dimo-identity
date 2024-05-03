@@ -43,7 +43,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
     /**
      * @notice Creates a new definition table associated with a specific manufacturer
-     * @dev This function can only be called by an address with the ADMIN_ROLE
+     * @dev This function can only be called by an address with the ADMIN_ROLE or the owner of the manufacturerId
      * @dev The Tableland table NFT is minted to this contract
      * @param tableOwner The owner of the table to be minted
      * @param manufacturerId The unique identifier of the manufacturer
@@ -92,6 +92,69 @@ contract DeviceDefinitionTable is AccessControlInternal {
         dds.tables[manufacturerId] = tableId;
 
         emit DeviceDefinitionTableCreated(tableOwner, manufacturerId, tableId);
+    }
+
+    /**
+     * @notice Creates a set of new definition tables associated with a specific manufacturer
+     * @dev This function can only be called by an address with the ADMIN_ROLE or the owner of the manufacturerIds
+     * @dev The Tableland table NFT is minted to this contract
+     * @param tableOwner The owner of the tables to be minted
+     * @param manufacturerIds A list of unique manufacturer identifiers
+     */
+    function createDeviceDefinitionTableBatch(
+        address tableOwner,
+        uint256[] calldata manufacturerIds
+    ) external {
+        INFT manufacturerIdProxy = INFT(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+
+        for (uint256 i = 0; i < manufacturerIds.length; i++) {
+            if (!manufacturerIdProxy.exists(manufacturerIds[i])) {
+                revert InvalidManufacturerId(manufacturerIds[i]);
+            }
+            if (
+                !_hasRole(ADMIN_ROLE, msg.sender) &&
+                msg.sender != manufacturerIdProxy.ownerOf(manufacturerIds[i])
+            ) revert Unauthorized(msg.sender);
+
+            DeviceDefinitionTableStorage.Storage
+                storage dds = DeviceDefinitionTableStorage.getStorage();
+            TablelandTablesImpl tablelandTables = TablelandDeployments.get();
+
+            if (dds.tables[manufacturerIds[i]] != 0) {
+                revert TableAlreadyExists(manufacturerIds[i]);
+            }
+
+            string memory statement = string(
+                abi.encodePacked(
+                    "CREATE TABLE _",
+                    Strings.toString(block.chainid),
+                    "(id TEXT PRIMARY KEY, model TEXT NOT NULL, year INTEGER NOT NULL, metadata TEXT, ksuid TEXT, deviceType TEXT, imageURI TEXT, UNIQUE(model,year))"
+                )
+            );
+
+            uint256 tableId = tablelandTables.create(address(this), statement);
+
+            tablelandTables.setController(
+                address(this),
+                tableId,
+                address(this)
+            );
+            INFT(address(tablelandTables)).safeTransferFrom(
+                address(this),
+                tableOwner,
+                tableId
+            );
+
+            dds.tables[manufacturerIds[i]] = tableId;
+
+            emit DeviceDefinitionTableCreated(
+                tableOwner,
+                manufacturerIds[i],
+                tableId
+            );
+        }
     }
 
     /**
@@ -270,9 +333,11 @@ contract DeviceDefinitionTable is AccessControlInternal {
         ];
     }
 
-    function _insertDeviceDefinitionData(TablelandTablesImpl tablelandTables, uint256 tableId, DeviceDefinitionInput calldata data
+    function _insertDeviceDefinitionData(
+        TablelandTablesImpl tablelandTables,
+        uint256 tableId,
+        DeviceDefinitionInput calldata data
     ) private {
-        
         tablelandTables.mutate(
             address(this),
             tableId,
@@ -285,22 +350,24 @@ contract DeviceDefinitionTable is AccessControlInternal {
         );
     }
 
-    function _convertDeviceDefinitionToString(DeviceDefinitionInput calldata data) private pure returns (string memory) {
+    function _convertDeviceDefinitionToString(
+        DeviceDefinitionInput calldata data
+    ) private pure returns (string memory) {
         string memory concatenatedData = string.concat(
-                    string(abi.encodePacked("'", data.id, "'")),
-                    ",",
-                    string(abi.encodePacked("'", data.model, "'")),
-                    ",",
-                    Strings.toString(data.year),
-                    ",",
-                    string(abi.encodePacked("'", data.metadata, "'")),
-                    ",",
-                    string(abi.encodePacked("'", data.ksuid, "'")),
-                    ",",
-                    string(abi.encodePacked("'", data.deviceType, "'")),
-                    ",",
-                    string(abi.encodePacked("'", data.imageURI, "'"))
-                );
+            string(abi.encodePacked("'", data.id, "'")),
+            ",",
+            string(abi.encodePacked("'", data.model, "'")),
+            ",",
+            Strings.toString(data.year),
+            ",",
+            string(abi.encodePacked("'", data.metadata, "'")),
+            ",",
+            string(abi.encodePacked("'", data.ksuid, "'")),
+            ",",
+            string(abi.encodePacked("'", data.deviceType, "'")),
+            ",",
+            string(abi.encodePacked("'", data.imageURI, "'"))
+        );
 
         return concatenatedData;
     }

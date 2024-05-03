@@ -47,6 +47,7 @@ describe('DeviceDefinitionTable', async function () {
   let manufacturer1: HardhatEthersSigner;
   let manufacturer2: HardhatEthersSigner;
   let manufacturer3: HardhatEthersSigner;
+  let manufacturerAdmin: HardhatEthersSigner;
   let privilegedUser1: HardhatEthersSigner;
 
   before(async () => {
@@ -57,6 +58,7 @@ describe('DeviceDefinitionTable', async function () {
       manufacturer1,
       manufacturer2,
       manufacturer3,
+      manufacturerAdmin,
       privilegedUser1
     ] = await ethers.getSigners();
 
@@ -193,7 +195,7 @@ describe('DeviceDefinitionTable', async function () {
 
     context('Admin as caller', () => {
       context('State', () => {
-        it('Should create register a new table to a manufacturer', async () => {
+        it('Should create a new table to a manufacturer', async () => {
           expect(await tablelandRegistry.listTables(manufacturer1.address)).to.be.empty;
 
           await ddTableInstance
@@ -229,7 +231,7 @@ describe('DeviceDefinitionTable', async function () {
 
     context('Manufacturer as caller', () => {
       context('State', () => {
-        it('Should create register a new table to a manufacturer', async () => {
+        it('Should create a new table to a manufacturer', async () => {
           expect(await tablelandRegistry.listTables(manufacturer1.address)).to.be.empty;
 
           await ddTableInstance
@@ -259,6 +261,159 @@ describe('DeviceDefinitionTable', async function () {
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
             .withArgs(manufacturer1.address, 1, 2);
+        });
+      });
+    });
+  });
+
+  describe('createDeviceDefinitionTableBatch', () => {
+    context('Error handling', () => {
+      it('Should revert if a manufacturer ID does not exist', async () => {
+        await expect(
+          ddTableInstance
+            .connect(admin)
+            .createDeviceDefinitionTableBatch(admin.address, [1, 2, 99])
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'InvalidManufacturerId',
+        ).withArgs(99);
+      });
+      it('Should revert if caller does not have ADMIN_ROLE or it is not he manufacturer ID owner', async () => {
+        await expect(
+          ddTableInstance
+            .connect(unauthorized)
+            .createDeviceDefinitionTableBatch(admin.address, [1, 2, 3])
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'Unauthorized',
+        ).withArgs(unauthorized.address);
+      });
+      it('Should revert if Device Definition table already exists', async () => {
+        await ddTableInstance
+          .connect(admin)
+          .createDeviceDefinitionTable(manufacturer1.address, 1);
+
+        await expect(
+          ddTableInstance
+            .connect(admin)
+            .createDeviceDefinitionTableBatch(admin.address, [1, 2, 3])
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'TableAlreadyExists',
+        ).withArgs(1);
+      });
+    });
+
+    context('Admin as caller', () => {
+      context('State', () => {
+        it('Should create a new table for each manufacturer ID to the admin', async () => {
+          expect(await tablelandRegistry.listTables(manufacturer1.address)).to.be.empty;
+
+          await ddTableInstance
+            .connect(admin)
+            .createDeviceDefinitionTableBatch(admin.address, [1, 2, 3]);
+
+          expect(await tablelandRegistry.listTables(admin.address))
+            .to.deep.include.members([{ tableId: '2', chainId: CURRENT_CHAIN_ID }]);
+          expect(await tablelandRegistry.listTables(admin.address))
+            .to.deep.include.members([{ tableId: '3', chainId: CURRENT_CHAIN_ID }]);
+          expect(await tablelandRegistry.listTables(admin.address))
+            .to.deep.include.members([{ tableId: '4', chainId: CURRENT_CHAIN_ID }]);
+        });
+        it('Should correctly map each manufacturer ID to the corresponding table created', async () => {
+          expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(0);
+          expect(await ddTableInstance.getDeviceDefinitionTableId(2)).to.equal(0);
+          expect(await ddTableInstance.getDeviceDefinitionTableId(3)).to.equal(0);
+
+          await ddTableInstance
+            .connect(admin)
+            .createDeviceDefinitionTableBatch(admin.address, [1, 2, 3]);
+
+          expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.equal(2);
+          expect(await ddTableInstance.getDeviceDefinitionTableId(2)).to.equal(3);
+          expect(await ddTableInstance.getDeviceDefinitionTableId(3)).to.equal(4);
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit DeviceDefinitionTableCreated event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(admin)
+              .createDeviceDefinitionTableBatch(admin.address, [1, 2, 3])
+          )
+            .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
+            .withArgs(admin.address, 1, 2)
+            .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
+            .withArgs(admin.address, 2, 3)
+            .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
+            .withArgs(admin.address, 3, 4);
+        });
+      });
+    });
+
+    context('Manufacturer as caller', () => {
+      beforeEach(async () => {
+        await dimoAccessControlInstance
+          .connect(admin)
+          .grantRole(C.ADMIN_ROLE, manufacturerAdmin.address);
+
+        // Minting new mock manufacturer nodes
+        await manufacturerInstance
+          .connect(admin)
+          .mintManufacturerBatch(
+            manufacturerAdmin.address,
+            [
+              'mockAdminManuf1',
+              'mockAdminManuf2',
+              'mockAdminManuf3'
+            ]
+          );
+      });
+
+      context('State', () => {
+        it('Should create a new table for each manufacturer Id to the manufacturerAdmin', async () => {
+          expect(await tablelandRegistry.listTables(manufacturerAdmin.address)).to.be.empty;
+
+          await ddTableInstance
+            .connect(manufacturerAdmin)
+            .createDeviceDefinitionTableBatch(manufacturerAdmin.address, [4, 5, 6]);
+
+          expect(await tablelandRegistry.listTables(manufacturerAdmin.address))
+            .to.deep.include.members([{ tableId: '2', chainId: CURRENT_CHAIN_ID }]);
+          expect(await tablelandRegistry.listTables(manufacturerAdmin.address))
+            .to.deep.include.members([{ tableId: '3', chainId: CURRENT_CHAIN_ID }]);
+          expect(await tablelandRegistry.listTables(manufacturerAdmin.address))
+            .to.deep.include.members([{ tableId: '4', chainId: CURRENT_CHAIN_ID }]);
+        });
+        it('Should correctly map each manufacturer ID to the corresponding table created', async () => {
+          expect(await ddTableInstance.getDeviceDefinitionTableId(4)).to.equal(0);
+          expect(await ddTableInstance.getDeviceDefinitionTableId(5)).to.equal(0);
+          expect(await ddTableInstance.getDeviceDefinitionTableId(6)).to.equal(0);
+
+          await ddTableInstance
+            .connect(manufacturerAdmin)
+            .createDeviceDefinitionTableBatch(manufacturerAdmin.address, [4, 5, 6]);
+
+          expect(await ddTableInstance.getDeviceDefinitionTableId(4)).to.equal(2);
+          expect(await ddTableInstance.getDeviceDefinitionTableId(5)).to.equal(3);
+          expect(await ddTableInstance.getDeviceDefinitionTableId(6)).to.equal(4);
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit DeviceDefinitionTableCreated event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(manufacturerAdmin)
+              .createDeviceDefinitionTableBatch(manufacturerAdmin.address, [4, 5, 6])
+          )
+            .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
+            .withArgs(manufacturerAdmin.address, 4, 2)
+            .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
+            .withArgs(manufacturerAdmin.address, 5, 3)
+            .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
+            .withArgs(manufacturerAdmin.address, 6, 4);
         });
       });
     });

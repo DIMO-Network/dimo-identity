@@ -112,7 +112,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         address owner,
         string calldata deviceDefinitionId
     ) external {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         address vehicleIdProxyAddress = vs.idProxyAddress;
 
@@ -124,9 +123,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
-        ns
+        NodesStorage
+        .getStorage()
         .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-        // TODO Maybe just set it after verifying the DD
         vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
 
         emit VehicleNodeMintedWithDeviceDefinition(
@@ -143,17 +142,20 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
+     * @param attrInfo attrInfo
      * @param signature User's signature hash
      */
     function mintVehicleWithDeviceDefinitionSign(
         uint256 manufacturerNode,
         address owner,
         string calldata deviceDefinitionId,
+        AttributeInfoPair[] calldata attrInfo,
         bytes calldata signature
     ) external onlyRole(MINT_VEHICLE_ROLE) {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
-        address vehicleIdProxyAddress = vs.idProxyAddress;
+        // VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
 
         if (
             !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
@@ -161,24 +163,33 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             )
         ) revert InvalidParentNode(manufacturerNode);
 
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
+            newTokenId
+        ] = deviceDefinitionId;
+
+        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
+            newTokenId,
+            attrInfo
+        );
+
         bytes32 message = keccak256(
             abi.encode(
                 MINT_VEHICLE_WITH_DD_TYPEHASH,
                 manufacturerNode,
                 owner,
-                keccak256(bytes(deviceDefinitionId))
+                keccak256(bytes(deviceDefinitionId)),
+                attributesHash,
+                infosHash
             )
         );
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
             revert InvalidOwnerSignature();
-
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
-
-        ns
-        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-        // TODO Maybe just set it after verifying the DD
-        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
 
         emit VehicleNodeMintedWithDeviceDefinition(
             manufacturerNode,

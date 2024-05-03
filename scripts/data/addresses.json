@@ -685,9 +685,10 @@
                 ]
             },
             "DeviceDefinitionTable": {
-                "address": "0xA6d16B6E2B150CD859D333491b58505394aB647d",
+                "address": "0x286A6ca588F55E4E909dBCd47a7055122a1E444F",
                 "selectors": [
                     "0x20954d21",
+                    "0x794c6790",
                     "0x396e5987",
                     "0xa1d17941",
                     "0x23536c5f",
@@ -748,8 +749,8 @@
                 "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
                 "0x6903B9cE4bFAf9D900E40B9dd2F486a4530cA74f"
             ],
-            "StreamRegistry": "",
-            "DimoStreamrNode": ""
+            "StreamRegistry": "0xE9C98bdE63248e58E9137Db8270D9675B9E34b93",
+            "DimoStreamrNode": "0x577f22f5369046B7eF09B6b01424fA860533d243"
         }
     },
     "hardhat": {

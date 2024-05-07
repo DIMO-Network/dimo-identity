@@ -4,15 +4,16 @@ import axios from 'axios';
 import { task } from 'hardhat/config';
 import { EventLog } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { getAccounts, getDatabase, getValidator } from '@tableland/local';
+import { Database, Validator, helpers } from '@tableland/sdk';
 
 import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
 import { AddressesByNetwork, DeviceDefinitionInput, StringNumber } from '../../utils';
 import { makes } from '../data/Makes';
 
-const VALID_NETWORKS = ['localhost', 'amoy']
+const VALID_NETWORKS = ['localhost', 'polygon', 'amoy']
 const CHAIN_ID: StringNumber = {
     'localhost': 31337,
+    'polygon': 137,
     'amoy': 80002
 }
 
@@ -29,6 +30,12 @@ function getAddresses(currentNetwork: string): AddressesByNetwork {
 function validateNetwork(currentNetwork: string) {
     if (!VALID_NETWORKS.includes(currentNetwork)) {
         throw new Error(`Invalid network <${currentNetwork}>\nMake sure to add the flag "--network [${VALID_NETWORKS}]"\n`)
+    }
+}
+
+function validateQueryType(queryType: string) {
+    if (!['select', 'count'].includes(queryType)) {
+        throw new Error(`Invalid query type <${queryType}>\nAvailable queries: select or count"\n`)
     }
 }
 
@@ -53,6 +60,31 @@ async function getGasPrice(hre: HardhatRuntimeEnvironment, bump: bigint = 20n): 
 
     return (price * bump / 100n + price).toString();
 }
+
+async function getGasPriceWithSleep(
+    hre: HardhatRuntimeEnvironment,
+    bump: bigint = 20n,
+    priceLimit: bigint,
+    sleepInterval: number
+): Promise<string> {
+    let price = (await hre.ethers.provider.getFeeData()).gasPrice as bigint;
+    let returnPrice = price * bump / 100n + price;
+
+    if (priceLimit) {
+        while (returnPrice > priceLimit) {
+            console.log(`Gas price too high: ${returnPrice}\nSleeping ${sleepInterval} ms...`);
+            await sleep(sleepInterval);
+            console.log('Done sleeping');
+
+            price = (await hre.ethers.provider.getFeeData()).gasPrice as bigint;
+            returnPrice = price * bump / 100n + price
+        }
+    }
+
+    return returnPrice.toString();
+}
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 task('mint-manufacturer', 'Mints a new Manufacturer')
     .addPositionalParam('name', 'The name of the manufacturer to be minted')
@@ -96,8 +128,10 @@ task('create-dd-table', 'Creates a Device Definition table related to a Manufact
             instances[currentNetwork].modules.DIMORegistry.address,
         );
 
-        const tablelandDb = getDatabase(getAccounts()[0]);
-        const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
+        const db = new Database({
+            baseUrl: helpers.getBaseUrl(CHAIN_ID[currentNetwork]),
+        });
+        const tablelandValidator = new Validator(db.config);
 
         console.log(`Creating Device Definition table for manufacturer ID ${args.manufacturerId}...`);
 
@@ -131,8 +165,10 @@ task('create-dd-tables', 'Creates Device Definition tables related to s list of 
             'DeviceDefinitionTable',
             instances[currentNetwork].modules.DIMORegistry.address,
         );
-        const tablelandDb = getDatabase(getAccounts()[0]);
-        const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
+        const db = new Database({
+            baseUrl: helpers.getBaseUrl(CHAIN_ID[currentNetwork]),
+        });
+        const tablelandValidator = new Validator(db.config);
 
         for (const manufacturerId of manufacturerIds) {
             const _gasPrice = await getGasPrice(hre);
@@ -155,10 +191,9 @@ task('create-dd-tables', 'Creates Device Definition tables related to s list of 
         }
     });
 
-task('migration-tableland', 'npx hardhat migration-tableland --network localhost')
+task('migration-tableland', 'npx hardhat migration-tableland --network <networkName>')
     .setAction(async (args, hre) => {
         const currentNetwork = hre.network.name;
-        hre.ethers.provider
         validateNetwork(currentNetwork);
 
         let _gasPrice;
@@ -171,8 +206,10 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             instances[currentNetwork].modules.DIMORegistry.address,
         );
 
-        const tablelandDb = getDatabase(getAccounts()[0]);
-        const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
+        const db = new Database({
+            baseUrl: helpers.getBaseUrl(CHAIN_ID[currentNetwork]),
+        });
+        const tablelandValidator = new Validator(db.config);
 
         console.log(`Total manufacturers ${makes.length}...`);
 
@@ -185,15 +222,15 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             instances[currentNetwork].modules.DIMORegistry.address,
         );
 
-        for await (const element of makes) {
+        for (const make of makes) {
             const manufacturerId = await manufacturerInstance
                 .connect(signer)
-                .getManufacturerIdByName(element);
+                .getManufacturerIdByName(make);
 
             let ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
 
             if (ddTableId.toString() === '0') {
-                console.log(`Creating Device Definition table for manufacturer ${element} with ID  ${manufacturerId}...`);
+                console.log(`Creating Device Definition table for manufacturer ${make} with ID  ${manufacturerId}...`);
 
                 _gasPrice = await getGasPrice(hre);
                 const dTx = await ddTableInstance
@@ -205,15 +242,15 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
                     transactionHash: (await dTx.wait())?.hash as string,
                 });
 
-                ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
+                const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
+
+                console.log(`Device Definition table created\nTable ID: ${ddTableId}\nTable Name: ${ddTableName}`);
             }
 
-            const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
+            ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
 
-            console.log(`Device Definition table created\nTable ID: ${ddTableId}\nTable Name: ${ddTableName}`);
-
-            const deviceDefinitionByManufacturers = devices.filter((c) => c.make.name === element && c.type.year > 2006);
-            console.log(`Get Device Definition By Manufacturer [${element}] total => ${deviceDefinitionByManufacturers.length}`);
+            const deviceDefinitionByManufacturers = devices.filter((c) => c.make.name === make && c.type.year > 2006);
+            console.log(`Get Device Definition By Manufacturer [${make}] total => ${deviceDefinitionByManufacturers.length}`);
 
             const batchSize = 50;
             let items = 0;
@@ -221,7 +258,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
             for (let i = 0; i < deviceDefinitionByManufacturers.length; i += batchSize) {
                 const batch = deviceDefinitionByManufacturers.slice(i, i + batchSize).map(function (dd) {
                     const deviceDefinitionInput: DeviceDefinitionInput = {
-                        id: `${dd.type.make_slug}_${dd.type.model_slug}_${dd.type.year}`,
+                        id: generateSlug(`${dd.type.make_slug}_${dd.type.model_slug}_${dd.type.year}`),
                         ksuid: dd.device_definition_id,
                         model: dd.type.model,
                         year: dd.type.year,
@@ -236,75 +273,168 @@ task('migration-tableland', 'npx hardhat migration-tableland --network localhost
 
                 items += batch.length;
 
-                console.log(batch);
+                _gasPrice = await getGasPriceWithSleep(hre, 20n, 15000000000n, 5000); // 15 gwei
+                console.log(`Creating [${items}/${deviceDefinitionByManufacturers.length}] ...`);
+                const tx = await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch, { gasPrice: _gasPrice });
 
-                _gasPrice = await getGasPrice(hre);
-                console.log(`Creating [${deviceDefinitionByManufacturers.length}/${items}] ...`);
-                await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch, { gasPrice: _gasPrice });
+                await tablelandValidator.pollForReceiptByTransactionHash({
+                    chainId: CHAIN_ID[currentNetwork],
+                    transactionHash: (await tx.wait())?.hash as string,
+                });
             }
 
-            const count = await tablelandDb.prepare(
+            const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
+            const count = await db.prepare(
                 `SELECT COUNT(*) AS total FROM ${ddTableName}`
             ).first<{ total: number }>('total');
 
-            console.log(`${element} => ${ddTableName} total rows: ${count}`);
-            console.log(`${element} => ${ddTableName} total upload: ${deviceDefinitionByManufacturers.length}`);
+            console.log(`${make} => ${ddTableName} total rows: ${count}`);
+            console.log(`${make} => ${ddTableName} total upload: ${deviceDefinitionByManufacturers.length}\n`);
         }
     });
 
-task('query-tableland', 'npx hardhat query-tableland <name> --network localhost')
+task('query-tableland', 'npx hardhat query-tableland <name> <type> --network <networkName>')
     .addPositionalParam('name', 'The name of the manufacturer table')
-    .addPositionalParam('filter', 'The filter to query device definition table', '')
-    .addOptionalParam('limit', 'The limit to query device definition table', 'LIMIT 10')
+    .addPositionalParam('type', 'Type of quert <select|count>', 'select')
+    .addOptionalParam('filter', 'The filter to query device definition table', '')
+    .addOptionalParam('limit', 'The limit to query device definition table', '10')
     .setAction(async (args, hre) => {
         const currentNetwork = hre.network.name;
         validateNetwork(currentNetwork);
+        validateQueryType(args.type);
 
         const instances = getAddresses(currentNetwork);
-        const [signer] = await hre.ethers.getSigners();
-
+        const db = new Database({
+            baseUrl: helpers.getBaseUrl(CHAIN_ID[currentNetwork]),
+        });
         const manufacturerInstance: Manufacturer = await hre.ethers.getContractAt(
             'Manufacturer',
             instances[currentNetwork].modules.DIMORegistry.address,
         );
-
-        const tablelandDb = getDatabase(getAccounts()[0]);
-
-        console.log(`Manufacturer address [${instances[currentNetwork].modules.DIMORegistry.address}]`);
-        console.log('Signer', signer);
-        console.log('GetAccounts', getAccounts()[0]);
-        console.log(`Query to manufacturer table [${args.name}] for ${signer.address}...`);
-
         const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
             'DeviceDefinitionTable',
             instances[currentNetwork].modules.DIMORegistry.address,
         );
 
-        const manufacturerId = await manufacturerInstance
-            .connect(signer)
-            .getManufacturerIdByName(args.name);
+        console.log(`ManufacturerId address ${instances[currentNetwork].modules.DIMORegistry.address}`);
+        console.log(`Query to manufacturer table ${args.name}...`);
 
-        console.log(`Manufacturer ID => ${manufacturerId}...`);
+        const manufacturerId = await manufacturerInstance.getManufacturerIdByName(args.name);
         const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
 
+        console.log(`Manufacturer ID => ${manufacturerId} with table name ${ddTableName}`);
+
         const where = args.filter ? `WHERE id='${args.filter}'` : '';
-        const script = `SELECT * FROM ${ddTableName} ${where} ${args.limit}`;
+
+        let script = '';
+        switch (args.type) {
+            case 'select':
+                script = `SELECT * FROM ${ddTableName}${where} LIMIT ${args.limit}`;
+                break;
+            case 'count':
+                script = `SELECT COUNT(*) as total FROM ${ddTableName}${where} LIMIT ${args.limit}`;
+                break;
+        }
         console.log(script);
 
-        const query = await tablelandDb.prepare(
+        const query = await db.prepare(
             script
         ).all();
 
         console.log(`Duration: ${query.meta.duration}`);
         console.log(`Total rows: ${query.results.length}`);
         console.table(query.results);
-
     });
 
-task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-schema --network localhost')
+task('count-dds', 'npx hardhat count-dds --network <networkName>')
     .setAction(async (args, hre) => {
         const currentNetwork = hre.network.name;
-        hre.ethers.provider
+        validateNetwork(currentNetwork);
+
+        console.log('Get device definitions...');
+        const devices = (await getDeviceDefinitions()).data.device_definitions;
+        console.log(`Total device definitions ${devices.length}...`);
+
+        const output = [];
+        let numDdTotal = 0;
+        let numBatchesTotal = 0;
+        for (const make of makes) {
+            const deviceDefinitionByManufacturers = devices.filter((c) => c.make.name === make && c.type.year > 2006);
+            const _numDdByManuf = deviceDefinitionByManufacturers.length as number;
+            let _numBatchesByManuf = 0;
+
+            if (_numDdByManuf > 50) {
+                _numBatchesByManuf = Math.trunc(_numDdByManuf / 50) + 1;
+            } else if (_numDdByManuf > 0) {
+                _numBatchesByManuf = 1;
+            }
+
+            numDdTotal += _numDdByManuf;
+            numBatchesTotal += _numBatchesByManuf;
+            console.log(numBatchesTotal, _numBatchesByManuf)
+
+            output.push({
+                make: make,
+                count: _numDdByManuf,
+                numBatches: _numBatchesByManuf
+            });
+        }
+
+        console.table(output);
+        console.log(numDdTotal, numBatchesTotal)
+    });
+
+task('query-all-tableland', 'npx hardhat query-tableland <type> --network <networkName>')
+    .addPositionalParam('type', 'Type of quert <select|count>', 'select')
+    .addOptionalParam('filter', 'The filter to query device definition table', '')
+    .addOptionalParam('limit', 'The limit to query device definition table', '10')
+    .setAction(async (args, hre) => {
+        const currentNetwork = hre.network.name;
+        validateNetwork(currentNetwork);
+        validateQueryType(args.type);
+
+        const instances = getAddresses(currentNetwork);
+        const db = new Database({
+            baseUrl: helpers.getBaseUrl(CHAIN_ID[currentNetwork]),
+        });
+        const manufacturerInstance: Manufacturer = await hre.ethers.getContractAt(
+            'Manufacturer',
+            instances[currentNetwork].modules.DIMORegistry.address,
+        );
+        const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
+            'DeviceDefinitionTable',
+            instances[currentNetwork].modules.DIMORegistry.address,
+        );
+
+        console.log(`ManufacturerId address ${instances[currentNetwork].modules.DIMORegistry.address}`);
+
+        for (const make of makes.reverse()) {
+            const manufacturerId = await manufacturerInstance.getManufacturerIdByName(make);
+            const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
+
+            const where = args.filter ? `WHERE id='${args.filter}'` : '';
+
+            let script = '';
+            switch (args.type) {
+                case 'select':
+                    script = `SELECT * FROM ${ddTableName}${where} LIMIT ${args.limit}`;
+                    break;
+                case 'count':
+                    script = `SELECT COUNT(*) AS total FROM ${ddTableName}${where} LIMIT ${args.limit}`;
+                    break;
+            }
+
+            const query = await db.prepare(
+                script
+            ).all();
+
+            console.log(`${manufacturerId} ${make}: ${query.results[0]['total']}`);
+        }
+    });
+
+task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-schema --network <networkName>')
+    .setAction(async (args, hre) => {
+        const currentNetwork = hre.network.name;
         validateNetwork(currentNetwork);
 
         let _gasPrice;
@@ -317,8 +447,10 @@ task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-
             instances[currentNetwork].modules.DIMORegistry.address,
         );
 
-        const tablelandDb = getDatabase(getAccounts()[0]);
-        const tablelandValidator = getValidator(tablelandDb.config.baseUrl);
+        const db = new Database({
+            baseUrl: helpers.getBaseUrl(CHAIN_ID[currentNetwork]),
+        });
+        const tablelandValidator = new Validator(db.config);
 
         console.log(`Total manufacturers ${makes.length}...`);
 
@@ -363,10 +495,10 @@ task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-
         }
     });
 
-async function getDeviceMakes() {
-    return await axios.get('https://device-definitions-api.dimo.zone/device-makes');
-}
-
 async function getDeviceDefinitions() {
     return await axios.get('https://device-definitions-api.dimo.zone/device-definitions/all');
+}
+
+function generateSlug(str: string) {
+    return str.replace(/\//g, '-');
 }

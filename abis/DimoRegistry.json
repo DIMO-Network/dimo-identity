@@ -3811,6 +3811,24 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "tableOwner",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "manufacturerIds",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "createDeviceDefinitionTableBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256",
                 "name": "manufacturerId",
                 "type": "uint256"

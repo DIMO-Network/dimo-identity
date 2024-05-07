@@ -10,9 +10,10 @@ import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
 import { AddressesByNetwork, DeviceDefinitionInput, StringNumber } from '../../utils';
 import { makes } from '../data/Makes';
 
-const VALID_NETWORKS = ['localhost', 'amoy']
+const VALID_NETWORKS = ['localhost', 'polygon', 'amoy']
 const CHAIN_ID: StringNumber = {
     'localhost': 31337,
+    'polygon': 137,
     'amoy': 80002
 }
 
@@ -343,6 +344,44 @@ task('query-tableland', 'npx hardhat query-tableland <name> <type> --network <ne
         console.log(`Duration: ${query.meta.duration}`);
         console.log(`Total rows: ${query.results.length}`);
         console.table(query.results);
+    });
+
+task('count-dds', 'npx hardhat count-dds --network <networkName>')
+    .setAction(async (args, hre) => {
+        const currentNetwork = hre.network.name;
+        validateNetwork(currentNetwork);
+
+        console.log('Get device definitions...');
+        const devices = (await getDeviceDefinitions()).data.device_definitions;
+        console.log(`Total device definitions ${devices.length}...`);
+
+        const output = [];
+        let numDdTotal = 0;
+        let numBatchesTotal = 0;
+        for (const make of makes) {
+            const deviceDefinitionByManufacturers = devices.filter((c) => c.make.name === make && c.type.year > 2006);
+            const _numDdByManuf = deviceDefinitionByManufacturers.length as number;
+            let _numBatchesByManuf = 0;
+
+            if (_numDdByManuf > 50) {
+                _numBatchesByManuf = Math.trunc(_numDdByManuf / 50) + 1;
+            } else if (_numDdByManuf > 0) {
+                _numBatchesByManuf = 1;
+            }
+
+            numDdTotal += _numDdByManuf;
+            numBatchesTotal += _numBatchesByManuf;
+            console.log(numBatchesTotal, _numBatchesByManuf)
+
+            output.push({
+                make: make,
+                count: _numDdByManuf,
+                numBatches: _numBatchesByManuf
+            });
+        }
+
+        console.table(output);
+        console.log(numDdTotal, numBatchesTotal)
     });
 
 task('query-all-tableland', 'npx hardhat query-tableland <type> --network <networkName>')

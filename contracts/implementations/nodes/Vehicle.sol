@@ -102,16 +102,19 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     }
 
     /**
-     * @notice Public funtion to mint a vehicle with a Device Definition Id
+     * @notice Function to mint a vehicle with a Device Definition Id
+     * @dev Caller must have the admin role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
+     * @param attrInfo List of attribute-info pairs to be added
      */
     function mintVehicleWithDeviceDefinition(
         uint256 manufacturerNode,
         address owner,
-        string calldata deviceDefinitionId
-    ) external {
+        string calldata deviceDefinitionId,
+        AttributeInfoPair[] calldata attrInfo
+    ) external onlyRole(MINT_VEHICLE_ROLE) {
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         address vehicleIdProxyAddress = vs.idProxyAddress;
 
@@ -134,6 +137,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             owner,
             deviceDefinitionId
         );
+
+        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
     }
 
     /**

@@ -152,7 +152,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         AttributeInfoPair[] calldata attrInfo,
         bytes calldata signature
     ) external onlyRole(MINT_VEHICLE_ROLE) {
-        // VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
@@ -172,6 +171,13 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             newTokenId
         ] = deviceDefinitionId;
 
+        emit VehicleNodeMintedWithDeviceDefinition(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
+
         (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
             newTokenId,
             attrInfo
@@ -190,13 +196,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
             revert InvalidOwnerSignature();
-
-        emit VehicleNodeMintedWithDeviceDefinition(
-            manufacturerNode,
-            newTokenId,
-            owner,
-            deviceDefinitionId
-        );
     }
 
     /**

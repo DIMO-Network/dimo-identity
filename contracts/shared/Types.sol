@@ -63,6 +63,7 @@ struct MintVehicleAndSdWithDdInput {
     uint256 manufacturerNode;
     address owner;
     string deviceDefinitionId;
+    AttributeInfoPair[] attrInfoPairsVehicle;
     uint256 integrationNode;
     bytes vehicleOwnerSig;
     bytes syntheticDeviceSig;

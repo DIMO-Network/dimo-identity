@@ -3223,6 +3223,23 @@
                         "type": "string"
                     },
                     {
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "attribute",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "info",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct AttributeInfoPair[]",
+                        "name": "attrInfoPairsVehicle",
+                        "type": "tuple[]"
+                    },
+                    {
                         "internalType": "uint256",
                         "name": "integrationNode",
                         "type": "uint256"

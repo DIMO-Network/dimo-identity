@@ -351,8 +351,7 @@ describe('VehicleId', async function () {
           .connect(nonAdmin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS),
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`,
       );
     });
@@ -370,8 +369,7 @@ describe('VehicleId', async function () {
           .connect(nonAdmin)
           .setSyntheticDeviceIdAddress(C.ZERO_ADDRESS),
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`,
       );
     });
@@ -399,8 +397,7 @@ describe('VehicleId', async function () {
           .connect(nonAdmin)
           .setTrustedForwarder(C.ZERO_ADDRESS, true),
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`,
       );
     });
@@ -446,11 +443,11 @@ describe('VehicleId', async function () {
         await expect(
           vehicleIdInstance
             .connect(user2)
-            ['safeTransferFrom(address,address,uint256)'](
-              user1.address,
-              user2.address,
-              1,
-            ),
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            1,
+          ),
         ).to.be.revertedWithCustomError(vehicleIdInstance, 'Unauthorized');
       });
     });
@@ -461,11 +458,11 @@ describe('VehicleId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1,
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1,
+        );
 
         expect(await vehicleIdInstance.ownerOf(1)).to.equal(user2.address);
       });
@@ -477,11 +474,11 @@ describe('VehicleId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1,
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1,
+        );
 
         expect(
           await nodesInstance.getParentNode(
@@ -503,11 +500,11 @@ describe('VehicleId', async function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-            1,
-            1,
-            pairSignature,
-          );
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+          1,
+          1,
+          pairSignature,
+        );
 
         const vehicleIdToAdId = await mapperInstance.getLink(
           await vehicleIdInstance.getAddress(),
@@ -520,11 +517,11 @@ describe('VehicleId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1,
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1,
+        );
 
         expect(
           await nodesInstance.getParentNode(
@@ -549,11 +546,11 @@ describe('VehicleId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1,
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1,
+        );
 
         for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
           expect(
@@ -570,11 +567,11 @@ describe('VehicleId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1,
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1,
+        );
 
         expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
           previousVersion + ethers.toBigInt(1),
@@ -658,11 +655,11 @@ describe('VehicleId', async function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-            1,
-            1,
-            localPairSignature,
-          );
+        ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+          1,
+          1,
+          localPairSignature,
+        );
 
         await expect(vehicleIdInstance.connect(user1).burn(1))
           .to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
@@ -726,12 +723,17 @@ describe('VehicleId', async function () {
         it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
           await vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId2);
-  
+            .mintVehicleWithDeviceDefinition(
+              1,
+              user1.address,
+              C.mockDdId2,
+              C.mockVehicleAttributeInfoPairs
+            );
+
           expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.equal(C.mockDdId2);
-  
+
           await vehicleIdInstance.connect(user1).burn(2);
-  
+
           expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.empty;
         });
         it('Should correctly reset infos to blank', async () => {

@@ -1623,7 +1623,12 @@ describe('Vehicle', function () {
       it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId2);
+          .mintVehicleWithDeviceDefinition(
+            1,
+            user1.address,
+            C.mockDdId2,
+            C.mockVehicleAttributeInfoPairs
+          );
 
         expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.equal(C.mockDdId2);
 

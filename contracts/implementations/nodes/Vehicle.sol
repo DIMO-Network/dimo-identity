@@ -70,7 +70,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Mints a vehicle
-     * @dev Caller must have the admin role
+     * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param attrInfo List of attribute-info pairs to be added
@@ -103,7 +103,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Function to mint a vehicle with a Device Definition Id
-     * @dev Caller must have the admin role
+     * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
@@ -143,7 +143,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Mint a vehicle with a Device Definition Id through a metatransaction
-     * @dev Caller must have the minter role
+     * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
@@ -206,7 +206,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     /**
      * @notice Mints a vehicle through a metatransaction
      * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-     * @dev Caller must have the admin role
+     * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param attrInfo List of attribute-info pairs to be added
@@ -258,7 +258,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     /**
      * @notice Add infos to node
      * @dev attributes must be whitelisted
-     * @dev Caller must have the admin role
+     * @dev Caller must have the set vehicle info role
      * @param tokenId Node where the info will be added
      * @param attrInfo List of attribute-info pairs to be added
      */
@@ -275,7 +275,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Burns a vehicle and reset all its attributes
-     * @dev Caller must have the admin role
+     * @dev Caller must have the burn vehicle role
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenId Vehicle node id
      * @param ownerSig Vehicle owner signature hash

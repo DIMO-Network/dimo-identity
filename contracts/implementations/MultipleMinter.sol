@@ -30,7 +30,7 @@ contract MultipleMinter is
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
      * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-     * @dev Caller must have the minter role
+     * @dev Caller must have the mint vehicle sd role
      * @param data Input data with the following fields:
      *  manufacturerNode -> Parent manufacturer node id of the vehicle
      *  owner -> The new nodes owner
@@ -150,7 +150,7 @@ contract MultipleMinter is
     /**
      * @notice Mints and pairs a vehicle (with a Device Definition Id) and a synthetic device through a metatransaction
      * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-     * @dev Caller must have the minter role
+     * @dev Caller must have the mint vehicle sd role
      * @param data Input data with the following fields:
      *  manufacturerNode -> Parent manufacturer node id of the vehicle
      *  owner -> The new nodes owner

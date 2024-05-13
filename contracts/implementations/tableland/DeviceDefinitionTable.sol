@@ -203,6 +203,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
      *  model -> The model of the Device Definition
      *  year -> The year of the Device Definition
      *  metadata -> The metadata stringfied object of the Device Definition
+     *  ksuid -> K-Sortable Unique IDentifier
      *  deviceType -> The deviceType of the Device Definition
      *  imageURI -> The image uri of the Device Definition
      */
@@ -249,6 +250,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
      *  model -> The model of the Device Definition
      *  year -> The year of the Device Definition
      *  metadata -> The metadata stringfied object of the Device Definition
+     *  ksuid -> K-Sortable Unique IDentifier
      *  deviceType -> The deviceType of the Device Definition
      *  imageURI -> The image uri of the Device Definition
      */

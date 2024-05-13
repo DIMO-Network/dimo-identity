@@ -2819,6 +2819,23 @@
                 "internalType": "string",
                 "name": "deviceDefinitionId",
                 "type": "string"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "attribute",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "info",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct AttributeInfoPair[]",
+                "name": "attrInfo",
+                "type": "tuple[]"
             }
         ],
         "name": "mintVehicleWithDeviceDefinition",
@@ -2842,6 +2859,23 @@
                 "internalType": "string",
                 "name": "deviceDefinitionId",
                 "type": "string"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "attribute",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "info",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct AttributeInfoPair[]",
+                "name": "attrInfo",
+                "type": "tuple[]"
             },
             {
                 "internalType": "bytes",
@@ -3204,6 +3238,23 @@
                         "internalType": "string",
                         "name": "deviceDefinitionId",
                         "type": "string"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "attribute",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "info",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct AttributeInfoPair[]",
+                        "name": "attrInfoPairsVehicle",
+                        "type": "tuple[]"
                     },
                     {
                         "internalType": "uint256",

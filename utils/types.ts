@@ -71,6 +71,7 @@ export type MintVehicleAndSdWithDdInput = {
   manufacturerNode: string,
   owner: string,
   deviceDefinitionId: string,
+  attrInfoPairsVehicle: AttributeInfoPair[],
   integrationNode: string,
   vehicleOwnerSig: string,
   syntheticDeviceSig: string,

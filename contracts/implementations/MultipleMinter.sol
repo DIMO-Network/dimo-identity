@@ -30,7 +30,7 @@ contract MultipleMinter is
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
      * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-     * @dev Caller must have the minter role
+     * @dev Caller must have the mint vehicle sd role
      * @param data Input data with the following fields:
      *  manufacturerNode -> Parent manufacturer node id of the vehicle
      *  owner -> The new nodes owner
@@ -150,11 +150,12 @@ contract MultipleMinter is
     /**
      * @notice Mints and pairs a vehicle (with a Device Definition Id) and a synthetic device through a metatransaction
      * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-     * @dev Caller must have the minter role
+     * @dev Caller must have the mint vehicle sd role
      * @param data Input data with the following fields:
      *  manufacturerNode -> Parent manufacturer node id of the vehicle
      *  owner -> The new nodes owner
      *  deviceDefinitionId -> The Device Definition Id
+     *  attrInfoPairsVehicle -> List of attribute-info pairs to be added of the vehicle
      *  integrationNode -> Parent integration node id of the synthetic device
      *  vehicleOwnerSig -> Vehicle owner signature hash
      *  syntheticDeviceSig -> Synthetic Device's signature hash
@@ -164,7 +165,6 @@ contract MultipleMinter is
     function mintVehicleAndSdWithDeviceDefinitionSign(
         MintVehicleAndSdWithDdInput calldata data
     ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
@@ -210,12 +210,19 @@ contract MultipleMinter is
             data.deviceDefinitionId
         );
 
+        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
+            newTokenIdVehicle,
+            data.attrInfoPairsVehicle
+        );
+
         message = keccak256(
             abi.encode(
                 MINT_VEHICLE_WITH_DD_TYPEHASH,
                 data.manufacturerNode,
                 data.owner,
-                keccak256(bytes(data.deviceDefinitionId))
+                keccak256(bytes(data.deviceDefinitionId)),
+                attributesHash,
+                infosHash
             )
         );
 
@@ -244,12 +251,16 @@ contract MultipleMinter is
         // ----- END Synthetic Device mint and attributes -----
 
         // ----- Internal contract state change -----
-        ns.nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
             .manufacturerNode;
         vs.vehicleIdToDeviceDefinitionId[newTokenIdVehicle] = data
             .deviceDefinitionId;
 
-        ns.nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
+        NodesStorage
+        .getStorage()
+        .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
             .integrationNode;
 
         ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][

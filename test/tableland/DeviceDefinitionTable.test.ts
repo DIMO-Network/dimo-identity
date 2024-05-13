@@ -62,9 +62,9 @@ describe('DeviceDefinitionTable', async function () {
       privilegedUser1
     ] = await ethers.getSigners();
 
-    tablelandDb = getDatabase(accounts[0]);
+    tablelandDb = getDatabase(accounts[0]) as unknown as Database;
     tablelandValidator = getValidator(tablelandDb.config.baseUrl);
-    tablelandRegistry = getRegistry(accounts[0]);
+    tablelandRegistry = getRegistry(accounts[0]) as unknown as Registry;
 
     const deployments = await setup(admin, {
       modules: [

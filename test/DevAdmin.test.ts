@@ -1203,10 +1203,20 @@ describe('DevAdmin', function () {
       it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId1);
+          .mintVehicleWithDeviceDefinition(
+            1,
+            user1.address,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs
+          );
         await vehicleInstance
           .connect(admin)
-          .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId2);
+          .mintVehicleWithDeviceDefinition(
+            1,
+            user1.address,
+            C.mockDdId2,
+            C.mockVehicleAttributeInfoPairs
+          );
 
         expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(3)).to.be.equal(C.mockDdId1);
         expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(4)).to.be.equal(C.mockDdId2);
@@ -1441,10 +1451,20 @@ describe('DevAdmin', function () {
         it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
           await vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId1);
+            .mintVehicleWithDeviceDefinition(
+              1,
+              user1.address,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs
+            );
           await vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinition(1, user1.address, C.mockDdId2);
+            .mintVehicleWithDeviceDefinition(
+              1,
+              user1.address,
+              C.mockDdId2,
+              C.mockVehicleAttributeInfoPairs
+            );
 
           expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(3)).to.be.equal(C.mockDdId1);
           expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(4)).to.be.equal(C.mockDdId2);

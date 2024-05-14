@@ -6,11 +6,13 @@ import * as tdly from '@tenderly/hardhat-tenderly';
 import '@nomicfoundation/hardhat-toolbox';
 import '@nomiclabs/hardhat-solhint';
 import '@openzeppelin/hardhat-upgrades';
+import '@tableland/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
 import 'hardhat-abi-exporter';
 
 import './scripts/linearization';
+import './scripts/tableland/tasks';
 
 tdly.setup();
 dotenv.config();
@@ -42,14 +44,18 @@ const config: HardhatUserConfig = {
       url: process.env.POLYGON_URL || '',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
-    mumbai: {
-      url: process.env.MUMBAI_URL || '',
+    amoy: {
+      url: process.env.AMOY_URL || '',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
     tenderly: {
       url: process.env.TENDERLY_URL || '',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
+  },
+  localTableland: {
+    silent: false,
+    verbose: false,
   },
   tenderly: {
     username: process.env.TENDERLY_USERNAME || '', // tenderly username (or organization name)
@@ -72,8 +78,18 @@ const config: HardhatUserConfig = {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
+      polygonAmoy: process.env.POLYGONSCAN_API_KEY || '',
     },
+    customChains: [
+      {
+        network: 'polygonAmoy',
+        chainId: 80002,
+        urls: {
+          apiURL: 'https://api-amoy.polygonscan.com/api',
+          browserURL: 'https://amoy.polygonscan.com/',
+        },
+      },
+    ],
   },
   abiExporter: {
     path: './abis',

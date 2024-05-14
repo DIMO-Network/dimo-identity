@@ -11,4 +11,6 @@ export * from './SyntheticDevice';
 export * from './MultiPrivilege';
 export * from './NftArgs';
 export * from './UpgradeableContractsArgs';
+export * from './DeviceDefinitionTable';
+export * from './Vehicle';
 export * from './Streamr';

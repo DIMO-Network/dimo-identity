@@ -249,10 +249,9 @@ contract DevAdmin is AccessControlInternal {
     ) external onlyRole(DEV_VEHICLE_BURN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
+        address vehicleIdProxyAddress = vs.idProxyAddress;
         address sdIdProxyAddress = SyntheticDeviceStorage
             .getStorage()
             .idProxyAddress;
@@ -277,6 +276,7 @@ contract DevAdmin is AccessControlInternal {
             owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
 
             delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+            delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
             emit VehicleNodeBurnedDevAdmin(tokenId, owner);
 
@@ -297,12 +297,11 @@ contract DevAdmin is AccessControlInternal {
     ) external onlyRole(DEV_VEHICLE_BURN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
             .getStorage();
 
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
+        address vehicleIdProxyAddress = vs.idProxyAddress;
         address adIdProxyAddress = AftermarketDeviceStorage
             .getStorage()
             .idProxyAddress;
@@ -365,6 +364,7 @@ contract DevAdmin is AccessControlInternal {
             }
 
             delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+            delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
             emit VehicleNodeBurnedDevAdmin(tokenId, owner);
 

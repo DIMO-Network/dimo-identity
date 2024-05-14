@@ -98,8 +98,7 @@ async function deployNfts(
     );
 
     console.log(
-      `NFT contract ${
-        contractNameArg.name
+      `NFT contract ${contractNameArg.name
       } deployed to ${await contractProxy.getAddress()}`,
     );
 
@@ -210,7 +209,7 @@ async function removeModule(
 async function updateModule(
   deployer: HardhatEthersSigner,
   contractName: string,
-  networkName: string,
+  networkName: string
 ): Promise<AddressesByNetwork> {
   const instances = getAddresses();
 
@@ -287,7 +286,7 @@ async function upgradeNft(
   deployer: HardhatEthersSigner,
   nftName: string,
   networkName: string,
-  forceImport?: boolean,
+  forceImport?: boolean
 ): Promise<AddressesByNetwork> {
   const NftFactory = await ethers.getContractFactory(nftName, deployer);
 
@@ -540,18 +539,16 @@ async function main() {
     network.name === 'localhost' ||
     network.name === 'tenderly'
   ) {
-    networkName = 'polygon';
+    networkName = 'amoy';
     // console.log(deployer.address);
 
-    // 0xCED3c922200559128930180d3f0bfFd4d9f4F123
-    // 0x1741eC2915Ab71Fc03492715b5640133dA69420B
-    // deployer = await ethers.getImpersonatedSigner(
-    //   '0xCED3c922200559128930180d3f0bfFd4d9f4F123'
-    // );
+    // 0xCED3c922200559128930180d3f0bfFd4d9f4F123 -> polygon
+    // 0x1741eC2915Ab71Fc03492715b5640133dA69420B -> deployer
+    // 0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b -> amoy
 
     await network.provider.request({
       method: 'hardhat_impersonateAccount',
-      params: ['0xCED3c922200559128930180d3f0bfFd4d9f4F123'],
+      params: ['0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b'],
     });
     // await network.provider.request({
     //   method: 'hardhat_impersonateAccount',
@@ -559,7 +556,7 @@ async function main() {
     // });
 
     deployer = await ethers.getSigner(
-      '0xCED3c922200559128930180d3f0bfFd4d9f4F123',
+      '0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b',
     );
     nodeOwner = await ethers.getSigner(
       '0xc0f28da7ae009711026c648913eb17962fd96dd7',

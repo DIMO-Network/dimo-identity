@@ -33,6 +33,13 @@ export const schemaBase: TypedData = {
       { name: 'vehicleNode', type: 'uint256' }
     ],
     MintVehicleAndSdSign: [{ name: 'integrationNode', type: 'uint256' }],
+    MintVehicleWithDeviceDefinitionSign: [
+      { name: 'manufacturerNode', type: 'uint256' },
+      { name: 'owner', type: 'address' },
+      { name: 'deviceDefinitionId', type: 'string' },
+      { name: 'attributes', type: 'string[]' },
+      { name: 'infos', type: 'string[]' }
+    ],
     BurnSyntheticDeviceSign: [
       { name: 'vehicleNode', type: 'uint256' },
       { name: 'syntheticDeviceNode', type: 'uint256' }

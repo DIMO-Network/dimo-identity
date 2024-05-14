@@ -352,7 +352,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .addVehicleAttribute(C.mockVehicleAttribute1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'AttributeExists')
-          .withArgs(C.mockVehicleAttribute1);
+        .withArgs(C.mockVehicleAttribute1);
       });
     });
 
@@ -958,7 +958,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .mintVehicle(99, user1.address, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
-          .withArgs(99);
+        .withArgs(99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -1092,7 +1092,7 @@ describe('Vehicle', function () {
               signature
             )
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
-          .withArgs(99);
+        .withArgs(99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -1425,7 +1425,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance.connect(admin).burnVehicleSign(99, burnVehicleSig1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidNode')
-          .withArgs(await vehicleIdInstance.getAddress(), 99);
+        .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
         const localClaimOwnerSig = await signMessage({
@@ -1485,7 +1485,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
-          .withArgs(1);
+        .withArgs(1);
       });
       it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
         const localMintVehicleOwnerSig = await signMessage({
@@ -1522,7 +1522,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
-          .withArgs(1);
+        .withArgs(1);
       });
 
       context('Wrong signature', () => {
@@ -1709,7 +1709,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .setVehicleInfo(99, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidNode')
-          .withArgs(await vehicleIdInstance.getAddress(), 99);
+        .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -1800,7 +1800,7 @@ describe('Vehicle', function () {
     it('Should revert if caller is not the NFT Proxy', async () => {
       await expect(
         vehicleInstance.connect(nonAdmin).validateBurnAndResetNode(1)
-      ).to.be.revertedWithCustomError(vehicleInstance, 'OnlyNftProxy');
+      ).to.be.revertedWithCustomError(vehicleInstance,'OnlyNftProxy');
     });
   });
 });

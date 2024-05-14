@@ -256,6 +256,8 @@ task('migration-tableland', 'npx hardhat migration-tableland --network <networkN
             let items = 0;
 
             for (let i = 0; i < deviceDefinitionByManufacturers.length; i += batchSize) {
+                // todo: query tableland by id (dd_slug), if not found, delete record from tableland (using delete contract?)
+                
                 const batch = deviceDefinitionByManufacturers.slice(i, i + batchSize).map(function (dd) {
                     const deviceDefinitionInput: DeviceDefinitionInput = {
                         id: generateSlug(`${dd.type.make_slug}_${dd.type.model_slug}_${dd.type.year}`),

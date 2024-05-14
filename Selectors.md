@@ -112,6 +112,12 @@
 | 0x415c2d96 | multiDelegateCall(bytes[]) |
 | 0x1c0c6e51 | multiStaticCall(bytes[]) |
 
+## ERC721Holder
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x150b7a02 | onERC721Received(address,address,uint256,bytes) |
+
 ## AdLicenseValidator
 #### Functions
 | Selector | Signature |
@@ -455,6 +461,12 @@
 | 0x3784d0a9 | TableAlreadyExists(uint256) |
 | 0x45cbe5ec | TableDoesNotExist(uint256) |
 | 0x8e4a23d6 | Unauthorized(address) |
+
+## DeviceDefinitionController
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x66df322e | getPolicy(address,uint256) |
 
 ## StreamrConfigurator
 #### Functions

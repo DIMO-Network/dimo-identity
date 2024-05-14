@@ -69,6 +69,7 @@ main([
   'DimoAccessControl',
   'Eip712Checker',
   'Multicall',
+  'ERC721Holder',
   'AdLicenseValidator',
   'AftermarketDevice',
   'Manufacturer',
@@ -80,6 +81,7 @@ main([
   'MultipleMinter',
   'BaseDataURI',
   'DeviceDefinitionTable',
+  'DeviceDefinitionController',
   'StreamrConfigurator',
   'VehicleStream'
 ]).catch((error) => {

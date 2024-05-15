@@ -582,22 +582,23 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
                             const obj1 = element.device_attributes.find(item => item.name === obj2.name);
                             return obj1 && obj1.value !== obj2.value;
                         });
-                          
+
                         if (different.length > 0) {
                             updateDeviceDefinitionByManufacturers.push(element);
                         }
                     }
-                    
+
                 }
             });
 
             // delete dd
             let deleteDeviceDefinitionByManufacturers = [];
-            tablelandDeviceDefinitionByManufacturers.forEach(element => {
-                const dds = deviceDefinitionByManufacturers.filter((c) => c.name_slug === element.id);
-                //console.log(element.ksuid, dds[0].device_definition_id);
-                if ((dds?.length ?? 0) == 0){
-                    deleteDeviceDefinitionByManufacturers.push(element);
+            deviceDefinitionByManufacturers.forEach(element => {
+                const dds = tablelandDeviceDefinitionByManufacturers.filter((c) => c.ksuid === element.device_definition_id);
+                if (dds != undefined && dds.length > 0){
+                    if (dds[0].id !== element.name_slug) {
+                        deleteDeviceDefinitionByManufacturers.push(dds[0]);
+                    }
                 }
             });
 
@@ -606,7 +607,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
 
             if (deleteDeviceDefinitionByManufacturers.length > 0) {
                 console.log('\x1b[31m%s\x1b[0m', `Device Definition to delete ${deleteDeviceDefinitionByManufacturers.length} By Manufacturer [${make}]`);
-            
+
                 for (let i = 0; i < deleteDeviceDefinitionByManufacturers.length; i++) {
                     _gasPrice = await getGasPriceWithSleep(hre, 20n, 15000000000n, 5000); // 15 gwei
                     console.log(`Deleting [${deleteDeviceDefinitionByManufacturers[i].id}] ...`);
@@ -617,12 +618,12 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
                         transactionHash: (await tx.wait())?.hash as string,
                     });
                 }
-            
+
             }
 
             if (updateDeviceDefinitionByManufacturers.length > 0) {
                 console.log('\x1b[36m%s\x1b[0m', `Device Definition to update ${updateDeviceDefinitionByManufacturers.length} By Manufacturer [${make}]`);
-                
+
                 const devices = updateDeviceDefinitionByManufacturers.map(function (dd) {
                     const deviceDefinitionInput: DeviceDefinitionInput = {
                         id: dd.name_slug,
@@ -652,7 +653,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
 
             if (newDeviceDefinitionByManufacturers.length > 0) {
                 console.log('\x1b[36m%s\x1b[0m', `Device Definition to insert ${newDeviceDefinitionByManufacturers.length} By Manufacturer [${make}]`);
-                
+
                 for (let i = 0; i < newDeviceDefinitionByManufacturers.length; i += batchSize) {
                     const batch = newDeviceDefinitionByManufacturers.slice(i, i + batchSize).map(function (dd) {
                         const deviceDefinitionInput: DeviceDefinitionInput = {
@@ -682,8 +683,8 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
                 }
             }
 
-            if (newDeviceDefinitionByManufacturers.length > 0 
-                || updateDeviceDefinitionByManufacturers.length > 0 
+            if (newDeviceDefinitionByManufacturers.length > 0
+                || updateDeviceDefinitionByManufacturers.length > 0
                 || deleteDeviceDefinitionByManufacturers.length > 0) {
                 const count = await db.prepare(
                     `SELECT COUNT(*) AS total FROM ${ddTableName}`
@@ -707,7 +708,7 @@ function generateSlug(str: string) {
 
 async function getDeviceDefinitionsByTableName(db, ddTableName) {
     let script = `SELECT * FROM ${ddTableName}`;
-        
+
     const query = await db.prepare(
         script
     ).all();

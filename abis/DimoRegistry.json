@@ -3797,6 +3797,25 @@
                 "internalType": "string",
                 "name": "id",
                 "type": "string"
+            }
+        ],
+        "name": "DeviceDefinitionDeleted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "tableId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "id",
+                "type": "string"
             },
             {
                 "indexed": false,
@@ -3837,6 +3856,37 @@
             }
         ],
         "name": "DeviceDefinitionTableCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "tableId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "id",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "year",
+                "type": "uint256"
+            }
+        ],
+        "name": "DeviceDefinitionUpdated",
         "type": "event"
     },
     {
@@ -3890,6 +3940,24 @@
             }
         ],
         "name": "createDeviceDefinitionTableBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "id",
+                "type": "string"
+            }
+        ],
+        "name": "deleteDeviceDefinition",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -4056,6 +4124,61 @@
             }
         ],
         "name": "setDeviceDefinitionTable",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerId",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "id",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "model",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "year",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "metadata",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "ksuid",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "deviceType",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "imageURI",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct DeviceDefinitionInput",
+                "name": "data",
+                "type": "tuple"
+            }
+        ],
+        "name": "updateDeviceDefinition",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

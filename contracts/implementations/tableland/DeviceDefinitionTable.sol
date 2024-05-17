@@ -292,7 +292,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
         emit DeviceDefinitionUpdated(tableId, data.id, data.model, data.year);
 
-        _updateDeviceDefinitionData(tablelandTables, tableId, data);
+        _updateDeviceDefinitionData(tablelandTables, tableId, data.id, data.metadata);
     }
 
     /**
@@ -470,16 +470,26 @@ contract DeviceDefinitionTable is AccessControlInternal {
         return concatenatedData;
     }
 
+    /**
+     * @notice Update an Device Definition in an existing table
+     * @dev The specified Device Definition Table must exist
+     * @dev The func only uodate the metadata field
+     * @param tablelandTables The tableland reference
+     * @param tableId The unique identifier of the manufacturer
+     * @param id The alphanumeric ID of the Device Definition
+     * @param metadata The metadata stringfied object of the Device Definition
+     */
     function _updateDeviceDefinitionData(
         TablelandTablesImpl tablelandTables,
         uint256 tableId,
-        DeviceDefinitionInput calldata data
+        string calldata id,
+        string calldata metadata
     ) private {
 
         // Set the values to update
-        string memory setters = string.concat("metadata=", string(abi.encodePacked("'", data.metadata, "'")));
+        string memory setters = string.concat("metadata=", string(abi.encodePacked("'", metadata, "'")));
         // Specify filters for which row to update
-        string memory filters = string.concat("id=", string(abi.encodePacked("'", data.id, "'")));
+        string memory filters = string.concat("id=", string(abi.encodePacked("'", id, "'")));
 
         tablelandTables.mutate(
             address(this),
@@ -493,6 +503,13 @@ contract DeviceDefinitionTable is AccessControlInternal {
         );
     }
 
+    /**
+     * @notice Delete an Device Definition in an existing table
+     * @dev The specified Device Definition Table must exist
+     * @param tablelandTables The tableland reference
+     * @param tableId The unique identifier of the manufacturer
+     * @param id The alphanumeric ID of the Device Definition
+     */
     function _deleteDeviceDefinitionData(
         TablelandTablesImpl tablelandTables,
         uint256 tableId,

@@ -593,12 +593,11 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
 
             // delete dd
             let deleteDeviceDefinitionByManufacturers = [];
-            deviceDefinitionByManufacturers.forEach(element => {
-                const dds = tablelandDeviceDefinitionByManufacturers.filter((c) => c.ksuid === element.device_definition_id);
-                if (dds != undefined && dds.length > 0){
-                    if (dds[0].id !== element.name_slug) {
-                        deleteDeviceDefinitionByManufacturers.push(dds[0]);
-                    }
+            tablelandDeviceDefinitionByManufacturers.forEach(element => {
+                const dds = deviceDefinitionByManufacturers.filter((c) => c.name_slug === element.id);
+                //console.log(element.ksuid, dds[0].device_definition_id);
+                if (dds == undefined || dds == 0){
+                    deleteDeviceDefinitionByManufacturers.push(element);
                 }
             });
 

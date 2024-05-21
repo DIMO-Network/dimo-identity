@@ -946,4 +946,258 @@ describe('DeviceDefinitionTable', async function () {
       });
     });
   });
+
+  describe('updateDeviceDefinition', () => {
+    beforeEach(async () => {
+      const tx = await ddTableInstance
+        .connect(admin)
+        .createDeviceDefinitionTable(manufacturer1.address, 1);
+
+      await tablelandValidator.pollForReceiptByTransactionHash({
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      });
+
+      const txInsert = await ddTableInstance
+        .connect(manufacturer1)
+        .insertDeviceDefinition(1, C.mockDdInput1);
+
+      await tablelandValidator.pollForReceiptByTransactionHash({
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await txInsert.wait())?.hash as string,
+      });
+
+
+    });
+
+    context('Error handling', () => {
+      it('Should revert if Device Definition table does not exist', async () => {
+        await expect(
+          ddTableInstance
+            .connect(manufacturer1)
+            .updateDeviceDefinition(99, C.mockDdInput1)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'TableDoesNotExist',
+        ).withArgs(99);
+      });
+      it('Should revert if caller is not the manufacturer ID owner or has not the MANUFACTURER_UPDATE_DD_PRIVILEGE', async () => {
+        await expect(
+          ddTableInstance
+            .connect(unauthorized)
+            .updateDeviceDefinition(1, C.mockDdInput1)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'Unauthorized',
+        ).withArgs(unauthorized.address);
+      });
+    });
+
+    context('Table owner as caller', () => {
+      context('State', () => {
+        it('Should correctly update DD from the table', async () => {
+          const tx = await ddTableInstance
+            .connect(manufacturer1)
+            .updateDeviceDefinition(1, C.mockDdUpdate1);
+
+          await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          });
+
+          const count = await tablelandDb.prepare(
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+          ).first<{ total: number }>('total');
+
+          expect(count).to.deep.equal([1]);
+
+          const selectQuery = await tablelandDb.prepare(
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = "${C.mockDdId1}"`
+          ).first();
+
+          expect(selectQuery).to.deep.include({
+            id: C.mockDdId1,
+            model: C.mockDdModel1,
+            year: C.mockDdYear1,
+            metadata: C.mockDdMetadataUpdate1,
+            ksuid: C.mockKsuid1,
+            deviceType: C.mockDdDeviceType1,
+            imageURI: C.mockDdImageURI1
+          });
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit DeviceDefinitionUpdated event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(manufacturer1)
+              .updateDeviceDefinition(1, C.mockDdUpdate1)
+          )
+            .to.emit(ddTableInstance, 'DeviceDefinitionUpdated')
+            .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
+        });
+      });
+    });
+
+    context('Privileged address as caller', () => {
+      context('State', () => {
+        it('Should correctly update DD from the table', async () => {
+          const tx = await ddTableInstance
+            .connect(privilegedUser1)
+            .updateDeviceDefinition(1, C.mockDdUpdate1);
+
+          await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          });
+
+          const count = await tablelandDb.prepare(
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+          ).first<{ total: number }>('total');
+
+          expect(count).to.deep.equal([1]);
+
+          const selectQuery = await tablelandDb.prepare(
+            `SELECT * FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)} WHERE id = "${C.mockDdId1}"`
+          ).first();
+
+          expect(selectQuery).to.deep.include({
+            id: C.mockDdId1,
+            model: C.mockDdModel1,
+            year: C.mockDdYear1,
+            metadata: C.mockDdMetadataUpdate1,
+            ksuid: C.mockKsuid1,
+            deviceType: C.mockDdDeviceType1,
+            imageURI: C.mockDdImageURI1,
+          });
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit DeviceDefinitionUpdated event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(privilegedUser1)
+              .updateDeviceDefinition(1, C.mockDdUpdate1)
+          )
+            .to.emit(ddTableInstance, 'DeviceDefinitionUpdated')
+            .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
+        });
+      });
+    });
+  });
+
+  describe('deleteDeviceDefinition', () => {
+    beforeEach(async () => {
+      const tx = await ddTableInstance
+        .connect(admin)
+        .createDeviceDefinitionTable(manufacturer1.address, 1);
+
+      await tablelandValidator.pollForReceiptByTransactionHash({
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      });
+
+      const txInsert = await ddTableInstance
+        .connect(manufacturer1)
+        .insertDeviceDefinition(1, C.mockDdInput1);
+
+      await tablelandValidator.pollForReceiptByTransactionHash({
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await txInsert.wait())?.hash as string,
+      });
+
+
+    });
+
+    context('Error handling', () => {
+      it('Should revert if Device Definition table does not exist', async () => {
+        await expect(
+          ddTableInstance
+            .connect(manufacturer1)
+            .deleteDeviceDefinition(99, C.mockDdInput1.id)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'TableDoesNotExist',
+        ).withArgs(99);
+      });
+      it('Should revert if caller is not the manufacturer ID owner or has not the MANUFACTURER_DELETE_DD_PRIVILEGE', async () => {
+        await expect(
+          ddTableInstance
+            .connect(unauthorized)
+            .deleteDeviceDefinition(1, C.mockDdInput1.id)
+        ).to.be.revertedWithCustomError(
+          ddTableInstance,
+          'Unauthorized',
+        ).withArgs(unauthorized.address);
+      });
+    });
+
+    context('Table owner as caller', () => {
+      context('State', () => {
+        it('Should correctly delete DD from the table', async () => {
+          const tx = await ddTableInstance
+            .connect(manufacturer1)
+            .deleteDeviceDefinition(1, C.mockDdInput1.id);
+
+          await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          });
+
+          const count = await tablelandDb.prepare(
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+          ).first<{ total: number }>('total');
+
+          expect(count).to.deep.equal([0]);
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit DeviceDefinitionDeleted event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(manufacturer1)
+              .deleteDeviceDefinition(1, C.mockDdInput1.id)
+          )
+            .to.emit(ddTableInstance, 'DeviceDefinitionDeleted')
+            .withArgs(2, C.mockDdId1);
+        });
+      });
+    });
+
+    context('Privileged address as caller', () => {
+      context('State', () => {
+        it('Should correctly delete DD into the table', async () => {
+          const tx = await ddTableInstance
+            .connect(privilegedUser1)
+            .deleteDeviceDefinition(1, C.mockDdInput1.id);
+
+          await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CURRENT_CHAIN_ID,
+            transactionHash: (await tx.wait())?.hash as string,
+          });
+
+          const count = await tablelandDb.prepare(
+            `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
+          ).first<{ total: number }>('total');
+
+          expect(count).to.deep.equal([0]);
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit DeviceDefinitionDeleted event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(privilegedUser1)
+              .deleteDeviceDefinition(1, C.mockDdInput1.id)
+          )
+            .to.emit(ddTableInstance, 'DeviceDefinitionDeleted')
+            .withArgs(2, C.mockDdId1);
+        });
+      });
+    });
+  });
 });

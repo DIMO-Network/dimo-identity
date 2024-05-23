@@ -2701,4 +2701,39 @@ describe('DevAdmin', function () {
       });
     });
   });
+
+  describe('adminRemoveVehicleAttribute', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_REMOVE_ATTR role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .adminRemoveVehicleAttribute(C.mockVehicleAttribute1),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_REMOVE_ATTR
+          }`,
+        );
+      });
+    });
+
+    context('Events', () => {
+      it('Should not emit VehicleAttributeRemoved if attribute does not exist', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminRemoveVehicleAttribute('UnexistentAttribute')
+        )
+          .to.not.emit(devAdminInstance, 'VehicleAttributeRemoved')
+      });
+      it('Should emit VehicleAttributeRemoved event with correct params', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminRemoveVehicleAttribute(C.mockVehicleAttribute1)
+        )
+          .to.emit(devAdminInstance, 'VehicleAttributeRemoved')
+          .withArgs(C.mockVehicleAttribute1);
+      });
+    });
+  });
 });

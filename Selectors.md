@@ -33,6 +33,7 @@
 | 0xb17b974b | adminCacheDimoStreamrEns() |
 | 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
+| 0x5f741f4d | adminRemoveVehicleAttribute(string) |
 | 0xf73a8f04 | renameManufacturers((uint256,string)[]) |
 | 0xff96b761 | transferAftermarketDeviceOwnership(uint256,address) |
 | 0x5c129493 | unclaimAftermarketDeviceNode(uint256[]) |
@@ -53,6 +54,7 @@
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
 | 0x8ad18187 | SyntheticDeviceAttributeSetDevAdmin(uint256,string,string) |
 | 0x81741fdd | SyntheticDeviceNodeBurnedDevAdmin(uint256,uint256,address) |
+| 0x9b4bf377 | VehicleAttributeRemoved(string) |
 | 0x1d91e00c | VehicleAttributeSetDevAdmin(uint256,string,string) |
 | 0xb956d027 | VehicleNodeBurnedDevAdmin(uint256,address) |
 

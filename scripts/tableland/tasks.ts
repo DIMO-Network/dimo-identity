@@ -562,6 +562,13 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
             console.log(`API Device Definition By Manufacturer [${make}] total => ${deviceDefinitionByManufacturers.length}`);
             console.log(`Tableland Device Definition By Manufacturer [${make}] total => ${tablelandDeviceDefinitionByManufacturers.length}`);
 
+            // Clear empty attributes
+            deviceDefinitionByManufacturers.forEach(dd => {
+                if (dd.device_attributes) {
+                    dd.device_attributes = dd.device_attributes.filter(({ value }) => value);
+                }
+            });
+
             // Insert new dd
             let newDeviceDefinitionByManufacturers = [];
             deviceDefinitionByManufacturers.forEach(element => {
@@ -586,6 +593,15 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
                         if (different.length > 0) {
                             updateDeviceDefinitionByManufacturers.push(element);
                         }
+
+                        // If it has no different values, then validate if it has empty values.
+                        if (different.length == 0) {
+                            const hasEmptyValues = dds[0].metadata.device_attributes.some(({ value }) => !value);
+                            if (hasEmptyValues) {
+                                updateDeviceDefinitionByManufacturers.push(element);
+                            }
+                        }
+
                     }
 
                 }
@@ -596,7 +612,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
             tablelandDeviceDefinitionByManufacturers.forEach(element => {
                 const dds = deviceDefinitionByManufacturers.filter((c) => c.name_slug === element.id);
                 //console.log(element.ksuid, dds[0].device_definition_id);
-                if (dds == undefined || dds == 0){
+                if ((dds?.length ?? 0) == 0){
                     deleteDeviceDefinitionByManufacturers.push(element);
                 }
             });

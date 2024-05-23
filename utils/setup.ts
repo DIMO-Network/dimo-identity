@@ -1,4 +1,5 @@
 import { Wallet } from 'ethers';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 
 import * as C from './constants';
 import { GenericKeyAny, ContractsSetup } from './types';
@@ -6,7 +7,7 @@ import { DimoAccessControl } from '../typechain-types';
 import { initialize, deployUpgradeableContracts } from './deploys';
 
 export async function setup(
-  deployer: Wallet,
+  deployer: Wallet | HardhatEthersSigner,
   contracts: ContractsSetup
 ): Promise<GenericKeyAny> {
   const deployedRegistryContracts = await initialize(

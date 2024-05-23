@@ -1,11 +1,12 @@
 import { Wallet } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 
 import type { DIMORegistry } from '../typechain-types';
 import { getSelectors, ContractNameArgs, GenericKeyAny } from '.';
 
 export async function initialize(
-  deployer: Wallet,
+  deployer: Wallet | HardhatEthersSigner,
   ...contracts: string[]
 ): Promise<GenericKeyAny> {
   const instances: GenericKeyAny = {};
@@ -57,7 +58,7 @@ export async function initialize(
 }
 
 export async function deployUpgradeableContracts(
-  deployer: Wallet,
+  deployer: Wallet | HardhatEthersSigner,
   contractNameArgs: ContractNameArgs[]
 ): Promise<GenericKeyAny> {
   const instances: GenericKeyAny = {};

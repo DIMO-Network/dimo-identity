@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Log, EventLog, ContractTransactionReceipt } from 'ethers';
-import { ethers, network, upgrades, HardhatEthersSigner } from 'hardhat';
+import { ethers, network, upgrades } from 'hardhat';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 
 import {
   DIMORegistry,

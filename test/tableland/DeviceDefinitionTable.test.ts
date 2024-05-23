@@ -1,5 +1,6 @@
 import chai from 'chai';
-import { ethers, network, HardhatEthersSigner } from 'hardhat';
+import { ethers, network } from 'hardhat';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 
 import { LocalTableland, getAccounts, getDatabase, getValidator, getRegistry } from '@tableland/local';

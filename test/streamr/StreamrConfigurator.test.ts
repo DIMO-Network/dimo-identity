@@ -1,5 +1,6 @@
 import chai from 'chai';
-import { ethers, HardhatEthersSigner } from 'hardhat';
+import { ethers } from 'hardhat';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 
 import { DimoAccessControl, StreamrConfigurator } from '../../typechain-types';
 import { setup, createSnapshot, revertToSnapshot, C } from '../../utils';

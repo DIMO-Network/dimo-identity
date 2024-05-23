@@ -1,6 +1,7 @@
 import chai from 'chai';
 import { EventLog } from 'ethers';
-import { ethers, HardhatEthersSigner } from 'hardhat';
+import { ethers } from 'hardhat';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 
 import { MockMultiPrivilege } from '../../typechain-types';

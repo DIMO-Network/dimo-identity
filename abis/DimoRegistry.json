@@ -456,6 +456,19 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "string",
+                "name": "attribute",
+                "type": "string"
+            }
+        ],
+        "name": "VehicleAttributeRemoved",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": true,
                 "internalType": "uint256",
                 "name": "tokenId",
@@ -605,6 +618,19 @@
             }
         ],
         "name": "adminPairAftermarketDevice",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "attribute",
+                "type": "string"
+            }
+        ],
+        "name": "adminRemoveVehicleAttribute",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

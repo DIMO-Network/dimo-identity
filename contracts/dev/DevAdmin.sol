@@ -70,6 +70,7 @@ contract DevAdmin is AccessControlInternal {
         uint256 vehicleNode,
         address indexed owner
     );
+    event VehicleAttributeRemoved(string attribute);
 
     struct IdManufacturerName {
         uint256 tokenId;
@@ -629,6 +630,21 @@ contract DevAdmin is AccessControlInternal {
         );
 
         streamRegistry.createStreamWithENS(dimoStreamrEns, "/vehicles/", "{}");
+    }
+
+    /**
+     * @notice Admin function remove a vehicle node attribute
+     * @dev Caller must have the DEV_REMOVE_ATTR role
+     */
+    function adminRemoveVehicleAttribute(
+        string calldata attribute
+    ) external onlyRole(DEV_REMOVE_ATTR) {
+        if (
+            AttributeSet.remove(
+                VehicleStorage.getStorage().whitelistedAttributes,
+                attribute
+            )
+        ) emit VehicleAttributeRemoved(attribute);
     }
 
     /**

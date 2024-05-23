@@ -97,3 +97,6 @@ export const DEV_CHANGE_PARENT_NODE = ethers.keccak256(
 export const DEV_CACHE_ENS = ethers.keccak256(
   ethers.toUtf8Bytes('DEV_CACHE_ENS')
 );
+export const DEV_REMOVE_ATTR = ethers.keccak256(
+  ethers.toUtf8Bytes('DEV_REMOVE_ATTR')
+);

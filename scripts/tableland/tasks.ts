@@ -596,7 +596,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
             tablelandDeviceDefinitionByManufacturers.forEach(element => {
                 const dds = deviceDefinitionByManufacturers.filter((c) => c.name_slug === element.id);
                 //console.log(element.ksuid, dds[0].device_definition_id);
-                if (dds == undefined || dds == 0){
+                if ((dds?.length ?? 0) == 0){
                     deleteDeviceDefinitionByManufacturers.push(element);
                 }
             });

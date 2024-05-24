@@ -70,6 +70,22 @@ export const mockDdMetadata3 = {
     fuel_tank_capacity_gal: '15.800000'
 }
 
+export const mockDdMetadataUpdate1 = {
+    mpg: '21',
+    mpg_city: '18',
+    base_msrp: '67796',
+    fuel_type: 'Gasoline x',
+    wheelbase: '109 WB x',
+    generation: '2',
+    mpg_highway: '26',
+    vehicle_type: 'PASSENGER CAR x',
+    driven_wheels: 'RWDx',
+    number_of_doors: '4',
+    powertrain_type: 'ICE',
+    manufacturer_code: '6AE48',
+    fuel_tank_capacity_gal: '18'
+};
+
 export const mockDdInput1: DeviceDefinitionInput = {
     id: mockDdId1,
     model: mockDdModel1,
@@ -96,6 +112,16 @@ export const mockDdInput3: DeviceDefinitionInput = {
     ksuid: mockKsuid3,
     deviceType: mockDdDeviceType3,
     imageURI: mockDdImageURI3
+}
+
+export const mockDdUpdate1: DeviceDefinitionInput = {
+    id: mockDdId1,
+    model: mockDdModel1,
+    year: mockDdYear1,
+    metadata: JSON.stringify(mockDdMetadataUpdate1),
+    ksuid: mockKsuid1,
+    deviceType: mockDdDeviceType1,
+    imageURI: mockDdImageURI1
 }
 
 export const mockDdInputBatch: DeviceDefinitionInput[] = [

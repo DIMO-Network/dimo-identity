@@ -39,6 +39,16 @@ contract DeviceDefinitionTable is AccessControlInternal {
         string model,
         uint256 year
     );
+    event DeviceDefinitionUpdated(
+        uint256 indexed tableId,
+        string id,
+        string model,
+        uint256 year
+    );
+    event DeviceDefinitionDeleted(
+        uint256 indexed tableId,
+        string id
+    );
 
     /**
      * @notice Creates a new definition table associated with a specific manufacturer
@@ -239,6 +249,93 @@ contract DeviceDefinitionTable is AccessControlInternal {
     }
 
     /**
+     * @notice Update a Device Definition in an existing table
+     * @dev The caller must be the owner of the manufacturer ID
+     * @dev The specified Device Definition Table must exist
+     * @dev The pair (model,year) must be unique
+     * @param manufacturerId The unique identifier of the manufacturer
+     * @param data Input data with the following fields:
+     *  id -> The alphanumeric ID of the Device Definition
+     *  model -> The model of the Device Definition
+     *  year -> The year of the Device Definition
+     *  metadata -> The metadata stringfied object of the Device Definition
+     *  ksuid -> K-Sortable Unique IDentifier
+     *  deviceType -> The deviceType of the Device Definition
+     *  imageURI -> The image uri of the Device Definition
+     */
+    function updateDeviceDefinition(
+        uint256 manufacturerId,
+        DeviceDefinitionInput calldata data
+    ) external {
+        TablelandTablesImpl tablelandTables = TablelandDeployments.get();
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+        uint256 tableId = dds.tables[manufacturerId];
+
+        try INFT(address(tablelandTables)).ownerOf(tableId) {
+            INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+                ManufacturerStorage.getStorage().idProxyAddress
+            );
+
+            if (
+                !manufacturerIdProxy.hasPrivilege(
+                    manufacturerId,
+                    MANUFACTURER_INSERT_DD_PRIVILEGE,
+                    msg.sender
+                )
+            ) {
+                revert Unauthorized(msg.sender);
+            }
+        } catch {
+            revert TableDoesNotExist(manufacturerId);
+        }
+
+        emit DeviceDefinitionUpdated(tableId, data.id, data.model, data.year);
+
+        _updateDeviceDefinitionData(tablelandTables, tableId, data.id, data.metadata);
+    }
+
+    /**
+     * @notice Delete a Device Definition in an existing table
+     * @dev The caller must be the owner of the manufacturer ID
+     * @dev The specified Device Definition Table must exist
+     * @dev The pair (model,year) must be unique
+     * @param manufacturerId The unique identifier of the manufacturer
+     * @param id The unique device definition
+     */
+    function deleteDeviceDefinition(
+        uint256 manufacturerId,
+        string calldata id
+    ) external {
+        TablelandTablesImpl tablelandTables = TablelandDeployments.get();
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+        uint256 tableId = dds.tables[manufacturerId];
+
+        try INFT(address(tablelandTables)).ownerOf(tableId) {
+            INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+                ManufacturerStorage.getStorage().idProxyAddress
+            );
+
+            if (
+                !manufacturerIdProxy.hasPrivilege(
+                    manufacturerId,
+                    MANUFACTURER_INSERT_DD_PRIVILEGE,
+                    msg.sender
+                )
+            ) {
+                revert Unauthorized(msg.sender);
+            }
+        } catch {
+            revert TableDoesNotExist(manufacturerId);
+        }
+
+        emit DeviceDefinitionDeleted(tableId, id);
+
+        _deleteDeviceDefinitionData(tablelandTables, tableId, id);
+    }
+
+    /**
      * @notice Insert a list of Device Definition in an existing table
      * @dev The caller must be the owner of the manufacturer ID
      * @dev The specified Device Definition Table must exist
@@ -371,5 +468,64 @@ contract DeviceDefinitionTable is AccessControlInternal {
         );
 
         return concatenatedData;
+    }
+
+    /**
+     * @notice Update an Device Definition in an existing table
+     * @dev The specified Device Definition Table must exist
+     * @dev The func only uodate the metadata field
+     * @param tablelandTables The tableland reference
+     * @param tableId The unique identifier of the manufacturer
+     * @param id The alphanumeric ID of the Device Definition
+     * @param metadata The metadata stringfied object of the Device Definition
+     */
+    function _updateDeviceDefinitionData(
+        TablelandTablesImpl tablelandTables,
+        uint256 tableId,
+        string calldata id,
+        string calldata metadata
+    ) private {
+
+        // Set the values to update
+        string memory setters = string.concat("metadata=", string(abi.encodePacked("'", metadata, "'")));
+        // Specify filters for which row to update
+        string memory filters = string.concat("id=", string(abi.encodePacked("'", id, "'")));
+
+        tablelandTables.mutate(
+            address(this),
+            tableId,
+            SQLHelpers.toUpdate(
+                "",
+                tableId,
+                setters,
+                filters
+            )
+        );
+    }
+
+    /**
+     * @notice Delete an Device Definition in an existing table
+     * @dev The specified Device Definition Table must exist
+     * @param tablelandTables The tableland reference
+     * @param tableId The unique identifier of the manufacturer
+     * @param id The alphanumeric ID of the Device Definition
+     */
+    function _deleteDeviceDefinitionData(
+        TablelandTablesImpl tablelandTables,
+        uint256 tableId,
+        string calldata id
+    ) private {
+        // Specify filters for which row to delete
+        string memory filters = string.concat("id=", string(abi.encodePacked("'", id, "'")));
+
+        tablelandTables.mutate(
+            address(this),
+            tableId,
+            SQLHelpers.toDelete(
+                "",
+                tableId,
+                filters
+            )
+        );
     }
 }

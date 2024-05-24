@@ -497,10 +497,226 @@ task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-
         }
     });
 
+task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
+    .setAction(async (args, hre) => {
+        const currentNetwork = hre.network.name;
+        validateNetwork(currentNetwork);
+
+        let _gasPrice;
+        const instances = getAddresses(currentNetwork);
+        const [signer] = await hre.ethers.getSigners();
+        const tableOwner = await signer.getAddress();
+
+        const manufacturerInstance: Manufacturer = await hre.ethers.getContractAt(
+            'Manufacturer',
+            instances[currentNetwork].modules.DIMORegistry.address,
+        );
+
+        const db = new Database({
+            baseUrl: helpers.getBaseUrl(CHAIN_ID[currentNetwork]),
+        });
+        const tablelandValidator = new Validator(db.config);
+
+        console.log(`Total manufacturers ${makes.length}...`);
+
+        console.log('Get device definitions...');
+        const devices = (await getDeviceDefinitions()).data.device_definitions;
+        console.log(`Total device definitions ${devices.length}...`);
+
+        const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
+            'DeviceDefinitionTable',
+            instances[currentNetwork].modules.DIMORegistry.address,
+        );
+
+        for (const make of makes) {
+            const manufacturerId = await manufacturerInstance
+                .connect(signer)
+                .getManufacturerIdByName(make);
+
+            let ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
+
+            if (ddTableId.toString() === '0') {
+                console.log(`Creating Device Definition table for manufacturer ${make} with ID  ${manufacturerId}...`);
+
+                _gasPrice = await getGasPrice(hre);
+                const dTx = await ddTableInstance
+                    .connect(signer)
+                    .createDeviceDefinitionTable(tableOwner, manufacturerId, { gasPrice: _gasPrice });
+
+                await tablelandValidator.pollForReceiptByTransactionHash({
+                    chainId: CHAIN_ID[currentNetwork],
+                    transactionHash: (await dTx.wait())?.hash as string,
+                });
+
+                const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
+
+                console.log(`Device Definition table created\nTable ID: ${ddTableId}\nTable Name: ${ddTableName}`);
+            }
+
+            ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
+
+            const deviceDefinitionByManufacturers = devices.filter((c) => c.make.name === make && c.type.year > 2006);
+            const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
+            const tablelandDeviceDefinitionByManufacturers = await getDeviceDefinitionsByTableName(db, ddTableName);
+
+            console.log(`API Device Definition By Manufacturer [${make}] total => ${deviceDefinitionByManufacturers.length}`);
+            console.log(`Tableland Device Definition By Manufacturer [${make}] total => ${tablelandDeviceDefinitionByManufacturers.length}`);
+
+            // Insert new dd
+            let newDeviceDefinitionByManufacturers = [];
+            deviceDefinitionByManufacturers.forEach(element => {
+                const dds = tablelandDeviceDefinitionByManufacturers.filter((c) => c.id === element.name_slug);
+                if (dds != undefined && dds.length == 0){
+                    newDeviceDefinitionByManufacturers.push(element);
+                }
+            });
+
+            // Update dd when change attributes
+            let updateDeviceDefinitionByManufacturers = [];
+            deviceDefinitionByManufacturers.forEach(element => {
+                const dds = tablelandDeviceDefinitionByManufacturers.filter((c) => c.id === element.name_slug);
+                if (dds != undefined && dds.length > 0){
+
+                    if (dds[0].metadata.device_attributes) {
+                        const different = dds[0].metadata.device_attributes.filter(obj2 => {
+                            const obj1 = element.device_attributes.find(item => item.name === obj2.name);
+                            return obj1 && obj1.value !== obj2.value;
+                        });
+                          
+                        if (different.length > 0) {
+                            updateDeviceDefinitionByManufacturers.push(element);
+                        }
+                    }
+                    
+                }
+            });
+
+            // delete dd
+            let deleteDeviceDefinitionByManufacturers = [];
+            tablelandDeviceDefinitionByManufacturers.forEach(element => {
+                const dds = deviceDefinitionByManufacturers.filter((c) => c.name_slug === element.id);
+                //console.log(element.ksuid, dds[0].device_definition_id);
+                if ((dds?.length ?? 0) == 0){
+                    deleteDeviceDefinitionByManufacturers.push(element);
+                }
+            });
+
+            const batchSize = 50;
+            let items = 0;
+
+            if (deleteDeviceDefinitionByManufacturers.length > 0) {
+                console.log('\x1b[31m%s\x1b[0m', `Device Definition to delete ${deleteDeviceDefinitionByManufacturers.length} By Manufacturer [${make}]`);
+            
+                for (let i = 0; i < deleteDeviceDefinitionByManufacturers.length; i++) {
+                    _gasPrice = await getGasPriceWithSleep(hre, 20n, 15000000000n, 5000); // 15 gwei
+                    console.log(`Deleting [${deleteDeviceDefinitionByManufacturers[i].id}] ...`);
+                    const tx = await ddTableInstance.deleteDeviceDefinition(manufacturerId, deleteDeviceDefinitionByManufacturers[i].id, { gasPrice: _gasPrice });
+
+                    await tablelandValidator.pollForReceiptByTransactionHash({
+                        chainId: CHAIN_ID[currentNetwork],
+                        transactionHash: (await tx.wait())?.hash as string,
+                    });
+                }
+            
+            }
+
+            if (updateDeviceDefinitionByManufacturers.length > 0) {
+                console.log('\x1b[36m%s\x1b[0m', `Device Definition to update ${updateDeviceDefinitionByManufacturers.length} By Manufacturer [${make}]`);
+                
+                const devices = updateDeviceDefinitionByManufacturers.map(function (dd) {
+                    const deviceDefinitionInput: DeviceDefinitionInput = {
+                        id: dd.name_slug,
+                        ksuid: dd.device_definition_id,
+                        model: dd.type.model,
+                        year: dd.type.year,
+                        metadata: JSON.stringify({
+                            device_attributes: dd.device_attributes
+                        }),
+                        deviceType: dd.type.type,
+                        imageURI: dd.imageUrl ?? ''
+                    };
+                    return deviceDefinitionInput;
+                });
+
+                for (let i = 0; i < devices.length; i++) {
+                    _gasPrice = await getGasPriceWithSleep(hre, 20n, 15000000000n, 5000); // 15 gwei
+                    console.log(`Updating [${devices[i].id}] ...`);
+                    const tx = await ddTableInstance.updateDeviceDefinition(manufacturerId, devices[i], { gasPrice: _gasPrice });
+
+                    await tablelandValidator.pollForReceiptByTransactionHash({
+                        chainId: CHAIN_ID[currentNetwork],
+                        transactionHash: (await tx.wait())?.hash as string,
+                    });
+                }
+            }
+
+            if (newDeviceDefinitionByManufacturers.length > 0) {
+                console.log('\x1b[36m%s\x1b[0m', `Device Definition to insert ${newDeviceDefinitionByManufacturers.length} By Manufacturer [${make}]`);
+                
+                for (let i = 0; i < newDeviceDefinitionByManufacturers.length; i += batchSize) {
+                    const batch = newDeviceDefinitionByManufacturers.slice(i, i + batchSize).map(function (dd) {
+                        const deviceDefinitionInput: DeviceDefinitionInput = {
+                            id: dd.name_slug,
+                            ksuid: dd.device_definition_id,
+                            model: dd.type.model,
+                            year: dd.type.year,
+                            metadata: JSON.stringify({
+                                device_attributes: dd.device_attributes
+                            }),
+                            deviceType: dd.type.type,
+                            imageURI: dd.imageUrl ?? ''
+                        };
+                        return deviceDefinitionInput;
+                    });
+
+                    items += batch.length;
+
+                    _gasPrice = await getGasPriceWithSleep(hre, 20n, 15000000000n, 5000); // 15 gwei
+                    console.log(`Creating [${items}/${newDeviceDefinitionByManufacturers.length}] ...`);
+                    const tx = await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch, { gasPrice: _gasPrice });
+
+                    await tablelandValidator.pollForReceiptByTransactionHash({
+                        chainId: CHAIN_ID[currentNetwork],
+                        transactionHash: (await tx.wait())?.hash as string,
+                    });
+                }
+            }
+
+            if (newDeviceDefinitionByManufacturers.length > 0 
+                || updateDeviceDefinitionByManufacturers.length > 0 
+                || deleteDeviceDefinitionByManufacturers.length > 0) {
+                const count = await db.prepare(
+                    `SELECT COUNT(*) AS total FROM ${ddTableName}`
+                ).first<{ total: number }>('total');
+
+                console.log(`${make} => ${ddTableName} total rows: ${count}`);
+                console.log(`${make} => ${ddTableName} total upload: ${deviceDefinitionByManufacturers.length}\n`);
+            }
+
+            await delay(1000);
+        }
+    });
+
 async function getDeviceDefinitions() {
     return await axios.get('https://device-definitions-api.dimo.zone/device-definitions/all');
 }
 
 function generateSlug(str: string) {
     return str.replace(/\//g, '-');
+}
+
+async function getDeviceDefinitionsByTableName(db, ddTableName) {
+    let script = `SELECT * FROM ${ddTableName}`;
+        
+    const query = await db.prepare(
+        script
+    ).all();
+
+    return query.results;
+}
+
+function delay(time) {
+    return new Promise((resolve) => {
+        setTimeout(() => resolve(), time);
+    });
 }

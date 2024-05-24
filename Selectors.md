@@ -439,17 +439,21 @@
 |-|-|
 | 0x20954d21 | createDeviceDefinitionTable(address,uint256) |
 | 0x794c6790 | createDeviceDefinitionTableBatch(address,uint256[]) |
+| 0x32b3f2d5 | deleteDeviceDefinition(uint256,string) |
 | 0x396e5987 | getDeviceDefinitionTableId(uint256) |
 | 0xa1d17941 | getDeviceDefinitionTableName(uint256) |
 | 0x23536c5f | insertDeviceDefinition(uint256,(string,string,uint256,string,string,string,string)) |
 | 0x80d50451 | insertDeviceDefinitionBatch(uint256,(string,string,uint256,string,string,string,string)[]) |
 | 0x088fafdb | setDeviceDefinitionTable(uint256,uint256) |
+| 0x67c7f687 | updateDeviceDefinition(uint256,(string,string,uint256,string,string,string,string)) |
 
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x29504454 | DeviceDefinitionDeleted(uint256,string) |
 | 0x462ef08c | DeviceDefinitionInserted(uint256,string,string,uint256) |
 | 0x34045c03 | DeviceDefinitionTableCreated(address,uint256,uint256) |
+| 0x60fa772c | DeviceDefinitionUpdated(uint256,string,string,uint256) |
 | 0x753affc1 | ManufacturerTableSet(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |

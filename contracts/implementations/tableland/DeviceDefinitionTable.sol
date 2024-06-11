@@ -101,6 +101,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         dds.tables[manufacturerId] = tableId;
 
         emit DeviceDefinitionTableCreated(tableOwner, manufacturerId, tableId);
+        emit ManufacturerTableSet(manufacturerId, tableId);
     }
 
     /**
@@ -163,6 +164,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
                 manufacturerIds[i],
                 tableId
             );
+            emit ManufacturerTableSet(manufacturerIds[i], tableId);
         }
     }
 

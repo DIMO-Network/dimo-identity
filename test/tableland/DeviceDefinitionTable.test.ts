@@ -236,6 +236,15 @@ describe('DeviceDefinitionTable', async function () {
             .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
             .withArgs(manufacturer1.address, 1, 2);
         });
+        it('Should emit ManufacturerTableSet event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(admin)
+              .createDeviceDefinitionTable(manufacturer1.address, 1)
+          )
+            .to.emit(ddTableInstance, 'ManufacturerTableSet')
+            .withArgs(1, 2);
+        });
       });
     });
 
@@ -280,6 +289,15 @@ describe('DeviceDefinitionTable', async function () {
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
             .withArgs(manufacturer1.address, 1, 2);
+        });
+        it('Should emit ManufacturerTableSet event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(manufacturer1)
+              .createDeviceDefinitionTable(manufacturer1.address, 1)
+          )
+            .to.emit(ddTableInstance, 'ManufacturerTableSet')
+            .withArgs(1, 2);
         });
       });
     });
@@ -381,6 +399,19 @@ describe('DeviceDefinitionTable', async function () {
             .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
             .withArgs(admin.address, 3, 4);
         });
+        it('Should emit ManufacturerTableSet event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(admin)
+              .createDeviceDefinitionTableBatch(admin.address, [1, 2, 3])
+          )
+            .to.emit(ddTableInstance, 'ManufacturerTableSet')
+            .withArgs(1, 2)
+            .to.emit(ddTableInstance, 'ManufacturerTableSet')
+            .withArgs(2, 3)
+            .to.emit(ddTableInstance, 'ManufacturerTableSet')
+            .withArgs(3, 4);
+        });
       });
     });
 
@@ -459,6 +490,19 @@ describe('DeviceDefinitionTable', async function () {
             .withArgs(manufacturerAdmin.address, 5, 3)
             .to.emit(ddTableInstance, 'DeviceDefinitionTableCreated')
             .withArgs(manufacturerAdmin.address, 6, 4);
+        });
+        it('Should emit ManufacturerTableSet event with correct params', async () => {
+          await expect(
+            ddTableInstance
+              .connect(manufacturerAdmin)
+              .createDeviceDefinitionTableBatch(manufacturerAdmin.address, [4, 5, 6])
+          )
+            .to.emit(ddTableInstance, 'ManufacturerTableSet')
+            .withArgs(4, 2)
+            .to.emit(ddTableInstance, 'ManufacturerTableSet')
+            .withArgs(5, 3)
+            .to.emit(ddTableInstance, 'ManufacturerTableSet')
+            .withArgs(6, 4);
         });
       });
     });

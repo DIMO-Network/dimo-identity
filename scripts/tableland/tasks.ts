@@ -570,19 +570,19 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
             });
 
             // Insert new dd
-            let newDeviceDefinitionByManufacturers = [];
+            const newDeviceDefinitionByManufacturers: any[] = [];
             deviceDefinitionByManufacturers.forEach(element => {
                 const dds = tablelandDeviceDefinitionByManufacturers.filter((c) => c.id === element.name_slug);
-                if (dds != undefined && dds.length == 0){
+                if (dds !== undefined && dds.length === 0){
                     newDeviceDefinitionByManufacturers.push(element);
                 }
             });
 
             // Update dd when change attributes
-            let updateDeviceDefinitionByManufacturers = [];
+            const updateDeviceDefinitionByManufacturers: any[] = [];
             deviceDefinitionByManufacturers.forEach(element => {
                 const dds = tablelandDeviceDefinitionByManufacturers.filter((c) => c.id === element.name_slug);
-                if (dds != undefined && dds.length > 0){
+                if (dds !== undefined && dds.length > 0){
 
                     if (dds[0].metadata.device_attributes) {
                         const different = dds[0].metadata.device_attributes.filter(obj2 => {
@@ -595,7 +595,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
                         }
 
                         // If it has no different values, then validate if it has empty values.
-                        if (different.length == 0) {
+                        if (different.length === 0) {
                             const hasEmptyValues = dds[0].metadata.device_attributes.some(({ value }) => !value);
                             if (hasEmptyValues) {
                                 updateDeviceDefinitionByManufacturers.push(element);
@@ -608,11 +608,11 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
             });
 
             // delete dd
-            let deleteDeviceDefinitionByManufacturers = [];
+            const deleteDeviceDefinitionByManufacturers: any[] = [];
             tablelandDeviceDefinitionByManufacturers.forEach(element => {
                 const dds = deviceDefinitionByManufacturers.filter((c) => c.name_slug === element.id);
                 //console.log(element.ksuid, dds[0].device_definition_id);
-                if ((dds?.length ?? 0) == 0){
+                if ((dds?.length ?? 0) === 0){
                     deleteDeviceDefinitionByManufacturers.push(element);
                 }
             });
@@ -722,7 +722,7 @@ function generateSlug(str: string) {
 }
 
 async function getDeviceDefinitionsByTableName(db, ddTableName) {
-    let script = `SELECT * FROM ${ddTableName}`;
+    const script = `SELECT * FROM ${ddTableName}`;
 
     const query = await db.prepare(
         script
@@ -731,7 +731,7 @@ async function getDeviceDefinitionsByTableName(db, ddTableName) {
     return query.results;
 }
 
-function delay(time) {
+function delay(time: number) {
     return new Promise((resolve) => {
         setTimeout(() => resolve(), time);
     });

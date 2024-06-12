@@ -74,13 +74,18 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x9F67f131507F5D9e491beA439222b29AAD9ba082",
+                "address": "0x1ACF6d56cE48063F1e2db621fCEF3b14fF5642C1",
                 "selectors": [
                     "0xf0d1a557",
+                    "0xd0b61156",
+                    "0xb7bded95",
                     "0x3da44e56",
                     "0x1b1a82c8",
+                    "0xd84baff1",
+                    "0x8dca2b8e",
                     "0x9bfae6da",
-                    "0xd9c3ae61"
+                    "0xd9c3ae61",
+                    "0xea0e7d3a"
                 ]
             },
             "AftermarketDevice": {
@@ -136,9 +141,10 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x30B3CEd3547bD9B8661f6E619772b19a3149a965",
+                "address": "0x3335C1Cc5C85C7Ce7593E9aBCF3ED654a04e6FA6",
                 "selectors": [
-                    "0xfb1a28e8"
+                    "0xfb1a28e8",
+                    "0xd23965e3"
                 ]
             },
             "StreamrConfigurator": {
@@ -171,15 +177,17 @@
                 ]
             },
             "DeviceDefinitionTable": {
-                "address": "0x134437b358C2C7fAf61047BaE83ba22e2815327d",
+                "address": "0xb8b2060a30CD10c18d88F236b61907663f70609d",
                 "selectors": [
                     "0x20954d21",
                     "0x794c6790",
+                    "0x32b3f2d5",
                     "0x396e5987",
                     "0xa1d17941",
                     "0x23536c5f",
                     "0x80d50451",
-                    "0x088fafdb"
+                    "0x088fafdb",
+                    "0x67c7f687"
                 ]
             },
             "ERC721Holder": {

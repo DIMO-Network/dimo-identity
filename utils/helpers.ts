@@ -21,3 +21,30 @@ export function bytesToHex(uint8a: Uint8Array): string {
 export function dimoStreamMetadata(vehicleId: number | string) {
   return `{"partitions":1,"description":"DIMO Vehicle Stream for Vehicle ${vehicleId}","config":{"fields":[]}}`;
 }
+
+export async function getGasPrice(bump: bigint = 20n): Promise<bigint> {
+  const price = (await ethers.provider.getFeeData()).gasPrice as bigint;
+  return (price * bump / 100n + price);
+}
+
+export async function getGasPriceWithSleep(
+  bump: bigint = 20n,
+  sleepInterval: number = 5000,
+  priceLimit?: bigint
+): Promise<bigint> {
+  let returnPrice = await getGasPrice(bump);
+
+  if (priceLimit) {
+    while (returnPrice > priceLimit) {
+      console.log(`Gas price too high: ${returnPrice}\nSleeping ${sleepInterval} ms...`);
+      await sleep(sleepInterval);
+      console.log('Done sleeping');
+
+      returnPrice = await getGasPrice(bump);
+    }
+  }
+
+  return returnPrice;
+}
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

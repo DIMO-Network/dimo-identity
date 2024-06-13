@@ -37,6 +37,7 @@ main([
   'contracts/access/DimoAccessControl.sol:DimoAccessControl',
   'contracts/Eip712/Eip712Checker.sol:Eip712Checker',
   'contracts/shared/Multicall.sol:Multicall',
+  'contracts/utils/ERC721Holder.sol:ERC721Holder',
   'contracts/implementations/AdLicenseValidator/AdLicenseValidator.sol:AdLicenseValidator',
   'contracts/implementations/nodes/AftermarketDevice.sol:AftermarketDevice',
   'contracts/implementations/nodes/Manufacturer.sol:Manufacturer',
@@ -49,6 +50,8 @@ main([
   'contracts/implementations/BaseDataURI.sol:BaseDataURI',
   'contracts/implementations/streamr/StreamrConfigurator.sol:StreamrConfigurator',
   'contracts/implementations/streamr/VehicleStream.sol:VehicleStream',
+  'contracts/implementations/tableland/DeviceDefinitionTable.sol:DeviceDefinitionTable',
+  'contracts/implementations/tableland/DeviceDefinitionController.sol:DeviceDefinitionController',
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

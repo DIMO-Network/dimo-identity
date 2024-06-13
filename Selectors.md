@@ -33,6 +33,7 @@
 | 0xb17b974b | adminCacheDimoStreamrEns() |
 | 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
+| 0x5f741f4d | adminRemoveVehicleAttribute(string) |
 | 0xf73a8f04 | renameManufacturers((uint256,string)[]) |
 | 0xff96b761 | transferAftermarketDeviceOwnership(uint256,address) |
 | 0x5c129493 | unclaimAftermarketDeviceNode(uint256[]) |
@@ -53,6 +54,7 @@
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
 | 0x8ad18187 | SyntheticDeviceAttributeSetDevAdmin(uint256,string,string) |
 | 0x81741fdd | SyntheticDeviceNodeBurnedDevAdmin(uint256,uint256,address) |
+| 0x9b4bf377 | VehicleAttributeRemoved(string) |
 | 0x1d91e00c | VehicleAttributeSetDevAdmin(uint256,string,string) |
 | 0xb956d027 | VehicleNodeBurnedDevAdmin(uint256,address) |
 
@@ -111,6 +113,12 @@
 |-|-|
 | 0x415c2d96 | multiDelegateCall(bytes[]) |
 | 0x1c0c6e51 | multiStaticCall(bytes[]) |
+
+## ERC721Holder
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x150b7a02 | onERC721Received(address,address,uint256,bytes) |
 
 ## AdLicenseValidator
 #### Functions
@@ -297,6 +305,7 @@
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -319,8 +328,11 @@
 |-|-|
 | 0xf0d1a557 | addVehicleAttribute(string) |
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
+| 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
 | 0x3da44e56 | mintVehicle(uint256,address,(string,string)[]) |
 | 0x1b1a82c8 | mintVehicleSign(uint256,address,(string,string)[],bytes) |
+| 0xd84baff1 | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[]) |
+| 0x8dca2b8e | mintVehicleWithDeviceDefinitionSign(uint256,address,string,(string,string)[],bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
 | 0xd9c3ae61 | setVehicleInfo(uint256,(string,string)[]) |
 | 0xea0e7d3a | validateBurnAndResetNode(uint256) |
@@ -336,6 +348,7 @@
 | 0x3e7484c4 | VehicleIdProxySet(address) |
 | 0x7b36384f | VehicleNodeBurned(uint256,address) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -377,6 +390,7 @@
 | Selector | Signature |
 |-|-|
 | 0xfb1a28e8 | mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
+| 0xd23965e3 | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
 
 #### Events
 | Selector | Signature |
@@ -388,6 +402,7 @@
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
+| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -417,6 +432,47 @@
 | Selector | Signature |
 |-|-|
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
+
+## DeviceDefinitionTable
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x20954d21 | createDeviceDefinitionTable(address,uint256) |
+| 0x794c6790 | createDeviceDefinitionTableBatch(address,uint256[]) |
+| 0x32b3f2d5 | deleteDeviceDefinition(uint256,string) |
+| 0x396e5987 | getDeviceDefinitionTableId(uint256) |
+| 0xa1d17941 | getDeviceDefinitionTableName(uint256) |
+| 0x23536c5f | insertDeviceDefinition(uint256,(string,string,uint256,string,string,string,string)) |
+| 0x80d50451 | insertDeviceDefinitionBatch(uint256,(string,string,uint256,string,string,string,string)[]) |
+| 0x088fafdb | setDeviceDefinitionTable(uint256,uint256) |
+| 0x67c7f687 | updateDeviceDefinition(uint256,(string,string,uint256,string,string,string,string)) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x29504454 | DeviceDefinitionDeleted(uint256,string) |
+| 0x462ef08c | DeviceDefinitionInserted(uint256,string,string,uint256) |
+| 0x34045c03 | DeviceDefinitionTableCreated(address,uint256,uint256) |
+| 0x60fa772c | DeviceDefinitionUpdated(uint256,string,string,uint256) |
+| 0x753affc1 | ManufacturerTableSet(uint256,uint256) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0x264e42cf | ChainNotSupported(uint256) |
+| 0xa25b0cf9 | InvalidManufacturerId(uint256) |
+| 0x3784d0a9 | TableAlreadyExists(uint256) |
+| 0x45cbe5ec | TableDoesNotExist(uint256) |
+| 0x8e4a23d6 | Unauthorized(address) |
+
+## DeviceDefinitionController
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x66df322e | getPolicy(address,uint256) |
 
 ## StreamrConfigurator
 #### Functions

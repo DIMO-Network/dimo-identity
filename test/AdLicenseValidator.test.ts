@@ -1,5 +1,6 @@
 import chai from 'chai';
-import { ethers, HardhatEthersSigner } from 'hardhat';
+import { ethers, } from 'hardhat';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 
 import type {
   DimoAccessControl,

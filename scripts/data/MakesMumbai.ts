@@ -200,7 +200,7 @@ export const makes = [
   'DAF',
   'HINO',
   'TestManufacturer',
-  'Hashdog',
+  'HashDog',
   'International',
   'Chery'
 ];

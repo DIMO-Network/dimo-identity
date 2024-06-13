@@ -70,7 +70,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Mints a vehicle
-     * @dev Caller must have the admin role
+     * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param attrInfo List of attribute-info pairs to be added
@@ -102,9 +102,111 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     }
 
     /**
+     * @notice Function to mint a vehicle with a Device Definition Id
+     * @dev Caller must have the mint vehicle role
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param deviceDefinitionId The Device Definition Id
+     * @param attrInfo List of attribute-info pairs to be added
+     */
+    function mintVehicleWithDeviceDefinition(
+        uint256 manufacturerNode,
+        address owner,
+        string calldata deviceDefinitionId,
+        AttributeInfoPair[] calldata attrInfo
+    ) external onlyRole(MINT_VEHICLE_ROLE) {
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
+
+        emit VehicleNodeMintedWithDeviceDefinition(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
+
+        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+    }
+
+    /**
+     * @notice Mint a vehicle with a Device Definition Id through a metatransaction
+     * @dev Caller must have the mint vehicle role
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param deviceDefinitionId The Device Definition Id
+     * @param attrInfo attrInfo
+     * @param signature User's signature hash
+     */
+    function mintVehicleWithDeviceDefinitionSign(
+        uint256 manufacturerNode,
+        address owner,
+        string calldata deviceDefinitionId,
+        AttributeInfoPair[] calldata attrInfo,
+        bytes calldata signature
+    ) external onlyRole(MINT_VEHICLE_ROLE) {
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
+            newTokenId
+        ] = deviceDefinitionId;
+
+        emit VehicleNodeMintedWithDeviceDefinition(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
+
+        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
+            newTokenId,
+            attrInfo
+        );
+
+        bytes32 message = keccak256(
+            abi.encode(
+                MINT_VEHICLE_WITH_DD_TYPEHASH,
+                manufacturerNode,
+                owner,
+                keccak256(bytes(deviceDefinitionId)),
+                attributesHash,
+                infosHash
+            )
+        );
+
+        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
+            revert InvalidOwnerSignature();
+    }
+
+    /**
      * @notice Mints a vehicle through a metatransaction
      * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-     * @dev Caller must have the admin role
+     * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param attrInfo List of attribute-info pairs to be added
@@ -156,7 +258,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     /**
      * @notice Add infos to node
      * @dev attributes must be whitelisted
-     * @dev Caller must have the admin role
+     * @dev Caller must have the set vehicle info role
      * @param tokenId Node where the info will be added
      * @param attrInfo List of attribute-info pairs to be added
      */
@@ -173,7 +275,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Burns a vehicle and reset all its attributes
-     * @dev Caller must have the admin role
+     * @dev Caller must have the burn vehicle role
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenId Vehicle node id
      * @param ownerSig Vehicle owner signature hash
@@ -184,10 +286,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     ) external onlyRole(BURN_VEHICLE_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
+        address vehicleIdProxyAddress = vs.idProxyAddress;
         address sdIdProxyAddress = SyntheticDeviceStorage
             .getStorage()
             .idProxyAddress;
@@ -206,6 +307,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             revert InvalidOwnerSignature();
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+        delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
         emit VehicleNodeBurned(tokenId, owner);
 
@@ -223,10 +325,9 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     function validateBurnAndResetNode(uint256 tokenId) external onlyNftProxy {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
+        address vehicleIdProxyAddress = vs.idProxyAddress;
         address sdIdProxyAddress = SyntheticDeviceStorage
             .getStorage()
             .idProxyAddress;
@@ -241,10 +342,24 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
+        delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
         _resetInfos(tokenId);
 
         emit VehicleNodeBurned(tokenId, owner);
+    }
+
+    /**
+     * @notice Gets the Device Definition Id associated to a Vehicle Id
+     * @dev If there is no ddId associated, it returns an empty string
+     * @param vehicleId Vehicle Id
+     */
+    function getDeviceDefinitionIdByVehicleId(
+        uint256 vehicleId
+    ) external view returns (string memory ddId) {
+        ddId = VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
+            vehicleId
+        ];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //

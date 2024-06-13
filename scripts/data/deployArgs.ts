@@ -30,10 +30,12 @@ export const roles = {
     DEV_AD_UNPAIR_ROLE: _hashRole('DEV_AD_UNPAIR_ROLE'),
     DEV_RENAME_MANUFACTURERS_ROLE: _hashRole('DEV_RENAME_MANUFACTURERS_ROLE'),
     DEV_VEHICLE_BURN_ROLE: _hashRole('DEV_VEHICLE_BURN_ROLE'),
+    DEV_AD_PAIR_ROLE: _hashRole('DEV_AD_PAIR_ROLE'),
     DEV_AD_BURN_ROLE: _hashRole('DEV_AD_BURN_ROLE'),
     DEV_SD_BURN_ROLE: _hashRole('DEV_SD_BURN_ROLE'),
     DEV_CHANGE_PARENT_NODE: _hashRole('DEV_CHANGE_PARENT_NODE'),
-    DEV_CACHE_ENS: _hashRole('DEV_CACHE_ENS')
+    DEV_CACHE_ENS: _hashRole('DEV_CACHE_ENS'),
+    DEV_REMOVE_ATTR: _hashRole('DEV_REMOVE_ATTR')
   },
   nfts: {
     MINTER_ROLE: _hashRole('MINTER_ROLE'),
@@ -75,9 +77,10 @@ export const vehicleAttributes = [
   'Model',
   'Year',
   'DataURI',
-  'DefinitionURI'
+  'DefinitionURI',
+  'ImageURI'
 ];
-export const adAttributes = ['Serial', 'IMEI', 'DefinitionURI'];
+export const adAttributes = ['Serial', 'IMEI', 'DefinitionURI','HardwareRevision','DevEUI'];
 export const sdAttributes = [];
 
 export const manufacturerIdArgs = {
@@ -104,5 +107,7 @@ export const sdIdArgs = {
 export const dimoStreamrEns: GenericKeyAny = {
   polygon: 'streams.dimo.eth',
   mumbai: 'streams.dev.dimo.eth',
-  hardhat: 'streams.hardhat.dimo.eth'
+  amoy: 'streams.dev.dimo.eth',
+  hardhat: 'streams.hardhat.dimo.eth',
+  localhost: 'streams.localhost.dimo.eth'
 }

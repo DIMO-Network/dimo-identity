@@ -32,16 +32,16 @@ async function main() {
   if (
     network.name === 'hardhat' ||
     network.name === 'localhost' ||
-    network.name === 'tenderly'
+    network.name === 'tenderly' 
   ) {
-    currentNetwork = 'mumbai';
+    currentNetwork = 'amoy';
 
     // 0xCED3c922200559128930180d3f0bfFd4d9f4F123 gnosis
     // 0x1741eC2915Ab71Fc03492715b5640133dA69420B DIMO deployer
-    // 0xA363478EB480F1a311C777Abadc466b6190433D2 Shared
+    // 0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b Shared
     // 0xC0F28DA7Ae009711026C648913eB17962fd96dD7 Malte's gnosis
     deployer = await ethers.getImpersonatedSigner(
-      '0xA363478EB480F1a311C777Abadc466b6190433D2'
+      '0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b'
     );
     shaolin = await ethers.getImpersonatedSigner(
       '0xa9395ebb1fd55825023934e683cefd6f3f279137'
@@ -50,7 +50,7 @@ async function main() {
       '0xB8E514da5E7b2918AebC139ae7CbEFc3727f05D3'
     );
     shared = await ethers.getImpersonatedSigner(
-      '0xA363478EB480F1a311C777Abadc466b6190433D2'
+      '0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b'
     );
 
     await user1.sendTransaction({
@@ -84,19 +84,19 @@ async function main() {
     'Manufacturer',
     contractAddresses[currentNetwork].modules.DIMORegistry.address
   );
-  // const manufacturerIdInstance: ManufacturerId = await ethers.getContractAt(
-  //   'ManufacturerId',
-  //   contractAddresses[currentNetwork].nfts.ManufacturerId.proxy
-  // );
+  const manufacturerIdInstance: ManufacturerId = await ethers.getContractAt(
+    'ManufacturerId',
+    contractAddresses[currentNetwork].nfts.ManufacturerId.proxy
+  );
   const aftermarketDevice: AftermarketDevice = await ethers.getContractAt(
     'AftermarketDevice',
     contractAddresses[currentNetwork].modules.DIMORegistry.address
   );
-  // const aftermarketDeviceIdInstance: AftermarketDeviceId =
-  //   await ethers.getContractAt(
-  //     'AftermarketDeviceId',
-  //     contractAddresses[currentNetwork].nfts.AftermarketDeviceId.proxy
-  //   );
+  const aftermarketDeviceIdInstance: AftermarketDeviceId =
+    await ethers.getContractAt(
+      'AftermarketDeviceId',
+      contractAddresses[currentNetwork].nfts.AftermarketDeviceId.proxy
+    );
   const vehicleIdInstance: VehicleId = await ethers.getContractAt(
     'VehicleId',
     contractAddresses[currentNetwork].nfts.VehicleId.proxy

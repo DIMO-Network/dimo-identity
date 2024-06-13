@@ -1,4 +1,5 @@
 import { Wallet } from 'ethers';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 
 import * as C from './constants';
 import { GenericKeyAny, ContractsSetup } from './types';
@@ -6,7 +7,7 @@ import { DimoAccessControl } from '../typechain-types';
 import { initialize, deployUpgradeableContracts } from './deploys';
 
 export async function setup(
-  deployer: Wallet,
+  deployer: Wallet | HardhatEthersSigner,
   contracts: ContractsSetup
 ): Promise<GenericKeyAny> {
   const deployedRegistryContracts = await initialize(
@@ -63,7 +64,8 @@ export async function grantAdminRoles(
     C.DEV_AD_BURN_ROLE,
     C.DEV_SD_BURN_ROLE,
     C.DEV_CHANGE_PARENT_NODE,
-    C.DEV_CACHE_ENS
+    C.DEV_CACHE_ENS,
+    C.DEV_REMOVE_ATTR
   ];
 
   for (const role of roles) {

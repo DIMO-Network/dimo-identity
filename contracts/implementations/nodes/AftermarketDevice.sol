@@ -532,6 +532,8 @@ contract AftermarketDevice is
      *  - Caller must be the owner of the aftermarket device's parent manufacturer or an authorized address
      *  - The manufacturer node owner must grant the MANUFACTURER_FACTORY_RESET_PRIVILEGE privilege to the authorized address
      * @param adIdAddrs List of deviceId-deviceAddress pairs to be set
+     *  aftermarketDeviceNodeId -> Token ID of the AD
+     *  owner -> Address to be the new AD owner
      */
     function resetAftermarketDeviceAddressByManufacturerBatch(
         Types.AftermarketDeviceIdAddressPair[] calldata adIdAddrs

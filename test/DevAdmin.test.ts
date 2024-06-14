@@ -39,6 +39,7 @@ import {
   revertToSnapshot,
   signMessage,
   IdManufacturerName,
+  VehicleIdDeviceDefinitionId,
   C,
 } from '../utils';
 
@@ -2733,6 +2734,78 @@ describe('DevAdmin', function () {
         )
           .to.emit(devAdminInstance, 'VehicleAttributeRemoved')
           .withArgs(C.mockVehicleAttribute1);
+      });
+    });
+  });
+
+  describe('adminSetVehicleDDs', () => {
+    const vehicleIdsDdIds = [
+      { vehicleId: '1', deviceDefinitionId: C.mockDdId1 },
+      { vehicleId: '2', deviceDefinitionId: C.mockDdId2 }
+    ];
+    beforeEach(async () => {
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(2, user2.address, C.mockVehicleAttributeInfoPairs);
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_SET_DD role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .adminSetVehicleDDs(vehicleIdsDdIds),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_SET_DD}`
+        );
+      });
+      it('Should revert if vehicle ID is not minted', async () => {
+        const invalidList = [...vehicleIdsDdIds, { vehicleId: 99, deviceDefinitionId: C.mockDdId1 }];
+
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetVehicleDDs(invalidList),
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, 'InvalidNode')
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set DDs', async () => {
+        const ddBefore1 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(1);
+        const ddBefore2 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(2);
+
+        expect(ddBefore1).to.empty;
+        expect(ddBefore2).to.empty;
+
+        await devAdminInstance
+          .connect(admin)
+          .adminSetVehicleDDs(vehicleIdsDdIds);
+
+        const ddAfter1 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(1);
+        const ddAfter2 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(2);
+
+        expect(ddAfter1).to.equal(C.mockDdId1);
+        expect(ddAfter2).to.equal(C.mockDdId2);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit DeviceDefinitionIdSet event with correct params', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetVehicleDDs(vehicleIdsDdIds)
+        )
+          .to.emit(devAdminInstance, 'DeviceDefinitionIdSet')
+          .withArgs(1, C.mockDdId1)
+          .to.emit(devAdminInstance, 'DeviceDefinitionIdSet')
+          .withArgs(2, C.mockDdId2);
       });
     });
   });

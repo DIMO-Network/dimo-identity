@@ -408,6 +408,25 @@
             {
                 "indexed": true,
                 "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "ddId",
+                "type": "string"
+            }
+        ],
+        "name": "DeviceDefinitionIdSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
             },
@@ -631,6 +650,31 @@
             }
         ],
         "name": "adminRemoveVehicleAttribute",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "vehicleId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "deviceDefinitionId",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct DevAdmin.VehicleIdDeviceDefinitionId[]",
+                "name": "vehicleIdDdId",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "adminSetVehicleDDs",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

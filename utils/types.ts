@@ -84,6 +84,11 @@ export type IdManufacturerName = {
   name: string
 };
 
+export type VehicleIdDeviceDefinitionId = {
+  vehicleId: string,
+  deviceDefinitionId: string
+}
+
 export type SetPrivilegeData = {
   tokenId: string,
   privId: string,

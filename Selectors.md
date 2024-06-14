@@ -34,6 +34,7 @@
 | 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
 | 0x5f741f4d | adminRemoveVehicleAttribute(string) |
+| 0xdd60fd1a | adminSetVehicleDDs((uint256,string)[]) |
 | 0xf73a8f04 | renameManufacturers((uint256,string)[]) |
 | 0xff96b761 | transferAftermarketDeviceOwnership(uint256,address) |
 | 0x5c129493 | unclaimAftermarketDeviceNode(uint256[]) |
@@ -49,6 +50,7 @@
 | 0xaabf86a9 | AftermarketDeviceTransferredDevAdmin(uint256,address,address) |
 | 0xd2a3fcd4 | AftermarketDeviceUnclaimedDevAdmin(uint256) |
 | 0x1ba4ec81 | AftermarketDeviceUnpairedDevAdmin(uint256,uint256,address) |
+| 0x11880ae6 | DeviceDefinitionIdSet(uint256,string) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |

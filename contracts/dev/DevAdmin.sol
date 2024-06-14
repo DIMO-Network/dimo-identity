@@ -71,10 +71,15 @@ contract DevAdmin is AccessControlInternal {
         address indexed owner
     );
     event VehicleAttributeRemoved(string attribute);
+    event DeviceDefinitionIdSet(uint256 indexed vehicleId, string ddId);
 
     struct IdManufacturerName {
         uint256 tokenId;
         string name;
+    }
+    struct VehicleIdDeviceDefinitionId {
+        uint256 vehicleId;
+        string deviceDefinitionId;
     }
 
     /**
@@ -645,6 +650,32 @@ contract DevAdmin is AccessControlInternal {
                 attribute
             )
         ) emit VehicleAttributeRemoved(attribute);
+    }
+
+    /**
+     * @notice Admin function add device definition to existing vehicles
+     * @dev Caller must have the DEV_SET_DD role
+     */
+    function adminSetVehicleDDs(
+        VehicleIdDeviceDefinitionId[] calldata vehicleIdDdId
+    ) external onlyRole(DEV_SET_DD) {
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        uint256 vehicleId;
+        string memory ddId;
+        for (uint256 i = 0; i < vehicleIdDdId.length; i++) {
+            vehicleId = vehicleIdDdId[i].vehicleId;
+            ddId = vehicleIdDdId[i].deviceDefinitionId;
+
+            if (!INFT(vehicleIdProxyAddress).exists(vehicleId))
+                revert InvalidNode(vehicleIdProxyAddress, vehicleId);
+
+            vs.vehicleIdToDeviceDefinitionId[vehicleId] = ddId;
+
+            emit DeviceDefinitionIdSet(vehicleId, ddId);
+        }
     }
 
     /**

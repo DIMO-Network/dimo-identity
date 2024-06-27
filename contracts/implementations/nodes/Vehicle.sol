@@ -101,6 +101,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+
+        ChargingInternal._chargeDcx(msg.sender, MINTING_OPERATION);
     }
 
     /**
@@ -141,6 +143,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         );
 
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+
+        ChargingInternal._chargeDcx(msg.sender, MINTING_OPERATION);
     }
 
     /**
@@ -203,6 +207,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
             revert InvalidOwnerSignature();
+
+        ChargingInternal._chargeDcx(msg.sender, MINTING_OPERATION);
     }
 
     /**

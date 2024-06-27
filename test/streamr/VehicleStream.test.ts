@@ -14,13 +14,16 @@ import type { StreamRegistry, ENSCacheV2 } from '@streamr/network-contracts';
 import {
   DIMORegistry,
   Eip712Checker,
+  Charging,
   DimoAccessControl,
   Manufacturer,
   ManufacturerId,
   Vehicle,
   VehicleId,
   StreamrConfigurator,
-  VehicleStream
+  VehicleStream,
+  Shared,
+  MockDimoCredit
 } from '../../typechain-types';
 
 import {
@@ -39,8 +42,10 @@ describe('VehicleStream', async function () {
   let expiresDefault: number;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let chargingInstance: Charging;
   let dimoAccessControlInstance: DimoAccessControl;
   let manufacturerInstance: Manufacturer;
+  let sharedInstance: Shared;
   let vehicleInstance: Vehicle;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
@@ -48,12 +53,14 @@ describe('VehicleStream', async function () {
   let vehicleStreamInstance: VehicleStream;
   let ensCache: ENSCacheV2;
   let streamRegistry: StreamRegistry;
+  let mockDimoCreditInstance: MockDimoCredit;
 
   let DIMO_REGISTRY_ADDRESS: string;
   let VEHICLE_ID_ADDRESS: string;
   let STREAM_REGISTRY_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
+  let foundation: HardhatEthersSigner;
   let streamrAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
@@ -88,6 +95,7 @@ describe('VehicleStream', async function () {
   before(async () => {
     [
       admin,
+      foundation,
       streamrAdmin,
       manufacturer1,
       user1,
@@ -102,13 +110,15 @@ describe('VehicleStream', async function () {
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
+        'Charging',
         'DimoAccessControl',
         'Nodes',
         'Manufacturer',
         'Vehicle',
         'Mapper',
         'StreamrConfigurator',
-        'VehicleStream'
+        'VehicleStream',
+        'Shared'
       ],
       nfts: ['ManufacturerId', 'VehicleId'],
       upgradeableContracts: []
@@ -116,6 +126,7 @@ describe('VehicleStream', async function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    chargingInstance = deployments.Charging;
     dimoAccessControlInstance = deployments.DimoAccessControl;
     manufacturerInstance = deployments.Manufacturer;
     vehicleInstance = deployments.Vehicle;
@@ -123,9 +134,16 @@ describe('VehicleStream', async function () {
     vehicleIdInstance = deployments.VehicleId;
     streamrConfiguratorInstance = deployments.StreamrConfigurator;
     vehicleStreamInstance = deployments.VehicleStream;
+    sharedInstance = deployments.Shared;
 
     DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
     VEHICLE_ID_ADDRESS = await vehicleIdInstance.getAddress();
+
+    // Deploy MockDimoCredit contract
+    const MockDimoCreditFactory = await ethers.getContractFactory(
+      'MockDimoCredit'
+    );
+    mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -149,6 +167,27 @@ describe('VehicleStream', async function () {
       C.defaultDomainName,
       C.defaultDomainVersion
     );
+
+    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    await mockDimoCreditInstance
+      .connect(admin)
+      .mint(admin.address, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+
+    // Setup Shared variables
+    await sharedInstance
+      .connect(admin)
+      .setFoundation(foundation.address);
+    await sharedInstance
+      .connect(admin)
+      .setDimoCredit(await mockDimoCreditInstance.getAddress());
+
+    // Setup Charging variables
+    await chargingInstance
+      .connect(admin)
+      .setOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance

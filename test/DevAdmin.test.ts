@@ -13,6 +13,7 @@ import type { StreamRegistry, ENSCacheV2 } from '@streamr/network-contracts';
 import {
   DIMORegistry,
   Eip712Checker,
+  Charging,
   DimoAccessControl,
   Nodes,
   Manufacturer,
@@ -27,8 +28,10 @@ import {
   SyntheticDeviceId,
   AdLicenseValidator,
   Mapper,
+  Shared,
   StreamrConfigurator,
   MockDimoToken,
+  MockDimoCredit,
   MockStake,
   DevAdmin,
 } from '../typechain-types';
@@ -39,7 +42,6 @@ import {
   revertToSnapshot,
   signMessage,
   IdManufacturerName,
-  VehicleIdDeviceDefinitionId,
   C,
 } from '../utils';
 
@@ -49,6 +51,7 @@ describe('DevAdmin', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let chargingInstance: Charging;
   let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
@@ -58,8 +61,10 @@ describe('DevAdmin', function () {
   let syntheticDeviceInstance: SyntheticDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
+  let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
+  let mockDimoCreditInstance: MockDimoCredit;
   let devAdminInstance: DevAdmin;
   let manufacturerIdInstance: ManufacturerId;
   let integrationIdInstance: IntegrationId;
@@ -136,6 +141,7 @@ describe('DevAdmin', function () {
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
+        'Charging',
         'DimoAccessControl',
         'Nodes',
         'Manufacturer',
@@ -145,6 +151,7 @@ describe('DevAdmin', function () {
         'SyntheticDevice',
         'AdLicenseValidator',
         'Mapper',
+        'Shared',
         'StreamrConfigurator',
         'DevAdmin'
       ],
@@ -161,6 +168,7 @@ describe('DevAdmin', function () {
     dimoRegistryInstance = deployments.DIMORegistry;
     dimoAccessControlInstance = deployments.DimoAccessControl;
     eip712CheckerInstance = deployments.Eip712Checker;
+    chargingInstance = deployments.Charging;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
     integrationInstance = deployments.Integration;
@@ -169,6 +177,7 @@ describe('DevAdmin', function () {
     syntheticDeviceInstance = deployments.SyntheticDevice;
     adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
+    sharedInstance = deployments.Shared;
     devAdminInstance = deployments.DevAdmin;
     manufacturerIdInstance = deployments.ManufacturerId;
     integrationIdInstance = deployments.IntegrationId;
@@ -178,6 +187,23 @@ describe('DevAdmin', function () {
     streamrConfiguratorInstance = deployments.StreamrConfigurator;
 
     DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
+
+    // Deploy MockDimoToken contract
+    const MockDimoTokenFactory =
+      await ethers.getContractFactory('MockDimoToken');
+    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
+      C.oneBillionE18,
+    );
+
+    // Deploy MockDimoCredit contract
+    const MockDimoCreditFactory = await ethers.getContractFactory(
+      'MockDimoCredit'
+    );
+    mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
+
+    // Deploy MockStake contract
+    const MockStakeFactory = await ethers.getContractFactory('MockStake');
+    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -223,17 +249,6 @@ describe('DevAdmin', function () {
       C.defaultDomainVersion,
     );
 
-    // Deploy MockDimoToken contract
-    const MockDimoTokenFactory =
-      await ethers.getContractFactory('MockDimoToken');
-    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
-      C.oneBillionE18,
-    );
-
-    // Deploy MockStake contract
-    const MockStakeFactory = await ethers.getContractFactory('MockStake');
-    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
-
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
       .connect(admin)
@@ -244,6 +259,30 @@ describe('DevAdmin', function () {
         DIMO_REGISTRY_ADDRESS,
         C.manufacturerDimoTokensAmount,
       );
+
+    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    await mockDimoCreditInstance
+      .connect(admin)
+      .mint(admin.address, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+
+    // Setup Shared variables
+    await sharedInstance
+      .connect(admin)
+      .setFoundation(foundation.address);
+    await sharedInstance
+      .connect(admin)
+      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setDimoCredit(await mockDimoCreditInstance.getAddress());
+
+    // Setup Charging variables
+    await chargingInstance
+      .connect(admin)
+      .setOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
 
     // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);

@@ -112,7 +112,7 @@ describe('Shared', function () {
         await expect(
           sharedInstance
             .connect(nonAdmin)
-            .setDimoToken(MOCK_DIMO_TOKEN_ADDRESS)
+            .setDimoTokenAddress(MOCK_DIMO_TOKEN_ADDRESS)
         ).to.be.rejectedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
@@ -124,7 +124,7 @@ describe('Shared', function () {
       it('Should correctly return DIMO Token address', async () => {
         await sharedInstance
           .connect(admin)
-          .setDimoToken(MOCK_DIMO_TOKEN_ADDRESS);
+          .setDimoTokenAddress(MOCK_DIMO_TOKEN_ADDRESS);
 
         const dimoTokenAddress = await sharedInstance.getDimoToken();
 
@@ -137,7 +137,7 @@ describe('Shared', function () {
         await expect(
           sharedInstance
             .connect(admin)
-            .setDimoToken(MOCK_DIMO_TOKEN_ADDRESS)
+            .setDimoTokenAddress(MOCK_DIMO_TOKEN_ADDRESS)
         )
           .to.emit(sharedInstance, 'DimoTokenSet')
           .withArgs(MOCK_DIMO_TOKEN_ADDRESS);

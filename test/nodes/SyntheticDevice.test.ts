@@ -5,6 +5,7 @@ import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import {
   DIMORegistry,
   Eip712Checker,
+  Charging,
   DimoAccessControl,
   Nodes,
   Manufacturer,
@@ -16,7 +17,9 @@ import {
   SyntheticDevice,
   SyntheticDeviceId,
   Mapper,
+  Shared,
   MockDimoToken,
+  MockDimoCredit
 } from '../../typechain-types';
 import {
   initialize,
@@ -36,6 +39,7 @@ describe('SyntheticDevice', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let chargingInstance: Charging;
   let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
@@ -43,14 +47,19 @@ describe('SyntheticDevice', function () {
   let vehicleInstance: Vehicle;
   let syntheticDeviceInstance: SyntheticDevice;
   let mapperInstance: Mapper;
+  let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
+  let mockDimoCreditInstance: MockDimoCredit;
   let manufacturerIdInstance: ManufacturerId;
   let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
   let sdIdInstance: SyntheticDeviceId;
 
+  let DIMO_REGISTRY_ADDRESS: string;
+
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
+  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let integrationOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
@@ -64,6 +73,7 @@ describe('SyntheticDevice', function () {
     [
       admin,
       nonAdmin,
+      foundation,
       manufacturer1,
       integrationOwner1,
       user1,
@@ -77,6 +87,7 @@ describe('SyntheticDevice', function () {
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
+        'Charging',
         'DimoAccessControl',
         'Nodes',
         'Manufacturer',
@@ -84,6 +95,7 @@ describe('SyntheticDevice', function () {
         'Vehicle',
         'SyntheticDevice',
         'Mapper',
+        'Shared'
       ],
       nfts: [
         'ManufacturerId',
@@ -96,6 +108,7 @@ describe('SyntheticDevice', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    chargingInstance = deployments.Charging;
     dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
@@ -103,10 +116,27 @@ describe('SyntheticDevice', function () {
     vehicleInstance = deployments.Vehicle;
     syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
+    sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
     integrationIdInstance = deployments.IntegrationId;
     vehicleIdInstance = deployments.VehicleId;
     sdIdInstance = deployments.SyntheticDeviceId;
+
+    DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
+
+    // Deploy MockDimoToken contract
+    const MockDimoTokenFactory = await ethers.getContractFactory(
+      'MockDimoToken'
+    );
+    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
+      C.oneBillionE18
+    );
+
+    // Deploy MockDimoCredit contract
+    const MockDimoCreditFactory = await ethers.getContractFactory(
+      'MockDimoCredit'
+    );
+    mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -146,13 +176,6 @@ describe('SyntheticDevice', function () {
       C.defaultDomainVersion,
     );
 
-    // Deploy MockDimoToken contract
-    const MockDimoTokenFactory =
-      await ethers.getContractFactory('MockDimoToken');
-    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
-      C.oneBillionE18,
-    );
-
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
       .connect(admin)
@@ -163,6 +186,30 @@ describe('SyntheticDevice', function () {
         await dimoRegistryInstance.getAddress(),
         C.manufacturerDimoTokensAmount,
       );
+
+    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    await mockDimoCreditInstance
+      .connect(admin)
+      .mint(admin.address, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+
+    // Setup Shared variables
+    await sharedInstance
+      .connect(admin)
+      .setFoundation(foundation.address);
+    await sharedInstance
+      .connect(admin)
+      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setDimoCredit(await mockDimoCreditInstance.getAddress());
+
+    // Setup Charging variables
+    await chargingInstance
+      .connect(admin)
+      .setOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance

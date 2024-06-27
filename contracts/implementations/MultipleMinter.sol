@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./nodes/VehicleInternal.sol";
 import "./nodes/SyntheticDeviceInternal.sol";
+import "./Charging/ChargingInternal.sol";
 import "../interfaces/INFT.sol";
 import "../Eip712/Eip712CheckerInternal.sol";
 import "../libraries/NodesStorage.sol";
@@ -12,6 +13,7 @@ import "../libraries/nodes/VehicleStorage.sol";
 import "../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../libraries/MapperStorage.sol";
 
+import {MINT_VEHICLE_OPERATION} from "../shared/Operations.sol";
 import "../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
@@ -145,6 +147,8 @@ contract MultipleMinter is
 
         sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
     /**
@@ -272,5 +276,7 @@ contract MultipleMinter is
 
         sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 }

@@ -36,7 +36,7 @@ import {
 
 const { expect } = chai;
 
-describe.only('Vehicle', function () {
+describe('Vehicle', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;

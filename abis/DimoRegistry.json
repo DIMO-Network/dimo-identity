@@ -3449,6 +3449,123 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "internalType": "address",
+                "name": "dimoCredit",
+                "type": "address"
+            }
+        ],
+        "name": "DimoCreditSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "dimoToken",
+                "type": "address"
+            }
+        ],
+        "name": "DimoTokenSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "foundation",
+                "type": "address"
+            }
+        ],
+        "name": "FoundationSet",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "getDimoCredit",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "dimoCredit",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getDimoToken",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "dimoToken",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getFoundation",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "foundation",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "dimoCredit",
+                "type": "address"
+            }
+        ],
+        "name": "setDimoCredit",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "dimoToken",
+                "type": "address"
+            }
+        ],
+        "name": "setDimoTokenAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "foundation",
+                "type": "address"
+            }
+        ],
+        "name": "setFoundation",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": false,
                 "internalType": "string",
                 "name": "dimoStreamrEns",
@@ -4307,6 +4424,62 @@
             }
         ],
         "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "operation",
+                "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "cost",
+                "type": "uint256"
+            }
+        ],
+        "name": "OperationCostSet",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "operation",
+                "type": "bytes32"
+            }
+        ],
+        "name": "getDcxOperationCost",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "cost",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "operation",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "cost",
+                "type": "uint256"
+            }
+        ],
+        "name": "setDcxOperationCost",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     }
 ]

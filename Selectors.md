@@ -387,6 +387,52 @@
 |-|-|
 | 0xf6f6de47 | BeneficiarySet(address,uint256,address) |
 
+## Charging
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0xd25f5787 | getDcxOperationCost(bytes32) |
+| 0xa2fe8c85 | setDcxOperationCost(bytes32,uint256) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x2f2e341f | OperationCostSet(bytes32,uint256) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
+## Shared
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0xcfe55b7d | getDimoCredit() |
+| 0x77898251 | getDimoToken() |
+| 0xa2bc6cdf | getFoundation() |
+| 0x4fa9ff16 | setDimoCredit(address) |
+| 0x81c9bb13 | setDimoTokenAddress(address) |
+| 0xdb3543f5 | setFoundation(address) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0x6f17bce4 | DimoCreditSet(address) |
+| 0x3c3a6813 | DimoTokenSet(address) |
+| 0xfb3a4411 | FoundationSet(address) |
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
 ## MultipleMinter
 #### Functions
 | Selector | Signature |

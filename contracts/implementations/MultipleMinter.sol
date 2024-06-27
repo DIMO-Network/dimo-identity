@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./nodes/VehicleInternal.sol";
 import "./nodes/SyntheticDeviceInternal.sol";
-import "./Charging/ChargingInternal.sol";
+import "./charging/ChargingInternal.sol";
 import "../interfaces/INFT.sol";
 import "../Eip712/Eip712CheckerInternal.sol";
 import "../libraries/NodesStorage.sol";

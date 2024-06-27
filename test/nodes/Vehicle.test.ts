@@ -36,7 +36,7 @@ import {
 
 const { expect } = chai;
 
-describe('Vehicle', function () {
+describe.only('Vehicle', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
@@ -242,7 +242,7 @@ describe('Vehicle', function () {
     // Setup Charging variables
     await chargingInstance
       .connect(admin)
-      .setOperationCost(C.MINTING_OPERATION, C.MINTING_OPERATION_COST);
+      .setOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -562,7 +562,7 @@ describe('Vehicle', function () {
         ).changeTokenBalance(
           mockDimoCreditInstance,
           foundation,
-          C.MINTING_OPERATION_COST
+          C.MINT_VEHICLE_OPERATION_COST
         );
       });
     });
@@ -1005,7 +1005,7 @@ describe('Vehicle', function () {
         ).changeTokenBalance(
           mockDimoCreditInstance,
           foundation,
-          C.MINTING_OPERATION_COST
+          C.MINT_VEHICLE_OPERATION_COST
         );
       });
     });
@@ -1054,7 +1054,7 @@ describe('Vehicle', function () {
     });
   });
 
-  describe.only('mintVehicle', () => {
+  describe('mintVehicle', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
         await expect(
@@ -1152,7 +1152,7 @@ describe('Vehicle', function () {
         ).changeTokenBalance(
           mockDimoCreditInstance,
           foundation,
-          C.MINTING_OPERATION_COST
+          C.MINT_VEHICLE_OPERATION_COST
         );
       });
     });
@@ -1508,7 +1508,7 @@ describe('Vehicle', function () {
         ).changeTokenBalance(
           mockDimoCreditInstance,
           foundation,
-          C.MINTING_OPERATION_COST
+          C.MINT_VEHICLE_OPERATION_COST
         );
       });
     });

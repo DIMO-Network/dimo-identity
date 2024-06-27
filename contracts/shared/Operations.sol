@@ -2,4 +2,4 @@
 pragma solidity ^0.8.13;
 
 // Admin roles
-bytes32 constant MINTING_OPERATION = keccak256("MINTING_OPERATION");
+bytes32 constant MINT_VEHICLE_OPERATION = keccak256("MINT_VEHICLE_OPERATION");

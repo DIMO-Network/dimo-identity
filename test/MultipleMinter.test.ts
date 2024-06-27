@@ -60,7 +60,6 @@ describe('MultipleMinter', function () {
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let integrationOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
@@ -72,7 +71,6 @@ describe('MultipleMinter', function () {
     [
       admin,
       nonAdmin,
-      foundation,
       manufacturer1,
       integrationOwner1,
       user1,
@@ -139,6 +137,7 @@ describe('MultipleMinter', function () {
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -190,11 +189,11 @@ describe('MultipleMinter', function () {
     await mockDimoCreditInstance
       .connect(admin)
       .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setup Shared variables
-    await sharedInstance
-      .connect(admin)
-      .setFoundation(foundation.address);
     await sharedInstance
       .connect(admin)
       .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
@@ -390,19 +389,6 @@ describe('MultipleMinter', function () {
           multipleMinterInstance,
           'AttributeNotWhitelisted'
         ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
-      });
-      it('Should revert if contract has insufficient allowance', async () => {
-        const currentAllowance = await mockDimoCreditInstance
-          .allowance(admin.address, DIMO_REGISTRY_ADDRESS);
-        await mockDimoCreditInstance
-          .connect(admin)
-          .decreaseAllowance(DIMO_REGISTRY_ADDRESS, currentAllowance);
-
-        await expect(
-          multipleMinterInstance
-            .connect(admin)
-            .mintVehicleAndSdSign(incorrectMintInput)
-        ).to.be.revertedWith('ERC20: insufficient allowance');
       });
 
       context('Wrong signature', () => {
@@ -976,19 +962,6 @@ describe('MultipleMinter', function () {
           'AttributeNotWhitelisted'
         ).withArgs(C.mockSyntheticDeviceAttributeInfoPairsNotWhitelisted[1].attribute);
       });
-      it('Should revert if contract has insufficient allowance', async () => {
-        const currentAllowance = await mockDimoCreditInstance
-          .allowance(admin.address, DIMO_REGISTRY_ADDRESS);
-        await mockDimoCreditInstance
-          .connect(admin)
-          .decreaseAllowance(DIMO_REGISTRY_ADDRESS, currentAllowance);
-
-        await expect(
-          multipleMinterInstance
-            .connect(admin)
-            .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
-        ).to.be.revertedWith('ERC20: insufficient allowance');
-      });
 
       context('Wrong signature', () => {
         context('Vehicle owner signature', () => {
@@ -1405,15 +1378,15 @@ describe('MultipleMinter', function () {
           )
         ).to.be.equal(3);
       });
-      it('Should correctly transfer the DIMO Credit tokens to the foundation', async () => {
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
         await expect(() =>
           multipleMinterInstance
-          .connect(admin)
-          .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            .connect(admin)
+            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
         ).changeTokenBalance(
           mockDimoCreditInstance,
-          foundation,
-          C.MINT_VEHICLE_OPERATION_COST
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
         );
       });
     });

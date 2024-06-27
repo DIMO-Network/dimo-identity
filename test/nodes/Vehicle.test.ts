@@ -163,6 +163,7 @@ describe('Vehicle', function () {
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -212,13 +213,16 @@ describe('Vehicle', function () {
       .connect(manufacturer1)
       .approve(DIMO_REGISTRY_ADDRESS, C.manufacturerDimoTokensAmount);
 
-    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    // Mint DIMO Credit Tokens to admin, approve DIMORegistry and grant BURNER_ROLE
     await mockDimoCreditInstance
       .connect(admin)
       .mint(admin.address, C.adminDimoCreditTokensAmount);
     await mockDimoCreditInstance
       .connect(admin)
       .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
@@ -229,9 +233,6 @@ describe('Vehicle', function () {
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Setup Shared variables
-    await sharedInstance
-      .connect(admin)
-      .setFoundation(foundation.address);
     await sharedInstance
       .connect(admin)
       .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
@@ -461,23 +462,6 @@ describe('Vehicle', function () {
           'AttributeNotWhitelisted'
         ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
       });
-      it('Should revert if contract has insufficient allowance', async () => {
-        await mockDimoCreditInstance
-          .connect(admin)
-          .decreaseAllowance(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
-
-        await expect(
-          vehicleInstance
-            .connect(admin)
-            .mintVehicleWithDeviceDefinition(
-              1,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairs
-            )
-        ).to.be.revertedWith('ERC20: insufficient allowance');
-      });
-
     });
 
     context('State', () => {
@@ -549,7 +533,7 @@ describe('Vehicle', function () {
           )
         ).to.be.equal(C.mockVehicleInfo2);
       });
-      it('Should correctly transfer the DIMO Credit tokens to the foundation', async () => {
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
         await expect(() =>
           vehicleInstance
             .connect(admin)
@@ -561,8 +545,8 @@ describe('Vehicle', function () {
             )
         ).changeTokenBalance(
           mockDimoCreditInstance,
-          foundation,
-          C.MINT_VEHICLE_OPERATION_COST
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
         );
       });
     });
@@ -684,23 +668,6 @@ describe('Vehicle', function () {
           vehicleInstance,
           'AttributeNotWhitelisted'
         ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
-      });
-      it('Should revert if contract has insufficient allowance', async () => {
-        await mockDimoCreditInstance
-          .connect(admin)
-          .decreaseAllowance(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
-
-        await expect(
-          vehicleInstance
-            .connect(admin)
-            .mintVehicleWithDeviceDefinitionSign(
-              1,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
-        ).to.be.revertedWith('ERC20: insufficient allowance');
       });
 
       context('Wrong signature', () => {
@@ -991,7 +958,7 @@ describe('Vehicle', function () {
           )
         ).to.be.equal(C.mockVehicleInfo2);
       });
-      it('Should correctly transfer the DIMO Credit tokens to the foundation', async () => {
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
         await expect(() =>
           vehicleInstance
             .connect(admin)
@@ -1004,8 +971,8 @@ describe('Vehicle', function () {
             )
         ).changeTokenBalance(
           mockDimoCreditInstance,
-          foundation,
-          C.MINT_VEHICLE_OPERATION_COST
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
         );
       });
     });
@@ -1088,21 +1055,6 @@ describe('Vehicle', function () {
           'AttributeNotWhitelisted'
         ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
       });
-      it('Should revert if contract has insufficient allowance', async () => {
-        await mockDimoCreditInstance
-          .connect(admin)
-          .decreaseAllowance(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
-
-        await expect(
-          vehicleInstance
-            .connect(admin)
-            .mintVehicle(
-              1,
-              user1.address,
-              C.mockVehicleAttributeInfoPairs
-            )
-        ).to.be.revertedWith('ERC20: insufficient allowance');
-      });
     });
 
     context('State', () => {
@@ -1144,15 +1096,15 @@ describe('Vehicle', function () {
           )
         ).to.be.equal(C.mockVehicleInfo2);
       });
-      it('Should correctly transfer the DIMO Credit tokens to the foundation', async () => {
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
         await expect(() =>
           vehicleInstance
             .connect(admin)
             .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
         ).changeTokenBalance(
           mockDimoCreditInstance,
-          foundation,
-          C.MINT_VEHICLE_OPERATION_COST
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
         );
       });
     });
@@ -1248,22 +1200,6 @@ describe('Vehicle', function () {
           vehicleInstance,
           'AttributeNotWhitelisted'
         ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
-      });
-      it('Should revert if contract has insufficient allowance', async () => {
-        await mockDimoCreditInstance
-          .connect(admin)
-          .decreaseAllowance(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
-
-        await expect(
-          vehicleInstance
-            .connect(admin)
-            .mintVehicleSign(
-              1,
-              user1.address,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
-        ).to.be.revertedWith('ERC20: insufficient allowance');
       });
 
       context('Wrong signature', () => {
@@ -1495,7 +1431,7 @@ describe('Vehicle', function () {
           )
         ).to.be.equal(C.mockVehicleInfo2);
       });
-      it('Should correctly transfer the DIMO Credit tokens to the foundation', async () => {
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
         await expect(() =>
           vehicleInstance
             .connect(admin)
@@ -1507,8 +1443,8 @@ describe('Vehicle', function () {
             )
         ).changeTokenBalance(
           mockDimoCreditInstance,
-          foundation,
-          C.MINT_VEHICLE_OPERATION_COST
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
         );
       });
     });

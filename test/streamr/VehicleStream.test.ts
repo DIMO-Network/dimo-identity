@@ -60,7 +60,6 @@ describe('VehicleStream', async function () {
   let STREAM_REGISTRY_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let streamrAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
@@ -95,7 +94,6 @@ describe('VehicleStream', async function () {
   before(async () => {
     [
       admin,
-      foundation,
       streamrAdmin,
       manufacturer1,
       user1,
@@ -147,6 +145,7 @@ describe('VehicleStream', async function () {
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -175,11 +174,11 @@ describe('VehicleStream', async function () {
     await mockDimoCreditInstance
       .connect(admin)
       .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setup Shared variables
-    await sharedInstance
-      .connect(admin)
-      .setFoundation(foundation.address);
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());

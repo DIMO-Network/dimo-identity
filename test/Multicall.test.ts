@@ -141,6 +141,7 @@ describe('Multicall', function () {
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -175,7 +176,7 @@ describe('Multicall', function () {
     await mockDimoTokenInstance
       .connect(manufacturer1)
       .approve(DIMO_REGISTRY_ADDRESS, C.manufacturerDimoTokensAmount);
-    
+
     // Mint DIMO Credit Tokens to admin and approve DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
@@ -183,11 +184,11 @@ describe('Multicall', function () {
     await mockDimoCreditInstance
       .connect(admin)
       .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setup Shared variables
-    await sharedInstance
-      .connect(admin)
-      .setFoundation(foundation.address);
     await sharedInstance
       .connect(admin)
       .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
@@ -325,7 +326,7 @@ describe('Multicall', function () {
           [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
-        aftermarketDeviceInstance.interface.encodeFunctionData(
+          aftermarketDeviceInstance.interface.encodeFunctionData(
             'claimAftermarketDeviceSign',
             [1, user1.address, ownerSig, adSig]
           );
@@ -349,7 +350,7 @@ describe('Multicall', function () {
           [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
-        aftermarketDeviceInstance.interface.encodeFunctionData(
+          aftermarketDeviceInstance.interface.encodeFunctionData(
             'claimAftermarketDeviceSign',
             [1, user1.address, ownerSig, adSig]
           );

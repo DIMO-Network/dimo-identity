@@ -54,7 +54,6 @@ describe('SyntheticDeviceId', async function () {
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let integrationOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
@@ -65,7 +64,6 @@ describe('SyntheticDeviceId', async function () {
     [
       admin,
       nonAdmin,
-      foundation,
       manufacturer1,
       integrationOwner1,
       user1,
@@ -122,6 +120,7 @@ describe('SyntheticDeviceId', async function () {
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -162,11 +161,11 @@ describe('SyntheticDeviceId', async function () {
     await mockDimoCreditInstance
       .connect(admin)
       .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setup Shared variables
-    await sharedInstance
-      .connect(admin)
-      .setFoundation(foundation.address);
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
@@ -293,8 +292,7 @@ describe('SyntheticDeviceId', async function () {
       await expect(
         sdIdInstance.connect(nonAdmin).setDimoRegistryAddress(C.ZERO_ADDRESS)
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
@@ -310,8 +308,7 @@ describe('SyntheticDeviceId', async function () {
       await expect(
         sdIdInstance.connect(nonAdmin).setTrustedForwarder(C.ZERO_ADDRESS, true)
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`
       );
     });
@@ -356,11 +353,11 @@ describe('SyntheticDeviceId', async function () {
         await expect(
           sdIdInstance
             .connect(user1)
-            ['safeTransferFrom(address,address,uint256)'](
-              user1.address,
-              user2.address,
-              1
-            )
+          ['safeTransferFrom(address,address,uint256)'](
+            user1.address,
+            user2.address,
+            1
+          )
         ).to.be.revertedWithCustomError(sdIdInstance, 'Unauthorized');
       });
     });
@@ -371,11 +368,11 @@ describe('SyntheticDeviceId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
@@ -384,11 +381,11 @@ describe('SyntheticDeviceId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         expect(await sdIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
@@ -410,11 +407,11 @@ describe('SyntheticDeviceId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         expect(
           await mapperInstance.getNodeLink(
@@ -438,11 +435,11 @@ describe('SyntheticDeviceId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         expect(
           await nodesInstance.getParentNode(await sdIdInstance.getAddress(), 1)
@@ -461,11 +458,11 @@ describe('SyntheticDeviceId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         for (const attrInfoPair of C.mockSyntheticDeviceAttributeInfoPairs) {
           expect(
@@ -486,11 +483,11 @@ describe('SyntheticDeviceId', async function () {
 
         await vehicleIdInstance
           .connect(user1)
-          ['safeTransferFrom(address,address,uint256)'](
-            user1.address,
-            user2.address,
-            1
-          );
+        ['safeTransferFrom(address,address,uint256)'](
+          user1.address,
+          user2.address,
+          1
+        );
 
         expect(
           await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(

@@ -74,7 +74,7 @@ describe('AftermarketDeviceId', async function () {
   before(async () => {
     [
       admin,
-      nonAdmin,      
+      nonAdmin,
       foundation,
       manufacturer1,
       user1,
@@ -143,6 +143,7 @@ describe('AftermarketDeviceId', async function () {
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -177,7 +178,7 @@ describe('AftermarketDeviceId', async function () {
     await mockDimoTokenInstance
       .connect(manufacturer1)
       .approve(DIMO_REGISTRY_ADDRESS, C.manufacturerDimoTokensAmount);
-    
+
     // Mint DIMO Credit Tokens to admin and approve DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
@@ -185,11 +186,11 @@ describe('AftermarketDeviceId', async function () {
     await mockDimoCreditInstance
       .connect(admin)
       .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setup Shared variables
-    await sharedInstance
-      .connect(admin)
-      .setFoundation(foundation.address);
     await sharedInstance
       .connect(admin)
       .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());

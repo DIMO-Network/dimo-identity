@@ -166,6 +166,7 @@ describe('AftermarketDevice', function () {
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -203,7 +204,7 @@ describe('AftermarketDevice', function () {
         DIMO_REGISTRY_ADDRESS,
         C.manufacturerDimoTokensAmount,
       );
-    
+
     // Mint DIMO Credit Tokens to admin and approve DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
@@ -211,11 +212,11 @@ describe('AftermarketDevice', function () {
     await mockDimoCreditInstance
       .connect(admin)
       .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setup Shared variables
-    await sharedInstance
-      .connect(admin)
-      .setFoundation(foundation.address);
     await sharedInstance
       .connect(admin)
       .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
@@ -304,7 +305,7 @@ describe('AftermarketDevice', function () {
         DIMO_REGISTRY_ADDRESS,
         C.manufacturerDimoTokensAmount,
       );
-    
+
     await manufacturerIdInstance.createPrivilege(true, 'Minter');
     await manufacturerIdInstance.createPrivilege(true, 'Claimer');
     await manufacturerIdInstance.createPrivilege(true, 'Manufacturer Factory Reset');

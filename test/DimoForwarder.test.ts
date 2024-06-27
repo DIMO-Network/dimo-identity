@@ -145,6 +145,7 @@ describe('DimoForwarder', async function () {
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -182,7 +183,7 @@ describe('DimoForwarder', async function () {
         DIMO_REGISTRY_ADDRESS,
         C.manufacturerDimoTokensAmount,
       );
-    
+
     // Mint DIMO Credit Tokens to admin and approve DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
@@ -190,11 +191,11 @@ describe('DimoForwarder', async function () {
     await mockDimoCreditInstance
       .connect(admin)
       .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setup Shared variables
-    await sharedInstance
-      .connect(admin)
-      .setFoundation(foundation.address);
     await sharedInstance
       .connect(admin)
       .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
@@ -382,18 +383,18 @@ describe('DimoForwarder', async function () {
       );
     await aftermarketDeviceInstance
       .connect(admin)
-      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-        1,
-        1,
-        pairSignature1,
-      );
+    ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+      1,
+      1,
+      pairSignature1,
+    );
     await aftermarketDeviceInstance
       .connect(admin)
-      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-        2,
-        2,
-        pairSignature2,
-      );
+    ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+      2,
+      2,
+      pairSignature2,
+    );
   });
 
   beforeEach(async () => {
@@ -411,8 +412,7 @@ describe('DimoForwarder', async function () {
           .connect(nonAdmin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS),
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`,
       );
     });
@@ -430,8 +430,7 @@ describe('DimoForwarder', async function () {
           .connect(nonAdmin)
           .setVehicleIdProxyAddress(await vehicleIdInstance.getAddress()),
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`,
       );
     });
@@ -446,8 +445,7 @@ describe('DimoForwarder', async function () {
             await aftermarketDeviceInstance.getAddress(),
           ),
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`,
       );
     });

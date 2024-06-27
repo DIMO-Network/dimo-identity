@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./VehicleInternal.sol";
+import "../Charging/ChargingInternal.sol";
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
@@ -10,6 +11,7 @@ import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 
+import {MINTING_OPERATION} from "../../shared/Operations.sol";
 import {ADMIN_ROLE, MINT_VEHICLE_ROLE, BURN_VEHICLE_ROLE, SET_VEHICLE_INFO_ROLE} from "../../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
@@ -253,6 +255,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
             revert InvalidOwnerSignature();
+
+        ChargingInternal._chargeDcx(msg.sender, MINTING_OPERATION);
     }
 
     /**

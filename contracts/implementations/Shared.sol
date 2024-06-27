@@ -28,7 +28,10 @@ contract Shared is AccessControlInternal {
     }
 
     // TODO Documentation
-    function setDimoToken(address dimoToken) external onlyRole(ADMIN_ROLE) {
+    // TODO Rename to setDimoTokenAddress after deprecating AdLicenseValidator
+    function setDimoTokenAddress(
+        address dimoToken
+    ) external onlyRole(ADMIN_ROLE) {
         SharedStorage.getStorage().dimoToken = dimoToken;
 
         emit DimoTokenSet(dimoToken);

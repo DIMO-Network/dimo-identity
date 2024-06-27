@@ -9,7 +9,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 /**
  * @title Charging
- * @notice TODO Documentation
+ * @notice Contract with functions to assist in charging for operations
  */
 contract Charging is AccessControlInternal {
     event OperationCostSet(bytes32 operation, uint256 cost);

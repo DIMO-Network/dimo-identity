@@ -4,7 +4,6 @@ pragma solidity ^0.8.13;
 import "../interfaces/IDimo.sol";
 import "../interfaces/ILicense.sol";
 
-// TODO Documentation
 /**
  * @title ChargingStorage
  * @notice Storage of the Charging contract
@@ -15,7 +14,8 @@ library ChargingStorage {
 
     struct Storage {
         // TODO Use Enumerable Set ?
-        mapping(bytes32 => uint256) operationCost;
+        // operation => cost
+        mapping(bytes32 => uint256) operationCost; // TODO Rename to operationDcxCost
     }
 
     /* solhint-disable no-inline-assembly */

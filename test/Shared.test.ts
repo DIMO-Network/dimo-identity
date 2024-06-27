@@ -121,7 +121,7 @@ describe('Shared', function () {
     });
 
     context('State', () => {
-      it('Should correctly return DIMO Token address', async () => {
+      it('Should correctly return DIMO token address', async () => {
         await sharedInstance
           .connect(admin)
           .setDimoTokenAddress(MOCK_DIMO_TOKEN_ADDRESS);
@@ -160,7 +160,7 @@ describe('Shared', function () {
     });
 
     context('State', () => {
-      it('Should correctly return DIMO Credit Token address', async () => {
+      it('Should correctly return DIMO Credit token address', async () => {
         await sharedInstance
           .connect(admin)
           .setDimoCredit(MOCK_DIMO_CREDIT_ADDRESS);

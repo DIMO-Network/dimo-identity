@@ -1,10 +1,9 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-// TODO Documentation
 /**
  * @title SharedStorage
- * @notice Storage of shared variables
+ * @notice Storage of Shared contract
  */
 library SharedStorage {
     bytes32 internal constant SHARED_STORAGE_SLOT =

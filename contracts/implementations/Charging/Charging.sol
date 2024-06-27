@@ -14,7 +14,13 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 contract Charging is AccessControlInternal {
     event OperationCostSet(bytes32 operation, uint256 cost);
 
-    // TODO Documentation
+    /**
+     * @notice Sets the cost for an operation
+     * @dev Only an admin can set the cost
+     * @param operation The operation to have the cost set
+     * @param cost The cost of the operation
+     */
+    // TODO Rename to setOperationDcxCost
     function setOperationCost(
         bytes32 operation,
         uint256 cost
@@ -24,7 +30,10 @@ contract Charging is AccessControlInternal {
         emit OperationCostSet(operation, cost);
     }
 
-    // TODO Documentation
+    /**
+     * @notice Gets the cost of an operation
+     * @param operation The operation to get the cost from
+     */
     function getOperationCost(
         bytes32 operation
     ) external view returns (uint256 cost) {

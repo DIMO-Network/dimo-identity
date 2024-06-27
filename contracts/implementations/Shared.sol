@@ -9,7 +9,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
 /**
  * @title Shared
- * @notice TODO Documentation
+ * @notice Contract to manage shared variables
  */
 contract Shared is AccessControlInternal {
     event FoundationSet(address indexed foundation);
@@ -27,8 +27,12 @@ contract Shared is AccessControlInternal {
         emit FoundationSet(foundation);
     }
 
-    // TODO Documentation
     // TODO Rename to setDimoTokenAddress after deprecating AdLicenseValidator
+    /**
+     * @notice Sets the DIMO token address
+     * @dev Only an admin can set the address
+     * @param dimoToken The DIMO token address
+     */
     function setDimoTokenAddress(
         address dimoToken
     ) external onlyRole(ADMIN_ROLE) {
@@ -37,24 +41,34 @@ contract Shared is AccessControlInternal {
         emit DimoTokenSet(dimoToken);
     }
 
-    // TODO Documentation
+    /**
+     * @notice Sets the DIMO Credit token address
+     * @dev Only an admin can set the address
+     * @param dimoCredit The DIMO Credit token address
+     */
     function setDimoCredit(address dimoCredit) external onlyRole(ADMIN_ROLE) {
         SharedStorage.getStorage().dimoCredit = dimoCredit;
 
         emit DimoCreditSet(dimoCredit);
     }
 
-    // TODO Documentation
+    /**
+     * @notice Gets the Foundation address
+     */
     function getFoundation() external view returns (address foundation) {
         foundation = SharedStorage.getStorage().foundation;
     }
 
-    // TODO Documentation
+    /**
+     * @notice Gets the DIMO token address
+     */
     function getDimoToken() external view returns (address dimoToken) {
         dimoToken = SharedStorage.getStorage().dimoToken;
     }
 
-    // TODO Documentation
+    /**
+     * @notice Gets the DIMO Credit token address
+     */
     function getDimoCredit() external view returns (address dimoCredit) {
         dimoCredit = SharedStorage.getStorage().dimoCredit;
     }

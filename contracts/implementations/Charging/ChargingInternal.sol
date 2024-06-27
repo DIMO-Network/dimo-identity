@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 library ChargingInternal {
     /**
      * @notice Charges the sender for the operation
-     * The sender transfers the operation cost amount to the foundation
+     * The sender transfers the DCX operation cost amount to the foundation
      * @dev This contract must be approved to spend the tokens in advance
      * @param sender The address of the sender
      * @param operation The operation to get the cost from
@@ -21,7 +21,7 @@ library ChargingInternal {
     function _chargeDcx(address sender, bytes32 operation) internal {
         SharedStorage.Storage storage s = SharedStorage.getStorage();
 
-        uint256 cost = ChargingStorage.getStorage().operationCost[operation];
+        uint256 cost = ChargingStorage.getStorage().dcxOperationCost[operation];
 
         IERC20(s.dimoCredit).transferFrom(sender, s.foundation, cost);
     }

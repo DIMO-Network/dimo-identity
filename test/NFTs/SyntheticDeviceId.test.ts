@@ -174,7 +174,7 @@ describe('SyntheticDeviceId', async function () {
     // Setup Charging variables
     await chargingInstance
       .connect(admin)
-      .setOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
+      .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance

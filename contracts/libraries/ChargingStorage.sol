@@ -14,8 +14,8 @@ library ChargingStorage {
 
     struct Storage {
         // TODO Use Enumerable Set ?
-        // operation => cost
-        mapping(bytes32 => uint256) operationCost; // TODO Rename to operationDcxCost
+        // operation => DCX cost
+        mapping(bytes32 => uint256) dcxOperationCost;
     }
 
     /* solhint-disable no-inline-assembly */

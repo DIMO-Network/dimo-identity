@@ -48,7 +48,7 @@ describe('Charging', function () {
         await expect(
           chargingInstance
             .connect(nonAdmin)
-            .setOperationCost(C.MOCK_OPERATION, C.MOCK_OPERATION_COST)
+            .setDcxOperationCost(C.MOCK_OPERATION, C.MOCK_OPERATION_COST)
         ).to.be.rejectedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
@@ -60,9 +60,9 @@ describe('Charging', function () {
       it('Should correctly return the operation cost', async () => {
         await chargingInstance
           .connect(admin)
-          .setOperationCost(C.MOCK_OPERATION, C.MOCK_OPERATION_COST);
+          .setDcxOperationCost(C.MOCK_OPERATION, C.MOCK_OPERATION_COST);
 
-        const operationCost = await chargingInstance.getOperationCost(C.MOCK_OPERATION);
+        const operationCost = await chargingInstance.getDcxOperationCost(C.MOCK_OPERATION);
 
         expect(operationCost).to.equal(C.MOCK_OPERATION_COST);
       });
@@ -73,7 +73,7 @@ describe('Charging', function () {
         await expect(
           chargingInstance
             .connect(admin)
-            .setOperationCost(C.MOCK_OPERATION, C.MOCK_OPERATION_COST)
+            .setDcxOperationCost(C.MOCK_OPERATION, C.MOCK_OPERATION_COST)
         )
           .to.emit(chargingInstance, 'OperationCostSet')
           .withArgs(C.MOCK_OPERATION, C.MOCK_OPERATION_COST);

@@ -35,7 +35,7 @@ export async function setup(
 }
 
 export async function grantAdminRoles(
-  admin: Wallet,
+  admin: Wallet | HardhatEthersSigner,
   accessControlContract: DimoAccessControl
 ) {
   const roles = [

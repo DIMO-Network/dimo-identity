@@ -23,4 +23,11 @@ contract Charging is AccessControlInternal {
 
         emit OperationCostSet(operation, cost);
     }
+
+    // TODO Documentation
+    function getOperationCost(
+        bytes32 operation
+    ) external view returns (uint256 cost) {
+        cost = ChargingStorage.getStorage().operationCost[operation];
+    }
 }

@@ -1,5 +1,6 @@
 export * from './Misc';
 export * from './BaseNft';
+export * from './Charging';
 export * from './DataURI';
 export * from './AccessControl';
 export * from './eip712';

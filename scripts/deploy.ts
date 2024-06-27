@@ -8,6 +8,8 @@ import {
   DIMORegistry,
   DimoAccessControl,
   Eip712Checker,
+  Charging,
+  Shared,
   BaseDataURI,
   Manufacturer,
   Integration,
@@ -118,6 +120,8 @@ async function deployModules(
     { name: 'DeviceDefinitionTable', args: [] },
     { name: 'ERC721Holder', args: [] },
     { name: 'DeviceDefinitionController', args: [] },
+    { name: 'Charging', args: [] },
+    { name: 'Shared', args: [] },
   ];
 
   const instances = getAddresses();
@@ -361,6 +365,16 @@ async function setupRegistry(
       'AdLicenseValidator',
       instances[networkName].modules.DIMORegistry.address,
     );
+  const chargingInstance: Charging =
+    await ethers.getContractAt(
+      'Charging',
+      instances[networkName].modules.DIMORegistry.address,
+    );
+  const sharedInstance: Shared =
+    await ethers.getContractAt(
+      'Shared',
+      instances[networkName].modules.DIMORegistry.address,
+    );
   const manufacturerInstance: Manufacturer = await ethers.getContractAt(
     'Manufacturer',
     instances[networkName].modules.DIMORegistry.address,
@@ -429,6 +443,42 @@ async function setupRegistry(
   await (await adLicenseValidatorInstance.setAdMintCost(C.adMintCost)).wait();
   console.log(`${C.adMintCost} set as aftermarket device mint cost`);
   console.log('\n----- AdLicenseValidator setup -----');
+
+  console.log('\n----- Setting up Charging -----\n');
+  await (
+    await chargingInstance.setDcxOperationCost(
+      C.MINT_VEHICLE_OPERATION,
+      C.MINT_VEHICLE_OPERATION_COST[networkName]
+    )
+  ).wait();
+  console.log('\n----- Charging setup -----');
+
+  console.log('\n----- Setting up Shared -----\n');
+  await (
+    await sharedInstance.setFoundation(
+      instances[networkName].misc.Foundation,
+    )
+  ).wait();
+  console.log(
+    `${instances[networkName].misc.Foundation} set as Foundation address`,
+  );
+  await (
+    await sharedInstance.setDimoTokenAddress(
+      instances[networkName].misc.DimoToken.proxy,
+    )
+  ).wait();
+  console.log(
+    `${instances[networkName].misc.DimoToken.proxy} set as DIMO token address`,
+  );
+  await (
+    await sharedInstance.setDimoCredit(
+      instances[networkName].misc.DimoCredit.proxy,
+    )
+  ).wait();
+  console.log(
+    `${instances[networkName].misc.DimoCredit.proxy} set as DIMO Credit token address`,
+  );
+  console.log('\n----- Shared setup -----');
 
   console.log('\n----- Setting NFT proxies -----\n');
   await (
@@ -748,16 +798,29 @@ async function buildMocks(
     deployer,
   ).deploy(ethers.parseEther('1000000000'));
 
+  // Deploy MockDimoCredit contract
+  const MockDimoCreditFactory = await ethers.getContractFactory('MockDimoCredit');
+  const mockDimoCreditInstance = await MockDimoCreditFactory.connect(deployer).deploy();
+
   // Deploy MockStake contract
   const MockStakeFactory = await ethers.getContractFactory('MockStake');
   const mockStakeInstance = await MockStakeFactory.connect(deployer).deploy();
 
   instances[networkName].misc.DimoToken.proxy =
     await mockDimoTokenInstance.getAddress();
+  instances[networkName].misc.DimoCredit.proxy =
+    await mockDimoCreditInstance.getAddress();
   instances[networkName].misc.Stake.proxy =
     await mockStakeInstance.getAddress();
   instances[networkName].misc.Foundation = mockFoundation.address;
   instances[networkName].misc.Kms = [mockKms.address];
+
+  await mockDimoCreditInstance
+    .connect(deployer)
+    .grantRole(
+      C.roles.nfts.BURNER_ROLE,
+      instances[networkName].modules.DIMORegistry.address
+    );
 
   return instances;
 }

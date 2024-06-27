@@ -112,3 +112,12 @@ export const dimoStreamrEns: GenericKeyAny = {
   hardhat: 'streams.hardhat.dimo.eth',
   localhost: 'streams.localhost.dimo.eth'
 }
+
+export const MINT_VEHICLE_OPERATION = _hashRole('MINT_VEHICLE_OPERATION');
+export const MINT_VEHICLE_OPERATION_COST: GenericKeyAny = {
+  polygon: ethers.parseEther('1'),
+  mumbai: ethers.parseEther('1'),
+  amoy: ethers.parseEther('1'),
+  hardhat: ethers.parseEther('1'),
+  localhost: ethers.parseEther('1')
+}

@@ -122,6 +122,7 @@ async function deployModules(
     { name: 'DeviceDefinitionController', args: [] },
     { name: 'Charging', args: [] },
     { name: 'Shared', args: [] },
+    { name: 'Nonces', args: [] },
   ];
 
   const instances = getAddresses();

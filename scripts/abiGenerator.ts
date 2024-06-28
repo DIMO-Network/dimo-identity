@@ -44,6 +44,7 @@ main([
   'contracts/implementations/nodes/Integration.sol:Integration',
   'contracts/implementations/nodes/SyntheticDevice.sol:SyntheticDevice',
   'contracts/implementations/nodes/Vehicle.sol:Vehicle',
+  'contracts/implementations/nonces/Nonces.sol:Nonces',
   'contracts/implementations/Nodes.sol:Nodes',
   'contracts/implementations/Mapper.sol:Mapper',
   'contracts/implementations/MultipleMinter.sol:MultipleMinter',

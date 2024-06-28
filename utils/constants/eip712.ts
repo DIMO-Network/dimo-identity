@@ -17,9 +17,19 @@ export const schemaBase: TypedData = {
       { name: 'infos', type: 'string[]' },
       { name: 'nonce', type: 'uint256' }
     ],
+    ClaimAftermarketDeviceOwnerSign: [
+      { name: 'aftermarketDeviceNode', type: 'uint256' },
+      { name: 'owner', type: 'address' },
+      { name: 'nonce', type: 'uint256' }
+    ],
     ClaimAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
       { name: 'owner', type: 'address' }
+    ],
+    PairAftermarketDeviceOwnerSign: [
+      { name: 'aftermarketDeviceNode', type: 'uint256' },
+      { name: 'vehicleNode', type: 'uint256' },
+      { name: 'nonce', type: 'uint256' }
     ],
     PairAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
@@ -27,7 +37,8 @@ export const schemaBase: TypedData = {
     ],
     UnPairAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
-      { name: 'vehicleNode', type: 'uint256' }
+      { name: 'vehicleNode', type: 'uint256' },
+      { name: 'nonce', type: 'uint256' }
     ],
     MintSyntheticDeviceSign: [
       { name: 'integrationNode', type: 'uint256' },

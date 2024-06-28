@@ -121,7 +121,8 @@ describe('AftermarketDevice', function () {
         'AftermarketDevice',
         'AdLicenseValidator',
         'Mapper',
-        'Shared'
+        'Shared',
+        'Nonces'
       ],
       nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
       upgradeableContracts: [],
@@ -1164,11 +1165,12 @@ describe('AftermarketDevice', function () {
 
       ownerSig = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       adSig = await signMessage({
@@ -1380,14 +1382,16 @@ describe('AftermarketDevice', function () {
   describe('claimAftermarketDeviceSign', () => {
     let ownerSig: string;
     let adSig: string;
+
     before(async () => {
       ownerSig = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       adSig = await signMessage({
@@ -1396,7 +1400,7 @@ describe('AftermarketDevice', function () {
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
-          owner: user1.address,
+          owner: user1.address
         },
       });
     });
@@ -1458,11 +1462,12 @@ describe('AftermarketDevice', function () {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
             _domainName: 'Wrong domain',
-            _primaryType: 'ClaimAftermarketDeviceSign',
+            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1484,11 +1489,12 @@ describe('AftermarketDevice', function () {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
             _domainVersion: '99',
-            _primaryType: 'ClaimAftermarketDeviceSign',
+            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1510,11 +1516,12 @@ describe('AftermarketDevice', function () {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
             _chainId: 99,
-            _primaryType: 'ClaimAftermarketDeviceSign',
+            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1535,11 +1542,12 @@ describe('AftermarketDevice', function () {
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
-            _primaryType: 'ClaimAftermarketDeviceSign',
+            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '99',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1560,11 +1568,38 @@ describe('AftermarketDevice', function () {
         it('Should revert if owner does not match signer', async () => {
           const invalidOwnerSig = await signMessage({
             _signer: user1,
-            _primaryType: 'ClaimAftermarketDeviceSign',
+            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
               owner: user2.address,
+              nonce: 0
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .claimAftermarketDeviceSign(
+                1,
+                user1.address,
+                invalidOwnerSig,
+                adSig,
+              ),
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidOwnerSignature',
+          );
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const invalidOwnerSig = await signMessage({
+            _signer: user1,
+            _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user2.address,
+              nonce: 99
             },
           });
 
@@ -1593,7 +1628,7 @@ describe('AftermarketDevice', function () {
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
-              owner: user1.address,
+              owner: user1.address
             },
           });
 
@@ -1619,7 +1654,7 @@ describe('AftermarketDevice', function () {
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
-              owner: user1.address,
+              owner: user1.address
             },
           });
 
@@ -1645,7 +1680,7 @@ describe('AftermarketDevice', function () {
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
-              owner: user1.address,
+              owner: user1.address
             },
           });
 
@@ -1670,7 +1705,7 @@ describe('AftermarketDevice', function () {
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '99',
-              owner: user1.address,
+              owner: user1.address
             },
           });
 
@@ -1695,7 +1730,7 @@ describe('AftermarketDevice', function () {
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
-              owner: user2.address,
+              owner: user2.address
             },
           });
 
@@ -1720,7 +1755,7 @@ describe('AftermarketDevice', function () {
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '2',
-              owner: user1.address,
+              owner: user1.address
             },
           });
 
@@ -1782,11 +1817,12 @@ describe('AftermarketDevice', function () {
     before(async () => {
       claimOwnerSig2 = await signMessage({
         _signer: user2,
-        _primaryType: 'ClaimAftermarketDeviceSign',
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '2',
           owner: user2.address,
+          nonce: 0
         },
       });
       claimAdSig2 = await signMessage({
@@ -1800,11 +1836,12 @@ describe('AftermarketDevice', function () {
       });
       pairVehicleSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'PairAftermarketDeviceSign',
+        _primaryType: 'PairAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '2',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       pairAdSig1 = await signMessage({
@@ -2108,11 +2145,12 @@ describe('AftermarketDevice', function () {
             const invalidSignature = await signMessage({
               _signer: user1,
               _domainName: 'Wrong domain',
-              _primaryType: 'PairAftermarketDeviceSign',
+              _primaryType: 'PairAftermarketDeviceOwnerSign',
               _verifyingContract: DIMO_REGISTRY_ADDRESS,
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2134,11 +2172,12 @@ describe('AftermarketDevice', function () {
             const invalidSignature = await signMessage({
               _signer: user1,
               _domainVersion: '99',
-              _primaryType: 'PairAftermarketDeviceSign',
+              _primaryType: 'PairAftermarketDeviceOwnerSign',
               _verifyingContract: DIMO_REGISTRY_ADDRESS,
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2160,11 +2199,12 @@ describe('AftermarketDevice', function () {
             const invalidSignature = await signMessage({
               _signer: user1,
               _chainId: 99,
-              _primaryType: 'PairAftermarketDeviceSign',
+              _primaryType: 'PairAftermarketDeviceOwnerSign',
               _verifyingContract: DIMO_REGISTRY_ADDRESS,
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2185,11 +2225,12 @@ describe('AftermarketDevice', function () {
           it('Should revert if aftermarket device node is incorrect', async () => {
             const invalidSignature = await signMessage({
               _signer: user1,
-              _primaryType: 'PairAftermarketDeviceSign',
+              _primaryType: 'PairAftermarketDeviceOwnerSign',
               _verifyingContract: DIMO_REGISTRY_ADDRESS,
               message: {
                 aftermarketDeviceNode: '99',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2210,11 +2251,38 @@ describe('AftermarketDevice', function () {
           it('Should revert if aftermarket vehicle node is incorrect', async () => {
             const invalidSignature = await signMessage({
               _signer: user1,
-              _primaryType: 'PairAftermarketDeviceSign',
+              _primaryType: 'PairAftermarketDeviceOwnerSign',
               _verifyingContract: DIMO_REGISTRY_ADDRESS,
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '99',
+                nonce: 0
+              },
+            });
+
+            await expect(
+              aftermarketDeviceInstance
+                .connect(admin)
+              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                2,
+                1,
+                pairAdSig2,
+                invalidSignature,
+              ),
+            ).to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'InvalidOwnerSignature',
+            );
+          });
+          it('Should revert if nonce does not match current nonce', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'PairAftermarketDeviceOwnerSign',
+              _verifyingContract: DIMO_REGISTRY_ADDRESS,
+              message: {
+                aftermarketDeviceNode: '1',
+                vehicleNode: '99',
+                nonce: 99
               },
             });
 
@@ -2294,11 +2362,12 @@ describe('AftermarketDevice', function () {
     before(async () => {
       claimOwnerSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimAdSig1 = await signMessage({
@@ -2312,11 +2381,12 @@ describe('AftermarketDevice', function () {
       });
       claimOwnerSig2 = await signMessage({
         _signer: user2,
-        _primaryType: 'ClaimAftermarketDeviceSign',
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '2',
           owner: user2.address,
+          nonce: 0
         },
       });
       claimAdSig2 = await signMessage({
@@ -2330,11 +2400,12 @@ describe('AftermarketDevice', function () {
       });
       pairSignature = await signMessage({
         _signer: user1,
-        _primaryType: 'PairAftermarketDeviceSign',
+        _primaryType: 'PairAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
     });
@@ -2521,11 +2592,12 @@ describe('AftermarketDevice', function () {
           const invalidSignature = await signMessage({
             _signer: user1,
             _domainName: 'Wrong domain',
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -2546,11 +2618,12 @@ describe('AftermarketDevice', function () {
           const invalidSignature = await signMessage({
             _signer: user1,
             _domainVersion: '99',
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -2571,11 +2644,12 @@ describe('AftermarketDevice', function () {
           const invalidSignature = await signMessage({
             _signer: user1,
             _chainId: 99,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -2595,11 +2669,12 @@ describe('AftermarketDevice', function () {
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidSignature = await signMessage({
             _signer: user1,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '99',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -2619,11 +2694,37 @@ describe('AftermarketDevice', function () {
         it('Should revert if aftermarket vehicle node is incorrect', async () => {
           const invalidSignature = await signMessage({
             _signer: user1,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '99',
+              nonce: 0
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              1,
+              invalidSignature,
+            ),
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidOwnerSignature',
+          );
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '99',
+              nonce: 0
             },
           });
 
@@ -2697,11 +2798,12 @@ describe('AftermarketDevice', function () {
     before(async () => {
       claimOwnerSig = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimAdSig = await signMessage({
@@ -2715,11 +2817,12 @@ describe('AftermarketDevice', function () {
       });
       pairSignature = await signMessage({
         _signer: user1,
-        _primaryType: 'PairAftermarketDeviceSign',
+        _primaryType: 'PairAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
     });
@@ -3076,11 +3179,12 @@ describe('AftermarketDevice', function () {
     before(async () => {
       claimOwnerSig = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimAdSig = await signMessage({
@@ -3094,11 +3198,12 @@ describe('AftermarketDevice', function () {
       });
       pairSignature = await signMessage({
         _signer: user1,
-        _primaryType: 'PairAftermarketDeviceSign',
+        _primaryType: 'PairAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       unPairSignature = await signMessage({
@@ -3108,6 +3213,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
     });
@@ -3221,6 +3327,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -3242,6 +3349,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -3263,6 +3371,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -3283,6 +3392,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '99',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -3303,6 +3413,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '99',
+              nonce: 0
             },
           });
 
@@ -3323,6 +3434,28 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .unpairAftermarketDeviceSign(1, 1, wrongSignerSignature),
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidSigner',
+          );
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const wrongSignerSignature = await signMessage({
+            _signer: user2,
+            _primaryType: 'UnPairAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1',
+              nonce: 99
             },
           });
 
@@ -3955,20 +4088,22 @@ describe('AftermarketDevice', function () {
           ];
           const pairSig1 = await signMessage({
             _signer: user1,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: await aftermarketDeviceInstance.getAddress(),
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
           const pairSig2 = await signMessage({
             _signer: user2,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: await aftermarketDeviceInstance.getAddress(),
             message: {
               aftermarketDeviceNode: '2',
               vehicleNode: '2',
+              nonce: 0
             },
           });
 
@@ -4042,20 +4177,22 @@ describe('AftermarketDevice', function () {
           ];
           const pairSig1 = await signMessage({
             _signer: user1,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: await aftermarketDeviceInstance.getAddress(),
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
           const pairSig2 = await signMessage({
             _signer: user2,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: await aftermarketDeviceInstance.getAddress(),
             message: {
               aftermarketDeviceNode: '2',
               vehicleNode: '2',
+              nonce: 0
             },
           });
 
@@ -4397,20 +4534,22 @@ describe('AftermarketDevice', function () {
           ];
           const pairSig1 = await signMessage({
             _signer: user1,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: await aftermarketDeviceInstance.getAddress(),
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
           const pairSig2 = await signMessage({
             _signer: user2,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: await aftermarketDeviceInstance.getAddress(),
             message: {
               aftermarketDeviceNode: '2',
               vehicleNode: '2',
+              nonce: 0
             },
           });
 
@@ -4484,20 +4623,22 @@ describe('AftermarketDevice', function () {
           ];
           const pairSig1 = await signMessage({
             _signer: user1,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: await aftermarketDeviceInstance.getAddress(),
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
           const pairSig2 = await signMessage({
             _signer: user2,
-            _primaryType: 'PairAftermarketDeviceSign',
+            _primaryType: 'PairAftermarketDeviceOwnerSign',
             _verifyingContract: await aftermarketDeviceInstance.getAddress(),
             message: {
               aftermarketDeviceNode: '2',
               vehicleNode: '2',
+              nonce: 0
             },
           });
 
@@ -4696,11 +4837,12 @@ describe('AftermarketDevice', function () {
     it('Should return true if the queried AD is claimed', async () => {
       const ownerSig = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
         _verifyingContract: DIMO_REGISTRY_ADDRESS,
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       const adSig = await signMessage({

@@ -30,13 +30,9 @@ contract SyntheticDevice is
     VehicleInternal,
     SyntheticDeviceInternal
 {
-    bytes32 private constant MINT_OWNER_TYPEHASH =
+    bytes32 private constant MINT_TYPEHASH =
         keccak256(
-            "MintSyntheticDeviceOwnerSign(uint256 integrationNode,uint256 vehicleNode,uint256 nonce)"
-        );
-    bytes32 private constant MINT_DEVICE_TYPEHASH =
-        keccak256(
-            "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
+            "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode,uint256 nonce)"
         );
     bytes32 private constant BURN_TYPEHASH =
         keccak256(
@@ -201,17 +197,21 @@ contract SyntheticDevice is
         address owner = INFT(vehicleIdProxyAddress).ownerOf(data.vehicleNode);
         bytes32 messageDevice = keccak256(
             abi.encode(
-                MINT_DEVICE_TYPEHASH,
+                MINT_TYPEHASH,
                 data.integrationNode,
-                data.vehicleNode
+                data.vehicleNode,
+                NoncesInternal._useNonce(
+                    MINT_TYPEHASH,
+                    data.syntheticDeviceAddr
+                )
             )
         );
         bytes32 messageOwner = keccak256(
             abi.encode(
-                MINT_OWNER_TYPEHASH,
+                MINT_TYPEHASH,
                 data.integrationNode,
                 data.vehicleNode,
-                NoncesInternal._useNonce(MINT_OWNER_TYPEHASH, owner)
+                NoncesInternal._useNonce(MINT_TYPEHASH, owner)
             )
         );
 

@@ -1335,7 +1335,7 @@ describe('Vehicle', function () {
             _verifyingContract: await vehicleInstance.getAddress(),
             message: {
               manufacturerNode: '1',
-              owner: user2.address,
+              owner: user1.address,
               attributes: C.mockVehicleAttributes,
               infos: C.mockVehicleInfos,
               nonce: 99
@@ -1485,7 +1485,7 @@ describe('Vehicle', function () {
       it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
         const localClaimOwnerSig = await signMessage({
           _signer: user1,
-          _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+          _primaryType: 'ClaimAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -1499,12 +1499,13 @@ describe('Vehicle', function () {
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
-            owner: user1.address
+            owner: user1.address,
+            nonce: 0
           }
         });
         const localPairSignature = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceOwnerSign',
+          _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -1547,7 +1548,7 @@ describe('Vehicle', function () {
       it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
         const localMintVehicleOwnerSig = await signMessage({
           _signer: user1,
-          _primaryType: 'MintSyntheticDeviceOwnerSign',
+          _primaryType: 'MintSyntheticDeviceSign',
           _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
             integrationNode: '1',
@@ -1561,7 +1562,8 @@ describe('Vehicle', function () {
           _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
             integrationNode: '1',
-            vehicleNode: '1'
+            vehicleNode: '1',
+            nonce: 0
           }
         });
         const localMintSdInput = {
@@ -1668,7 +1670,7 @@ describe('Vehicle', function () {
             _primaryType: 'BurnVehicleSign',
             _verifyingContract: await vehicleInstance.getAddress(),
             message: {
-              vehicleNode: '99',
+              vehicleNode: '1',
               nonce: 99
             }
           });

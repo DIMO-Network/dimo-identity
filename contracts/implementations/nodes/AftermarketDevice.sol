@@ -34,21 +34,13 @@ contract AftermarketDevice is
     AccessControlInternal,
     AdLicenseValidatorInternal
 {
-    bytes32 private constant CLAIM_OWNER_TYPEHASH =
+    bytes32 private constant CLAIM_TYPEHASH =
         keccak256(
-            "ClaimAftermarketDeviceOwnerSign(uint256 aftermarketDeviceNode,address owner,uint256 nonce)"
+            "ClaimAftermarketDeviceSign(uint256 aftermarketDeviceNode,address owner,uint256 nonce)"
         );
-    bytes32 private constant CLAIM_DEVICE_TYPEHASH =
+    bytes32 private constant PAIR_TYPEHASH =
         keccak256(
-            "ClaimAftermarketDeviceSign(uint256 aftermarketDeviceNode,address owner)"
-        );
-    bytes32 private constant PAIR_OWNER_TYPEHASH =
-        keccak256(
-            "PairAftermarketDeviceOwnerSign(uint256 aftermarketDeviceNode,uint256 vehicleNode,uint256 nonce)"
-        );
-    bytes32 private constant PAIR_DEVICE_TYPEHASH =
-        keccak256(
-            "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
+            "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode,uint256 nonce)"
         );
     bytes32 private constant UNPAIR_TYPEHASH =
         keccak256(
@@ -267,20 +259,28 @@ contract AftermarketDevice is
     ) external onlyRole(Roles.CLAIM_AD_ROLE) {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
-        bytes32 messageOwner = keccak256(
-            abi.encode(
-                CLAIM_OWNER_TYPEHASH,
-                aftermarketDeviceNode,
-                owner,
-                NoncesInternal._useNonce(CLAIM_OWNER_TYPEHASH, owner)
-            )
-        );
-        bytes32 messageDevice = keccak256(
-            abi.encode(CLAIM_DEVICE_TYPEHASH, aftermarketDeviceNode, owner)
-        );
         address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
             aftermarketDeviceNode
         ];
+        bytes32 messageOwner = keccak256(
+            abi.encode(
+                CLAIM_TYPEHASH,
+                aftermarketDeviceNode,
+                owner,
+                NoncesInternal._useNonce(CLAIM_TYPEHASH, owner)
+            )
+        );
+        bytes32 messageDevice = keccak256(
+            abi.encode(
+                CLAIM_TYPEHASH,
+                aftermarketDeviceNode,
+                owner,
+                NoncesInternal._useNonce(
+                    CLAIM_TYPEHASH,
+                    aftermarketDeviceAddress
+                )
+            )
+        );
         address adIdProxy = ads.idProxyAddress;
 
         if (!INFT(adIdProxy).exists(aftermarketDeviceNode))
@@ -327,8 +327,6 @@ contract AftermarketDevice is
         bytes calldata aftermarketDeviceSig,
         bytes calldata vehicleOwnerSig
     ) external onlyRole(Roles.PAIR_AD_ROLE) {
-        MapperStorage.Storage storage ms = MapperStorage.getStorage();
-
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
@@ -344,16 +342,24 @@ contract AftermarketDevice is
         address vehicleIdOwner = INFT(vehicleIdProxyAddress).ownerOf(
             vehicleNode
         );
+        address adIdAddress = AftermarketDeviceStorage
+            .getStorage()
+            .nodeIdToDeviceAddress[aftermarketDeviceNode];
         bytes32 messageOwner = keccak256(
             abi.encode(
-                PAIR_OWNER_TYPEHASH,
+                PAIR_TYPEHASH,
                 aftermarketDeviceNode,
                 vehicleNode,
-                NoncesInternal._useNonce(PAIR_OWNER_TYPEHASH, vehicleIdOwner)
+                NoncesInternal._useNonce(PAIR_TYPEHASH, vehicleIdOwner)
             )
         );
         bytes32 messageDevice = keccak256(
-            abi.encode(PAIR_DEVICE_TYPEHASH, aftermarketDeviceNode, vehicleNode)
+            abi.encode(
+                PAIR_TYPEHASH,
+                aftermarketDeviceNode,
+                vehicleNode,
+                NoncesInternal._useNonce(PAIR_TYPEHASH, adIdAddress)
+            )
         );
 
         if (
@@ -361,15 +367,19 @@ contract AftermarketDevice is
                 aftermarketDeviceNode
             ]
         ) revert AdNotClaimed(aftermarketDeviceNode);
-        if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
-            revert Errors.VehiclePaired(vehicleNode);
-        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
-            revert AdPaired(aftermarketDeviceNode);
+        if (
+            MapperStorage.getStorage().links[vehicleIdProxyAddress][
+                vehicleNode
+            ] != 0
+        ) revert Errors.VehiclePaired(vehicleNode);
+        if (
+            MapperStorage.getStorage().links[adIdProxyAddress][
+                aftermarketDeviceNode
+            ] != 0
+        ) revert AdPaired(aftermarketDeviceNode);
         if (
             !Eip712CheckerInternal._verifySignature(
-                AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
-                    aftermarketDeviceNode
-                ],
+                adIdAddress,
                 messageDevice,
                 aftermarketDeviceSig
             )
@@ -383,8 +393,12 @@ contract AftermarketDevice is
             )
         ) revert Errors.InvalidOwnerSignature();
 
-        ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
-        ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
+        MapperStorage.getStorage().links[vehicleIdProxyAddress][
+            vehicleNode
+        ] = aftermarketDeviceNode;
+        MapperStorage.getStorage().links[adIdProxyAddress][
+            aftermarketDeviceNode
+        ] = vehicleNode;
 
         emit AftermarketDevicePaired(
             aftermarketDeviceNode,
@@ -420,10 +434,10 @@ contract AftermarketDevice is
         address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
         bytes32 messageOwner = keccak256(
             abi.encode(
-                PAIR_OWNER_TYPEHASH,
+                PAIR_TYPEHASH,
                 aftermarketDeviceNode,
                 vehicleNode,
-                NoncesInternal._useNonce(PAIR_OWNER_TYPEHASH, owner)
+                NoncesInternal._useNonce(PAIR_TYPEHASH, owner)
             )
         );
 

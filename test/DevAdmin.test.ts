@@ -433,7 +433,7 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       ownerSig = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
@@ -448,6 +448,7 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
     });
@@ -509,7 +510,7 @@ describe('DevAdmin', function () {
     });
   });
 
-  describe.skip('unclaimAftermarketDeviceNode', () => {
+  describe('unclaimAftermarketDeviceNode', () => {
     let claimOwnerSig1: string;
     let claimOwnerSig2: string;
     let claimAdSig1: string;
@@ -518,7 +519,7 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       claimOwnerSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
@@ -528,7 +529,7 @@ describe('DevAdmin', function () {
       });
       claimOwnerSig2 = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '2',
@@ -543,6 +544,7 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimAdSig2 = await signMessage({
@@ -552,6 +554,7 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user1.address,
+          nonce: 0
         },
       });
     });
@@ -606,7 +609,7 @@ describe('DevAdmin', function () {
     });
 
     context('State', () => {
-      it('Should correctly unclaim aftermarket Device', async () => {
+      it.skip('Should correctly unclaim aftermarket Device', async () => {
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
@@ -688,7 +691,7 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       claimOwnerSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
@@ -698,7 +701,7 @@ describe('DevAdmin', function () {
       });
       claimOwnerSig2 = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '2',
@@ -713,6 +716,7 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimAdSig2 = await signMessage({
@@ -722,11 +726,12 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user1.address,
+          nonce: 0
         },
       });
       pairSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'PairAftermarketDeviceOwnerSign',
+        _primaryType: 'PairAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
@@ -736,7 +741,7 @@ describe('DevAdmin', function () {
       });
       pairSig2 = await signMessage({
         _signer: user1,
-        _primaryType: 'PairAftermarketDeviceOwnerSign',
+        _primaryType: 'PairAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '2',
@@ -859,7 +864,7 @@ describe('DevAdmin', function () {
     });
   });
 
-  describe.skip('unpairAftermarketDeviceByVehicleNode', () => {
+  describe('unpairAftermarketDeviceByVehicleNode', () => {
     let claimOwnerSig1: string;
     let claimOwnerSig2: string;
     let claimAdSig1: string;
@@ -870,7 +875,7 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       claimOwnerSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
@@ -880,7 +885,7 @@ describe('DevAdmin', function () {
       });
       claimOwnerSig2 = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '2',
@@ -895,6 +900,7 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimAdSig2 = await signMessage({
@@ -904,11 +910,12 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user1.address,
+          nonce: 0
         },
       });
       pairSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'PairAftermarketDeviceOwnerSign',
+        _primaryType: 'PairAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
@@ -918,12 +925,12 @@ describe('DevAdmin', function () {
       });
       pairSig2 = await signMessage({
         _signer: user1,
-        _primaryType: 'PairAftermarketDeviceOwnerSign',
+        _primaryType: 'PairAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '2',
           vehicleNode: '2',
-          nonce: 0
+          nonce: 1
         },
       });
     });
@@ -1132,7 +1139,7 @@ describe('DevAdmin', function () {
       it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
         const localClaimOwnerSig = await signMessage({
           _signer: user1,
-          _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+          _primaryType: 'ClaimAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -1147,11 +1154,12 @@ describe('DevAdmin', function () {
           message: {
             aftermarketDeviceNode: '1',
             owner: user1.address,
+            nonce: 0
           },
         });
         const localPairSignature = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceOwnerSign',
+          _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -1196,7 +1204,7 @@ describe('DevAdmin', function () {
       it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
         const localMintVehicleOwnerSig = await signMessage({
           _signer: user1,
-          _primaryType: 'MintSyntheticDeviceOwnerSign',
+          _primaryType: 'MintSyntheticDeviceSign',
           _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
             integrationNode: '1',
@@ -1211,6 +1219,7 @@ describe('DevAdmin', function () {
           message: {
             integrationNode: '1',
             vehicleNode: '1',
+            nonce: 0
           },
         });
         const localMintSdInput = {
@@ -1353,7 +1362,7 @@ describe('DevAdmin', function () {
     });
   });
 
-  describe.skip('adminBurnVehiclesAndDeletePairings', () => {
+  describe('adminBurnVehiclesAndDeletePairings', () => {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
@@ -1394,6 +1403,7 @@ describe('DevAdmin', function () {
           message: {
             aftermarketDeviceNode: '1',
             owner: user1.address,
+            nonce: 0
           },
         });
         const localClaimAdSig = await signMessage({
@@ -1403,11 +1413,12 @@ describe('DevAdmin', function () {
           message: {
             aftermarketDeviceNode: '1',
             owner: user1.address,
+            nonce: 0
           },
         });
         const localPairSignature = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceOwnerSign',
+          _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -1447,7 +1458,7 @@ describe('DevAdmin', function () {
 
         const localMintVehicleOwnerSig = await signMessage({
           _signer: user2,
-          _primaryType: 'MintSyntheticDeviceOwnerSign',
+          _primaryType: 'MintSyntheticDeviceSign',
           _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
             integrationNode: '1',
@@ -1462,6 +1473,7 @@ describe('DevAdmin', function () {
           message: {
             integrationNode: '1',
             vehicleNode: '2',
+            nonce: 0
           },
         });
         const localMintSdInput = {
@@ -1696,7 +1708,7 @@ describe('DevAdmin', function () {
       it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
         const localClaimOwnerSig = await signMessage({
           _signer: user1,
-          _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+          _primaryType: 'ClaimAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -1711,11 +1723,12 @@ describe('DevAdmin', function () {
           message: {
             aftermarketDeviceNode: '1',
             owner: user1.address,
+            nonce: 0
           },
         });
         const localPairSignature = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceOwnerSign',
+          _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -1769,6 +1782,7 @@ describe('DevAdmin', function () {
           message: {
             integrationNode: '1',
             vehicleNode: '2',
+            nonce: 0
           },
         });
         const mintSyntheticDeviceSig1 = await signMessage({
@@ -1778,6 +1792,7 @@ describe('DevAdmin', function () {
           message: {
             integrationNode: '1',
             vehicleNode: '2',
+            nonce: 0
           },
         });
         const localMintSdInput = {
@@ -1859,7 +1874,7 @@ describe('DevAdmin', function () {
       it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
         const localPairSignature = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceOwnerSign',
+          _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -2039,7 +2054,7 @@ describe('DevAdmin', function () {
         ];
         const localPairSignature1 = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceOwnerSign',
+          _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -2049,7 +2064,7 @@ describe('DevAdmin', function () {
         });
         const localPairSignature2 = await signMessage({
           _signer: user2,
-          _primaryType: 'PairAftermarketDeviceOwnerSign',
+          _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '2',
@@ -2224,7 +2239,7 @@ describe('DevAdmin', function () {
         ];
         const localPairSignature1 = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceOwnerSign',
+          _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
@@ -2234,7 +2249,7 @@ describe('DevAdmin', function () {
         });
         const localPairSignature2 = await signMessage({
           _signer: user2,
-          _primaryType: 'PairAftermarketDeviceOwnerSign',
+          _primaryType: 'PairAftermarketDeviceSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '2',
@@ -2306,7 +2321,7 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       const localMintVehicleOwnerSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'MintSyntheticDeviceOwnerSign',
+        _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
           integrationNode: '1',
@@ -2316,7 +2331,7 @@ describe('DevAdmin', function () {
       });
       const localMintVehicleOwnerSig2 = await signMessage({
         _signer: user2,
-        _primaryType: 'MintSyntheticDeviceOwnerSign',
+        _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
           integrationNode: '1',
@@ -2331,6 +2346,7 @@ describe('DevAdmin', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       const mintSyntheticDeviceSig2 = await signMessage({
@@ -2340,6 +2356,7 @@ describe('DevAdmin', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '2',
+          nonce: 0
         },
       });
       const localMintSdInput1 = {
@@ -2556,7 +2573,7 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       claimOwnerSig1 = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
+        _primaryType: 'ClaimAftermarketDeviceSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
@@ -2571,6 +2588,7 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
     });

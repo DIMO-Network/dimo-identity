@@ -17,37 +17,25 @@ export const schemaBase: TypedData = {
       { name: 'infos', type: 'string[]' },
       { name: 'nonce', type: 'uint256' }
     ],
-    ClaimAftermarketDeviceOwnerSign: [
+    ClaimAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
       { name: 'owner', type: 'address' },
       { name: 'nonce', type: 'uint256' }
     ],
-    ClaimAftermarketDeviceSign: [
-      { name: 'aftermarketDeviceNode', type: 'uint256' },
-      { name: 'owner', type: 'address' }
-    ],
-    PairAftermarketDeviceOwnerSign: [
+    PairAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
       { name: 'vehicleNode', type: 'uint256' },
       { name: 'nonce', type: 'uint256' }
-    ],
-    PairAftermarketDeviceSign: [
-      { name: 'aftermarketDeviceNode', type: 'uint256' },
-      { name: 'vehicleNode', type: 'uint256' }
     ],
     UnPairAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
       { name: 'vehicleNode', type: 'uint256' },
       { name: 'nonce', type: 'uint256' }
     ],
-    MintSyntheticDeviceOwnerSign: [
+    MintSyntheticDeviceSign: [
       { name: 'integrationNode', type: 'uint256' },
       { name: 'vehicleNode', type: 'uint256' },
       { name: 'nonce', type: 'uint256' }
-    ],
-    MintSyntheticDeviceSign: [
-      { name: 'integrationNode', type: 'uint256' },
-      { name: 'vehicleNode', type: 'uint256' }
     ],
     MintVehicleAndSdSign: [{ name: 'integrationNode', type: 'uint256' }],
     MintVehicleWithDeviceDefinitionSign: [

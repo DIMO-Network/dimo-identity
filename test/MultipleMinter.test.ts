@@ -573,7 +573,7 @@ describe('MultipleMinter', function () {
               _verifyingContract: await vehicleInstance.getAddress(),
               message: {
                 manufacturerNode: '1',
-                owner: user2.address,
+                owner: user1.address,
                 attributes: C.mockVehicleAttributes,
                 infos: C.mockVehicleInfos,
                 nonce: 99
@@ -1205,7 +1205,7 @@ describe('MultipleMinter', function () {
               _verifyingContract: await vehicleInstance.getAddress(),
               message: {
                 manufacturerNode: '1',
-                owner: user2.address,
+                owner: user1.address,
                 deviceDefinitionId: C.mockDdId1,
                 attributes: C.mockVehicleAttributes,
                 infos: C.mockVehicleInfos,

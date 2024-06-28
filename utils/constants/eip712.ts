@@ -37,7 +37,10 @@ export const schemaBase: TypedData = {
       { name: 'vehicleNode', type: 'uint256' },
       { name: 'nonce', type: 'uint256' }
     ],
-    MintVehicleAndSdSign: [{ name: 'integrationNode', type: 'uint256' }],
+    MintVehicleAndSdSign: [
+      { name: 'integrationNode', type: 'uint256' },
+      { name: 'nonce', type: 'uint256' }
+    ],
     MintVehicleWithDeviceDefinitionSign: [
       { name: 'manufacturerNode', type: 'uint256' },
       { name: 'owner', type: 'address' },

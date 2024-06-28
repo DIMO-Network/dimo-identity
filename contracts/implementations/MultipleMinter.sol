@@ -28,7 +28,9 @@ contract MultipleMinter is
     SyntheticDeviceInternal
 {
     bytes32 private constant MINT_VEHICLE_SD_TYPEHASH =
-        keccak256("MintVehicleAndSdSign(uint256 integrationNode)");
+        keccak256(
+            "MintVehicleAndSdSign(uint256 integrationNode,uint256 nonce)"
+        );
 
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
@@ -69,7 +71,14 @@ contract MultipleMinter is
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
         bytes32 message = keccak256(
-            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.integrationNode)
+            abi.encode(
+                MINT_VEHICLE_SD_TYPEHASH,
+                data.integrationNode,
+                NoncesInternal._useNonce(
+                    MINT_VEHICLE_SD_TYPEHASH,
+                    data.syntheticDeviceAddr
+                )
+            )
         );
 
         if (
@@ -197,7 +206,14 @@ contract MultipleMinter is
         ) revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
         bytes32 message = keccak256(
-            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.integrationNode)
+            abi.encode(
+                MINT_VEHICLE_SD_TYPEHASH,
+                data.integrationNode,
+                NoncesInternal._useNonce(
+                    MINT_VEHICLE_SD_TYPEHASH,
+                    data.syntheticDeviceAddr
+                )
+            )
         );
 
         if (

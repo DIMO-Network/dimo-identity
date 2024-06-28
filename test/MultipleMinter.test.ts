@@ -290,7 +290,8 @@ describe('MultipleMinter', function () {
         _primaryType: 'MintVehicleAndSdSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1'
+          integrationNode: '1',
+          nonce: 0
         }
       });
       mintVehicleOwnerSig1 = await signMessage({
@@ -596,7 +597,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '1'
+                integrationNode: '1',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -614,7 +616,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '1'
+                integrationNode: '1',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -632,7 +635,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '1'
+                integrationNode: '1',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -650,7 +654,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '1'
+                integrationNode: '1',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -667,7 +672,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '99'
+                integrationNode: '99',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -890,7 +896,8 @@ describe('MultipleMinter', function () {
         _primaryType: 'MintVehicleAndSdSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1'
+          integrationNode: '1',
+          nonce: 0
         }
       });
       mintVehicleOwnerSig1 = await signMessage({
@@ -1229,7 +1236,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '1'
+                integrationNode: '1',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -1247,7 +1255,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '1'
+                integrationNode: '1',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -1265,7 +1274,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '1'
+                integrationNode: '1',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -1283,7 +1293,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '1'
+                integrationNode: '1',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -1300,7 +1311,8 @@ describe('MultipleMinter', function () {
               _primaryType: 'MintVehicleAndSdSign',
               _verifyingContract: await multipleMinterInstance.getAddress(),
               message: {
-                integrationNode: '99'
+                integrationNode: '99',
+                nonce: 0
               }
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;

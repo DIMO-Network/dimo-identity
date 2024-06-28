@@ -57,7 +57,10 @@ export const schemaBase: TypedData = {
       { name: 'vehicleNode', type: 'uint256' },
       { name: 'syntheticDeviceNode', type: 'uint256' }
     ],
-    BurnVehicleSign: [{ name: 'vehicleNode', type: 'uint256' }]
+    BurnVehicleSign: [
+      { name: 'vehicleNode', type: 'uint256' },
+      { name: 'nonce', type: 'uint256' }
+    ]
   },
   primaryType: '',
   domain: {},

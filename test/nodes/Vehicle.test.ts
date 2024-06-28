@@ -1446,7 +1446,8 @@ describe('Vehicle', function () {
         _primaryType: 'BurnVehicleSign',
         _verifyingContract: await vehicleInstance.getAddress(),
         message: {
-          vehicleNode: '1'
+          vehicleNode: '1',
+          nonce: 0
         }
       });
       burnVehicleSig2 = await signMessage({
@@ -1454,7 +1455,8 @@ describe('Vehicle', function () {
         _primaryType: 'BurnVehicleSign',
         _verifyingContract: await vehicleInstance.getAddress(),
         message: {
-          vehicleNode: '2'
+          vehicleNode: '2',
+          nonce: 0
         }
       });
     });
@@ -1483,11 +1485,12 @@ describe('Vehicle', function () {
       it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
         const localClaimOwnerSig = await signMessage({
           _signer: user1,
-          _primaryType: 'ClaimAftermarketDeviceSign',
+          _primaryType: 'ClaimAftermarketDeviceOwnerSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
-            owner: user1.address
+            owner: user1.address,
+            nonce: 0
           }
         });
         const localClaimAdSig = await signMessage({
@@ -1501,11 +1504,12 @@ describe('Vehicle', function () {
         });
         const localPairSignature = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceSign',
+          _primaryType: 'PairAftermarketDeviceOwnerSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
-            vehicleNode: '1'
+            vehicleNode: '1',
+            nonce: 0
           }
         });
 
@@ -1585,7 +1589,8 @@ describe('Vehicle', function () {
             _primaryType: 'BurnVehicleSign',
             _verifyingContract: await vehicleInstance.getAddress(),
             message: {
-              vehicleNode: '1'
+              vehicleNode: '1',
+              nonce: 0
             }
           });
 
@@ -1600,7 +1605,8 @@ describe('Vehicle', function () {
             _primaryType: 'BurnVehicleSign',
             _verifyingContract: await vehicleInstance.getAddress(),
             message: {
-              vehicleNode: '1'
+              vehicleNode: '1',
+              nonce: 0
             }
           });
 
@@ -1615,7 +1621,8 @@ describe('Vehicle', function () {
             _primaryType: 'BurnVehicleSign',
             _verifyingContract: await vehicleInstance.getAddress(),
             message: {
-              vehicleNode: '1'
+              vehicleNode: '1',
+              nonce: 0
             }
           });
 
@@ -1630,7 +1637,8 @@ describe('Vehicle', function () {
             _primaryType: 'BurnVehicleSign',
             _verifyingContract: await vehicleInstance.getAddress(),
             message: {
-              vehicleNode: '1'
+              vehicleNode: '1',
+              nonce: 0
             }
           });
 
@@ -1644,7 +1652,23 @@ describe('Vehicle', function () {
             _primaryType: 'BurnVehicleSign',
             _verifyingContract: await vehicleInstance.getAddress(),
             message: {
-              vehicleNode: '99'
+              vehicleNode: '99',
+              nonce: 0
+            }
+          });
+
+          await expect(
+            vehicleInstance.connect(admin).burnVehicleSign(1, invalidSignature)
+          ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'BurnVehicleSign',
+            _verifyingContract: await vehicleInstance.getAddress(),
+            message: {
+              vehicleNode: '99',
+              nonce: 99
             }
           });
 

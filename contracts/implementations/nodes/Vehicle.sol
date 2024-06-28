@@ -23,7 +23,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
  */
 contract Vehicle is AccessControlInternal, VehicleInternal {
     bytes32 private constant BURN_TYPEHASH =
-        keccak256("BurnVehicleSign(uint256 vehicleNode)");
+        keccak256("BurnVehicleSign(uint256 vehicleNode,uint256 nonce)");
 
     event VehicleIdProxySet(address indexed proxy);
     event VehicleAttributeAdded(string attribute);
@@ -323,7 +323,13 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             revert VehiclePaired(tokenId);
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
-        bytes32 message = keccak256(abi.encode(BURN_TYPEHASH, tokenId));
+        bytes32 message = keccak256(
+            abi.encode(
+                BURN_TYPEHASH,
+                tokenId,
+                NoncesInternal._useNonce(BURN_TYPEHASH, owner)
+            )
+        );
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
             revert InvalidOwnerSignature();

@@ -297,11 +297,12 @@ describe('Multicall', function () {
       });
       ownerSig = await signMessage({
         _signer: user1,
-        _primaryType: 'ClaimAftermarketDeviceSign',
+        _primaryType: 'ClaimAftermarketDeviceOwnerSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
-          owner: user1.address
+          owner: user1.address,
+          nonce: 0
         }
       });
       adSig = await signMessage({
@@ -315,11 +316,12 @@ describe('Multicall', function () {
       });
       pairSign = await signMessage({
         _signer: user1,
-        _primaryType: 'PairAftermarketDeviceSign',
+        _primaryType: 'PairAftermarketDeviceOwnerSign',
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
-          vehicleNode: '1'
+          vehicleNode: '1',
+          nonce: 0
         }
       });
 

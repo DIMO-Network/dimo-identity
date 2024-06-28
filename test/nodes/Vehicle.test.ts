@@ -1547,11 +1547,12 @@ describe('Vehicle', function () {
       it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
         const localMintVehicleOwnerSig = await signMessage({
           _signer: user1,
-          _primaryType: 'MintSyntheticDeviceSign',
+          _primaryType: 'MintSyntheticDeviceOwnerSign',
           _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
             integrationNode: '1',
-            vehicleNode: '1'
+            vehicleNode: '1',
+            nonce: 0
           }
         });
         const mintSyntheticDeviceSig1 = await signMessage({

@@ -306,20 +306,22 @@ describe('DimoForwarder', async function () {
     // Minting and pairing 2 vehicles and aftermarket devices
     const claimOwnerSig1 = await signMessage({
       _signer: user1,
-      _primaryType: 'ClaimAftermarketDeviceSign',
+      _primaryType: 'ClaimAftermarketDeviceOwnerSign',
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '1',
         owner: user1.address,
+        nonce: 0
       },
     });
     const claimOwnerSig2 = await signMessage({
       _signer: user2,
-      _primaryType: 'ClaimAftermarketDeviceSign',
+      _primaryType: 'ClaimAftermarketDeviceOwnerSign',
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '2',
         owner: user2.address,
+        nonce: 0
       },
     });
     const claimAdSig2 = await signMessage({
@@ -342,20 +344,22 @@ describe('DimoForwarder', async function () {
     });
     const pairSignature1 = await signMessage({
       _signer: user1,
-      _primaryType: 'PairAftermarketDeviceSign',
+      _primaryType: 'PairAftermarketDeviceOwnerSign',
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '1',
         vehicleNode: '1',
+        nonce: 0
       },
     });
     const pairSignature2 = await signMessage({
       _signer: user2,
-      _primaryType: 'PairAftermarketDeviceSign',
+      _primaryType: 'PairAftermarketDeviceOwnerSign',
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '2',
         vehicleNode: '2',
+        nonce: 0
       },
     });
 

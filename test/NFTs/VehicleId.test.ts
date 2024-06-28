@@ -115,7 +115,8 @@ describe('VehicleId', async function () {
         'SyntheticDevice',
         'AdLicenseValidator',
         'Mapper',
-        'Shared'
+        'Shared',
+        'Nonces'
       ],
       nfts: [
         'ManufacturerId',
@@ -353,11 +354,12 @@ describe('VehicleId', async function () {
 
     const claimOwnerSig1 = await signMessage({
       _signer: user1,
-      _primaryType: 'ClaimAftermarketDeviceSign',
+      _primaryType: 'ClaimAftermarketDeviceOwnerSign',
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '1',
         owner: user1.address,
+        nonce: 0
       },
     });
     const claimAdSig1 = await signMessage({
@@ -537,11 +539,12 @@ describe('VehicleId', async function () {
       it('Should keep the aftermarket device pairing', async () => {
         const pairSignature = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceSign',
+          _primaryType: 'PairAftermarketDeviceOwnerSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
             vehicleNode: '1',
+            nonce: 0
           },
         });
 
@@ -692,11 +695,12 @@ describe('VehicleId', async function () {
       it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
         const localPairSignature = await signMessage({
           _signer: user1,
-          _primaryType: 'PairAftermarketDeviceSign',
+          _primaryType: 'PairAftermarketDeviceOwnerSign',
           _verifyingContract: await aftermarketDeviceInstance.getAddress(),
           message: {
             aftermarketDeviceNode: '1',
             vehicleNode: '1',
+            nonce: 0
           },
         });
 
@@ -715,11 +719,12 @@ describe('VehicleId', async function () {
       it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
         const localMintVehicleOwnerSig = await signMessage({
           _signer: user1,
-          _primaryType: 'MintSyntheticDeviceSign',
+          _primaryType: 'MintSyntheticDeviceOwnerSign',
           _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
             integrationNode: '1',
             vehicleNode: '1',
+            nonce: 0
           },
         });
         const mintSyntheticDeviceSig1 = await signMessage({

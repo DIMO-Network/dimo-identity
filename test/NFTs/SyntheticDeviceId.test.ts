@@ -255,11 +255,12 @@ describe('SyntheticDeviceId', async function () {
     });
     const mintVehicleOwnerSig1 = await signMessage({
       _signer: user1,
-      _primaryType: 'MintSyntheticDeviceSign',
+      _primaryType: 'MintSyntheticDeviceOwnerSign',
       _verifyingContract: await syntheticDeviceInstance.getAddress(),
       message: {
         integrationNode: '1',
-        vehicleNode: '1'
+        vehicleNode: '1',
+        nonce: 0
       }
     });
     const correctMintInput1 = {

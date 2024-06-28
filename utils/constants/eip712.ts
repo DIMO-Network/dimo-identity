@@ -14,7 +14,8 @@ export const schemaBase: TypedData = {
       { name: 'manufacturerNode', type: 'uint256' },
       { name: 'owner', type: 'address' },
       { name: 'attributes', type: 'string[]' },
-      { name: 'infos', type: 'string[]' }
+      { name: 'infos', type: 'string[]' },
+      { name: 'nonce', type: 'uint256' }
     ],
     ClaimAftermarketDeviceSign: [
       { name: 'aftermarketDeviceNode', type: 'uint256' },
@@ -38,7 +39,8 @@ export const schemaBase: TypedData = {
       { name: 'owner', type: 'address' },
       { name: 'deviceDefinitionId', type: 'string' },
       { name: 'attributes', type: 'string[]' },
-      { name: 'infos', type: 'string[]' }
+      { name: 'infos', type: 'string[]' },
+      { name: 'nonce', type: 'uint256' }
     ],
     BurnSyntheticDeviceSign: [
       { name: 'vehicleNode', type: 'uint256' },

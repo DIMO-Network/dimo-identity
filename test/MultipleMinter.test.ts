@@ -91,7 +91,8 @@ describe('MultipleMinter', function () {
         'SyntheticDevice',
         'Mapper',
         'MultipleMinter',
-        'Shared'
+        'Shared',
+        'Nonces'
       ],
       nfts: [
         'ManufacturerId',
@@ -300,7 +301,8 @@ describe('MultipleMinter', function () {
           manufacturerNode: '1',
           owner: user1.address,
           attributes: C.mockVehicleAttributes,
-          infos: C.mockVehicleInfos
+          infos: C.mockVehicleInfos,
+          nonce: 0
         }
       });
       correctMintInput = {
@@ -402,7 +404,8 @@ describe('MultipleMinter', function () {
                 manufacturerNode: '1',
                 owner: user1.address,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -423,7 +426,8 @@ describe('MultipleMinter', function () {
                 manufacturerNode: '1',
                 owner: user1.address,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -444,7 +448,8 @@ describe('MultipleMinter', function () {
                 manufacturerNode: '1',
                 owner: user1.address,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -465,7 +470,8 @@ describe('MultipleMinter', function () {
                 manufacturerNode: '1',
                 owner: user1.address,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -485,7 +491,8 @@ describe('MultipleMinter', function () {
                 manufacturerNode: '99',
                 owner: user1.address,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -505,7 +512,8 @@ describe('MultipleMinter', function () {
                 manufacturerNode: '1',
                 owner: user1.address,
                 attributes: C.mockVehicleAttributes.slice(1),
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -525,7 +533,8 @@ describe('MultipleMinter', function () {
                 manufacturerNode: '1',
                 owner: user1.address,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfosWrongSize
+                infos: C.mockVehicleInfosWrongSize,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -545,7 +554,29 @@ describe('MultipleMinter', function () {
                 manufacturerNode: '1',
                 owner: user2.address,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              multipleMinterInstance
+                .connect(admin)
+                .mintVehicleAndSdSign(incorrectMintInput)
+            ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
+          });
+          it('Should revert if nonce does not match current nonce', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVehicleSign',
+              _verifyingContract: await vehicleInstance.getAddress(),
+              message: {
+                manufacturerNode: '1',
+                owner: user2.address,
+                attributes: C.mockVehicleAttributes,
+                infos: C.mockVehicleInfos,
+                nonce: 99
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -871,7 +902,8 @@ describe('MultipleMinter', function () {
           owner: user1.address,
           deviceDefinitionId: C.mockDdId1,
           attributes: C.mockVehicleAttributes,
-          infos: C.mockVehicleInfos
+          infos: C.mockVehicleInfos,
+          nonce: 0
         }
       });
       correctMintInput = {
@@ -975,7 +1007,8 @@ describe('MultipleMinter', function () {
                 owner: user1.address,
                 deviceDefinitionId: C.mockDdId1,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -997,7 +1030,8 @@ describe('MultipleMinter', function () {
                 owner: user1.address,
                 deviceDefinitionId: C.mockDdId1,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -1019,7 +1053,8 @@ describe('MultipleMinter', function () {
                 owner: user1.address,
                 deviceDefinitionId: C.mockDdId1,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -1041,7 +1076,8 @@ describe('MultipleMinter', function () {
                 owner: user1.address,
                 deviceDefinitionId: C.mockDdId1,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -1062,7 +1098,8 @@ describe('MultipleMinter', function () {
                 owner: user1.address,
                 deviceDefinitionId: C.mockDdId1,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -1083,7 +1120,8 @@ describe('MultipleMinter', function () {
                 owner: user1.address,
                 deviceDefinitionId: C.mockDdId2,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -1104,7 +1142,8 @@ describe('MultipleMinter', function () {
                 owner: user1.address,
                 deviceDefinitionId: C.mockDdId1,
                 attributes: C.mockVehicleAttributes.slice(1),
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -1125,7 +1164,8 @@ describe('MultipleMinter', function () {
                 owner: user1.address,
                 deviceDefinitionId: C.mockDdId1,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfosWrongSize
+                infos: C.mockVehicleInfosWrongSize,
+                nonce: 0
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -1146,7 +1186,30 @@ describe('MultipleMinter', function () {
                 owner: user2.address,
                 deviceDefinitionId: C.mockDdId1,
                 attributes: C.mockVehicleAttributes,
-                infos: C.mockVehicleInfos
+                infos: C.mockVehicleInfos,
+                nonce: 0
+              }
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              multipleMinterInstance
+                .connect(admin)
+                .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+            ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
+          });
+          it('Should revert if nonce does not match current nonce', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintVehicleWithDeviceDefinitionSign',
+              _verifyingContract: await vehicleInstance.getAddress(),
+              message: {
+                manufacturerNode: '1',
+                owner: user2.address,
+                deviceDefinitionId: C.mockDdId1,
+                attributes: C.mockVehicleAttributes,
+                infos: C.mockVehicleInfos,
+                nonce: 99
               }
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;

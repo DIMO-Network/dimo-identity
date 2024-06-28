@@ -46,6 +46,21 @@ export type MintSyntheticDeviceInput = {
   attrInfoPairs: AttributeInfoPair[]
 };
 
+export type MintVehicleInput = {
+  manufacturerNode: string,
+  owner: string,
+  attrInfo: AttributeInfoPair[],
+  signature: string
+};
+
+export type MintVehicleWithDdInput = {
+  manufacturerNode: string,
+  owner: string,
+  deviceDefinitionId: string,
+  attrInfo: AttributeInfoPair[],
+  signature: string
+};
+
 export type MintVehicleAndSdInput = {
   manufacturerNode: string,
   owner: string,

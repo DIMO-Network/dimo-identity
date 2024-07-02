@@ -789,7 +789,7 @@
         "misc": {
             "DimoToken": {
                 "proxy": "0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10",
-                "implementation": "0x05e044bC83B1D2158dBd31ECAfC9210319fb742d"
+                "implementation": "0x2B06014980c3d28644241ba87b8518C236c4B75b"
             },
             "DimoCredit": {
                 "proxy": "0x49c120f4C3c6679Ebd357F2d749E4D1C03598d65",

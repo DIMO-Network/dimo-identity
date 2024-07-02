@@ -609,7 +609,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0xf46d24a83Ab3F0521DB6926403E0AB89E9D017D4",
+                "address": "0x68BAE63198f520C0a41AfF65d5CC515F3E6242d5",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
@@ -676,15 +676,25 @@
                 ]
             },
             "Charging": {
-                "address": "",
-                "selectors": []
+                "address": "0x2375812aA04ae6739c1555e3996aafe2Dc419EDb",
+                "selectors": [
+                    "0xd25f5787",
+                    "0xa2fe8c85"
+                ]
             },
             "Shared": {
-                "address": "",
-                "selectors": []
+                "address": "0x374A48ACe6578905D712Ed5B55d84c8D69B384b4",
+                "selectors": [
+                    "0xcfe55b7d",
+                    "0x77898251",
+                    "0xa2bc6cdf",
+                    "0x4fa9ff16",
+                    "0x81c9bb13",
+                    "0xdb3543f5"
+                ]
             },
             "MultipleMinter": {
-                "address": "0x8a0E5Fb31d8B7fC4327622603b7dEDEeA5A507c8",
+                "address": "0x9cFf9165A898d5b5b4786d2F3F8A78061Fa3aa5d",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3"

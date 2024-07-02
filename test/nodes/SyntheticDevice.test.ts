@@ -93,7 +93,8 @@ describe('SyntheticDevice', function () {
         'Vehicle',
         'SyntheticDevice',
         'Mapper',
-        'Shared'
+        'Shared',
+        'Nonces'
       ],
       nfts: [
         'ManufacturerId',
@@ -625,6 +626,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       mintVehicleOwnerSig1 = await signMessage({
@@ -634,6 +636,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       correctMintInput = {
@@ -770,6 +773,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -792,6 +796,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -814,6 +819,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -836,6 +842,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -857,6 +864,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '99',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -878,6 +886,29 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '2',
+                nonce: 0
+              },
+            });
+            incorrectMintInput.syntheticDeviceSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign(incorrectMintInput),
+            ).to.be.revertedWithCustomError(
+              syntheticDeviceInstance,
+              'InvalidSdSignature',
+            );
+          });
+          it('Should revert if nonce does not match current nonce', async () => {
+            const invalidSignature = await signMessage({
+              _signer: sdAddress1,
+              _primaryType: 'MintSyntheticDeviceSign',
+              _verifyingContract: await syntheticDeviceInstance.getAddress(),
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                nonce: 99
               },
             });
             incorrectMintInput.syntheticDeviceSig = invalidSignature;
@@ -903,6 +934,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -925,6 +957,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -947,6 +980,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -969,6 +1003,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -990,6 +1025,7 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '99',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -1011,6 +1047,29 @@ describe('SyntheticDevice', function () {
               message: {
                 integrationNode: '1',
                 vehicleNode: '2',
+                nonce: 0
+              },
+            });
+            incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+            await expect(
+              syntheticDeviceInstance
+                .connect(admin)
+                .mintSyntheticDeviceSign(incorrectMintInput),
+            ).to.be.revertedWithCustomError(
+              syntheticDeviceInstance,
+              'InvalidOwnerSignature',
+            );
+          });
+          it('Should revert if nonce does not match current nonce', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'MintSyntheticDeviceSign',
+              _verifyingContract: await syntheticDeviceInstance.getAddress(),
+              message: {
+                integrationNode: '1',
+                vehicleNode: '1',
+                nonce: 99
               },
             });
             incorrectMintInput.vehicleOwnerSig = invalidSignature;
@@ -1166,6 +1225,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       mintVehicleOwnerSig1 = await signMessage({
@@ -1175,6 +1235,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       mintSyntheticDeviceSig2 = await signMessage({
@@ -1184,6 +1245,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '2',
+          nonce: 0
         },
       });
       mintVehicleOwnerSig2 = await signMessage({
@@ -1193,6 +1255,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '2',
+          nonce: 1
         },
       });
       mintInput1 = {
@@ -1218,6 +1281,7 @@ describe('SyntheticDevice', function () {
         message: {
           vehicleNode: '1',
           syntheticDeviceNode: '1',
+          nonce: 0
         },
       });
     });
@@ -1265,6 +1329,7 @@ describe('SyntheticDevice', function () {
           message: {
             vehicleNode: '2',
             syntheticDeviceNode: '1',
+            nonce: 0
           },
         });
 
@@ -1294,6 +1359,7 @@ describe('SyntheticDevice', function () {
           message: {
             vehicleNode: '1',
             syntheticDeviceNode: '2',
+            nonce: 0
           },
         });
 
@@ -1325,6 +1391,7 @@ describe('SyntheticDevice', function () {
             message: {
               vehicleNode: '1',
               syntheticDeviceNode: '1',
+              nonce: 0
             },
           });
 
@@ -1346,6 +1413,7 @@ describe('SyntheticDevice', function () {
             message: {
               vehicleNode: '1',
               syntheticDeviceNode: '1',
+              nonce: 0
             },
           });
 
@@ -1367,6 +1435,7 @@ describe('SyntheticDevice', function () {
             message: {
               vehicleNode: '1',
               syntheticDeviceNode: '1',
+              nonce: 0
             },
           });
 
@@ -1388,6 +1457,7 @@ describe('SyntheticDevice', function () {
             message: {
               vehicleNode: '1',
               syntheticDeviceNode: '1',
+              nonce: 0
             },
           });
 
@@ -1408,6 +1478,7 @@ describe('SyntheticDevice', function () {
             message: {
               vehicleNode: '99',
               syntheticDeviceNode: '1',
+              nonce: 0
             },
           });
 
@@ -1428,6 +1499,28 @@ describe('SyntheticDevice', function () {
             message: {
               vehicleNode: '1',
               syntheticDeviceNode: '99',
+              nonce: 0
+            },
+          });
+
+          await expect(
+            syntheticDeviceInstance
+              .connect(admin)
+              .burnSyntheticDeviceSign(1, 1, invalidSignature),
+          ).to.be.revertedWithCustomError(
+            syntheticDeviceInstance,
+            'InvalidOwnerSignature',
+          );
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'BurnSyntheticDeviceSign',
+            _verifyingContract: await syntheticDeviceInstance.getAddress(),
+            message: {
+              vehicleNode: '1',
+              syntheticDeviceNode: '1',
+              nonce: 99
             },
           });
 
@@ -1563,6 +1656,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       const mintVehicleOwnerSig1 = await signMessage({
@@ -1572,6 +1666,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       mintInput = {
@@ -1710,6 +1805,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       const mintVehicleOwnerSig1 = await signMessage({
@@ -1719,6 +1815,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       mintInput = {
@@ -1766,6 +1863,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       const mintVehicleOwnerSig1 = await signMessage({
@@ -1775,6 +1873,7 @@ describe('SyntheticDevice', function () {
         message: {
           integrationNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       mintInput = {

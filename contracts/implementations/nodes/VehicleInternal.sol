@@ -14,11 +14,11 @@ import "../../shared/Errors.sol";
 contract VehicleInternal {
     bytes32 internal constant MINT_VEHICLE_TYPEHASH =
         keccak256(
-            "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"
+            "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos,uint256 nonce)"
         );
     bytes32 internal constant MINT_VEHICLE_WITH_DD_TYPEHASH =
         keccak256(
-            "MintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode,address owner,string deviceDefinitionId,string[] attributes,string[] infos)"
+            "MintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode,address owner,string deviceDefinitionId,string[] attributes,string[] infos,uint256 nonce)"
         );
 
     event VehicleAttributeSet(uint256 tokenId, string attribute, string info);

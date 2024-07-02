@@ -115,7 +115,8 @@ describe('VehicleId', async function () {
         'SyntheticDevice',
         'AdLicenseValidator',
         'Mapper',
-        'Shared'
+        'Shared',
+        'Nonces'
       ],
       nfts: [
         'ManufacturerId',
@@ -358,6 +359,7 @@ describe('VehicleId', async function () {
       message: {
         aftermarketDeviceNode: '1',
         owner: user1.address,
+        nonce: 0
       },
     });
     const claimAdSig1 = await signMessage({
@@ -367,6 +369,7 @@ describe('VehicleId', async function () {
       message: {
         aftermarketDeviceNode: '1',
         owner: user1.address,
+        nonce: 0
       },
     });
 
@@ -542,6 +545,7 @@ describe('VehicleId', async function () {
           message: {
             aftermarketDeviceNode: '1',
             vehicleNode: '1',
+            nonce: 0
           },
         });
 
@@ -697,6 +701,7 @@ describe('VehicleId', async function () {
           message: {
             aftermarketDeviceNode: '1',
             vehicleNode: '1',
+            nonce: 0
           },
         });
 
@@ -720,6 +725,7 @@ describe('VehicleId', async function () {
           message: {
             integrationNode: '1',
             vehicleNode: '1',
+            nonce: 0
           },
         });
         const mintSyntheticDeviceSig1 = await signMessage({
@@ -729,6 +735,7 @@ describe('VehicleId', async function () {
           message: {
             integrationNode: '1',
             vehicleNode: '1',
+            nonce: 0
           },
         });
         const localMintSdInput = {

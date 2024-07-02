@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./nodes/VehicleInternal.sol";
 import "./nodes/SyntheticDeviceInternal.sol";
+import "./nonces/NoncesInternal.sol";
 import "./charging/ChargingInternal.sol";
 import "../interfaces/INFT.sol";
 import "../Eip712/Eip712CheckerInternal.sol";
@@ -27,7 +28,9 @@ contract MultipleMinter is
     SyntheticDeviceInternal
 {
     bytes32 private constant MINT_VEHICLE_SD_TYPEHASH =
-        keccak256("MintVehicleAndSdSign(uint256 integrationNode)");
+        keccak256(
+            "MintVehicleAndSdSign(uint256 integrationNode,uint256 nonce)"
+        );
 
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
@@ -46,8 +49,6 @@ contract MultipleMinter is
     function mintVehicleAndSdSign(
         MintVehicleAndSdInput calldata data
     ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
             .getStorage();
 
@@ -70,7 +71,14 @@ contract MultipleMinter is
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
         bytes32 message = keccak256(
-            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.integrationNode)
+            abi.encode(
+                MINT_VEHICLE_SD_TYPEHASH,
+                data.integrationNode,
+                NoncesInternal._useNonce(
+                    MINT_VEHICLE_SD_TYPEHASH,
+                    data.syntheticDeviceAddr
+                )
+            )
         );
 
         if (
@@ -103,7 +111,8 @@ contract MultipleMinter is
                 data.manufacturerNode,
                 data.owner,
                 attributesHash,
-                infosHash
+                infosHash,
+                NoncesInternal._useNonce(MINT_VEHICLE_TYPEHASH, data.owner)
             )
         );
 
@@ -132,18 +141,22 @@ contract MultipleMinter is
         // ----- END Synthetic Device mint and attributes -----
 
         // ----- Internal contract state change -----
-        ns.nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
             .manufacturerNode;
 
-        ns.nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
+        NodesStorage
+        .getStorage()
+        .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
             .integrationNode;
 
-        ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
-            newTokenIdVehicle
-        ] = newTokenIdDevice;
-        ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
-            newTokenIdDevice
-        ] = newTokenIdVehicle;
+        MapperStorage.getStorage().nodeLinks[vehicleIdProxyAddress][
+            sdIdProxyAddress
+        ][newTokenIdVehicle] = newTokenIdDevice;
+        MapperStorage.getStorage().nodeLinks[sdIdProxyAddress][
+            vehicleIdProxyAddress
+        ][newTokenIdDevice] = newTokenIdVehicle;
 
         sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
@@ -169,13 +182,12 @@ contract MultipleMinter is
     function mintVehicleAndSdWithDeviceDefinitionSign(
         MintVehicleAndSdWithDdInput calldata data
     ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
-        MapperStorage.Storage storage ms = MapperStorage.getStorage();
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
-        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
-            .getStorage();
-
-        address vehicleIdProxyAddress = vs.idProxyAddress;
-        address sdIdProxyAddress = sds.idProxyAddress;
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = SyntheticDeviceStorage
+            .getStorage()
+            .idProxyAddress;
 
         if (
             !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
@@ -187,11 +199,21 @@ contract MultipleMinter is
                 data.manufacturerNode
             )
         ) revert InvalidParentNode(data.manufacturerNode);
-        if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
-            revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
+        if (
+            SyntheticDeviceStorage.getStorage().deviceAddressToNodeId[
+                data.syntheticDeviceAddr
+            ] != 0
+        ) revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
         bytes32 message = keccak256(
-            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.integrationNode)
+            abi.encode(
+                MINT_VEHICLE_SD_TYPEHASH,
+                data.integrationNode,
+                NoncesInternal._useNonce(
+                    MINT_VEHICLE_SD_TYPEHASH,
+                    data.syntheticDeviceAddr
+                )
+            )
         );
 
         if (
@@ -226,7 +248,8 @@ contract MultipleMinter is
                 data.owner,
                 keccak256(bytes(data.deviceDefinitionId)),
                 attributesHash,
-                infosHash
+                infosHash,
+                NoncesInternal._useNonce(MINT_VEHICLE_TYPEHASH, data.owner)
             )
         );
 
@@ -259,23 +282,28 @@ contract MultipleMinter is
         .getStorage()
         .nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
             .manufacturerNode;
-        vs.vehicleIdToDeviceDefinitionId[newTokenIdVehicle] = data
-            .deviceDefinitionId;
+        VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
+            newTokenIdVehicle
+        ] = data.deviceDefinitionId;
 
         NodesStorage
         .getStorage()
         .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
             .integrationNode;
 
-        ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
-            newTokenIdVehicle
-        ] = newTokenIdDevice;
-        ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
-            newTokenIdDevice
-        ] = newTokenIdVehicle;
+        MapperStorage.getStorage().nodeLinks[vehicleIdProxyAddress][
+            sdIdProxyAddress
+        ][newTokenIdVehicle] = newTokenIdDevice;
+        MapperStorage.getStorage().nodeLinks[sdIdProxyAddress][
+            vehicleIdProxyAddress
+        ][newTokenIdDevice] = newTokenIdVehicle;
 
-        sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
-        sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
+        SyntheticDeviceStorage.getStorage().deviceAddressToNodeId[
+            data.syntheticDeviceAddr
+        ] = newTokenIdDevice;
+        SyntheticDeviceStorage.getStorage().nodeIdToDeviceAddress[
+            newTokenIdDevice
+        ] = data.syntheticDeviceAddr;
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }

@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./VehicleInternal.sol";
 import "./SyntheticDeviceInternal.sol";
+import "../nonces/NoncesInternal.sol";
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
@@ -31,11 +32,11 @@ contract SyntheticDevice is
 {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
-            "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
+            "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode,uint256 nonce)"
         );
     bytes32 private constant BURN_TYPEHASH =
         keccak256(
-            "BurnSyntheticDeviceSign(uint256 vehicleNode,uint256 syntheticDeviceNode)"
+            "BurnSyntheticDeviceSign(uint256 vehicleNode,uint256 syntheticDeviceNode,uint256 nonce)"
         );
 
     event SyntheticDeviceIdProxySet(address proxy);
@@ -194,21 +195,37 @@ contract SyntheticDevice is
         ) revert VehiclePaired(data.vehicleNode);
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(data.vehicleNode);
-        bytes32 message = keccak256(
-            abi.encode(MINT_TYPEHASH, data.integrationNode, data.vehicleNode)
+        bytes32 messageDevice = keccak256(
+            abi.encode(
+                MINT_TYPEHASH,
+                data.integrationNode,
+                data.vehicleNode,
+                NoncesInternal._useNonce(
+                    MINT_TYPEHASH,
+                    data.syntheticDeviceAddr
+                )
+            )
+        );
+        bytes32 messageOwner = keccak256(
+            abi.encode(
+                MINT_TYPEHASH,
+                data.integrationNode,
+                data.vehicleNode,
+                NoncesInternal._useNonce(MINT_TYPEHASH, owner)
+            )
         );
 
         if (
             !Eip712CheckerInternal._verifySignature(
                 data.syntheticDeviceAddr,
-                message,
+                messageDevice,
                 data.syntheticDeviceSig
             )
         ) revert InvalidSdSignature();
         if (
             !Eip712CheckerInternal._verifySignature(
                 owner,
-                message,
+                messageOwner,
                 data.vehicleOwnerSig
             )
         ) revert InvalidOwnerSignature();
@@ -274,7 +291,12 @@ contract SyntheticDevice is
 
         address owner = INFT(sdIdProxyAddress).ownerOf(syntheticDeviceNode);
         bytes32 message = keccak256(
-            abi.encode(BURN_TYPEHASH, vehicleNode, syntheticDeviceNode)
+            abi.encode(
+                BURN_TYPEHASH,
+                vehicleNode,
+                syntheticDeviceNode,
+                NoncesInternal._useNonce(BURN_TYPEHASH, owner)
+            )
         );
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))

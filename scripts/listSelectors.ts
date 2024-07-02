@@ -80,6 +80,7 @@ main([
   'Mapper',
   'Charging',
   'Shared',
+  'Nonces',
   'MultipleMinter',
   'BaseDataURI',
   'DeviceDefinitionTable',

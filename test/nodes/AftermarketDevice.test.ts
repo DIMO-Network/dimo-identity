@@ -121,7 +121,8 @@ describe('AftermarketDevice', function () {
         'AftermarketDevice',
         'AdLicenseValidator',
         'Mapper',
-        'Shared'
+        'Shared',
+        'Nonces'
       ],
       nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
       upgradeableContracts: [],
@@ -1169,6 +1170,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       adSig = await signMessage({
@@ -1178,6 +1180,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
     });
@@ -1380,6 +1383,7 @@ describe('AftermarketDevice', function () {
   describe('claimAftermarketDeviceSign', () => {
     let ownerSig: string;
     let adSig: string;
+
     before(async () => {
       ownerSig = await signMessage({
         _signer: user1,
@@ -1388,6 +1392,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       adSig = await signMessage({
@@ -1397,6 +1402,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
     });
@@ -1463,6 +1469,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1489,6 +1496,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1515,6 +1523,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1540,6 +1549,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '99',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1565,6 +1575,33 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               owner: user2.address,
+              nonce: 0
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .claimAftermarketDeviceSign(
+                1,
+                user1.address,
+                invalidOwnerSig,
+                adSig,
+              ),
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidOwnerSignature',
+          );
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const invalidOwnerSig = await signMessage({
+            _signer: user1,
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user1.address,
+              nonce: 99
             },
           });
 
@@ -1594,6 +1631,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1620,6 +1658,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1646,6 +1685,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1671,6 +1711,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '99',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1696,6 +1737,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               owner: user2.address,
+              nonce: 0
             },
           });
 
@@ -1721,6 +1763,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '2',
               owner: user1.address,
+              nonce: 0
             },
           });
 
@@ -1787,6 +1830,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user2.address,
+          nonce: 0
         },
       });
       claimAdSig2 = await signMessage({
@@ -1796,6 +1840,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user2.address,
+          nonce: 0
         },
       });
       pairVehicleSig1 = await signMessage({
@@ -1805,6 +1850,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '2',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       pairAdSig1 = await signMessage({
@@ -1814,6 +1860,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       pairAdSig2 = await signMessage({
@@ -1823,6 +1870,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '2',
           vehicleNode: '1',
+          nonce: 0
         },
       });
     });
@@ -1982,6 +2030,7 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2008,6 +2057,7 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2034,6 +2084,7 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2059,6 +2110,7 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '99',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2084,6 +2136,33 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '99',
+                nonce: 0
+              },
+            });
+
+            await expect(
+              aftermarketDeviceInstance
+                .connect(admin)
+              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                2,
+                1,
+                invalidSignature,
+                pairVehicleSig1,
+              ),
+            ).to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'InvalidAdSignature',
+            );
+          });
+          it('Should revert if nonce does not match current nonce', async () => {
+            const invalidSignature = await signMessage({
+              _signer: adAddress1,
+              _primaryType: 'PairAftermarketDeviceSign',
+              _verifyingContract: DIMO_REGISTRY_ADDRESS,
+              message: {
+                aftermarketDeviceNode: '1',
+                vehicleNode: '1',
+                nonce: 99
               },
             });
 
@@ -2113,6 +2192,7 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2139,6 +2219,7 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2165,6 +2246,7 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2190,6 +2272,7 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '99',
                 vehicleNode: '1',
+                nonce: 0
               },
             });
 
@@ -2215,6 +2298,33 @@ describe('AftermarketDevice', function () {
               message: {
                 aftermarketDeviceNode: '1',
                 vehicleNode: '99',
+                nonce: 0
+              },
+            });
+
+            await expect(
+              aftermarketDeviceInstance
+                .connect(admin)
+              ['pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)'](
+                2,
+                1,
+                pairAdSig2,
+                invalidSignature,
+              ),
+            ).to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'InvalidOwnerSignature',
+            );
+          });
+          it('Should revert if nonce does not match current nonce', async () => {
+            const invalidSignature = await signMessage({
+              _signer: user1,
+              _primaryType: 'PairAftermarketDeviceSign',
+              _verifyingContract: DIMO_REGISTRY_ADDRESS,
+              message: {
+                aftermarketDeviceNode: '1',
+                vehicleNode: '1',
+                nonce: 99
               },
             });
 
@@ -2299,6 +2409,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimAdSig1 = await signMessage({
@@ -2308,6 +2419,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimOwnerSig2 = await signMessage({
@@ -2317,6 +2429,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user2.address,
+          nonce: 0
         },
       });
       claimAdSig2 = await signMessage({
@@ -2326,6 +2439,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user2.address,
+          nonce: 0
         },
       });
       pairSignature = await signMessage({
@@ -2335,6 +2449,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
     });
@@ -2526,6 +2641,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -2551,6 +2667,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -2576,6 +2693,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -2600,6 +2718,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '99',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -2624,6 +2743,32 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '99',
+              nonce: 0
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+            ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+              1,
+              1,
+              invalidSignature,
+            ),
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidOwnerSignature',
+          );
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const invalidSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'PairAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1',
+              nonce: 99
             },
           });
 
@@ -2702,6 +2847,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimAdSig = await signMessage({
@@ -2711,6 +2857,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       pairSignature = await signMessage({
@@ -2720,6 +2867,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
     });
@@ -3081,6 +3229,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       claimAdSig = await signMessage({
@@ -3090,6 +3239,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       pairSignature = await signMessage({
@@ -3099,6 +3249,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
       unPairSignature = await signMessage({
@@ -3108,6 +3259,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           vehicleNode: '1',
+          nonce: 0
         },
       });
     });
@@ -3221,6 +3373,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -3242,6 +3395,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -3263,6 +3417,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -3283,6 +3438,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '99',
               vehicleNode: '1',
+              nonce: 0
             },
           });
 
@@ -3303,6 +3459,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '99',
+              nonce: 0
             },
           });
 
@@ -3323,6 +3480,28 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .unpairAftermarketDeviceSign(1, 1, wrongSignerSignature),
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidSigner',
+          );
+        });
+        it('Should revert if nonce does not match current nonce', async () => {
+          const wrongSignerSignature = await signMessage({
+            _signer: user1,
+            _primaryType: 'UnPairAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              vehicleNode: '1',
+              nonce: 99
             },
           });
 
@@ -3960,6 +4139,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
           const pairSig2 = await signMessage({
@@ -3969,6 +4149,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '2',
               vehicleNode: '2',
+              nonce: 0
             },
           });
 
@@ -4047,6 +4228,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
           const pairSig2 = await signMessage({
@@ -4056,6 +4238,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '2',
               vehicleNode: '2',
+              nonce: 0
             },
           });
 
@@ -4402,6 +4585,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
           const pairSig2 = await signMessage({
@@ -4411,6 +4595,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '2',
               vehicleNode: '2',
+              nonce: 0
             },
           });
 
@@ -4489,6 +4674,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '1',
               vehicleNode: '1',
+              nonce: 0
             },
           });
           const pairSig2 = await signMessage({
@@ -4498,6 +4684,7 @@ describe('AftermarketDevice', function () {
             message: {
               aftermarketDeviceNode: '2',
               vehicleNode: '2',
+              nonce: 0
             },
           });
 
@@ -4701,6 +4888,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
       const adSig = await signMessage({
@@ -4710,6 +4898,7 @@ describe('AftermarketDevice', function () {
         message: {
           aftermarketDeviceNode: '1',
           owner: user1.address,
+          nonce: 0
         },
       });
 

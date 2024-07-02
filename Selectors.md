@@ -332,9 +332,9 @@
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
 | 0x3da44e56 | mintVehicle(uint256,address,(string,string)[]) |
-| 0x1b1a82c8 | mintVehicleSign(uint256,address,(string,string)[],bytes) |
+| 0x9c70326b | mintVehicleSign((uint256,address,(string,string)[],bytes)) |
 | 0xd84baff1 | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[]) |
-| 0x8dca2b8e | mintVehicleWithDeviceDefinitionSign(uint256,address,string,(string,string)[],bytes) |
+| 0x5675d304 | mintVehicleWithDeviceDefinitionSign((uint256,address,string,(string,string)[],bytes)) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
 | 0xd9c3ae61 | setVehicleInfo(uint256,(string,string)[]) |
 | 0xea0e7d3a | validateBurnAndResetNode(uint256) |
@@ -432,6 +432,12 @@
 | Selector | Signature |
 |-|-|
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
+
+## Nonces
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x86e2b63f | nonces(bytes32,address) |
 
 ## MultipleMinter
 #### Functions

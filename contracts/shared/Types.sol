@@ -38,6 +38,21 @@ struct MintSyntheticDeviceInput {
     AttributeInfoPair[] attrInfoPairs; // List of attribute-info pairs to be added
 }
 
+struct MintVehicleInput {
+    uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
+    address owner; // The new nodes owner
+    AttributeInfoPair[] attrInfo; // List of attribute-info pairs to be added
+    bytes signature; // User's signature hash
+}
+
+struct MintVehicleWithDdInput {
+    uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
+    address owner; // The new nodes owner
+    string deviceDefinitionId; // The Device Definition Id
+    AttributeInfoPair[] attrInfo; // List of attribute-info pairs to be added
+    bytes signature; // User's signature hash
+}
+
 struct MintVehicleAndSdInput {
     uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
     address owner; // The new nodes owner

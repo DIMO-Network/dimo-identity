@@ -78,6 +78,8 @@ main([
   'Vehicle',
   'Nodes',
   'Mapper',
+  'Charging',
+  'Shared',
   'MultipleMinter',
   'BaseDataURI',
   'DeviceDefinitionTable',

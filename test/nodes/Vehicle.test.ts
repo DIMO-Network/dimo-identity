@@ -5,6 +5,7 @@ import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import {
   DIMORegistry,
   Eip712Checker,
+  Charging,
   DimoAccessControl,
   Nodes,
   Manufacturer,
@@ -18,7 +19,9 @@ import {
   AftermarketDevice,
   AftermarketDeviceId,
   AdLicenseValidator,
+  Shared,
   MockDimoToken,
+  MockDimoCredit,
   MockStake
 } from '../../typechain-types';
 import {
@@ -37,6 +40,7 @@ describe('Vehicle', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let chargingInstance: Charging;
   let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
@@ -45,13 +49,17 @@ describe('Vehicle', function () {
   let aftermarketDeviceInstance: AftermarketDevice;
   let syntheticDeviceInstance: SyntheticDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
+  let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
+  let mockDimoCreditInstance: MockDimoCredit;
   let mockStakeInstance: MockStake;
   let manufacturerIdInstance: ManufacturerId;
   let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
   let sdIdInstance: SyntheticDeviceId;
+
+  let DIMO_REGISTRY_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
@@ -93,6 +101,7 @@ describe('Vehicle', function () {
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
+        'Charging',
         'DimoAccessControl',
         'Nodes',
         'Manufacturer',
@@ -101,7 +110,8 @@ describe('Vehicle', function () {
         'AftermarketDevice',
         'SyntheticDevice',
         'AdLicenseValidator',
-        'Mapper'
+        'Mapper',
+        'Shared'
       ],
       nfts: [
         'ManufacturerId',
@@ -115,6 +125,7 @@ describe('Vehicle', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    chargingInstance = deployments.Charging;
     dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
@@ -123,29 +134,51 @@ describe('Vehicle', function () {
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     syntheticDeviceInstance = deployments.SyntheticDevice;
     adLicenseValidatorInstance = deployments.AdLicenseValidator;
+    sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
     integrationIdInstance = deployments.IntegrationId;
     vehicleIdInstance = deployments.VehicleId;
     adIdInstance = deployments.AftermarketDeviceId;
     sdIdInstance = deployments.SyntheticDeviceId;
 
+    DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
+
+    // Deploy MockDimoToken contract
+    const MockDimoTokenFactory = await ethers.getContractFactory(
+      'MockDimoToken'
+    );
+    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
+      C.oneBillionE18
+    );
+
+    // Deploy MockDimoCredit contract
+    const MockDimoCreditFactory = await ethers.getContractFactory(
+      'MockDimoCredit'
+    );
+    mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
+
+    // Deploy MockStake contract
+    const MockStakeFactory = await ethers.getContractFactory('MockStake');
+    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await integrationIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await sdIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -165,22 +198,12 @@ describe('Vehicle', function () {
       .setSyntheticDeviceIdProxyAddress(await sdIdInstance.getAddress());
 
     // Initialize EIP-712
-    await eip712CheckerInstance.initialize(
-      C.defaultDomainName,
-      C.defaultDomainVersion
-    );
-
-    // Deploy MockDimoToken contract
-    const MockDimoTokenFactory = await ethers.getContractFactory(
-      'MockDimoToken'
-    );
-    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
-      C.oneBillionE18
-    );
-
-    // Deploy MockStake contract
-    const MockStakeFactory = await ethers.getContractFactory('MockStake');
-    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+    await eip712CheckerInstance
+      .connect(admin)
+      .initialize(
+        C.defaultDomainName,
+        C.defaultDomainVersion
+      );
 
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
@@ -188,7 +211,18 @@ describe('Vehicle', function () {
       .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
     await mockDimoTokenInstance
       .connect(manufacturer1)
-      .approve(await dimoRegistryInstance.getAddress(), C.manufacturerDimoTokensAmount);
+      .approve(DIMO_REGISTRY_ADDRESS, C.manufacturerDimoTokensAmount);
+
+    // Mint DIMO Credit Tokens to admin, approve DIMORegistry and grant BURNER_ROLE
+    await mockDimoCreditInstance
+      .connect(admin)
+      .mint(admin.address, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
@@ -197,6 +231,19 @@ describe('Vehicle', function () {
     );
     await adLicenseValidatorInstance.setLicense(await mockStakeInstance.getAddress());
     await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
+
+    // Setup Shared variables
+    await sharedInstance
+      .connect(admin)
+      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setDimoCredit(await mockDimoCreditInstance.getAddress());
+
+    // Setup Charging variables
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -261,19 +308,19 @@ describe('Vehicle', function () {
     // Grant Transferer role to DIMO Registry
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_TRANSFERER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_TRANSFERER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Setting DimoRegistry address in the Proxy IDs
     await vehicleIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
 
     // Setting DIMORegistry address
     await manufacturerIdInstance.setDimoRegistryAddress(
-      await dimoRegistryInstance.getAddress()
+      DIMO_REGISTRY_ADDRESS
     );
   });
 
@@ -353,7 +400,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .addVehicleAttribute(C.mockVehicleAttribute1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'AttributeExists')
-        .withArgs(C.mockVehicleAttribute1);
+          .withArgs(C.mockVehicleAttribute1);
       });
     });
 
@@ -485,6 +532,22 @@ describe('Vehicle', function () {
             C.mockVehicleAttribute2
           )
         ).to.be.equal(C.mockVehicleInfo2);
+      });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleWithDeviceDefinition(
+              1,
+              user1.address,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs
+            )
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
       });
     });
 
@@ -895,6 +958,23 @@ describe('Vehicle', function () {
           )
         ).to.be.equal(C.mockVehicleInfo2);
       });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleWithDeviceDefinitionSign(
+              1,
+              user1.address,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              signature
+            )
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
+      });
     });
 
     context('Events', () => {
@@ -959,7 +1039,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .mintVehicle(99, user1.address, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
-        .withArgs(99);
+          .withArgs(99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -1015,6 +1095,17 @@ describe('Vehicle', function () {
             C.mockVehicleAttribute2
           )
         ).to.be.equal(C.mockVehicleInfo2);
+      });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          vehicleInstance
+            .connect(admin)
+            .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs)
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
       });
     });
 
@@ -1093,7 +1184,7 @@ describe('Vehicle', function () {
               signature
             )
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
-        .withArgs(99);
+          .withArgs(99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -1340,6 +1431,22 @@ describe('Vehicle', function () {
           )
         ).to.be.equal(C.mockVehicleInfo2);
       });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          vehicleInstance
+            .connect(admin)
+            .mintVehicleSign(
+              1,
+              user1.address,
+              C.mockVehicleAttributeInfoPairs,
+              signature
+            )
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
+      });
     });
 
     context('Events', () => {
@@ -1426,7 +1533,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance.connect(admin).burnVehicleSign(99, burnVehicleSig1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidNode')
-        .withArgs(await vehicleIdInstance.getAddress(), 99);
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it('Should revert if Vehicle is paired to an Aftermarket Device', async () => {
         const localClaimOwnerSig = await signMessage({
@@ -1486,7 +1593,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
-        .withArgs(1);
+          .withArgs(1);
       });
       it('Should revert if Vehicle is paired to a Synthetic Device', async () => {
         const localMintVehicleOwnerSig = await signMessage({
@@ -1523,7 +1630,7 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1)
         ).to.be.revertedWithCustomError(vehicleInstance, 'VehiclePaired')
-        .withArgs(1);
+          .withArgs(1);
       });
 
       context('Wrong signature', () => {
@@ -1710,7 +1817,7 @@ describe('Vehicle', function () {
             .connect(admin)
             .setVehicleInfo(99, C.mockVehicleAttributeInfoPairs)
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidNode')
-        .withArgs(await vehicleIdInstance.getAddress(), 99);
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
       });
       it('Should revert if attribute is not whitelisted', async () => {
         await expect(
@@ -1801,7 +1908,7 @@ describe('Vehicle', function () {
     it('Should revert if caller is not the NFT Proxy', async () => {
       await expect(
         vehicleInstance.connect(nonAdmin).validateBurnAndResetNode(1)
-      ).to.be.revertedWithCustomError(vehicleInstance,'OnlyNftProxy');
+      ).to.be.revertedWithCustomError(vehicleInstance, 'OnlyNftProxy');
     });
   });
 });

@@ -1,5 +1,6 @@
 import { network } from 'hardhat';
 import { Wallet } from 'ethers';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 
 import { C } from './';
 
@@ -12,7 +13,7 @@ export async function signMessage({
   _verifyingContract,
   message
 }: {
-  _signer: Wallet,
+  _signer: Wallet | HardhatEthersSigner,
   _domainName?: string,
   _domainVersion?: string,
   _chainId?: number,

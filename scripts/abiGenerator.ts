@@ -48,10 +48,12 @@ main([
   'contracts/implementations/Mapper.sol:Mapper',
   'contracts/implementations/MultipleMinter.sol:MultipleMinter',
   'contracts/implementations/BaseDataURI.sol:BaseDataURI',
+  'contracts/implementations/Shared.sol:Shared',
   'contracts/implementations/streamr/StreamrConfigurator.sol:StreamrConfigurator',
   'contracts/implementations/streamr/VehicleStream.sol:VehicleStream',
   'contracts/implementations/tableland/DeviceDefinitionTable.sol:DeviceDefinitionTable',
   'contracts/implementations/tableland/DeviceDefinitionController.sol:DeviceDefinitionController',
+  'contracts/implementations/charging/Charging.sol:Charging',
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

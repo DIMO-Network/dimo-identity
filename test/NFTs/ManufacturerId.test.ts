@@ -54,6 +54,7 @@ describe('ManufacturerId', async function () {
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());

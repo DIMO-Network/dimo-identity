@@ -5,6 +5,7 @@ import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import {
   DIMORegistry,
   Eip712Checker,
+  Charging,
   DimoAccessControl,
   Nodes,
   Manufacturer,
@@ -17,7 +18,9 @@ import {
   SyntheticDeviceId,
   Mapper,
   MultipleMinter,
-  MockDimoToken
+  Shared,
+  MockDimoToken,
+  MockDimoCredit
 } from '../typechain-types';
 import {
   setup,
@@ -36,6 +39,7 @@ describe('MultipleMinter', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let chargingInstance: Charging;
   let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
@@ -44,11 +48,15 @@ describe('MultipleMinter', function () {
   let syntheticDeviceInstance: SyntheticDevice;
   let mapperInstance: Mapper;
   let multipleMinterInstance: MultipleMinter;
+  let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
+  let mockDimoCreditInstance: MockDimoCredit;
   let manufacturerIdInstance: ManufacturerId;
   let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
   let sdIdInstance: SyntheticDeviceId;
+
+  let DIMO_REGISTRY_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
@@ -74,6 +82,7 @@ describe('MultipleMinter', function () {
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
+        'Charging',
         'DimoAccessControl',
         'Nodes',
         'Manufacturer',
@@ -81,7 +90,8 @@ describe('MultipleMinter', function () {
         'Vehicle',
         'SyntheticDevice',
         'Mapper',
-        'MultipleMinter'
+        'MultipleMinter',
+        'Shared'
       ],
       nfts: [
         'ManufacturerId',
@@ -94,6 +104,7 @@ describe('MultipleMinter', function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    chargingInstance = deployments.Charging;
     dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
@@ -102,28 +113,46 @@ describe('MultipleMinter', function () {
     syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
     multipleMinterInstance = deployments.MultipleMinter;
+    sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
     integrationIdInstance = deployments.IntegrationId;
     vehicleIdInstance = deployments.VehicleId;
     sdIdInstance = deployments.SyntheticDeviceId;
 
+    DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
+
+    // Deploy MockDimoToken contract
+    const MockDimoTokenFactory = await ethers.getContractFactory(
+      'MockDimoToken'
+    );
+    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
+      C.oneBillionE18
+    );
+
+    // Deploy MockDimoCredit contract
+    const MockDimoCreditFactory = await ethers.getContractFactory(
+      'MockDimoCredit'
+    );
+    mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await integrationIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await sdIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await sdIdInstance
       .connect(admin)
-      .grantRole(C.NFT_BURNER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -145,21 +174,37 @@ describe('MultipleMinter', function () {
       C.defaultDomainVersion
     );
 
-    // Deploy MockDimoToken contract
-    const MockDimoTokenFactory = await ethers.getContractFactory(
-      'MockDimoToken'
-    );
-    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
-      C.oneBillionE18
-    );
-
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
       .connect(admin)
       .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
     await mockDimoTokenInstance
       .connect(manufacturer1)
-      .approve(await dimoRegistryInstance.getAddress(), C.manufacturerDimoTokensAmount);
+      .approve(DIMO_REGISTRY_ADDRESS, C.manufacturerDimoTokensAmount);
+
+    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    await mockDimoCreditInstance
+      .connect(admin)
+      .mint(admin.address, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
+
+    // Setup Shared variables
+    await sharedInstance
+      .connect(admin)
+      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setDimoCredit(await mockDimoCreditInstance.getAddress());
+
+    // Setup Charging variables
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -214,7 +259,7 @@ describe('MultipleMinter', function () {
     // Setting DimoRegistry address in the AftermarketDeviceId
     await sdIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
 
     await vehicleInstance
       .connect(admin)
@@ -317,7 +362,7 @@ describe('MultipleMinter', function () {
         ).to.be.revertedWithCustomError(
           multipleMinterInstance,
           'DeviceAlreadyRegistered'
-        ).withArgs(await sdAddress1.address);
+        ).withArgs(sdAddress1.address);
       });
       it('Should revert if synthetic device attribute is not whitelisted', async () => {
         incorrectMintInput.attrInfoPairsDevice =
@@ -1332,6 +1377,17 @@ describe('MultipleMinter', function () {
             1
           )
         ).to.be.equal(3);
+      });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          multipleMinterInstance
+            .connect(admin)
+            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
       });
     });
 

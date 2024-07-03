@@ -13,7 +13,6 @@ library ChargingStorage {
         keccak256("DIMORegistry.charging.storage");
 
     struct Storage {
-        // TODO Use Enumerable Set ?
         // operation => DCX cost
         mapping(bytes32 => uint256) dcxOperationCost;
     }

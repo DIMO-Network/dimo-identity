@@ -10,7 +10,7 @@ library SharedStorage {
         keccak256("DIMORegistry.shared.storage");
 
     struct Storage {
-        address foundation; // TODO Maybe a better name
+        address foundation;
         address dimoCredit;
         address dimoToken;
         address manufacturerLicense; // TODO to deprecate AdLicenseValidator

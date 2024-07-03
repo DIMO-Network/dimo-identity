@@ -74,7 +74,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x1ACF6d56cE48063F1e2db621fCEF3b14fF5642C1",
+                "address": "0x8CdC8C21EC7eb2CEdEB64b0c79F18856e46b8E6B",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
@@ -141,15 +141,25 @@
                 ]
             },
             "Charging": {
-                "address": "",
-                "selectors": []
+                "address": "0x6028092554F61B0e4e51AD8F4A93cD9105B4D844",
+                "selectors": [
+                    "0xd25f5787",
+                    "0xa2fe8c85"
+                ]
             },
             "Shared": {
-                "address": "",
-                "selectors": []
+                "address": "0xF203e6B307a1C02044aa6f3346F37bbEF46Ec24a",
+                "selectors": [
+                    "0xcfe55b7d",
+                    "0x77898251",
+                    "0xa2bc6cdf",
+                    "0x4fa9ff16",
+                    "0x81c9bb13",
+                    "0xdb3543f5"
+                ]
             },
             "MultipleMinter": {
-                "address": "0x3335C1Cc5C85C7Ce7593E9aBCF3ED654a04e6FA6",
+                "address": "0x1986d17eBa12Cc430BCb182B77143F7D6fFf0517",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3"
@@ -617,7 +627,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0xf46d24a83Ab3F0521DB6926403E0AB89E9D017D4",
+                "address": "0x6E466b8946272D53126fC6D1aAa05d7c2e7fC23d",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
@@ -684,15 +694,25 @@
                 ]
             },
             "Charging": {
-                "address": "",
-                "selectors": []
+                "address": "0x2375812aA04ae6739c1555e3996aafe2Dc419EDb",
+                "selectors": [
+                    "0xd25f5787",
+                    "0xa2fe8c85"
+                ]
             },
             "Shared": {
-                "address": "",
-                "selectors": []
+                "address": "0x374A48ACe6578905D712Ed5B55d84c8D69B384b4",
+                "selectors": [
+                    "0xcfe55b7d",
+                    "0x77898251",
+                    "0xa2bc6cdf",
+                    "0x4fa9ff16",
+                    "0x81c9bb13",
+                    "0xdb3543f5"
+                ]
             },
             "MultipleMinter": {
-                "address": "0x8a0E5Fb31d8B7fC4327622603b7dEDEeA5A507c8",
+                "address": "0x9cFf9165A898d5b5b4786d2F3F8A78061Fa3aa5d",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3"

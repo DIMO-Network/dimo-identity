@@ -108,7 +108,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Function to mint a vehicle with a Device Definition Id
-     * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
@@ -119,7 +118,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         address owner,
         string calldata deviceDefinitionId,
         AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(MINT_VEHICLE_ROLE) {
+    ) external {
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         address vehicleIdProxyAddress = vs.idProxyAddress;
 

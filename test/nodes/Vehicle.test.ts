@@ -422,21 +422,6 @@ describe('Vehicle', function () {
 
   describe('mintVehicleWithDeviceDefinition', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
-        await expect(
-          vehicleInstance
-            .connect(nonAdmin)
-            .mintVehicleWithDeviceDefinition(
-              1,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairs
-            )
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_ROLE
-          }`
-        );
-      });
       it('Should revert if parent node is not a manufacturer node', async () => {
         await expect(
           vehicleInstance

@@ -10,7 +10,7 @@ library NoncesStorage {
         keccak256("DIMORegistry.nonces.storage");
 
     struct Storage {
-        // typehash -> account -> nonce
+        // operation typehash -> account -> nonce
         mapping(bytes32 => mapping(address => uint256)) operationNonces;
     }
 

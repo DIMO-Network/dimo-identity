@@ -262,23 +262,12 @@ contract AftermarketDevice is
         address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
             aftermarketDeviceNode
         ];
-        bytes32 messageOwner = keccak256(
+        bytes32 message = keccak256(
             abi.encode(
                 CLAIM_TYPEHASH,
                 aftermarketDeviceNode,
                 owner,
                 NoncesInternal._useNonce(CLAIM_TYPEHASH, owner)
-            )
-        );
-        bytes32 messageDevice = keccak256(
-            abi.encode(
-                CLAIM_TYPEHASH,
-                aftermarketDeviceNode,
-                owner,
-                NoncesInternal._useNonce(
-                    CLAIM_TYPEHASH,
-                    aftermarketDeviceAddress
-                )
             )
         );
         address adIdProxy = ads.idProxyAddress;
@@ -287,17 +276,12 @@ contract AftermarketDevice is
             revert Errors.InvalidNode(adIdProxy, aftermarketDeviceNode);
         if (ads.deviceClaimed[aftermarketDeviceNode])
             revert DeviceAlreadyClaimed(aftermarketDeviceNode);
-        if (
-            !Eip712CheckerInternal._verifySignature(
-                owner,
-                messageOwner,
-                ownerSig
-            )
-        ) revert Errors.InvalidOwnerSignature();
+        if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
+            revert Errors.InvalidOwnerSignature();
         if (
             !Eip712CheckerInternal._verifySignature(
                 aftermarketDeviceAddress,
-                messageDevice,
+                message,
                 aftermarketDeviceSig
             )
         ) revert InvalidAdSignature();
@@ -345,20 +329,12 @@ contract AftermarketDevice is
         address adIdAddress = AftermarketDeviceStorage
             .getStorage()
             .nodeIdToDeviceAddress[aftermarketDeviceNode];
-        bytes32 messageOwner = keccak256(
+        bytes32 message = keccak256(
             abi.encode(
                 PAIR_TYPEHASH,
                 aftermarketDeviceNode,
                 vehicleNode,
                 NoncesInternal._useNonce(PAIR_TYPEHASH, vehicleIdOwner)
-            )
-        );
-        bytes32 messageDevice = keccak256(
-            abi.encode(
-                PAIR_TYPEHASH,
-                aftermarketDeviceNode,
-                vehicleNode,
-                NoncesInternal._useNonce(PAIR_TYPEHASH, adIdAddress)
             )
         );
 
@@ -380,7 +356,7 @@ contract AftermarketDevice is
         if (
             !Eip712CheckerInternal._verifySignature(
                 adIdAddress,
-                messageDevice,
+                message,
                 aftermarketDeviceSig
             )
         ) revert InvalidAdSignature();
@@ -388,7 +364,7 @@ contract AftermarketDevice is
         if (
             !Eip712CheckerInternal._verifySignature(
                 vehicleIdOwner,
-                messageOwner,
+                message,
                 vehicleOwnerSig
             )
         ) revert Errors.InvalidOwnerSignature();

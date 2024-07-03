@@ -14,8 +14,11 @@ error InvalidAccountNonce(
  * @notice Library to track nonces for addresses. Nonces will only increment.
  */
 library NoncesInternal {
-    // TODO Documentation
-    /// @notice Returns the current value and increments nonce
+    /**
+     * @notice Returns the current value and increments nonce
+     * @param typehash The operation typehash
+     * @param account The account associated with the nonce
+     */
     function _useNonce(
         bytes32 typehash,
         address account
@@ -29,8 +32,12 @@ library NoncesInternal {
         }
     }
 
-    // TODO Documentation
-    /// @notice Increments nonce and checks if that `nonce` is the next valid for `account`
+    /**
+     * @notice Increments nonce and checks if that `nonce` is the next valid for `account`
+     * @param typehash The operation typehash
+     * @param account The account associated with the nonce
+     * @param nonce The nonce to be checked
+     */
     function _useCheckedNonce(
         bytes32 typehash,
         address account,

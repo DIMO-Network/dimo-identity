@@ -554,7 +554,7 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user1.address,
-          nonce: 0
+          nonce: 1
         },
       });
     });
@@ -609,7 +609,8 @@ describe('DevAdmin', function () {
     });
 
     context('State', () => {
-      it.skip('Should correctly unclaim aftermarket Device', async () => {
+      it('Should correctly unclaim aftermarket Device', async () => {
+        // Claim devices 1 and 2
         await expect(
           aftermarketDeviceInstance
             .connect(admin)
@@ -641,9 +642,52 @@ describe('DevAdmin', function () {
           )
           .withArgs(2);
 
+        // Unclaim devices 1 and 2
         await devAdminInstance
           .connect(admin)
           .unclaimAftermarketDeviceNode([1, 2]);
+
+        // Claim devices 1 and 2 again, update owner nonce
+        claimOwnerSig1 = await signMessage({
+          _signer: user1,
+          _primaryType: 'ClaimAftermarketDeviceSign',
+          _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+          message: {
+            aftermarketDeviceNode: '1',
+            owner: user1.address,
+            nonce: 2
+          },
+        });
+        claimOwnerSig2 = await signMessage({
+          _signer: user1,
+          _primaryType: 'ClaimAftermarketDeviceSign',
+          _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+          message: {
+            aftermarketDeviceNode: '2',
+            owner: user1.address,
+            nonce: 3
+          },
+        });
+        claimAdSig1 = await signMessage({
+          _signer: adAddress1,
+          _primaryType: 'ClaimAftermarketDeviceSign',
+          _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+          message: {
+            aftermarketDeviceNode: '1',
+            owner: user1.address,
+            nonce: 2
+          },
+        });
+        claimAdSig2 = await signMessage({
+          _signer: adAddress2,
+          _primaryType: 'ClaimAftermarketDeviceSign',
+          _verifyingContract: await aftermarketDeviceInstance.getAddress(),
+          message: {
+            aftermarketDeviceNode: '2',
+            owner: user1.address,
+            nonce: 3
+          },
+        });
 
         await expect(
           aftermarketDeviceInstance
@@ -726,7 +770,7 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user1.address,
-          nonce: 0
+          nonce: 1
         },
       });
       pairSig1 = await signMessage({
@@ -910,7 +954,7 @@ describe('DevAdmin', function () {
         message: {
           aftermarketDeviceNode: '2',
           owner: user1.address,
-          nonce: 0
+          nonce: 1
         },
       });
       pairSig1 = await signMessage({

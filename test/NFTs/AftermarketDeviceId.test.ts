@@ -305,7 +305,7 @@ describe('AftermarketDeviceId', async function () {
       message: {
         aftermarketDeviceNode: '2',
         owner: user1.address,
-        nonce: 0
+        nonce: 1
       }
     });
     const pairSignature = await signMessage({

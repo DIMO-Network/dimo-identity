@@ -13,6 +13,7 @@ import type { StreamRegistry, ENSCacheV2 } from '@streamr/network-contracts';
 import {
   DIMORegistry,
   Eip712Checker,
+  Charging,
   DimoAccessControl,
   Nodes,
   Manufacturer,
@@ -27,8 +28,10 @@ import {
   SyntheticDeviceId,
   AdLicenseValidator,
   Mapper,
+  Shared,
   StreamrConfigurator,
   MockDimoToken,
+  MockDimoCredit,
   MockStake,
   DevAdmin,
 } from '../typechain-types';
@@ -48,6 +51,7 @@ describe('DevAdmin', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let chargingInstance: Charging;
   let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
@@ -57,8 +61,10 @@ describe('DevAdmin', function () {
   let syntheticDeviceInstance: SyntheticDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
+  let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
+  let mockDimoCreditInstance: MockDimoCredit;
   let devAdminInstance: DevAdmin;
   let manufacturerIdInstance: ManufacturerId;
   let integrationIdInstance: IntegrationId;
@@ -135,6 +141,7 @@ describe('DevAdmin', function () {
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
+        'Charging',
         'DimoAccessControl',
         'Nodes',
         'Manufacturer',
@@ -144,6 +151,7 @@ describe('DevAdmin', function () {
         'SyntheticDevice',
         'AdLicenseValidator',
         'Mapper',
+        'Shared',
         'StreamrConfigurator',
         'DevAdmin'
       ],
@@ -160,6 +168,7 @@ describe('DevAdmin', function () {
     dimoRegistryInstance = deployments.DIMORegistry;
     dimoAccessControlInstance = deployments.DimoAccessControl;
     eip712CheckerInstance = deployments.Eip712Checker;
+    chargingInstance = deployments.Charging;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
     integrationInstance = deployments.Integration;
@@ -168,6 +177,7 @@ describe('DevAdmin', function () {
     syntheticDeviceInstance = deployments.SyntheticDevice;
     adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
+    sharedInstance = deployments.Shared;
     devAdminInstance = deployments.DevAdmin;
     manufacturerIdInstance = deployments.ManufacturerId;
     integrationIdInstance = deployments.IntegrationId;
@@ -178,8 +188,26 @@ describe('DevAdmin', function () {
 
     DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
 
+    // Deploy MockDimoToken contract
+    const MockDimoTokenFactory =
+      await ethers.getContractFactory('MockDimoToken');
+    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
+      C.oneBillionE18,
+    );
+
+    // Deploy MockDimoCredit contract
+    const MockDimoCreditFactory = await ethers.getContractFactory(
+      'MockDimoCredit'
+    );
+    mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
+
+    // Deploy MockStake contract
+    const MockStakeFactory = await ethers.getContractFactory('MockStake');
+    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -222,17 +250,6 @@ describe('DevAdmin', function () {
       C.defaultDomainVersion,
     );
 
-    // Deploy MockDimoToken contract
-    const MockDimoTokenFactory =
-      await ethers.getContractFactory('MockDimoToken');
-    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
-      C.oneBillionE18,
-    );
-
-    // Deploy MockStake contract
-    const MockStakeFactory = await ethers.getContractFactory('MockStake');
-    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
-
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
       .connect(admin)
@@ -243,6 +260,30 @@ describe('DevAdmin', function () {
         DIMO_REGISTRY_ADDRESS,
         C.manufacturerDimoTokensAmount,
       );
+
+    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    await mockDimoCreditInstance
+      .connect(admin)
+      .mint(admin.address, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
+
+    // Setup Shared variables
+    await sharedInstance
+      .connect(admin)
+      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setDimoCredit(await mockDimoCreditInstance.getAddress());
+
+    // Setup Charging variables
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
 
     // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
@@ -2733,6 +2774,78 @@ describe('DevAdmin', function () {
         )
           .to.emit(devAdminInstance, 'VehicleAttributeRemoved')
           .withArgs(C.mockVehicleAttribute1);
+      });
+    });
+  });
+
+  describe('adminSetVehicleDDs', () => {
+    const vehicleIdsDdIds = [
+      { vehicleId: '1', deviceDefinitionId: C.mockDdId1 },
+      { vehicleId: '2', deviceDefinitionId: C.mockDdId2 }
+    ];
+    beforeEach(async () => {
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(2, user2.address, C.mockVehicleAttributeInfoPairs);
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_SET_DD role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .adminSetVehicleDDs(vehicleIdsDdIds),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_SET_DD}`
+        );
+      });
+      it('Should revert if vehicle ID is not minted', async () => {
+        const invalidList = [...vehicleIdsDdIds, { vehicleId: 99, deviceDefinitionId: C.mockDdId1 }];
+
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetVehicleDDs(invalidList),
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, 'InvalidNode')
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set DDs', async () => {
+        const ddBefore1 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(1);
+        const ddBefore2 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(2);
+
+        expect(ddBefore1).to.empty;
+        expect(ddBefore2).to.empty;
+
+        await devAdminInstance
+          .connect(admin)
+          .adminSetVehicleDDs(vehicleIdsDdIds);
+
+        const ddAfter1 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(1);
+        const ddAfter2 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(2);
+
+        expect(ddAfter1).to.equal(C.mockDdId1);
+        expect(ddAfter2).to.equal(C.mockDdId2);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit DeviceDefinitionIdSet event with correct params', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetVehicleDDs(vehicleIdsDdIds)
+        )
+          .to.emit(devAdminInstance, 'DeviceDefinitionIdSet')
+          .withArgs(1, C.mockDdId1)
+          .to.emit(devAdminInstance, 'DeviceDefinitionIdSet')
+          .withArgs(2, C.mockDdId2);
       });
     });
   });

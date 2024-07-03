@@ -5,6 +5,7 @@ import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import {
   DIMORegistry,
   Eip712Checker,
+  Charging,
   DimoAccessControl,
   Nodes,
   Manufacturer,
@@ -15,8 +16,10 @@ import {
   AftermarketDeviceId,
   AdLicenseValidator,
   Mapper,
+  Shared,
   DimoForwarder,
   MockDimoToken,
+  MockDimoCredit,
   MockStake,
 } from '../typechain-types';
 import {
@@ -34,6 +37,7 @@ describe('DimoForwarder', async function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
+  let chargingInstance: Charging;
   let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
@@ -41,12 +45,16 @@ describe('DimoForwarder', async function () {
   let aftermarketDeviceInstance: AftermarketDevice;
   let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
+  let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
+  let mockDimoCreditInstance: MockDimoCredit;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
   let forwarderInstance: DimoForwarder;
+
+  let DIMO_REGISTRY_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
@@ -84,6 +92,7 @@ describe('DimoForwarder', async function () {
     const deployments = await setup(admin, {
       modules: [
         'Eip712Checker',
+        'Charging',
         'DimoAccessControl',
         'Nodes',
         'Manufacturer',
@@ -91,6 +100,7 @@ describe('DimoForwarder', async function () {
         'AftermarketDevice',
         'AdLicenseValidator',
         'Mapper',
+        'Shared'
       ],
       nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
       upgradeableContracts: ['DimoForwarder'],
@@ -98,6 +108,7 @@ describe('DimoForwarder', async function () {
 
     dimoRegistryInstance = deployments.DIMORegistry;
     eip712CheckerInstance = deployments.Eip712Checker;
+    chargingInstance = deployments.Charging;
     dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
@@ -105,22 +116,45 @@ describe('DimoForwarder', async function () {
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
+    sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
     adIdInstance = deployments.AftermarketDeviceId;
     forwarderInstance = deployments.DimoForwarder;
 
+    DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
+
+    // Deploy MockDimoToken contract
+    const MockDimoTokenFactory = await ethers.getContractFactory(
+      'MockDimoToken'
+    );
+    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
+      C.oneBillionE18
+    );
+
+    // Deploy MockDimoCredit contract
+    const MockDimoCreditFactory = await ethers.getContractFactory(
+      'MockDimoCredit'
+    );
+    mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
+
+    // Deploy MockStake contract
+    const MockStakeFactory = await ethers.getContractFactory('MockStake');
+    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
+    // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -139,17 +173,6 @@ describe('DimoForwarder', async function () {
       C.defaultDomainVersion,
     );
 
-    // Deploy MockDimoToken contract
-    const MockDimoTokenFactory =
-      await ethers.getContractFactory('MockDimoToken');
-    mockDimoTokenInstance = await MockDimoTokenFactory.connect(admin).deploy(
-      C.oneBillionE18,
-    );
-
-    // Deploy MockStake contract
-    const MockStakeFactory = await ethers.getContractFactory('MockStake');
-    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
-
     // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
     await mockDimoTokenInstance
       .connect(admin)
@@ -157,9 +180,33 @@ describe('DimoForwarder', async function () {
     await mockDimoTokenInstance
       .connect(manufacturer1)
       .approve(
-        await dimoRegistryInstance.getAddress(),
+        DIMO_REGISTRY_ADDRESS,
         C.manufacturerDimoTokensAmount,
       );
+
+    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    await mockDimoCreditInstance
+      .connect(admin)
+      .mint(admin.address, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
+
+    // Setup Shared variables
+    await sharedInstance
+      .connect(admin)
+      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setDimoCredit(await mockDimoCreditInstance.getAddress());
+
+    // Setup Charging variables
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
 
     // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
@@ -211,7 +258,7 @@ describe('DimoForwarder', async function () {
       .connect(admin)
       .grantRole(
         C.NFT_TRANSFERER_ROLE,
-        await dimoRegistryInstance.getAddress(),
+        DIMO_REGISTRY_ADDRESS,
       );
 
     // Minting aftermarket devices for testing
@@ -229,13 +276,13 @@ describe('DimoForwarder', async function () {
     // Set Dimo Registry in the NFTs
     await manufacturerIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
 
     // Set DimoForwarder in the NFTs
     await vehicleIdInstance
@@ -247,7 +294,7 @@ describe('DimoForwarder', async function () {
 
     // Set Proxy Ids in the Forwarder
     await forwarderInstance.setDimoRegistryAddress(
-      await dimoRegistryInstance.getAddress(),
+      DIMO_REGISTRY_ADDRESS,
     );
     await forwarderInstance.setVehicleIdProxyAddress(
       await vehicleIdInstance.getAddress(),
@@ -336,18 +383,18 @@ describe('DimoForwarder', async function () {
       );
     await aftermarketDeviceInstance
       .connect(admin)
-      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-        1,
-        1,
-        pairSignature1,
-      );
+    ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+      1,
+      1,
+      pairSignature1,
+    );
     await aftermarketDeviceInstance
       .connect(admin)
-      ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
-        2,
-        2,
-        pairSignature2,
-      );
+    ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](
+      2,
+      2,
+      pairSignature2,
+    );
   });
 
   beforeEach(async () => {
@@ -365,8 +412,7 @@ describe('DimoForwarder', async function () {
           .connect(nonAdmin)
           .setDimoRegistryAddress(C.ZERO_ADDRESS),
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`,
       );
     });
@@ -384,8 +430,7 @@ describe('DimoForwarder', async function () {
           .connect(nonAdmin)
           .setVehicleIdProxyAddress(await vehicleIdInstance.getAddress()),
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`,
       );
     });
@@ -400,8 +445,7 @@ describe('DimoForwarder', async function () {
             await aftermarketDeviceInstance.getAddress(),
           ),
       ).to.be.revertedWith(
-        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
-          C.ADMIN_ROLE
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
         }`,
       );
     });

@@ -50,3 +50,4 @@ bytes32 constant DEV_SD_BURN_ROLE = keccak256("DEV_SD_BURN_ROLE");
 bytes32 constant DEV_CHANGE_PARENT_NODE = keccak256("DEV_CHANGE_PARENT_NODE");
 bytes32 constant DEV_CACHE_ENS = keccak256("DEV_CACHE_ENS");
 bytes32 constant DEV_REMOVE_ATTR = keccak256("DEV_REMOVE_ATTR");
+bytes32 constant DEV_SET_DD = keccak256("DEV_SET_DD");

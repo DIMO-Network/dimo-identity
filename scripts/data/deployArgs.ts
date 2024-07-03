@@ -35,7 +35,8 @@ export const roles = {
     DEV_SD_BURN_ROLE: _hashRole('DEV_SD_BURN_ROLE'),
     DEV_CHANGE_PARENT_NODE: _hashRole('DEV_CHANGE_PARENT_NODE'),
     DEV_CACHE_ENS: _hashRole('DEV_CACHE_ENS'),
-    DEV_REMOVE_ATTR: _hashRole('DEV_REMOVE_ATTR')
+    DEV_REMOVE_ATTR: _hashRole('DEV_REMOVE_ATTR'),
+    DEV_SET_DD: _hashRole('DEV_SET_DD')
   },
   nfts: {
     MINTER_ROLE: _hashRole('MINTER_ROLE'),
@@ -110,4 +111,13 @@ export const dimoStreamrEns: GenericKeyAny = {
   amoy: 'streams.dev.dimo.eth',
   hardhat: 'streams.hardhat.dimo.eth',
   localhost: 'streams.localhost.dimo.eth'
+}
+
+export const MINT_VEHICLE_OPERATION = _hashRole('MINT_VEHICLE_OPERATION');
+export const MINT_VEHICLE_OPERATION_COST: GenericKeyAny = {
+  polygon: ethers.parseEther('1'),
+  mumbai: ethers.parseEther('1'),
+  amoy: ethers.parseEther('1'),
+  hardhat: ethers.parseEther('1'),
+  localhost: ethers.parseEther('1')
 }

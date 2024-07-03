@@ -74,7 +74,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x1ACF6d56cE48063F1e2db621fCEF3b14fF5642C1",
+                "address": "0x8CdC8C21EC7eb2CEdEB64b0c79F18856e46b8E6B",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
@@ -140,8 +140,26 @@
                     "0xbebc0bfc"
                 ]
             },
+            "Charging": {
+                "address": "0x6028092554F61B0e4e51AD8F4A93cD9105B4D844",
+                "selectors": [
+                    "0xd25f5787",
+                    "0xa2fe8c85"
+                ]
+            },
+            "Shared": {
+                "address": "0xF203e6B307a1C02044aa6f3346F37bbEF46Ec24a",
+                "selectors": [
+                    "0xcfe55b7d",
+                    "0x77898251",
+                    "0xa2bc6cdf",
+                    "0x4fa9ff16",
+                    "0x81c9bb13",
+                    "0xdb3543f5"
+                ]
+            },
             "MultipleMinter": {
-                "address": "0x3335C1Cc5C85C7Ce7593E9aBCF3ED654a04e6FA6",
+                "address": "0x1986d17eBa12Cc430BCb182B77143F7D6fFf0517",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3"
@@ -229,6 +247,10 @@
             "DimoToken": {
                 "proxy": "0xe261d618a959afffd53168cd07d12e37b26761db",
                 "implementation": "0x379e5770d36Bf563C267097E3fA54DdCcbEFC00B"
+            },
+            "DimoCredit": {
+                "proxy": "0x7186F9aC35d24c9a4cf1E58a797c04DF1b334322",
+                "implementation": "0x73216F7ADc3420A94709c42e618E454ec88ef8e6"
             },
             "Stake": {
                 "proxy": "0xaa32a9e74486dd136ccedf17061fe4efc95a621e",
@@ -389,6 +411,14 @@
                     "0xbebc0bfc"
                 ]
             },
+            "Charging": {
+                "address": "",
+                "selectors": []
+            },
+            "Shared": {
+                "address": "",
+                "selectors": []
+            },
             "MultipleMinter": {
                 "address": "0xEAE0B5CecB16C443DC36Df01158DDc176502ccd7",
                 "selectors": [
@@ -494,6 +524,10 @@
                 "proxy": "0x80ee7ec4493a1d7975ab900f94db25ba7c688201",
                 "implementation": ""
             },
+            "DimoCredit": {
+                "proxy": "0x0000000000000000000000000000000000000000",
+                "implementation": ""
+            },
             "Stake": {
                 "proxy": "0xB84d17B7b7BC9b3D03bfE8880AF0116B6d4EB5FC",
                 "implementation": ""
@@ -585,7 +619,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0xf46d24a83Ab3F0521DB6926403E0AB89E9D017D4",
+                "address": "0x6E466b8946272D53126fC6D1aAa05d7c2e7fC23d",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
@@ -651,8 +685,26 @@
                     "0xbebc0bfc"
                 ]
             },
+            "Charging": {
+                "address": "0x2375812aA04ae6739c1555e3996aafe2Dc419EDb",
+                "selectors": [
+                    "0xd25f5787",
+                    "0xa2fe8c85"
+                ]
+            },
+            "Shared": {
+                "address": "0x374A48ACe6578905D712Ed5B55d84c8D69B384b4",
+                "selectors": [
+                    "0xcfe55b7d",
+                    "0x77898251",
+                    "0xa2bc6cdf",
+                    "0x4fa9ff16",
+                    "0x81c9bb13",
+                    "0xdb3543f5"
+                ]
+            },
             "MultipleMinter": {
-                "address": "0x8a0E5Fb31d8B7fC4327622603b7dEDEeA5A507c8",
+                "address": "0x9cFf9165A898d5b5b4786d2F3F8A78061Fa3aa5d",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3"
@@ -681,7 +733,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0x020f734F54ebFde4d324c29bCB0da3c0a9e61aEe",
+                "address": "0x688244f1eAc2abdfB012DcA0377a89e3163E0899",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -692,6 +744,7 @@
                     "0x56936962",
                     "0x3febacab",
                     "0x5f741f4d",
+                    "0xdd60fd1a",
                     "0xf73a8f04",
                     "0xff96b761",
                     "0x5c129493",
@@ -756,7 +809,11 @@
         "misc": {
             "DimoToken": {
                 "proxy": "0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10",
-                "implementation": "0x05e044bC83B1D2158dBd31ECAfC9210319fb742d"
+                "implementation": "0x2B06014980c3d28644241ba87b8518C236c4B75b"
+            },
+            "DimoCredit": {
+                "proxy": "0x49c120f4C3c6679Ebd357F2d749E4D1C03598d65",
+                "implementation": "0xe833F49E60C61B76F711AFff76A0dF91AE2c274c"
             },
             "Stake": {
                 "proxy": "0x2cF1d5e60c38eB5795C00Ce72d0D5392ae1e15e1",
@@ -858,8 +915,8 @@
                     "0xb7bded95",
                     "0x3da44e56",
                     "0x1b1a82c8",
-                    "0xf8ddeada",
-                    "0xd3b47405",
+                    "0xd84baff1",
+                    "0x8dca2b8e",
                     "0x9bfae6da",
                     "0xd9c3ae61",
                     "0xea0e7d3a"
@@ -917,18 +974,34 @@
                     "0xbebc0bfc"
                 ]
             },
+            "Charging": {
+                "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+                "selectors": [
+                    "0xd25f5787",
+                    "0xa2fe8c85"
+                ]
+            },
+            "Shared": {
+                "address": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+                "selectors": [
+                    "0xcfe55b7d",
+                    "0x77898251",
+                    "0xa2bc6cdf",
+                    "0x4fa9ff16",
+                    "0x81c9bb13",
+                    "0xdb3543f5"
+                ]
+            },
             "MultipleMinter": {
                 "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
                 "selectors": [
                     "0xfb1a28e8",
-                    "0x191292f8"
+                    "0xd23965e3"
                 ]
             },
             "StreamrConfigurator": {
                 "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
                 "selectors": [
-                    "0x282eb387",
-                    "0x11d679c9",
                     "0x9e594424",
                     "0x5f450e29",
                     "0x0c3cac3b"
@@ -959,6 +1032,8 @@
                     "0xb17b974b",
                     "0x56936962",
                     "0x3febacab",
+                    "0x5f741f4d",
+                    "0xdd60fd1a",
                     "0xf73a8f04",
                     "0xff96b761",
                     "0x5c129493",
@@ -974,25 +1049,27 @@
                 ]
             },
             "DeviceDefinitionTable": {
-                "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
                 "selectors": [
                     "0x20954d21",
+                    "0x794c6790",
+                    "0x32b3f2d5",
                     "0x396e5987",
                     "0xa1d17941",
-                    "0x0ce801ab",
-                    "0x53e7070b",
-                    "0x6928118b",
-                    "0x088fafdb"
+                    "0x23536c5f",
+                    "0x80d50451",
+                    "0x088fafdb",
+                    "0x67c7f687"
                 ]
             },
             "ERC721Holder": {
-                "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+                "address": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
                 "selectors": [
                     "0x150b7a02"
                 ]
             },
             "DeviceDefinitionController": {
-                "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+                "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
                 "selectors": [
                     "0x66df322e"
                 ]
@@ -1000,38 +1077,42 @@
         },
         "nfts": {
             "ManufacturerId": {
-                "proxy": "0xf5059a5D33d5853360D16C683c16e67980206f36",
-                "implementation": "0x851356ae760d987E095750cCeb3bC6014560891C"
+                "proxy": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
+                "implementation": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00"
             },
             "IntegrationId": {
-                "proxy": "0x998abeb3E57409262aE5b751f60747921B33613E",
-                "implementation": "0x95401dc811bb5740090279Ba06cfA8fcF6113778"
+                "proxy": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
+                "implementation": "0x809d550fca64d94Bd9F66E60752A544199cfAC3D"
             },
             "VehicleId": {
-                "proxy": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528",
-                "implementation": "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49"
+                "proxy": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+                "implementation": "0x1291Be112d480055DaFd8a610b7d1e203891C274"
             },
             "AftermarketDeviceId": {
-                "proxy": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
-                "implementation": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf"
+                "proxy": "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90",
+                "implementation": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575"
             },
             "SyntheticDeviceId": {
-                "proxy": "0x9d4454B023096f34B160D6B654540c56A1F81688",
-                "implementation": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf"
+                "proxy": "0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3",
+                "implementation": "0x82e01223d51Eb87e16A03E24687EDF0F294da6f1"
             }
         },
         "misc": {
             "DimoToken": {
-                "proxy": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
+                "proxy": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+                "implementation": ""
+            },
+            "DimoCredit": {
+                "proxy": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
                 "implementation": ""
             },
             "Stake": {
-                "proxy": "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650",
+                "proxy": "0x04C89607413713Ec9775E14b954286519d836FEf",
                 "implementation": ""
             },
             "DimoForwarder": {
-                "proxy": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
-                "implementation": "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9"
+                "proxy": "0x9d4454B023096f34B160D6B654540c56A1F81688",
+                "implementation": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf"
             },
             "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
             "Kms": [
@@ -1182,6 +1263,14 @@
                     "0xbebc0bfc"
                 ]
             },
+            "Charging": {
+                "address": "",
+                "selectors": []
+            },
+            "Shared": {
+                "address": "",
+                "selectors": []
+            },
             "MultipleMinter": {
                 "address": "0xc96304e3c037f81dA488ed9dEa1D8F2a48278a75",
                 "selectors": [
@@ -1285,6 +1374,10 @@
         "misc": {
             "DimoToken": {
                 "proxy": "0x3347B4d90ebe72BeFb30444C9966B2B990aE9FcB",
+                "implementation": ""
+            },
+            "DimoCredit": {
+                "proxy": "0x0000000000000000000000000000000000000000",
                 "implementation": ""
             },
             "Stake": {

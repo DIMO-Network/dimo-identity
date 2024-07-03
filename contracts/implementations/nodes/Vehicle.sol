@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./VehicleInternal.sol";
+import "../charging/ChargingInternal.sol";
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
@@ -10,6 +11,7 @@ import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 
+import {MINT_VEHICLE_OPERATION} from "../../shared/Operations.sol";
 import {ADMIN_ROLE, MINT_VEHICLE_ROLE, BURN_VEHICLE_ROLE, SET_VEHICLE_INFO_ROLE} from "../../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
@@ -99,11 +101,12 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
     /**
      * @notice Function to mint a vehicle with a Device Definition Id
-     * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
@@ -114,7 +117,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         address owner,
         string calldata deviceDefinitionId,
         AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(MINT_VEHICLE_ROLE) {
+    ) external {
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         address vehicleIdProxyAddress = vs.idProxyAddress;
 
@@ -139,6 +142,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         );
 
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
     /**
@@ -201,6 +206,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
             revert InvalidOwnerSignature();
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
     /**
@@ -253,6 +260,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
             revert InvalidOwnerSignature();
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
     /**

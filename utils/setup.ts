@@ -35,7 +35,7 @@ export async function setup(
 }
 
 export async function grantAdminRoles(
-  admin: Wallet,
+  admin: Wallet | HardhatEthersSigner,
   accessControlContract: DimoAccessControl
 ) {
   const roles = [
@@ -65,7 +65,8 @@ export async function grantAdminRoles(
     C.DEV_SD_BURN_ROLE,
     C.DEV_CHANGE_PARENT_NODE,
     C.DEV_CACHE_ENS,
-    C.DEV_REMOVE_ATTR
+    C.DEV_REMOVE_ATTR,
+    C.DEV_SET_DD
   ];
 
   for (const role of roles) {

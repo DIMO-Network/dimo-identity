@@ -100,3 +100,6 @@ export const DEV_CACHE_ENS = ethers.keccak256(
 export const DEV_REMOVE_ATTR = ethers.keccak256(
   ethers.toUtf8Bytes('DEV_REMOVE_ATTR')
 );
+export const DEV_SET_DD = ethers.keccak256(
+  ethers.toUtf8Bytes('DEV_SET_DD')
+);

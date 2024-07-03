@@ -45,10 +45,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         string model,
         uint256 year
     );
-    event DeviceDefinitionDeleted(
-        uint256 indexed tableId,
-        string id
-    );
+    event DeviceDefinitionDeleted(uint256 indexed tableId, string id);
 
     /**
      * @notice Creates a new definition table associated with a specific manufacturer
@@ -294,7 +291,12 @@ contract DeviceDefinitionTable is AccessControlInternal {
 
         emit DeviceDefinitionUpdated(tableId, data.id, data.model, data.year);
 
-        _updateDeviceDefinitionData(tablelandTables, tableId, data.id, data.metadata);
+        _updateDeviceDefinitionData(
+            tablelandTables,
+            tableId,
+            data.id,
+            data.metadata
+        );
     }
 
     /**
@@ -487,21 +489,21 @@ contract DeviceDefinitionTable is AccessControlInternal {
         string calldata id,
         string calldata metadata
     ) private {
-
         // Set the values to update
-        string memory setters = string.concat("metadata=", string(abi.encodePacked("'", metadata, "'")));
+        string memory setters = string.concat(
+            "metadata=",
+            string(abi.encodePacked("'", metadata, "'"))
+        );
         // Specify filters for which row to update
-        string memory filters = string.concat("id=", string(abi.encodePacked("'", id, "'")));
+        string memory filters = string.concat(
+            "id=",
+            string(abi.encodePacked("'", id, "'"))
+        );
 
         tablelandTables.mutate(
             address(this),
             tableId,
-            SQLHelpers.toUpdate(
-                "",
-                tableId,
-                setters,
-                filters
-            )
+            SQLHelpers.toUpdate("", tableId, setters, filters)
         );
     }
 
@@ -518,16 +520,15 @@ contract DeviceDefinitionTable is AccessControlInternal {
         string calldata id
     ) private {
         // Specify filters for which row to delete
-        string memory filters = string.concat("id=", string(abi.encodePacked("'", id, "'")));
+        string memory filters = string.concat(
+            "id=",
+            string(abi.encodePacked("'", id, "'"))
+        );
 
         tablelandTables.mutate(
             address(this),
             tableId,
-            SQLHelpers.toDelete(
-                "",
-                tableId,
-                filters
-            )
+            SQLHelpers.toDelete("", tableId, filters)
         );
     }
 }

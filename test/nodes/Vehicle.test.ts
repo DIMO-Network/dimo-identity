@@ -36,7 +36,7 @@ import {
 
 const { expect } = chai;
 
-describe('Vehicle', function () {
+describe.only('Vehicle', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;
@@ -419,21 +419,6 @@ describe('Vehicle', function () {
 
   describe('mintVehicleWithDeviceDefinition', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
-        await expect(
-          vehicleInstance
-            .connect(nonAdmin)
-            .mintVehicleWithDeviceDefinition(
-              1,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairs
-            )
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_ROLE
-          }`
-        );
-      });
       it('Should revert if parent node is not a manufacturer node', async () => {
         await expect(
           vehicleInstance
@@ -605,7 +590,7 @@ describe('Vehicle', function () {
     });
   });
 
-  describe.only('mintVehicleWithDeviceDefinitionSign', () => {
+  describe('mintVehicleWithDeviceDefinitionSign', () => {
     let signature: string;
     before(async () => {
       signature = await signMessage({
@@ -623,6 +608,22 @@ describe('Vehicle', function () {
     });
 
     context('Error handling', () => {
+      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
+        await expect(
+          vehicleInstance
+            .connect(nonAdmin)
+            .mintVehicleWithDeviceDefinitionSign(
+              99,
+              user1.address,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              signature
+            )
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_ROLE
+          }`
+        );
+      });
       it('Should revert if parent node is not a manufacturer node', async () => {
         await expect(
           vehicleInstance

@@ -118,7 +118,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         address owner,
         string calldata deviceDefinitionId,
         AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(MINT_VEHICLE_ROLE) {
+    ) external {
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         address vehicleIdProxyAddress = vs.idProxyAddress;
 
@@ -162,7 +162,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         string calldata deviceDefinitionId,
         AttributeInfoPair[] calldata attrInfo,
         bytes calldata signature
-    ) external {
+    ) external onlyRole(MINT_VEHICLE_ROLE) {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;

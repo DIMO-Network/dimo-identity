@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./VehicleInternal.sol";
+import "../nonces/NoncesInternal.sol";
 import "../charging/ChargingInternal.sol";
 import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
@@ -22,7 +23,7 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
  */
 contract Vehicle is AccessControlInternal, VehicleInternal {
     bytes32 private constant BURN_TYPEHASH =
-        keccak256("BurnVehicleSign(uint256 vehicleNode)");
+        keccak256("BurnVehicleSign(uint256 vehicleNode,uint256 nonce)");
 
     event VehicleIdProxySet(address indexed proxy);
     event VehicleAttributeAdded(string attribute);
@@ -149,18 +150,15 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     /**
      * @notice Mint a vehicle with a Device Definition Id through a metatransaction
      * @dev Caller must have the mint vehicle role
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param deviceDefinitionId The Device Definition Id
-     * @param attrInfo attrInfo
-     * @param signature User's signature hash
+     * @param data Input data with the following fields:
+     *  manufacturerNode -> Parent manufacturer node id of the vehicle
+     *  owner -> The new nodes owner
+     *  deviceDefinitionId -> The Device Definition Id
+     *  attrInfos -> List of attribute-info pairs to be added
+     *  vehicleOwnerSig -> User's signature hash
      */
     function mintVehicleWithDeviceDefinitionSign(
-        uint256 manufacturerNode,
-        address owner,
-        string calldata deviceDefinitionId,
-        AttributeInfoPair[] calldata attrInfo,
-        bytes calldata signature
+        MintVehicleWithDdInput calldata data
     ) external onlyRole(MINT_VEHICLE_ROLE) {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -168,44 +166,54 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         if (
             !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
-                manufacturerNode
+                data.manufacturerNode
             )
-        ) revert InvalidParentNode(manufacturerNode);
+        ) revert InvalidParentNode(data.manufacturerNode);
 
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(data.owner);
 
         NodesStorage
         .getStorage()
-        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = data
+            .manufacturerNode;
         VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
             newTokenId
-        ] = deviceDefinitionId;
+        ] = data.deviceDefinitionId;
 
         emit VehicleNodeMintedWithDeviceDefinition(
-            manufacturerNode,
+            data.manufacturerNode,
             newTokenId,
-            owner,
-            deviceDefinitionId
+            data.owner,
+            data.deviceDefinitionId
         );
 
         (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
             newTokenId,
-            attrInfo
+            data.attrInfo
         );
 
         bytes32 message = keccak256(
             abi.encode(
                 MINT_VEHICLE_WITH_DD_TYPEHASH,
-                manufacturerNode,
-                owner,
-                keccak256(bytes(deviceDefinitionId)),
+                data.manufacturerNode,
+                data.owner,
+                keccak256(bytes(data.deviceDefinitionId)),
                 attributesHash,
-                infosHash
+                infosHash,
+                NoncesInternal._useNonce(
+                    MINT_VEHICLE_WITH_DD_TYPEHASH,
+                    data.owner
+                )
             )
         );
 
-        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
-            revert InvalidOwnerSignature();
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                data.owner,
+                message,
+                data.signature
+            )
+        ) revert InvalidOwnerSignature();
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
@@ -214,16 +222,14 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
      * @notice Mints a vehicle through a metatransaction
      * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
      * @dev Caller must have the mint vehicle role
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param attrInfo List of attribute-info pairs to be added
-     * @param signature User's signature hash
+     * @param data Input data with the following fields:
+     *  manufacturerNode -> Parent manufacturer node id of the vehicle
+     *  owner -> The new nodes owner
+     *  attrInfos -> List of attribute-info pairs to be added
+     *  vehicleOwnerSig -> User's signature hash
      */
     function mintVehicleSign(
-        uint256 manufacturerNode,
-        address owner,
-        AttributeInfoPair[] calldata attrInfo,
-        bytes calldata signature
+        MintVehicleInput calldata data
     ) external onlyRole(MINT_VEHICLE_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
@@ -232,34 +238,40 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
         if (
             !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
-                manufacturerNode
+                data.manufacturerNode
             )
-        ) revert InvalidParentNode(manufacturerNode);
+        ) revert InvalidParentNode(data.manufacturerNode);
 
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(data.owner);
 
-        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
+        emit VehicleNodeMinted(data.manufacturerNode, newTokenId, data.owner);
 
-        ns
-        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        ns.nodes[vehicleIdProxyAddress][newTokenId].parentNode = data
+            .manufacturerNode;
 
         (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
             newTokenId,
-            attrInfo
+            data.attrInfo
         );
 
         bytes32 message = keccak256(
             abi.encode(
                 MINT_VEHICLE_TYPEHASH,
-                manufacturerNode,
-                owner,
+                data.manufacturerNode,
+                data.owner,
                 attributesHash,
-                infosHash
+                infosHash,
+                NoncesInternal._useNonce(MINT_VEHICLE_TYPEHASH, data.owner)
             )
         );
 
-        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
-            revert InvalidOwnerSignature();
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                data.owner,
+                message,
+                data.signature
+            )
+        ) revert InvalidOwnerSignature();
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
@@ -310,7 +322,13 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             revert VehiclePaired(tokenId);
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
-        bytes32 message = keccak256(abi.encode(BURN_TYPEHASH, tokenId));
+        bytes32 message = keccak256(
+            abi.encode(
+                BURN_TYPEHASH,
+                tokenId,
+                NoncesInternal._useNonce(BURN_TYPEHASH, owner)
+            )
+        );
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, ownerSig))
             revert InvalidOwnerSignature();

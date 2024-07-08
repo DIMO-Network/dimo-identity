@@ -28,6 +28,7 @@ import {
   createSnapshot,
   revertToSnapshot,
   signMessage,
+  MintVehicleInput,
   C
 } from '../utils';
 
@@ -97,7 +98,8 @@ describe('Multicall', function () {
         'AdLicenseValidator',
         'Mapper',
         'Multicall',
-        'Shared'
+        'Shared',
+        'Nonces'
       ],
       nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
       upgradeableContracts: []
@@ -278,6 +280,8 @@ describe('Multicall', function () {
     let ownerSig: string;
     let adSig: string;
     let pairSign: string;
+    let mintVehicleInput: MintVehicleInput;
+
     before(async () => {
       mintSig = await signMessage({
         _signer: user1,
@@ -287,7 +291,8 @@ describe('Multicall', function () {
           manufacturerNode: '1',
           owner: user1.address,
           attributes: C.mockVehicleAttributes,
-          infos: C.mockVehicleInfos
+          infos: C.mockVehicleInfos,
+          nonce: 0
         }
       });
       ownerSig = await signMessage({
@@ -296,7 +301,8 @@ describe('Multicall', function () {
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
-          owner: user1.address
+          owner: user1.address,
+          nonce: 0
         }
       });
       adSig = await signMessage({
@@ -305,7 +311,8 @@ describe('Multicall', function () {
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
-          owner: user1.address
+          owner: user1.address,
+          nonce: 0
         }
       });
       pairSign = await signMessage({
@@ -314,16 +321,24 @@ describe('Multicall', function () {
         _verifyingContract: await aftermarketDeviceInstance.getAddress(),
         message: {
           aftermarketDeviceNode: '1',
-          vehicleNode: '1'
+          vehicleNode: '1',
+          nonce: 0
         }
       });
+
+      mintVehicleInput = {
+        manufacturerNode: '1',
+        owner: user1.address,
+        attrInfo: C.mockVehicleAttributeInfoPairs,
+        signature: mintSig
+      }
     });
 
     context('State', () => {
       it('Should mint vehicle and claim aftermarket device in the same transaction', async () => {
         const mintVehicleSignEncoded = vehicleInstance.interface.encodeFunctionData(
           'mintVehicleSign',
-          [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
+          [mintVehicleInput]
         );
         const claimAftermarketDeviceSignEncoded =
           aftermarketDeviceInstance.interface.encodeFunctionData(
@@ -347,7 +362,7 @@ describe('Multicall', function () {
       it('Should mint vehicle, claim aftermarket device and pair them in the same transaction', async () => {
         const mintVehicleSignEncoded = vehicleInstance.interface.encodeFunctionData(
           'mintVehicleSign',
-          [1, user1.address, C.mockVehicleAttributeInfoPairs, mintSig]
+          [mintVehicleInput]
         );
         const claimAftermarketDeviceSignEncoded =
           aftermarketDeviceInstance.interface.encodeFunctionData(

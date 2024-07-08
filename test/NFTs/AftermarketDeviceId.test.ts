@@ -100,7 +100,8 @@ describe('AftermarketDeviceId', async function () {
         'AftermarketDevice',
         'AdLicenseValidator',
         'Mapper',
-        'Shared'
+        'Shared',
+        'Nonces'
       ],
       nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
       upgradeableContracts: []
@@ -273,7 +274,8 @@ describe('AftermarketDeviceId', async function () {
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '1',
-        owner: user1.address
+        owner: user1.address,
+        nonce: 0
       }
     });
     const claimAdSig1 = await signMessage({
@@ -282,7 +284,8 @@ describe('AftermarketDeviceId', async function () {
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '1',
-        owner: user1.address
+        owner: user1.address,
+        nonce: 0
       }
     });
     const claimOwnerSig2 = await signMessage({
@@ -291,7 +294,8 @@ describe('AftermarketDeviceId', async function () {
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '2',
-        owner: user1.address
+        owner: user1.address,
+        nonce: 1
       }
     });
     const claimAdSig2 = await signMessage({
@@ -300,7 +304,8 @@ describe('AftermarketDeviceId', async function () {
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '2',
-        owner: user1.address
+        owner: user1.address,
+        nonce: 1
       }
     });
     const pairSignature = await signMessage({
@@ -309,7 +314,8 @@ describe('AftermarketDeviceId', async function () {
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '1',
-        vehicleNode: '1'
+        vehicleNode: '1',
+        nonce: 0
       }
     });
 

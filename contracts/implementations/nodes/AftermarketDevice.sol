@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
+import "../nonces/NoncesInternal.sol";
 import "../../interfaces/INFTMultiPrivilege.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
@@ -35,17 +36,17 @@ contract AftermarketDevice is
 {
     bytes32 private constant CLAIM_TYPEHASH =
         keccak256(
-            "ClaimAftermarketDeviceSign(uint256 aftermarketDeviceNode,address owner)"
+            "ClaimAftermarketDeviceSign(uint256 aftermarketDeviceNode,address owner,uint256 nonce)"
         );
     bytes32 private constant PAIR_TYPEHASH =
         keccak256(
-            "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
+            "PairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode,uint256 nonce)"
         );
-
     bytes32 private constant UNPAIR_TYPEHASH =
         keccak256(
-            "UnPairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode)"
+            "UnPairAftermarketDeviceSign(uint256 aftermarketDeviceNode,uint256 vehicleNode,uint256 nonce)"
         );
+
     uint256 private constant MANUFACTURER_MINTER_PRIVILEGE = 1;
     uint256 private constant MANUFACTURER_CLAIMER_PRIVILEGE = 2;
     uint256 private constant MANUFACTURER_FACTORY_RESET_PRIVILEGE = 3;
@@ -258,12 +259,17 @@ contract AftermarketDevice is
     ) external onlyRole(Roles.CLAIM_AD_ROLE) {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
-        bytes32 message = keccak256(
-            abi.encode(CLAIM_TYPEHASH, aftermarketDeviceNode, owner)
-        );
         address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
             aftermarketDeviceNode
         ];
+        bytes32 message = keccak256(
+            abi.encode(
+                CLAIM_TYPEHASH,
+                aftermarketDeviceNode,
+                owner,
+                NoncesInternal._useNonce(CLAIM_TYPEHASH, owner)
+            )
+        );
         address adIdProxy = ads.idProxyAddress;
 
         if (!INFT(adIdProxy).exists(aftermarketDeviceNode))
@@ -305,10 +311,6 @@ contract AftermarketDevice is
         bytes calldata aftermarketDeviceSig,
         bytes calldata vehicleOwnerSig
     ) external onlyRole(Roles.PAIR_AD_ROLE) {
-        MapperStorage.Storage storage ms = MapperStorage.getStorage();
-        bytes32 message = keccak256(
-            abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
-        );
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
@@ -320,20 +322,40 @@ contract AftermarketDevice is
             revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
         if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
             revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+
+        address vehicleIdOwner = INFT(vehicleIdProxyAddress).ownerOf(
+            vehicleNode
+        );
+        address adIdAddress = AftermarketDeviceStorage
+            .getStorage()
+            .nodeIdToDeviceAddress[aftermarketDeviceNode];
+        bytes32 message = keccak256(
+            abi.encode(
+                PAIR_TYPEHASH,
+                aftermarketDeviceNode,
+                vehicleNode,
+                NoncesInternal._useNonce(PAIR_TYPEHASH, vehicleIdOwner)
+            )
+        );
+
         if (
             !AftermarketDeviceStorage.getStorage().deviceClaimed[
                 aftermarketDeviceNode
             ]
         ) revert AdNotClaimed(aftermarketDeviceNode);
-        if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
-            revert Errors.VehiclePaired(vehicleNode);
-        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
-            revert AdPaired(aftermarketDeviceNode);
+        if (
+            MapperStorage.getStorage().links[vehicleIdProxyAddress][
+                vehicleNode
+            ] != 0
+        ) revert Errors.VehiclePaired(vehicleNode);
+        if (
+            MapperStorage.getStorage().links[adIdProxyAddress][
+                aftermarketDeviceNode
+            ] != 0
+        ) revert AdPaired(aftermarketDeviceNode);
         if (
             !Eip712CheckerInternal._verifySignature(
-                AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
-                    aftermarketDeviceNode
-                ],
+                adIdAddress,
                 message,
                 aftermarketDeviceSig
             )
@@ -341,14 +363,18 @@ contract AftermarketDevice is
 
         if (
             !Eip712CheckerInternal._verifySignature(
-                INFT(vehicleIdProxyAddress).ownerOf(vehicleNode),
+                vehicleIdOwner,
                 message,
                 vehicleOwnerSig
             )
         ) revert Errors.InvalidOwnerSignature();
 
-        ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
-        ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
+        MapperStorage.getStorage().links[vehicleIdProxyAddress][
+            vehicleNode
+        ] = aftermarketDeviceNode;
+        MapperStorage.getStorage().links[adIdProxyAddress][
+            aftermarketDeviceNode
+        ] = vehicleNode;
 
         emit AftermarketDevicePaired(
             aftermarketDeviceNode,
@@ -371,9 +397,6 @@ contract AftermarketDevice is
         bytes calldata signature
     ) external onlyRole(Roles.PAIR_AD_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
-        bytes32 message = keccak256(
-            abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
-        );
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
             .idProxyAddress;
@@ -385,6 +408,14 @@ contract AftermarketDevice is
             revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
+        bytes32 messageOwner = keccak256(
+            abi.encode(
+                PAIR_TYPEHASH,
+                aftermarketDeviceNode,
+                vehicleNode,
+                NoncesInternal._useNonce(PAIR_TYPEHASH, owner)
+            )
+        );
 
         if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
             revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
@@ -399,8 +430,13 @@ contract AftermarketDevice is
             revert Errors.VehiclePaired(vehicleNode);
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
             revert AdPaired(aftermarketDeviceNode);
-        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
-            revert Errors.InvalidOwnerSignature();
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                owner,
+                messageOwner,
+                signature
+            )
+        ) revert Errors.InvalidOwnerSignature();
 
         ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
         ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
@@ -469,9 +505,6 @@ contract AftermarketDevice is
         uint256 vehicleNode,
         bytes calldata signature
     ) external onlyRole(Roles.UNPAIR_AD_ROLE) {
-        bytes32 message = keccak256(
-            abi.encode(UNPAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
-        );
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -484,6 +517,17 @@ contract AftermarketDevice is
             revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
         if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
             revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+
+        address vehicleOwner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
+        bytes32 message = keccak256(
+            abi.encode(
+                UNPAIR_TYPEHASH,
+                aftermarketDeviceNode,
+                vehicleNode,
+                NoncesInternal._useNonce(UNPAIR_TYPEHASH, vehicleOwner)
+            )
+        );
+
         if (
             ms.links[vehicleIdProxyAddress][vehicleNode] !=
             aftermarketDeviceNode
@@ -494,10 +538,8 @@ contract AftermarketDevice is
         address signer = Eip712CheckerInternal._recover(message, signature);
         address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
 
-        if (
-            signer != adOwner &&
-            signer != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
-        ) revert Errors.InvalidSigner();
+        if (signer != adOwner && signer != vehicleOwner)
+            revert Errors.InvalidSigner();
 
         delete ms.links[vehicleIdProxyAddress][vehicleNode];
         delete ms.links[adIdProxyAddress][aftermarketDeviceNode];

@@ -1,5 +1,5 @@
 import { TypedData } from '../types';
-import xdd from './Eip712Types.json';
+import * as Types from './Eip712Types.json';
 
 export const defaultDomainName = 'DIMO';
 export const defaultDomainVersion = '1';
@@ -12,7 +12,7 @@ export const schemaBase: TypedData = {
       { name: 'chainId', type: 'uint256' },
       { name: 'verifyingContract', type: 'address' }
     ],
-    ...xdd,
+    ...Types,
   },
   primaryType: '',
   domain: {},

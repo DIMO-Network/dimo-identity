@@ -35,4 +35,3 @@
     ],
     "BurnVehicleSign": [{ "name": "vehicleNode", "type": "uint256" }]
   }
-  

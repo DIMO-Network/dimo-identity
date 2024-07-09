@@ -18,4 +18,3 @@ export const schemaBase: TypedData = {
   domain: {},
   message: {}
 };
-

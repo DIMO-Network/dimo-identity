@@ -17,7 +17,6 @@ import {
   VehicleId,
   AftermarketDevice,
   AftermarketDeviceId,
-  AdLicenseValidator,
   SyntheticDevice,
   SyntheticDeviceId,
   StreamrConfigurator,
@@ -110,7 +109,6 @@ async function deployModules(
     { name: 'Vehicle', args: [] },
     { name: 'AftermarketDevice', args: [] },
     { name: 'SyntheticDevice', args: [] },
-    { name: 'AdLicenseValidator', args: [] },
     { name: 'Mapper', args: [] },
     { name: 'MultipleMinter', args: [] },
     { name: 'StreamrConfigurator', args: [] },
@@ -360,11 +358,6 @@ async function setupRegistry(
     'Eip712Checker',
     instances[networkName].modules.DIMORegistry.address,
   );
-  const adLicenseValidatorInstance: AdLicenseValidator =
-    await ethers.getContractAt(
-      'AdLicenseValidator',
-      instances[networkName].modules.DIMORegistry.address,
-    );
   const chargingInstance: Charging =
     await ethers.getContractAt(
       'Charging',
@@ -415,40 +408,17 @@ async function setupRegistry(
   console.log(`${C.eip712Name} and ${C.eip712Version} set to EIP712Checker`);
   console.log('\n----- EIP712 initialized -----');
 
-  console.log('\n----- Setting up AdLicenseValidator -----\n');
-  await (
-    await adLicenseValidatorInstance.setFoundationAddress(
-      instances[networkName].misc.Foundation,
-    )
-  ).wait();
-  console.log(
-    `${instances[networkName].misc.Foundation} set as Foundation address`,
-  );
-  await (
-    await adLicenseValidatorInstance.setDimoToken(
-      instances[networkName].misc.DimoToken.proxy,
-    )
-  ).wait();
-  console.log(
-    `${instances[networkName].misc.DimoToken.proxy} set as DIMO token address`,
-  );
-  await (
-    await adLicenseValidatorInstance.setLicense(
-      instances[networkName].misc.Stake.proxy,
-    )
-  ).wait();
-  console.log(
-    `${instances[networkName].misc.Stake.proxy} set as License contract address`,
-  );
-  await (await adLicenseValidatorInstance.setAdMintCost(C.adMintCost)).wait();
-  console.log(`${C.adMintCost} set as aftermarket device mint cost`);
-  console.log('\n----- AdLicenseValidator setup -----');
-
   console.log('\n----- Setting up Charging -----\n');
   await (
     await chargingInstance.setDcxOperationCost(
       C.MINT_VEHICLE_OPERATION,
       C.MINT_VEHICLE_OPERATION_COST[networkName]
+    )
+  ).wait();
+  await (
+    await chargingInstance.setDcxOperationCost(
+      C.MINT_AD_OPERATION,
+      C.MINT_AD_OPERATION_COST[networkName]
     )
   ).wait();
   console.log('\n----- Charging setup -----');
@@ -463,7 +433,7 @@ async function setupRegistry(
     `${instances[networkName].misc.Foundation} set as Foundation address`,
   );
   await (
-    await sharedInstance.setDimoTokenAddress(
+    await sharedInstance.setDimoToken(
       instances[networkName].misc.DimoToken.proxy,
     )
   ).wait();
@@ -477,6 +447,14 @@ async function setupRegistry(
   ).wait();
   console.log(
     `${instances[networkName].misc.DimoCredit.proxy} set as DIMO Credit token address`,
+  );
+  await (
+    await sharedInstance.setManufacturerLicense(
+      instances[networkName].misc.Stake.proxy,
+    )
+  ).wait();
+  console.log(
+    `${instances[networkName].misc.Stake.proxy} set as Manufacturer License contract address`,
   );
   console.log('\n----- Shared setup -----');
 

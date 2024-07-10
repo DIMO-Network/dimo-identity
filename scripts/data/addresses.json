@@ -955,18 +955,8 @@
                     "0x80430e0d"
                 ]
             },
-            "AdLicenseValidator": {
-                "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
-                "selectors": [
-                    "0x46946743",
-                    "0x2390baa8",
-                    "0x5b6c1979",
-                    "0xf41377ca",
-                    "0x0fd21c17"
-                ]
-            },
             "Mapper": {
-                "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+                "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
                 "selectors": [
                     "0x0a6cef46",
                     "0x112e62a2",
@@ -975,32 +965,34 @@
                 ]
             },
             "Charging": {
-                "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+                "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
                 "selectors": [
                     "0xd25f5787",
                     "0xa2fe8c85"
                 ]
             },
             "Shared": {
-                "address": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+                "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
                 "selectors": [
                     "0xcfe55b7d",
                     "0x77898251",
                     "0xa2bc6cdf",
+                    "0x170e4293",
                     "0x4fa9ff16",
-                    "0x81c9bb13",
-                    "0xdb3543f5"
+                    "0x5b6c1979",
+                    "0xdb3543f5",
+                    "0xea9ae2f5"
                 ]
             },
             "MultipleMinter": {
-                "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+                "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3"
                 ]
             },
             "StreamrConfigurator": {
-                "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+                "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
                 "selectors": [
                     "0x9e594424",
                     "0x5f450e29",
@@ -1008,7 +1000,7 @@
                 ]
             },
             "VehicleStream": {
-                "address": "0x9A676e781A523b5d0C0e43731313A708CB607508",
+                "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
                 "selectors": [
                     "0x497323c8",
                     "0x180e469a",
@@ -1022,7 +1014,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+                "address": "0x9A676e781A523b5d0C0e43731313A708CB607508",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -1042,14 +1034,14 @@
                 ]
             },
             "Multicall": {
-                "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+                "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
                 "selectors": [
                     "0x415c2d96",
                     "0x1c0c6e51"
                 ]
             },
             "DeviceDefinitionTable": {
-                "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+                "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
                 "selectors": [
                     "0x20954d21",
                     "0x794c6790",
@@ -1063,13 +1055,13 @@
                 ]
             },
             "ERC721Holder": {
-                "address": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+                "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
                 "selectors": [
                     "0x150b7a02"
                 ]
             },
             "DeviceDefinitionController": {
-                "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+                "address": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
                 "selectors": [
                     "0x66df322e"
                 ]
@@ -1077,42 +1069,42 @@
         },
         "nfts": {
             "ManufacturerId": {
+                "proxy": "0x9d4454B023096f34B160D6B654540c56A1F81688",
+                "implementation": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf"
+            },
+            "IntegrationId": {
                 "proxy": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
                 "implementation": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00"
             },
-            "IntegrationId": {
+            "VehicleId": {
                 "proxy": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
                 "implementation": "0x809d550fca64d94Bd9F66E60752A544199cfAC3D"
             },
-            "VehicleId": {
+            "AftermarketDeviceId": {
                 "proxy": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
                 "implementation": "0x1291Be112d480055DaFd8a610b7d1e203891C274"
             },
-            "AftermarketDeviceId": {
+            "SyntheticDeviceId": {
                 "proxy": "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90",
                 "implementation": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575"
-            },
-            "SyntheticDeviceId": {
-                "proxy": "0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3",
-                "implementation": "0x82e01223d51Eb87e16A03E24687EDF0F294da6f1"
             }
         },
         "misc": {
             "DimoToken": {
-                "proxy": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+                "proxy": "0x922D6956C99E12DFeB3224DEA977D0939758A1Fe",
                 "implementation": ""
             },
             "DimoCredit": {
-                "proxy": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
+                "proxy": "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
                 "implementation": ""
             },
             "Stake": {
-                "proxy": "0x04C89607413713Ec9775E14b954286519d836FEf",
+                "proxy": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
                 "implementation": ""
             },
             "DimoForwarder": {
-                "proxy": "0x9d4454B023096f34B160D6B654540c56A1F81688",
-                "implementation": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf"
+                "proxy": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
+                "implementation": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf"
             },
             "Foundation": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
             "Kms": [
@@ -1242,16 +1234,6 @@
                     "0xc624e8a1",
                     "0xecf452d7",
                     "0x80430e0d"
-                ]
-            },
-            "AdLicenseValidator": {
-                "address": "0xF8e31cb472bc70500f08Cd84917E5A1912Ec8397",
-                "selectors": [
-                    "0x46946743",
-                    "0x2390baa8",
-                    "0x5b6c1979",
-                    "0xf41377ca",
-                    "0x0fd21c17"
                 ]
             },
             "Mapper": {

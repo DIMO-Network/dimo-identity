@@ -8,8 +8,11 @@ import "../../libraries/NoncesStorage.sol";
  * @notice Contract to track nonces for addresses. Nonces will only increment.
  */
 contract Nonces {
-    // TODO Documentation
-    /// @notice Returns the next unused nonce for an address
+    /**
+     * @notice Returns the next unused nonce for an address
+     * @param typehash The operation typehash
+     * @param account The account associated with the nonce
+     */
     function nonces(
         bytes32 typehash,
         address account

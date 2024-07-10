@@ -172,19 +172,19 @@ describe('VehicleId', async function () {
     // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await integrationIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await sdIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Set base data URI
     await baseDataUriInstance.setBaseDataURI(
@@ -215,24 +215,15 @@ describe('VehicleId', async function () {
       C.defaultDomainVersion,
     );
 
-    // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
-    await mockDimoTokenInstance
-      .connect(admin)
-      .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
-    await mockDimoTokenInstance
-      .connect(manufacturer1)
-      .approve(
-        await dimoRegistryInstance.getAddress(),
-        C.manufacturerDimoTokensAmount,
-      );
-
-    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    // Mint DIMO Credit tokens to the admin and manufacturer
     await mockDimoCreditInstance
       .connect(admin)
       .mint(admin.address, C.adminDimoCreditTokensAmount);
     await mockDimoCreditInstance
       .connect(admin)
-      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+      .mint(manufacturer1.address, C.manufacturerDimoCreditTokensAmount);
+
+    // Grant BURNER role to DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
       .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -249,6 +240,9 @@ describe('VehicleId', async function () {
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
 
     // Setup AdLicenseValidator variables
     await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
@@ -325,7 +319,7 @@ describe('VehicleId', async function () {
       .connect(admin)
       .grantRole(
         C.NFT_TRANSFERER_ROLE,
-        await dimoRegistryInstance.getAddress(),
+        DIMO_REGISTRY_ADDRESS,
       );
 
     // Minting aftermarket devices for testing
@@ -343,13 +337,13 @@ describe('VehicleId', async function () {
     // Setting DimoRegistry address in the Proxy IDs
     await manufacturerIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
 
     const claimOwnerSig1 = await signMessage({
       _signer: user1,

@@ -9,10 +9,12 @@ import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/AftermarketDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 import "../AdLicenseValidator/AdLicenseValidatorInternal.sol";
+import "../charging/ChargingInternal.sol";
 
 import "../../shared/Roles.sol" as Roles;
 import "../../shared/Types.sol" as Types;
 import "../../shared/Errors.sol" as Errors;
+import {MINT_AD_OPERATION} from "../../shared/Operations.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
@@ -188,7 +190,12 @@ contract AftermarketDevice is
         }
 
         // Validate license and transfer funds to foundation
-        _validateMintRequest(manufacturerNodeOwner, msg.sender, devicesAmount);
+        _validateMintRequest(manufacturerNodeOwner);
+        ChargingInternal._chargeDcx(
+            msg.sender,
+            MINT_AD_OPERATION,
+            devicesAmount
+        );
     }
 
     /**

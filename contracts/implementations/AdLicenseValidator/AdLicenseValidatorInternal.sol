@@ -13,23 +13,13 @@ error InvalidLicense();
 contract AdLicenseValidatorInternal {
     /**
      * @notice Validates if the manufacturer has a License
-     * Calculates the total cost to mint the desired amount of aftermarket devices
-     * The sender transfers the calculated amount to the foundation
-     * @dev This contract must be approved to spend the tokens in advance
      * @param manufacturer The address of the manufacturer
-     * @param sender The address of the sender
-     * @param amount The amount of devices to be minted
      */
-    function _validateMintRequest(
-        address manufacturer,
-        address sender,
-        uint256 amount
-    ) internal {
-        AdLicenseValidatorStorage.Storage storage s = AdLicenseValidatorStorage
-            .getStorage();
-
-        if (s.license.balanceOf(manufacturer) == 0) revert InvalidLicense();
-
-        s.dimoToken.transferFrom(sender, s.foundation, s.adMintCost * amount);
+    function _validateMintRequest(address manufacturer) internal view {
+        if (
+            AdLicenseValidatorStorage.getStorage().license.balanceOf(
+                manufacturer
+            ) == 0
+        ) revert InvalidLicense();
     }
 }

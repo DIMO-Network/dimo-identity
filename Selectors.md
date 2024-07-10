@@ -122,28 +122,6 @@
 |-|-|
 | 0x150b7a02 | onERC721Received(address,address,uint256,bytes) |
 
-## AdLicenseValidator
-#### Functions
-| Selector | Signature |
-|-|-|
-| 0x46946743 | getAdMintCost() |
-| 0x2390baa8 | setAdMintCost(uint256) |
-| 0x5b6c1979 | setDimoToken(address) |
-| 0xf41377ca | setFoundationAddress(address) |
-| 0x0fd21c17 | setLicense(address) |
-
-#### Events
-| Selector | Signature |
-|-|-|
-| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
-| 0x2f878811 | RoleGranted(bytes32,address,address) |
-| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
-
-#### Errors
-| Selector | Signature |
-|-|-|
-| 0xc9134785 | UintUtils__InsufficientHexLength() |
-
 ## AftermarketDevice
 #### Functions
 | Selector | Signature |
@@ -414,9 +392,11 @@
 | 0xcfe55b7d | getDimoCredit() |
 | 0x77898251 | getDimoToken() |
 | 0xa2bc6cdf | getFoundation() |
+| 0x170e4293 | getManufacturerLicense() |
 | 0x4fa9ff16 | setDimoCredit(address) |
-| 0x81c9bb13 | setDimoTokenAddress(address) |
+| 0x5b6c1979 | setDimoToken(address) |
 | 0xdb3543f5 | setFoundation(address) |
+| 0xea9ae2f5 | setManufacturerLicense(address) |
 
 #### Events
 | Selector | Signature |
@@ -424,6 +404,7 @@
 | 0x6f17bce4 | DimoCreditSet(address) |
 | 0x3c3a6813 | DimoTokenSet(address) |
 | 0xfb3a4411 | FoundationSet(address) |
+| 0x52ce7955 | ManufacturerLicenseSet(address) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |

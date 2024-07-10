@@ -31,10 +31,7 @@ error OwnersDoNotMatch();
  * @notice Contract that represents the Aftermarket Device node
  * @dev It uses the Mapper contract to link Aftermarket Devices to Vehicles
  */
-contract AftermarketDevice is
-    AccessControlInternal,
-    AdLicenseValidatorInternal
-{
+contract AftermarketDevice is AccessControlInternal {
     bytes32 private constant CLAIM_TYPEHASH =
         keccak256(
             "ClaimAftermarketDeviceSign(uint256 aftermarketDeviceNode,address owner)"
@@ -189,8 +186,8 @@ contract AftermarketDevice is
                 _setInfos(newTokenId, adInfos[i].attrInfoPairs);
         }
 
-        // Validate license and transfer funds to foundation
-        _validateMintRequest(manufacturerNodeOwner);
+        // Validate license and charge DCX
+        AdLicenseValidatorInternal._validateMintRequest(manufacturerNodeOwner);
         ChargingInternal._chargeDcx(
             msg.sender,
             MINT_AD_OPERATION,

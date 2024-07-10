@@ -11,7 +11,6 @@ import {
   ManufacturerId,
   AftermarketDevice,
   AftermarketDeviceId,
-  AdLicenseValidator,
   Mapper,
   Shared,
   MockDimoToken,
@@ -36,7 +35,6 @@ describe('Mapper', function () {
   let dimoAccessControlInstance: DimoAccessControl;
   let manufacturerInstance: Manufacturer;
   let aftermarketDeviceInstance: AftermarketDevice;
-  let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
@@ -48,7 +46,6 @@ describe('Mapper', function () {
   let DIMO_REGISTRY_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let beneficiary1: HardhatEthersSigner;
@@ -65,7 +62,6 @@ describe('Mapper', function () {
   before(async () => {
     [
       admin,
-      foundation,
       manufacturer1,
       user1,
       beneficiary1,
@@ -86,7 +82,6 @@ describe('Mapper', function () {
         'Nodes',
         'Manufacturer',
         'AftermarketDevice',
-        'AdLicenseValidator',
         'Mapper',
         'Shared'
       ],
@@ -100,7 +95,6 @@ describe('Mapper', function () {
     dimoAccessControlInstance = deployments.DimoAccessControl;
     manufacturerInstance = deployments.Manufacturer;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
-    adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
@@ -166,23 +160,18 @@ describe('Mapper', function () {
     // Setup Shared variables
     await sharedInstance
       .connect(admin)
-      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+      .setDimoToken(await mockDimoTokenInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setManufacturerLicense(await mockStakeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
-
-    // Setup AdLicenseValidator variables
-    await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
-    await adLicenseValidatorInstance.setDimoToken(
-      await mockDimoTokenInstance.getAddress()
-    );
-    await adLicenseValidatorInstance.setLicense(await mockStakeInstance.getAddress());
-    await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance

@@ -191,7 +191,7 @@ describe('SyntheticDevice', function () {
     // Setup Shared variables
     await sharedInstance
       .connect(admin)
-      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+      .setDimoToken(await mockDimoTokenInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());

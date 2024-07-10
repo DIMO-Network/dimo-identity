@@ -19,7 +19,6 @@ import {
   SyntheticDeviceId,
   AftermarketDevice,
   AftermarketDeviceId,
-  AdLicenseValidator,
   Mapper,
   Shared,
   MockDimoToken,
@@ -50,7 +49,6 @@ describe('VehicleId', async function () {
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let syntheticDeviceInstance: SyntheticDevice;
-  let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
@@ -66,7 +64,6 @@ describe('VehicleId', async function () {
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let integrationOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
@@ -86,7 +83,6 @@ describe('VehicleId', async function () {
     [
       admin,
       nonAdmin,
-      foundation,
       manufacturer1,
       integrationOwner1,
       user1,
@@ -113,7 +109,6 @@ describe('VehicleId', async function () {
         'Vehicle',
         'AftermarketDevice',
         'SyntheticDevice',
-        'AdLicenseValidator',
         'Mapper',
         'Shared'
       ],
@@ -138,7 +133,6 @@ describe('VehicleId', async function () {
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     syntheticDeviceInstance = deployments.SyntheticDevice;
-    adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
@@ -231,10 +225,13 @@ describe('VehicleId', async function () {
     // Setup Shared variables
     await sharedInstance
       .connect(admin)
-      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+      .setDimoToken(await mockDimoTokenInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setManufacturerLicense(await mockStakeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -243,16 +240,6 @@ describe('VehicleId', async function () {
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
-
-    // Setup AdLicenseValidator variables
-    await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
-    await adLicenseValidatorInstance.setDimoToken(
-      await mockDimoTokenInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setLicense(
-      await mockStakeInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance

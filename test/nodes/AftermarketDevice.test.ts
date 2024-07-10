@@ -15,7 +15,6 @@ import {
   VehicleId,
   AftermarketDevice,
   AftermarketDeviceId,
-  AdLicenseValidator,
   Mapper,
   Shared,
   MockDimoToken,
@@ -46,7 +45,6 @@ describe('AftermarketDevice', function () {
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
-  let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
@@ -63,7 +61,6 @@ describe('AftermarketDevice', function () {
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let manufacturer2: HardhatEthersSigner;
   let manufacturerPrivileged1: HardhatEthersSigner;
@@ -88,7 +85,6 @@ describe('AftermarketDevice', function () {
     [
       admin,
       nonAdmin,
-      foundation,
       manufacturer1,
       manufacturer2,
       manufacturerPrivileged1,
@@ -119,7 +115,6 @@ describe('AftermarketDevice', function () {
         'Manufacturer',
         'Vehicle',
         'AftermarketDevice',
-        'AdLicenseValidator',
         'Mapper',
         'Shared'
       ],
@@ -135,7 +130,6 @@ describe('AftermarketDevice', function () {
     manufacturerInstance = deployments.Manufacturer;
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
-    adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
@@ -216,10 +210,13 @@ describe('AftermarketDevice', function () {
     // Setup Shared variables
     await sharedInstance
       .connect(admin)
-      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+      .setDimoToken(await mockDimoTokenInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setManufacturerLicense(await mockStakeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -228,16 +225,6 @@ describe('AftermarketDevice', function () {
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
-
-    // Setup AdLicenseValidator variables
-    await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
-    await adLicenseValidatorInstance.setDimoToken(
-      await mockDimoTokenInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setLicense(
-      await mockStakeInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance

@@ -14,7 +14,6 @@ import {
   VehicleId,
   AftermarketDevice,
   AftermarketDeviceId,
-  AdLicenseValidator,
   Mapper,
   Shared,
   MockDimoToken,
@@ -43,7 +42,6 @@ describe('Multicall', function () {
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
-  let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
@@ -57,7 +55,6 @@ describe('Multicall', function () {
   let DIMO_REGISTRY_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let adAddress1: HardhatEthersSigner;
@@ -73,7 +70,6 @@ describe('Multicall', function () {
   before(async () => {
     [
       admin,
-      foundation,
       manufacturer1,
       user1,
       adAddress1,
@@ -94,7 +90,6 @@ describe('Multicall', function () {
         'Manufacturer',
         'Vehicle',
         'AftermarketDevice',
-        'AdLicenseValidator',
         'Mapper',
         'Multicall',
         'Shared'
@@ -111,7 +106,6 @@ describe('Multicall', function () {
     manufacturerInstance = deployments.Manufacturer;
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
-    adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
     multicallInstance = deployments.Multicall;
@@ -185,10 +179,13 @@ describe('Multicall', function () {
     // Setup Shared variables
     await sharedInstance
       .connect(admin)
-      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+      .setDimoToken(await mockDimoTokenInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setManufacturerLicense(await mockStakeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -197,14 +194,6 @@ describe('Multicall', function () {
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
-
-    // Setup AdLicenseValidator variables
-    await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
-    await adLicenseValidatorInstance.setDimoToken(
-      await mockDimoTokenInstance.getAddress()
-    );
-    await adLicenseValidatorInstance.setLicense(await mockStakeInstance.getAddress());
-    await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance

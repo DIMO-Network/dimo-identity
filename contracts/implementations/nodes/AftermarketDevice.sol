@@ -9,10 +9,12 @@ import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/AftermarketDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 import "../AdLicenseValidator/AdLicenseValidatorInternal.sol";
+import "../charging/ChargingInternal.sol";
 
 import "../../shared/Roles.sol" as Roles;
 import "../../shared/Types.sol" as Types;
 import "../../shared/Errors.sol" as Errors;
+import {MINT_AD_OPERATION} from "../../shared/Operations.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
@@ -29,10 +31,7 @@ error OwnersDoNotMatch();
  * @notice Contract that represents the Aftermarket Device node
  * @dev It uses the Mapper contract to link Aftermarket Devices to Vehicles
  */
-contract AftermarketDevice is
-    AccessControlInternal,
-    AdLicenseValidatorInternal
-{
+contract AftermarketDevice is AccessControlInternal {
     bytes32 private constant CLAIM_TYPEHASH =
         keccak256(
             "ClaimAftermarketDeviceSign(uint256 aftermarketDeviceNode,address owner)"
@@ -187,8 +186,13 @@ contract AftermarketDevice is
                 _setInfos(newTokenId, adInfos[i].attrInfoPairs);
         }
 
-        // Validate license and transfer funds to foundation
-        _validateMintRequest(manufacturerNodeOwner, msg.sender, devicesAmount);
+        // Validate license and charge DCX
+        AdLicenseValidatorInternal._validateMintRequest(manufacturerNodeOwner);
+        ChargingInternal._chargeDcx(
+            msg.sender,
+            MINT_AD_OPERATION,
+            devicesAmount
+        );
     }
 
     /**

@@ -15,7 +15,6 @@ import {
   VehicleId,
   AftermarketDevice,
   AftermarketDeviceId,
-  AdLicenseValidator,
   Mapper,
   Shared,
   MockDimoToken,
@@ -46,7 +45,6 @@ describe('AftermarketDevice', function () {
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
-  let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
@@ -63,7 +61,6 @@ describe('AftermarketDevice', function () {
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let manufacturer2: HardhatEthersSigner;
   let manufacturerPrivileged1: HardhatEthersSigner;
@@ -88,7 +85,6 @@ describe('AftermarketDevice', function () {
     [
       admin,
       nonAdmin,
-      foundation,
       manufacturer1,
       manufacturer2,
       manufacturerPrivileged1,
@@ -119,7 +115,6 @@ describe('AftermarketDevice', function () {
         'Manufacturer',
         'Vehicle',
         'AftermarketDevice',
-        'AdLicenseValidator',
         'Mapper',
         'Shared'
       ],
@@ -135,7 +130,6 @@ describe('AftermarketDevice', function () {
     manufacturerInstance = deployments.Manufacturer;
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
-    adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
@@ -194,24 +188,21 @@ describe('AftermarketDevice', function () {
       C.defaultDomainVersion,
     );
 
-    // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
-    await mockDimoTokenInstance
-      .connect(admin)
-      .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
-    await mockDimoTokenInstance
-      .connect(manufacturer1)
-      .approve(
-        DIMO_REGISTRY_ADDRESS,
-        C.manufacturerDimoTokensAmount,
-      );
-
-    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    // Mint DIMO Credit tokens to the admin, manufacturer and privileged address
     await mockDimoCreditInstance
       .connect(admin)
       .mint(admin.address, C.adminDimoCreditTokensAmount);
     await mockDimoCreditInstance
       .connect(admin)
-      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+      .mint(manufacturer1.address, C.manufacturerDimoCreditTokensAmount);
+    await mockDimoCreditInstance
+      .connect(admin)
+      .mint(
+        manufacturerPrivileged1.address,
+        C.manufacturerDimoCreditTokensAmount,
+      );
+
+    // Grant BURNER role to DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
       .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -219,25 +210,21 @@ describe('AftermarketDevice', function () {
     // Setup Shared variables
     await sharedInstance
       .connect(admin)
-      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+      .setDimoToken(await mockDimoTokenInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setManufacturerLicense(await mockStakeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
-
-    // Setup AdLicenseValidator variables
-    await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
-    await adLicenseValidatorInstance.setDimoToken(
-      await mockDimoTokenInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setLicense(
-      await mockStakeInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -292,20 +279,7 @@ describe('AftermarketDevice', function () {
       DIMO_REGISTRY_ADDRESS,
     );
 
-    // Transfer DIMO Tokens to the privileged address, approve DIMORegistry, create and set privileges
-    await mockDimoTokenInstance
-      .connect(admin)
-      .transfer(
-        manufacturerPrivileged1.address,
-        C.manufacturerDimoTokensAmount,
-      );
-    await mockDimoTokenInstance
-      .connect(manufacturerPrivileged1)
-      .approve(
-        DIMO_REGISTRY_ADDRESS,
-        C.manufacturerDimoTokensAmount,
-      );
-
+    // Create and set privileges
     await manufacturerIdInstance.createPrivilege(true, 'Minter');
     await manufacturerIdInstance.createPrivilege(true, 'Claimer');
     await manufacturerIdInstance.createPrivilege(true, 'Manufacturer Factory Reset');
@@ -531,10 +505,10 @@ describe('AftermarketDevice', function () {
             'InvalidLicense',
           );
         });
-        it('Should revert if manufacturer does not have enough DIMO tokens', async () => {
-          await mockDimoTokenInstance
-            .connect(manufacturer1)
-            .burn(C.manufacturerDimoTokensAmount);
+        it('Should revert if manufacturer does not have enough DIMO Credit tokens', async () => {
+          await mockDimoCreditInstance
+            .connect(admin)
+            .burn(manufacturer1.address, C.manufacturerDimoCreditTokensAmount);
 
           await expect(
             aftermarketDeviceInstance
@@ -543,21 +517,7 @@ describe('AftermarketDevice', function () {
                 1,
                 mockAftermarketDeviceInfosList,
               ),
-          ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
-        });
-        it('Should revert if manufacturer has not approve DIMORegistry', async () => {
-          await mockDimoTokenInstance
-            .connect(manufacturer1)
-            .approve(DIMO_REGISTRY_ADDRESS, 0);
-
-          await expect(
-            aftermarketDeviceInstance
-              .connect(manufacturer1)
-              .mintAftermarketDeviceByManufacturerBatch(
-                1,
-                mockAftermarketDeviceInfosList,
-              ),
-          ).to.be.revertedWith('ERC20: insufficient allowance');
+          ).to.be.revertedWith('ERC20: burn amount exceeds balance');
         });
         it('Should revert if attribute is not whitelisted', async () => {
           await expect(
@@ -689,9 +649,9 @@ describe('AftermarketDevice', function () {
             ),
           ).to.be.equal(C.mockAftermarketDeviceInfo2);
         });
-        it('Should correctly decrease the DIMO balance of the manufacturer', async () => {
+        it('Should correctly burn DIMO Credit tokens from the sender', async () => {
           const balanceChange =
-            C.adMintCost *
+            C.MINT_AD_OPERATION_COST *
             ethers.toBigInt(C.mockAdAttributeInfoPairs.length) *
             ethers.toBigInt(-1);
 
@@ -703,25 +663,8 @@ describe('AftermarketDevice', function () {
                 mockAftermarketDeviceInfosList,
               ),
           ).changeTokenBalance(
-            mockDimoTokenInstance,
+            mockDimoCreditInstance,
             manufacturer1,
-            balanceChange,
-          );
-        });
-        it('Should correctly transfer the DIMO tokens to the foundation', async () => {
-          const balanceChange =
-            C.adMintCost * ethers.toBigInt(C.mockAdAttributeInfoPairs.length);
-
-          await expect(() =>
-            aftermarketDeviceInstance
-              .connect(manufacturer1)
-              .mintAftermarketDeviceByManufacturerBatch(
-                1,
-                mockAftermarketDeviceInfosList,
-              ),
-          ).changeTokenBalance(
-            mockDimoTokenInstance,
-            foundation,
             balanceChange,
           );
         });
@@ -903,10 +846,10 @@ describe('AftermarketDevice', function () {
             'InvalidLicense',
           );
         });
-        it('Should revert if manufacturer does not have enough DIMO tokens', async () => {
-          await mockDimoTokenInstance
-            .connect(manufacturerPrivileged1)
-            .burn(C.manufacturerDimoTokensAmount);
+        it('Should revert if privileged account does not have enough DIMO Credit tokens', async () => {
+          await mockDimoCreditInstance
+            .connect(admin)
+            .burn(manufacturerPrivileged1.address, C.manufacturerDimoTokensAmount);
 
           await expect(
             aftermarketDeviceInstance
@@ -915,21 +858,7 @@ describe('AftermarketDevice', function () {
                 1,
                 mockAftermarketDeviceInfosList,
               ),
-          ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
-        });
-        it('Should revert if manufacturer has not approve DIMORegistry', async () => {
-          await mockDimoTokenInstance
-            .connect(manufacturerPrivileged1)
-            .approve(DIMO_REGISTRY_ADDRESS, 0);
-
-          await expect(
-            aftermarketDeviceInstance
-              .connect(manufacturerPrivileged1)
-              .mintAftermarketDeviceByManufacturerBatch(
-                1,
-                mockAftermarketDeviceInfosList,
-              ),
-          ).to.be.revertedWith('ERC20: insufficient allowance');
+          ).to.be.revertedWith('ERC20: burn amount exceeds balance');
         });
         it('Should revert if attribute is not whitelisted', async () => {
           await expect(
@@ -1063,7 +992,7 @@ describe('AftermarketDevice', function () {
         });
         it('Should correctly decrease the DIMO balance of the privileged address', async () => {
           const balanceChange =
-            C.adMintCost *
+            C.MINT_AD_OPERATION_COST *
             ethers.toBigInt(C.mockAdAttributeInfoPairs.length) *
             ethers.toBigInt(-1);
 
@@ -1075,25 +1004,8 @@ describe('AftermarketDevice', function () {
                 mockAftermarketDeviceInfosList,
               ),
           ).changeTokenBalance(
-            mockDimoTokenInstance,
+            mockDimoCreditInstance,
             manufacturerPrivileged1,
-            balanceChange,
-          );
-        });
-        it('Should correctly transfer the DIMO tokens to the foundation', async () => {
-          const balanceChange =
-            C.adMintCost * ethers.toBigInt(C.mockAdAttributeInfoPairs.length);
-
-          await expect(() =>
-            aftermarketDeviceInstance
-              .connect(manufacturerPrivileged1)
-              .mintAftermarketDeviceByManufacturerBatch(
-                1,
-                mockAftermarketDeviceInfosList,
-              ),
-          ).changeTokenBalance(
-            mockDimoTokenInstance,
-            foundation,
             balanceChange,
           );
         });

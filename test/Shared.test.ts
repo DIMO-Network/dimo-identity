@@ -6,7 +6,8 @@ import type {
   DimoAccessControl,
   Shared,
   MockDimoToken,
-  MockDimoCredit
+  MockDimoCredit,
+  MockStake
 } from '../typechain-types';
 import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
@@ -18,9 +19,11 @@ describe('Shared', function () {
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockStakeInstance: MockStake;
 
   let MOCK_DIMO_TOKEN_ADDRESS: string;
   let MOCK_DIMO_CREDIT_ADDRESS: string;
+  let MOCK_STAKE_ADDRESS: string;
 
   let admin: HardhatEthersSigner
   let nonAdmin: HardhatEthersSigner;
@@ -37,6 +40,11 @@ describe('Shared', function () {
 
     dimoAccessControlInstance = deployments.DimoAccessControl;
     sharedInstance = deployments.Shared;
+
+    // Deploy MockStake contract
+    const MockStakeFactory = await ethers.getContractFactory('MockStake');
+    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+    MOCK_STAKE_ADDRESS = await mockStakeInstance.getAddress();
 
     await dimoAccessControlInstance
       .connect(admin)
@@ -112,7 +120,7 @@ describe('Shared', function () {
         await expect(
           sharedInstance
             .connect(nonAdmin)
-            .setDimoTokenAddress(MOCK_DIMO_TOKEN_ADDRESS)
+            .setDimoToken(MOCK_DIMO_TOKEN_ADDRESS)
         ).to.be.rejectedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
@@ -124,7 +132,7 @@ describe('Shared', function () {
       it('Should correctly return DIMO token address', async () => {
         await sharedInstance
           .connect(admin)
-          .setDimoTokenAddress(MOCK_DIMO_TOKEN_ADDRESS);
+          .setDimoToken(MOCK_DIMO_TOKEN_ADDRESS);
 
         const dimoTokenAddress = await sharedInstance.getDimoToken();
 
@@ -137,7 +145,7 @@ describe('Shared', function () {
         await expect(
           sharedInstance
             .connect(admin)
-            .setDimoTokenAddress(MOCK_DIMO_TOKEN_ADDRESS)
+            .setDimoToken(MOCK_DIMO_TOKEN_ADDRESS)
         )
           .to.emit(sharedInstance, 'DimoTokenSet')
           .withArgs(MOCK_DIMO_TOKEN_ADDRESS);
@@ -180,6 +188,45 @@ describe('Shared', function () {
         )
           .to.emit(sharedInstance, 'DimoCreditSet')
           .withArgs(MOCK_DIMO_CREDIT_ADDRESS);
+      });
+    });
+  });
+  
+  describe('setManufacturerLicense', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          sharedInstance
+            .connect(nonAdmin)
+            .setManufacturerLicense(MOCK_STAKE_ADDRESS)
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
+          }`
+        );
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly return Manufacturer License address', async () => {
+        await sharedInstance
+          .connect(admin)
+          .setManufacturerLicense(MOCK_STAKE_ADDRESS);
+
+        const manufacturerLicenseAddress = await sharedInstance.getManufacturerLicense();
+
+        expect(manufacturerLicenseAddress).to.equal(MOCK_STAKE_ADDRESS);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit ManufacturerLicenseSet event with correct params', async () => {
+        await expect(
+          sharedInstance
+            .connect(admin)
+            .setManufacturerLicense(MOCK_STAKE_ADDRESS)
+        )
+          .to.emit(sharedInstance, 'ManufacturerLicenseSet')
+          .withArgs(MOCK_STAKE_ADDRESS);
       });
     });
   });

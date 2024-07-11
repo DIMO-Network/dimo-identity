@@ -19,7 +19,6 @@ import {
   SyntheticDeviceId,
   AftermarketDevice,
   AftermarketDeviceId,
-  AdLicenseValidator,
   Mapper,
   Shared,
   MockDimoToken,
@@ -50,7 +49,6 @@ describe('VehicleId', async function () {
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let syntheticDeviceInstance: SyntheticDevice;
-  let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
@@ -66,7 +64,6 @@ describe('VehicleId', async function () {
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let integrationOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
@@ -86,7 +83,6 @@ describe('VehicleId', async function () {
     [
       admin,
       nonAdmin,
-      foundation,
       manufacturer1,
       integrationOwner1,
       user1,
@@ -113,7 +109,6 @@ describe('VehicleId', async function () {
         'Vehicle',
         'AftermarketDevice',
         'SyntheticDevice',
-        'AdLicenseValidator',
         'Mapper',
         'Shared'
       ],
@@ -138,7 +133,6 @@ describe('VehicleId', async function () {
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     syntheticDeviceInstance = deployments.SyntheticDevice;
-    adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
@@ -172,19 +166,19 @@ describe('VehicleId', async function () {
     // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await integrationIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await sdIdInstance
       .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, await dimoRegistryInstance.getAddress());
+      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
 
     // Set base data URI
     await baseDataUriInstance.setBaseDataURI(
@@ -215,24 +209,15 @@ describe('VehicleId', async function () {
       C.defaultDomainVersion,
     );
 
-    // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
-    await mockDimoTokenInstance
-      .connect(admin)
-      .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
-    await mockDimoTokenInstance
-      .connect(manufacturer1)
-      .approve(
-        await dimoRegistryInstance.getAddress(),
-        C.manufacturerDimoTokensAmount,
-      );
-
-    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    // Mint DIMO Credit tokens to the admin and manufacturer
     await mockDimoCreditInstance
       .connect(admin)
       .mint(admin.address, C.adminDimoCreditTokensAmount);
     await mockDimoCreditInstance
       .connect(admin)
-      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+      .mint(manufacturer1.address, C.manufacturerDimoCreditTokensAmount);
+
+    // Grant BURNER role to DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
       .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -240,25 +225,21 @@ describe('VehicleId', async function () {
     // Setup Shared variables
     await sharedInstance
       .connect(admin)
-      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+      .setDimoToken(await mockDimoTokenInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setManufacturerLicense(await mockStakeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
-
-    // Setup AdLicenseValidator variables
-    await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
-    await adLicenseValidatorInstance.setDimoToken(
-      await mockDimoTokenInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setLicense(
-      await mockStakeInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -325,7 +306,7 @@ describe('VehicleId', async function () {
       .connect(admin)
       .grantRole(
         C.NFT_TRANSFERER_ROLE,
-        await dimoRegistryInstance.getAddress(),
+        DIMO_REGISTRY_ADDRESS,
       );
 
     // Minting aftermarket devices for testing
@@ -343,13 +324,13 @@ describe('VehicleId', async function () {
     // Setting DimoRegistry address in the Proxy IDs
     await manufacturerIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await adIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(await dimoRegistryInstance.getAddress());
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
 
     const claimOwnerSig1 = await signMessage({
       _signer: user1,

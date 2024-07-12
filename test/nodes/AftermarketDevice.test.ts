@@ -1189,6 +1189,102 @@ describe('AftermarketDevice', function () {
       });
     });
 
+    context('Manufacturer node owner as claimer', () => {
+      context('Error handling', () => {
+        it('Should revert if device is already claimed', async () => {
+          await aftermarketDeviceInstance
+            .connect(admin)
+            .claimAftermarketDeviceSign(1, user1.address, ownerSig, adSig);
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
+          )
+            .to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'DeviceAlreadyClaimed',
+            )
+            .withArgs(1);
+        });
+        it('Should revert if device does not exist', async () => {
+          const wrongAdOwnerPairs = [...localAdOwnerPairs,
+          { aftermarketDeviceNodeId: '99', owner: user1.address },
+          ];
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .claimAftermarketDeviceBatch(wrongAdOwnerPairs),
+          )
+            .to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'InvalidNode',
+            )
+            .withArgs(AD_ID_ADDRESS, 99);
+        });
+        it('Should revert if manufacturer has transferred their token', async () => {
+          await manufacturerInstance
+            .connect(admin)
+            .setController(manufacturer2.address);
+          await manufacturerIdInstance
+            .connect(admin)
+            .grantRole(C.NFT_TRANSFERER_ROLE, manufacturer1.address);
+          await manufacturerIdInstance
+            .connect(manufacturer1)
+          ['safeTransferFrom(address,address,uint256)'](
+            manufacturer1.address,
+            manufacturer2.address,
+            1,
+          );
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'Unauthorized',
+          );
+        });
+      });
+
+      context('State', async () => {
+        it('Should correctly set node owners', async () => {
+          await aftermarketDeviceInstance
+            .connect(manufacturer1)
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
+
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
+        });
+        it('Should correctly set nodes as claimed', async () => {
+          expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.false;
+          expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(2)).to.be.false;
+
+          await aftermarketDeviceInstance
+            .connect(manufacturer1)
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
+
+          expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;
+          expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(2)).to.be.true;
+        });
+      });
+
+      context('Events', () => {
+        it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturer1)
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
+          )
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(1, user1.address)
+            .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+            .withArgs(2, user2.address);
+        });
+      });
+    });
+
     context('Privileged address as claimer', () => {
       context('Error handling', () => {
         it('Should revert if device is already claimed', async () => {
@@ -1297,7 +1393,7 @@ describe('AftermarketDevice', function () {
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(2)).to.be.false;
 
           await aftermarketDeviceInstance
-            .connect(admin)
+            .connect(manufacturerPrivileged1)
             .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;

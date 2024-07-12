@@ -204,43 +204,12 @@ contract AftermarketDevice is AccessControlInternal {
      *  owner -> Address to be the new AD owner
      */
     function claimAftermarketDeviceBatch(
-        uint256 manufacturerNode,
         Types.AftermarketDeviceOwnerPair[] calldata adOwnerPair
     ) external {
-        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
-            ManufacturerStorage.getStorage().idProxyAddress
-        );
-
-        if (
-            !_hasRole(Roles.ADMIN_ROLE, msg.sender) &&
-            !manufacturerIdProxy.hasPrivilege(
-                manufacturerNode,
-                MANUFACTURER_CLAIMER_PRIVILEGE,
-                msg.sender
-            )
-        ) revert Errors.Unauthorized(msg.sender);
-
-        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
-            .getStorage();
-        INFT adIdProxy = INFT(ads.idProxyAddress);
-
-        uint256 aftermarketDeviceNode;
-        address owner;
-        for (uint256 i = 0; i < adOwnerPair.length; i++) {
-            aftermarketDeviceNode = adOwnerPair[i].aftermarketDeviceNodeId;
-            owner = adOwnerPair[i].owner;
-
-            if (ads.deviceClaimed[aftermarketDeviceNode])
-                revert DeviceAlreadyClaimed(aftermarketDeviceNode);
-
-            ads.deviceClaimed[aftermarketDeviceNode] = true;
-            adIdProxy.safeTransferFrom(
-                adIdProxy.ownerOf(aftermarketDeviceNode),
-                owner,
-                aftermarketDeviceNode
-            );
-
-            emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
+        if (_hasRole(Roles.ADMIN_ROLE, msg.sender)) {
+            _claimAftermarketDeviceBatchByAdmin(adOwnerPair);
+        } else {
+            _claimAftermarketDeviceBatch(adOwnerPair);
         }
     }
 
@@ -715,6 +684,101 @@ contract AftermarketDevice is AccessControlInternal {
     }
 
     // ***** PRIVATE FUNCTIONS ***** //
+
+    /**
+     * @notice Internal function to claim the ownership of a list of aftermarket devices to a list of owners
+     * Caller must have the admin role
+     * @param adOwnerPair List of pairs AD-owner
+     *  aftermarketDeviceNodeId -> Token ID of the AD
+     *  owner -> Address to be the new AD owner
+     */
+    function _claimAftermarketDeviceBatchByAdmin(
+        Types.AftermarketDeviceOwnerPair[] calldata adOwnerPair
+    ) private {
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+
+        INFT adIdProxy = INFT(ads.idProxyAddress);
+        uint256 aftermarketDeviceNode;
+        address newOwner;
+        for (uint256 i = 0; i < adOwnerPair.length; i++) {
+            aftermarketDeviceNode = adOwnerPair[i].aftermarketDeviceNodeId;
+            newOwner = adOwnerPair[i].owner;
+
+            if (!adIdProxy.exists(aftermarketDeviceNode))
+                revert Errors.InvalidNode(
+                    address(adIdProxy),
+                    aftermarketDeviceNode
+                );
+            if (ads.deviceClaimed[aftermarketDeviceNode])
+                revert DeviceAlreadyClaimed(aftermarketDeviceNode);
+
+            ads.deviceClaimed[aftermarketDeviceNode] = true;
+            adIdProxy.safeTransferFrom(
+                adIdProxy.ownerOf(aftermarketDeviceNode),
+                newOwner,
+                aftermarketDeviceNode
+            );
+
+            emit AftermarketDeviceClaimed(aftermarketDeviceNode, newOwner);
+        }
+    }
+
+    /**
+     * @notice Internal function to claim the ownership of a list of aftermarket devices to a list of owners
+     * Caller must be the manufacturer node owner, or the manufacturer node owner must have granted the claimer privilege to the caller
+     * @param adOwnerPair List of pairs AD-owner
+     *  aftermarketDeviceNodeId -> Token ID of the AD
+     *  owner -> Address to be the new AD owner
+     */
+    function _claimAftermarketDeviceBatch(
+        Types.AftermarketDeviceOwnerPair[] calldata adOwnerPair
+    ) private {
+        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+            ManufacturerStorage.getStorage().idProxyAddress
+        );
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+
+        INFT adIdProxy = INFT(ads.idProxyAddress);
+        uint256 aftermarketDeviceNode;
+        uint256 adParentNode;
+        address newOwner;
+        for (uint256 i = 0; i < adOwnerPair.length; i++) {
+            aftermarketDeviceNode = adOwnerPair[i].aftermarketDeviceNodeId;
+
+            if (!adIdProxy.exists(aftermarketDeviceNode))
+                revert Errors.InvalidNode(
+                    address(adIdProxy),
+                    aftermarketDeviceNode
+                );
+
+            newOwner = adOwnerPair[i].owner;
+            adParentNode = ns
+            .nodes[address(adIdProxy)][aftermarketDeviceNode].parentNode;
+
+            if (
+                !manufacturerIdProxy.hasPrivilege(
+                    adParentNode,
+                    MANUFACTURER_CLAIMER_PRIVILEGE,
+                    msg.sender
+                )
+            ) revert Errors.Unauthorized(msg.sender);
+
+            if (ads.deviceClaimed[aftermarketDeviceNode])
+                revert DeviceAlreadyClaimed(aftermarketDeviceNode);
+
+            ads.deviceClaimed[aftermarketDeviceNode] = true;
+            adIdProxy.safeTransferFrom(
+                adIdProxy.ownerOf(aftermarketDeviceNode),
+                newOwner,
+                aftermarketDeviceNode
+            );
+
+            emit AftermarketDeviceClaimed(aftermarketDeviceNode, newOwner);
+        }
+    }
 
     /**
      * @dev Internal function to add infos to node

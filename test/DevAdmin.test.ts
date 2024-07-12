@@ -1832,7 +1832,7 @@ describe('DevAdmin', function () {
           .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceBatch(1, [{ aftermarketDeviceNodeId: '1', owner: await user1.address }]);
+          .claimAftermarketDeviceBatch([{ aftermarketDeviceNodeId: '1', owner: await user1.address }]);
 
         await aftermarketDeviceInstance
           .connect(admin)
@@ -1873,7 +1873,7 @@ describe('DevAdmin', function () {
         ];
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+          .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
         expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;
         expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(2)).to.be.true;
@@ -2017,7 +2017,7 @@ describe('DevAdmin', function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+          .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
         await vehicleInstance
           .connect(admin)
@@ -2200,7 +2200,7 @@ describe('DevAdmin', function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+          .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
         await vehicleInstance
           .connect(admin)

@@ -174,7 +174,7 @@
                 ]
             },
             "VehicleStream": {
-                "address": "0x97f5C59064dF9527268ede53e4B429683E3be5AA",
+                "address": "0xb41D08E63F4181aeeF2219711129F85Cebf97088",
                 "selectors": [
                     "0x497323c8",
                     "0x180e469a",

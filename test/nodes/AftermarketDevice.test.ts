@@ -1070,8 +1070,8 @@ describe('AftermarketDevice', function () {
     let adSig: string;
     before(async () => {
       localAdOwnerPairs = [
-        { aftermarketDeviceNodeId: '1', owner: await user1.address },
-        { aftermarketDeviceNodeId: '2', owner: await user2.address },
+        { aftermarketDeviceNodeId: '1', owner: user1.address },
+        { aftermarketDeviceNodeId: '2', owner: user2.address },
       ];
 
       ownerSig = await signMessage({
@@ -1112,7 +1112,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(nonAdmin)
-              .claimAftermarketDeviceBatch(1, localAdOwnerPairs),
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
           ).to.be.revertedWithCustomError(
             aftermarketDeviceInstance,
             'Unauthorized',
@@ -1126,7 +1126,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-              .claimAftermarketDeviceBatch(1, localAdOwnerPairs),
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
           )
             .to.be.revertedWithCustomError(
               aftermarketDeviceInstance,
@@ -1134,13 +1134,29 @@ describe('AftermarketDevice', function () {
             )
             .withArgs(1);
         });
+        it('Should revert if device does not exist', async () => {
+          const wrongAdOwnerPairs = [...localAdOwnerPairs,
+          { aftermarketDeviceNodeId: '99', owner: user1.address },
+          ];
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(admin)
+              .claimAftermarketDeviceBatch(wrongAdOwnerPairs),
+          )
+            .to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'InvalidNode',
+            )
+            .withArgs(AD_ID_ADDRESS, 99);
+        });
       });
 
       context('State', async () => {
         it('Should correctly set node owners', async () => {
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
           expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
           expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
@@ -1151,7 +1167,7 @@ describe('AftermarketDevice', function () {
 
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(2)).to.be.true;
@@ -1163,7 +1179,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(admin)
-              .claimAftermarketDeviceBatch(1, localAdOwnerPairs),
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
           )
             .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
             .withArgs(1, user1.address)
@@ -1182,7 +1198,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(manufacturerPrivileged1)
-              .claimAftermarketDeviceBatch(1, localAdOwnerPairs),
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
           )
             .to.be.revertedWithCustomError(
               aftermarketDeviceInstance,
@@ -1190,11 +1206,27 @@ describe('AftermarketDevice', function () {
             )
             .withArgs(1);
         });
+        it('Should revert if device does not exist', async () => {
+          const wrongAdOwnerPairs = [...localAdOwnerPairs,
+          { aftermarketDeviceNodeId: '99', owner: user1.address },
+          ];
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(manufacturerPrivileged1)
+              .claimAftermarketDeviceBatch(wrongAdOwnerPairs),
+          )
+            .to.be.revertedWithCustomError(
+              aftermarketDeviceInstance,
+              'InvalidNode',
+            )
+            .withArgs(AD_ID_ADDRESS, 99);
+        });
         it('Should revert if the caller does not have the minter privilege', async () => {
           await expect(
             aftermarketDeviceInstance
               .connect(nonManufacturerPrivilged)
-              .claimAftermarketDeviceBatch(1, localAdOwnerPairs),
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
           ).to.be.revertedWithCustomError(
             aftermarketDeviceInstance,
             'Unauthorized',
@@ -1207,7 +1239,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(manufacturerPrivileged1)
-              .claimAftermarketDeviceBatch(1, localAdOwnerPairs),
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
           ).to.be.revertedWithCustomError(
             aftermarketDeviceInstance,
             'Unauthorized',
@@ -1219,7 +1251,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(manufacturerPrivileged1)
-              .claimAftermarketDeviceBatch(1, localAdOwnerPairs),
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
           ).to.be.revertedWithCustomError(
             aftermarketDeviceInstance,
             'Unauthorized',
@@ -1243,7 +1275,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(manufacturerPrivileged1)
-              .claimAftermarketDeviceBatch(1, localAdOwnerPairs),
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
           ).to.be.revertedWithCustomError(
             aftermarketDeviceInstance,
             'Unauthorized',
@@ -1255,7 +1287,7 @@ describe('AftermarketDevice', function () {
         it('Should correctly set node owners', async () => {
           await aftermarketDeviceInstance
             .connect(manufacturerPrivileged1)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
           expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
           expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
@@ -1266,7 +1298,7 @@ describe('AftermarketDevice', function () {
 
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(2)).to.be.true;
@@ -1278,7 +1310,7 @@ describe('AftermarketDevice', function () {
           await expect(
             aftermarketDeviceInstance
               .connect(manufacturerPrivileged1)
-              .claimAftermarketDeviceBatch(1, localAdOwnerPairs),
+              .claimAftermarketDeviceBatch(localAdOwnerPairs),
           )
             .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
             .withArgs(1, user1.address)
@@ -3722,7 +3754,7 @@ describe('AftermarketDevice', function () {
           ];
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(2)).to.be.true;
@@ -3741,7 +3773,7 @@ describe('AftermarketDevice', function () {
           ];
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(3)).to.be.false;
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(4)).to.be.false;
@@ -3892,7 +3924,7 @@ describe('AftermarketDevice', function () {
             .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
           await aftermarketDeviceInstance
             .connect(admin)
           ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
@@ -3979,7 +4011,7 @@ describe('AftermarketDevice', function () {
             .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
           await aftermarketDeviceInstance
             .connect(admin)
           ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
@@ -4164,7 +4196,7 @@ describe('AftermarketDevice', function () {
           ];
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(2)).to.be.true;
@@ -4183,7 +4215,7 @@ describe('AftermarketDevice', function () {
           ];
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(3)).to.be.false;
           expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(4)).to.be.false;
@@ -4334,7 +4366,7 @@ describe('AftermarketDevice', function () {
             .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
           await aftermarketDeviceInstance
             .connect(admin)
           ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);
@@ -4421,7 +4453,7 @@ describe('AftermarketDevice', function () {
             .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
           await aftermarketDeviceInstance
             .connect(admin)
-            .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+            .claimAftermarketDeviceBatch(localAdOwnerPairs);
           await aftermarketDeviceInstance
             .connect(admin)
           ['pairAftermarketDeviceSign(uint256,uint256,bytes)'](1, 1, pairSig1);

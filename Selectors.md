@@ -127,7 +127,7 @@
 | Selector | Signature |
 |-|-|
 | 0x6111afa3 | addAftermarketDeviceAttribute(string) |
-| 0x60deec60 | claimAftermarketDeviceBatch(uint256,(uint256,address)[]) |
+| 0xab2ae229 | claimAftermarketDeviceBatch((uint256,address)[]) |
 | 0x89a841bb | claimAftermarketDeviceSign(uint256,address,bytes,bytes) |
 | 0x682a25e3 | getAftermarketDeviceAddressById(uint256) |
 | 0x9796cf22 | getAftermarketDeviceIdByAddress(address) |

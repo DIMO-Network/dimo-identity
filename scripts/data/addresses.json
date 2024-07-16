@@ -121,16 +121,6 @@
                     "0x80430e0d"
                 ]
             },
-            "AdLicenseValidator": {
-                "address": "0x8AA7EbCa4202d49de98DF90149d1C970793f17D3",
-                "selectors": [
-                    "0x46946743",
-                    "0x2390baa8",
-                    "0x5b6c1979",
-                    "0xf41377ca",
-                    "0x0fd21c17"
-                ]
-            },
             "Mapper": {
                 "address": "0xe9A927Ee6f6D6b41B4c0599D5Df4EB5ebD7537eA",
                 "selectors": [
@@ -392,16 +382,6 @@
                     "0xc624e8a1",
                     "0xecf452d7",
                     "0x80430e0d"
-                ]
-            },
-            "AdLicenseValidator": {
-                "address": "0x9FC51E77506F11Ec5e3c16e7D505B854A3D50110",
-                "selectors": [
-                    "0x46946743",
-                    "0x2390baa8",
-                    "0x5b6c1979",
-                    "0xf41377ca",
-                    "0x0fd21c17"
                 ]
             },
             "Mapper": {
@@ -666,16 +646,6 @@
                     "0xc624e8a1",
                     "0xecf452d7",
                     "0x80430e0d"
-                ]
-            },
-            "AdLicenseValidator": {
-                "address": "0xf3589240D848413c8861AC80277087493F329D93",
-                "selectors": [
-                    "0x46946743",
-                    "0x2390baa8",
-                    "0x5b6c1979",
-                    "0xf41377ca",
-                    "0x0fd21c17"
                 ]
             },
             "Mapper": {

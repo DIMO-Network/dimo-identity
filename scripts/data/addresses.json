@@ -89,10 +89,10 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x6397e67AC10D7cC53DCFC34e1ef578E05B2C6D53",
+                "address": "0x0C140d65B85E3c7D8A1A8bc9c7ffA7Ac839E0298",
                 "selectors": [
                     "0x6111afa3",
-                    "0x60deec60",
+                    "0xab2ae229",
                     "0x89a841bb",
                     "0x682a25e3",
                     "0x9796cf22",
@@ -148,14 +148,16 @@
                 ]
             },
             "Shared": {
-                "address": "0xF203e6B307a1C02044aa6f3346F37bbEF46Ec24a",
+                "address": "0xb9a818CF79e469665030a116cc1B9e85B5822040",
                 "selectors": [
                     "0xcfe55b7d",
                     "0x77898251",
                     "0xa2bc6cdf",
+                    "0x170e4293",
                     "0x4fa9ff16",
-                    "0x81c9bb13",
-                    "0xdb3543f5"
+                    "0x5b6c1979",
+                    "0xdb3543f5",
+                    "0xea9ae2f5"
                 ]
             },
             "MultipleMinter": {

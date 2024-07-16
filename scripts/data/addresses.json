@@ -634,10 +634,10 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x98C7f3ff54372993358a53b6d66f06f23028eba6",
+                "address": "0xa5bF75219E0ce9a006CF0D85d1b7AC010000986f",
                 "selectors": [
                     "0x6111afa3",
-                    "0x60deec60",
+                    "0xab2ae229",
                     "0x89a841bb",
                     "0x682a25e3",
                     "0x9796cf22",
@@ -693,14 +693,16 @@
                 ]
             },
             "Shared": {
-                "address": "0x374A48ACe6578905D712Ed5B55d84c8D69B384b4",
+                "address": "0xBBA8892657C9a8156c7AAd79d45128EA5191f224",
                 "selectors": [
                     "0xcfe55b7d",
                     "0x77898251",
                     "0xa2bc6cdf",
+                    "0x170e4293",
                     "0x4fa9ff16",
-                    "0x81c9bb13",
-                    "0xdb3543f5"
+                    "0x5b6c1979",
+                    "0xdb3543f5",
+                    "0xea9ae2f5"
                 ]
             },
             "MultipleMinter": {
@@ -719,7 +721,7 @@
                 ]
             },
             "VehicleStream": {
-                "address": "0xF663e51f46Bab352FAb0d44D6249eCD27026bce9",
+                "address": "0x0e15032f40274Bb21B902A6cFCbDa4C066148002",
                 "selectors": [
                     "0x497323c8",
                     "0x180e469a",

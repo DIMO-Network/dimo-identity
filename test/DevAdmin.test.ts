@@ -26,7 +26,6 @@ import {
   AftermarketDeviceId,
   SyntheticDevice,
   SyntheticDeviceId,
-  AdLicenseValidator,
   Mapper,
   Shared,
   StreamrConfigurator,
@@ -59,7 +58,6 @@ describe('DevAdmin', function () {
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let syntheticDeviceInstance: SyntheticDevice;
-  let adLicenseValidatorInstance: AdLicenseValidator;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
@@ -79,7 +77,6 @@ describe('DevAdmin', function () {
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let streamrAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let manufacturer2: HardhatEthersSigner;
@@ -120,7 +117,6 @@ describe('DevAdmin', function () {
     [
       admin,
       nonAdmin,
-      foundation,
       streamrAdmin,
       manufacturer1,
       manufacturer2,
@@ -149,7 +145,6 @@ describe('DevAdmin', function () {
         'Vehicle',
         'AftermarketDevice',
         'SyntheticDevice',
-        'AdLicenseValidator',
         'Mapper',
         'Shared',
         'StreamrConfigurator',
@@ -175,7 +170,6 @@ describe('DevAdmin', function () {
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     syntheticDeviceInstance = deployments.SyntheticDevice;
-    adLicenseValidatorInstance = deployments.AdLicenseValidator;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
     devAdminInstance = deployments.DevAdmin;
@@ -250,24 +244,15 @@ describe('DevAdmin', function () {
       C.defaultDomainVersion,
     );
 
-    // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
-    await mockDimoTokenInstance
-      .connect(admin)
-      .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
-    await mockDimoTokenInstance
-      .connect(manufacturer1)
-      .approve(
-        DIMO_REGISTRY_ADDRESS,
-        C.manufacturerDimoTokensAmount,
-      );
-
-    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    // Mint DIMO Credit tokens to the admin and manufacturer
     await mockDimoCreditInstance
       .connect(admin)
       .mint(admin.address, C.adminDimoCreditTokensAmount);
     await mockDimoCreditInstance
       .connect(admin)
-      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+      .mint(manufacturer1.address, C.manufacturerDimoCreditTokensAmount);
+
+    // Grant BURNER role to DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
       .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -275,25 +260,21 @@ describe('DevAdmin', function () {
     // Setup Shared variables
     await sharedInstance
       .connect(admin)
-      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+      .setDimoToken(await mockDimoTokenInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setManufacturerLicense(await mockStakeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
-
-    // Setup AdLicenseValidator variables
-    await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
-    await adLicenseValidatorInstance.setDimoToken(
-      await mockDimoTokenInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setLicense(
-      await mockStakeInstance.getAddress(),
-    );
-    await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -1851,7 +1832,7 @@ describe('DevAdmin', function () {
           .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceBatch(1, [{ aftermarketDeviceNodeId: '1', owner: await user1.address }]);
+          .claimAftermarketDeviceBatch([{ aftermarketDeviceNodeId: '1', owner: await user1.address }]);
 
         await aftermarketDeviceInstance
           .connect(admin)
@@ -1892,7 +1873,7 @@ describe('DevAdmin', function () {
         ];
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+          .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
         expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;
         expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(2)).to.be.true;
@@ -2036,7 +2017,7 @@ describe('DevAdmin', function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+          .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
         await vehicleInstance
           .connect(admin)
@@ -2219,7 +2200,7 @@ describe('DevAdmin', function () {
 
         await aftermarketDeviceInstance
           .connect(admin)
-          .claimAftermarketDeviceBatch(1, localAdOwnerPairs);
+          .claimAftermarketDeviceBatch(localAdOwnerPairs);
 
         await vehicleInstance
           .connect(admin)

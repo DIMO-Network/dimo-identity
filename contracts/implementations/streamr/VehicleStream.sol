@@ -165,18 +165,6 @@ contract VehicleStream is AccessControlInternal {
         if (
             !streamRegistry.hasPermission(
                 streamId,
-                msg.sender,
-                IStreamRegistry.PermissionType.Grant
-            )
-        ) {
-            revert NoStreamrPermission(
-                msg.sender,
-                IStreamRegistry.PermissionType.Grant
-            );
-        }
-        if (
-            !streamRegistry.hasPermission(
-                streamId,
                 address(this),
                 IStreamRegistry.PermissionType.Grant
             )

@@ -1,6 +1,6 @@
 import chai from 'chai';
 import { ethers } from 'hardhat';
-import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
+import { HardhatEthersSigner } from '@nomicsetVehicleStream/hardhat-ethers/signers';
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 
 import {
@@ -167,13 +167,15 @@ describe('VehicleStream', async function () {
       C.defaultDomainVersion
     );
 
-    // Mint DIMO Credit Tokens to admin and approve DIMORegistry
+    // Mint DIMO Credit tokens to the admin and manufacturer
     await mockDimoCreditInstance
       .connect(admin)
       .mint(admin.address, C.adminDimoCreditTokensAmount);
     await mockDimoCreditInstance
       .connect(admin)
-      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+      .mint(manufacturer1.address, C.manufacturerDimoCreditTokensAmount);
+
+    // Grant BURNER role to DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
       .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
@@ -187,6 +189,9 @@ describe('VehicleStream', async function () {
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance
@@ -389,17 +394,17 @@ describe('VehicleStream', async function () {
   describe('setVehicleStream', () => {
     let mockStreamId: string;
     beforeEach(async () => {
-      mockStreamId = `${await user1.address.toString().toLowerCase()}${C.MOCK_STREAM_PATH}`;
+      mockStreamId = `${await user2.address.toString().toLowerCase()}${C.MOCK_STREAM_PATH}`;
 
       await streamRegistry
-        .connect(user1)
+        .connect(user2)
         .createStream(C.MOCK_STREAM_PATH, '{}');
 
       await streamRegistry
-        .connect(user1)
+        .connect(user2)
         .grantPermission(mockStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
       await streamRegistry
-        .connect(user1)
+        .connect(user2)
         .grantPermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
     });
 
@@ -442,7 +447,7 @@ describe('VehicleStream', async function () {
       });
       it('Should revert if DIMO Streamr Node does not have Publish permission', async () => {
         await streamRegistry
-          .connect(user1)
+          .connect(user2)
           .revokePermission(mockStreamId, C.DIMO_STREAMR_NODE, C.StreamrPermissionType.Publish);
 
         await expect(
@@ -457,26 +462,9 @@ describe('VehicleStream', async function () {
           C.StreamrPermissionType.Publish
         );
       });
-      it('Should revert if third party stream owner does not have Grant permission', async () => {
-        await streamRegistry
-          .connect(user1)
-          .revokePermission(mockStreamId, user1.address, C.StreamrPermissionType.Grant);
-
-        await expect(
-          vehicleStreamInstance
-            .connect(user1)
-            .setVehicleStream(1, mockStreamId)
-        ).to.be.revertedWithCustomError(
-          vehicleStreamInstance,
-          'NoStreamrPermission'
-        ).withArgs(
-          user1.address,
-          C.StreamrPermissionType.Grant
-        );
-      });
       it('Should revert if DIMO Registry does not have Grant permission', async () => {
         await streamRegistry
-          .connect(user1)
+          .connect(user2)
           .revokePermission(mockStreamId, DIMO_REGISTRY_ADDRESS, C.StreamrPermissionType.Grant);
 
         await expect(

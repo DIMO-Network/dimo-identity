@@ -18,7 +18,6 @@ import {
   SyntheticDeviceId,
   AftermarketDevice,
   AftermarketDeviceId,
-  AdLicenseValidator,
   Shared,
   MockDimoToken,
   MockDimoCredit,
@@ -48,7 +47,6 @@ describe('Vehicle', function () {
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let syntheticDeviceInstance: SyntheticDevice;
-  let adLicenseValidatorInstance: AdLicenseValidator;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
@@ -63,7 +61,6 @@ describe('Vehicle', function () {
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
-  let foundation: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let integrationOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
@@ -83,7 +80,6 @@ describe('Vehicle', function () {
     [
       admin,
       nonAdmin,
-      foundation,
       manufacturer1,
       integrationOwner1,
       user1,
@@ -109,7 +105,6 @@ describe('Vehicle', function () {
         'Vehicle',
         'AftermarketDevice',
         'SyntheticDevice',
-        'AdLicenseValidator',
         'Mapper',
         'Shared'
       ],
@@ -133,7 +128,6 @@ describe('Vehicle', function () {
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     syntheticDeviceInstance = deployments.SyntheticDevice;
-    adLicenseValidatorInstance = deployments.AdLicenseValidator;
     sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
     integrationIdInstance = deployments.IntegrationId;
@@ -205,45 +199,37 @@ describe('Vehicle', function () {
         C.defaultDomainVersion
       );
 
-    // Transfer DIMO Tokens to the manufacturer and approve DIMORegistry
-    await mockDimoTokenInstance
-      .connect(admin)
-      .transfer(manufacturer1.address, C.manufacturerDimoTokensAmount);
-    await mockDimoTokenInstance
-      .connect(manufacturer1)
-      .approve(DIMO_REGISTRY_ADDRESS, C.manufacturerDimoTokensAmount);
-
-    // Mint DIMO Credit Tokens to admin, approve DIMORegistry and grant BURNER_ROLE
+    // Mint DIMO Credit tokens to the admin and manufacturer
     await mockDimoCreditInstance
       .connect(admin)
       .mint(admin.address, C.adminDimoCreditTokensAmount);
     await mockDimoCreditInstance
       .connect(admin)
-      .approve(DIMO_REGISTRY_ADDRESS, C.adminDimoCreditTokensAmount);
+      .mint(manufacturer1.address, C.manufacturerDimoCreditTokensAmount);
+
+    // Grant BURNER role to DIMORegistry
     await mockDimoCreditInstance
       .connect(admin)
       .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
 
-    // Setup AdLicenseValidator variables
-    await adLicenseValidatorInstance.setFoundationAddress(foundation.address);
-    await adLicenseValidatorInstance.setDimoToken(
-      await mockDimoTokenInstance.getAddress()
-    );
-    await adLicenseValidatorInstance.setLicense(await mockStakeInstance.getAddress());
-    await adLicenseValidatorInstance.setAdMintCost(C.adMintCost);
-
     // Setup Shared variables
     await sharedInstance
       .connect(admin)
-      .setDimoTokenAddress(await mockDimoTokenInstance.getAddress());
+      .setDimoToken(await mockDimoTokenInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setManufacturerLicense(await mockStakeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
       .connect(admin)
       .setDcxOperationCost(C.MINT_VEHICLE_OPERATION, C.MINT_VEHICLE_OPERATION_COST);
+    await chargingInstance
+      .connect(admin)
+      .setDcxOperationCost(C.MINT_AD_OPERATION, C.MINT_AD_OPERATION_COST);
 
     // Whitelist Manufacturer attributes
     await manufacturerInstance

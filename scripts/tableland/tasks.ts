@@ -555,7 +555,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
 
             ddTableId = await ddTableInstance.getDeviceDefinitionTableId(manufacturerId);
 
-            const deviceDefinitionByManufacturers = devices.filter((c) => c.make.name === make && c.type.year > 2006);
+            const deviceDefinitionByManufacturers = devices.filter((c) => c.make.name === make && c.type.year >= 2005);
             const ddTableName = await ddTableInstance.getDeviceDefinitionTableName(manufacturerId);
             const tablelandDeviceDefinitionByManufacturers = await getDeviceDefinitionsByTableName(db, ddTableName);
 

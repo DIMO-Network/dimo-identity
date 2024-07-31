@@ -339,6 +339,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         _deleteDeviceDefinitionData(tablelandTables, tableId, id);
     }
 
+    // TODO Move it to after inserDeviceDefinition in the next upgrade
     /**
      * @notice Insert a list of Device Definition in an existing table
      * @dev The caller must be the owner of the manufacturer ID

@@ -238,11 +238,11 @@
         "misc": {
             "DimoToken": {
                 "proxy": "0xe261d618a959afffd53168cd07d12e37b26761db",
-                "implementation": "0x379e5770d36Bf563C267097E3fA54DdCcbEFC00B"
+                "implementation": ""
             },
             "DimoCredit": {
                 "proxy": "0x7186F9aC35d24c9a4cf1E58a797c04DF1b334322",
-                "implementation": "0x73216F7ADc3420A94709c42e618E454ec88ef8e6"
+                "implementation": ""
             },
             "Stake": {
                 "proxy": "0xaa32a9e74486dd136ccedf17061fe4efc95a621e",
@@ -783,15 +783,15 @@
         "misc": {
             "DimoToken": {
                 "proxy": "0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10",
-                "implementation": "0x2B06014980c3d28644241ba87b8518C236c4B75b"
+                "implementation": ""
             },
             "DimoCredit": {
                 "proxy": "0x49c120f4C3c6679Ebd357F2d749E4D1C03598d65",
-                "implementation": "0xe833F49E60C61B76F711AFff76A0dF91AE2c274c"
+                "implementation": ""
             },
             "Stake": {
                 "proxy": "0x2cF1d5e60c38eB5795C00Ce72d0D5392ae1e15e1",
-                "implementation": "0xff5b42eb2019f8513dc021ce926c5d662c3b432f"
+                "implementation": ""
             },
             "DimoForwarder": {
                 "proxy": "0xBF050bA5f13F4D7ba1744fcCd6087EDde78a337e",

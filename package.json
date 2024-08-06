@@ -38,7 +38,7 @@
     "@tableland/local": "^2.4.1",
     "@tableland/sdk": "^7.0.0-pre.0",
     "@tableland/sqlparser": "^1.3.0",
-    "@tenderly/hardhat-tenderly": "^1.7.7",
+    "@tenderly/hardhat-tenderly": "^2.3.0",
     "@typescript-eslint/eslint-plugin": "^6.7.2",
     "@typescript-eslint/parser": "^6.7.2",
     "erc721a-upgradeable": "^4.2.3",

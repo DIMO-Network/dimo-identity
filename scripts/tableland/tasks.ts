@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as csv from 'fast-csv'
 import axios from 'axios';
 import { task } from 'hardhat/config';
 import { EventLog } from 'ethers';
@@ -7,7 +8,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { Database, Validator, helpers } from '@tableland/sdk';
 
 import { Manufacturer, DeviceDefinitionTable } from '../../typechain-types';
-import { AddressesByNetwork, DeviceDefinitionInput, StringNumber } from '../../utils';
+import { AddressesByNetwork, DeviceDefinitionInput, StringNumber, GenericKeyAny } from '../../utils';
 import { makes } from '../data/Makes';
 
 const VALID_NETWORKS = ['localhost', 'polygon', 'amoy']
@@ -15,6 +16,13 @@ const CHAIN_ID: StringNumber = {
     'localhost': 31337,
     'polygon': 137,
     'amoy': 80002
+}
+
+function trim(data: GenericKeyAny): GenericKeyAny {
+    for (const key in data) {
+        data[key] = data[key].trim()
+    }
+    return data
 }
 
 function getAddresses(currentNetwork: string): AddressesByNetwork {
@@ -25,6 +33,25 @@ function getAddresses(currentNetwork: string): AddressesByNetwork {
     return JSON.parse(
         fs.readFileSync(addressesPath, 'utf8'),
     );
+}
+
+function parseDdInsertCsvFile(fileAddress: string): Promise<DeviceDefinitionInput[] | unknown> {
+    return new Promise((resolve) => {
+        const ddInput: DeviceDefinitionInput[] = []
+
+        fs.createReadStream(path.resolve(fileAddress))
+            .pipe(csv.parse({ headers: true }))
+            .on('data', (row: any) => {
+                row = trim(row) as DeviceDefinitionInput
+
+                ddInput.push(row)
+            })
+            .on('end', async () => {
+                return resolve(ddInput)
+            })
+    }).catch((err) => {
+        throw err
+    })
 }
 
 function validateNetwork(currentNetwork: string) {
@@ -190,6 +217,46 @@ task('create-dd-tables', 'Creates Device Definition tables related to s list of 
 
             console.log(`Device Definition table created\nTable ID: ${tableId}\nTable Name: ${tableName}\nTable Owner: ${tableOwner}`);
         }
+    });
+
+task('insert-dds', 'Inserts a new device definition')
+    .addPositionalParam('manufacturerId', 'The manufacturer ID')
+    .addPositionalParam('deviceDefinitionFile', 'Device Definition CSV file')
+    .setAction(async (args: { manufacturerId: string, deviceDefinitionFile: string }, hre) => {
+        const currentNetwork = hre.network.name;
+        validateNetwork(currentNetwork);
+
+        const ddInsertInputs = await parseDdInsertCsvFile(args.deviceDefinitionFile) as DeviceDefinitionInput[];
+        console.log(ddInsertInputs);
+        const instances = getAddresses(currentNetwork);
+        const [signer] = await hre.ethers.getSigners();
+        const manufacturerId = args.manufacturerId;
+        const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
+            'DeviceDefinitionTable',
+            instances[currentNetwork].modules.DIMORegistry.address,
+        );
+        const db = new Database({
+            baseUrl: helpers.getBaseUrl(CHAIN_ID[currentNetwork]),
+        });
+        const tablelandValidator = new Validator(db.config);
+
+        const _gasPrice = await getGasPrice(hre);
+
+        console.log(`Inserting a device definitions for manufacturer ID ${manufacturerId}...`);
+
+        const tx = await ddTableInstance
+            .connect(signer)
+            .insertDeviceDefinitionBatch(
+                manufacturerId,
+                ddInsertInputs,
+                { gasPrice: _gasPrice });
+
+        await tablelandValidator.pollForReceiptByTransactionHash({
+            chainId: CHAIN_ID[currentNetwork],
+            transactionHash: (await tx.wait())?.hash as string,
+        });
+
+        console.log('Device Definitions inserted');
     });
 
 task('migration-tableland', 'npx hardhat migration-tableland --network <networkName>')

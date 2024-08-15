@@ -15,10 +15,6 @@
         {
             "name": "infos",
             "type": "string[]"
-        },
-        {
-            "name": "nonce",
-            "type": "uint256"
         }
     ],
     "ClaimAftermarketDeviceSign": [
@@ -29,10 +25,6 @@
         {
             "name": "owner",
             "type": "address"
-        },
-        {
-            "name": "nonce",
-            "type": "uint256"
         }
     ],
     "PairAftermarketDeviceSign": [
@@ -42,10 +34,6 @@
         },
         {
             "name": "vehicleNode",
-            "type": "uint256"
-        },
-        {
-            "name": "nonce",
             "type": "uint256"
         }
     ],
@@ -57,10 +45,6 @@
         {
             "name": "vehicleNode",
             "type": "uint256"
-        },
-        {
-            "name": "nonce",
-            "type": "uint256"
         }
     ],
     "MintSyntheticDeviceSign": [
@@ -71,19 +55,11 @@
         {
             "name": "vehicleNode",
             "type": "uint256"
-        },
-        {
-            "name": "nonce",
-            "type": "uint256"
         }
     ],
     "MintVehicleAndSdSign": [
         {
             "name": "integrationNode",
-            "type": "uint256"
-        },
-        {
-            "name": "nonce",
             "type": "uint256"
         }
     ],
@@ -107,10 +83,6 @@
         {
             "name": "infos",
             "type": "string[]"
-        },
-        {
-            "name": "nonce",
-            "type": "uint256"
         }
     ],
     "BurnSyntheticDeviceSign": [
@@ -121,19 +93,11 @@
         {
             "name": "syntheticDeviceNode",
             "type": "uint256"
-        },
-        {
-            "name": "nonce",
-            "type": "uint256"
         }
     ],
     "BurnVehicleSign": [
         {
             "name": "vehicleNode",
-            "type": "uint256"
-        },
-        {
-            "name": "nonce",
             "type": "uint256"
         }
     ]

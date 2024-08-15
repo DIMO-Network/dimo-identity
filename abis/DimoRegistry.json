@@ -944,71 +944,6 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "getAdMintCost",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "adMintCost",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_adMintCost",
-                "type": "uint256"
-            }
-        ],
-        "name": "setAdMintCost",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_dimoToken",
-                "type": "address"
-            }
-        ],
-        "name": "setDimoToken",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_foundation",
-                "type": "address"
-            }
-        ],
-        "name": "setFoundationAddress",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_license",
-                "type": "address"
-            }
-        ],
-        "name": "setLicense",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
         "inputs": [
             {
                 "internalType": "uint256",
@@ -1311,11 +1246,6 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "manufacturerNode",
-                "type": "uint256"
-            },
             {
                 "components": [
                     {
@@ -3523,6 +3453,19 @@
         "type": "event"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "manufacturerLicense",
+                "type": "address"
+            }
+        ],
+        "name": "ManufacturerLicenseSet",
+        "type": "event"
+    },
+    {
         "inputs": [],
         "name": "getDimoCredit",
         "outputs": [
@@ -3562,6 +3505,19 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "getManufacturerLicense",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "manufacturerLicense",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "address",
@@ -3582,7 +3538,7 @@
                 "type": "address"
             }
         ],
-        "name": "setDimoTokenAddress",
+        "name": "setDimoToken",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -3596,6 +3552,19 @@
             }
         ],
         "name": "setFoundation",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "manufacturerLicense",
+                "type": "address"
+            }
+        ],
+        "name": "setManufacturerLicense",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

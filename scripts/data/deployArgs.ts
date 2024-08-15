@@ -50,7 +50,6 @@ export const dimoRegistryName = 'DIMORegistry';
 
 export const eip712Name = 'DIMO';
 export const eip712Version = '1';
-export const adMintCost = ethers.parseEther('50');
 
 export const MANUFACTURER_NFT_NAME = 'DIMO Manufacturer ID';
 export const MANUFACTURER_NFT_SYMBOL = 'DIMO/MANUFACTURER';
@@ -114,7 +113,16 @@ export const dimoStreamrEns: GenericKeyAny = {
 }
 
 export const MINT_VEHICLE_OPERATION = _hashRole('MINT_VEHICLE_OPERATION');
+export const MINT_AD_OPERATION = _hashRole('MINT_AD_OPERATION');
+
 export const MINT_VEHICLE_OPERATION_COST: GenericKeyAny = {
+  polygon: ethers.parseEther('1'),
+  mumbai: ethers.parseEther('1'),
+  amoy: ethers.parseEther('1'),
+  hardhat: ethers.parseEther('1'),
+  localhost: ethers.parseEther('1')
+}
+export const MINT_AD_OPERATION_COST: GenericKeyAny = {
   polygon: ethers.parseEther('1'),
   mumbai: ethers.parseEther('1'),
   amoy: ethers.parseEther('1'),

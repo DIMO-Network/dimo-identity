@@ -16,6 +16,25 @@ library ChargingInternal {
      * @dev This contract must be approved to spend the tokens in advance
      * @param sender The address of the sender
      * @param operation The operation to get the cost from
+     * @param amount TODO Documentation
+     */
+    function _chargeDcx(
+        address sender,
+        bytes32 operation,
+        uint256 amount
+    ) internal {
+        address dimoCredit = SharedStorage.getStorage().dimoCredit;
+        uint256 cost = ChargingStorage.getStorage().dcxOperationCost[operation];
+
+        IERC20Burnable(dimoCredit).burn(sender, cost * amount);
+    }
+
+    /**
+     * @notice Charges the sender for the operation
+     * The sender's DCX tokens will be burned.
+     * @dev This contract must be approved to spend the tokens in advance
+     * @param sender The address of the sender
+     * @param operation The operation to get the cost from
      */
     function _chargeDcx(address sender, bytes32 operation) internal {
         address dimoCredit = SharedStorage.getStorage().dimoCredit;

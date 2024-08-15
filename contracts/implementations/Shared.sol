@@ -15,6 +15,7 @@ contract Shared is AccessControlInternal {
     event FoundationSet(address indexed foundation);
     event DimoTokenSet(address indexed dimoToken);
     event DimoCreditSet(address indexed dimoCredit);
+    event ManufacturerLicenseSet(address indexed manufacturerLicense);
 
     /**
      * @notice Sets the foundation address
@@ -27,15 +28,12 @@ contract Shared is AccessControlInternal {
         emit FoundationSet(foundation);
     }
 
-    // TODO Rename to setDimoTokenAddress after deprecating AdLicenseValidator
     /**
      * @notice Sets the DIMO token address
      * @dev Only an admin can set the address
      * @param dimoToken The DIMO token address
      */
-    function setDimoTokenAddress(
-        address dimoToken
-    ) external onlyRole(ADMIN_ROLE) {
+    function setDimoToken(address dimoToken) external onlyRole(ADMIN_ROLE) {
         SharedStorage.getStorage().dimoToken = dimoToken;
 
         emit DimoTokenSet(dimoToken);
@@ -50,6 +48,19 @@ contract Shared is AccessControlInternal {
         SharedStorage.getStorage().dimoCredit = dimoCredit;
 
         emit DimoCreditSet(dimoCredit);
+    }
+
+    /**
+     * @notice Sets the Manufacturer License contract address
+     * @dev Only an admin can set the Manufacturer License contract address
+     * @param manufacturerLicense The Manufacturer License contract address
+     */
+    function setManufacturerLicense(
+        address manufacturerLicense
+    ) external onlyRole(ADMIN_ROLE) {
+        SharedStorage.getStorage().manufacturerLicense = manufacturerLicense;
+
+        emit ManufacturerLicenseSet(manufacturerLicense);
     }
 
     /**
@@ -71,5 +82,16 @@ contract Shared is AccessControlInternal {
      */
     function getDimoCredit() external view returns (address dimoCredit) {
         dimoCredit = SharedStorage.getStorage().dimoCredit;
+    }
+
+    /**
+     * @notice Gets the Manufacturer License address
+     */
+    function getManufacturerLicense()
+        external
+        view
+        returns (address manufacturerLicense)
+    {
+        manufacturerLicense = SharedStorage.getStorage().manufacturerLicense;
     }
 }

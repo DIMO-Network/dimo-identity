@@ -13,7 +13,7 @@ library SharedStorage {
         address foundation;
         address dimoCredit;
         address dimoToken;
-        address manufacturerLicense; // TODO to deprecate AdLicenseValidator
+        address manufacturerLicense;
     }
 
     /* solhint-disable no-inline-assembly */

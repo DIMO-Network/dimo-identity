@@ -70,7 +70,6 @@ main([
   'Eip712Checker',
   'Multicall',
   'ERC721Holder',
-  'AdLicenseValidator',
   'AftermarketDevice',
   'Manufacturer',
   'Integration',

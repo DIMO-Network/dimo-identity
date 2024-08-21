@@ -91,8 +91,8 @@ async function getGasPrice(hre: HardhatRuntimeEnvironment, bump: bigint = 20n): 
 async function getGasPriceWithSleep(
     hre: HardhatRuntimeEnvironment,
     bump: bigint = 20n,
-    priceLimit: bigint,
-    sleepInterval: number
+    priceLimit?: bigint,
+    sleepInterval?: number
 ): Promise<string> {
     let price = (await hre.ethers.provider.getFeeData()).gasPrice as bigint;
     let returnPrice = price * bump / 100n + price;
@@ -100,7 +100,7 @@ async function getGasPriceWithSleep(
     if (priceLimit) {
         while (returnPrice > priceLimit) {
             process.stdout.write(`Gas price too high: ${returnPrice} Sleeping ${sleepInterval} ms...`);
-            await sleep(sleepInterval);
+            await sleep(sleepInterval as number);
             process.stdout.write('\r\x1b[K');
 
             price = (await hre.ethers.provider.getFeeData()).gasPrice as bigint;
@@ -566,11 +566,13 @@ task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-
     });
 
 task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
+    .addOptionalParam('limitGasPrice', 'Transaction limit gas price')
     .setAction(async (args, hre) => {
         const currentNetwork = hre.network.name;
         validateNetwork(currentNetwork);
 
         let _gasPrice;
+        const limitGasPrice = args.limitGasPrice
         const instances = getAddresses(currentNetwork);
         const [signer] = await hre.ethers.getSigners();
         const tableOwner = await signer.getAddress();
@@ -691,7 +693,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
                 console.log('\x1b[31m%s\x1b[0m', `Device Definition to delete ${deleteDeviceDefinitionByManufacturers.length} By Manufacturer [${make}]`);
 
                 for (let i = 0; i < deleteDeviceDefinitionByManufacturers.length; i++) {
-                    _gasPrice = await getGasPriceWithSleep(hre, 20n, 36500000000n, 5000); // 36.5 gwei
+                    _gasPrice = await getGasPriceWithSleep(hre, 20n, limitGasPrice, 5000); // 36.5 gwei
                     console.log(`Deleting [${deleteDeviceDefinitionByManufacturers[i].id}] ...`);
                     const tx = await ddTableInstance.deleteDeviceDefinition(manufacturerId, deleteDeviceDefinitionByManufacturers[i].id, { gasPrice: _gasPrice });
 
@@ -725,7 +727,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
                     const nonce = await signer.getNonce()
                     const batch = devices.slice(i, i + updateBatchSize);
                     const batchTxPromise = [];
-                    _gasPrice = await getGasPriceWithSleep(hre, 20n, 37000000000n, 5000); // 37 gwei
+                    _gasPrice = await getGasPriceWithSleep(hre, 20n, limitGasPrice, 5000); // 37 gwei
                     console.log(`Updating ${batch.map(b => b.id)} ...`);
 
                     for (let j = 0; j < batch.length; j++) {
@@ -772,7 +774,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
 
                     items += batch.length;
 
-                    _gasPrice = await getGasPriceWithSleep(hre, 20n, 36500000000n, 5000); // 36.5 gwei
+                    _gasPrice = await getGasPriceWithSleep(hre, 20n, limitGasPrice, 5000); // 36.5 gwei
                     console.log(`Creating [${items}/${newDeviceDefinitionByManufacturers.length}] ...`);
                     const tx = await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch, { gasPrice: _gasPrice });
 
@@ -793,8 +795,6 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
                 console.log(`${make} => ${ddTableName} total rows: ${count}`);
                 console.log(`${make} => ${ddTableName} total upload: ${deviceDefinitionByManufacturers.length}\n`);
             }
-
-            await delay(1000);
         }
     });
 

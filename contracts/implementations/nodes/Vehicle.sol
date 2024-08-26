@@ -318,11 +318,11 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
         delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
+        _resetInfos(tokenId);
+
         emit VehicleNodeBurned(tokenId, owner);
 
         INFT(vehicleIdProxyAddress).burn(tokenId);
-
-        _resetInfos(tokenId);
     }
 
     /**
@@ -426,8 +426,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             i++
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
-
-            emit VehicleAttributeSet(tokenId, attributes[i], "");
         }
     }
 }

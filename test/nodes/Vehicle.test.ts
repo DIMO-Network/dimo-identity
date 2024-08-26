@@ -1752,15 +1752,6 @@ describe('Vehicle', function () {
           .to.emit(vehicleInstance, 'VehicleNodeBurned')
           .withArgs(1, user1.address);
       });
-      it('Should emit VehicleAttributeSet events with correct params', async () => {
-        await expect(
-          vehicleInstance.connect(admin).burnVehicleSign(1, burnVehicleSig1)
-        )
-          .to.emit(vehicleInstance, 'VehicleAttributeSet')
-          .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-          .to.emit(vehicleInstance, 'VehicleAttributeSet')
-          .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, '');
-      });
     });
   });
 

@@ -74,7 +74,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x8CdC8C21EC7eb2CEdEB64b0c79F18856e46b8E6B",
+                "address": "0x0B5f7c96e45A465B8829C4AF14C9ab4BB22Ec5ba",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
@@ -601,7 +601,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x6E466b8946272D53126fC6D1aAa05d7c2e7fC23d",
+                "address": "0xe47876A61512BFe6C205AEE7b17025339a2df8dF",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",

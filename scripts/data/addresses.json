@@ -224,7 +224,7 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0xA95F69F7D84E10ec9e77Da34b1E4253DD91B0265"
+                "implementation": "0x07079Ded0EEC8452107f13eA2fA3db610437A702"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",
@@ -769,7 +769,7 @@
             },
             "VehicleId": {
                 "proxy": "0x45fbCD3ef7361d156e8b16F5538AE36DEdf61Da8",
-                "implementation": "0xc24c60b970736454fDF268488F2308bd24dD28d5"
+                "implementation": "0x155a4b42597aE28EB8a318Ab0cE5a7a06C41472c"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x325b45949C833986bC98e98a49F3CA5C5c4643B5",

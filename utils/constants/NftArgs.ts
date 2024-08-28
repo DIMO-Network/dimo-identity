@@ -73,6 +73,7 @@ export const nftArgs: ContractNameArgsByNetwork = {
       VEHICLE_NFT_BASE_URI,
       ZERO_ADDRESS,
       ZERO_ADDRESS,
+      ZERO_ADDRESS,
       [],
     ],
     opts: {

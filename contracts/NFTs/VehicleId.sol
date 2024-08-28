@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
+import "../interfaces/ISacd.sol";
 import "./Base/MultiPrivilege/MultiPrivilegeTransferableBurnable.sol";
 
 error ZeroAddress();
@@ -14,6 +15,7 @@ contract VehicleId is Initializable, MultiPrivilege {
     IDimoRegistry public _dimoRegistry;
     address public syntheticDeviceId;
     mapping(address => bool) public trustedForwarders;
+    address public sacd;
 
     // 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
     bytes4 public constant SAFE_TRANSFER_FROM = 0x42842e0e;
@@ -29,12 +31,14 @@ contract VehicleId is Initializable, MultiPrivilege {
         string calldata baseUri_,
         address dimoRegistry_,
         address syntheticDeviceId_,
+        address sacd_,
         address[] calldata trustedForwarders_
     ) external initializer {
         _multiPrivilegeInit(name_, symbol_, baseUri_);
 
         _dimoRegistry = IDimoRegistry(dimoRegistry_);
         syntheticDeviceId = syntheticDeviceId_;
+        sacd = sacd_;
         for (uint256 i = 0; i < trustedForwarders_.length; i++) {
             trustedForwarders[trustedForwarders_[i]] = true;
         }
@@ -64,6 +68,16 @@ contract VehicleId is Initializable, MultiPrivilege {
     ) external onlyRole(ADMIN_ROLE) {
         if (addr == address(0)) revert ZeroAddress();
         syntheticDeviceId = addr;
+    }
+
+    /**
+     * @notice Sets the SACD address
+     * @dev Only an admin can set the SACD address
+     * @param addr The address to be set
+     */
+    function setSacdAddress(address addr) external onlyRole(ADMIN_ROLE) {
+        if (addr == address(0)) revert ZeroAddress();
+        sacd = addr;
     }
 
     /**
@@ -175,6 +189,7 @@ contract VehicleId is Initializable, MultiPrivilege {
         }
 
         _dimoRegistry.onTransferVehicleStream(to, tokenId);
+        ISacd(sacd).onTransfer(address(this), tokenId);
 
         super._transfer(from, to, tokenId);
     }

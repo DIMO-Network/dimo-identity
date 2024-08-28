@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 /**
  * @title MockDimoCredit
  * @dev Mocks the DIMO Credit token to be used in tests
+ * Refers to https://github.com/DIMO-Network/developer-license/blob/main/src/DimoCredit.sol
  */
 contract MockDimoCredit is ERC20, AccessControl {
     bytes32 constant BURNER_ROLE = keccak256("BURNER_ROLE");

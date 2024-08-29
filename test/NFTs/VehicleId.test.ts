@@ -24,6 +24,7 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockStake,
+  MockSacd
 } from '../../typechain-types';
 import {
   setup,
@@ -54,6 +55,7 @@ describe('VehicleId', async function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockSacdInstance: MockSacd;
   let manufacturerIdInstance: ManufacturerId;
   let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
@@ -160,6 +162,10 @@ describe('VehicleId', async function () {
     // Deploy MockStake contract
     const MockStakeFactory = await ethers.getContractFactory('MockStake');
     mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+
+    // Deploy MockSacd contract
+    const MockSacdFactory = await ethers.getContractFactory('MockSacd');
+    mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -331,6 +337,10 @@ describe('VehicleId', async function () {
     await adIdInstance
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
+
+    await vehicleIdInstance
+      .connect(admin)
+      .setSacdAddress(await mockSacdInstance.getAddress());
 
     const claimOwnerSig1 = await signMessage({
       _signer: user1,

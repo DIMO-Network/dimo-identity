@@ -23,7 +23,8 @@ import {
   StreamrConfigurator,
   VehicleStream,
   Shared,
-  MockDimoCredit
+  MockDimoCredit,
+  MockSacd
 } from '../../typechain-types';
 
 import {
@@ -54,6 +55,7 @@ describe('VehicleStream', async function () {
   let ensCache: ENSCacheV2;
   let streamRegistry: StreamRegistry;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockSacdInstance: MockSacd;
 
   let DIMO_REGISTRY_ADDRESS: string;
   let VEHICLE_ID_ADDRESS: string;
@@ -143,6 +145,10 @@ describe('VehicleStream', async function () {
     );
     mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
 
+    // Deploy MockSacd contract
+    const MockSacdFactory = await ethers.getContractFactory('MockSacd');
+    mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
     // Grant NFT minter roles to DIMO Registry contract
@@ -225,6 +231,10 @@ describe('VehicleStream', async function () {
     await vehicleIdInstance
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
+
+    await vehicleIdInstance
+      .connect(admin)
+      .setSacdAddress(await mockSacdInstance.getAddress());
 
     // Create and set Vehicle privileges
     await vehicleIdInstance.createPrivilege(true, C.VEHICLE_ALL_TIME_NON_LOCATION_DATA_PRIVILEGE);

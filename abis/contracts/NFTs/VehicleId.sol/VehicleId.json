@@ -755,6 +755,11 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "sacd_",
+        "type": "address"
+      },
+      {
         "internalType": "address[]",
         "name": "trustedForwarders_",
         "type": "address[]"
@@ -958,6 +963,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "sacd",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -1154,6 +1172,19 @@
       }
     ],
     "name": "setPrivileges",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "setSacdAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

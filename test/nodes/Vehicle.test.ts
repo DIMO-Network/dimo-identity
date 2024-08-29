@@ -21,7 +21,8 @@ import {
   Shared,
   MockDimoToken,
   MockDimoCredit,
-  MockStake
+  MockStake,
+  MockSacd
 } from '../../typechain-types';
 import {
   initialize,

@@ -736,15 +736,17 @@
                 ]
             },
             "DeviceDefinitionTable": {
-                "address": "0x286A6ca588F55E4E909dBCd47a7055122a1E444F",
+                "address": "0x9a83e4A19eD710577bc65cc00b01341c6FBcF64f",
                 "selectors": [
                     "0x20954d21",
                     "0x794c6790",
+                    "0x32b3f2d5",
                     "0x396e5987",
                     "0xa1d17941",
                     "0x23536c5f",
                     "0x80d50451",
-                    "0x088fafdb"
+                    "0x088fafdb",
+                    "0x67c7f687"
                 ]
             },
             "ERC721Holder": {

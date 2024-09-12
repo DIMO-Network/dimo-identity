@@ -35,7 +35,7 @@ function getAddresses(currentNetwork: string): AddressesByNetwork {
     );
 }
 
-function parseDdInsertCsvFile(fileAddress: string): Promise<DeviceDefinitionInput[] | unknown> {
+async function parseDdInsertCsvFile(fileAddress: string): Promise<DeviceDefinitionInput[] | unknown> {
     return new Promise((resolve) => {
         const ddInput: DeviceDefinitionInput[] = []
 
@@ -48,6 +48,25 @@ function parseDdInsertCsvFile(fileAddress: string): Promise<DeviceDefinitionInpu
             })
             .on('end', async () => {
                 return resolve(ddInput)
+            })
+    }).catch((err) => {
+        throw err
+    })
+}
+
+async function parseDdDeleteCsvFile(fileAddress: string): Promise<string[] | unknown> {
+    return new Promise((resolve) => {
+        const ddList: string[] = []
+
+        fs.createReadStream(path.resolve(fileAddress))
+            .pipe(csv.parse({ headers: true }))
+            .on('data', (row: any) => {
+                row = row.id.trim()
+
+                ddList.push(row)
+            })
+            .on('end', async () => {
+                return resolve(ddList)
             })
     }).catch((err) => {
         throw err
@@ -242,7 +261,7 @@ task('insert-dds', 'Inserts a new device definition')
 
         const _gasPrice = await getGasPrice(hre);
 
-        console.log(`Inserting a device definitions for manufacturer ID ${manufacturerId}...`);
+        console.log(`Inserting device definitions for manufacturer ID ${manufacturerId}...`);
 
         const tx = await ddTableInstance
             .connect(signer)
@@ -258,6 +277,49 @@ task('insert-dds', 'Inserts a new device definition')
 
         console.log('Device Definitions inserted');
     });
+
+task('delete-dds', 'Deletes a list of Device Definitions by ID')
+    .addPositionalParam('manufacturerId', 'The manufacturer ID')
+    .addPositionalParam('deviceDefinitionFile', 'Device Definition CSV file')
+    .addOptionalParam('limitGasPrice', 'Transaction limit gas price')
+    .setAction(async (args: { manufacturerId: string, deviceDefinitionFile: string, limitGasPrice?: bigint}, hre) => {
+        const currentNetwork = hre.network.name;
+        validateNetwork(currentNetwork);
+
+        let _gasPrice;
+        const limitGasPrice = args.limitGasPrice
+        const ddDeleteInputs = await parseDdDeleteCsvFile(args.deviceDefinitionFile) as string;
+        const instances = getAddresses(currentNetwork);
+        const [signer] = await hre.ethers.getSigners();
+        const manufacturerId = args.manufacturerId;
+        const ddTableInstance: DeviceDefinitionTable = await hre.ethers.getContractAt(
+            'DeviceDefinitionTable',
+            instances[currentNetwork].modules.DIMORegistry.address,
+        );
+        const db = new Database({
+            baseUrl: helpers.getBaseUrl(CHAIN_ID[currentNetwork]),
+        });
+        const tablelandValidator = new Validator(db.config);
+
+        console.log('\x1b[31m%s\x1b[0m', `Device Definition to delete ${ddDeleteInputs.length} By Manufacturer [${manufacturerId}]`);
+
+        for (let i = 0; i < ddDeleteInputs.length; i++) {
+            _gasPrice = await getGasPriceWithSleep(hre, 20n, limitGasPrice, 5000);
+            console.log(`Deleting [${ddDeleteInputs[i]}] ...`);
+            const tx = await ddTableInstance
+                .connect(signer)
+                .deleteDeviceDefinition(manufacturerId, ddDeleteInputs[i], { gasPrice: _gasPrice });
+
+            await tablelandValidator.pollForReceiptByTransactionHash({
+                chainId: CHAIN_ID[currentNetwork],
+                transactionHash: (await tx.wait())?.hash as string,
+            });
+
+            console.log(`Deleted [${ddDeleteInputs[i]}]`);
+        }
+
+        console.log('All DDs deleted!');
+    })
 
 task('migration-tableland', 'npx hardhat migration-tableland --network <networkName>')
     .setAction(async (args, hre) => {
@@ -363,7 +425,7 @@ task('migration-tableland', 'npx hardhat migration-tableland --network <networkN
         }
     });
 
-task('query-tableland', 'npx hardhat query-tableland <name> <type> --network <networkName>')
+task('query-tableland', 'Queries tableland tables by manufacturer name')
     .addPositionalParam('name', 'The name of the manufacturer table')
     .addPositionalParam('type', 'Type of quert <select|count>', 'select')
     .addOptionalParam('filter', 'The filter to query device definition table', '')
@@ -416,7 +478,7 @@ task('query-tableland', 'npx hardhat query-tableland <name> <type> --network <ne
         console.table(query.results);
     });
 
-task('count-dds', 'npx hardhat count-dds --network <networkName>')
+task('count-dds', 'Counts the number of records of a tableland table')
     .setAction(async (args, hre) => {
         const currentNetwork = hre.network.name;
         validateNetwork(currentNetwork);
@@ -454,7 +516,7 @@ task('count-dds', 'npx hardhat count-dds --network <networkName>')
         console.log(numDdTotal, numBatchesTotal)
     });
 
-task('query-all-tableland', 'npx hardhat query-tableland <type> --network <networkName>')
+task('query-all-tableland', 'Queries all tableland tables')
     .addPositionalParam('type', 'Type of quert <select|count>', 'select')
     .addOptionalParam('filter', 'The filter to query device definition table', '')
     .addOptionalParam('limit', 'The limit to query device definition table', '10')
@@ -502,7 +564,7 @@ task('query-all-tableland', 'npx hardhat query-tableland <type> --network <netwo
         }
     });
 
-task('create-manufacturer-table-schema', 'npx hardhat create-manufacturer-table-schema --network <networkName>')
+task('create-dd-table-schema', 'Creates a Device Definition tableland table')
     .setAction(async (args, hre) => {
         const currentNetwork = hre.network.name;
         validateNetwork(currentNetwork);
@@ -693,7 +755,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
                 console.log('\x1b[31m%s\x1b[0m', `Device Definition to delete ${deleteDeviceDefinitionByManufacturers.length} By Manufacturer [${make}]`);
 
                 for (let i = 0; i < deleteDeviceDefinitionByManufacturers.length; i++) {
-                    _gasPrice = await getGasPriceWithSleep(hre, 20n, limitGasPrice, 5000); // 36.5 gwei
+                    _gasPrice = await getGasPriceWithSleep(hre, 20n, limitGasPrice, 5000);
                     console.log(`Deleting [${deleteDeviceDefinitionByManufacturers[i].id}] ...`);
                     const tx = await ddTableInstance.deleteDeviceDefinition(manufacturerId, deleteDeviceDefinitionByManufacturers[i].id, { gasPrice: _gasPrice });
 
@@ -774,7 +836,7 @@ task('sync-tableland', 'npx hardhat sync-tableland --network <networkName>')
 
                     items += batch.length;
 
-                    _gasPrice = await getGasPriceWithSleep(hre, 20n, limitGasPrice, 5000); // 36.5 gwei
+                    _gasPrice = await getGasPriceWithSleep(hre, 20n, limitGasPrice, 5000);
                     console.log(`Creating [${items}/${newDeviceDefinitionByManufacturers.length}] ...`);
                     const tx = await ddTableInstance.insertDeviceDefinitionBatch(manufacturerId, batch, { gasPrice: _gasPrice });
 

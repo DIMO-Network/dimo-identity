@@ -18,4 +18,8 @@ contract MockDimoToken is ERC20, AccessControl {
     function burn(uint256 amount) external {
         _burn(msg.sender, amount);
     }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
 }

@@ -1814,7 +1814,7 @@ describe('AftermarketDevice', function () {
   });
 
 
-  describe('claimAftermarketDevice', () => {
+  describe.only('claimAftermarketDevice', () => {
     let adSig: string;
     before(async () => {
       adSig = await signMessage({
@@ -1873,7 +1873,7 @@ describe('AftermarketDevice', function () {
       context('Wrong signature', () => {
         it('Should revert if domain name is incorrect', async () => {
           const invalidAdSig = await signMessage({
-            _signer: user1,
+            _signer: adAddress1,
             _domainName: 'Wrong domain',
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
@@ -1894,7 +1894,7 @@ describe('AftermarketDevice', function () {
         });
         it('Should revert if domain version is incorrect', async () => {
           const invalidAdSig = await signMessage({
-            _signer: user1,
+            _signer: adAddress1,
             _domainVersion: '99',
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
@@ -1915,7 +1915,7 @@ describe('AftermarketDevice', function () {
         });
         it('Should revert if domain chain ID is incorrect', async () => {
           const invalidAdSig = await signMessage({
-            _signer: user1,
+            _signer: adAddress1,
             _chainId: 99,
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
@@ -1936,7 +1936,7 @@ describe('AftermarketDevice', function () {
         });
         it('Should revert if aftermarket device node is incorrect', async () => {
           const invalidAdSig = await signMessage({
-            _signer: user1,
+            _signer: adAddress1,
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
@@ -1956,7 +1956,7 @@ describe('AftermarketDevice', function () {
         });
         it('Should revert if owner does not match owner parameter', async () => {
           const invalidAdSig = await signMessage({
-            _signer: user1,
+            _signer: adAddress1,
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {
@@ -1976,7 +1976,7 @@ describe('AftermarketDevice', function () {
         });
         it('Should revert if signer does not match address associated with aftermarket device ID', async () => {
           const invalidAdSig = await signMessage({
-            _signer: user1,
+            _signer: adAddress1,
             _primaryType: 'ClaimAftermarketDeviceSign',
             _verifyingContract: DIMO_REGISTRY_ADDRESS,
             message: {

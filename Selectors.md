@@ -134,6 +134,7 @@
 | 0x9796cf22 | getAftermarketDeviceIdByAddress(address) |
 | 0xc6b36f2a | isAftermarketDeviceClaimed(uint256) |
 | 0x7ba79a39 | mintAftermarketDeviceByManufacturerBatch(uint256,(address,(string,string)[])[]) |
+| 0x492ab283 | pairAftermarketDevice(uint256,uint256) |
 | 0xb50df2f7 | pairAftermarketDeviceSign(uint256,uint256,bytes,bytes) |
 | 0xcfe642dd | pairAftermarketDeviceSign(uint256,uint256,bytes) |
 | 0x9b3abd48 | reprovisionAftermarketDeviceByManufacturerBatch(uint256[]) |

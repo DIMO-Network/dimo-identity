@@ -422,6 +422,52 @@ contract AftermarketDevice is AccessControlInternal {
     }
 
     /**
+     * TODO Documentation
+     */
+    function pairAftermarketDevice(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode
+    ) external {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (
+            !AftermarketDeviceStorage.getStorage().deviceClaimed[
+                aftermarketDeviceNode
+            ]
+        ) revert AdNotClaimed(aftermarketDeviceNode);
+        if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
+            revert Errors.VehiclePaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
+            revert AdPaired(aftermarketDeviceNode);
+
+        address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
+
+        if (
+            msg.sender != adOwner ||
+            msg.sender != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
+        ) revert Errors.Unauthorized(msg.sender);
+
+        ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
+
+        emit AftermarketDevicePaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            adOwner
+        );
+    }
+
+    /**
      * @dev Unpairs an aftermarket device from a vehicles
      * Both vehicle and AD owners can unpair.
      * @dev Caller must have the admin role

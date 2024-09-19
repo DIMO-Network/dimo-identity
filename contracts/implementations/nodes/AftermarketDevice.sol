@@ -264,7 +264,10 @@ contract AftermarketDevice is AccessControlInternal {
     }
 
     /**
-     * TODO Documentation
+     * @notice Claims the ownership of an aftermarket device
+     * The aftermarket device owner signs a typed structured (EIP-712) message in advance and submits to be verified
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param aftermarketDeviceSig Aftermarket Device's signature hash
      */
     function claimAftermarketDevice(
         uint256 aftermarketDeviceNode,
@@ -422,7 +425,9 @@ contract AftermarketDevice is AccessControlInternal {
     }
 
     /**
-     * TODO Documentation
+     * @notice Pairs an aftermarket device with a vehicle
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
      */
     function pairAftermarketDevice(
         uint256 aftermarketDeviceNode,

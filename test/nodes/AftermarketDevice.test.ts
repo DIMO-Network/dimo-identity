@@ -2944,7 +2944,7 @@ describe('AftermarketDevice', function () {
     });
   });
 
-  describe.only('pairAftermarketDeviceSign(uint256,uint256)', () => {
+  describe('pairAftermarketDeviceSign(uint256,uint256)', () => {
     let claimAdSig1: string;
     let claimAdSig2: string;
     before(async () => {

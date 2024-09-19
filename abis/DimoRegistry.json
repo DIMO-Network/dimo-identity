@@ -1247,6 +1247,24 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "aftermarketDeviceSig",
+                "type": "bytes"
+            }
+        ],
+        "name": "claimAftermarketDevice",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "components": [
                     {
                         "internalType": "uint256",

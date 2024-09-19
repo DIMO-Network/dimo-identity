@@ -264,6 +264,46 @@ contract AftermarketDevice is AccessControlInternal {
     }
 
     /**
+     * TODO Documentation
+     */
+    function claimAftermarketDevice(
+        uint256 aftermarketDeviceNode,
+        bytes calldata aftermarketDeviceSig
+    ) external {
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        address owner = msg.sender;
+        bytes32 message = keccak256(
+            abi.encode(CLAIM_TYPEHASH, aftermarketDeviceNode, owner)
+        );
+        address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
+            aftermarketDeviceNode
+        ];
+        address adIdProxy = ads.idProxyAddress;
+
+        if (!INFT(adIdProxy).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxy, aftermarketDeviceNode);
+        if (ads.deviceClaimed[aftermarketDeviceNode])
+            revert DeviceAlreadyClaimed(aftermarketDeviceNode);
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                aftermarketDeviceAddress,
+                message,
+                aftermarketDeviceSig
+            )
+        ) revert InvalidAdSignature();
+
+        ads.deviceClaimed[aftermarketDeviceNode] = true;
+        INFT(adIdProxy).safeTransferFrom(
+            INFT(adIdProxy).ownerOf(aftermarketDeviceNode),
+            owner,
+            aftermarketDeviceNode
+        );
+
+        emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
+    }
+
+    /**
      * @notice Pairs an aftermarket device with a vehicle through a metatransaction.
      * The vehicle owner and AD sign a typed structured (EIP-712) message in advance and submits to be verified
      * @dev Caller must have the admin role

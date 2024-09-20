@@ -1247,6 +1247,24 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "aftermarketDeviceSig",
+                "type": "bytes"
+            }
+        ],
+        "name": "claimAftermarketDevice",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "components": [
                     {
                         "internalType": "uint256",
@@ -1392,6 +1410,24 @@
             }
         ],
         "name": "mintAftermarketDeviceByManufacturerBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            }
+        ],
+        "name": "pairAftermarketDevice",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

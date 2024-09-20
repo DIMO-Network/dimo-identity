@@ -29,20 +29,24 @@ abstract contract NftBaseUpgradeable is
 
     string private baseURI;
 
-    /// @notice Sets the base URI
-    /// @dev Caller must have the admin role
-    /// @param baseURI_ Base URI to be set
+    /**
+     * @notice Sets the base URI
+     * @dev Caller must have the admin role
+     * @param baseURI_ Base URI to be set
+     */
     function setBaseURI(
         string calldata baseURI_
     ) external virtual onlyRole(ADMIN_ROLE) {
         baseURI = baseURI_;
     }
 
-    /// @notice Mints a new token
-    /// @dev Caller must have the minter role
-    /// @dev Token Id auto increments
-    /// @param to Token owner
-    /// @return tokenId Minted token Id
+    /**
+     * @notice Mints a new token
+     * @dev Caller must have the minter role
+     * @dev Token Id auto increments
+     * @param to Token owner
+     * @return tokenId Minted token Id
+     */
     function safeMint(
         address to
     ) public virtual onlyRole(MINTER_ROLE) returns (uint256 tokenId) {
@@ -51,12 +55,14 @@ abstract contract NftBaseUpgradeable is
         _safeMint(to, tokenId);
     }
 
-    /// @notice Mints a new token
-    /// @dev Caller must have the minter role
-    /// @dev Token Id auto increments
-    /// @param to Token owner
-    /// @param uri Individual token URI
-    /// @return tokenId Minted token Id
+    /**
+     * @notice Mints a new token
+     * @dev Caller must have the minter role
+     * @dev Token Id auto increments
+     * @param to Token owner
+     * @param uri Individual token URI
+     * @return tokenId Minted token Id
+     */
     function safeMint(
         address to,
         string calldata uri
@@ -67,16 +73,20 @@ abstract contract NftBaseUpgradeable is
         _setTokenURI(tokenId, uri);
     }
 
-    /// @notice Checks if a token was minted
-    /// @param tokenId Token Id to be checked
-    /// @return boolean
+    /**
+     * @notice Checks if a token was minted
+     * @param tokenId Token Id to be checked
+     * @return boolean
+     */
     function exists(uint256 tokenId) external view returns (bool) {
         return _exists(tokenId);
     }
 
-    /// @notice Gets the token URI associated to a token
-    /// @param tokenId Token Id to be checked
-    /// @return string
+    /**
+     * @notice Gets the token URI associated to a token
+     * @param tokenId Token Id to be checked
+     * @return string
+     */
     function tokenURI(
         uint256 tokenId
     )
@@ -105,10 +115,12 @@ abstract contract NftBaseUpgradeable is
         return super.supportsInterface(interfaceId);
     }
 
-    /// @notice Initialize function to be used by contracts that inherit from NftBaseUpgradeable
-    /// @param name_ Token name
-    /// @param symbol_ Token symbol
-    /// @param baseUri_ Token base URI
+    /**
+     * @notice Initialize function to be used by contracts that inherit from NftBaseUpgradeable
+     * @param name_ Token name
+     * @param symbol_ Token symbol
+     * @param baseUri_ Token base URI
+     */
     function _baseNftInit(
         string calldata name_,
         string calldata symbol_,
@@ -128,21 +140,27 @@ abstract contract NftBaseUpgradeable is
         _grantRole(TRANSFERER_ROLE, msg.sender);
     }
 
-    /// @notice Gets the base URI
-    /// @return string
+    /**
+     * @notice Gets the base URI
+     * @return string
+     */
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
 
-    /// @notice Internal function to authorize contract upgrade
-    /// @dev Caller must have the upgrader role
-    /// @param newImplementation New contract implementation address
+    /**
+     * @notice Internal function to authorize contract upgrade
+     * @dev Caller must have the upgrader role
+     * @param newImplementation New contract implementation address
+     */
     function _authorizeUpgrade(
         address newImplementation
     ) internal virtual override onlyRole(UPGRADER_ROLE) {}
 
-    /// @notice Internal function to burn a token
-    /// @param tokenId Token Id to be burned
+    /**
+     * @notice Internal function to burn a token
+     * @param tokenId Token Id to be burned
+     */
     function _burn(
         uint256 tokenId
     )

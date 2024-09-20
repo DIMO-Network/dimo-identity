@@ -147,12 +147,16 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     }
 
     /**
-     * // TODO Documentation
-     * @notice Function to mint a vehicle with a Device Definition Id
+     * @notice Function to mint a vehicle with a Device Definition Id and set permissions with SACD
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
      * @param attrInfo List of attribute-info pairs to be added
+     * @param sacdInput SACD input args
+     *  grantee -> The address to receive the permissions
+     *  permissions -> The uint256 that represents the byte array of permissions
+     *  expiration -> Expiration of the permissions
+     *  source -> The URI source associated with the permissions
      */
     function mintVehicleWithDeviceDefinition(
         uint256 manufacturerNode,

@@ -151,3 +151,10 @@ export type NftArgs = {
   name: string,
   args: (string | string[])[]
 };
+
+export type SacdInput = {
+  grantee: string,
+  permissions: string,
+  expiration: string,
+  source: string,
+}

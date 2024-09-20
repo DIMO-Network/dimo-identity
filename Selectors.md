@@ -311,6 +311,7 @@
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
 | 0x3da44e56 | mintVehicle(uint256,address,(string,string)[]) |
 | 0x1b1a82c8 | mintVehicleSign(uint256,address,(string,string)[],bytes) |
+| 0x97c95b2a | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string)) |
 | 0xd84baff1 | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[]) |
 | 0x8dca2b8e | mintVehicleWithDeviceDefinitionSign(uint256,address,string,(string,string)[],bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |

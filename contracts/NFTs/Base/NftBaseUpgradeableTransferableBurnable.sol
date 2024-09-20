@@ -45,7 +45,7 @@ abstract contract NftBaseUpgradeable is
     /// @return tokenId Minted token Id
     function safeMint(
         address to
-    ) external virtual onlyRole(MINTER_ROLE) returns (uint256 tokenId) {
+    ) public virtual onlyRole(MINTER_ROLE) returns (uint256 tokenId) {
         _tokenIdCounter.increment();
         tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);

@@ -147,6 +147,52 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     }
 
     /**
+     * // TODO Documentation
+     * @notice Function to mint a vehicle with a Device Definition Id
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param deviceDefinitionId The Device Definition Id
+     * @param attrInfo List of attribute-info pairs to be added
+     */
+    function mintVehicleWithDeviceDefinition(
+        uint256 manufacturerNode,
+        address owner,
+        string calldata deviceDefinitionId,
+        AttributeInfoPair[] calldata attrInfo,
+        SacdInput calldata sacdInput
+    ) external {
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMintWithSacd(
+            owner,
+            sacdInput
+        );
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
+
+        emit VehicleNodeMintedWithDeviceDefinition(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
+
+        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+    }
+
+    /**
      * @notice Mint a vehicle with a Device Definition Id through a metatransaction
      * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id

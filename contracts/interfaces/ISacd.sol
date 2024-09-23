@@ -8,14 +8,14 @@ pragma solidity ^0.8.13;
  * associated with specific ERC721 tokens
  */
 interface ISacd {
-    function setSacd(
+    function setPermissions(
         address asset,
         uint256 tokenId,
         address grantee,
         uint256 permissions,
         uint256 expiration,
         string calldata source
-    ) external returns (address sacd);
+    ) external;
 
     function hasPermission(
         address asset,

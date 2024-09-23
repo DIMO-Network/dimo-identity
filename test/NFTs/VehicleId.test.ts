@@ -474,6 +474,29 @@ describe('VehicleId', async function () {
     });
   });
 
+  describe('safeMintWithSacd', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
+        await expect(
+          vehicleIdInstance
+            .connect(nonAdmin)
+            .safeMintWithSacd(
+              user1.address,
+              {
+                grantee: user2.address,
+                permissions: '0',
+                expiration: '0',
+                source: ''
+              }
+            )
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.NFT_MINTER_ROLE
+          }`,
+        );
+      });
+    });
+  });
+
   context('On transfer', async () => {
     context('Error handling', () => {
       it('Should revert if caller is approved, but not the token owner', async () => {
@@ -612,7 +635,7 @@ describe('VehicleId', async function () {
         );
 
         expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
-          previousVersion + ethers.toBigInt(1),
+          previousVersion + 1n,
         );
       });
     });
@@ -761,12 +784,12 @@ describe('VehicleId', async function () {
         it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
           await vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinition(
-              1,
-              user1.address,
-              C.mockDdId2,
-              C.mockVehicleAttributeInfoPairs
-            );
+          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](
+            1,
+            user1.address,
+            C.mockDdId2,
+            C.mockVehicleAttributeInfoPairs
+          );
 
           expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.equal(C.mockDdId2);
 
@@ -798,7 +821,7 @@ describe('VehicleId', async function () {
           await vehicleIdInstance.connect(user1).burn(1);
 
           expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
-            previousVersion + ethers.toBigInt(1),
+            previousVersion + 1n,
           );
         });
       });

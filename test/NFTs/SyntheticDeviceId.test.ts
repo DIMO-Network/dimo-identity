@@ -242,7 +242,6 @@ describe('SyntheticDeviceId', async function () {
     await vehicleIdInstance
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
-
     await vehicleIdInstance
       .connect(admin)
       .setSacdAddress(await mockSacdInstance.getAddress());

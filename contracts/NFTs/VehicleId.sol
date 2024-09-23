@@ -10,6 +10,13 @@ error Unauthorized();
 error TransferFailed(address idProxy, uint256 id, string errorMessage);
 
 contract VehicleId is Initializable, MultiPrivilege {
+    struct SacdInput {
+        address grantee;
+        uint256 permissions;
+        uint256 expiration;
+        string source;
+    }
+
     uint256 private constant VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE = 6;
 
     IDimoRegistry public _dimoRegistry;
@@ -91,6 +98,31 @@ contract VehicleId is Initializable, MultiPrivilege {
         bool trusted
     ) external onlyRole(ADMIN_ROLE) {
         trustedForwarders[addr] = trusted;
+    }
+
+    /**
+     * @notice Mints a new token and sets permissions with SACD
+     * @dev super.safeMint requires the caller to have the MINTER_ROLE
+     * @param to Token owner
+     * @param sacdInput SACD input args
+     *  grantee -> The address to receive the permissions
+     *  permissions -> The uint256 that represents the byte array of permissions
+     *  expiration -> Expiration of the permissions
+     *  source -> The URI source associated with the permissions
+     */
+    function safeMintWithSacd(
+        address to,
+        SacdInput calldata sacdInput
+    ) external returns (uint256 tokenId) {
+        tokenId = super.safeMint(to);
+        ISacd(sacd).setPermissions(
+            address(this),
+            tokenId,
+            sacdInput.grantee,
+            sacdInput.permissions,
+            sacdInput.expiration,
+            sacdInput.source
+        );
     }
 
     /**

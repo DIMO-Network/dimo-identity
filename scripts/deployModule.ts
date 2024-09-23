@@ -315,13 +315,13 @@ async function upgradeNft(
     kind: 'uups',
   });
 
-  const upgradedProxy = await upgrades.upgradeProxy(
+  const upgradedProxy = await (await upgrades.upgradeProxy(
     oldProxyAddress,
     NftFactory,
     {
       kind: 'uups',
     },
-  );
+  )).waitForDeployment();
 
   console.log(`----- NFT ${nftName} upgraded -----`);
 

@@ -555,13 +555,19 @@ contract AftermarketDevice is AccessControlInternal {
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != vehicleNode)
             revert AdNotPaired(aftermarketDeviceNode);
 
-        address signer = Eip712CheckerInternal._recover(message, signature);
         address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
+        address vehicleOwner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
 
-        if (
-            signer != adOwner &&
-            signer != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
-        ) revert Errors.InvalidSigner();
+        bool isValidAdOwnerSignature = Eip712CheckerInternal._verifySignature(
+            adOwner,
+            message,
+            signature
+        );
+        bool isValidVehicleOwnerSignature = Eip712CheckerInternal
+            ._verifySignature(vehicleOwner, message, signature);
+
+        if (!(isValidAdOwnerSignature || isValidVehicleOwnerSignature))
+            revert Errors.InvalidSigner();
 
         delete ms.links[vehicleIdProxyAddress][vehicleNode];
         delete ms.links[adIdProxyAddress][aftermarketDeviceNode];

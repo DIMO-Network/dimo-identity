@@ -605,7 +605,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x5346D1019C3b6765cF7c200B8f8736B95009Dd93",
+                "address": "0x2a0AD46E54B879B9C1A6B00b4a60fD29A40a4687",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
@@ -621,7 +621,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x3c9F9d1F72865b2D84D2f93Ff91Ca45e3c2e556b",
+                "address": "0x185EbF7D5C9229B810A218781FdCf8B9c99b995D",
                 "selectors": [
                     "0x6111afa3",
                     "0x08d2c2f5",
@@ -643,7 +643,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0xe8444A22F5ba4fde599d65442b3563c8Dd7f5FaA",
+                "address": "0x288C625eD94950999f43aC96111B37f696066382",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
@@ -685,7 +685,7 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x9cFf9165A898d5b5b4786d2F3F8A78061Fa3aa5d",
+                "address": "0xaC7eE3Df60F881C6cf8a9FAc072F595BCAF4Ccf0",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3"

@@ -4,7 +4,7 @@ coverage
 coverage.json
 typechain-types
 .vscode/settings.json
-*_old.sol
+*Old.sol
 default-ice.bin
 
 #Hardhat files

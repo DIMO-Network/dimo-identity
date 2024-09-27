@@ -1062,13 +1062,13 @@ describe('DeviceDefinitionTable', async function () {
           ).first();
 
           expect(selectQuery).to.deep.include({
-            id: C.mockDdId1,
-            model: C.mockDdModel1,
-            year: C.mockDdYear1,
-            metadata: C.mockDdMetadataUpdate1,
-            ksuid: C.mockKsuid1,
-            deviceType: C.mockDdDeviceType1,
-            imageURI: C.mockDdImageURI1
+            id: C.mockDdUpdate1.id,
+            model: C.mockDdModel1, // It should not change
+            year: C.mockDdYear1, // It should not change
+            metadata: JSON.parse(C.mockDdUpdate1.metadata),
+            ksuid: C.mockDdUpdate1.ksuid,
+            deviceType: C.mockDdUpdate1.deviceType,
+            imageURI: C.mockDdUpdate1.imageURI
           });
         });
       });
@@ -1081,7 +1081,7 @@ describe('DeviceDefinitionTable', async function () {
               .updateDeviceDefinition(1, C.mockDdUpdate1)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionUpdated')
-            .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
+            .withArgs(2, C.mockDdId1);
         });
       });
     });
@@ -1109,13 +1109,13 @@ describe('DeviceDefinitionTable', async function () {
           ).first();
 
           expect(selectQuery).to.deep.include({
-            id: C.mockDdId1,
-            model: C.mockDdModel1,
-            year: C.mockDdYear1,
-            metadata: C.mockDdMetadataUpdate1,
-            ksuid: C.mockKsuid1,
-            deviceType: C.mockDdDeviceType1,
-            imageURI: C.mockDdImageURI1,
+            id: C.mockDdUpdate1.id,
+            model: C.mockDdModel1, // It should not change
+            year: C.mockDdYear1, // It should not change
+            metadata: JSON.parse(C.mockDdUpdate1.metadata),
+            ksuid: C.mockDdUpdate1.ksuid,
+            deviceType: C.mockDdUpdate1.deviceType,
+            imageURI: C.mockDdUpdate1.imageURI
           });
         });
       });
@@ -1128,7 +1128,7 @@ describe('DeviceDefinitionTable', async function () {
               .updateDeviceDefinition(1, C.mockDdUpdate1)
           )
             .to.emit(ddTableInstance, 'DeviceDefinitionUpdated')
-            .withArgs(2, C.mockDdId1, C.mockDdModel1, C.mockDdYear1);
+            .withArgs(2, C.mockDdId1);
         });
       });
     });

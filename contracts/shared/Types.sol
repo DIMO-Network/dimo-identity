@@ -70,3 +70,11 @@ struct DeviceDefinitionInput {
     string deviceType; // The deviceType of the Device Definition
     string imageURI; // The image uri of the Device Definition
 }
+
+struct DeviceDefinitionUpdateInput {
+    string id; // The alphanumeric ID of the Device Definition
+    string metadata; // The metadata stringfied object of the Device Definition
+    string ksuid; // K-Sortable Unique IDentifier
+    string deviceType; // The deviceType of the Device Definition
+    string imageURI; // The image uri of the Device Definition
+}

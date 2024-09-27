@@ -1,4 +1,4 @@
-import { DeviceDefinitionInput } from '../types';
+import { DeviceDefinitionInput, DeviceDefinitionUpdateInput } from '../types';
 
 export const mockDdId1 = 'mockDdModel1_2021';
 export const mockDdId2 = 'mockDdModel2_2022';
@@ -114,14 +114,12 @@ export const mockDdInput3: DeviceDefinitionInput = {
     imageURI: mockDdImageURI3
 }
 
-export const mockDdUpdate1: DeviceDefinitionInput = {
+export const mockDdUpdate1: DeviceDefinitionUpdateInput = {
     id: mockDdId1,
-    model: mockDdModel1,
-    year: mockDdYear1,
     metadata: JSON.stringify(mockDdMetadataUpdate1),
-    ksuid: mockKsuid1,
-    deviceType: mockDdDeviceType1,
-    imageURI: mockDdImageURI1
+    ksuid: mockKsuid2,
+    deviceType: mockDdDeviceType2,
+    imageURI: mockDdImageURI2
 }
 
 export const mockDdInputBatch: DeviceDefinitionInput[] = [

@@ -67,6 +67,14 @@ export type DeviceDefinitionInput = {
   imageURI: string;
 };
 
+export type DeviceDefinitionUpdateInput = {
+  id: string,
+  metadata: string,
+  ksuid: string,
+  deviceType: string;
+  imageURI: string;
+};
+
 export type MintVehicleAndSdWithDdInput = {
   manufacturerNode: string,
   owner: string,

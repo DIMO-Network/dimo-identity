@@ -1813,6 +1813,221 @@ describe('AftermarketDevice', function () {
     });
   });
 
+  describe('claimAftermarketDevice', () => {
+    let adSig: string;
+    before(async () => {
+      adSig = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: DIMO_REGISTRY_ADDRESS,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address,
+        },
+      });
+    });
+
+    beforeEach(async () => {
+      await adIdInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(DIMO_REGISTRY_ADDRESS, true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList,
+        );
+    });
+
+    context('Error handling', () => {
+      it('Should revert if node is not an Aftermarket Device', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .claimAftermarketDevice(99, adSig),
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidNode',
+          )
+          .withArgs(AD_ID_ADDRESS, 99);
+      });
+      it('Should revert if device is already claimed', async () => {
+        await aftermarketDeviceInstance
+          .connect(user1)
+          .claimAftermarketDevice(1, adSig);
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .claimAftermarketDevice(1, adSig),
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'DeviceAlreadyClaimed',
+          )
+          .withArgs(1);
+      });
+
+      context('Wrong signature', () => {
+        it('Should revert if domain name is incorrect', async () => {
+          const invalidAdSig = await signMessage({
+            _signer: adAddress1,
+            _domainName: 'Wrong domain',
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user1.address,
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(user1)
+              .claimAftermarketDevice(1, invalidAdSig)
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidAdSignature',
+          );
+        });
+        it('Should revert if domain version is incorrect', async () => {
+          const invalidAdSig = await signMessage({
+            _signer: adAddress1,
+            _domainVersion: '99',
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user1.address,
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(user1)
+              .claimAftermarketDevice(1, invalidAdSig)
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidAdSignature',
+          );
+        });
+        it('Should revert if domain chain ID is incorrect', async () => {
+          const invalidAdSig = await signMessage({
+            _signer: adAddress1,
+            _chainId: 99,
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user1.address,
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(user1)
+              .claimAftermarketDevice(1, invalidAdSig)
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidAdSignature',
+          );
+        });
+        it('Should revert if aftermarket device node is incorrect', async () => {
+          const invalidAdSig = await signMessage({
+            _signer: adAddress1,
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '99',
+              owner: user1.address,
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(user1)
+              .claimAftermarketDevice(1, invalidAdSig)
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidAdSignature',
+          );
+        });
+        it('Should revert if owner does not match owner parameter', async () => {
+          const invalidAdSig = await signMessage({
+            _signer: adAddress1,
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '1',
+              owner: user2.address,
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(user1)
+              .claimAftermarketDevice(1, invalidAdSig)
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidAdSignature',
+          );
+        });
+        it('Should revert if signer does not match address associated with aftermarket device ID', async () => {
+          const invalidAdSig = await signMessage({
+            _signer: adAddress1,
+            _primaryType: 'ClaimAftermarketDeviceSign',
+            _verifyingContract: DIMO_REGISTRY_ADDRESS,
+            message: {
+              aftermarketDeviceNode: '2',
+              owner: user1.address,
+            },
+          });
+
+          await expect(
+            aftermarketDeviceInstance
+              .connect(user1)
+              .claimAftermarketDevice(1, invalidAdSig)
+          ).to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidAdSignature',
+          );
+        });
+      });
+    });
+
+    context('State', async () => {
+      it('Should correctly set node owner', async () => {
+        await aftermarketDeviceInstance
+          .connect(user1)
+          .claimAftermarketDevice(1, adSig);
+
+        expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should correctly set node as claimed', async () => {
+        expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.false;
+
+        await aftermarketDeviceInstance
+          .connect(user1)
+          .claimAftermarketDevice(1, adSig);
+
+        expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AftermarketDeviceClaimed event with correct params', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .claimAftermarketDevice(1, adSig),
+        )
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceClaimed')
+          .withArgs(1, user1.address);
+      });
+    });
+  });
+
   describe('pairAftermarketDeviceSign(uint256,uint256,bytes,bytes)', () => {
     let claimOwnerSig2: string;
     let claimAdSig2: string;
@@ -2722,6 +2937,184 @@ describe('AftermarketDevice', function () {
             1,
             pairSignature,
           ),
+        )
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDevicePaired')
+          .withArgs(1, 1, user1.address);
+      });
+    });
+  });
+
+  describe('pairAftermarketDeviceSign(uint256,uint256)', () => {
+    let claimAdSig1: string;
+    let claimAdSig2: string;
+    before(async () => {
+      claimAdSig1 = await signMessage({
+        _signer: adAddress1,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: DIMO_REGISTRY_ADDRESS,
+        message: {
+          aftermarketDeviceNode: '1',
+          owner: user1.address,
+        },
+      });
+      claimAdSig2 = await signMessage({
+        _signer: adAddress2,
+        _primaryType: 'ClaimAftermarketDeviceSign',
+        _verifyingContract: DIMO_REGISTRY_ADDRESS,
+        message: {
+          aftermarketDeviceNode: '2',
+          owner: user2.address,
+        },
+      });
+    });
+
+    beforeEach(async () => {
+      await adIdInstance
+        .connect(manufacturer1)
+        .setApprovalForAll(DIMO_REGISTRY_ADDRESS, true);
+      await aftermarketDeviceInstance
+        .connect(manufacturer1)
+        .mintAftermarketDeviceByManufacturerBatch(
+          1,
+          mockAftermarketDeviceInfosList,
+        );
+      await vehicleInstance
+        .connect(admin)
+        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      await aftermarketDeviceInstance
+        .connect(user1)
+        .claimAftermarketDevice(1, claimAdSig1);
+    });
+
+    context('Error handling', () => {
+      it('Should revert if node is not a Vehicle', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .pairAftermarketDevice(1, 99)
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidNode',
+          )
+          .withArgs(VEHICLE_ID_ADDRESS, 99);
+      });
+      it('Should revert if node is not an Aftermarket Device', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .pairAftermarketDevice(99, 1)
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidNode',
+          )
+          .withArgs(AD_ID_ADDRESS, 99);
+      });
+      it('Should revert if device is not claimed', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .pairAftermarketDevice(2, 1)
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'AdNotClaimed',
+          )
+          .withArgs(2);
+      });
+      it('Should revert if owner is not the vehicle node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .pairAftermarketDevice(1, 2)
+        ).to.be.revertedWithCustomError(
+          aftermarketDeviceInstance,
+          'Unauthorized',
+        )
+          .withArgs(user1.address);
+      });
+      it('Should revert if owner is not the aftermarket device node owner', async () => {
+        await aftermarketDeviceInstance
+          .connect(user2)
+          .claimAftermarketDevice(2, claimAdSig2);
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .pairAftermarketDevice(2, 1)
+        ).to.be.revertedWithCustomError(
+          aftermarketDeviceInstance,
+          'Unauthorized',
+        )
+          .withArgs(user1.address);
+      });
+      it('Should revert if vehicle is already paired', async () => {
+        await aftermarketDeviceInstance
+          .connect(user1)
+          .pairAftermarketDevice(1, 1)
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .pairAftermarketDevice(1, 1)
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'VehiclePaired',
+          )
+          .withArgs(1);
+      });
+      it('Should revert if aftermarket device is already paired', async () => {
+        await aftermarketDeviceInstance
+          .connect(user1)
+          .pairAftermarketDevice(1, 1)
+
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .pairAftermarketDevice(1, 2)
+        )
+          .to.be.revertedWithCustomError(aftermarketDeviceInstance, 'AdPaired')
+          .withArgs(1);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly map the aftermarket device to the vehicle', async () => {
+        await aftermarketDeviceInstance
+          .connect(user1)
+          .pairAftermarketDevice(1, 1)
+
+        expect(
+          await mapperInstance.getLink(AD_ID_ADDRESS, 1),
+        ).to.be.equal(1);
+      });
+      it('Should correctly map the vehicle to the aftermarket device', async () => {
+        await aftermarketDeviceInstance
+          .connect(user1)
+          .pairAftermarketDevice(1, 1)
+
+        expect(
+          await mapperInstance.getLink(VEHICLE_ID_ADDRESS, 1),
+        ).to.be.equal(1);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AftermarketDevicePaired event with correct params', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(user1)
+            .pairAftermarketDevice(1, 1)
         )
           .to.emit(aftermarketDeviceInstance, 'AftermarketDevicePaired')
           .withArgs(1, 1, user1.address);

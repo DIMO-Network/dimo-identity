@@ -78,3 +78,10 @@ struct DeviceDefinitionUpdateInput {
     string deviceType; // The deviceType of the Device Definition
     string imageURI; // The image uri of the Device Definition
 }
+
+struct SacdInput {
+    address grantee;
+    uint256 permissions;
+    uint256 expiration;
+    string source;
+}

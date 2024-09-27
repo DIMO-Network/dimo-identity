@@ -14,4 +14,5 @@ export * from './NftArgs';
 export * from './UpgradeableContractsArgs';
 export * from './DeviceDefinitionTable';
 export * from './Vehicle';
+export * from './Sacd';
 export * from './Streamr';

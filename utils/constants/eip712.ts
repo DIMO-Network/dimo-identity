@@ -1,7 +1,9 @@
 import { TypedData } from '../types';
+import * as Types from './Eip712Types.json';
 
 export const defaultDomainName = 'DIMO';
 export const defaultDomainVersion = '1';
+
 export const schemaBase: TypedData = {
   types: {
     EIP712Domain: [
@@ -10,41 +12,7 @@ export const schemaBase: TypedData = {
       { name: 'chainId', type: 'uint256' },
       { name: 'verifyingContract', type: 'address' }
     ],
-    MintVehicleSign: [
-      { name: 'manufacturerNode', type: 'uint256' },
-      { name: 'owner', type: 'address' },
-      { name: 'attributes', type: 'string[]' },
-      { name: 'infos', type: 'string[]' }
-    ],
-    ClaimAftermarketDeviceSign: [
-      { name: 'aftermarketDeviceNode', type: 'uint256' },
-      { name: 'owner', type: 'address' }
-    ],
-    PairAftermarketDeviceSign: [
-      { name: 'aftermarketDeviceNode', type: 'uint256' },
-      { name: 'vehicleNode', type: 'uint256' }
-    ],
-    UnPairAftermarketDeviceSign: [
-      { name: 'aftermarketDeviceNode', type: 'uint256' },
-      { name: 'vehicleNode', type: 'uint256' }
-    ],
-    MintSyntheticDeviceSign: [
-      { name: 'integrationNode', type: 'uint256' },
-      { name: 'vehicleNode', type: 'uint256' }
-    ],
-    MintVehicleAndSdSign: [{ name: 'integrationNode', type: 'uint256' }],
-    MintVehicleWithDeviceDefinitionSign: [
-      { name: 'manufacturerNode', type: 'uint256' },
-      { name: 'owner', type: 'address' },
-      { name: 'deviceDefinitionId', type: 'string' },
-      { name: 'attributes', type: 'string[]' },
-      { name: 'infos', type: 'string[]' }
-    ],
-    BurnSyntheticDeviceSign: [
-      { name: 'vehicleNode', type: 'uint256' },
-      { name: 'syntheticDeviceNode', type: 'uint256' }
-    ],
-    BurnVehicleSign: [{ name: 'vehicleNode', type: 'uint256' }]
+    ...Types,
   },
   primaryType: '',
   domain: {},

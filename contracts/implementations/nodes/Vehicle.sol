@@ -147,6 +147,56 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     }
 
     /**
+     * @notice Function to mint a vehicle with a Device Definition Id and set permissions with SACD
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param deviceDefinitionId The Device Definition Id
+     * @param attrInfo List of attribute-info pairs to be added
+     * @param sacdInput SACD input args
+     *  grantee -> The address to receive the permissions
+     *  permissions -> The uint256 that represents the byte array of permissions
+     *  expiration -> Expiration of the permissions
+     *  source -> The URI source associated with the permissions
+     */
+    function mintVehicleWithDeviceDefinition(
+        uint256 manufacturerNode,
+        address owner,
+        string calldata deviceDefinitionId,
+        AttributeInfoPair[] calldata attrInfo,
+        SacdInput calldata sacdInput
+    ) external {
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMintWithSacd(
+            owner,
+            sacdInput
+        );
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
+
+        emit VehicleNodeMintedWithDeviceDefinition(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
+
+        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+    }
+
+    /**
      * @notice Mint a vehicle with a Device Definition Id through a metatransaction
      * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
@@ -318,11 +368,11 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
         delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
+        _resetInfos(tokenId);
+
         emit VehicleNodeBurned(tokenId, owner);
 
         INFT(vehicleIdProxyAddress).burn(tokenId);
-
-        _resetInfos(tokenId);
     }
 
     /**
@@ -426,8 +476,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             i++
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
-
-            emit VehicleAttributeSet(tokenId, attributes[i], "");
         }
     }
 }

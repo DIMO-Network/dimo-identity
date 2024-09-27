@@ -755,6 +755,11 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "sacd_",
+        "type": "address"
+      },
+      {
         "internalType": "address[]",
         "name": "trustedForwarders_",
         "type": "address[]"
@@ -958,6 +963,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "sacd",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -990,6 +1008,52 @@
       }
     ],
     "name": "safeMint",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "grantee",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "permissions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expiration",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "source",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct VehicleId.SacdInput",
+        "name": "sacdInput",
+        "type": "tuple"
+      }
+    ],
+    "name": "safeMintWithSacd",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1154,6 +1218,19 @@
       }
     ],
     "name": "setPrivileges",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "setSacdAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

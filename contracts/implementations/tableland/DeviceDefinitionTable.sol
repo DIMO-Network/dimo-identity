@@ -253,10 +253,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
      * @dev The specified Device Definition Table must exist
      * @dev The pair (model,year) must be unique
      * @param manufacturerId The unique identifier of the manufacturer
-     * @param data Input data with the following fields:
-     *  id -> The alphanumeric ID of the Device Definition
-     *  model -> The model of the Device Definition
-     *  year -> The year of the Device Definition
+     * @param data Input data with the following fields that can be updated:
+     *  id -> The alphanumeric ID of the Device Definition, used to find the definition to update
      *  metadata -> The metadata stringfied object of the Device Definition
      *  ksuid -> K-Sortable Unique IDentifier
      *  deviceType -> The deviceType of the Device Definition
@@ -294,11 +292,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         _updateDeviceDefinitionData(
             tablelandTables,
             tableId,
-            data.id,
-            data.metadata,
-            data.deviceType,
-            data.imageURI,
-            data.ksuid
+            data
         );
     }
 
@@ -484,32 +478,28 @@ contract DeviceDefinitionTable is AccessControlInternal {
      * @param tablelandTables The tableland reference
      * @param tableId The unique identifier of the manufacturer
      * @param id The alphanumeric ID of the Device Definition
-     * @param metadata The metadata stringfied object of the Device Definition
+     * @param input the object with fields to update of the Device Definition. The only fields that can be updated are: metadata, deviceType, imageURI and ksuid
      */
     function _updateDeviceDefinitionData(
         TablelandTablesImpl tablelandTables,
         uint256 tableId,
-        string calldata id,
-        string calldata metadata,
-        string calldata deviceType,
-        string calldata imageURI,
-        string calldata ksuid
+        DeviceDefinitionInput calldata input
     ) private {
         // Set the values to update
         string memory setters = string.concat(
             "metadata=",
-            string(abi.encodePacked("'", metadata, "'")),
+            string(abi.encodePacked("'", input.metadata, "'")),
             ", deviceType=",
-            string(abi.encodePacked("'", deviceType, "'")),
+            string(abi.encodePacked("'", input.deviceType, "'")),
             ", imageURI=",
-            string(abi.encodePacked("'", imageURI, "'")),
+            string(abi.encodePacked("'", input.imageURI, "'")),
             ", ksuid=",
-            string(abi.encodePacked("'", ksuid, "'"))
+            string(abi.encodePacked("'", input.ksuid, "'"))
         );
         // Specify filters for which row to update
         string memory filters = string.concat(
             "id=",
-            string(abi.encodePacked("'", id, "'"))
+            string(abi.encodePacked("'", input.id, "'"))
         );
 
         tablelandTables.mutate(

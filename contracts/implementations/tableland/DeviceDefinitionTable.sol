@@ -295,7 +295,10 @@ contract DeviceDefinitionTable is AccessControlInternal {
             tablelandTables,
             tableId,
             data.id,
-            data.metadata
+            data.metadata,
+            data.deviceType,
+            data.imageURI,
+            data.ksuid
         );
     }
 
@@ -487,12 +490,21 @@ contract DeviceDefinitionTable is AccessControlInternal {
         TablelandTablesImpl tablelandTables,
         uint256 tableId,
         string calldata id,
-        string calldata metadata
+        string calldata metadata,
+        string calldata deviceType,
+        string calldata imageURI,
+        string calldata ksuid
     ) private {
         // Set the values to update
         string memory setters = string.concat(
             "metadata=",
-            string(abi.encodePacked("'", metadata, "'"))
+            string(abi.encodePacked("'", metadata, "'")),
+            ", deviceType=",
+            string(abi.encodePacked("'", deviceType, "'")),
+            ", imageURI=",
+            string(abi.encodePacked("'", imageURI, "'")),
+            ", ksuid=",
+            string(abi.encodePacked("'", ksuid, "'"))
         );
         // Specify filters for which row to update
         string memory filters = string.concat(

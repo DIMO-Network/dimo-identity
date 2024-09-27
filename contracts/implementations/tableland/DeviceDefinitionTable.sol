@@ -477,7 +477,6 @@ contract DeviceDefinitionTable is AccessControlInternal {
      * @dev The func only uodate the metadata field
      * @param tablelandTables The tableland reference
      * @param tableId The unique identifier of the manufacturer
-     * @param id The alphanumeric ID of the Device Definition
      * @param input the object with fields to update of the Device Definition. The only fields that can be updated are: metadata, deviceType, imageURI and ksuid
      */
     function _updateDeviceDefinitionData(

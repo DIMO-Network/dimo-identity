@@ -39,12 +39,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
         string model,
         uint256 year
     );
-    event DeviceDefinitionUpdated(
-        uint256 indexed tableId,
-        string id,
-        string model,
-        uint256 year
-    );
+    event DeviceDefinitionUpdated(uint256 indexed tableId, string id);
     event DeviceDefinitionDeleted(uint256 indexed tableId, string id);
 
     /**
@@ -253,10 +248,8 @@ contract DeviceDefinitionTable is AccessControlInternal {
      * @dev The specified Device Definition Table must exist
      * @dev The pair (model,year) must be unique
      * @param manufacturerId The unique identifier of the manufacturer
-     * @param data Input data with the following fields:
-     *  id -> The alphanumeric ID of the Device Definition
-     *  model -> The model of the Device Definition
-     *  year -> The year of the Device Definition
+     * @param data Input data with the following fields that can be updated:
+     *  id -> The alphanumeric ID of the Device Definition, used to find the definition to update
      *  metadata -> The metadata stringfied object of the Device Definition
      *  ksuid -> K-Sortable Unique IDentifier
      *  deviceType -> The deviceType of the Device Definition
@@ -264,7 +257,7 @@ contract DeviceDefinitionTable is AccessControlInternal {
      */
     function updateDeviceDefinition(
         uint256 manufacturerId,
-        DeviceDefinitionInput calldata data
+        DeviceDefinitionUpdateInput calldata data
     ) external {
         TablelandTablesImpl tablelandTables = TablelandDeployments.get();
         DeviceDefinitionTableStorage.Storage
@@ -289,14 +282,9 @@ contract DeviceDefinitionTable is AccessControlInternal {
             revert TableDoesNotExist(manufacturerId);
         }
 
-        emit DeviceDefinitionUpdated(tableId, data.id, data.model, data.year);
+        emit DeviceDefinitionUpdated(tableId, data.id);
 
-        _updateDeviceDefinitionData(
-            tablelandTables,
-            tableId,
-            data.id,
-            data.metadata
-        );
+        _updateDeviceDefinitionData(tablelandTables, tableId, data);
     }
 
     /**
@@ -478,27 +466,30 @@ contract DeviceDefinitionTable is AccessControlInternal {
     /**
      * @notice Update an Device Definition in an existing table
      * @dev The specified Device Definition Table must exist
-     * @dev The func only uodate the metadata field
      * @param tablelandTables The tableland reference
      * @param tableId The unique identifier of the manufacturer
-     * @param id The alphanumeric ID of the Device Definition
-     * @param metadata The metadata stringfied object of the Device Definition
+     * @param input the object with fields to update of the Device Definition. The only fields that can be updated are: metadata, deviceType, imageURI and ksuid
      */
     function _updateDeviceDefinitionData(
         TablelandTablesImpl tablelandTables,
         uint256 tableId,
-        string calldata id,
-        string calldata metadata
+        DeviceDefinitionUpdateInput calldata input
     ) private {
         // Set the values to update
         string memory setters = string.concat(
             "metadata=",
-            string(abi.encodePacked("'", metadata, "'"))
+            string(abi.encodePacked("'", input.metadata, "'")),
+            ", ksuid=",
+            string(abi.encodePacked("'", input.ksuid, "'")),
+            ", deviceType=",
+            string(abi.encodePacked("'", input.deviceType, "'")),
+            ", imageURI=",
+            string(abi.encodePacked("'", input.imageURI, "'"))
         );
         // Specify filters for which row to update
         string memory filters = string.concat(
             "id=",
-            string(abi.encodePacked("'", id, "'"))
+            string(abi.encodePacked("'", input.id, "'"))
         );
 
         tablelandTables.mutate(

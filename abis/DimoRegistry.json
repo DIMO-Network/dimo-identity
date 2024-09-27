@@ -4131,18 +4131,6 @@
                 "internalType": "string",
                 "name": "id",
                 "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "model",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "year",
-                "type": "uint256"
             }
         ],
         "name": "DeviceDefinitionUpdated",
@@ -4403,16 +4391,6 @@
                     },
                     {
                         "internalType": "string",
-                        "name": "model",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "year",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "string",
                         "name": "metadata",
                         "type": "string"
                     },
@@ -4432,7 +4410,7 @@
                         "type": "string"
                     }
                 ],
-                "internalType": "struct DeviceDefinitionInput",
+                "internalType": "struct DeviceDefinitionUpdateInput",
                 "name": "data",
                 "type": "tuple"
             }

@@ -35,7 +35,12 @@ contract DimoForwarder is
         _disableInitializers();
     }
 
-    // TODO Documentation
+    /**
+     * @notice Initializes the contract with specified parameters
+     * @param dimoRegistry_ The DIMORegistry contract address
+     * @param vehicleIdProxyAddress_ The Vehicle ID contract address
+     * @param adIdProxyAddress_ The Aftermarket Device ID contract address
+     */
     function initialize(
         address dimoRegistry_,
         address vehicleIdProxyAddress_,
@@ -88,12 +93,12 @@ contract DimoForwarder is
     }
 
     /**
-     * @notice Tranfers both Vehicle and Aftermarket Device Ids
-     * @dev Vehicle Id and Aftermarket Device Id must be paired
+     * @notice Tranfers both Vehicle and Aftermarket Device IDs
+     * @dev Vehicle ID and Aftermarket Device ID must be paired
      * @dev For the purpose of this contract, all requests must succeed
-     * @param vehicleId Vehicle Id to be transferred
-     * @param aftermarketDeviceId Aftermarket Device Id to be transferred
-     * @param to New Ids owner
+     * @param vehicleId Vehicle ID to be transferred
+     * @param aftermarketDeviceId Aftermarket Device ID to be transferred
+     * @param to New IDs owner
      */
     function transferVehicleAndAftermarketDeviceIds(
         uint256 vehicleId,
@@ -115,12 +120,19 @@ contract DimoForwarder is
         _execTransfer(adIdProxyAddress, to, aftermarketDeviceId);
     }
 
-    // TODO Documentation
+    /**
+     * @notice Tranfers multiple Vehicle and Aftermarket Device IDs
+     * @dev For the purpose of this contract, all requests must succeed
+     * @param vehicleIds The list of Vehicle IDs to be transferred
+     * @param aftermarketDeviceIds The list of Aftermarket Device IDs to be transferred
+     * @param to New IDs owner
+     */
     function transferVehicleAndAftermarketDeviceIds(
         uint256[] calldata vehicleIds,
         uint256[] calldata aftermarketDeviceIds,
         address to
     ) external {
+        // To save gas if arrays are the same size
         if (vehicleIds.length == aftermarketDeviceIds.length) {
             for (uint256 i = 0; i < vehicleIds.length; i++) {
                 _execTransfer(vehicleIdProxyAddress, to, vehicleIds[i]);

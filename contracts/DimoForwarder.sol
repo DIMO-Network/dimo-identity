@@ -35,6 +35,12 @@ contract DimoForwarder is
         _disableInitializers();
     }
 
+    /**
+     * @notice Initializes the contract with specified parameters
+     * @param dimoRegistry_ The DIMORegistry contract address
+     * @param vehicleIdProxyAddress_ The Vehicle ID contract address
+     * @param adIdProxyAddress_ The Aftermarket Device ID contract address
+     */
     function initialize(
         address dimoRegistry_,
         address vehicleIdProxyAddress_,
@@ -52,9 +58,11 @@ contract DimoForwarder is
         _grantRole(UPGRADER_ROLE, msg.sender);
     }
 
-    /// @notice Sets the DIMO Registry address
-    /// @dev Only an admin can set the DIMO Registry address
-    /// @param dimoRegistry_ The address to be set
+    /**
+     * @notice Sets the DIMO Registry address
+     * @dev Only an admin can set the DIMO Registry address
+     * @param dimoRegistry_ The address to be set
+     */
     function setDimoRegistryAddress(
         address dimoRegistry_
     ) external onlyRole(ADMIN_ROLE) {
@@ -62,30 +70,36 @@ contract DimoForwarder is
         dimoRegistry = IDimoRegistry(dimoRegistry_);
     }
 
-    /// @notice Sets the Vehicle ID proxy address
-    /// @dev Only an admin can set the Vehicle ID proxy address
-    /// @param vehicleIdProxyAddress_ The address to be set
+    /**
+     * @notice Sets the Vehicle ID proxy address
+     * @dev Only an admin can set the Vehicle ID proxy address
+     * @param vehicleIdProxyAddress_ The address to be set
+     */
     function setVehicleIdProxyAddress(
         address vehicleIdProxyAddress_
     ) external onlyRole(ADMIN_ROLE) {
         vehicleIdProxyAddress = vehicleIdProxyAddress_;
     }
 
-    /// @notice Sets the Aftermarket Device ID proxy address
-    /// @dev Only an admin can set the Aftermarket Device ID proxy address
-    /// @param adIdProxyAddress_ The address to be set
+    /**
+     * @notice Sets the Aftermarket Device ID proxy address
+     * @dev Only an admin can set the Aftermarket Device ID proxy address
+     * @param adIdProxyAddress_ The address to be set
+     */
     function setAftermarketDeviceIdProxyAddress(
         address adIdProxyAddress_
     ) external onlyRole(ADMIN_ROLE) {
         adIdProxyAddress = adIdProxyAddress_;
     }
 
-    /// @notice Tranfers both Vehicle and Aftermarket Device Ids
-    /// @dev Vehicle Id and Aftermarket Device Id must be paired
-    /// @dev For the purpose of this contract, all requests must succeed
-    /// @param vehicleId Vehicle Id to be transferred
-    /// @param aftermarketDeviceId Aftermarket Device Id to be transferred
-    /// @param to New Ids owner
+    /**
+     * @notice Tranfers both Vehicle and Aftermarket Device IDs
+     * @dev Vehicle ID and Aftermarket Device ID must be paired
+     * @dev For the purpose of this contract, all requests must succeed
+     * @param vehicleId Vehicle ID to be transferred
+     * @param aftermarketDeviceId Aftermarket Device ID to be transferred
+     * @param to New IDs owner
+     */
     function transferVehicleAndAftermarketDeviceIds(
         uint256 vehicleId,
         uint256 aftermarketDeviceId,
@@ -106,9 +120,39 @@ contract DimoForwarder is
         _execTransfer(adIdProxyAddress, to, aftermarketDeviceId);
     }
 
-    /// @notice Internal function to authorize contract upgrade
-    /// @dev Caller must have the upgrader role
-    /// @param newImplementation New contract implementation address
+    /**
+     * @notice Tranfers multiple Vehicle and Aftermarket Device IDs
+     * @dev For the purpose of this contract, all requests must succeed
+     * @param vehicleIds The list of Vehicle IDs to be transferred
+     * @param aftermarketDeviceIds The list of Aftermarket Device IDs to be transferred
+     * @param to New IDs owner
+     */
+    function transferVehicleAndAftermarketDeviceIds(
+        uint256[] calldata vehicleIds,
+        uint256[] calldata aftermarketDeviceIds,
+        address to
+    ) external {
+        // To save gas if arrays are the same size
+        if (vehicleIds.length == aftermarketDeviceIds.length) {
+            for (uint256 i = 0; i < vehicleIds.length; i++) {
+                _execTransfer(vehicleIdProxyAddress, to, vehicleIds[i]);
+                _execTransfer(adIdProxyAddress, to, aftermarketDeviceIds[i]);
+            }
+        } else {
+            for (uint256 i = 0; i < vehicleIds.length; i++) {
+                _execTransfer(vehicleIdProxyAddress, to, vehicleIds[i]);
+            }
+            for (uint256 i = 0; i < aftermarketDeviceIds.length; i++) {
+                _execTransfer(adIdProxyAddress, to, aftermarketDeviceIds[i]);
+            }
+        }
+    }
+
+    /**
+     * @notice Internal function to authorize contract upgrade
+     * @dev Caller must have the upgrader role
+     * @param newImplementation New contract implementation address
+     */
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {}

@@ -283,52 +283,85 @@ async function updateModules2(contractNames: string[], networkName: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function upgradeContract(
+  deployer: HardhatEthersSigner,
+  contractName: string,
+  contractProxyAddress: string,
+  forceImport?: boolean
+): Promise<string> {
+  const ContractFactory = await ethers.getContractFactory(contractName, deployer);
+
+  console.log(`\n----- Upgrading ${contractName} contract -----\n`);
+
+  if (forceImport) {
+    const ContractFactoryOld = await ethers.getContractFactory(
+      `${contractName}Old`,
+      deployer,
+    );
+
+    await upgrades.forceImport(contractProxyAddress, ContractFactoryOld, {
+      kind: 'uups',
+    });
+  }
+
+  await upgrades.validateImplementation(ContractFactory, {
+    kind: 'uups',
+  });
+  await upgrades.validateUpgrade(contractProxyAddress, ContractFactory, {
+    kind: 'uups',
+  });
+
+  const upgradedProxy = await (await upgrades.upgradeProxy(
+    contractProxyAddress,
+    ContractFactory,
+    {
+      kind: 'uups',
+    },
+  )).waitForDeployment();
+
+  const newImplementationAddress = await upgrades.erc1967.getImplementationAddress(await upgradedProxy.getAddress());
+  console.log(`----- Contract ${contractName} upgraded with implementation ${newImplementationAddress} -----`);
+
+  return newImplementationAddress;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function upgradeNft(
   deployer: HardhatEthersSigner,
   nftName: string,
   networkName: string,
   forceImport?: boolean
 ): Promise<AddressesByNetwork> {
-  const NftFactory = await ethers.getContractFactory(nftName, deployer);
-
   const instances = getAddresses();
 
-  const oldProxyAddress = instances[networkName].nfts[nftName].proxy;
+  const newImplementationAddress = await upgradeContract(
+    deployer,
+    nftName,
+    instances[networkName].nfts[nftName].proxy,
+    forceImport
+  )
 
-  console.log(`\n----- Upgrading ${nftName} NFT -----\n`);
+  instances[networkName].nfts[nftName].implementation = newImplementationAddress;
 
-  if (forceImport) {
-    const NftFactoryOld = await ethers.getContractFactory(
-      `${nftName}Old`,
-      deployer,
-    );
+  return instances;
+}
 
-    await upgrades.forceImport(oldProxyAddress, NftFactoryOld, {
-      kind: 'uups',
-    });
-  }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function upgradeDimoForwarder(
+  deployer: HardhatEthersSigner,
+  networkName: string,
+  forceImport?: boolean
+): Promise<AddressesByNetwork> {
+  const instances = getAddresses();
 
-  await upgrades.validateImplementation(NftFactory, {
-    kind: 'uups',
-  });
-  await upgrades.validateUpgrade(oldProxyAddress, NftFactory, {
-    kind: 'uups',
-  });
+  const newImplementationAddress = await upgradeContract(
+    deployer,
+    'DimoForwarder',
+    instances[networkName].misc['DimoForwarder'].proxy,
+    forceImport
+  )
 
-  const upgradedProxy = await (await upgrades.upgradeProxy(
-    oldProxyAddress,
-    NftFactory,
-    {
-      kind: 'uups',
-    },
-  )).waitForDeployment();
-
-  console.log(`----- NFT ${nftName} upgraded -----`);
-
-  instances[networkName].nfts[nftName].implementation =
-    await upgrades.erc1967.getImplementationAddress(
-      await upgradedProxy.getAddress(),
-    );
+  instances[networkName].misc['DimoForwarder'].implementation = newImplementationAddress;
 
   return instances;
 }

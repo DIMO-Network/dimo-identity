@@ -804,7 +804,7 @@
             },
             "DimoForwarder": {
                 "proxy": "0xBF050bA5f13F4D7ba1744fcCd6087EDde78a337e",
-                "implementation": "0x7dc21878C58BDbC8E07d7DEC09c94E0d9a2972E8"
+                "implementation": "0x1Fd3C02C52477F53Fc4E67E028738F4EA0890124"
             },
             "Foundation": "0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b",
             "Kms": [

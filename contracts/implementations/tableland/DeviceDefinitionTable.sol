@@ -243,6 +243,71 @@ contract DeviceDefinitionTable is AccessControlInternal {
     }
 
     /**
+     * @notice Insert a list of Device Definition in an existing table
+     * @dev The caller must be the owner of the manufacturer ID
+     * @dev The specified Device Definition Table must exist
+     * @dev The pair (model,year) must be unique
+     * @param manufacturerId The unique identifier of the manufacturer
+     * @param data Input data list with the following fields:
+     *  id -> The alphanumeric ID of the Device Definition
+     *  model -> The model of the Device Definition
+     *  year -> The year of the Device Definition
+     *  metadata -> The metadata stringfied object of the Device Definition
+     *  ksuid -> K-Sortable Unique IDentifier
+     *  deviceType -> The deviceType of the Device Definition
+     *  imageURI -> The image uri of the Device Definition
+     */
+    function insertDeviceDefinitionBatch(
+        uint256 manufacturerId,
+        DeviceDefinitionInput[] calldata data
+    ) external {
+        TablelandTablesImpl tablelandTables = TablelandDeployments.get();
+        DeviceDefinitionTableStorage.Storage
+            storage dds = DeviceDefinitionTableStorage.getStorage();
+        uint256 tableId = dds.tables[manufacturerId];
+
+        try INFT(address(tablelandTables)).ownerOf(tableId) {
+            INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+                ManufacturerStorage.getStorage().idProxyAddress
+            );
+
+            if (
+                !manufacturerIdProxy.hasPrivilege(
+                    manufacturerId,
+                    MANUFACTURER_INSERT_DD_PRIVILEGE,
+                    msg.sender
+                )
+            ) {
+                revert Unauthorized(msg.sender);
+            }
+        } catch {
+            revert TableDoesNotExist(manufacturerId);
+        }
+
+        uint256 len = data.length;
+        string[] memory vals = new string[](len);
+        for (uint256 i; i < len; i++) {
+            vals[i] = _convertDeviceDefinitionToString(data[i]);
+
+            emit DeviceDefinitionInserted(
+                tableId,
+                data[i].id,
+                data[i].model,
+                data[i].year
+            );
+        }
+
+        string memory stmt = SQLHelpers.toBatchInsert(
+            "",
+            tableId,
+            "id,model,year,metadata,ksuid,deviceType,imageURI",
+            vals
+        );
+
+        tablelandTables.mutate(address(this), tableId, stmt);
+    }
+
+    /**
      * @notice Update a Device Definition in an existing table
      * @dev The caller must be the owner of the manufacturer ID
      * @dev The specified Device Definition Table must exist
@@ -325,72 +390,6 @@ contract DeviceDefinitionTable is AccessControlInternal {
         emit DeviceDefinitionDeleted(tableId, id);
 
         _deleteDeviceDefinitionData(tablelandTables, tableId, id);
-    }
-
-    // TODO Move it to after inserDeviceDefinition in the next upgrade
-    /**
-     * @notice Insert a list of Device Definition in an existing table
-     * @dev The caller must be the owner of the manufacturer ID
-     * @dev The specified Device Definition Table must exist
-     * @dev The pair (model,year) must be unique
-     * @param manufacturerId The unique identifier of the manufacturer
-     * @param data Input data list with the following fields:
-     *  id -> The alphanumeric ID of the Device Definition
-     *  model -> The model of the Device Definition
-     *  year -> The year of the Device Definition
-     *  metadata -> The metadata stringfied object of the Device Definition
-     *  ksuid -> K-Sortable Unique IDentifier
-     *  deviceType -> The deviceType of the Device Definition
-     *  imageURI -> The image uri of the Device Definition
-     */
-    function insertDeviceDefinitionBatch(
-        uint256 manufacturerId,
-        DeviceDefinitionInput[] calldata data
-    ) external {
-        TablelandTablesImpl tablelandTables = TablelandDeployments.get();
-        DeviceDefinitionTableStorage.Storage
-            storage dds = DeviceDefinitionTableStorage.getStorage();
-        uint256 tableId = dds.tables[manufacturerId];
-
-        try INFT(address(tablelandTables)).ownerOf(tableId) {
-            INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
-                ManufacturerStorage.getStorage().idProxyAddress
-            );
-
-            if (
-                !manufacturerIdProxy.hasPrivilege(
-                    manufacturerId,
-                    MANUFACTURER_INSERT_DD_PRIVILEGE,
-                    msg.sender
-                )
-            ) {
-                revert Unauthorized(msg.sender);
-            }
-        } catch {
-            revert TableDoesNotExist(manufacturerId);
-        }
-
-        uint256 len = data.length;
-        string[] memory vals = new string[](len);
-        for (uint256 i; i < len; i++) {
-            vals[i] = _convertDeviceDefinitionToString(data[i]);
-
-            emit DeviceDefinitionInserted(
-                tableId,
-                data[i].id,
-                data[i].model,
-                data[i].year
-            );
-        }
-
-        string memory stmt = SQLHelpers.toBatchInsert(
-            "",
-            tableId,
-            "id,model,year,metadata,ksuid,deviceType,imageURI",
-            vals
-        );
-
-        tablelandTables.mutate(address(this), tableId, stmt);
     }
 
     /**

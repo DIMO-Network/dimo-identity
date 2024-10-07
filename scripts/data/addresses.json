@@ -74,13 +74,14 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x0B5f7c96e45A465B8829C4AF14C9ab4BB22Ec5ba",
+                "address": "0xf2f7854512c75CbcF7C6A43084daf61704c68e3f",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
                     "0xb7bded95",
                     "0x3da44e56",
                     "0x1b1a82c8",
+                    "0x97c95b2a",
                     "0xd84baff1",
                     "0x8dca2b8e",
                     "0x9bfae6da",
@@ -89,15 +90,17 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x0C140d65B85E3c7D8A1A8bc9c7ffA7Ac839E0298",
+                "address": "0xBfD45f8488379e4ea346E49db5E49770154af9c1",
                 "selectors": [
                     "0x6111afa3",
+                    "0x08d2c2f5",
                     "0xab2ae229",
                     "0x89a841bb",
                     "0x682a25e3",
                     "0x9796cf22",
                     "0xc6b36f2a",
                     "0x7ba79a39",
+                    "0x492ab283",
                     "0xb50df2f7",
                     "0xcfe642dd",
                     "0x9b3abd48",
@@ -109,7 +112,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0x22e9F325c8d06F6e2F71320b440989254016bf0F",
+                "address": "0x25832B17BEc5698c3e646034Bc892f361ae2C354",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
@@ -151,7 +154,7 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x1986d17eBa12Cc430BCb182B77143F7D6fFf0517",
+                "address": "0xe15F6E995ef9308F01E4640658a91e8fb77E15a1",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3"
@@ -250,7 +253,7 @@
             },
             "DimoForwarder": {
                 "proxy": "0xA6D4a36CECAdd7b23C7B6DC2377746D08cf5a609",
-                "implementation": "0xA6c4e0938835cb6d66074833737A87Fc1400533b"
+                "implementation": "0xfAc2dC0943024a6512759575DA7a8e951CC6b255"
             },
             "Foundation": "0xCED3c922200559128930180d3f0bfFd4d9f4F123",
             "Kms": [

@@ -67,6 +67,14 @@ export type DeviceDefinitionInput = {
   imageURI: string;
 };
 
+export type DeviceDefinitionUpdateInput = {
+  id: string,
+  metadata: string,
+  ksuid: string,
+  deviceType: string;
+  imageURI: string;
+};
+
 export type MintVehicleAndSdWithDdInput = {
   manufacturerNode: string,
   owner: string,
@@ -151,3 +159,10 @@ export type NftArgs = {
   name: string,
   args: (string | string[])[]
 };
+
+export type SacdInput = {
+  grantee: string,
+  permissions: string,
+  expiration: string,
+  source: string,
+}

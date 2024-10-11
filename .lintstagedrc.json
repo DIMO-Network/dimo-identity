@@ -3,7 +3,7 @@
         "eslint . '**/*.ts' --fix"
     ],
     "*.sol": [
-        "solhint 'contracts/**/*.sol' --fix",
+        "solhint 'contracts/**/*.sol' --fix --noPrompt",
         "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'"
     ]
 }

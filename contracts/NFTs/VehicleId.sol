@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
+import "../interfaces/ISacd.sol";
 import "./Base/MultiPrivilege/MultiPrivilegeTransferableBurnable.sol";
 
 error ZeroAddress();
@@ -9,11 +10,19 @@ error Unauthorized();
 error TransferFailed(address idProxy, uint256 id, string errorMessage);
 
 contract VehicleId is Initializable, MultiPrivilege {
+    struct SacdInput {
+        address grantee;
+        uint256 permissions;
+        uint256 expiration;
+        string source;
+    }
+
     uint256 private constant VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE = 6;
 
     IDimoRegistry public _dimoRegistry;
     address public syntheticDeviceId;
     mapping(address => bool) public trustedForwarders;
+    address public sacd;
 
     // 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
     bytes4 public constant SAFE_TRANSFER_FROM = 0x42842e0e;
@@ -29,12 +38,14 @@ contract VehicleId is Initializable, MultiPrivilege {
         string calldata baseUri_,
         address dimoRegistry_,
         address syntheticDeviceId_,
+        address sacd_,
         address[] calldata trustedForwarders_
     ) external initializer {
         _multiPrivilegeInit(name_, symbol_, baseUri_);
 
         _dimoRegistry = IDimoRegistry(dimoRegistry_);
         syntheticDeviceId = syntheticDeviceId_;
+        sacd = sacd_;
         for (uint256 i = 0; i < trustedForwarders_.length; i++) {
             trustedForwarders[trustedForwarders_[i]] = true;
         }
@@ -67,6 +78,16 @@ contract VehicleId is Initializable, MultiPrivilege {
     }
 
     /**
+     * @notice Sets the SACD address
+     * @dev Only an admin can set the SACD address
+     * @param addr The address to be set
+     */
+    function setSacdAddress(address addr) external onlyRole(ADMIN_ROLE) {
+        if (addr == address(0)) revert ZeroAddress();
+        sacd = addr;
+    }
+
+    /**
      * @notice Sets trusted or not to an address
      * @dev Only an admin can set a trusted forwarder
      * @param addr The address to be set
@@ -77,6 +98,31 @@ contract VehicleId is Initializable, MultiPrivilege {
         bool trusted
     ) external onlyRole(ADMIN_ROLE) {
         trustedForwarders[addr] = trusted;
+    }
+
+    /**
+     * @notice Mints a new token and sets permissions with SACD
+     * @dev super.safeMint requires the caller to have the MINTER_ROLE
+     * @param to Token owner
+     * @param sacdInput SACD input args
+     *  grantee -> The address to receive the permissions
+     *  permissions -> The uint256 that represents the byte array of permissions
+     *  expiration -> Expiration of the permissions
+     *  source -> The URI source associated with the permissions
+     */
+    function safeMintWithSacd(
+        address to,
+        SacdInput calldata sacdInput
+    ) external returns (uint256 tokenId) {
+        tokenId = super.safeMint(to);
+        ISacd(sacd).setPermissions(
+            address(this),
+            tokenId,
+            sacdInput.grantee,
+            sacdInput.permissions,
+            sacdInput.expiration,
+            sacdInput.source
+        );
     }
 
     /**
@@ -175,6 +221,7 @@ contract VehicleId is Initializable, MultiPrivilege {
         }
 
         _dimoRegistry.onTransferVehicleStream(to, tokenId);
+        ISacd(sacd).onTransfer(address(this), tokenId);
 
         super._transfer(from, to, tokenId);
     }

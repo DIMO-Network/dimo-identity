@@ -264,6 +264,49 @@ contract AftermarketDevice is AccessControlInternal {
     }
 
     /**
+     * @notice Claims the ownership of an aftermarket device
+     * The aftermarket device signs a typed structured (EIP-712) message in advance and submits to be verified
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param aftermarketDeviceSig Aftermarket Device's signature hash
+     */
+    function claimAftermarketDevice(
+        uint256 aftermarketDeviceNode,
+        bytes calldata aftermarketDeviceSig
+    ) external {
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        address owner = msg.sender;
+        bytes32 message = keccak256(
+            abi.encode(CLAIM_TYPEHASH, aftermarketDeviceNode, owner)
+        );
+        address aftermarketDeviceAddress = ads.nodeIdToDeviceAddress[
+            aftermarketDeviceNode
+        ];
+        address adIdProxy = ads.idProxyAddress;
+
+        if (!INFT(adIdProxy).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxy, aftermarketDeviceNode);
+        if (ads.deviceClaimed[aftermarketDeviceNode])
+            revert DeviceAlreadyClaimed(aftermarketDeviceNode);
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                aftermarketDeviceAddress,
+                message,
+                aftermarketDeviceSig
+            )
+        ) revert InvalidAdSignature();
+
+        ads.deviceClaimed[aftermarketDeviceNode] = true;
+        INFT(adIdProxy).safeTransferFrom(
+            INFT(adIdProxy).ownerOf(aftermarketDeviceNode),
+            owner,
+            aftermarketDeviceNode
+        );
+
+        emit AftermarketDeviceClaimed(aftermarketDeviceNode, owner);
+    }
+
+    /**
      * @notice Pairs an aftermarket device with a vehicle through a metatransaction.
      * The vehicle owner and AD sign a typed structured (EIP-712) message in advance and submits to be verified
      * @dev Caller must have the admin role
@@ -382,6 +425,54 @@ contract AftermarketDevice is AccessControlInternal {
     }
 
     /**
+     * @notice Pairs an aftermarket device with a vehicle
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
+     */
+    function pairAftermarketDevice(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode
+    ) external {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (
+            !AftermarketDeviceStorage.getStorage().deviceClaimed[
+                aftermarketDeviceNode
+            ]
+        ) revert AdNotClaimed(aftermarketDeviceNode);
+        if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
+            revert Errors.VehiclePaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
+            revert AdPaired(aftermarketDeviceNode);
+
+        address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
+
+        if (
+            msg.sender != adOwner ||
+            msg.sender != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
+        ) revert Errors.Unauthorized(msg.sender);
+
+        ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
+
+        emit AftermarketDevicePaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            adOwner
+        );
+    }
+
+    /**
      * @dev Unpairs an aftermarket device from a vehicles
      * Both vehicle and AD owners can unpair.
      * @dev Caller must have the admin role
@@ -464,13 +555,19 @@ contract AftermarketDevice is AccessControlInternal {
         if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != vehicleNode)
             revert AdNotPaired(aftermarketDeviceNode);
 
-        address signer = Eip712CheckerInternal._recover(message, signature);
         address adOwner = INFT(adIdProxyAddress).ownerOf(aftermarketDeviceNode);
+        address vehicleOwner = INFT(vehicleIdProxyAddress).ownerOf(vehicleNode);
 
-        if (
-            signer != adOwner &&
-            signer != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode)
-        ) revert Errors.InvalidSigner();
+        bool isValidAdOwnerSignature = Eip712CheckerInternal._verifySignature(
+            adOwner,
+            message,
+            signature
+        );
+        bool isValidVehicleOwnerSignature = Eip712CheckerInternal
+            ._verifySignature(vehicleOwner, message, signature);
+
+        if (!(isValidAdOwnerSignature || isValidVehicleOwnerSignature))
+            revert Errors.InvalidSigner();
 
         delete ms.links[vehicleIdProxyAddress][vehicleNode];
         delete ms.links[adIdProxyAddress][aftermarketDeviceNode];

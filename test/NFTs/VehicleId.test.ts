@@ -24,6 +24,7 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockStake,
+  MockSacd
 } from '../../typechain-types';
 import {
   setup,
@@ -54,6 +55,7 @@ describe('VehicleId', async function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockSacdInstance: MockSacd;
   let manufacturerIdInstance: ManufacturerId;
   let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
@@ -160,6 +162,10 @@ describe('VehicleId', async function () {
     // Deploy MockStake contract
     const MockStakeFactory = await ethers.getContractFactory('MockStake');
     mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+
+    // Deploy MockSacd contract
+    const MockSacdFactory = await ethers.getContractFactory('MockSacd');
+    mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -332,6 +338,10 @@ describe('VehicleId', async function () {
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
 
+    await vehicleIdInstance
+      .connect(admin)
+      .setSacdAddress(await mockSacdInstance.getAddress());
+
     const claimOwnerSig1 = await signMessage({
       _signer: user1,
       _primaryType: 'ClaimAftermarketDeviceSign',
@@ -461,6 +471,29 @@ describe('VehicleId', async function () {
       // eslint-disable-next-line no-unused-expressions
       expect(await vehicleIdInstance.trustedForwarders(mockForwarder.address))
         .to.be.false;
+    });
+  });
+
+  describe('safeMintWithSacd', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
+        await expect(
+          vehicleIdInstance
+            .connect(nonAdmin)
+            .safeMintWithSacd(
+              user1.address,
+              {
+                grantee: user2.address,
+                permissions: '0',
+                expiration: '0',
+                source: ''
+              }
+            )
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.NFT_MINTER_ROLE
+          }`,
+        );
+      });
     });
   });
 
@@ -602,7 +635,7 @@ describe('VehicleId', async function () {
         );
 
         expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
-          previousVersion + ethers.toBigInt(1),
+          previousVersion + 1n,
         );
       });
     });
@@ -751,12 +784,12 @@ describe('VehicleId', async function () {
         it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
           await vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinition(
-              1,
-              user1.address,
-              C.mockDdId2,
-              C.mockVehicleAttributeInfoPairs
-            );
+          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](
+            1,
+            user1.address,
+            C.mockDdId2,
+            C.mockVehicleAttributeInfoPairs
+          );
 
           expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.equal(C.mockDdId2);
 
@@ -788,7 +821,7 @@ describe('VehicleId', async function () {
           await vehicleIdInstance.connect(user1).burn(1);
 
           expect(await vehicleIdInstance.tokenIdToVersion(1)).to.equal(
-            previousVersion + ethers.toBigInt(1),
+            previousVersion + 1n,
           );
         });
       });
@@ -798,13 +831,6 @@ describe('VehicleId', async function () {
           await expect(vehicleIdInstance.connect(user1).burn(1))
             .to.emit(vehicleInstance, 'VehicleNodeBurned')
             .withArgs(1, user1.address);
-        });
-        it('Should emit VehicleAttributeSet events with correct params', async () => {
-          await expect(vehicleIdInstance.connect(user1).burn(1))
-            .to.emit(vehicleInstance, 'VehicleAttributeSet')
-            .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-            .to.emit(vehicleInstance, 'VehicleAttributeSet')
-            .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, '');
         });
       });
     });

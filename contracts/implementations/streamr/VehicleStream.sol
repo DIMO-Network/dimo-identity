@@ -74,6 +74,7 @@ contract VehicleStream is AccessControlInternal {
         string memory streamPath = string(
             abi.encodePacked("/vehicles/", Strings.toString(vehicleId))
         );
+        /* solhint-disable quotes */
         string memory metadata = string(
             abi.encodePacked(
                 '{"partitions":1,"description":"DIMO Vehicle Stream for Vehicle ',
@@ -81,6 +82,7 @@ contract VehicleStream is AccessControlInternal {
                 '","config":{"fields":[]}}'
             )
         );
+        /* solhint-disable quotes */
         streamRegistry.createStreamWithENS(
             dimoStreamrEns,
             streamPath,

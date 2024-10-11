@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./Eip712CheckerStorage.sol";
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
 /**
  * @title Eip712CheckerInternal
@@ -34,22 +34,6 @@ library Eip712CheckerInternal {
     }
 
     /**
-     * @dev Recovers message signer
-     * @param message Hashed data payload
-     * @param signature Signed data payload
-     */
-    function _recover(
-        bytes32 message,
-        bytes calldata signature
-    ) internal view returns (address signer) {
-        bytes32 msgHash = keccak256(
-            abi.encodePacked("\x19\x01", _eip712Domain(), message)
-        );
-
-        return ECDSA.recover(msgHash, signature);
-    }
-
-    /**
      * @dev Recovers message signer and verifies if metches signatory
      * @param signatory The signer to be verified
      * @param message Hashed data payload
@@ -66,30 +50,7 @@ library Eip712CheckerInternal {
             abi.encodePacked("\x19\x01", _eip712Domain(), message)
         );
 
-        return signatory == ECDSA.recover(msgHash, signature);
-    }
-
-    /**
-     * @dev Recovers message signer and verifies if metches signatory
-     * @param signatory The signer to be verified
-     * @param message Hashed data payload
-     * @param v Signature "v" value
-     * @param r Signature "r" value
-     * @param s Signature "s" value
-     */
-    function _verifySignature(
-        address signatory,
-        bytes32 message,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) internal view returns (bool success) {
-        require(signatory != address(0), "ECDSA: zero signatory address");
-
-        bytes32 msgHash = keccak256(
-            abi.encodePacked("\x19\x01", _eip712Domain(), message)
-        );
-
-        return signatory == ECDSA.recover(msgHash, v, r, s);
+        return
+            SignatureChecker.isValidSignatureNow(signatory, msgHash, signature);
     }
 }

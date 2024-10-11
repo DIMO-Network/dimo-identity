@@ -127,12 +127,14 @@
 | Selector | Signature |
 |-|-|
 | 0x6111afa3 | addAftermarketDeviceAttribute(string) |
+| 0x08d2c2f5 | claimAftermarketDevice(uint256,bytes) |
 | 0xab2ae229 | claimAftermarketDeviceBatch((uint256,address)[]) |
 | 0x89a841bb | claimAftermarketDeviceSign(uint256,address,bytes,bytes) |
 | 0x682a25e3 | getAftermarketDeviceAddressById(uint256) |
 | 0x9796cf22 | getAftermarketDeviceIdByAddress(address) |
 | 0xc6b36f2a | isAftermarketDeviceClaimed(uint256) |
 | 0x7ba79a39 | mintAftermarketDeviceByManufacturerBatch(uint256,(address,(string,string)[])[]) |
+| 0x492ab283 | pairAftermarketDevice(uint256,uint256) |
 | 0xb50df2f7 | pairAftermarketDeviceSign(uint256,uint256,bytes,bytes) |
 | 0xcfe642dd | pairAftermarketDeviceSign(uint256,uint256,bytes) |
 | 0x9b3abd48 | reprovisionAftermarketDeviceByManufacturerBatch(uint256[]) |
@@ -311,6 +313,7 @@
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
 | 0x3da44e56 | mintVehicle(uint256,address,(string,string)[]) |
 | 0x1b1a82c8 | mintVehicleSign(uint256,address,(string,string)[],bytes) |
+| 0x97c95b2a | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string)) |
 | 0xd84baff1 | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[]) |
 | 0x8dca2b8e | mintVehicleWithDeviceDefinitionSign(uint256,address,string,(string,string)[],bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
@@ -474,7 +477,7 @@
 | 0x23536c5f | insertDeviceDefinition(uint256,(string,string,uint256,string,string,string,string)) |
 | 0x80d50451 | insertDeviceDefinitionBatch(uint256,(string,string,uint256,string,string,string,string)[]) |
 | 0x088fafdb | setDeviceDefinitionTable(uint256,uint256) |
-| 0x67c7f687 | updateDeviceDefinition(uint256,(string,string,uint256,string,string,string,string)) |
+| 0x182fef60 | updateDeviceDefinition(uint256,(string,string,string,string,string)) |
 
 #### Events
 | Selector | Signature |
@@ -482,7 +485,7 @@
 | 0x29504454 | DeviceDefinitionDeleted(uint256,string) |
 | 0x462ef08c | DeviceDefinitionInserted(uint256,string,string,uint256) |
 | 0x34045c03 | DeviceDefinitionTableCreated(address,uint256,uint256) |
-| 0x60fa772c | DeviceDefinitionUpdated(uint256,string,string,uint256) |
+| 0x67c3ba00 | DeviceDefinitionUpdated(uint256,string) |
 | 0x753affc1 | ManufacturerTableSet(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |

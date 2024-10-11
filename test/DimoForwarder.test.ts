@@ -20,6 +20,7 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockStake,
+  MockSacd
 } from '../typechain-types';
 import {
   setup,
@@ -47,6 +48,7 @@ describe('DimoForwarder', async function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockStakeInstance: MockStake;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockSacdInstance: MockSacd;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
@@ -136,6 +138,9 @@ describe('DimoForwarder', async function () {
     const MockStakeFactory = await ethers.getContractFactory('MockStake');
     mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
 
+    // Deploy MockSacd contract
+    const MockSacdFactory = await ethers.getContractFactory('MockSacd');
+    mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -265,6 +270,10 @@ describe('DimoForwarder', async function () {
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
 
+    await vehicleIdInstance
+      .connect(admin)
+      .setSacdAddress(await mockSacdInstance.getAddress());
+
     // Set DimoForwarder in the NFTs
     await vehicleIdInstance
       .connect(admin)
@@ -295,12 +304,12 @@ describe('DimoForwarder', async function () {
       },
     });
     const claimOwnerSig2 = await signMessage({
-      _signer: user2,
+      _signer: user1,
       _primaryType: 'ClaimAftermarketDeviceSign',
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '2',
-        owner: user2.address,
+        owner: user1.address,
       },
     });
     const claimAdSig2 = await signMessage({
@@ -309,7 +318,7 @@ describe('DimoForwarder', async function () {
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
         aftermarketDeviceNode: '2',
-        owner: user2.address,
+        owner: user1.address,
       },
     });
     const claimAdSig1 = await signMessage({
@@ -331,7 +340,7 @@ describe('DimoForwarder', async function () {
       },
     });
     const pairSignature2 = await signMessage({
-      _signer: user2,
+      _signer: user1,
       _primaryType: 'PairAftermarketDeviceSign',
       _verifyingContract: await aftermarketDeviceInstance.getAddress(),
       message: {
@@ -345,7 +354,7 @@ describe('DimoForwarder', async function () {
       .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
     await vehicleInstance
       .connect(admin)
-      .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
     await aftermarketDeviceInstance
       .connect(admin)
       .claimAftermarketDeviceSign(
@@ -358,7 +367,7 @@ describe('DimoForwarder', async function () {
       .connect(admin)
       .claimAftermarketDeviceSign(
         2,
-        user2.address,
+        user1.address,
         claimOwnerSig2,
         claimAdSig2,
       );
@@ -432,13 +441,13 @@ describe('DimoForwarder', async function () {
     });
   });
 
-  describe('transferVehicleAndAftermarketDeviceIds', async () => {
+  describe('transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)', async () => {
     context('Error handling', () => {
       it('Should revert if vehicle and aftermarket device are not paired', async () => {
         await expect(
           forwarderInstance
             .connect(user1)
-            .transferVehicleAndAftermarketDeviceIds(3, 2, user2.address),
+          ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](3, 2, user2.address),
         )
           .to.be.revertedWithCustomError(forwarderInstance, 'InvalidLink')
           .withArgs(
@@ -457,7 +466,7 @@ describe('DimoForwarder', async function () {
         await expect(
           forwarderInstance
             .connect(user2)
-            .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address),
+          ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](1, 1, user2.address),
         )
           .to.be.revertedWithCustomError(forwarderInstance, 'TransferFailed')
           .withArgs(
@@ -474,7 +483,7 @@ describe('DimoForwarder', async function () {
 
         await forwarderInstance
           .connect(user1)
-          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+        ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](1, 1, user2.address);
 
         expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
@@ -483,7 +492,7 @@ describe('DimoForwarder', async function () {
 
         await forwarderInstance
           .connect(user1)
-          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+        ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](1, 1, user2.address);
 
         expect(await adIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
@@ -497,7 +506,7 @@ describe('DimoForwarder', async function () {
 
         await forwarderInstance
           .connect(user1)
-          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+        ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](1, 1, user2.address);
 
         expect(
           await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1),
@@ -516,7 +525,7 @@ describe('DimoForwarder', async function () {
 
         await forwarderInstance
           .connect(user1)
-          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+        ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](1, 1, user2.address);
 
         expect(
           await nodesInstance.getParentNode(
@@ -532,7 +541,7 @@ describe('DimoForwarder', async function () {
 
         await forwarderInstance
           .connect(user1)
-          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+        ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](1, 1, user2.address);
 
         expect(
           await nodesInstance.getParentNode(await adIdInstance.getAddress(), 1),
@@ -551,7 +560,7 @@ describe('DimoForwarder', async function () {
 
         await forwarderInstance
           .connect(user1)
-          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+        ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](1, 1, user2.address);
 
         for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
           expect(
@@ -577,7 +586,7 @@ describe('DimoForwarder', async function () {
 
         await forwarderInstance
           .connect(user1)
-          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+        ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](1, 1, user2.address);
 
         for (const attrInfoPair of C.mockAftermarketDeviceInfosList[0]
           .attrInfoPairs) {
@@ -599,13 +608,466 @@ describe('DimoForwarder', async function () {
 
         await forwarderInstance
           .connect(user1)
-          .transferVehicleAndAftermarketDeviceIds(1, 1, user2.address);
+        ['transferVehicleAndAftermarketDeviceIds(uint256,uint256,address)'](1, 1, user2.address);
 
         expect(
           await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
             adAddress1.address,
           ),
         ).to.equal(1);
+      });
+    });
+  });
+
+  describe('transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)', async () => {
+    context('Error handling', () => {
+      it('Should revert if caller is not the vehicle owner', async () => {
+        await expect(
+          forwarderInstance
+            .connect(user2)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [], user2.address),
+        )
+          .to.be.revertedWithCustomError(forwarderInstance, 'TransferFailed')
+          .withArgs(
+            await vehicleIdInstance.getAddress(),
+            1,
+            'ERC721: caller is not token owner or approved',
+          );
+      });
+      it('Should revert if caller is not the aftermarket device owner', async () => {
+        await expect(
+          forwarderInstance
+            .connect(user2)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([], [1, 2], user2.address),
+        )
+          .to.be.revertedWithCustomError(forwarderInstance, 'TransferFailed')
+          .withArgs(
+            await adIdInstance.getAddress(),
+            1,
+            'ERC721: caller is not token owner or approved',
+          );
+      });
+    });
+
+    context('State', () => {
+      context('Same size arrays', () => {
+        it('Should transfer vehicle ID to the new owner', async () => {
+          expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+          expect(await vehicleIdInstance.ownerOf(2)).to.be.equal(user1.address);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1, 2], user2.address);
+
+          expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
+          expect(await vehicleIdInstance.ownerOf(2)).to.be.equal(user2.address);
+        });
+        it('Should transfer aftermarket device ID to the new owner', async () => {
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(user1.address);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1, 2], user2.address);
+
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(user2.address);
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
+        });
+        it('Should keep pairing link between vehicle ID and aftermarket device ID', async () => {
+          expect(
+            await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 2),
+          ).to.equal(2);
+          expect(
+            await mapperInstance.getLink(await adIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await mapperInstance.getLink(await adIdInstance.getAddress(), 2),
+          ).to.equal(2);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1, 2], user2.address);
+
+          expect(
+            await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 2),
+          ).to.equal(2);
+          expect(
+            await mapperInstance.getLink(await adIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await mapperInstance.getLink(await adIdInstance.getAddress(), 2),
+          ).to.equal(2);
+        });
+        it('Should keep the vehicle ID parent node', async () => {
+          expect(
+            await nodesInstance.getParentNode(
+              await vehicleIdInstance.getAddress(),
+              1,
+            ),
+          ).to.equal(1);
+          expect(
+            await nodesInstance.getParentNode(
+              await vehicleIdInstance.getAddress(),
+              2,
+            ),
+          ).to.equal(1);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1, 2], user2.address);
+
+          expect(
+            await nodesInstance.getParentNode(
+              await vehicleIdInstance.getAddress(),
+              1,
+            ),
+          ).to.equal(1);
+          expect(
+            await nodesInstance.getParentNode(
+              await vehicleIdInstance.getAddress(),
+              2,
+            ),
+          ).to.equal(1);
+        });
+        it('Should keep the aftermarket device ID parent node', async () => {
+          expect(
+            await nodesInstance.getParentNode(await adIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await nodesInstance.getParentNode(await adIdInstance.getAddress(), 2),
+          ).to.equal(1);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1, 2], user2.address);
+
+          expect(
+            await nodesInstance.getParentNode(await adIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await nodesInstance.getParentNode(await adIdInstance.getAddress(), 2),
+          ).to.equal(1);
+        });
+        it('Should keep the same vehicle ID infos', async () => {
+          for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
+            expect(
+              await nodesInstance.getInfo(
+                await vehicleIdInstance.getAddress(),
+                1,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+            expect(
+              await nodesInstance.getInfo(
+                await vehicleIdInstance.getAddress(),
+                2,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+          }
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1, 2], user2.address);
+
+          for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
+            expect(
+              await nodesInstance.getInfo(
+                await vehicleIdInstance.getAddress(),
+                1,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+            expect(
+              await nodesInstance.getInfo(
+                await vehicleIdInstance.getAddress(),
+                2,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+          }
+        });
+        it('Should keep the same aftermarket device ID infos', async () => {
+          for (const attrInfoPair of C.mockAftermarketDeviceInfosList[0]
+            .attrInfoPairs) {
+            expect(
+              await nodesInstance.getInfo(
+                await adIdInstance.getAddress(),
+                1,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+            expect(
+              await nodesInstance.getInfo(
+                await adIdInstance.getAddress(),
+                2,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+          }
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1, 2], user2.address);
+
+          for (const attrInfoPair of C.mockAftermarketDeviceInfosList[0]
+            .attrInfoPairs) {
+            expect(
+              await nodesInstance.getInfo(
+                await adIdInstance.getAddress(),
+                1,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+            expect(
+              await nodesInstance.getInfo(
+                await adIdInstance.getAddress(),
+                2,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+          }
+        });
+        it('Should keep the same aftermarket device address', async () => {
+          expect(
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              adAddress1.address,
+            ),
+          ).to.equal(1);
+          expect(
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              adAddress2.address,
+            ),
+          ).to.equal(2);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1, 2], user2.address);
+
+          expect(
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              adAddress1.address,
+            ),
+          ).to.equal(1);
+          expect(
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              adAddress2.address,
+            ),
+          ).to.equal(2);
+        });
+      });
+
+      context('Different size arrays', () => {
+        it('Should transfer vehicle ID to the new owner', async () => {
+          expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+          expect(await vehicleIdInstance.ownerOf(2)).to.be.equal(user1.address);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1], user2.address);
+
+          expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user2.address);
+          expect(await vehicleIdInstance.ownerOf(2)).to.be.equal(user2.address);
+        });
+        it('Should transfer aftermarket device ID to the new owner', async () => {
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(user1.address);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1], [1, 2], user2.address);
+
+          expect(await adIdInstance.ownerOf(1)).to.be.equal(user2.address);
+          expect(await adIdInstance.ownerOf(2)).to.be.equal(user2.address);
+        });
+        it('Should keep pairing link between vehicle ID and aftermarket device ID', async () => {
+          expect(
+            await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await mapperInstance.getLink(await adIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await mapperInstance.getLink(await adIdInstance.getAddress(), 2),
+          ).to.equal(2);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1], [1, 2], user2.address);
+
+          expect(
+            await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await mapperInstance.getLink(await adIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await mapperInstance.getLink(await adIdInstance.getAddress(), 2),
+          ).to.equal(2);
+        });
+        it('Should keep the vehicle ID parent node', async () => {
+          expect(
+            await nodesInstance.getParentNode(
+              await vehicleIdInstance.getAddress(),
+              1,
+            ),
+          ).to.equal(1);
+          expect(
+            await nodesInstance.getParentNode(
+              await vehicleIdInstance.getAddress(),
+              2,
+            ),
+          ).to.equal(1);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1], user2.address);
+
+          expect(
+            await nodesInstance.getParentNode(
+              await vehicleIdInstance.getAddress(),
+              1,
+            ),
+          ).to.equal(1);
+          expect(
+            await nodesInstance.getParentNode(
+              await vehicleIdInstance.getAddress(),
+              2,
+            ),
+          ).to.equal(1);
+        });
+        it('Should keep the aftermarket device ID parent node', async () => {
+          expect(
+            await nodesInstance.getParentNode(await adIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await nodesInstance.getParentNode(await adIdInstance.getAddress(), 2),
+          ).to.equal(1);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1], [1, 2], user2.address);
+
+          expect(
+            await nodesInstance.getParentNode(await adIdInstance.getAddress(), 1),
+          ).to.equal(1);
+          expect(
+            await nodesInstance.getParentNode(await adIdInstance.getAddress(), 2),
+          ).to.equal(1);
+        });
+        it('Should keep the same vehicle ID infos', async () => {
+          for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
+            expect(
+              await nodesInstance.getInfo(
+                await vehicleIdInstance.getAddress(),
+                1,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+            expect(
+              await nodesInstance.getInfo(
+                await vehicleIdInstance.getAddress(),
+                2,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+          }
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1, 2], [1], user2.address);
+
+          for (const attrInfoPair of C.mockVehicleAttributeInfoPairs) {
+            expect(
+              await nodesInstance.getInfo(
+                await vehicleIdInstance.getAddress(),
+                1,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+            expect(
+              await nodesInstance.getInfo(
+                await vehicleIdInstance.getAddress(),
+                2,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+          }
+        });
+        it('Should keep the same aftermarket device ID infos', async () => {
+          for (const attrInfoPair of C.mockAftermarketDeviceInfosList[0]
+            .attrInfoPairs) {
+            expect(
+              await nodesInstance.getInfo(
+                await adIdInstance.getAddress(),
+                1,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+            expect(
+              await nodesInstance.getInfo(
+                await adIdInstance.getAddress(),
+                2,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+          }
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1], [1, 2], user2.address);
+
+          for (const attrInfoPair of C.mockAftermarketDeviceInfosList[0]
+            .attrInfoPairs) {
+            expect(
+              await nodesInstance.getInfo(
+                await adIdInstance.getAddress(),
+                1,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+            expect(
+              await nodesInstance.getInfo(
+                await adIdInstance.getAddress(),
+                2,
+                attrInfoPair.attribute,
+              ),
+            ).to.equal(attrInfoPair.info);
+          }
+        });
+        it('Should keep the same aftermarket device address', async () => {
+          expect(
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              adAddress1.address,
+            ),
+          ).to.equal(1);
+          expect(
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              adAddress2.address,
+            ),
+          ).to.equal(2);
+
+          await forwarderInstance
+            .connect(user1)
+          ['transferVehicleAndAftermarketDeviceIds(uint256[],uint256[],address)']([1], [1, 2], user2.address);
+
+          expect(
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              adAddress1.address,
+            ),
+          ).to.equal(1);
+          expect(
+            await aftermarketDeviceInstance.getAftermarketDeviceIdByAddress(
+              adAddress2.address,
+            ),
+          ).to.equal(2);
+        });
       });
     });
   });

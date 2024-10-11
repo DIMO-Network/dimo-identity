@@ -18,7 +18,8 @@ import {
   SyntheticDeviceId,
   Mapper,
   Shared,
-  MockDimoCredit
+  MockDimoCredit,
+  MockSacd
 } from '../../typechain-types';
 import {
   setup,
@@ -49,6 +50,7 @@ describe('SyntheticDeviceId', async function () {
   let vehicleIdInstance: VehicleId;
   let sdIdInstance: SyntheticDeviceId;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockSacdInstance: MockSacd;
 
   let DIMO_REGISTRY_ADDRESS: string;
 
@@ -117,6 +119,9 @@ describe('SyntheticDeviceId', async function () {
       'MockDimoCredit'
     );
     mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
+
+    const MockSacdFactory = await ethers.getContractFactory('MockSacd');
+    mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -237,6 +242,9 @@ describe('SyntheticDeviceId', async function () {
     await vehicleIdInstance
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
+    await vehicleIdInstance
+      .connect(admin)
+      .setSacdAddress(await mockSacdInstance.getAddress());
 
     // Set DimoForwarder in the SyntheticDeviceId
     await sdIdInstance

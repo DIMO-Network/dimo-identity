@@ -46,6 +46,14 @@ contract SyntheticDevice is
         address indexed owner
     );
 
+    modifier onlyNftProxy() {
+        require(
+            msg.sender == SyntheticDeviceStorage.getStorage().idProxyAddress,
+            "Only NFT Proxy"
+        );
+        _;
+    }
+
     // ***** Admin management ***** //
 
     /**
@@ -238,7 +246,7 @@ contract SyntheticDevice is
         if (data.attrInfoPairs.length > 0)
             _setInfos(newTokenId, data.attrInfoPairs);
     }
-
+    
     /**
      * @notice Burns a synthetic device and reset all its attributes and links
      * @dev Caller must have the admin role
@@ -299,6 +307,56 @@ contract SyntheticDevice is
         emit SyntheticDeviceNodeBurned(syntheticDeviceNode, vehicleNode, owner);
 
         _resetInfos(syntheticDeviceNode);
+    }
+
+
+    /**
+     * @notice Validates burning of a synthetic device and reset all its attributes
+     * @dev Can only be called by the Synthetic Proxy when a token owner calls the `burn` function
+     * @dev The actual burn takes place on the VehicleId contract
+     * @param tokenId Synthetic Device node id
+     */
+    function validateBurnAndResetNode(uint256 tokenId) external onlyNftProxy {
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+
+        VehicleStorage.Storage storage vs = VehicleStorage
+            .getStorage();
+
+        address sdIdProxyAddress = sds.idProxyAddress;
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        if (!INFT(sdIdProxyAddress).exists(tokenId))
+            revert InvalidNode(vehicleIdProxyAddress, tokenId);
+
+        uint256 vehicleNode = ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
+                tokenId];
+        if (vehicleNode == 0 ) revert VehicleNotPaired(vehicleNode);
+
+        address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
+
+        //
+        delete ns.nodes[sdIdProxyAddress][tokenId].parentNode;
+
+        delete ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+            vehicleNode
+        ];
+        delete ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
+            tokenId
+        ];
+
+        delete sds.deviceAddressToNodeId[
+            sds.nodeIdToDeviceAddress[tokenId]
+        ];
+        delete sds.nodeIdToDeviceAddress[tokenId];
+
+        emit SyntheticDeviceNodeBurned(tokenId, vehicleNode, owner);
+
+        _resetInfos(tokenId);
     }
 
     /**

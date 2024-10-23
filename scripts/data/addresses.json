@@ -608,7 +608,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x2a0AD46E54B879B9C1A6B00b4a60fD29A40a4687",
+                "address": "0xF7E135A00a762Afa8A87802Eca33d1f5374e626b",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
@@ -781,7 +781,7 @@
             },
             "VehicleId": {
                 "proxy": "0x45fbCD3ef7361d156e8b16F5538AE36DEdf61Da8",
-                "implementation": "0x1bff780Aebe94bb87500C9f94960675B53393B9c"
+                "implementation": "0xbde35f209febdf8fe16fdab674d630bd1a19b5db"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x325b45949C833986bC98e98a49F3CA5C5c4643B5",

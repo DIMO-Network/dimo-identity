@@ -227,7 +227,7 @@
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
-                "implementation": "0x07079Ded0EEC8452107f13eA2fA3db610437A702"
+                "implementation": "0x15Dbe46535ED13720aD9FAeac4F65fb673c3181a"
             },
             "AftermarketDeviceId": {
                 "proxy": "0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA",

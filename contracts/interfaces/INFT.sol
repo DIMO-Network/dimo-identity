@@ -10,10 +10,7 @@ import "../shared/Types.sol";
 interface INFT {
     function safeMint(address to) external returns (uint256);
 
-    function safeMintWithSacd(
-        address to,
-        SacdInput calldata sacdInput
-    ) external returns (uint256);
+    function setSacd(uint256 tokenId, SacdInput calldata sacdInput) external;
 
     function safeTransferByRegistry(
         address from,

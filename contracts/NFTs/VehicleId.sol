@@ -101,20 +101,17 @@ contract VehicleId is Initializable, MultiPrivilege {
     }
 
     /**
-     * @notice Mints a new token and sets permissions with SACD
-     * @dev super.safeMint requires the caller to have the MINTER_ROLE
-     * @param to Token owner
+     * @notice Sets permissions with SACD
+     * @dev Only the DIMORegistry can call this function
+     * @param tokenId Token Id to set permissions
      * @param sacdInput SACD input args
      *  grantee -> The address to receive the permissions
      *  permissions -> The uint256 that represents the byte array of permissions
      *  expiration -> Expiration of the permissions
      *  source -> The URI source associated with the permissions
      */
-    function safeMintWithSacd(
-        address to,
-        SacdInput calldata sacdInput
-    ) external returns (uint256 tokenId) {
-        tokenId = super.safeMint(to);
+    function setSacd(uint256 tokenId, SacdInput calldata sacdInput) external {
+        if (_msgSender() != address(_dimoRegistry)) revert Unauthorized();
         ISacd(sacd).setPermissions(
             address(this),
             tokenId,

@@ -11,6 +11,7 @@ import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
 import 'hardhat-abi-exporter';
 
+import './scripts/tasks';
 import './scripts/linearization';
 import './scripts/tableland/tasks';
 

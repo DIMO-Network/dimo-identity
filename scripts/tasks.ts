@@ -23,24 +23,26 @@ function validateNetwork(currentNetwork: string) {
 }
 
 task('mint-vehicle', 'Mints a new Vehicle')
-    .setAction(async (args, hre) => {
+    .addOptionalParam('owner', 'The address to which the vehicle will be minted')
+    .setAction(async (args: { owner: string | undefined }, hre) => {
         const currentNetwork = hre.network.name;
         validateNetwork(currentNetwork);
 
         const instances = getAddresses();
         const [signer] = await hre.ethers.getSigners();
+        const owner = args.owner ?? signer.address;
         const vehicleInstance: Vehicle = await hre.ethers.getContractAt(
             'Vehicle',
             instances[currentNetwork].modules.DIMORegistry.address,
         );
 
-        console.log(`Minting vehicle for ${signer.address}...`);
+        console.log(`Minting vehicle for ${owner}...`);
 
         const tx = await vehicleInstance
             .connect(signer)
         ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
             131,
-            signer.address,
+            owner,
             'toyota_4runner_2024',
             [
                 {

@@ -2,8 +2,8 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
-import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
 import "./Base/ERC2771ContextUpgradeable.sol";
+import "./Base/MultiPrivilege/MultiPrivilegeTransferableBurnable.sol";
 
 error ZeroAddress();
 error Unauthorized();
@@ -62,7 +62,7 @@ contract SyntheticDeviceId is
     /// @param tokenId Token Id to be burned
     function burn(uint256 tokenId) public override {
         if (_msgSender() != address(dimoRegistry)) {
-            dimoRegistry.validateBurnAndResetNode(tokenId);
+            dimoRegistry.validateSdBurnAndResetNode(tokenId);
             ERC721BurnableUpgradeable.burn(tokenId);
         } else {
             super._burn(tokenId);

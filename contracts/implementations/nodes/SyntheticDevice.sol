@@ -47,10 +47,8 @@ contract SyntheticDevice is
     );
 
     modifier onlyNftProxy() {
-        require(
-            msg.sender == SyntheticDeviceStorage.getStorage().idProxyAddress,
-            "Only NFT Proxy"
-        );
+        if (msg.sender != SyntheticDeviceStorage.getStorage().idProxyAddress)
+            revert OnlyNftProxy();
         _;
     }
 
@@ -246,7 +244,7 @@ contract SyntheticDevice is
         if (data.attrInfoPairs.length > 0)
             _setInfos(newTokenId, data.attrInfoPairs);
     }
-    
+
     /**
      * @notice Burns a synthetic device and reset all its attributes and links
      * @dev Caller must have the admin role
@@ -309,49 +307,40 @@ contract SyntheticDevice is
         _resetInfos(syntheticDeviceNode);
     }
 
-
     /**
      * @notice Validates burning of a synthetic device and reset all its attributes
      * @dev Can only be called by the Synthetic Proxy when a token owner calls the `burn` function
      * @dev The actual burn takes place on the VehicleId contract
      * @param tokenId Synthetic Device node id
      */
-    function validateBurnAndResetNode(uint256 tokenId) external onlyNftProxy {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-
+    function validateSdBurnAndResetNode(uint256 tokenId) external onlyNftProxy {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
-
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
             .getStorage();
 
-        VehicleStorage.Storage storage vs = VehicleStorage
-            .getStorage();
-
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
         address sdIdProxyAddress = sds.idProxyAddress;
-        address vehicleIdProxyAddress = vs.idProxyAddress;
 
         if (!INFT(sdIdProxyAddress).exists(tokenId))
-            revert InvalidNode(vehicleIdProxyAddress, tokenId);
+            revert InvalidNode(sdIdProxyAddress, tokenId);
 
-        uint256 vehicleNode = ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
-                tokenId];
-        if (vehicleNode == 0 ) revert VehicleNotPaired(vehicleNode);
+        uint256 vehicleNode = ms.nodeLinks[sdIdProxyAddress][
+            vehicleIdProxyAddress
+        ][tokenId];
+        address owner = INFT(sdIdProxyAddress).ownerOf(tokenId);
 
-        address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
-
-        //
-        delete ns.nodes[sdIdProxyAddress][tokenId].parentNode;
+        delete NodesStorage
+        .getStorage()
+        .nodes[sdIdProxyAddress][tokenId].parentNode;
 
         delete ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
             vehicleNode
         ];
-        delete ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
-            tokenId
-        ];
+        delete ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][tokenId];
 
-        delete sds.deviceAddressToNodeId[
-            sds.nodeIdToDeviceAddress[tokenId]
-        ];
+        delete sds.deviceAddressToNodeId[sds.nodeIdToDeviceAddress[tokenId]];
         delete sds.nodeIdToDeviceAddress[tokenId];
 
         emit SyntheticDeviceNodeBurned(tokenId, vehicleNode, owner);

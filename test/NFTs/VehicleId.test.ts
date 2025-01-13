@@ -768,7 +768,7 @@ describe('VehicleId', async function () {
           await vehicleIdInstance.connect(user1).burn(1);
 
           const parentNode = await nodesInstance.getParentNode(
-            await sdIdInstance.getAddress(),
+            await vehicleIdInstance.getAddress(),
             1,
           );
 
@@ -777,7 +777,7 @@ describe('VehicleId', async function () {
         it('Should correctly reset node owner to zero address', async () => {
           await vehicleIdInstance.connect(user1).burn(1);
 
-          await expect(sdIdInstance.ownerOf(1)).to.be.revertedWith(
+          await expect(vehicleIdInstance.ownerOf(1)).to.be.revertedWith(
             'ERC721: invalid token ID',
           );
         });
@@ -802,16 +802,23 @@ describe('VehicleId', async function () {
 
           expect(
             await nodesInstance.getInfo(
-              await sdIdInstance.getAddress(),
+              await vehicleIdInstance.getAddress(),
               1,
-              C.mockSyntheticDeviceAttribute1,
+              C.mockVehicleAttribute1,
             ),
           ).to.be.equal('');
           expect(
             await nodesInstance.getInfo(
-              await sdIdInstance.getAddress(),
+              await vehicleIdInstance.getAddress(),
               1,
-              C.mockSyntheticDeviceAttribute2,
+              C.mockVehicleAttribute2,
+            ),
+          ).to.be.equal('');
+          expect(
+            await nodesInstance.getInfo(
+              await vehicleIdInstance.getAddress(),
+              1,
+              C.mockVehicleAttribute3,
             ),
           ).to.be.equal('');
         });

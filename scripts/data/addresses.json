@@ -112,7 +112,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0x25832B17BEc5698c3e646034Bc892f361ae2C354",
+                "address": "0xB0346664FbEcC3929878Eb4FEfB43753f5b6059b",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
@@ -121,7 +121,8 @@
                     "0x261d982a",
                     "0xc624e8a1",
                     "0xecf452d7",
-                    "0x80430e0d"
+                    "0x80430e0d",
+                    "0x53c2aa33"
                 ]
             },
             "Mapper": {
@@ -235,7 +236,7 @@
             },
             "SyntheticDeviceId": {
                 "proxy": "0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D",
-                "implementation": "0x14e26D1B5A9E47DDBeF2Eb5326CE3B296CE9B1B6"
+                "implementation": "0x7A07516D3AE7DC3a9EEEefa6B62C3667eC2B4AF2"
             }
         },
         "misc": {
@@ -646,7 +647,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0x288C625eD94950999f43aC96111B37f696066382",
+                "address": "0xe15bD8abF720d4148cfbd24b5809A66C0A507166",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
@@ -655,7 +656,8 @@
                     "0x261d982a",
                     "0xc624e8a1",
                     "0xecf452d7",
-                    "0x80430e0d"
+                    "0x80430e0d",
+                    "0x53c2aa33"
                 ]
             },
             "Mapper": {
@@ -789,7 +791,7 @@
             },
             "SyntheticDeviceId": {
                 "proxy": "0x78513c8CB4D6B6079f813850376bc9c7fc8aE67f",
-                "implementation": "0x72b7268bD15EC670BfdA1445bD380C9400F4b1A6"
+                "implementation": "0xa5828757436C3363FE3eF896fC55705445a9B550"
             }
         },
         "misc": {

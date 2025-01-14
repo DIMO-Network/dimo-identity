@@ -2,8 +2,8 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
-import "./Base/MultiPrivilege/MultiPrivilegeTransferable.sol";
 import "./Base/ERC2771ContextUpgradeable.sol";
+import "./Base/MultiPrivilege/MultiPrivilegeTransferableBurnable.sol";
 
 error ZeroAddress();
 error Unauthorized();
@@ -58,10 +58,15 @@ contract SyntheticDeviceId is
 
     /// @notice Function to burn a token
     /// @dev Caller must have the burner role
-    /// @dev To be called by DIMORegistry in burnSyntheticDeviceSign function
+    /// @dev To be called by DIMORegistry in burnSyntheticDevice and burnSyntheticDeviceSign function
     /// @param tokenId Token Id to be burned
     function burn(uint256 tokenId) public override {
-        super._burn(tokenId);
+        if (_msgSender() != address(dimoRegistry)) {
+            dimoRegistry.validateSdBurnAndResetNode(tokenId);
+            ERC721BurnableUpgradeable.burn(tokenId);
+        } else {
+            super._burn(tokenId);
+        }
     }
 
     /// @notice Internal function to transfer a token

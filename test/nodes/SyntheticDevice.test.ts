@@ -1800,4 +1800,12 @@ describe('SyntheticDevice', function () {
       expect(address).to.equal(sdAddress1.address);
     });
   });
+
+  describe('validateSdBurnAndResetNode', () => {
+    it('Should revert if caller is not the NFT Proxy', async () => {
+      await expect(
+        syntheticDeviceInstance.connect(nonAdmin).validateSdBurnAndResetNode(1)
+      ).to.be.revertedWithCustomError(syntheticDeviceInstance, 'OnlyNftProxy');
+    });
+  });
 });

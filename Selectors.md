@@ -273,6 +273,7 @@
 | 0xc624e8a1 | mintSyntheticDeviceSign((uint256,uint256,bytes,bytes,address,(string,string)[])) |
 | 0xecf452d7 | setSyntheticDeviceIdProxyAddress(address) |
 | 0x80430e0d | setSyntheticDeviceInfo(uint256,(string,string)[]) |
+| 0x53c2aa33 | validateSdBurnAndResetNode(uint256) |
 
 #### Events
 | Selector | Signature |
@@ -299,6 +300,7 @@
 | 0x38a85a8d | InvalidOwnerSignature() |
 | 0x5299bab7 | InvalidParentNode(uint256) |
 | 0xf8e95d55 | InvalidSdSignature() |
+| 0x87e6ac10 | OnlyNftProxy() |
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 | 0x2d91fcb5 | VehicleNotPaired(uint256) |
 | 0xc46a5168 | VehiclePaired(uint256) |

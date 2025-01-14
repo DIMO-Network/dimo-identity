@@ -109,7 +109,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0x22e9F325c8d06F6e2F71320b440989254016bf0F",
+                "address": "0xB0346664FbEcC3929878Eb4FEfB43753f5b6059b",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
@@ -118,7 +118,8 @@
                     "0x261d982a",
                     "0xc624e8a1",
                     "0xecf452d7",
-                    "0x80430e0d"
+                    "0x80430e0d",
+                    "0x53c2aa33"
                 ]
             },
             "Mapper": {
@@ -232,7 +233,7 @@
             },
             "SyntheticDeviceId": {
                 "proxy": "0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D",
-                "implementation": "0x14e26D1B5A9E47DDBeF2Eb5326CE3B296CE9B1B6"
+                "implementation": "0x7A07516D3AE7DC3a9EEEefa6B62C3667eC2B4AF2"
             }
         },
         "misc": {

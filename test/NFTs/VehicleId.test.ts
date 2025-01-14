@@ -474,14 +474,14 @@ describe('VehicleId', async function () {
     });
   });
 
-  describe('safeMintWithSacd', () => {
+  describe('setSacd', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
+      it('Should revert if caller is not the DIMO Registry', async () => {
         await expect(
           vehicleIdInstance
             .connect(nonAdmin)
-            .safeMintWithSacd(
-              user1.address,
+            .setSacd(
+              1,
               {
                 grantee: user2.address,
                 permissions: '0',
@@ -489,10 +489,7 @@ describe('VehicleId', async function () {
                 source: ''
               }
             )
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.NFT_MINTER_ROLE
-          }`,
-        );
+        ).to.be.revertedWithCustomError(vehicleIdInstance, 'Unauthorized');
       });
     });
   });

@@ -174,10 +174,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             )
         ) revert InvalidParentNode(manufacturerNode);
 
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMintWithSacd(
-            owner,
-            sacdInput
-        );
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
         NodesStorage
         .getStorage()
@@ -194,6 +191,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+
+        INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
     }
 
     /**

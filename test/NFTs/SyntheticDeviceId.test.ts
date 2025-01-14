@@ -60,7 +60,7 @@ describe('SyntheticDeviceId', async function () {
   let integrationOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
-  let sDAddress1: HardhatEthersSigner;
+  let sdAddress1: HardhatEthersSigner;
 
   before(async () => {
     [
@@ -70,7 +70,7 @@ describe('SyntheticDeviceId', async function () {
       integrationOwner1,
       user1,
       user2,
-      sDAddress1
+      sdAddress1
     ] = await ethers.getSigners();
 
     const deployments = await setup(admin, {
@@ -242,6 +242,9 @@ describe('SyntheticDeviceId', async function () {
     await vehicleIdInstance
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
+    await sdIdInstance
+      .connect(admin)
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
       .setSacdAddress(await mockSacdInstance.getAddress());
@@ -258,7 +261,7 @@ describe('SyntheticDeviceId', async function () {
 
     // Minting and linking a vehicle to a synthetic device
     const mintSyntheticDeviceSig1 = await signMessage({
-      _signer: sDAddress1,
+      _signer: sdAddress1,
       _primaryType: 'MintSyntheticDeviceSign',
       _verifyingContract: await syntheticDeviceInstance.getAddress(),
       message: {
@@ -280,7 +283,7 @@ describe('SyntheticDeviceId', async function () {
       vehicleNode: '1',
       syntheticDeviceSig: mintSyntheticDeviceSig1,
       vehicleOwnerSig: mintVehicleOwnerSig1,
-      syntheticDeviceAddr: sDAddress1.address,
+      syntheticDeviceAddr: sdAddress1.address,
       attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs
     };
 
@@ -490,7 +493,7 @@ describe('SyntheticDeviceId', async function () {
       it('Should keep the same synthetic device address', async () => {
         expect(
           await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
-            sDAddress1.address
+            sdAddress1.address
           )
         ).to.equal(1);
 
@@ -504,9 +507,112 @@ describe('SyntheticDeviceId', async function () {
 
         expect(
           await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
-            sDAddress1.address
+            sdAddress1.address
           )
         ).to.equal(1);
+      });
+    });
+  });
+
+  describe('burn', () => {
+    context('Error handling', () => {
+      it('Should revert if token is not a Synthetic Device', async () => {
+        await expect(sdIdInstance.connect(user1).burn(99))
+          .to.be.revertedWithCustomError(syntheticDeviceInstance, 'InvalidNode')
+          .withArgs(await sdIdInstance.getAddress(), 99);
+      });
+      it('Should revert if caller is not the token owner', async () => {
+        await expect(sdIdInstance.connect(user2).burn(1))
+          .to.be.revertedWith('ERC721: caller is not token owner or approved');
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly reset parent node to 0', async () => {
+        await sdIdInstance.connect(user1).burn(1);
+
+        const parentNode = await nodesInstance.getParentNode(
+          await sdIdInstance.getAddress(),
+          1,
+        );
+
+        expect(parentNode).to.be.equal(0);
+      });
+      it('Should correctly reset synthetic device address to 0', async () => {
+        const sdAddressBefore = await syntheticDeviceInstance.getSyntheticDeviceAddressById(1);
+        const sdIdBefore = await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(sdAddress1.address);
+
+        expect(sdAddressBefore).to.be.equal(sdAddress1.address);
+        expect(sdIdBefore).to.be.equal(sdIdBefore);
+
+        await sdIdInstance.connect(user1).burn(1);
+
+        const sdAddressAfter = await syntheticDeviceInstance.getSyntheticDeviceAddressById(1);
+        const sdIdAfter = await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(sdAddress1.address);
+
+        expect(sdAddressAfter).to.be.equal(C.ZERO_ADDRESS);
+        expect(sdIdAfter).to.be.equal(0);
+      });
+      it('Should correctly reset node link', async () => {
+        const vehicleIdAddress = await vehicleIdInstance.getAddress();
+        const sdIdAddress = await sdIdInstance.getAddress();
+
+        expect(await mapperInstance.getNodeLink(vehicleIdAddress, sdIdAddress, 1)).to.equal(1);
+        expect(await mapperInstance.getNodeLink(sdIdAddress, vehicleIdAddress, 1)).to.equal(1);
+
+        await sdIdInstance.connect(user1).burn(1);
+
+        expect(await mapperInstance.getNodeLink(vehicleIdAddress, sdIdAddress, 1)).to.equal(0);
+        expect(await mapperInstance.getNodeLink(sdIdAddress, vehicleIdAddress, 1)).to.equal(0);
+      });
+      it('Should correctly reset node owner to zero address', async () => {
+        await sdIdInstance.connect(user1).burn(1);
+
+        await expect(sdIdInstance.ownerOf(1)).to.be.revertedWith(
+          'ERC721: invalid token ID',
+        );
+      });
+      it('Should correctly reset infos to blank', async () => {
+        await sdIdInstance.connect(user1).burn(1);
+
+        expect(
+          await nodesInstance.getInfo(
+            await sdIdInstance.getAddress(),
+            1,
+            C.mockSyntheticDeviceAttribute1,
+          ),
+        ).to.be.equal('');
+        expect(
+          await nodesInstance.getInfo(
+            await sdIdInstance.getAddress(),
+            1,
+            C.mockSyntheticDeviceAttribute2,
+          ),
+        ).to.be.equal('');
+        expect(
+          await nodesInstance.getInfo(
+            await sdIdInstance.getAddress(),
+            1,
+            C.mockSyntheticDeviceAttribute3,
+          ),
+        ).to.be.equal('');
+      });
+      it('Should update multi-privilege token version', async () => {
+        const previousVersion = await sdIdInstance.tokenIdToVersion(1);
+
+        await sdIdInstance.connect(user1).burn(1);
+
+        expect(await sdIdInstance.tokenIdToVersion(1)).to.equal(
+          previousVersion + 1n,
+        );
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit SyntheticDeviceNodeBurned event with correct params', async () => {
+        await expect(sdIdInstance.connect(user1).burn(1))
+          .to.emit(syntheticDeviceInstance, 'SyntheticDeviceNodeBurned')
+          .withArgs(1, 1, user1.address);
       });
     });
   });

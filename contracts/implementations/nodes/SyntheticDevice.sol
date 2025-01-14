@@ -46,6 +46,12 @@ contract SyntheticDevice is
         address indexed owner
     );
 
+    modifier onlyNftProxy() {
+        if (msg.sender != SyntheticDeviceStorage.getStorage().idProxyAddress)
+            revert OnlyNftProxy();
+        _;
+    }
+
     // ***** Admin management ***** //
 
     /**
@@ -299,6 +305,47 @@ contract SyntheticDevice is
         emit SyntheticDeviceNodeBurned(syntheticDeviceNode, vehicleNode, owner);
 
         _resetInfos(syntheticDeviceNode);
+    }
+
+    /**
+     * @notice Validates burning of a synthetic device and reset all its attributes
+     * @dev Can only be called by the Synthetic Proxy when a token owner calls the `burn` function
+     * @dev The actual burn takes place on the VehicleId contract
+     * @param tokenId Synthetic Device node id
+     */
+    function validateSdBurnAndResetNode(uint256 tokenId) external onlyNftProxy {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = sds.idProxyAddress;
+
+        if (!INFT(sdIdProxyAddress).exists(tokenId))
+            revert InvalidNode(sdIdProxyAddress, tokenId);
+
+        uint256 vehicleNode = ms.nodeLinks[sdIdProxyAddress][
+            vehicleIdProxyAddress
+        ][tokenId];
+        address owner = INFT(sdIdProxyAddress).ownerOf(tokenId);
+
+        delete NodesStorage
+        .getStorage()
+        .nodes[sdIdProxyAddress][tokenId].parentNode;
+
+        delete ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
+            vehicleNode
+        ];
+        delete ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][tokenId];
+
+        delete sds.deviceAddressToNodeId[sds.nodeIdToDeviceAddress[tokenId]];
+        delete sds.nodeIdToDeviceAddress[tokenId];
+
+        emit SyntheticDeviceNodeBurned(tokenId, vehicleNode, owner);
+
+        _resetInfos(tokenId);
     }
 
     /**

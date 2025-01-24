@@ -292,7 +292,7 @@
                 "type": "string"
             }
         ],
-        "name": "AftermarketDeviceAttributeSetDevAdmin",
+        "name": "AftermarketDeviceAttributeSet",
         "type": "event"
     },
     {
@@ -311,7 +311,7 @@
                 "type": "address"
             }
         ],
-        "name": "AftermarketDeviceNodeBurnedDevAdmin",
+        "name": "AftermarketDeviceNodeBurned",
         "type": "event"
     },
     {
@@ -361,7 +361,7 @@
                 "type": "address"
             }
         ],
-        "name": "AftermarketDeviceTransferredDevAdmin",
+        "name": "AftermarketDeviceTransferred",
         "type": "event"
     },
     {
@@ -374,7 +374,7 @@
                 "type": "uint256"
             }
         ],
-        "name": "AftermarketDeviceUnclaimedDevAdmin",
+        "name": "AftermarketDeviceUnclaimed",
         "type": "event"
     },
     {
@@ -399,7 +399,7 @@
                 "type": "address"
             }
         ],
-        "name": "AftermarketDeviceUnpairedDevAdmin",
+        "name": "AftermarketDeviceUnpaired",
         "type": "event"
     },
     {
@@ -443,7 +443,7 @@
                 "type": "string"
             }
         ],
-        "name": "SyntheticDeviceAttributeSetDevAdmin",
+        "name": "SyntheticDeviceAttributeSet",
         "type": "event"
     },
     {
@@ -468,7 +468,7 @@
                 "type": "address"
             }
         ],
-        "name": "SyntheticDeviceNodeBurnedDevAdmin",
+        "name": "SyntheticDeviceNodeBurned",
         "type": "event"
     },
     {
@@ -506,7 +506,7 @@
                 "type": "string"
             }
         ],
-        "name": "VehicleAttributeSetDevAdmin",
+        "name": "VehicleAttributeSet",
         "type": "event"
     },
     {
@@ -525,7 +525,7 @@
                 "type": "address"
             }
         ],
-        "name": "VehicleNodeBurnedDevAdmin",
+        "name": "VehicleNodeBurned",
         "type": "event"
     },
     {
@@ -2305,31 +2305,6 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "attribute",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "info",
-                "type": "string"
-            }
-        ],
-        "name": "SyntheticDeviceAttributeSet",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
                 "indexed": false,
                 "internalType": "address",
                 "name": "proxy",
@@ -2337,31 +2312,6 @@
             }
         ],
         "name": "SyntheticDeviceIdProxySet",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "syntheticDeviceNode",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "vehicleNode",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            }
-        ],
-        "name": "SyntheticDeviceNodeBurned",
         "type": "event"
     },
     {
@@ -2740,25 +2690,6 @@
             }
         ],
         "name": "VehicleIdProxySet",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "vehicleNode",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            }
-        ],
-        "name": "VehicleNodeBurned",
         "type": "event"
     },
     {

@@ -24,43 +24,38 @@ error AdPaired(uint256 id);
  * @dev Admin module for development and testing
  */
 contract DevAdmin is AccessControlInternal {
-    event AftermarketDeviceUnclaimedDevAdmin(
-        uint256 indexed aftermarketDeviceNode
-    );
-    event AftermarketDeviceTransferredDevAdmin(
+    event AftermarketDeviceUnclaimed(uint256 indexed aftermarketDeviceNode);
+    event AftermarketDeviceTransferred(
         uint256 indexed aftermarketDeviceNode,
         address indexed oldOwner,
         address indexed newOwner
     );
-    event AftermarketDeviceUnpairedDevAdmin(
+    event AftermarketDeviceUnpaired(
         uint256 indexed aftermarketDeviceNode,
         uint256 indexed vehicleNode,
         address indexed owner
     );
-    event VehicleNodeBurnedDevAdmin(
-        uint256 indexed vehicleNode,
-        address indexed owner
-    );
-    event AftermarketDeviceNodeBurnedDevAdmin(
+    event VehicleNodeBurned(uint256 indexed vehicleNode, address indexed owner);
+    event AftermarketDeviceNodeBurned(
         uint256 indexed adNode,
         address indexed owner
     );
-    event SyntheticDeviceNodeBurnedDevAdmin(
+    event SyntheticDeviceNodeBurned(
         uint256 indexed syntheticDeviceNode,
         uint256 indexed vehicleNode,
         address indexed owner
     );
-    event VehicleAttributeSetDevAdmin(
+    event VehicleAttributeSet(
         uint256 indexed tokenId,
         string attribute,
         string info
     );
-    event AftermarketDeviceAttributeSetDevAdmin(
+    event AftermarketDeviceAttributeSet(
         uint256 indexed tokenId,
         string attribute,
         string info
     );
-    event SyntheticDeviceAttributeSetDevAdmin(
+    event SyntheticDeviceAttributeSet(
         uint256 indexed tokenId,
         string attribute,
         string info
@@ -101,7 +96,7 @@ contract DevAdmin is AccessControlInternal {
 
         adIdProxy.safeTransferFrom(oldOwner, newOwner, aftermarketDeviceNode);
 
-        emit AftermarketDeviceTransferredDevAdmin(
+        emit AftermarketDeviceTransferred(
             aftermarketDeviceNode,
             oldOwner,
             newOwner
@@ -131,7 +126,7 @@ contract DevAdmin is AccessControlInternal {
 
             ads.deviceClaimed[_adNode] = false;
 
-            emit AftermarketDeviceUnclaimedDevAdmin(_adNode);
+            emit AftermarketDeviceUnclaimed(_adNode);
         }
     }
 
@@ -167,7 +162,7 @@ contract DevAdmin is AccessControlInternal {
             delete ms.links[vehicleIdProxyAddress][_vehicleNode];
             delete ms.links[adIdProxyAddress][_adNode];
 
-            emit AftermarketDeviceUnpairedDevAdmin(
+            emit AftermarketDeviceUnpaired(
                 _adNode,
                 _vehicleNode,
                 INFT(adIdProxyAddress).ownerOf(_adNode)
@@ -207,7 +202,7 @@ contract DevAdmin is AccessControlInternal {
             delete ms.links[vehicleIdProxyAddress][_vehicleNode];
             delete ms.links[adIdProxyAddress][_adNode];
 
-            emit AftermarketDeviceUnpairedDevAdmin(
+            emit AftermarketDeviceUnpaired(
                 _adNode,
                 _vehicleNode,
                 INFT(vehicleIdProxyAddress).ownerOf(_vehicleNode)
@@ -284,7 +279,7 @@ contract DevAdmin is AccessControlInternal {
             delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
             delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
-            emit VehicleNodeBurnedDevAdmin(tokenId, owner);
+            emit VehicleNodeBurned(tokenId, owner);
 
             INFT(vehicleIdProxyAddress).burn(tokenId);
 
@@ -332,7 +327,7 @@ contract DevAdmin is AccessControlInternal {
                 delete ms.links[vehicleIdProxyAddress][tokenId];
                 delete ms.links[adIdProxyAddress][pairedDeviceNode];
 
-                emit AftermarketDeviceUnpairedDevAdmin(
+                emit AftermarketDeviceUnpaired(
                     pairedDeviceNode,
                     tokenId,
                     owner
@@ -360,7 +355,7 @@ contract DevAdmin is AccessControlInternal {
 
                 INFT(sdIdProxyAddress).burn(pairedDeviceNode);
 
-                emit SyntheticDeviceNodeBurnedDevAdmin(
+                emit SyntheticDeviceNodeBurned(
                     pairedDeviceNode,
                     tokenId,
                     owner
@@ -372,7 +367,7 @@ contract DevAdmin is AccessControlInternal {
             delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
             delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
-            emit VehicleNodeBurnedDevAdmin(tokenId, owner);
+            emit VehicleNodeBurned(tokenId, owner);
 
             INFT(vehicleIdProxyAddress).burn(tokenId);
 
@@ -417,7 +412,7 @@ contract DevAdmin is AccessControlInternal {
             ];
             delete ads.nodeIdToDeviceAddress[tokenId];
 
-            emit AftermarketDeviceNodeBurnedDevAdmin(tokenId, owner);
+            emit AftermarketDeviceNodeBurned(tokenId, owner);
 
             INFT(adIdProxyAddress).burn(tokenId);
 
@@ -461,7 +456,7 @@ contract DevAdmin is AccessControlInternal {
                 delete ms.links[vehicleIdProxyAddress][pairedVehicleNode];
                 delete ms.links[adIdProxyAddress][tokenId];
 
-                emit AftermarketDeviceUnpairedDevAdmin(
+                emit AftermarketDeviceUnpaired(
                     tokenId,
                     pairedVehicleNode,
                     owner
@@ -475,7 +470,7 @@ contract DevAdmin is AccessControlInternal {
             ];
             delete ads.nodeIdToDeviceAddress[tokenId];
 
-            emit AftermarketDeviceNodeBurnedDevAdmin(tokenId, owner);
+            emit AftermarketDeviceNodeBurned(tokenId, owner);
 
             INFT(adIdProxyAddress).burn(tokenId);
 
@@ -537,11 +532,7 @@ contract DevAdmin is AccessControlInternal {
 
             INFT(sdIdProxyAddress).burn(tokenId);
 
-            emit SyntheticDeviceNodeBurnedDevAdmin(
-                tokenId,
-                pairedVehicleNode,
-                owner
-            );
+            emit SyntheticDeviceNodeBurned(tokenId, pairedVehicleNode, owner);
 
             _resetSdInfos(tokenId);
         }
@@ -698,7 +689,7 @@ contract DevAdmin is AccessControlInternal {
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
-            emit VehicleAttributeSetDevAdmin(tokenId, attributes[i], "");
+            emit VehicleAttributeSet(tokenId, attributes[i], "");
         }
     }
 
@@ -723,11 +714,7 @@ contract DevAdmin is AccessControlInternal {
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
-            emit AftermarketDeviceAttributeSetDevAdmin(
-                tokenId,
-                attributes[i],
-                ""
-            );
+            emit AftermarketDeviceAttributeSet(tokenId, attributes[i], "");
         }
     }
 
@@ -748,11 +735,7 @@ contract DevAdmin is AccessControlInternal {
         for (uint256 i = 0; i < attributes.length; i++) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
-            emit SyntheticDeviceAttributeSetDevAdmin(
-                tokenId,
-                attributes[i],
-                ""
-            );
+            emit SyntheticDeviceAttributeSet(tokenId, attributes[i], "");
         }
     }
 }

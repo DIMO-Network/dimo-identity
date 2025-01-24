@@ -476,13 +476,13 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceTransferredDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceTransferred event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .transferAftermarketDeviceOwnership(1, user2.address),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceTransferredDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceTransferred')
           .withArgs(1, user1.address, user2.address);
       });
     });
@@ -642,13 +642,13 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnclaimedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnclaimed event with correct params', async () => {
         await expect(
           devAdminInstance.connect(admin).unclaimAftermarketDeviceNode([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimed')
           .withArgs(1)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimed')
           .withArgs(2);
       });
     });
@@ -817,15 +817,15 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .unpairAftermarketDeviceByDeviceNode([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(2, 2, user1.address);
       });
     });
@@ -994,15 +994,15 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .unpairAftermarketDeviceByVehicleNode([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(2, 2, user1.address);
       });
     });
@@ -1296,22 +1296,22 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit VehicleNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit VehicleNodeBurned event with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnVehicles([1, 2]))
-          .to.emit(devAdminInstance, 'VehicleNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleNodeBurned')
           .withArgs(1, user1.address)
-          .to.emit(devAdminInstance, 'VehicleNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleNodeBurned')
           .withArgs(2, user2.address);
       });
-      it('Should emit VehicleAttributeSetDevAdmin events with correct params', async () => {
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnVehicles([1, 2]))
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(2, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(2, C.mockVehicleAttributeInfoPairs[1].attribute, '');
       });
     });
@@ -1655,7 +1655,7 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
         const localClaimOwnerSig = await signMessage({
           _signer: user1,
           _primaryType: 'ClaimAftermarketDeviceSign',
@@ -1718,10 +1718,10 @@ describe('DevAdmin', function () {
             .connect(admin)
             .adminBurnVehiclesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(1, 1, user1.address);
       });
-      it('Should emit SyntheticDeviceNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit SyntheticDeviceNodeBurned event with correct params', async () => {
         const localMintVehicleOwnerSig = await signMessage({
           _signer: user2,
           _primaryType: 'MintSyntheticDeviceSign',
@@ -1758,33 +1758,33 @@ describe('DevAdmin', function () {
             .connect(admin)
             .adminBurnVehiclesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurned')
           .withArgs(1, 2, user2.address);
       });
-      it('Should emit VehicleNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit VehicleNodeBurned event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnVehiclesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'VehicleNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleNodeBurned')
           .withArgs(1, user1.address)
-          .to.emit(devAdminInstance, 'VehicleNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleNodeBurned')
           .withArgs(2, user2.address);
       });
-      it('Should emit VehicleAttributeSetDevAdmin events with correct params', async () => {
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnVehiclesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(2, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(2, C.mockVehicleAttributeInfoPairs[1].attribute, '');
       });
     });
@@ -1941,22 +1941,22 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceNodeBurned event with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnAftermarketDevices([1, 2]))
-          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurned')
           .withArgs(1, manufacturer1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurned')
           .withArgs(2, manufacturer1.address);
       });
-      it('Should emit AftermarketDeviceAttributeSetDevAdmin events with correct params', async () => {
+      it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnAftermarketDevices([1, 2]))
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(1, C.mockAdAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(1, C.mockAdAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(2, C.mockAdAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(2, C.mockAdAttributeInfoPairs[1].attribute, '');
       });
     });
@@ -2225,33 +2225,33 @@ describe('DevAdmin', function () {
         );
       });
 
-      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnAftermarketDevicesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(2, 2, user2.address);
       });
-      it('Should emit AftermarketDeviceNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceNodeBurned event with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnAftermarketDevicesAndDeletePairings([1, 2]))
-          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurned')
           .withArgs(1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurned')
           .withArgs(2, user2.address);
       });
       it('Should emit After2arketDeviceAttributeSetDevAdmin events with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnAftermarketDevicesAndDeletePairings([1, 2]))
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(1, C.mockAdAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(1, C.mockAdAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(2, C.mockAdAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(2, C.mockAdAttributeInfoPairs[1].attribute, '');
       });
     });
@@ -2473,30 +2473,30 @@ describe('DevAdmin', function () {
     });
 
     context('Events', () => {
-      it('Should emit SyntheticDeviceNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit SyntheticDeviceNodeBurned event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnSyntheticDevicesAndDeletePairings([1, 2])
         )
-          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurned')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurned')
           .withArgs(2, 2, user2.address);
       });
-      it('Should emit SyntheticDeviceAttributeSetDevAdmin events with correct params', async () => {
+      it('Should emit SyntheticDeviceAttributeSet events with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnSyntheticDevicesAndDeletePairings([1, 2])
         )
-          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSet')
           .withArgs(1, C.mockSyntheticDeviceAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSet')
           .withArgs(1, C.mockSyntheticDeviceAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSet')
           .withArgs(2, C.mockSyntheticDeviceAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSet')
           .withArgs(2, C.mockSyntheticDeviceAttributeInfoPairs[1].attribute, '');
       });
     });

@@ -444,7 +444,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_TRANSFER_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_TRANSFER_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -472,6 +472,13 @@ describe('DevAdmin', function () {
           .transferAftermarketDeviceOwnership(1, user2.address);
 
         expect(await adIdInstance.ownerOf(1)).to.be.equal(user2.address);
+      });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_TRANSFER_ROLE);
+        await expect(devAdminInstance
+          .connect(admin)
+          .transferAftermarketDeviceOwnership(1, user2.address)
+        ).to.not.be.rejected;
       });
     });
 
@@ -564,7 +571,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_UNCLAIM_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_UNCLAIM_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).unclaimAftermarketDeviceNode([1]),
         ).to.be.rejectedWith(
@@ -637,6 +644,14 @@ describe('DevAdmin', function () {
               claimOwnerSig2,
               claimAdSig2,
             ),
+        ).to.not.be.rejected;
+      });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_UNCLAIM_ROLE);
+        
+        await expect(devAdminInstance
+          .connect(admin)
+          .unclaimAftermarketDeviceNode([1, 2])
         ).to.not.be.rejected;
       });
     });
@@ -756,7 +771,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_UNPAIR_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_UNPAIR_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -813,6 +828,14 @@ describe('DevAdmin', function () {
         expect(
           await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 2),
         ).to.be.equal(0);
+      });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_UNPAIR_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .unpairAftermarketDeviceByDeviceNode([1, 2])
+        ).to.not.be.rejected;
       });
     });
 
@@ -933,7 +956,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_UNPAIR_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_UNPAIR_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -991,6 +1014,14 @@ describe('DevAdmin', function () {
           await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 2),
         ).to.be.equal(0);
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_UNPAIR_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .unpairAftermarketDeviceByVehicleNode([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
@@ -1016,7 +1047,7 @@ describe('DevAdmin', function () {
     ];
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_RENAME_MANUFACTURERS_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_RENAME_MANUFACTURERS_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -1069,6 +1100,14 @@ describe('DevAdmin', function () {
           expect(nameReturned).to.equal(newIdManufacturerNames[i].name);
         }
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_RENAME_MANUFACTURERS_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .renameManufacturers(newIdManufacturerNames)
+        ).to.not.be.rejected;
+      });
     });
   });
 
@@ -1083,7 +1122,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_VEHICLE_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_VEHICLE_BURN_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).adminBurnVehicles([1, 2]),
         ).to.be.rejectedWith(
@@ -1293,6 +1332,14 @@ describe('DevAdmin', function () {
           previousVersion2 + ethers.toBigInt(1),
         );
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_VEHICLE_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnVehicles([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
@@ -1328,7 +1375,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_VEHICLE_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_VEHICLE_BURN_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -1545,6 +1592,14 @@ describe('DevAdmin', function () {
             previousVersion2 + ethers.toBigInt(1),
           );
         });
+        it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+          await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_VEHICLE_BURN_ROLE);
+
+          await expect(devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2])
+          ).to.not.be.rejected;
+        });
       });
 
       context('Aftermarket Device paired', () => {
@@ -1651,6 +1706,14 @@ describe('DevAdmin', function () {
             ),
           ).to.be.equal(0);
         });
+      });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_VEHICLE_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnVehiclesAndDeletePairings([1, 2])
+        ).to.not.be.rejected;
       });
     });
 
@@ -1801,7 +1864,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_BURN_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).adminBurnAftermarketDevices([1, 2]),
         ).to.be.rejectedWith(
@@ -1938,6 +2001,14 @@ describe('DevAdmin', function () {
           previousVersion2 + ethers.toBigInt(1),
         );
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnAftermarketDevices([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
@@ -1973,7 +2044,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_BURN_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).adminBurnAftermarketDevicesAndDeletePairings([1, 2]),
         ).to.be.rejectedWith(
@@ -2171,6 +2242,14 @@ describe('DevAdmin', function () {
           previousVersion2 + ethers.toBigInt(1),
         );
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnAftermarketDevicesAndDeletePairings([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
@@ -2328,7 +2407,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_SD_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_SD_BURN_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2470,6 +2549,14 @@ describe('DevAdmin', function () {
           ),
         ).to.be.equal(0);
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_SD_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnSyntheticDevicesAndDeletePairings([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
@@ -2550,7 +2637,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_PAIR_ROLE role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_PAIR_ROLE role', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).adminPairAftermarketDevice(1, 1),
         ).to.be.rejectedWith(
@@ -2618,6 +2705,14 @@ describe('DevAdmin', function () {
           await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1),
         ).to.be.equal(1);
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_PAIR_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminPairAftermarketDevice(1, 1)
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
@@ -2646,7 +2741,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_CHANGE_PARENT_NODE role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_CHANGE_PARENT_NODE role', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2694,12 +2789,20 @@ describe('DevAdmin', function () {
           expect(await nodesInstance.getParentNode(adProxyAddress, adId)).to.equal(2);
         }
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_CHANGE_PARENT_NODE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminChangeParentNode(2, await adIdInstance.getAddress(), adIdsList)
+        ).to.not.be.rejected;
+      });
     });
   });
 
   describe('adminCacheDimoStreamrEns', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_CACHE_ENS role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_CACHE_ENS role', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2726,7 +2829,7 @@ describe('DevAdmin', function () {
 
   describe('adminRemoveVehicleAttribute', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_REMOVE_ATTR role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_REMOVE_ATTR role', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2774,7 +2877,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_SET_DD role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_SET_DD role', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2813,6 +2916,14 @@ describe('DevAdmin', function () {
 
         expect(ddAfter1).to.equal(C.mockDdId1);
         expect(ddAfter2).to.equal(C.mockDdId2);
+      });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_SET_DD);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminSetVehicleDDs(vehicleIdsDdIds)
+        ).to.not.be.rejected;
       });
     });
 

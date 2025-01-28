@@ -16,51 +16,52 @@ import "../shared/Errors.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
-error AdNotClaimed(uint256 id);
-error AdPaired(uint256 id);
-
 /**
  * @title DevAdmin
  * @dev Admin module for development and testing
  */
 contract DevAdmin is AccessControlInternal {
-    event AftermarketDeviceUnclaimedDevAdmin(
-        uint256 indexed aftermarketDeviceNode
-    );
-    event AftermarketDeviceTransferredDevAdmin(
+    struct IdManufacturerName {
+        uint256 tokenId;
+        string name;
+    }
+    struct VehicleIdDeviceDefinitionId {
+        uint256 vehicleId;
+        string deviceDefinitionId;
+    }
+
+    event AftermarketDeviceUnclaimed(uint256 indexed aftermarketDeviceNode);
+    event AftermarketDeviceTransferred(
         uint256 indexed aftermarketDeviceNode,
         address indexed oldOwner,
         address indexed newOwner
     );
-    event AftermarketDeviceUnpairedDevAdmin(
+    event AftermarketDeviceUnpaired(
         uint256 indexed aftermarketDeviceNode,
         uint256 indexed vehicleNode,
         address indexed owner
     );
-    event VehicleNodeBurnedDevAdmin(
-        uint256 indexed vehicleNode,
-        address indexed owner
-    );
-    event AftermarketDeviceNodeBurnedDevAdmin(
+    event VehicleNodeBurned(uint256 indexed vehicleNode, address indexed owner);
+    event AftermarketDeviceNodeBurned(
         uint256 indexed adNode,
         address indexed owner
     );
-    event SyntheticDeviceNodeBurnedDevAdmin(
+    event SyntheticDeviceNodeBurned(
         uint256 indexed syntheticDeviceNode,
         uint256 indexed vehicleNode,
         address indexed owner
     );
-    event VehicleAttributeSetDevAdmin(
+    event VehicleAttributeSet(
         uint256 indexed tokenId,
         string attribute,
         string info
     );
-    event AftermarketDeviceAttributeSetDevAdmin(
+    event AftermarketDeviceAttributeSet(
         uint256 indexed tokenId,
         string attribute,
         string info
     );
-    event SyntheticDeviceAttributeSetDevAdmin(
+    event SyntheticDeviceAttributeSet(
         uint256 indexed tokenId,
         string attribute,
         string info
@@ -73,25 +74,26 @@ contract DevAdmin is AccessControlInternal {
     event VehicleAttributeRemoved(string attribute);
     event DeviceDefinitionIdSet(uint256 indexed vehicleId, string ddId);
 
-    struct IdManufacturerName {
-        uint256 tokenId;
-        string name;
-    }
-    struct VehicleIdDeviceDefinitionId {
-        uint256 vehicleId;
-        string deviceDefinitionId;
+    error AdNotClaimed(uint256 id);
+    error AdPaired(uint256 id);
+
+    modifier authorized(bytes32 role) {
+        if (!_hasRole(DEV_SUPER_ADMIN_ROLE, msg.sender)) {
+            _checkRole(role, msg.sender);
+        }
+        _;
     }
 
     /**
      * @dev Transfers the ownership of an afermarket device
-     * @dev Caller must have the DEV_AD_TRANSFER_ROLE role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_AD_TRANSFER_ROLE roles
      * @param aftermarketDeviceNode Aftermarket device node id
      * @param newOwner The address of the new owner
      */
     function transferAftermarketDeviceOwnership(
         uint256 aftermarketDeviceNode,
         address newOwner
-    ) external onlyRole(DEV_AD_TRANSFER_ROLE) {
+    ) external authorized(DEV_AD_TRANSFER_ROLE) {
         INFT adIdProxy = INFT(
             AftermarketDeviceStorage.getStorage().idProxyAddress
         );
@@ -101,7 +103,7 @@ contract DevAdmin is AccessControlInternal {
 
         adIdProxy.safeTransferFrom(oldOwner, newOwner, aftermarketDeviceNode);
 
-        emit AftermarketDeviceTransferredDevAdmin(
+        emit AftermarketDeviceTransferred(
             aftermarketDeviceNode,
             oldOwner,
             newOwner
@@ -110,12 +112,12 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @dev Sets deviceClaimed to false for each aftermarket device
-     * @dev Caller must have the DEV_AD_UNCLAIM_ROLE role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_AD_UNCLAIM_ROLE roles
      * @param aftermarketDeviceNodes Array of aftermarket device node ids
      */
     function unclaimAftermarketDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
-    ) external onlyRole(DEV_AD_UNCLAIM_ROLE) {
+    ) external authorized(DEV_AD_UNCLAIM_ROLE) {
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
             .getStorage();
         INFT adIdProxy = INFT(ads.idProxyAddress);
@@ -131,18 +133,18 @@ contract DevAdmin is AccessControlInternal {
 
             ads.deviceClaimed[_adNode] = false;
 
-            emit AftermarketDeviceUnclaimedDevAdmin(_adNode);
+            emit AftermarketDeviceUnclaimed(_adNode);
         }
     }
 
     /**
      * @dev Unpairs a list of aftermarket device from their respective vehicles by the device node
-     * @dev Caller must have the DEV_AD_UNPAIR_ROLE role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_AD_UNPAIR_ROLE roles
      * @param aftermarketDeviceNodes Array of aftermarket device node ids
      */
     function unpairAftermarketDeviceByDeviceNode(
         uint256[] calldata aftermarketDeviceNodes
-    ) external onlyRole(DEV_AD_UNPAIR_ROLE) {
+    ) external authorized(DEV_AD_UNPAIR_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -167,7 +169,7 @@ contract DevAdmin is AccessControlInternal {
             delete ms.links[vehicleIdProxyAddress][_vehicleNode];
             delete ms.links[adIdProxyAddress][_adNode];
 
-            emit AftermarketDeviceUnpairedDevAdmin(
+            emit AftermarketDeviceUnpaired(
                 _adNode,
                 _vehicleNode,
                 INFT(adIdProxyAddress).ownerOf(_adNode)
@@ -177,12 +179,12 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @dev Unpairs a list of aftermarket devices from their respective vehicles by the vehicle node ids
-     * @dev Caller must have the DEV_AD_UNPAIR_ROLE role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_AD_UNPAIR_ROLE roles
      * @param vehicleNodes Array of vehicle node id
      */
     function unpairAftermarketDeviceByVehicleNode(
         uint256[] calldata vehicleNodes
-    ) external onlyRole(DEV_AD_UNPAIR_ROLE) {
+    ) external authorized(DEV_AD_UNPAIR_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -207,7 +209,7 @@ contract DevAdmin is AccessControlInternal {
             delete ms.links[vehicleIdProxyAddress][_vehicleNode];
             delete ms.links[adIdProxyAddress][_adNode];
 
-            emit AftermarketDeviceUnpairedDevAdmin(
+            emit AftermarketDeviceUnpaired(
                 _adNode,
                 _vehicleNode,
                 INFT(vehicleIdProxyAddress).ownerOf(_vehicleNode)
@@ -217,11 +219,12 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Renames manufacturer name
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_RENAME_MANUFACTURERS_ROLE roles
      * @param idManufacturerNames pairs token id to manufactures to be renamed
      */
     function renameManufacturers(
         IdManufacturerName[] calldata idManufacturerNames
-    ) external onlyRole(DEV_RENAME_MANUFACTURERS_ROLE) {
+    ) external authorized(DEV_RENAME_MANUFACTURERS_ROLE) {
         ManufacturerStorage.Storage storage ms = ManufacturerStorage
             .getStorage();
 
@@ -246,13 +249,13 @@ contract DevAdmin is AccessControlInternal {
     /**
      * @notice Admin function to burn a list of vehicles and reset all its attributes
      * @dev It reverts if any vehicle doesn't exist or is paired
-     * @dev Caller must have the DEV_VEHICLE_BURN_ROLE role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_VEHICLE_BURN_ROLE roles
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenIds List of vehicle node ids
      */
     function adminBurnVehicles(
         uint256[] calldata tokenIds
-    ) external onlyRole(DEV_VEHICLE_BURN_ROLE) {
+    ) external authorized(DEV_VEHICLE_BURN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
@@ -284,7 +287,7 @@ contract DevAdmin is AccessControlInternal {
             delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
             delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
-            emit VehicleNodeBurnedDevAdmin(tokenId, owner);
+            emit VehicleNodeBurned(tokenId, owner);
 
             INFT(vehicleIdProxyAddress).burn(tokenId);
 
@@ -294,13 +297,13 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Admin function to burn a list of vehicles and reset all its attributes and links
-     * @dev Caller must have the DEV_VEHICLE_BURN_ROLE role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_VEHICLE_BURN_ROLE roles
      * @dev This contract has the BURNER_ROLE in the VehicleId and SyntheticDeviceId
      * @param tokenIds List of vehicle node ids
      */
     function adminBurnVehiclesAndDeletePairings(
         uint256[] calldata tokenIds
-    ) external onlyRole(DEV_VEHICLE_BURN_ROLE) {
+    ) external authorized(DEV_VEHICLE_BURN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
@@ -332,7 +335,7 @@ contract DevAdmin is AccessControlInternal {
                 delete ms.links[vehicleIdProxyAddress][tokenId];
                 delete ms.links[adIdProxyAddress][pairedDeviceNode];
 
-                emit AftermarketDeviceUnpairedDevAdmin(
+                emit AftermarketDeviceUnpaired(
                     pairedDeviceNode,
                     tokenId,
                     owner
@@ -360,7 +363,7 @@ contract DevAdmin is AccessControlInternal {
 
                 INFT(sdIdProxyAddress).burn(pairedDeviceNode);
 
-                emit SyntheticDeviceNodeBurnedDevAdmin(
+                emit SyntheticDeviceNodeBurned(
                     pairedDeviceNode,
                     tokenId,
                     owner
@@ -372,7 +375,7 @@ contract DevAdmin is AccessControlInternal {
             delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
             delete vs.vehicleIdToDeviceDefinitionId[tokenId];
 
-            emit VehicleNodeBurnedDevAdmin(tokenId, owner);
+            emit VehicleNodeBurned(tokenId, owner);
 
             INFT(vehicleIdProxyAddress).burn(tokenId);
 
@@ -383,13 +386,13 @@ contract DevAdmin is AccessControlInternal {
     /**
      * @notice Admin function to burn a list of aftermarket devices and reset all its attributes
      * @dev It reverts if any aftermarket device doesn't exist or is paired
-     * @dev Caller must have the DEV_AD_BURN_ROLE
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_AD_BURN_ROLE
      * @dev This contract has the BURNER_ROLE in the AftermarketDeviceId
      * @param tokenIds List of aftermarket device node ids
      */
     function adminBurnAftermarketDevices(
         uint256[] calldata tokenIds
-    ) external onlyRole(DEV_AD_BURN_ROLE) {
+    ) external authorized(DEV_AD_BURN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
@@ -417,7 +420,7 @@ contract DevAdmin is AccessControlInternal {
             ];
             delete ads.nodeIdToDeviceAddress[tokenId];
 
-            emit AftermarketDeviceNodeBurnedDevAdmin(tokenId, owner);
+            emit AftermarketDeviceNodeBurned(tokenId, owner);
 
             INFT(adIdProxyAddress).burn(tokenId);
 
@@ -428,12 +431,12 @@ contract DevAdmin is AccessControlInternal {
     /**
      * @notice Admin function to burn a list of aftermarket devices and reset all its attributes and links
      * @dev It reverts if any aftermarket device doesn't exist
-     * @dev Caller must have the DEV_AD_BURN_ROLE
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_AD_BURN_ROLE
      * @param tokenIds List of aftermarket device node ids
      */
     function adminBurnAftermarketDevicesAndDeletePairings(
         uint256[] calldata tokenIds
-    ) external onlyRole(DEV_AD_BURN_ROLE) {
+    ) external authorized(DEV_AD_BURN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
@@ -461,7 +464,7 @@ contract DevAdmin is AccessControlInternal {
                 delete ms.links[vehicleIdProxyAddress][pairedVehicleNode];
                 delete ms.links[adIdProxyAddress][tokenId];
 
-                emit AftermarketDeviceUnpairedDevAdmin(
+                emit AftermarketDeviceUnpaired(
                     tokenId,
                     pairedVehicleNode,
                     owner
@@ -475,7 +478,7 @@ contract DevAdmin is AccessControlInternal {
             ];
             delete ads.nodeIdToDeviceAddress[tokenId];
 
-            emit AftermarketDeviceNodeBurnedDevAdmin(tokenId, owner);
+            emit AftermarketDeviceNodeBurned(tokenId, owner);
 
             INFT(adIdProxyAddress).burn(tokenId);
 
@@ -485,13 +488,13 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Admin function to burn a list of synthetic devices and reset all its attributes and links is exist
-     * @dev Caller must have the DEV_SD_BURN_ROLE role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_SD_BURN_ROLE roles
      * @dev This contract has the BURNER_ROLE in the SyntheticDeviceId
      * @param tokenIds List of synthetic device ids
      */
     function adminBurnSyntheticDevicesAndDeletePairings(
         uint256[] calldata tokenIds
-    ) external onlyRole(DEV_SD_BURN_ROLE) {
+    ) external authorized(DEV_SD_BURN_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
@@ -537,11 +540,7 @@ contract DevAdmin is AccessControlInternal {
 
             INFT(sdIdProxyAddress).burn(tokenId);
 
-            emit SyntheticDeviceNodeBurnedDevAdmin(
-                tokenId,
-                pairedVehicleNode,
-                owner
-            );
+            emit SyntheticDeviceNodeBurned(tokenId, pairedVehicleNode, owner);
 
             _resetSdInfos(tokenId);
         }
@@ -549,14 +548,14 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Admin function to pair an aftermarket device with a vehicle
-     * @dev Caller must have the DEV_AD_PAIR role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_AD_PAIR roles
      * @param aftermarketDeviceNode Aftermarket device node id
      * @param vehicleNode Vehicle node id
      */
     function adminPairAftermarketDevice(
         uint256 aftermarketDeviceNode,
         uint256 vehicleNode
-    ) external onlyRole(DEV_AD_PAIR_ROLE) {
+    ) external authorized(DEV_AD_PAIR_ROLE) {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -592,7 +591,7 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Admin function change the parent node of nodes
-     * @dev Caller must have the DEV_CHANGE_PARENT_NODE role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_CHANGE_PARENT_NODE roles
      * @param newParentNode The new parent node to be applied to all nodes
      * @param idProxyAddress The NFT proxy address of the nodes to be modified
      * @param nodeIdList The list of node IDs to be modified
@@ -601,7 +600,7 @@ contract DevAdmin is AccessControlInternal {
         uint256 newParentNode,
         address idProxyAddress,
         uint256[] calldata nodeIdList
-    ) external onlyRole(DEV_CHANGE_PARENT_NODE) {
+    ) external authorized(DEV_CHANGE_PARENT_NODE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         INFT manufacturerIdInstance = INFT(
             ManufacturerStorage.getStorage().idProxyAddress
@@ -624,9 +623,9 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Admin function to create the base stream on Streamr network and populates their ENS cache
-     * @dev Caller must have the DEV_CACHE_ENS role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_CACHE_ENS roles
      */
-    function adminCacheDimoStreamrEns() external onlyRole(DEV_CACHE_ENS) {
+    function adminCacheDimoStreamrEns() external authorized(DEV_CACHE_ENS) {
         string memory dimoStreamrEns = StreamrConfiguratorStorage
             .getStorage()
             .dimoStreamrEns;
@@ -639,11 +638,11 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Admin function remove a vehicle node attribute
-     * @dev Caller must have the DEV_REMOVE_ATTR role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_REMOVE_ATTR roles
      */
     function adminRemoveVehicleAttribute(
         string calldata attribute
-    ) external onlyRole(DEV_REMOVE_ATTR) {
+    ) external authorized(DEV_REMOVE_ATTR) {
         if (
             AttributeSet.remove(
                 VehicleStorage.getStorage().whitelistedAttributes,
@@ -654,11 +653,11 @@ contract DevAdmin is AccessControlInternal {
 
     /**
      * @notice Admin function add device definition to existing vehicles
-     * @dev Caller must have the DEV_SET_DD role
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_SET_DD roles
      */
     function adminSetVehicleDDs(
         VehicleIdDeviceDefinitionId[] calldata vehicleIdDdId
-    ) external onlyRole(DEV_SET_DD) {
+    ) external authorized(DEV_SET_DD) {
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
 
         address vehicleIdProxyAddress = vs.idProxyAddress;
@@ -698,7 +697,7 @@ contract DevAdmin is AccessControlInternal {
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
-            emit VehicleAttributeSetDevAdmin(tokenId, attributes[i], "");
+            emit VehicleAttributeSet(tokenId, attributes[i], "");
         }
     }
 
@@ -723,11 +722,7 @@ contract DevAdmin is AccessControlInternal {
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
-            emit AftermarketDeviceAttributeSetDevAdmin(
-                tokenId,
-                attributes[i],
-                ""
-            );
+            emit AftermarketDeviceAttributeSet(tokenId, attributes[i], "");
         }
     }
 
@@ -748,11 +743,7 @@ contract DevAdmin is AccessControlInternal {
         for (uint256 i = 0; i < attributes.length; i++) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
 
-            emit SyntheticDeviceAttributeSetDevAdmin(
-                tokenId,
-                attributes[i],
-                ""
-            );
+            emit SyntheticDeviceAttributeSet(tokenId, attributes[i], "");
         }
     }
 }

@@ -44,21 +44,21 @@
 #### Events
 | Selector | Signature |
 |-|-|
-| 0x000d5c45 | AftermarketDeviceAttributeSetDevAdmin(uint256,string,string) |
-| 0xb33f329d | AftermarketDeviceNodeBurnedDevAdmin(uint256,address) |
+| 0x977fe0dd | AftermarketDeviceAttributeSet(uint256,string,string) |
+| 0xc4d38c0a | AftermarketDeviceNodeBurned(uint256,address) |
 | 0x89ec1328 | AftermarketDevicePaired(uint256,uint256,address) |
-| 0xaabf86a9 | AftermarketDeviceTransferredDevAdmin(uint256,address,address) |
-| 0xd2a3fcd4 | AftermarketDeviceUnclaimedDevAdmin(uint256) |
-| 0x1ba4ec81 | AftermarketDeviceUnpairedDevAdmin(uint256,uint256,address) |
+| 0x1d2e8864 | AftermarketDeviceTransferred(uint256,address,address) |
+| 0x9811dbce | AftermarketDeviceUnclaimed(uint256) |
+| 0xd9135724 | AftermarketDeviceUnpaired(uint256,uint256,address) |
 | 0x11880ae6 | DeviceDefinitionIdSet(uint256,string) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
-| 0x8ad18187 | SyntheticDeviceAttributeSetDevAdmin(uint256,string,string) |
-| 0x81741fdd | SyntheticDeviceNodeBurnedDevAdmin(uint256,uint256,address) |
+| 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
+| 0xe4edc3c1 | SyntheticDeviceNodeBurned(uint256,uint256,address) |
 | 0x9b4bf377 | VehicleAttributeRemoved(string) |
-| 0x1d91e00c | VehicleAttributeSetDevAdmin(uint256,string,string) |
-| 0xb956d027 | VehicleNodeBurnedDevAdmin(uint256,address) |
+| 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
+| 0x7b36384f | VehicleNodeBurned(uint256,address) |
 
 #### Errors
 | Selector | Signature |

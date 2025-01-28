@@ -67,6 +67,9 @@ export const MINT_VEHICLE_SD_ROLE = ethers.keccak256(
 );
 
 // Developer roles
+export const DEV_SUPER_ADMIN_ROLE = ethers.keccak256(
+  ethers.toUtf8Bytes('DEV_SUPER_ADMIN_ROLE')
+);
 export const DEV_AD_TRANSFER_ROLE = ethers.keccak256(
   ethers.toUtf8Bytes('DEV_AD_TRANSFER_ROLE')
 );

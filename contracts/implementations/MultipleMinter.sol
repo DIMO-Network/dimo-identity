@@ -165,11 +165,16 @@ contract MultipleMinter is
      *  syntheticDeviceSig -> Synthetic Device's signature hash
      *  syntheticDeviceAddr -> Address associated with the synthetic device
      *  attrInfoPairsDevice -> List of attribute-info pairs to be added of the synthetic device
+     * @param sacdInput SACD input args
+     *  grantee -> The address to receive the permissions
+     *  permissions -> The uint256 that represents the byte array of permissions
+     *  expiration -> Expiration of the permissions
+     *  source -> The URI source associated with the permissions
      */
     function mintVehicleAndSdWithDeviceDefinitionSign(
-        MintVehicleAndSdWithDdInput calldata data
+        MintVehicleAndSdWithDdInput calldata data,
+        SacdInput calldata sacdInput
     ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
-        MapperStorage.Storage storage ms = MapperStorage.getStorage();
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
             .getStorage();
@@ -267,16 +272,18 @@ contract MultipleMinter is
         .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
             .integrationNode;
 
-        ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
-            newTokenIdVehicle
-        ] = newTokenIdDevice;
-        ms.nodeLinks[sdIdProxyAddress][vehicleIdProxyAddress][
-            newTokenIdDevice
-        ] = newTokenIdVehicle;
+        MapperStorage.getStorage().nodeLinks[vehicleIdProxyAddress][
+            sdIdProxyAddress
+        ][newTokenIdVehicle] = newTokenIdDevice;
+        MapperStorage.getStorage().nodeLinks[sdIdProxyAddress][
+            vehicleIdProxyAddress
+        ][newTokenIdDevice] = newTokenIdVehicle;
 
         sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+
+        INFT(vehicleIdProxyAddress).setSacd(newTokenIdVehicle, sacdInput);
     }
 }

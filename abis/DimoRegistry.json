@@ -3378,6 +3378,33 @@
                 "internalType": "struct MintVehicleAndSdWithDdInput",
                 "name": "data",
                 "type": "tuple"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "grantee",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "permissions",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "expiration",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "source",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct SacdInput",
+                "name": "sacdInput",
+                "type": "tuple"
             }
         ],
         "name": "mintVehicleAndSdWithDeviceDefinitionSign",

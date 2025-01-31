@@ -710,10 +710,10 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0xaC7eE3Df60F881C6cf8a9FAc072F595BCAF4Ccf0",
+                "address": "0x73e8b73C6B2D70041Cc4aa8Bc889e902dB9614aB",
                 "selectors": [
                     "0xfb1a28e8",
-                    "0xd23965e3"
+                    "0xdfcdf33c"
                 ]
             },
             "StreamrConfigurator": {

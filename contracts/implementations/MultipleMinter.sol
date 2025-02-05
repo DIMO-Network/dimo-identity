@@ -300,7 +300,7 @@ contract MultipleMinter is
      *  expiration -> Expiration of the permissions
      *  source -> The URI source associated with the permissions
      */
-    function mintVehicleAndSdWithDeviceDefinitionSignWithSacd(
+    function mintVehicleAndSdWithDeviceDefinitionSignAndSacd(
         MintVehicleAndSdWithDdInput calldata data,
         SacdInput calldata sacdInput
     ) external onlyRole(MINT_VEHICLE_SD_ROLE) {

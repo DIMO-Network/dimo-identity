@@ -424,7 +424,8 @@
 | Selector | Signature |
 |-|-|
 | 0xfb1a28e8 | mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
-| 0xdfcdf33c | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
+| 0xd23965e3 | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
+| 0x62a147ff | mintVehicleAndSdWithDeviceDefinitionSignWithSacd((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
 
 #### Events
 | Selector | Signature |

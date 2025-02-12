@@ -314,14 +314,13 @@ describe('Vehicle', function () {
     await adIdInstance
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
-    await vehicleIdInstance
-      .connect(admin)
-      .setSacdAddress(await mockSacdInstance.getAddress());
-
-    // Setting DIMORegistry address
     await manufacturerIdInstance.setDimoRegistryAddress(
       DIMO_REGISTRY_ADDRESS
     );
+
+    await vehicleIdInstance
+      .connect(admin)
+      .setSacdAddress(await mockSacdInstance.getAddress());
   });
 
   beforeEach(async () => {
@@ -722,6 +721,25 @@ describe('Vehicle', function () {
           admin.address,
           -C.MINT_VEHICLE_OPERATION_COST
         );
+      });
+      it('Should correctly set SACD permissions', async () => {
+        expect(
+          await mockSacdInstance.permissionRecords(await vehicleIdInstance.getAddress(), 1, 0, user2.address)
+        ).to.eql([0n, 0n, ''])
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+          1,
+          user1.address,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs,
+          sacdInput
+        )
+
+        expect(
+          await mockSacdInstance.permissionRecords(await vehicleIdInstance.getAddress(), 1, 0, user2.address)
+        ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source])
       });
     });
 

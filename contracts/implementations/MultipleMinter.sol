@@ -31,17 +31,17 @@ contract MultipleMinter is
 
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
-     * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-     * @dev Caller must have the mint vehicle sd role
-     * @param data Input data with the following fields:
-     *  manufacturerNode -> Parent manufacturer node id of the vehicle
-     *  owner -> The new nodes owner
-     *  attrInfoPairsVehicle -> List of attribute-info pairs to be added of the vehicle
-     *  integrationNode -> Parent integration node id of the synthetic device
-     *  vehicleOwnerSig -> Vehicle owner signature hash
-     *  syntheticDeviceSig -> Synthetic Device's signature hash
-     *  syntheticDeviceAddr -> Address associated with the synthetic device
-     *  attrInfoPairsDevice -> List of attribute-info pairs to be added of the synthetic device
+     * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified//-
+     * @dev Caller must have the MINT_VEHICLE_SD_ROLE
+     * @param data A MintVehicleAndSdInput struct containing:
+     *        - manufacturerNode: Parent manufacturer node id of the vehicle
+     *        - owner: The new nodes owner
+     *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
+     *        - integrationNode: Parent integration node id of the synthetic device
+     *        - vehicleOwnerSig: Vehicle owner signature hash
+     *        - syntheticDeviceSig: Synthetic Device's signature hash
+     *        - syntheticDeviceAddr: Address associated with the synthetic device
+     *        - attrInfoPairsDevice: List of attribute-info pairs to be added to the synthetic device
      */
     function mintVehicleAndSdSign(
         MintVehicleAndSdInput calldata data
@@ -283,22 +283,22 @@ contract MultipleMinter is
     /**
      * @notice Mints and pairs a vehicle (with a Device Definition Id) and a synthetic device, and set permissions with SACD through a metatransaction
      * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-     * @dev Caller must have the mint vehicle sd role
-     * @param data Input data with the following fields:
-     *  manufacturerNode -> Parent manufacturer node id of the vehicle
-     *  owner -> The new nodes owner
-     *  deviceDefinitionId -> The Device Definition Id
-     *  attrInfoPairsVehicle -> List of attribute-info pairs to be added of the vehicle
-     *  integrationNode -> Parent integration node id of the synthetic device
-     *  vehicleOwnerSig -> Vehicle owner signature hash
-     *  syntheticDeviceSig -> Synthetic Device's signature hash
-     *  syntheticDeviceAddr -> Address associated with the synthetic device
-     *  attrInfoPairsDevice -> List of attribute-info pairs to be added of the synthetic device
-     * @param sacdInput SACD input args
-     *  grantee -> The address to receive the permissions
-     *  permissions -> The uint256 that represents the byte array of permissions
-     *  expiration -> Expiration of the permissions
-     *  source -> The URI source associated with the permissions
+     * @dev Caller must have the MINT_VEHICLE_SD_ROLE
+     * @param data A MintVehicleAndSdWithDdInput struct containing:
+     *        - manufacturerNode: Parent manufacturer node id of the vehicle
+     *        - owner: The new nodes owner
+     *        - deviceDefinitionId: The Device Definition Id
+     *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
+     *        - integrationNode: Parent integration node id of the synthetic device
+     *        - vehicleOwnerSig: Vehicle owner signature hash
+     *        - syntheticDeviceSig: Synthetic Device's signature hash
+     *        - syntheticDeviceAddr: Address associated with the synthetic device
+     *        - attrInfoPairsDevice: List of attribute-info pairs to be added to the synthetic device
+     * @param sacdInput SACD input args for setting permissions
+     *        - grantee: The address to receive the permissions
+     *        - permissions: The uint256 that represents the byte array of permissions
+     *        - expiration: Expiration of the permissions
+     *        - source: The URI source associated with the permissions
      */
     function mintVehicleAndSdWithDeviceDefinitionSignAndSacd(
         MintVehicleAndSdWithDdInput calldata data,
@@ -416,7 +416,21 @@ contract MultipleMinter is
         INFT(vehicleIdProxyAddress).setSacd(newTokenIdVehicle, sacdInput);
     }
 
-    // TODO Documentation
+    /**
+     * @notice Mints and pairs multiple vehicles (with Device Definition Ids) and synthetic devices in batch
+     * @dev Caller must have the MINT_VEHICLE_SD_ROLE
+     * @param data An array of MintVehicleAndSdWithDdInputBatch structs containing:
+     *        - manufacturerNode: Parent manufacturer node id of the vehicle
+     *        - owner: The new nodes owner
+     *        - deviceDefinitionId: The Device Definition Id
+     *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
+     *        - integrationNode: Parent integration node id of the synthetic device
+     *        - vehicleOwnerSig: Vehicle owner signature hash
+     *        - syntheticDeviceSig: Synthetic Device's signature hash
+     *        - syntheticDeviceAddr: Address associated with the synthetic device
+     *        - attrInfoPairsDevice: List of attribute-info pairs to be added to the synthetic device
+     *        - sacdInput: SACD input args for setting permissions
+     */
     function mintVehicleAndSdWithDeviceDefinitionSignBatch(
         MintVehicleAndSdWithDdInputBatch[] calldata data
     ) external onlyRole(MINT_VEHICLE_SD_ROLE) {

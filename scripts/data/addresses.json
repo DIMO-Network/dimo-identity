@@ -285,7 +285,8 @@
             "StreamRegistry": "0x0D483E10612F327FC11965Fc82E90dC19b141641",
             "DimoStreamrNode": "0x3F3ab5A20F704D6e7299EdEE84200fDA5d849BE7",
             "TablelandTables": "0x5c4e6A9e5C1e1BF445A062006faF19EA6c49aFeA",
-            "Sacd": "0xEF919b3793deaae1637523d483e3434ae113004E"
+            "Sacd": "0xEF919b3793deaae1637523d483e3434ae113004E",
+            "Connections": "0x41799E9Dc893722844E771a1C1cAf3BBc2876132"
         }
     },
     "mumbai": {
@@ -832,7 +833,7 @@
                 "proxy": "0xBF050bA5f13F4D7ba1744fcCd6087EDde78a337e",
                 "implementation": "0x1Fd3C02C52477F53Fc4E67E028738F4EA0890124"
             },
-            "Foundation": "0x07B584f6a7125491C991ca2a45ab9e641B1CeE1b",
+            "Foundation": "0xC008EF40B0b42AAD7e34879EB024385024f753ea",
             "Kms": [
                 "0x74cb2b8ed0c1789d84ef701921d1152e592c330c",
                 "0x6903B9cE4bFAf9D900E40B9dd2F486a4530cA74f",
@@ -841,7 +842,8 @@
             "StreamRegistry": "0xE9C98bdE63248e58E9137Db8270D9675B9E34b93",
             "DimoStreamrNode": "0x577f22f5369046B7eF09B6b01424fA860533d243",
             "TablelandTables": "0x170fb206132b693e38adFc8727dCfa303546Cec1",
-            "Sacd": "0xaC24E8add57e7Ca8e8B2D0d76f4210Ae53ebDB28"
+            "Sacd": "0x4E5F9320b1c7cB3DE5ebDD760aD67375B66cF8a3",
+            "Connections": "0x41799E9Dc893722844E771a1C1cAf3BBc2876132"
         }
     },
     "hardhat": {
@@ -1124,7 +1126,8 @@
             "StreamRegistry": "0x0000000000000000000000000000000000000000",
             "DimoStreamrNode": "0x0000000000000000000000000000000000000000",
             "TablelandTables": "0x0000000000000000000000000000000000000000",
-            "Sacd": "0x0000000000000000000000000000000000000000"
+            "Sacd": "0x0000000000000000000000000000000000000000",
+            "Connections": "0x0000000000000000000000000000000000000000"
         }
     },
     "localhost": {
@@ -1390,7 +1393,8 @@
             "StreamRegistry": "0x0000000000000000000000000000000000000000",
             "DimoStreamrNode": "0x0000000000000000000000000000000000000000",
             "TablelandTables": "0x0000000000000000000000000000000000000000",
-            "Sacd": "0x0000000000000000000000000000000000000000"
+            "Sacd": "0x0000000000000000000000000000000000000000",
+            "Connections": "0x0000000000000000000000000000000000000000"
         }
     }
 }

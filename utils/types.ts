@@ -87,6 +87,10 @@ export type MintVehicleAndSdWithDdInput = {
   attrInfoPairsDevice: AttributeInfoPair[]
 };
 
+export type MintVehicleAndSdWithDdInputBatch = MintVehicleAndSdWithDdInput & {
+  sacdInput: SacdInput
+}
+
 export type IdManufacturerName = {
   tokenId: string,
   name: string

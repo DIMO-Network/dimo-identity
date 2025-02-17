@@ -14,6 +14,7 @@ contract StreamrConfigurator is AccessControlInternal {
     event StreamRegistrySet(address streamRegistry);
     event DimoStreamrNodeSet(address dimoStreamrNode);
     event DimoStreamrEnsSet(string dimoStreamrEns);
+    event StreamrSacdListenerSet(address streamrSacdListener);
 
     /**
      * @notice Sets the StreamRegistry contract address
@@ -51,5 +52,19 @@ contract StreamrConfigurator is AccessControlInternal {
     ) external onlyRole(ADMIN_ROLE) {
         StreamrConfiguratorStorage.getStorage().dimoStreamrEns = dimoStreamrEns;
         emit DimoStreamrEnsSet(dimoStreamrEns);
+    }
+
+    /**
+     * @notice Sets the Streamr SACD Listener address
+     * @dev Caller must have the ADMIN_ROLE
+     * @param streamrSacdListener The Streamr SACD Listener address
+     */
+    function setStreamrSacdListener(
+        address streamrSacdListener
+    ) external onlyRole(ADMIN_ROLE) {
+        StreamrConfiguratorStorage
+            .getStorage()
+            .streamrSacdListener = streamrSacdListener;
+        emit StreamrSacdListenerSet(streamrSacdListener);
     }
 }

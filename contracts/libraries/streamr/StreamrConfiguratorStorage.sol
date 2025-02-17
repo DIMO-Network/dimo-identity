@@ -13,6 +13,7 @@ library StreamrConfiguratorStorage {
         address streamRegistry;
         address dimoStreamrNode;
         string dimoStreamrEns;
+        address streamrSacdListener;
     }
 
     /* solhint-disable no-inline-assembly */

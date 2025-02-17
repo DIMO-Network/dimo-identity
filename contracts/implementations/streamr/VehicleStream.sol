@@ -261,7 +261,7 @@ contract VehicleStream is AccessControlInternal {
 
     /**
      * @notice Set a subscription permission for a user
-     * @dev Only the vehicle id owner can add new subscribers to their stream
+     * @dev Only the vehicle id owner can add new subscribers to their stream (directly or via SACD)
      * @param vehicleId Vehicle node id
      * @param subscriber Vehicle stream subscriber
      * @param expirationTime Subscription expiration timestamp
@@ -386,7 +386,12 @@ contract VehicleStream is AccessControlInternal {
         address subscriber,
         uint256 expirationTime
     ) external {
-        if (msg.sender != VehicleStorage.getStorage().idProxyAddress) {
+        address sacdListener = StreamrConfiguratorStorage
+            .getStorage()
+            .streamrSacdListener;
+
+        // Only the VehicleId NFT and the StreamrSacdListener can call this function
+        if (msg.sender != VehicleStorage.getStorage().idProxyAddress && msg.sender != sacdListener) {
             revert Errors.Unauthorized(msg.sender);
         }
 

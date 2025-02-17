@@ -3,13 +3,14 @@ pragma solidity ^0.8.13;
 
 import "../interfaces/IDimoRegistry.sol";
 import "../interfaces/ISacd.sol";
+import "../interfaces/ISacdListener.sol";
 import "./Base/MultiPrivilege/MultiPrivilegeTransferableBurnable.sol";
 
 error ZeroAddress();
 error Unauthorized();
 error TransferFailed(address idProxy, uint256 id, string errorMessage);
 
-contract VehicleId is Initializable, MultiPrivilege {
+contract VehicleId is Initializable, MultiPrivilege, ISacdListener {
     struct SacdInput {
         address grantee;
         uint256 permissions;
@@ -23,6 +24,7 @@ contract VehicleId is Initializable, MultiPrivilege {
     address public syntheticDeviceId;
     mapping(address => bool) public trustedForwarders;
     address public sacd;
+    ISacdListener[] public sacdListeners;
 
     // 0x42842e0e is the selector of safeTransferFrom(address,address,uint256)
     bytes4 public constant SAFE_TRANSFER_FROM = 0x42842e0e;
@@ -98,6 +100,48 @@ contract VehicleId is Initializable, MultiPrivilege {
         bool trusted
     ) external onlyRole(ADMIN_ROLE) {
         trustedForwarders[addr] = trusted;
+    }
+
+    /**
+     * @notice Add a SACD listener that gets notified when NFT permissions change
+     * @dev Only an admin can modify the listeners
+     * @param listener that implements ISacdListener
+     */
+    function addSacdListener(ISacdListener listener) external onlyRole(ADMIN_ROLE) {
+        sacdListeners.push(listener);
+    }
+
+    /**
+     * @notice Remove a SACD listener
+     * @dev Only an admin can modify the listeners
+     * @param listener that implements ISacdListener
+     */
+    function removeSacdListener(ISacdListener listener) external onlyRole(ADMIN_ROLE) {
+        for (uint256 i = 0; i < sacdListeners.length; i++) {
+            if (sacdListeners[i] == listener) {
+                sacdListeners[i] = sacdListeners[sacdListeners.length - 1];
+                sacdListeners.pop();
+                break;
+            }
+        }
+    }
+
+    /**
+     * @notice Forwards the SACD onSetPermissions callback to all listeners
+     * @param tokenId Token ID associated with the permissions
+     * @param permissions The uint256 that represents the byte array of permissions
+     * @param grantee The address to receive the permission
+     * @param expiration Expiration of the permissions
+     */
+    function onSetPermissions(
+        uint256 tokenId,
+        address grantee,
+        uint256 permissions,
+        uint256 expiration
+    ) external override {
+        for (uint256 i = 0; i < sacdListeners.length; i++) {
+            sacdListeners[i].onSetPermissions(tokenId, grantee, permissions, expiration);
+        }
     }
 
     /**

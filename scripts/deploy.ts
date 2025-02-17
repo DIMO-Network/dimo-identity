@@ -71,6 +71,7 @@ function buildNftArgs(
     ...C.vehicleIdArgs.args,
     instances[networkName].modules.DIMORegistry.address,
     ethers.ZeroAddress,
+    ethers.ZeroAddress, // TODO: this should be the SACD address, see VehicleId.sol:initialize
     [instances[networkName].misc.DimoForwarder.proxy],
   ];
   currentAdIdArgs.args = [
@@ -760,6 +761,35 @@ async function setupStreamr(
     );
 
   console.log('\n----- DIMO Base StreamId set -----\n');
+
+  console.log('\n----- Deploying Streamr SACD Listener -----\n');
+
+  const StreamrSacdListenerFactory = await ethers.getContractFactory('StreamrSacdListener');
+  const streamrSacdListener = await StreamrSacdListenerFactory
+    .connect(deployer)
+    .deploy(
+      instances[networkName].modules.DIMORegistry.address
+  );
+  const streamrSacdListenerAddress = await streamrSacdListener.getAddress();
+  console.log(`  Streamr SACD Listener deployed to ${streamrSacdListenerAddress}`);
+
+  await streamrConfiguratorInstance
+    .connect(deployer)
+    .setStreamrSacdListener(
+      streamrSacdListenerAddress
+    );
+
+  const vehicleIdInstance: VehicleId = await ethers.getContractAt(
+    'VehicleId',
+    instances[networkName].nfts.VehicleId.proxy,
+  );
+  await vehicleIdInstance
+    .connect(deployer)
+    .addSacdListener(
+      streamrSacdListenerAddress
+    );
+
+  console.log('\n----- Streamr SACD Listener deployed and set up -----\n');
 }
 
 async function buildMocks(

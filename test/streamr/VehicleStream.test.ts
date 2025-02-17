@@ -227,7 +227,7 @@ describe('VehicleStream', async function () {
     // Setting DIMORegistry address
     await manufacturerIdInstance
       .connect(admin)
-      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS,);
+      .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
       .connect(admin)
       .setDimoRegistryAddress(DIMO_REGISTRY_ADDRESS);
@@ -259,6 +259,18 @@ describe('VehicleStream', async function () {
     await streamrConfiguratorInstance
       .connect(admin)
       .setDimoBaseStreamId(C.DIMO_STREAMR_ENS);
+
+    // Deploy StreamrSacdListener that connects the VehicleId NFT to VehicleStream module of DimoRegistry
+    const StreamrSacdListenerFactory = await ethers.getContractFactory('StreamrSacdListener');
+    const streamrSacdListener = await StreamrSacdListenerFactory.connect(admin).deploy(DIMO_REGISTRY_ADDRESS);
+    const streamrSacdListenerAddress = await streamrSacdListener.getAddress();
+
+    await streamrConfiguratorInstance
+      .connect(admin)
+      .setStreamrSacdListener(streamrSacdListenerAddress);
+    await vehicleIdInstance
+      .connect(admin)
+      .addSacdListener(streamrSacdListenerAddress);
   });
 
   beforeEach(async () => {
@@ -1336,6 +1348,83 @@ describe('VehicleStream', async function () {
             .setPrivilege(1, C.VEHICLE_SUBSCRIBE_LIVE_DATA_PRIVILEGE, subscriber.address, expiresDefault)
         ).to.emit(vehicleStreamInstance, 'SubscribedToVehicleStream')
           .withArgs(mockStreamId, subscriber.address, expiresDefault);
+      });
+    });
+  });
+
+  context('SACD callback', () => {
+    let streamId: string;
+    beforeEach(async () => {
+      await vehicleStreamInstance.connect(user1).createVehicleStream(1);
+      streamId = await vehicleStreamInstance.getVehicleStream(1);
+    });
+
+    context('Error handling', () => {
+    });
+
+    context.only('State', () => {
+      it('Should update the stream permissions when the correct SACD permissions are changed', async () => {
+        const VEHICLE_SUBSCRIBE_LIVE_DATA_PERMISSION_BITMASK = 1 << 6;
+
+        const permissionsBefore = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+        expect(permissionsBefore[0]).to.eql(false);
+        expect(permissionsBefore[1]).to.eql(false);
+        expect(permissionsBefore[2]).to.equal('0');
+        expect(permissionsBefore[3]).to.equal('0');
+        expect(permissionsBefore[4]).to.eql(false);
+
+        await mockSacdInstance
+          .connect(user1)
+          .setPermissions(
+            VEHICLE_ID_ADDRESS,
+            1,
+            subscriber.address,
+            VEHICLE_SUBSCRIBE_LIVE_DATA_PERMISSION_BITMASK,
+            expiresDefault,
+            'test'
+          );
+
+        const permissionsAfter = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+        expect(permissionsAfter[0]).to.eql(false);
+        expect(permissionsAfter[1]).to.eql(false);
+        expect(permissionsAfter[2]).to.equal('0');
+        expect(permissionsAfter[3]).to.equal(expiresDefault);
+        expect(permissionsAfter[4]).to.eql(false);
+
+        await mockSacdInstance
+          .connect(user1)
+          .setPermissions(
+            VEHICLE_ID_ADDRESS,
+            1,
+            subscriber.address,
+            5, // here the 6th bit is not set, so we expect the permissions to be revoked
+            expiresDefault,
+            'test'
+          );
+
+        expect(await streamRegistry.getPermissionsForUser(streamId, subscriber.address)).to.deep.equal(permissionsBefore);
+      });
+
+      it('Should not change the stream permissions when other SACD permissions are changed', async () => {
+        const permissionsBefore = await streamRegistry.getPermissionsForUser(streamId, subscriber.address);
+        expect(permissionsBefore[0]).to.eql(false);
+        expect(permissionsBefore[1]).to.eql(false);
+        expect(permissionsBefore[2]).to.equal('0');
+        expect(permissionsBefore[3]).to.equal('0');
+        expect(permissionsBefore[4]).to.eql(false);
+
+        await mockSacdInstance
+          .connect(user1)
+          .setPermissions(
+            VEHICLE_ID_ADDRESS,
+            1,
+            subscriber.address,
+            5, // here the 6th bit is not set, so we expect the permissions to not change
+            expiresDefault,
+            'test'
+          );
+
+        expect(await streamRegistry.getPermissionsForUser(streamId, subscriber.address)).to.deep.equal(permissionsBefore);
       });
     });
   });

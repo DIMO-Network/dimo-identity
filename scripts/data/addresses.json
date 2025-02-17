@@ -905,6 +905,7 @@
                     "0xb7bded95",
                     "0x3da44e56",
                     "0x1b1a82c8",
+                    "0x97c95b2a",
                     "0xd84baff1",
                     "0x8dca2b8e",
                     "0x9bfae6da",
@@ -986,7 +987,8 @@
                 "selectors": [
                     "0x9e594424",
                     "0x5f450e29",
-                    "0x0c3cac3b"
+                    "0x0c3cac3b",
+                    "0x69934da4"
                 ]
             },
             "VehicleStream": {

@@ -470,6 +470,19 @@
   {
     "inputs": [
       {
+        "internalType": "contract ISacdListener",
+        "name": "listener",
+        "type": "address"
+      }
+    ],
+    "name": "addSacdListener",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "to",
         "type": "address"
@@ -813,6 +826,34 @@
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "grantee",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "permissions",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expiration",
+        "type": "uint256"
+      }
+    ],
+    "name": "onSetPermissions",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
       }
     ],
     "name": "ownerOf",
@@ -929,6 +970,19 @@
   {
     "inputs": [
       {
+        "internalType": "contract ISacdListener",
+        "name": "listener",
+        "type": "address"
+      }
+    ],
+    "name": "removeSacdListener",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes32",
         "name": "role",
         "type": "bytes32"
@@ -968,6 +1022,25 @@
     "outputs": [
       {
         "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "sacdListeners",
+    "outputs": [
+      {
+        "internalType": "contract ISacdListener",
         "name": "",
         "type": "address"
       }

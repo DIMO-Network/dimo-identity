@@ -71,41 +71,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     // ***** Interaction with nodes *****//
 
     /**
-     * @notice Mints a vehicle
-     * @dev Caller must have the mint vehicle role
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param attrInfo List of attribute-info pairs to be added
-     */
-    function mintVehicle(
-        uint256 manufacturerNode,
-        address owner,
-        AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(MINT_VEHICLE_ROLE) {
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
-
-        if (
-            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
-                manufacturerNode
-            )
-        ) revert InvalidParentNode(manufacturerNode);
-
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
-
-        NodesStorage
-        .getStorage()
-        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-
-        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
-
-        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
-
-        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-    }
-
-    /**
      * @notice Function to mint a vehicle with a Device Definition Id
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
@@ -248,60 +213,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
                 manufacturerNode,
                 owner,
                 keccak256(bytes(deviceDefinitionId)),
-                attributesHash,
-                infosHash
-            )
-        );
-
-        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
-            revert InvalidOwnerSignature();
-
-        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-    }
-
-    /**
-     * @notice Mints a vehicle through a metatransaction
-     * The vehicle owner signs a typed structured (EIP-712) message in advance and submits to be verified
-     * @dev Caller must have the mint vehicle role
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param attrInfo List of attribute-info pairs to be added
-     * @param signature User's signature hash
-     */
-    function mintVehicleSign(
-        uint256 manufacturerNode,
-        address owner,
-        AttributeInfoPair[] calldata attrInfo,
-        bytes calldata signature
-    ) external onlyRole(MINT_VEHICLE_ROLE) {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
-
-        if (
-            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
-                manufacturerNode
-            )
-        ) revert InvalidParentNode(manufacturerNode);
-
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
-
-        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
-
-        ns
-        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-
-        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
-            newTokenId,
-            attrInfo
-        );
-
-        bytes32 message = keccak256(
-            abi.encode(
-                MINT_VEHICLE_TYPEHASH,
-                manufacturerNode,
-                owner,
                 attributesHash,
                 infosHash
             )

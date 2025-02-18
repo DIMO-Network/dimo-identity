@@ -351,10 +351,10 @@ describe('DimoForwarder', async function () {
 
     await vehicleInstance
       .connect(admin)
-      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     await vehicleInstance
       .connect(admin)
-      .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
     await aftermarketDeviceInstance
       .connect(admin)
       .claimAftermarketDeviceSign(

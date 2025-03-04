@@ -630,13 +630,11 @@
                 ]
             },
             "Vehicle": {
-                "address": "0xF7E135A00a762Afa8A87802Eca33d1f5374e626b",
+                "address": "0x9fc1bb806018686971cAa0C43e4eE5084b1dF3C3",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
                     "0xb7bded95",
-                    "0x3da44e56",
-                    "0x1b1a82c8",
                     "0x97c95b2a",
                     "0xd84baff1",
                     "0x8dca2b8e",

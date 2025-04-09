@@ -563,9 +563,45 @@ async function grantAllRoles(
   }
 }
 
-async function main() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function deployContract(
+  deployer: HardhatEthersSigner,
+  contractName: string,
+  networkName: string,
+  contractType: 'nft' | 'module',
+  args: any[] = []
+): Promise<AddressesByNetwork> {
+  console.log(`\n----- Deploying contract ${contractName} -----\n`);
+
+  const instances = getAddresses();
+
+  const ContractFactory = await ethers.getContractFactory(contractName);
+  const contractImplementation = await ContractFactory.connect(deployer).deploy(...args);
+
+  await contractImplementation.waitForDeployment();
+
+  const implementationAddress = await contractImplementation.getAddress();
+
+  console.log(
+    `Contract ${contractName} deployed to ${implementationAddress}`
+  );
+
+  if (contractType === 'nft') {
+    instances[networkName].nfts[contractName].implementation = implementationAddress;
+  } else if (contractType === 'module') {
+    instances[networkName].modules[contractName].address = implementationAddress;
+  } else {
+    throw new Error('Invalid contract type. Must be either "nft" or "module".');
+  }
+
+  console.log(`\n----- Contract ${contractName} deployed -----`);
+
+  return instances;
+}
+
+async function main(networkFlag?: string) {
   // eslint-disable-next-line prefer-const
-  let [deployer, user1, nodeOwner] = await ethers.getSigners();
+  let [deployer, funder] = await ethers.getSigners();
   let networkName = network.name;
 
   if (
@@ -573,35 +609,24 @@ async function main() {
     network.name === 'localhost' ||
     network.name === 'tenderly'
   ) {
-    networkName = 'amoy';
+    networkName = networkFlag || 'amoy'; // Use the flag if provided, otherwise default to 'polygon'
     // console.log(deployer.address);
 
     // 0xCED3c922200559128930180d3f0bfFd4d9f4F123 -> polygon
     // 0x1741eC2915Ab71Fc03492715b5640133dA69420B -> deployer
-    // 0x8E58b98d569B0679713273c5105499C249e9bC84 -> amoy
+    // 0xC008EF40B0b42AAD7e34879EB024385024f753ea -> amoy
 
     await network.provider.request({
       method: 'hardhat_impersonateAccount',
-      params: ['0x8E58b98d569B0679713273c5105499C249e9bC84'],
+      params: ['0xC008EF40B0b42AAD7e34879EB024385024f753ea'],
     });
-    // await network.provider.request({
-    //   method: 'hardhat_impersonateAccount',
-    //   params: ['0xc0f28da7ae009711026c648913eb17962fd96dd7']
-    // });
 
     deployer = await ethers.getSigner(
-      '0x8E58b98d569B0679713273c5105499C249e9bC84',
-    );
-    nodeOwner = await ethers.getSigner(
-      '0xc0f28da7ae009711026c648913eb17962fd96dd7',
+      '0xC008EF40B0b42AAD7e34879EB024385024f753ea',
     );
 
-    await user1.sendTransaction({
+    await funder.sendTransaction({
       to: deployer.address,
-      value: ethers.parseEther('100'),
-    });
-    await user1.sendTransaction({
-      to: nodeOwner.address,
       value: ethers.parseEther('100'),
     });
   }

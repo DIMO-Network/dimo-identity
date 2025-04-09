@@ -708,9 +708,10 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x1eFf690C960dAD0B441C7F1EDa267e459D3353Eb",
+                "address": "0x682D3f2492e0C8f36EC6ce13861deBb22f4290e5",
                 "selectors": [
                     "0xfb1a28e8",
+                    "0xd23965e3",
                     "0x58657dcc",
                     "0x7ae7fe4e"
                 ]

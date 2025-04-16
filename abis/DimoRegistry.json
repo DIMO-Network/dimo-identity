@@ -3575,6 +3575,19 @@
             {
                 "indexed": true,
                 "internalType": "address",
+                "name": "connections",
+                "type": "address"
+            }
+        ],
+        "name": "ConnectionsSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
                 "name": "dimoCredit",
                 "type": "address"
             }
@@ -3620,6 +3633,19 @@
         ],
         "name": "ManufacturerLicenseSet",
         "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "getConnections",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "connections",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     },
     {
         "inputs": [],
@@ -3671,6 +3697,19 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "connections",
+                "type": "address"
+            }
+        ],
+        "name": "setConnections",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {

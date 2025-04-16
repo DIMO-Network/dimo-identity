@@ -2,11 +2,11 @@
 pragma solidity ^0.8.13;
 
 /**
- * @title MockStake
- * @dev Mocks the Stake contract to be used in tests
+ * @title MockConnectionLicense
+ * @dev Mocks the Connections contract (connection license) to be used in tests
  * Refers to https://github.com/DIMO-Network/dimo-staking-contract-license-nft
  */
-contract MockStake {
+contract MockConnections {
     mapping(address => uint256) private userToBalance;
 
     function setLicenseBalance(address user, uint256 balance) external {

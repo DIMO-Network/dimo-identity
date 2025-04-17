@@ -11,8 +11,6 @@ import {
   BaseDataURI,
   Manufacturer,
   ManufacturerId,
-  Integration,
-  IntegrationId,
   Vehicle,
   VehicleId,
   SyntheticDevice,
@@ -24,7 +22,8 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
-  MockSacd
+  MockSacd,
+  MockConnections
 } from '../../typechain-types';
 import {
   setup,
@@ -46,7 +45,6 @@ describe('VehicleId', async function () {
   let nodesInstance: Nodes;
   let baseDataUriInstance: BaseDataURI;
   let manufacturerInstance: Manufacturer;
-  let integrationInstance: Integration;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let syntheticDeviceInstance: SyntheticDevice;
@@ -56,8 +54,8 @@ describe('VehicleId', async function () {
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockSacdInstance: MockSacd;
+  let mockConnectionsInstance: MockConnections;
   let manufacturerIdInstance: ManufacturerId;
-  let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
   let sdIdInstance: SyntheticDeviceId;
@@ -67,7 +65,7 @@ describe('VehicleId', async function () {
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
-  let integrationOwner1: HardhatEthersSigner;
+  let connectionOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
   let adAddress1: HardhatEthersSigner;
@@ -86,7 +84,7 @@ describe('VehicleId', async function () {
       admin,
       nonAdmin,
       manufacturer1,
-      integrationOwner1,
+      connectionOwner1,
       user1,
       user2,
       adAddress1,
@@ -107,7 +105,6 @@ describe('VehicleId', async function () {
         'Nodes',
         'BaseDataURI',
         'Manufacturer',
-        'Integration',
         'Vehicle',
         'AftermarketDevice',
         'SyntheticDevice',
@@ -116,7 +113,6 @@ describe('VehicleId', async function () {
       ],
       nfts: [
         'ManufacturerId',
-        'IntegrationId',
         'VehicleId',
         'AftermarketDeviceId',
         'SyntheticDeviceId',
@@ -131,14 +127,12 @@ describe('VehicleId', async function () {
     nodesInstance = deployments.Nodes;
     baseDataUriInstance = deployments.BaseDataURI;
     manufacturerInstance = deployments.Manufacturer;
-    integrationInstance = deployments.Integration;
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
-    integrationIdInstance = deployments.IntegrationId;
     vehicleIdInstance = deployments.VehicleId;
     adIdInstance = deployments.AftermarketDeviceId;
     sdIdInstance = deployments.SyntheticDeviceId;
@@ -167,13 +161,18 @@ describe('VehicleId', async function () {
     const MockSacdFactory = await ethers.getContractFactory('MockSacd');
     mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
 
+    // Deploy MockConnections contract
+    const MockConnectionsFactory = await ethers.getContractFactory(
+      'MockConnections'
+    );
+    mockConnectionsInstance = await MockConnectionsFactory
+      .connect(admin)
+      .deploy(C.CONNECTIONS_ERC721_NAME, C.CONNECTIONS_ERC721_SYMBOL);
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
     // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
-      .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
-    await integrationIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
@@ -196,9 +195,6 @@ describe('VehicleId', async function () {
     await manufacturerInstance
       .connect(admin)
       .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress());
-    await integrationInstance
-      .connect(admin)
-      .setIntegrationIdProxyAddress(await integrationIdInstance.getAddress());
     await vehicleInstance
       .connect(admin)
       .setVehicleIdProxyAddress(await vehicleIdInstance.getAddress());
@@ -238,6 +234,9 @@ describe('VehicleId', async function () {
     await sharedInstance
       .connect(admin)
       .setManufacturerLicense(await mockManufacturerLicenseInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setConnections(await mockConnectionsInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -254,14 +253,6 @@ describe('VehicleId', async function () {
     await manufacturerInstance
       .connect(admin)
       .addManufacturerAttribute(C.mockManufacturerAttribute2);
-
-    // Whitelist Integration attributes
-    await integrationInstance
-      .connect(admin)
-      .addIntegrationAttribute(C.mockIntegrationAttribute1);
-    await integrationInstance
-      .connect(admin)
-      .addIntegrationAttribute(C.mockIntegrationAttribute2);
 
     // Whitelist Vehicle attributes
     await vehicleInstance
@@ -296,13 +287,11 @@ describe('VehicleId', async function () {
         C.mockManufacturerAttributeInfoPairs,
       );
 
-    // Mint Integration Node
-    await integrationInstance
-      .connect(admin)
-      .mintIntegration(
-        integrationOwner1.address,
-        C.mockIntegrationNames[0],
-        C.mockIntegrationAttributeInfoPairs,
+    // Mint Connection ID
+    await mockConnectionsInstance
+      .mint(
+        connectionOwner1.address,
+        C.CONNECTION_NAME_1
       );
 
     await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
@@ -363,7 +352,7 @@ describe('VehicleId', async function () {
 
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     await aftermarketDeviceInstance
       .connect(admin)
       .claimAftermarketDeviceSign(
@@ -694,7 +683,7 @@ describe('VehicleId', async function () {
       it('Should revert if caller is not the token owner', async () => {
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleIdInstance.connect(user1).burn(2),
@@ -729,7 +718,7 @@ describe('VehicleId', async function () {
           _primaryType: 'MintSyntheticDeviceSign',
           _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
-            integrationNode: '1',
+            connectionId: C.CONNECTION_ID_1,
             vehicleNode: '1',
           },
         });
@@ -738,12 +727,12 @@ describe('VehicleId', async function () {
           _primaryType: 'MintSyntheticDeviceSign',
           _verifyingContract: await syntheticDeviceInstance.getAddress(),
           message: {
-            integrationNode: '1',
+            connectionId: C.CONNECTION_ID_1,
             vehicleNode: '1',
           },
         });
         const localMintSdInput = {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
           syntheticDeviceSig: mintSyntheticDeviceSig1,
           vehicleOwnerSig: localMintVehicleOwnerSig,

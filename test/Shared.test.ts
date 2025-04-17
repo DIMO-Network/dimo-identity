@@ -51,7 +51,7 @@ describe('Shared', function () {
 
     // Deploy MockConnections contract
     const MockConnectionsFactory = await ethers.getContractFactory('MockConnections');
-    mockConnectionsInstance = await MockConnectionsFactory.connect(admin).deploy();
+    mockConnectionsInstance = await MockConnectionsFactory.connect(admin).deploy(C.CONNECTIONS_ERC721_NAME, C.CONNECTIONS_ERC721_SYMBOL);
     MOCK_CONNECTIONS_ADDRESS = await mockConnectionsInstance.getAddress();
 
     await dimoAccessControlInstance
@@ -199,7 +199,7 @@ describe('Shared', function () {
       });
     });
   });
-  
+
   describe('setManufacturerLicense', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {

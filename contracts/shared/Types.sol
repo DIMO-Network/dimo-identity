@@ -30,7 +30,7 @@ struct MintSyntheticDeviceBatchInput {
 }
 
 struct MintSyntheticDeviceInput {
-    uint256 integrationNode; // Parent integration node id
+    uint256 connectionId; // Parent connection id
     uint256 vehicleNode; // Vehicle node id
     bytes syntheticDeviceSig; // Synthetic Device's signature hash
     bytes vehicleOwnerSig; // Vehicle owner signature hash

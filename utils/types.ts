@@ -38,7 +38,7 @@ export type MintSyntheticDeviceBatchInput = {
 };
 
 export type MintSyntheticDeviceInput = {
-  integrationNode: string,
+  connectionId: string,
   vehicleNode: string,
   vehicleOwnerSig: string,
   syntheticDeviceAddr: string,

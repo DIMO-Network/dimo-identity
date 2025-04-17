@@ -10,8 +10,6 @@ import {
   Nodes,
   Manufacturer,
   ManufacturerId,
-  Integration,
-  IntegrationId,
   Vehicle,
   VehicleId,
   SyntheticDevice,
@@ -19,7 +17,8 @@ import {
   Mapper,
   Shared,
   MockDimoToken,
-  MockDimoCredit
+  MockDimoCredit,
+  MockConnections
 } from '../../typechain-types';
 import {
   initialize,
@@ -43,15 +42,14 @@ describe('SyntheticDevice', function () {
   let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
   let manufacturerInstance: Manufacturer;
-  let integrationInstance: Integration;
   let vehicleInstance: Vehicle;
   let syntheticDeviceInstance: SyntheticDevice;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockConnectionsInstance: MockConnections;
   let manufacturerIdInstance: ManufacturerId;
-  let integrationIdInstance: IntegrationId;
   let vehicleIdInstance: VehicleId;
   let sdIdInstance: SyntheticDeviceId;
 
@@ -60,7 +58,7 @@ describe('SyntheticDevice', function () {
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
-  let integrationOwner1: HardhatEthersSigner;
+  let connectionOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
   let sdAddress1: HardhatEthersSigner;
@@ -73,7 +71,7 @@ describe('SyntheticDevice', function () {
       admin,
       nonAdmin,
       manufacturer1,
-      integrationOwner1,
+      connectionOwner1,
       user1,
       user2,
       sdAddress1,
@@ -89,7 +87,6 @@ describe('SyntheticDevice', function () {
         'DimoAccessControl',
         'Nodes',
         'Manufacturer',
-        'Integration',
         'Vehicle',
         'SyntheticDevice',
         'Mapper',
@@ -97,7 +94,6 @@ describe('SyntheticDevice', function () {
       ],
       nfts: [
         'ManufacturerId',
-        'IntegrationId',
         'VehicleId',
         'SyntheticDeviceId',
       ],
@@ -110,13 +106,11 @@ describe('SyntheticDevice', function () {
     dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
     manufacturerInstance = deployments.Manufacturer;
-    integrationInstance = deployments.Integration;
     vehicleInstance = deployments.Vehicle;
     syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
     manufacturerIdInstance = deployments.ManufacturerId;
-    integrationIdInstance = deployments.IntegrationId;
     vehicleIdInstance = deployments.VehicleId;
     sdIdInstance = deployments.SyntheticDeviceId;
 
@@ -136,13 +130,18 @@ describe('SyntheticDevice', function () {
     );
     mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
 
+    // Deploy MockConnections contract
+    const MockConnectionsFactory = await ethers.getContractFactory(
+      'MockConnections'
+    );
+    mockConnectionsInstance = await MockConnectionsFactory
+      .connect(admin)
+      .deploy(C.CONNECTIONS_ERC721_NAME, C.CONNECTIONS_ERC721_SYMBOL);
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
     // Grant NFT minter roles to DIMO Registry contract
     await manufacturerIdInstance
-      .connect(admin)
-      .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
-    await integrationIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
     await vehicleIdInstance
@@ -159,9 +158,6 @@ describe('SyntheticDevice', function () {
     await manufacturerInstance
       .connect(admin)
       .setManufacturerIdProxyAddress(await manufacturerIdInstance.getAddress());
-    await integrationInstance
-      .connect(admin)
-      .setIntegrationIdProxyAddress(await integrationIdInstance.getAddress());
     await vehicleInstance
       .connect(admin)
       .setVehicleIdProxyAddress(await vehicleIdInstance.getAddress());
@@ -195,6 +191,9 @@ describe('SyntheticDevice', function () {
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setConnections(await mockConnectionsInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -211,14 +210,6 @@ describe('SyntheticDevice', function () {
     await manufacturerInstance
       .connect(admin)
       .addManufacturerAttribute(C.mockManufacturerAttribute2);
-
-    // Whitelist Integration attributes
-    await integrationInstance
-      .connect(admin)
-      .addIntegrationAttribute(C.mockIntegrationAttribute1);
-    await integrationInstance
-      .connect(admin)
-      .addIntegrationAttribute(C.mockIntegrationAttribute2);
 
     // Whitelist Vehicle attributes
     await vehicleInstance
@@ -245,14 +236,8 @@ describe('SyntheticDevice', function () {
         C.mockManufacturerAttributeInfoPairs,
       );
 
-    // Mint Integration Node
-    await integrationInstance
-      .connect(admin)
-      .mintIntegration(
-        integrationOwner1.address,
-        C.mockIntegrationNames[0],
-        C.mockIntegrationAttributeInfoPairs,
-      );
+    // TODO Mint connections
+    await mockConnectionsInstance.mint(connectionOwner1.address, C.CONNECTION_NAME_1);
 
     // Setting DimoRegistry address in the AftermarketDeviceId
     await sdIdInstance
@@ -261,10 +246,10 @@ describe('SyntheticDevice', function () {
 
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
   });
 
   beforeEach(async () => {
@@ -395,13 +380,13 @@ describe('SyntheticDevice', function () {
         await expect(
           syntheticDeviceInstance
             .connect(nonAdmin)
-            .mintSyntheticDeviceBatch(1, correctMintInput),
+            .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput),
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_SD_ROLE
           }`,
         );
       });
-      it('Should revert if parent node is not an integration node', async () => {
+      it('Should revert if parent node is not a connection ID', async () => {
         await expect(
           syntheticDeviceInstance
             .connect(admin)
@@ -419,7 +404,7 @@ describe('SyntheticDevice', function () {
         await expect(
           syntheticDeviceInstance
             .connect(admin)
-            .mintSyntheticDeviceBatch(1, incorrectMintInput),
+            .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, incorrectMintInput),
         )
           .to.be.revertedWithCustomError(syntheticDeviceInstance, 'InvalidNode')
           .withArgs(await vehicleIdInstance.getAddress(), 99);
@@ -429,15 +414,15 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
           .connect(admin)
-          .mintSyntheticDeviceBatch(1, correctMintInput);
+          .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput);
 
         await expect(
           syntheticDeviceInstance
             .connect(admin)
-            .mintSyntheticDeviceBatch(1, incorrectMintInput),
+            .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, incorrectMintInput),
         )
           .to.be.revertedWithCustomError(
             syntheticDeviceInstance,
@@ -452,7 +437,7 @@ describe('SyntheticDevice', function () {
         await expect(
           syntheticDeviceInstance
             .connect(admin)
-            .mintSyntheticDeviceBatch(1, incorrectMintInput),
+            .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, incorrectMintInput),
         )
           .to.be.revertedWithCustomError(
             syntheticDeviceInstance,
@@ -467,12 +452,12 @@ describe('SyntheticDevice', function () {
 
         await syntheticDeviceInstance
           .connect(admin)
-          .mintSyntheticDeviceBatch(1, correctMintInput);
+          .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput);
 
         await expect(
           syntheticDeviceInstance
             .connect(admin)
-            .mintSyntheticDeviceBatch(1, incorrectMintInput),
+            .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, incorrectMintInput),
         )
           .to.be.revertedWithCustomError(
             syntheticDeviceInstance,
@@ -486,26 +471,26 @@ describe('SyntheticDevice', function () {
       it('Should correctly set parent node', async () => {
         await syntheticDeviceInstance
           .connect(admin)
-          .mintSyntheticDeviceBatch(1, correctMintInput);
+          .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput);
 
         const parentNode = await nodesInstance.getParentNode(
           await sdIdInstance.getAddress(),
           1,
         );
 
-        expect(parentNode).to.be.equal(1);
+        expect(parentNode).to.be.equal(C.CONNECTION_ID_1);
       });
       it('Should correctly set node owner', async () => {
         await syntheticDeviceInstance
           .connect(admin)
-          .mintSyntheticDeviceBatch(1, correctMintInput);
+          .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput);
 
         expect(await sdIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should correctly set device address', async () => {
         await syntheticDeviceInstance
           .connect(admin)
-          .mintSyntheticDeviceBatch(1, correctMintInput);
+          .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput);
 
         const id = await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
           sdAddress1.address,
@@ -516,7 +501,7 @@ describe('SyntheticDevice', function () {
       it('Should correctly set infos', async () => {
         await syntheticDeviceInstance
           .connect(admin)
-          .mintSyntheticDeviceBatch(1, correctMintInput);
+          .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput);
 
         expect(
           await nodesInstance.getInfo(
@@ -536,7 +521,7 @@ describe('SyntheticDevice', function () {
       it('Should correctly map the synthetic device to the vehicle', async () => {
         await syntheticDeviceInstance
           .connect(admin)
-          .mintSyntheticDeviceBatch(1, correctMintInput);
+          .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput);
 
         expect(
           await mapperInstance.getNodeLink(
@@ -549,7 +534,7 @@ describe('SyntheticDevice', function () {
       it('Should correctly map the vehicle to the synthetic device', async () => {
         await syntheticDeviceInstance
           .connect(admin)
-          .mintSyntheticDeviceBatch(1, correctMintInput);
+          .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput);
 
         expect(
           await mapperInstance.getNodeLink(
@@ -566,16 +551,16 @@ describe('SyntheticDevice', function () {
         await expect(
           syntheticDeviceInstance
             .connect(admin)
-            .mintSyntheticDeviceBatch(1, correctMintInput),
+            .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput),
         )
           .to.emit(syntheticDeviceInstance, 'SyntheticDeviceNodeMinted')
-          .withArgs(1, 1, 1, sdAddress1.address, user1.address);
+          .withArgs(C.CONNECTION_ID_1, 1, 1, sdAddress1.address, user1.address);
       });
       it('Should emit SyntheticDeviceAttributeSet events with correct params', async () => {
         await expect(
           syntheticDeviceInstance
             .connect(admin)
-            .mintSyntheticDeviceBatch(1, correctMintInput),
+            .mintSyntheticDeviceBatch(C.CONNECTION_ID_1, correctMintInput),
         )
           .to.emit(syntheticDeviceInstance, 'SyntheticDeviceAttributeSet')
           .withArgs(
@@ -617,7 +602,7 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
@@ -626,12 +611,12 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
       correctMintInput = {
-        integrationNode: '1',
+        connectionId: C.CONNECTION_ID_1,
         vehicleNode: '1',
         syntheticDeviceSig: mintSyntheticDeviceSig1,
         vehicleOwnerSig: mintVehicleOwnerSig1,
@@ -655,8 +640,8 @@ describe('SyntheticDevice', function () {
           }`,
         );
       });
-      it('Should revert if parent node is not an integration node', async () => {
-        incorrectMintInput.integrationNode = '99';
+      it('Should revert if parent node is not a connection ID', async () => {
+        incorrectMintInput.connectionId = '99';
 
         await expect(
           syntheticDeviceInstance
@@ -685,7 +670,7 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
           .connect(admin)
           .mintSyntheticDeviceSign(correctMintInput);
@@ -706,7 +691,7 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           syntheticDeviceInstance
@@ -762,7 +747,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '1',
               },
             });
@@ -784,7 +769,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '1',
               },
             });
@@ -806,7 +791,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '1',
               },
             });
@@ -828,7 +813,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '1',
               },
             });
@@ -843,13 +828,13 @@ describe('SyntheticDevice', function () {
               'InvalidSdSignature',
             );
           });
-          it('Should revert if integration node is incorrect', async () => {
+          it('Should revert if connection ID is incorrect', async () => {
             const invalidSignature = await signMessage({
               _signer: sdAddress1,
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '99',
+                connectionId: '99',
                 vehicleNode: '1',
               },
             });
@@ -870,7 +855,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '2',
               },
             });
@@ -895,7 +880,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '1',
               },
             });
@@ -917,7 +902,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '1',
               },
             });
@@ -939,7 +924,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '1',
               },
             });
@@ -961,7 +946,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '1',
               },
             });
@@ -976,13 +961,13 @@ describe('SyntheticDevice', function () {
               'InvalidOwnerSignature',
             );
           });
-          it('Should revert if integration node is incorrect', async () => {
+          it('Should revert if connection ID is incorrect', async () => {
             const invalidSignature = await signMessage({
               _signer: user1,
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '99',
+                connectionId: '99',
                 vehicleNode: '1',
               },
             });
@@ -1003,7 +988,7 @@ describe('SyntheticDevice', function () {
               _primaryType: 'MintSyntheticDeviceSign',
               _verifyingContract: await syntheticDeviceInstance.getAddress(),
               message: {
-                integrationNode: '1',
+                connectionId: C.CONNECTION_ID_1,
                 vehicleNode: '2',
               },
             });
@@ -1033,7 +1018,7 @@ describe('SyntheticDevice', function () {
           1,
         );
 
-        expect(parentNode).to.be.equal(1);
+        expect(parentNode).to.be.equal(C.CONNECTION_ID_1);
       });
       it('Should correctly set node owner', async () => {
         await syntheticDeviceInstance
@@ -1109,7 +1094,7 @@ describe('SyntheticDevice', function () {
             .mintSyntheticDeviceSign(correctMintInput),
         )
           .to.emit(syntheticDeviceInstance, 'SyntheticDeviceNodeMinted')
-          .withArgs(1, 1, 1, sdAddress1.address, user1.address);
+          .withArgs(C.CONNECTION_ID_1, 1, 1, sdAddress1.address, user1.address);
       });
       it('Should emit SyntheticDeviceAttributeSet events with correct params', async () => {
         await expect(
@@ -1126,7 +1111,7 @@ describe('SyntheticDevice', function () {
       });
       it('Should not emit SyntheticDeviceAttributeSet event if attrInfoPairsDevice is empty', async () => {
         correctMintInput = {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
           syntheticDeviceSig: mintSyntheticDeviceSig1,
           vehicleOwnerSig: mintVehicleOwnerSig1,
@@ -1158,7 +1143,7 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
@@ -1167,7 +1152,7 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
@@ -1176,7 +1161,7 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '2',
         },
       });
@@ -1185,12 +1170,12 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '2',
         },
       });
       mintInput1 = {
-        integrationNode: '1',
+        connectionId: C.CONNECTION_ID_1,
         vehicleNode: '1',
         syntheticDeviceSig: mintSyntheticDeviceSig1,
         vehicleOwnerSig: mintVehicleOwnerSig1,
@@ -1198,7 +1183,7 @@ describe('SyntheticDevice', function () {
         attrInfoPairs: C.mockSyntheticDeviceAttributeInfoPairs,
       };
       mintInput2 = {
-        integrationNode: '1',
+        connectionId: C.CONNECTION_ID_1,
         vehicleNode: '2',
         syntheticDeviceSig: mintSyntheticDeviceSig2,
         vehicleOwnerSig: mintVehicleOwnerSig2,
@@ -1264,7 +1249,7 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
           .connect(admin)
           .mintSyntheticDeviceSign(mintInput2);
@@ -1293,7 +1278,7 @@ describe('SyntheticDevice', function () {
 
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
           .connect(admin)
           .mintSyntheticDeviceSign(mintInput2);
@@ -1555,7 +1540,7 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
@@ -1564,12 +1549,12 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
       mintInput = {
-        integrationNode: '1',
+        connectionId: C.CONNECTION_ID_1,
         vehicleNode: '1',
         syntheticDeviceSig: mintSyntheticDeviceSig1,
         vehicleOwnerSig: mintVehicleOwnerSig1,
@@ -1702,7 +1687,7 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
@@ -1711,12 +1696,12 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
       mintInput = {
-        integrationNode: '1',
+        connectionId: C.CONNECTION_ID_1,
         vehicleNode: '1',
         syntheticDeviceSig: mintSyntheticDeviceSig1,
         vehicleOwnerSig: mintVehicleOwnerSig1,
@@ -1758,7 +1743,7 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
@@ -1767,12 +1752,12 @@ describe('SyntheticDevice', function () {
         _primaryType: 'MintSyntheticDeviceSign',
         _verifyingContract: await syntheticDeviceInstance.getAddress(),
         message: {
-          integrationNode: '1',
+          connectionId: C.CONNECTION_ID_1,
           vehicleNode: '1',
         },
       });
       mintInput = {
-        integrationNode: '1',
+        connectionId: C.CONNECTION_ID_1,
         vehicleNode: '1',
         syntheticDeviceSig: mintSyntheticDeviceSig1,
         vehicleOwnerSig: mintVehicleOwnerSig1,

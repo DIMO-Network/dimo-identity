@@ -59,7 +59,7 @@
     ],
     "MintVehicleAndSdSign": [
         {
-            "name": "integrationNode",
+            "name": "connectionId",
             "type": "uint256"
         }
     ],

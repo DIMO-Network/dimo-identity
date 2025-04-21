@@ -38,7 +38,7 @@ export type MintSyntheticDeviceBatchInput = {
 };
 
 export type MintSyntheticDeviceInput = {
-  integrationNode: string,
+  connectionId: string,
   vehicleNode: string,
   vehicleOwnerSig: string,
   syntheticDeviceAddr: string,
@@ -50,7 +50,7 @@ export type MintVehicleAndSdInput = {
   manufacturerNode: string,
   owner: string,
   attrInfoPairsVehicle: AttributeInfoPair[],
-  integrationNode: string,
+  connectionId: string,
   vehicleOwnerSig: string,
   syntheticDeviceSig: string,
   syntheticDeviceAddr: string,
@@ -80,7 +80,7 @@ export type MintVehicleAndSdWithDdInput = {
   owner: string,
   deviceDefinitionId: string,
   attrInfoPairsVehicle: AttributeInfoPair[],
-  integrationNode: string,
+  connectionId: string,
   vehicleOwnerSig: string,
   syntheticDeviceSig: string,
   syntheticDeviceAddr: string,

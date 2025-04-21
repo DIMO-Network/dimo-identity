@@ -16,6 +16,7 @@ contract Shared is AccessControlInternal {
     event DimoTokenSet(address indexed dimoToken);
     event DimoCreditSet(address indexed dimoCredit);
     event ManufacturerLicenseSet(address indexed manufacturerLicense);
+    event ConnectionsSet(address indexed connections);
 
     /**
      * @notice Sets the foundation address
@@ -63,6 +64,13 @@ contract Shared is AccessControlInternal {
         emit ManufacturerLicenseSet(manufacturerLicense);
     }
 
+    // TODO Documentation
+    function setConnections(address connections) external onlyRole(ADMIN_ROLE) {
+        SharedStorage.getStorage().connections = connections;
+
+        emit ConnectionsSet(connections);
+    }
+
     /**
      * @notice Gets the Foundation address
      */
@@ -93,5 +101,12 @@ contract Shared is AccessControlInternal {
         returns (address manufacturerLicense)
     {
         manufacturerLicense = SharedStorage.getStorage().manufacturerLicense;
+    }
+
+    /**
+     * @notice Gets the Connections address
+     */
+    function getConnections() external view returns (address connections) {
+        connections = SharedStorage.getStorage().connections;
     }
 }

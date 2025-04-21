@@ -8,10 +8,10 @@ import "../interfaces/INFT.sol";
 import "../Eip712/Eip712CheckerInternal.sol";
 import "../libraries/NodesStorage.sol";
 import "../libraries/nodes/ManufacturerStorage.sol";
-import "../libraries/nodes/IntegrationStorage.sol";
 import "../libraries/nodes/VehicleStorage.sol";
 import "../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../libraries/MapperStorage.sol";
+import "../libraries/SharedStorage.sol";
 
 import {MINT_VEHICLE_OPERATION} from "../shared/Operations.sol";
 import "../shared/Roles.sol";
@@ -27,7 +27,7 @@ contract MultipleMinter is
     SyntheticDeviceInternal
 {
     bytes32 private constant MINT_VEHICLE_SD_TYPEHASH =
-        keccak256("MintVehicleAndSdSign(uint256 integrationNode)");
+        keccak256("MintVehicleAndSdSign(uint256 connectionId)");
 
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
@@ -37,7 +37,7 @@ contract MultipleMinter is
      *        - manufacturerNode: Parent manufacturer node id of the vehicle
      *        - owner: The new nodes owner
      *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
-     *        - integrationNode: Parent integration node id of the synthetic device
+     *        - connectionId: Parent connection id of the synthetic device
      *        - vehicleOwnerSig: Vehicle owner signature hash
      *        - syntheticDeviceSig: Synthetic Device's signature hash
      *        - syntheticDeviceAddr: Address associated with the synthetic device
@@ -57,10 +57,10 @@ contract MultipleMinter is
         address sdIdProxyAddress = sds.idProxyAddress;
 
         if (
-            !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
-                data.integrationNode
+            !INFT(SharedStorage.getStorage().connections).exists(
+                data.connectionId
             )
-        ) revert InvalidParentNode(data.integrationNode);
+        ) revert InvalidParentNode(data.connectionId);
         if (
             !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
                 data.manufacturerNode
@@ -70,7 +70,7 @@ contract MultipleMinter is
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
         bytes32 message = keccak256(
-            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.integrationNode)
+            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.connectionId)
         );
 
         if (
@@ -120,7 +120,7 @@ contract MultipleMinter is
         uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);
 
         emit SyntheticDeviceNodeMinted(
-            data.integrationNode,
+            data.connectionId,
             newTokenIdDevice,
             newTokenIdVehicle,
             data.syntheticDeviceAddr,
@@ -136,7 +136,7 @@ contract MultipleMinter is
             .manufacturerNode;
 
         ns.nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
-            .integrationNode;
+            .connectionId;
 
         ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
             newTokenIdVehicle
@@ -160,7 +160,7 @@ contract MultipleMinter is
      *  owner -> The new nodes owner
      *  deviceDefinitionId -> The Device Definition Id
      *  attrInfoPairsVehicle -> List of attribute-info pairs to be added of the vehicle
-     *  integrationNode -> Parent integration node id of the synthetic device
+     *  connectionId -> Parent connection id of the synthetic device
      *  vehicleOwnerSig -> Vehicle owner signature hash
      *  syntheticDeviceSig -> Synthetic Device's signature hash
      *  syntheticDeviceAddr -> Address associated with the synthetic device
@@ -178,10 +178,10 @@ contract MultipleMinter is
         address sdIdProxyAddress = sds.idProxyAddress;
 
         if (
-            !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
-                data.integrationNode
+            !INFT(SharedStorage.getStorage().connections).exists(
+                data.connectionId
             )
-        ) revert InvalidParentNode(data.integrationNode);
+        ) revert InvalidParentNode(data.connectionId);
         if (
             !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
                 data.manufacturerNode
@@ -191,7 +191,7 @@ contract MultipleMinter is
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
         bytes32 message = keccak256(
-            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.integrationNode)
+            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.connectionId)
         );
 
         if (
@@ -243,7 +243,7 @@ contract MultipleMinter is
         uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);
 
         emit SyntheticDeviceNodeMinted(
-            data.integrationNode,
+            data.connectionId,
             newTokenIdDevice,
             newTokenIdVehicle,
             data.syntheticDeviceAddr,
@@ -265,7 +265,7 @@ contract MultipleMinter is
         NodesStorage
         .getStorage()
         .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
-            .integrationNode;
+            .connectionId;
 
         ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
             newTokenIdVehicle
@@ -289,7 +289,7 @@ contract MultipleMinter is
      *        - owner: The new nodes owner
      *        - deviceDefinitionId: The Device Definition Id
      *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
-     *        - integrationNode: Parent integration node id of the synthetic device
+     *        - connectionId: Parent connection id of the synthetic device
      *        - vehicleOwnerSig: Vehicle owner signature hash
      *        - syntheticDeviceSig: Synthetic Device's signature hash
      *        - syntheticDeviceAddr: Address associated with the synthetic device
@@ -312,10 +312,10 @@ contract MultipleMinter is
         address sdIdProxyAddress = sds.idProxyAddress;
 
         if (
-            !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
-                data.integrationNode
+            !INFT(SharedStorage.getStorage().connections).exists(
+                data.connectionId
             )
-        ) revert InvalidParentNode(data.integrationNode);
+        ) revert InvalidParentNode(data.connectionId);
         if (
             !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
                 data.manufacturerNode
@@ -325,7 +325,7 @@ contract MultipleMinter is
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
         bytes32 message = keccak256(
-            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.integrationNode)
+            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.connectionId)
         );
 
         if (
@@ -377,7 +377,7 @@ contract MultipleMinter is
         uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);
 
         emit SyntheticDeviceNodeMinted(
-            data.integrationNode,
+            data.connectionId,
             newTokenIdDevice,
             newTokenIdVehicle,
             data.syntheticDeviceAddr,
@@ -399,7 +399,7 @@ contract MultipleMinter is
         NodesStorage
         .getStorage()
         .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
-            .integrationNode;
+            .connectionId;
 
         MapperStorage.getStorage().nodeLinks[vehicleIdProxyAddress][
             sdIdProxyAddress
@@ -424,7 +424,7 @@ contract MultipleMinter is
      *        - owner: The new nodes owner
      *        - deviceDefinitionId: The Device Definition Id
      *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
-     *        - integrationNode: Parent integration node id of the synthetic device
+     *        - connectionId: Parent connection id of the synthetic device
      *        - vehicleOwnerSig: Vehicle owner signature hash
      *        - syntheticDeviceSig: Synthetic Device's signature hash
      *        - syntheticDeviceAddr: Address associated with the synthetic device
@@ -444,10 +444,10 @@ contract MultipleMinter is
 
         for (uint256 i = 0; i < data.length; i++) {
             if (
-                !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
-                    data[i].integrationNode
+                !INFT(SharedStorage.getStorage().connections).exists(
+                    data[i].connectionId
                 )
-            ) revert InvalidParentNode(data[i].integrationNode);
+            ) revert InvalidParentNode(data[i].connectionId);
             if (
                 !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
                     data[i].manufacturerNode
@@ -457,7 +457,7 @@ contract MultipleMinter is
                 revert DeviceAlreadyRegistered(data[i].syntheticDeviceAddr);
 
             bytes32 message = keccak256(
-                abi.encode(MINT_VEHICLE_SD_TYPEHASH, data[i].integrationNode)
+                abi.encode(MINT_VEHICLE_SD_TYPEHASH, data[i].connectionId)
             );
 
             if (
@@ -511,7 +511,7 @@ contract MultipleMinter is
             );
 
             emit SyntheticDeviceNodeMinted(
-                data[i].integrationNode,
+                data[i].connectionId,
                 newTokenIdDevice,
                 newTokenIdVehicle,
                 data[i].syntheticDeviceAddr,
@@ -535,7 +535,7 @@ contract MultipleMinter is
             NodesStorage
             .getStorage()
             .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data[i]
-                .integrationNode;
+                .connectionId;
 
             MapperStorage.getStorage().nodeLinks[vehicleIdProxyAddress][
                 sdIdProxyAddress

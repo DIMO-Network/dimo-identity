@@ -19,7 +19,7 @@ import {
   DimoForwarder,
   MockDimoToken,
   MockDimoCredit,
-  MockStake,
+  MockManufacturerLicense,
   MockSacd
 } from '../typechain-types';
 import {
@@ -46,7 +46,7 @@ describe('DimoForwarder', async function () {
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
-  let mockStakeInstance: MockStake;
+  let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockSacdInstance: MockSacd;
   let manufacturerIdInstance: ManufacturerId;
@@ -134,9 +134,9 @@ describe('DimoForwarder', async function () {
     );
     mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
 
-    // Deploy MockStake contract
-    const MockStakeFactory = await ethers.getContractFactory('MockStake');
-    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+    // Deploy MockManufacturerLicense contract
+    const MockManufacturerLicenseFactory = await ethers.getContractFactory('MockManufacturerLicense');
+    mockManufacturerLicenseInstance = await MockManufacturerLicenseFactory.connect(admin).deploy();
 
     // Deploy MockSacd contract
     const MockSacdFactory = await ethers.getContractFactory('MockSacd');
@@ -194,7 +194,7 @@ describe('DimoForwarder', async function () {
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
     await sharedInstance
       .connect(admin)
-      .setManufacturerLicense(await mockStakeInstance.getAddress());
+      .setManufacturerLicense(await mockManufacturerLicenseInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -237,7 +237,7 @@ describe('DimoForwarder', async function () {
         C.mockManufacturerAttributeInfoPairs,
       );
 
-    await mockStakeInstance.setLicenseBalance(manufacturer1.address, 1);
+    await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
 
     // Grant Transferer role to DIMO Registry
     await adIdInstance

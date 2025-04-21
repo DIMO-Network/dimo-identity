@@ -19,7 +19,7 @@ import {
   Shared,
   MockDimoToken,
   MockDimoCredit,
-  MockStake,
+  MockManufacturerLicense,
 } from '../../typechain-types';
 import {
   initialize,
@@ -49,7 +49,7 @@ describe('AftermarketDevice', function () {
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
-  let mockStakeInstance: MockStake;
+  let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
@@ -154,9 +154,9 @@ describe('AftermarketDevice', function () {
     );
     mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
 
-    // Deploy MockStake contract
-    const MockStakeFactory = await ethers.getContractFactory('MockStake');
-    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+    // Deploy MockManufacturerLicense contract
+    const MockManufacturerLicenseFactory = await ethers.getContractFactory('MockManufacturerLicense');
+    mockManufacturerLicenseInstance = await MockManufacturerLicenseFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -216,7 +216,7 @@ describe('AftermarketDevice', function () {
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
     await sharedInstance
       .connect(admin)
-      .setManufacturerLicense(await mockStakeInstance.getAddress());
+      .setManufacturerLicense(await mockManufacturerLicenseInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -259,7 +259,7 @@ describe('AftermarketDevice', function () {
         C.mockManufacturerAttributeInfoPairs,
       );
 
-    await mockStakeInstance.setLicenseBalance(manufacturer1.address, 1);
+    await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
 
     // Grant Transferer role to DIMO Registry
     await adIdInstance
@@ -491,7 +491,7 @@ describe('AftermarketDevice', function () {
             .withArgs(manufacturer2.address);
         });
         it('Should revert if manufacturer does not have a license', async () => {
-          await mockStakeInstance.setLicenseBalance(manufacturer1.address, 0);
+          await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 0);
 
           await expect(
             aftermarketDeviceInstance
@@ -832,7 +832,7 @@ describe('AftermarketDevice', function () {
           );
         });
         it('Should revert if manufacturer does not have a license', async () => {
-          await mockStakeInstance.setLicenseBalance(manufacturer1.address, 0);
+          await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 0);
 
           await expect(
             aftermarketDeviceInstance

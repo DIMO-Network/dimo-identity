@@ -48,3 +48,22 @@ export async function getGasPriceWithSleep(
 }
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Converts a string to uint256 representation, similar to Solidity's uint256(bytes32(bytes(string)))
+ * @param str The string to convert
+ * @returns The uint256 representation as a string
+ */
+export function stringToUint256(str: string): string {
+  // Convert string to bytes
+  const strBytes = ethers.toUtf8Bytes(str);
+  
+  // Pad to 32 bytes (bytes32) with zeros
+  const paddedBytes = ethers.zeroPadBytes(strBytes, 32);
+  
+  // Convert to BigInt
+  const uint256Value = BigInt(ethers.hexlify(paddedBytes));
+  
+  // Return as string
+  return uint256Value.toString();
+}

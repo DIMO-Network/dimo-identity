@@ -283,7 +283,7 @@ describe('Vehicle', function () {
         C.mockManufacturerAttributeInfoPairs
       );
 
-    // Mint Integration Node
+    // Mint Connection ID
     await mockConnectionsInstance
       .mint(
         connectionOwner1.address,

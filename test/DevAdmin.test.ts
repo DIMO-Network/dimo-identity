@@ -444,7 +444,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_TRANSFER_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_TRANSFER_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -473,16 +473,23 @@ describe('DevAdmin', function () {
 
         expect(await adIdInstance.ownerOf(1)).to.be.equal(user2.address);
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_TRANSFER_ROLE);
+        await expect(devAdminInstance
+          .connect(admin)
+          .transferAftermarketDeviceOwnership(1, user2.address)
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceTransferredDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceTransferred event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .transferAftermarketDeviceOwnership(1, user2.address),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceTransferredDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceTransferred')
           .withArgs(1, user1.address, user2.address);
       });
     });
@@ -541,10 +548,10 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -564,7 +571,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_UNCLAIM_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_UNCLAIM_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).unclaimAftermarketDeviceNode([1]),
         ).to.be.rejectedWith(
@@ -639,16 +646,24 @@ describe('DevAdmin', function () {
             ),
         ).to.not.be.rejected;
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_UNCLAIM_ROLE);
+        
+        await expect(devAdminInstance
+          .connect(admin)
+          .unclaimAftermarketDeviceNode([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnclaimedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnclaimed event with correct params', async () => {
         await expect(
           devAdminInstance.connect(admin).unclaimAftermarketDeviceNode([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimed')
           .withArgs(1)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnclaimed')
           .withArgs(2);
       });
     });
@@ -727,10 +742,10 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -756,7 +771,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_UNPAIR_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_UNPAIR_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -814,18 +829,26 @@ describe('DevAdmin', function () {
           await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 2),
         ).to.be.equal(0);
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_UNPAIR_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .unpairAftermarketDeviceByDeviceNode([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .unpairAftermarketDeviceByDeviceNode([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(2, 2, user1.address);
       });
     });
@@ -904,10 +927,10 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -933,7 +956,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_UNPAIR_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_UNPAIR_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -991,18 +1014,26 @@ describe('DevAdmin', function () {
           await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 2),
         ).to.be.equal(0);
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_UNPAIR_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .unpairAftermarketDeviceByVehicleNode([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .unpairAftermarketDeviceByVehicleNode([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(2, 2, user1.address);
       });
     });
@@ -1016,7 +1047,7 @@ describe('DevAdmin', function () {
     ];
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_RENAME_MANUFACTURERS_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_RENAME_MANUFACTURERS_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -1069,6 +1100,14 @@ describe('DevAdmin', function () {
           expect(nameReturned).to.equal(newIdManufacturerNames[i].name);
         }
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_RENAME_MANUFACTURERS_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .renameManufacturers(newIdManufacturerNames)
+        ).to.not.be.rejected;
+      });
     });
   });
 
@@ -1076,14 +1115,14 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_VEHICLE_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_VEHICLE_BURN_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).adminBurnVehicles([1, 2]),
         ).to.be.rejectedWith(
@@ -1293,25 +1332,33 @@ describe('DevAdmin', function () {
           previousVersion2 + ethers.toBigInt(1),
         );
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_VEHICLE_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnVehicles([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
-      it('Should emit VehicleNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit VehicleNodeBurned event with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnVehicles([1, 2]))
-          .to.emit(devAdminInstance, 'VehicleNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleNodeBurned')
           .withArgs(1, user1.address)
-          .to.emit(devAdminInstance, 'VehicleNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleNodeBurned')
           .withArgs(2, user2.address);
       });
-      it('Should emit VehicleAttributeSetDevAdmin events with correct params', async () => {
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnVehicles([1, 2]))
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(2, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(2, C.mockVehicleAttributeInfoPairs[1].attribute, '');
       });
     });
@@ -1321,14 +1368,14 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_VEHICLE_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_VEHICLE_BURN_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -1545,6 +1592,14 @@ describe('DevAdmin', function () {
             previousVersion2 + ethers.toBigInt(1),
           );
         });
+        it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+          await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_VEHICLE_BURN_ROLE);
+
+          await expect(devAdminInstance
+            .connect(admin)
+            .adminBurnVehiclesAndDeletePairings([1, 2])
+          ).to.not.be.rejected;
+        });
       });
 
       context('Aftermarket Device paired', () => {
@@ -1652,10 +1707,18 @@ describe('DevAdmin', function () {
           ).to.be.equal(0);
         });
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_VEHICLE_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnVehiclesAndDeletePairings([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
         const localClaimOwnerSig = await signMessage({
           _signer: user1,
           _primaryType: 'ClaimAftermarketDeviceSign',
@@ -1718,10 +1781,10 @@ describe('DevAdmin', function () {
             .connect(admin)
             .adminBurnVehiclesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(1, 1, user1.address);
       });
-      it('Should emit SyntheticDeviceNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit SyntheticDeviceNodeBurned event with correct params', async () => {
         const localMintVehicleOwnerSig = await signMessage({
           _signer: user2,
           _primaryType: 'MintSyntheticDeviceSign',
@@ -1758,33 +1821,33 @@ describe('DevAdmin', function () {
             .connect(admin)
             .adminBurnVehiclesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurned')
           .withArgs(1, 2, user2.address);
       });
-      it('Should emit VehicleNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit VehicleNodeBurned event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnVehiclesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'VehicleNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleNodeBurned')
           .withArgs(1, user1.address)
-          .to.emit(devAdminInstance, 'VehicleNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleNodeBurned')
           .withArgs(2, user2.address);
       });
-      it('Should emit VehicleAttributeSetDevAdmin events with correct params', async () => {
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnVehiclesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(1, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(1, C.mockVehicleAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(2, C.mockVehicleAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'VehicleAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'VehicleAttributeSet')
           .withArgs(2, C.mockVehicleAttributeInfoPairs[1].attribute, '');
       });
     });
@@ -1801,7 +1864,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_BURN_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).adminBurnAftermarketDevices([1, 2]),
         ).to.be.rejectedWith(
@@ -1829,7 +1892,7 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await aftermarketDeviceInstance
           .connect(admin)
           .claimAftermarketDeviceBatch([{ aftermarketDeviceNodeId: '1', owner: await user1.address }]);
@@ -1938,25 +2001,33 @@ describe('DevAdmin', function () {
           previousVersion2 + ethers.toBigInt(1),
         );
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnAftermarketDevices([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
-      it('Should emit AftermarketDeviceNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceNodeBurned event with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnAftermarketDevices([1, 2]))
-          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurned')
           .withArgs(1, manufacturer1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurned')
           .withArgs(2, manufacturer1.address);
       });
-      it('Should emit AftermarketDeviceAttributeSetDevAdmin events with correct params', async () => {
+      it('Should emit AftermarketDeviceAttributeSet events with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnAftermarketDevices([1, 2]))
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(1, C.mockAdAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(1, C.mockAdAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(2, C.mockAdAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(2, C.mockAdAttributeInfoPairs[1].attribute, '');
       });
     });
@@ -1973,7 +2044,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_BURN_ROLE', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).adminBurnAftermarketDevicesAndDeletePairings([1, 2]),
         ).to.be.rejectedWith(
@@ -2021,10 +2092,10 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(2, user2.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](2, user2.address, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
 
         await aftermarketDeviceInstance
           .connect(admin)
@@ -2171,6 +2242,14 @@ describe('DevAdmin', function () {
           previousVersion2 + ethers.toBigInt(1),
         );
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnAftermarketDevicesAndDeletePairings([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
@@ -2204,10 +2283,10 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(2, user2.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](2, user2.address, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
 
         await aftermarketDeviceInstance
           .connect(admin)
@@ -2225,33 +2304,33 @@ describe('DevAdmin', function () {
         );
       });
 
-      it('Should emit AftermarketDeviceUnpairedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceUnpaired event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnAftermarketDevicesAndDeletePairings([1, 2]),
         )
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceUnpairedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceUnpaired')
           .withArgs(2, 2, user2.address);
       });
-      it('Should emit AftermarketDeviceNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit AftermarketDeviceNodeBurned event with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnAftermarketDevicesAndDeletePairings([1, 2]))
-          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurned')
           .withArgs(1, user1.address)
-          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceNodeBurned')
           .withArgs(2, user2.address);
       });
       it('Should emit After2arketDeviceAttributeSetDevAdmin events with correct params', async () => {
         await expect(devAdminInstance.connect(admin).adminBurnAftermarketDevicesAndDeletePairings([1, 2]))
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(1, C.mockAdAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(1, C.mockAdAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(2, C.mockAdAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'AftermarketDeviceAttributeSet')
           .withArgs(2, C.mockAdAttributeInfoPairs[1].attribute, '');
       });
     });
@@ -2314,10 +2393,10 @@ describe('DevAdmin', function () {
 
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user2.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
       await syntheticDeviceInstance
         .connect(admin)
@@ -2328,7 +2407,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_SD_BURN_ROLE', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_SD_BURN_ROLE', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2470,33 +2549,41 @@ describe('DevAdmin', function () {
           ),
         ).to.be.equal(0);
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_SD_BURN_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminBurnSyntheticDevicesAndDeletePairings([1, 2])
+        ).to.not.be.rejected;
+      });
     });
 
     context('Events', () => {
-      it('Should emit SyntheticDeviceNodeBurnedDevAdmin event with correct params', async () => {
+      it('Should emit SyntheticDeviceNodeBurned event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnSyntheticDevicesAndDeletePairings([1, 2])
         )
-          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurned')
           .withArgs(1, 1, user1.address)
-          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurnedDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceNodeBurned')
           .withArgs(2, 2, user2.address);
       });
-      it('Should emit SyntheticDeviceAttributeSetDevAdmin events with correct params', async () => {
+      it('Should emit SyntheticDeviceAttributeSet events with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminBurnSyntheticDevicesAndDeletePairings([1, 2])
         )
-          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSet')
           .withArgs(1, C.mockSyntheticDeviceAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSet')
           .withArgs(1, C.mockSyntheticDeviceAttributeInfoPairs[1].attribute, '')
-          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSet')
           .withArgs(2, C.mockSyntheticDeviceAttributeInfoPairs[0].attribute, '')
-          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSetDevAdmin')
+          .to.emit(devAdminInstance, 'SyntheticDeviceAttributeSet')
           .withArgs(2, C.mockSyntheticDeviceAttributeInfoPairs[1].attribute, '');
       });
     });
@@ -2538,7 +2625,7 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -2550,7 +2637,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_AD_PAIR_ROLE role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_AD_PAIR_ROLE role', async () => {
         await expect(
           devAdminInstance.connect(nonAdmin).adminPairAftermarketDevice(1, 1),
         ).to.be.rejectedWith(
@@ -2593,7 +2680,7 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-          .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 2),
@@ -2617,6 +2704,14 @@ describe('DevAdmin', function () {
         expect(
           await mapperInstance.getLink(await vehicleIdInstance.getAddress(), 1),
         ).to.be.equal(1);
+      });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_AD_PAIR_ROLE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminPairAftermarketDevice(1, 1)
+        ).to.not.be.rejected;
       });
     });
 
@@ -2646,7 +2741,7 @@ describe('DevAdmin', function () {
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_CHANGE_PARENT_NODE role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_CHANGE_PARENT_NODE role', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2694,12 +2789,20 @@ describe('DevAdmin', function () {
           expect(await nodesInstance.getParentNode(adProxyAddress, adId)).to.equal(2);
         }
       });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_CHANGE_PARENT_NODE);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminChangeParentNode(2, await adIdInstance.getAddress(), adIdsList)
+        ).to.not.be.rejected;
+      });
     });
   });
 
   describe('adminCacheDimoStreamrEns', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_CACHE_ENS role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_CACHE_ENS role', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2726,7 +2829,7 @@ describe('DevAdmin', function () {
 
   describe('adminRemoveVehicleAttribute', () => {
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_REMOVE_ATTR role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_REMOVE_ATTR role', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2761,20 +2864,20 @@ describe('DevAdmin', function () {
 
   describe('adminSetVehicleDDs', () => {
     const vehicleIdsDdIds = [
-      { vehicleId: '1', deviceDefinitionId: C.mockDdId1 },
+      { vehicleId: '1', deviceDefinitionId: C.mockDdId2 },
       { vehicleId: '2', deviceDefinitionId: C.mockDdId2 }
     ];
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(1, user1.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-        .mintVehicle(2, user2.address, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](2, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
-      it('Should revert if caller does not have DEV_SET_DD role', async () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_SET_DD role', async () => {
         await expect(
           devAdminInstance
             .connect(nonAdmin)
@@ -2801,8 +2904,8 @@ describe('DevAdmin', function () {
         const ddBefore1 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(1);
         const ddBefore2 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(2);
 
-        expect(ddBefore1).to.empty;
-        expect(ddBefore2).to.empty;
+        expect(ddBefore1).to.equal(C.mockDdId1);
+        expect(ddBefore2).to.equal(C.mockDdId1);
 
         await devAdminInstance
           .connect(admin)
@@ -2811,8 +2914,16 @@ describe('DevAdmin', function () {
         const ddAfter1 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(1);
         const ddAfter2 = await vehicleInstance.getDeviceDefinitionIdByVehicleId(2);
 
-        expect(ddAfter1).to.equal(C.mockDdId1);
+        expect(ddAfter1).to.equal(C.mockDdId2);
         expect(ddAfter2).to.equal(C.mockDdId2);
+      });
+      it('Should not revert if caller has DEV_SUPER_ADMIN_ROLE', async () => {
+        await dimoAccessControlInstance.connect(admin).renounceRole(C.DEV_SET_DD);
+
+        await expect(devAdminInstance
+          .connect(admin)
+          .adminSetVehicleDDs(vehicleIdsDdIds)
+        ).to.not.be.rejected;
       });
     });
 
@@ -2824,7 +2935,7 @@ describe('DevAdmin', function () {
             .adminSetVehicleDDs(vehicleIdsDdIds)
         )
           .to.emit(devAdminInstance, 'DeviceDefinitionIdSet')
-          .withArgs(1, C.mockDdId1)
+          .withArgs(1, C.mockDdId2)
           .to.emit(devAdminInstance, 'DeviceDefinitionIdSet')
           .withArgs(2, C.mockDdId2);
       });

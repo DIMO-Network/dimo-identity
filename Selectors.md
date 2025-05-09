@@ -44,21 +44,21 @@
 #### Events
 | Selector | Signature |
 |-|-|
-| 0x000d5c45 | AftermarketDeviceAttributeSetDevAdmin(uint256,string,string) |
-| 0xb33f329d | AftermarketDeviceNodeBurnedDevAdmin(uint256,address) |
+| 0x977fe0dd | AftermarketDeviceAttributeSet(uint256,string,string) |
+| 0xc4d38c0a | AftermarketDeviceNodeBurned(uint256,address) |
 | 0x89ec1328 | AftermarketDevicePaired(uint256,uint256,address) |
-| 0xaabf86a9 | AftermarketDeviceTransferredDevAdmin(uint256,address,address) |
-| 0xd2a3fcd4 | AftermarketDeviceUnclaimedDevAdmin(uint256) |
-| 0x1ba4ec81 | AftermarketDeviceUnpairedDevAdmin(uint256,uint256,address) |
+| 0x1d2e8864 | AftermarketDeviceTransferred(uint256,address,address) |
+| 0x9811dbce | AftermarketDeviceUnclaimed(uint256) |
+| 0xd9135724 | AftermarketDeviceUnpaired(uint256,uint256,address) |
 | 0x11880ae6 | DeviceDefinitionIdSet(uint256,string) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
-| 0x8ad18187 | SyntheticDeviceAttributeSetDevAdmin(uint256,string,string) |
-| 0x81741fdd | SyntheticDeviceNodeBurnedDevAdmin(uint256,uint256,address) |
+| 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
+| 0xe4edc3c1 | SyntheticDeviceNodeBurned(uint256,uint256,address) |
 | 0x9b4bf377 | VehicleAttributeRemoved(string) |
-| 0x1d91e00c | VehicleAttributeSetDevAdmin(uint256,string,string) |
-| 0xb956d027 | VehicleNodeBurnedDevAdmin(uint256,address) |
+| 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
+| 0x7b36384f | VehicleNodeBurned(uint256,address) |
 
 #### Errors
 | Selector | Signature |
@@ -313,8 +313,6 @@
 | 0xf0d1a557 | addVehicleAttribute(string) |
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
-| 0x3da44e56 | mintVehicle(uint256,address,(string,string)[]) |
-| 0x1b1a82c8 | mintVehicleSign(uint256,address,(string,string)[],bytes) |
 | 0x97c95b2a | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string)) |
 | 0xd84baff1 | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[]) |
 | 0x8dca2b8e | mintVehicleWithDeviceDefinitionSign(uint256,address,string,(string,string)[],bytes) |
@@ -425,6 +423,8 @@
 |-|-|
 | 0xfb1a28e8 | mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
 | 0xd23965e3 | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
+| 0x58657dcc | mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
+| 0x7ae7fe4e | mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[]) |
 
 #### Events
 | Selector | Signature |

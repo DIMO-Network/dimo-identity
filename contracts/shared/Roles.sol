@@ -37,6 +37,7 @@ bytes32 constant SET_VEHICLE_INFO_ROLE = keccak256("SET_VEHICLE_INFO_ROLE");
 bytes32 constant MINT_VEHICLE_SD_ROLE = keccak256("MINT_VEHICLE_SD_ROLE");
 
 // Developer roles
+bytes32 constant DEV_SUPER_ADMIN_ROLE = keccak256("DEV_SUPER_ADMIN_ROLE");
 bytes32 constant DEV_AD_TRANSFER_ROLE = keccak256("DEV_AD_TRANSFER_ROLE");
 bytes32 constant DEV_AD_UNCLAIM_ROLE = keccak256("DEV_AD_UNCLAIM_ROLE");
 bytes32 constant DEV_AD_UNPAIR_ROLE = keccak256("DEV_AD_UNPAIR_ROLE");

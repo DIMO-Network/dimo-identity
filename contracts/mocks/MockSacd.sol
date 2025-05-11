@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
+import "../interfaces/ISacdListener.sol";
+
+
 /**
  * @title MockSacd
  * @dev Mocks the SACD contract to be used in tests
@@ -29,6 +32,9 @@ contract MockSacd {
         permissionRecords[asset][tokenId][tokenIdVersion][
             grantee
         ] = PermissionRecord(permissions, expiration, source);
+        try ISacdListener(asset).onSetPermissions(tokenId, grantee, permissions, expiration) {} catch {
+            // Ignore if the asset does not implement onSetPermissions
+        }
     }
 
     function onTransfer(address asset, uint256 tokenId) external {

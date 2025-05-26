@@ -77,7 +77,7 @@ contract Shared is AccessControlInternal {
      * @dev Only an admin can set the SACD contract address
      * @param sacd The SACD contract address
      */
-    function setSACD(address sacd) external onlyRole(ADMIN_ROLE) {
+    function setSacd(address sacd) external onlyRole(ADMIN_ROLE) {
         SharedStorage.getStorage().sacd = sacd;
 
         emit SacdSet(sacd);

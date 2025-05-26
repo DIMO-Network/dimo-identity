@@ -31,6 +31,22 @@ contract MockSacd {
         ] = PermissionRecord(permissions, expiration, source);
     }
 
+    function hasPermission(
+        address asset,
+        uint256 tokenId,
+        address grantee,
+        uint8 permissionIndex
+    ) external view returns (bool) {
+        uint256 tokenIdVersion = tokenIdToVersion[asset][tokenId];
+        PermissionRecord memory pr = permissionRecords[asset][tokenId][
+            tokenIdVersion
+        ][grantee];
+
+        return
+            block.timestamp < pr.expiration &&
+            (pr.permissions >> (2 * permissionIndex)) & 3 == 3;
+    }
+
     function onTransfer(address asset, uint256 tokenId) external {
         tokenIdToVersion[asset][tokenId]++;
     }

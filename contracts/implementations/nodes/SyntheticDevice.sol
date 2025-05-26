@@ -188,11 +188,8 @@ contract SyntheticDevice is
             .idProxyAddress;
         address sdIdProxyAddress = sds.idProxyAddress;
 
-        if (
-            !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
-                data.connectionId
-            )
-        ) revert InvalidParentNode(data.connectionId);
+        if (!INFT(sharedStorage.connections).exists(data.connectionId))
+            revert InvalidParentNode(data.connectionId);
         if (
             !ISacd(sharedStorage.sacd).hasPermission(
                 sharedStorage.connections,

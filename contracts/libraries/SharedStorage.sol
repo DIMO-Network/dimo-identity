@@ -14,7 +14,7 @@ library SharedStorage {
         address dimoCredit;
         address dimoToken;
         address manufacturerLicense;
-        address connections;
+        address connectionsManager;
         // Address of the SACD contract, governing permissions for many NFTs.
         address sacd;
     }

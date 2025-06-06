@@ -285,7 +285,7 @@
             "DimoStreamrNode": "0x3F3ab5A20F704D6e7299EdEE84200fDA5d849BE7",
             "TablelandTables": "0x5c4e6A9e5C1e1BF445A062006faF19EA6c49aFeA",
             "Sacd": "0xEF919b3793deaae1637523d483e3434ae113004E",
-            "Connections": "0x41799E9Dc893722844E771a1C1cAf3BBc2876132"
+            "ConnectionsManager": "0x41799E9Dc893722844E771a1C1cAf3BBc2876132"
         }
     },
     "mumbai": {
@@ -841,7 +841,7 @@
             "DimoStreamrNode": "0x577f22f5369046B7eF09B6b01424fA860533d243",
             "TablelandTables": "0x170fb206132b693e38adFc8727dCfa303546Cec1",
             "Sacd": "0x4E5F9320b1c7cB3DE5ebDD760aD67375B66cF8a3",
-            "Connections": "0x41799E9Dc893722844E771a1C1cAf3BBc2876132"
+            "ConnectionsManager": "0x41799E9Dc893722844E771a1C1cAf3BBc2876132"
         }
     },
     "hardhat": {
@@ -1125,7 +1125,7 @@
             "DimoStreamrNode": "0x0000000000000000000000000000000000000000",
             "TablelandTables": "0x0000000000000000000000000000000000000000",
             "Sacd": "0x0000000000000000000000000000000000000000",
-            "Connections": "0x0000000000000000000000000000000000000000"
+            "ConnectionsManager": "0x0000000000000000000000000000000000000000"
         }
     },
     "localhost": {
@@ -1392,7 +1392,7 @@
             "DimoStreamrNode": "0x0000000000000000000000000000000000000000",
             "TablelandTables": "0x0000000000000000000000000000000000000000",
             "Sacd": "0x0000000000000000000000000000000000000000",
-            "Connections": "0x0000000000000000000000000000000000000000"
+            "ConnectionsManager": "0x0000000000000000000000000000000000000000"
         }
     }
 }

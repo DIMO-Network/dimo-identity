@@ -19,7 +19,7 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockSacd,
-  MockConnections
+  MockConnectionsManager
 } from '../../typechain-types';
 import {
   initialize,
@@ -50,7 +50,7 @@ describe('SyntheticDevice', function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockSacdInstance: MockSacd;
-  let mockConnectionsInstance: MockConnections;
+  let mockConnectionsManagerInstance: MockConnectionsManager;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let sdIdInstance: SyntheticDeviceId;
@@ -136,13 +136,13 @@ describe('SyntheticDevice', function () {
     const MockSacdFactory = await ethers.getContractFactory('MockSacd');
     mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
 
-    // Deploy MockConnections contract
-    const MockConnectionsFactory = await ethers.getContractFactory(
-      'MockConnections'
+    // Deploy MockConnectionsManager contract
+    const MockConnectionsManagerFactory = await ethers.getContractFactory(
+      'MockConnectionsManager'
     );
-    mockConnectionsInstance = await MockConnectionsFactory
+    mockConnectionsManagerInstance = await MockConnectionsManagerFactory
       .connect(admin)
-      .deploy(C.CONNECTIONS_ERC721_NAME, C.CONNECTIONS_ERC721_SYMBOL);
+      .deploy(C.CONNECTIONS_MANAGER_ERC721_NAME, C.CONNECTIONS_MANAGER_ERC721_SYMBOL);
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -199,7 +199,7 @@ describe('SyntheticDevice', function () {
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
     await sharedInstance
       .connect(admin)
-      .setConnections(await mockConnectionsInstance.getAddress());
+      .setConnectionsManager(await mockConnectionsManagerInstance.getAddress());
     await sharedInstance
       .connect(admin)
       .setSacd(await mockSacdInstance.getAddress());
@@ -246,7 +246,7 @@ describe('SyntheticDevice', function () {
       );
 
     // TODO Mint connections
-    await mockConnectionsInstance.mint(connectionOwner1.address, C.CONNECTION_NAME_1);
+    await mockConnectionsManagerInstance.mint(connectionOwner1.address, C.CONNECTION_NAME_1);
 
     // Setting DimoRegistry address in the AftermarketDeviceId
     await sdIdInstance

@@ -3579,7 +3579,7 @@
                 "type": "address"
             }
         ],
-        "name": "ConnectionsSet",
+        "name": "ConnectionsManagerSet",
         "type": "event"
     },
     {
@@ -3649,11 +3649,11 @@
     },
     {
         "inputs": [],
-        "name": "getConnections",
+        "name": "getConnectionsManager",
         "outputs": [
             {
                 "internalType": "address",
-                "name": "connections",
+                "name": "connectionsManager",
                 "type": "address"
             }
         ],
@@ -3729,11 +3729,11 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "connections",
+                "name": "connectionsManager",
                 "type": "address"
             }
         ],
-        "name": "setConnections",
+        "name": "setConnectionsManager",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

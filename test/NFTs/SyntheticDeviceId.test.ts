@@ -1,7 +1,6 @@
 import chai from 'chai';
 import { ethers } from 'hardhat';
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
-import { time } from '@nomicfoundation/hardhat-network-helpers';
 
 import {
   DIMORegistry,
@@ -52,7 +51,6 @@ describe('SyntheticDeviceId', async function () {
   let mockConnectionsInstance: MockConnections;
 
   let DIMO_REGISTRY_ADDRESS: string;
-  let expiresAtDefault: number;
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
@@ -140,13 +138,6 @@ describe('SyntheticDeviceId', async function () {
     await sdIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
-    
-    // Grant synthetic device minting permission
-
-    expiresAtDefault = (await time.latest()) + 31556926; // + 1 year
-    await sharedInstance.connect(admin).setSacd(mockSacdInstance);
-
-    await mockSacdInstance.setPermissions(mockConnectionsInstance, C.CONNECTION_ID_1, admin, 3, expiresAtDefault, '');
 
     // Set NFT Proxies
     await manufacturerInstance

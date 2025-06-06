@@ -15,8 +15,6 @@ library SharedStorage {
         address dimoToken;
         address manufacturerLicense;
         address connections;
-        // Address of the SACD contract, governing permissions for many NFTs.
-        address sacd;
     }
 
     /* solhint-disable no-inline-assembly */

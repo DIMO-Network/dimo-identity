@@ -17,7 +17,6 @@ contract Shared is AccessControlInternal {
     event DimoCreditSet(address indexed dimoCredit);
     event ManufacturerLicenseSet(address indexed manufacturerLicense);
     event ConnectionsSet(address indexed connections);
-    event SacdSet(address indexed sacd);
 
     /**
      * @notice Sets the foundation address
@@ -73,17 +72,6 @@ contract Shared is AccessControlInternal {
     }
 
     /**
-     * @notice Sets the SACD contract address
-     * @dev Only an admin can set the SACD contract address
-     * @param sacd The SACD contract address
-     */
-    function setSacd(address sacd) external onlyRole(ADMIN_ROLE) {
-        SharedStorage.getStorage().sacd = sacd;
-
-        emit SacdSet(sacd);
-    }
-
-    /**
      * @notice Gets the Foundation address
      */
     function getFoundation() external view returns (address foundation) {
@@ -120,12 +108,5 @@ contract Shared is AccessControlInternal {
      */
     function getConnections() external view returns (address connections) {
         connections = SharedStorage.getStorage().connections;
-    }
-
-    /**
-     * @notice Gets the SACD address
-     */
-    function getSacd() external view returns (address sacd) {
-        sacd = SharedStorage.getStorage().sacd;
     }
 }

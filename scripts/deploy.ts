@@ -456,6 +456,14 @@ async function setupRegistry(
   console.log(
     `${instances[networkName].misc.Stake.proxy} set as Manufacturer License contract address`,
   );
+  await (
+    await sharedInstance.setConnectionsManager(
+      instances[networkName].misc.ConnectionsManager,
+    )
+  ).wait();
+  console.log(
+    `${instances[networkName].misc.ConnectionsManager} set as Connections Manager contract address`,
+  );
   console.log('\n----- Shared setup -----');
 
   console.log('\n----- Setting NFT proxies -----\n');

@@ -147,7 +147,7 @@ describe('MultipleMinter', function () {
     // Deploy MockSacd contract
     const MockSacdFactory = await ethers.getContractFactory('MockSacd');
     mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
-    
+
     // Deploy MockConnectionsManager contract
     const MockConnectionsManagerFactory = await ethers.getContractFactory(
       'MockConnectionsManager'
@@ -209,7 +209,7 @@ describe('MultipleMinter', function () {
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
-      await sharedInstance
+    await sharedInstance
       .connect(admin)
       .setConnectionsManager(await mockConnectionsManagerInstance.getAddress());
 
@@ -253,7 +253,7 @@ describe('MultipleMinter', function () {
         C.mockManufacturerNames[0],
         C.mockManufacturerAttributeInfoPairs
       );
-      await manufacturerInstance
+    await manufacturerInstance
       .connect(admin)
       .mintManufacturer(
         manufacturer2.address,
@@ -287,10 +287,10 @@ describe('MultipleMinter', function () {
 
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
   });
 
   beforeEach(async () => {

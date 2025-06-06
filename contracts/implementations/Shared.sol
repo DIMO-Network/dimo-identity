@@ -16,7 +16,7 @@ contract Shared is AccessControlInternal {
     event DimoTokenSet(address indexed dimoToken);
     event DimoCreditSet(address indexed dimoCredit);
     event ManufacturerLicenseSet(address indexed manufacturerLicense);
-    event ConnectionsManagerSet(address indexed connections);
+    event ConnectionsManagerSet(address indexed connectionsManager);
     event SacdSet(address indexed sacd);
 
     /**

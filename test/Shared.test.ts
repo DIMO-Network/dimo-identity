@@ -254,7 +254,7 @@ describe('Shared', function () {
     });
 
     context('State', () => {
-      it('Should correctly return Connections address', async () => {
+      it('Should correctly return ConnectionsManager address', async () => {
         await sharedInstance
           .connect(admin)
           .setConnectionsManager(MOCK_CONNECTIONS_ADDRESS);

@@ -3575,7 +3575,7 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "connections",
+                "name": "connectionsManager",
                 "type": "address"
             }
         ],

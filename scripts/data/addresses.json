@@ -665,7 +665,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0xe15bD8abF720d4148cfbd24b5809A66C0A507166",
+                "address": "0xFAfd8541577afcF8b80928ACf71e3184503c19a3",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
@@ -695,12 +695,14 @@
                 ]
             },
             "Shared": {
-                "address": "0xBBA8892657C9a8156c7AAd79d45128EA5191f224",
+                "address": "0xcd1baf50604D6A3cF182645Ef894e4e1952Ff143",
                 "selectors": [
+                    "0xb0c1d1df",
                     "0xcfe55b7d",
                     "0x77898251",
                     "0xa2bc6cdf",
                     "0x170e4293",
+                    "0x2fee22f4",
                     "0x4fa9ff16",
                     "0x5b6c1979",
                     "0xdb3543f5",
@@ -708,7 +710,7 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x682D3f2492e0C8f36EC6ce13861deBb22f4290e5",
+                "address": "0xce12d0741ed57262e40eAdaA96944D78B514CF9A",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3",

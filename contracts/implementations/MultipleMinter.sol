@@ -57,7 +57,7 @@ contract MultipleMinter is
         address sdIdProxyAddress = sds.idProxyAddress;
 
         if (
-            !INFT(SharedStorage.getStorage().connections).exists(
+            !INFT(SharedStorage.getStorage().connectionsManager).exists(
                 data.connectionId
             )
         ) revert InvalidParentNode(data.connectionId);
@@ -178,7 +178,7 @@ contract MultipleMinter is
         address sdIdProxyAddress = sds.idProxyAddress;
 
         if (
-            !INFT(SharedStorage.getStorage().connections).exists(
+            !INFT(SharedStorage.getStorage().connectionsManager).exists(
                 data.connectionId
             )
         ) revert InvalidParentNode(data.connectionId);
@@ -312,7 +312,7 @@ contract MultipleMinter is
         address sdIdProxyAddress = sds.idProxyAddress;
 
         if (
-            !INFT(SharedStorage.getStorage().connections).exists(
+            !INFT(SharedStorage.getStorage().connectionsManager).exists(
                 data.connectionId
             )
         ) revert InvalidParentNode(data.connectionId);
@@ -444,7 +444,7 @@ contract MultipleMinter is
 
         for (uint256 i = 0; i < data.length; i++) {
             if (
-                !INFT(SharedStorage.getStorage().connections).exists(
+                !INFT(SharedStorage.getStorage().connectionsManager).exists(
                     data[i].connectionId
                 )
             ) revert InvalidParentNode(data[i].connectionId);

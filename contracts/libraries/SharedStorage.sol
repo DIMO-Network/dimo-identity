@@ -14,7 +14,7 @@ library SharedStorage {
         address dimoCredit;
         address dimoToken;
         address manufacturerLicense;
-        address connections;
+        address connectionsManager;
     }
 
     /* solhint-disable no-inline-assembly */

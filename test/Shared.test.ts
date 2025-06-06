@@ -8,7 +8,7 @@ import type {
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
-  MockConnections
+  MockConnectionsManager
 } from '../typechain-types';
 import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
@@ -21,7 +21,7 @@ describe('Shared', function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
-  let mockConnectionsInstance: MockConnections;
+  let mockConnectionsManagerInstance: MockConnectionsManager;
 
   let MOCK_DIMO_TOKEN_ADDRESS: string;
   let MOCK_DIMO_CREDIT_ADDRESS: string;
@@ -49,10 +49,10 @@ describe('Shared', function () {
     mockManufacturerLicenseInstance = await MockManufacturerLicenseFactory.connect(admin).deploy();
     MOCK_MANUFACTURER_LICENSE_ADDRESS = await mockManufacturerLicenseInstance.getAddress();
 
-    // Deploy MockConnections contract
-    const MockConnectionsFactory = await ethers.getContractFactory('MockConnections');
-    mockConnectionsInstance = await MockConnectionsFactory.connect(admin).deploy(C.CONNECTIONS_ERC721_NAME, C.CONNECTIONS_ERC721_SYMBOL);
-    MOCK_CONNECTIONS_ADDRESS = await mockConnectionsInstance.getAddress();
+    // Deploy MockConnectionsManager contract
+    const MockConnectionsManagerFactory = await ethers.getContractFactory('MockConnectionsManager');
+    mockConnectionsManagerInstance = await MockConnectionsManagerFactory.connect(admin).deploy(C.CONNECTIONS_MANAGER_ERC721_NAME, C.CONNECTIONS_MANAGER_ERC721_SYMBOL);
+    MOCK_CONNECTIONS_ADDRESS = await mockConnectionsManagerInstance.getAddress();
 
     await dimoAccessControlInstance
       .connect(admin)
@@ -245,7 +245,7 @@ describe('Shared', function () {
         await expect(
           sharedInstance
             .connect(nonAdmin)
-            .setConnections(MOCK_CONNECTIONS_ADDRESS)
+            .setConnectionsManager(MOCK_CONNECTIONS_ADDRESS)
         ).to.be.rejectedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
@@ -257,9 +257,9 @@ describe('Shared', function () {
       it('Should correctly return Connections address', async () => {
         await sharedInstance
           .connect(admin)
-          .setConnections(MOCK_CONNECTIONS_ADDRESS);
+          .setConnectionsManager(MOCK_CONNECTIONS_ADDRESS);
 
-        const connectionsAddress = await sharedInstance.getConnections();
+        const connectionsAddress = await sharedInstance.getConnectionsManager();
 
         expect(connectionsAddress).to.equal(MOCK_CONNECTIONS_ADDRESS);
       });
@@ -270,9 +270,9 @@ describe('Shared', function () {
         await expect(
           sharedInstance
             .connect(admin)
-            .setConnections(MOCK_CONNECTIONS_ADDRESS)
+            .setConnectionsManager(MOCK_CONNECTIONS_ADDRESS)
         )
-          .to.emit(sharedInstance, 'ConnectionsSet')
+          .to.emit(sharedInstance, 'ConnectionsManagerSet')
           .withArgs(MOCK_CONNECTIONS_ADDRESS);
       });
     });

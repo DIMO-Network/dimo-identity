@@ -4,11 +4,11 @@ pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 /**
- * @title MockConnections
- * @dev Mocks the Connections contract (connection license) to be used in tests
- * Refers to https://github.com/DIMO-Network/connections-license
+ * @title MockConnectionsManager
+ * @dev Mocks the ConnectionsManager contract to be used in tests
+ * Refers to https://github.com/DIMO-Network/connections
  */
-contract MockConnections is ERC721 {
+contract MockConnectionsManager is ERC721 {
     error NameExceedsMaxLength(string _name);
 
     constructor(

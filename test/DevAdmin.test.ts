@@ -30,7 +30,7 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
-  MockConnections,
+  MockConnectionsManager,
   DevAdmin,
 } from '../typechain-types';
 import {
@@ -61,7 +61,7 @@ describe('DevAdmin', function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
-  let mockConnectionsInstance: MockConnections;
+  let mockConnectionsManagerInstance: MockConnectionsManager;
   let devAdminInstance: DevAdmin;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
@@ -189,13 +189,13 @@ describe('DevAdmin', function () {
     );
     mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
 
-    // Deploy MockConnections contract
-    const MockConnectionsFactory = await ethers.getContractFactory(
-      'MockConnections'
+    // Deploy MockConnectionsManager contract
+    const MockConnectionsManagerFactory = await ethers.getContractFactory(
+      'MockConnectionsManager'
     );
-    mockConnectionsInstance = await MockConnectionsFactory
+    mockConnectionsManagerInstance = await MockConnectionsManagerFactory
       .connect(admin)
-      .deploy(C.CONNECTIONS_ERC721_NAME, C.CONNECTIONS_ERC721_SYMBOL);
+      .deploy(C.CONNECTIONS_MANAGER_ERC721_NAME, C.CONNECTIONS_MANAGER_ERC721_SYMBOL);
 
     // Deploy MockManufacturerLicense contract
     const MockManufacturerLicenseFactory = await ethers.getContractFactory('MockManufacturerLicense');
@@ -265,7 +265,7 @@ describe('DevAdmin', function () {
       .setManufacturerLicense(await mockManufacturerLicenseInstance.getAddress());
     await sharedInstance
       .connect(admin)
-      .setConnections(await mockConnectionsInstance.getAddress());
+      .setConnectionsManager(await mockConnectionsManagerInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -330,7 +330,7 @@ describe('DevAdmin', function () {
       );
 
     // Mint Connection ID
-    await mockConnectionsInstance
+    await mockConnectionsManagerInstance
       .mint(
         connectionOwner1.address,
         C.CONNECTION_NAME_1

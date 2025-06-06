@@ -21,7 +21,7 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockSacd,
-  MockConnections
+  MockConnectionsManager
 } from '../typechain-types';
 import {
   setup,
@@ -53,7 +53,7 @@ describe('MultipleMinter', function () {
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
-  let mockConnectionsInstance: MockConnections;
+  let mockConnectionsManagerInstance: MockConnectionsManager;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let sdIdInstance: SyntheticDeviceId;
@@ -148,13 +148,13 @@ describe('MultipleMinter', function () {
     const MockSacdFactory = await ethers.getContractFactory('MockSacd');
     mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
     
-    // Deploy MockConnections contract
-    const MockConnectionsFactory = await ethers.getContractFactory(
-      'MockConnections'
+    // Deploy MockConnectionsManager contract
+    const MockConnectionsManagerFactory = await ethers.getContractFactory(
+      'MockConnectionsManager'
     );
-    mockConnectionsInstance = await MockConnectionsFactory
+    mockConnectionsManagerInstance = await MockConnectionsManagerFactory
       .connect(admin)
-      .deploy(C.CONNECTIONS_ERC721_NAME, C.CONNECTIONS_ERC721_SYMBOL);
+      .deploy(C.CONNECTIONS_MANAGER_ERC721_NAME, C.CONNECTIONS_MANAGER_ERC721_SYMBOL);
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -211,7 +211,7 @@ describe('MultipleMinter', function () {
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
       await sharedInstance
       .connect(admin)
-      .setConnections(await mockConnectionsInstance.getAddress());
+      .setConnectionsManager(await mockConnectionsManagerInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -262,12 +262,12 @@ describe('MultipleMinter', function () {
       );
 
     // Mint Connection ID
-    await mockConnectionsInstance
+    await mockConnectionsManagerInstance
       .mint(
         connectionOwner1.address,
         C.CONNECTION_NAME_1,
       );
-    await mockConnectionsInstance
+    await mockConnectionsManagerInstance
       .mint(
         connectionOwner2.address,
         C.CONNECTION_NAME_2,

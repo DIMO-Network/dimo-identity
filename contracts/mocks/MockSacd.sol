@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
+import {IERC721} from "@openzeppelin/contracts/interfaces/IERC721.sol";
+
 /**
  * @title MockSacd
  * @dev Mocks the SACD contract to be used in tests
@@ -37,6 +39,14 @@ contract MockSacd {
         address grantee,
         uint8 permissionIndex
     ) external view returns (bool) {
+        try IERC721(asset).ownerOf(tokenId) returns (address tokenIdOwner) {
+            if (tokenIdOwner == grantee) {
+                return true;
+            }
+        } catch {
+            return false;
+        }
+
         uint256 tokenIdVersion = tokenIdToVersion[asset][tokenId];
         PermissionRecord memory pr = permissionRecords[asset][tokenId][
             tokenIdVersion

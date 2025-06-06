@@ -12,6 +12,9 @@ export const MANUFACTURER_FACTORY_RESET_PRIVILEGE = '3';
 export const MANUFACTURER_REPROVISION_PRIVILEGE = '4';
 export const MANUFACTURER_INSERT_DD_PRIVILEGE = '5';
 
+// Connection permissions
+export const CONNECTION_SD_MINTER_PERMISSION = '0';
+
 export const INTEGRATION_NFT_NAME = 'Integration NFT';
 export const INTEGRATION_NFT_SYMBOL = 'INFT';
 export const INTEGRATION_NFT_BASE_URI = 'https://dimo.zone/integration/';

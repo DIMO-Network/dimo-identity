@@ -15,7 +15,7 @@ import {
   Shared,
   MockDimoToken,
   MockDimoCredit,
-  MockStake
+  MockManufacturerLicense
 } from '../typechain-types';
 import {
   setup,
@@ -39,7 +39,7 @@ describe('Mapper', function () {
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
-  let mockStakeInstance: MockStake;
+  let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let manufacturerIdInstance: ManufacturerId;
   let adIdInstance: AftermarketDeviceId;
 
@@ -140,9 +140,9 @@ describe('Mapper', function () {
     );
     mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
 
-    // Deploy MockStake contract
-    const MockStakeFactory = await ethers.getContractFactory('MockStake');
-    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
+    // Deploy MockManufacturerLicense contract
+    const MockManufacturerLicenseFactory = await ethers.getContractFactory('MockManufacturerLicense');
+    mockManufacturerLicenseInstance = await MockManufacturerLicenseFactory.connect(admin).deploy();
 
     // Mint DIMO Credit tokens to the admin and manufacturer
     await mockDimoCreditInstance
@@ -166,7 +166,7 @@ describe('Mapper', function () {
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
     await sharedInstance
       .connect(admin)
-      .setManufacturerLicense(await mockStakeInstance.getAddress());
+      .setManufacturerLicense(await mockManufacturerLicenseInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -198,7 +198,7 @@ describe('Mapper', function () {
         C.mockManufacturerAttributeInfoPairs
       );
 
-    await mockStakeInstance.setLicenseBalance(manufacturer1.address, 1);
+    await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
 
     // Grant Transferer role to DIMO Registry
     await adIdInstance

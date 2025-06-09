@@ -7,7 +7,8 @@ import type {
   Shared,
   MockDimoToken,
   MockDimoCredit,
-  MockStake
+  MockManufacturerLicense,
+  MockConnectionsManager
 } from '../typechain-types';
 import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
@@ -19,11 +20,13 @@ describe('Shared', function () {
   let sharedInstance: Shared;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
-  let mockStakeInstance: MockStake;
+  let mockManufacturerLicenseInstance: MockManufacturerLicense;
+  let mockConnectionsManagerInstance: MockConnectionsManager;
 
   let MOCK_DIMO_TOKEN_ADDRESS: string;
   let MOCK_DIMO_CREDIT_ADDRESS: string;
-  let MOCK_STAKE_ADDRESS: string;
+  let MOCK_MANUFACTURER_LICENSE_ADDRESS: string;
+  let MOCK_CONNECTIONS_ADDRESS: string;
 
   let admin: HardhatEthersSigner
   let nonAdmin: HardhatEthersSigner;
@@ -41,10 +44,15 @@ describe('Shared', function () {
     dimoAccessControlInstance = deployments.DimoAccessControl;
     sharedInstance = deployments.Shared;
 
-    // Deploy MockStake contract
-    const MockStakeFactory = await ethers.getContractFactory('MockStake');
-    mockStakeInstance = await MockStakeFactory.connect(admin).deploy();
-    MOCK_STAKE_ADDRESS = await mockStakeInstance.getAddress();
+    // Deploy MockManufacturerLicense contract
+    const MockManufacturerLicenseFactory = await ethers.getContractFactory('MockManufacturerLicense');
+    mockManufacturerLicenseInstance = await MockManufacturerLicenseFactory.connect(admin).deploy();
+    MOCK_MANUFACTURER_LICENSE_ADDRESS = await mockManufacturerLicenseInstance.getAddress();
+
+    // Deploy MockConnectionsManager contract
+    const MockConnectionsManagerFactory = await ethers.getContractFactory('MockConnectionsManager');
+    mockConnectionsManagerInstance = await MockConnectionsManagerFactory.connect(admin).deploy(C.CONNECTIONS_MANAGER_ERC721_NAME, C.CONNECTIONS_MANAGER_ERC721_SYMBOL);
+    MOCK_CONNECTIONS_ADDRESS = await mockConnectionsManagerInstance.getAddress();
 
     await dimoAccessControlInstance
       .connect(admin)
@@ -191,14 +199,14 @@ describe('Shared', function () {
       });
     });
   });
-  
+
   describe('setManufacturerLicense', () => {
     context('Error handling', () => {
       it('Should revert if caller does not have admin role', async () => {
         await expect(
           sharedInstance
             .connect(nonAdmin)
-            .setManufacturerLicense(MOCK_STAKE_ADDRESS)
+            .setManufacturerLicense(MOCK_MANUFACTURER_LICENSE_ADDRESS)
         ).to.be.rejectedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
           }`
@@ -210,11 +218,11 @@ describe('Shared', function () {
       it('Should correctly return Manufacturer License address', async () => {
         await sharedInstance
           .connect(admin)
-          .setManufacturerLicense(MOCK_STAKE_ADDRESS);
+          .setManufacturerLicense(MOCK_MANUFACTURER_LICENSE_ADDRESS);
 
         const manufacturerLicenseAddress = await sharedInstance.getManufacturerLicense();
 
-        expect(manufacturerLicenseAddress).to.equal(MOCK_STAKE_ADDRESS);
+        expect(manufacturerLicenseAddress).to.equal(MOCK_MANUFACTURER_LICENSE_ADDRESS);
       });
     });
 
@@ -223,10 +231,49 @@ describe('Shared', function () {
         await expect(
           sharedInstance
             .connect(admin)
-            .setManufacturerLicense(MOCK_STAKE_ADDRESS)
+            .setManufacturerLicense(MOCK_MANUFACTURER_LICENSE_ADDRESS)
         )
           .to.emit(sharedInstance, 'ManufacturerLicenseSet')
-          .withArgs(MOCK_STAKE_ADDRESS);
+          .withArgs(MOCK_MANUFACTURER_LICENSE_ADDRESS);
+      });
+    });
+  });
+
+  describe('setConnections', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          sharedInstance
+            .connect(nonAdmin)
+            .setConnectionsManager(MOCK_CONNECTIONS_ADDRESS)
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
+          }`
+        );
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly return ConnectionsManager address', async () => {
+        await sharedInstance
+          .connect(admin)
+          .setConnectionsManager(MOCK_CONNECTIONS_ADDRESS);
+
+        const connectionsAddress = await sharedInstance.getConnectionsManager();
+
+        expect(connectionsAddress).to.equal(MOCK_CONNECTIONS_ADDRESS);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit ConnectionsSet event with correct params', async () => {
+        await expect(
+          sharedInstance
+            .connect(admin)
+            .setConnectionsManager(MOCK_CONNECTIONS_ADDRESS)
+        )
+          .to.emit(sharedInstance, 'ConnectionsManagerSet')
+          .withArgs(MOCK_CONNECTIONS_ADDRESS);
       });
     });
   });

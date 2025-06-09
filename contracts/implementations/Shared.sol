@@ -16,6 +16,7 @@ contract Shared is AccessControlInternal {
     event DimoTokenSet(address indexed dimoToken);
     event DimoCreditSet(address indexed dimoCredit);
     event ManufacturerLicenseSet(address indexed manufacturerLicense);
+    event ConnectionsManagerSet(address indexed connectionsManager);
 
     /**
      * @notice Sets the foundation address
@@ -64,6 +65,19 @@ contract Shared is AccessControlInternal {
     }
 
     /**
+     * @notice Sets the Connections Manager contract address
+     * @dev Only an admin can set the Connections Manager contract address
+     * @param connectionsManager The Connections Manager contract address
+     */
+    function setConnectionsManager(
+        address connectionsManager
+    ) external onlyRole(ADMIN_ROLE) {
+        SharedStorage.getStorage().connectionsManager = connectionsManager;
+
+        emit ConnectionsManagerSet(connectionsManager);
+    }
+
+    /**
      * @notice Gets the Foundation address
      */
     function getFoundation() external view returns (address foundation) {
@@ -93,5 +107,16 @@ contract Shared is AccessControlInternal {
         returns (address manufacturerLicense)
     {
         manufacturerLicense = SharedStorage.getStorage().manufacturerLicense;
+    }
+
+    /**
+     * @notice Gets the ConnectionsManager address
+     */
+    function getConnectionsManager()
+        external
+        view
+        returns (address connectionsManager)
+    {
+        connectionsManager = SharedStorage.getStorage().connectionsManager;
     }
 }

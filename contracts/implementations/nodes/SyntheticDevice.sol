@@ -7,10 +7,10 @@ import "../../interfaces/INFT.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
-import "../../libraries/nodes/IntegrationStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
+import "../../libraries/SharedStorage.sol";
 
 import {ADMIN_ROLE, MINT_SD_ROLE, BURN_SD_ROLE, SET_SD_INFO_ROLE} from "../../shared/Roles.sol";
 
@@ -31,7 +31,7 @@ contract SyntheticDevice is
 {
     bytes32 private constant MINT_TYPEHASH =
         keccak256(
-            "MintSyntheticDeviceSign(uint256 integrationNode,uint256 vehicleNode)"
+            "MintSyntheticDeviceSign(uint256 connectionId,uint256 vehicleNode)"
         );
     bytes32 private constant BURN_TYPEHASH =
         keccak256(
@@ -92,15 +92,15 @@ contract SyntheticDevice is
      * @notice Mints a list of synthetic devices and links them to vehicles
      * To be called for existing vehicles already connected
      * @dev Caller must have the admin role
-     * @dev All devices will be minted under the same integration node
-     * @param integrationNode Parent integration node id
+     * @dev All devices will be minted under the same connection id
+     * @param connectionId Parent connection id
      * @param data Input data with the following fields:
      *  vehicleNode -> Vehicle node id
      *  syntheticDeviceAddr -> Address associated with the synthetic device
      *  attrInfoPairs -> List of attribute-info pairs to be added
      */
     function mintSyntheticDeviceBatch(
-        uint256 integrationNode,
+        uint256 connectionId,
         MintSyntheticDeviceBatchInput[] calldata data
     ) external onlyRole(MINT_SD_ROLE) {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
@@ -114,10 +114,10 @@ contract SyntheticDevice is
         address sdIdProxyAddress = sds.idProxyAddress;
 
         if (
-            !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
-                integrationNode
+            !INFT(SharedStorage.getStorage().connectionsManager).exists(
+                connectionId
             )
-        ) revert InvalidParentNode(integrationNode);
+        ) revert InvalidParentNode(connectionId);
 
         address owner;
         uint256 newTokenId;
@@ -135,7 +135,7 @@ contract SyntheticDevice is
             owner = INFT(vehicleIdProxyAddress).ownerOf(data[i].vehicleNode);
             newTokenId = INFT(sdIdProxyAddress).safeMint(owner);
 
-            ns.nodes[sdIdProxyAddress][newTokenId].parentNode = integrationNode;
+            ns.nodes[sdIdProxyAddress][newTokenId].parentNode = connectionId;
 
             ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
                 data[i].vehicleNode
@@ -148,7 +148,7 @@ contract SyntheticDevice is
             sds.nodeIdToDeviceAddress[newTokenId] = data[i].syntheticDeviceAddr;
 
             emit SyntheticDeviceNodeMinted(
-                integrationNode,
+                connectionId,
                 newTokenId,
                 data[i].vehicleNode,
                 data[i].syntheticDeviceAddr,
@@ -164,7 +164,7 @@ contract SyntheticDevice is
      * @notice Mints a synthetic device and pair it with a vehicle
      * @dev Caller must have the admin role
      * @param data Input data with the following fields:
-     *  integrationNode -> Parent integration node id
+     *  connectionId -> Parent connection id
      *  vehicleNode -> Vehicle node id
      *  syntheticDeviceSig -> Synthetic Device's signature hash
      *  vehicleOwnerSig -> Vehicle owner signature hash
@@ -185,10 +185,10 @@ contract SyntheticDevice is
         address sdIdProxyAddress = sds.idProxyAddress;
 
         if (
-            !INFT(IntegrationStorage.getStorage().idProxyAddress).exists(
-                data.integrationNode
+            !INFT(SharedStorage.getStorage().connectionsManager).exists(
+                data.connectionId
             )
-        ) revert InvalidParentNode(data.integrationNode);
+        ) revert InvalidParentNode(data.connectionId);
         if (!INFT(vehicleIdProxyAddress).exists(data.vehicleNode))
             revert InvalidNode(vehicleIdProxyAddress, data.vehicleNode);
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
@@ -201,7 +201,7 @@ contract SyntheticDevice is
 
         address owner = INFT(vehicleIdProxyAddress).ownerOf(data.vehicleNode);
         bytes32 message = keccak256(
-            abi.encode(MINT_TYPEHASH, data.integrationNode, data.vehicleNode)
+            abi.encode(MINT_TYPEHASH, data.connectionId, data.vehicleNode)
         );
 
         if (
@@ -221,8 +221,7 @@ contract SyntheticDevice is
 
         uint256 newTokenId = INFT(sdIdProxyAddress).safeMint(owner);
 
-        ns.nodes[sdIdProxyAddress][newTokenId].parentNode = data
-            .integrationNode;
+        ns.nodes[sdIdProxyAddress][newTokenId].parentNode = data.connectionId;
 
         ms.nodeLinks[vehicleIdProxyAddress][sdIdProxyAddress][
             data.vehicleNode
@@ -234,7 +233,7 @@ contract SyntheticDevice is
         sds.nodeIdToDeviceAddress[newTokenId] = data.syntheticDeviceAddr;
 
         emit SyntheticDeviceNodeMinted(
-            data.integrationNode,
+            data.connectionId,
             newTokenId,
             data.vehicleNode,
             data.syntheticDeviceAddr,

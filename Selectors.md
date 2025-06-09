@@ -392,10 +392,12 @@
 #### Functions
 | Selector | Signature |
 |-|-|
+| 0xb0c1d1df | getConnectionsManager() |
 | 0xcfe55b7d | getDimoCredit() |
 | 0x77898251 | getDimoToken() |
 | 0xa2bc6cdf | getFoundation() |
 | 0x170e4293 | getManufacturerLicense() |
+| 0x2fee22f4 | setConnectionsManager(address) |
 | 0x4fa9ff16 | setDimoCredit(address) |
 | 0x5b6c1979 | setDimoToken(address) |
 | 0xdb3543f5 | setFoundation(address) |
@@ -404,6 +406,7 @@
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x460e3b50 | ConnectionsManagerSet(address) |
 | 0x6f17bce4 | DimoCreditSet(address) |
 | 0x3c3a6813 | DimoTokenSet(address) |
 | 0xfb3a4411 | FoundationSet(address) |

@@ -18,7 +18,7 @@ contract SyntheticDeviceInternal {
         string info
     );
     event SyntheticDeviceNodeMinted(
-        uint256 integrationNode,
+        uint256 connectionId,
         uint256 syntheticDeviceNode,
         uint256 indexed vehicleNode,
         address indexed syntheticDeviceAddress,

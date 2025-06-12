@@ -141,6 +141,11 @@ export const makes = [
     'Scania',
     'International',
     'HashDog',
-    'Chery'
+    'Chery',
+    'WeThePeople',
+    'Boeing',
+    'Ruptela',
+    'ae',
+    'Maxus'
   ];
   

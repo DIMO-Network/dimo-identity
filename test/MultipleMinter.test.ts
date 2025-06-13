@@ -60,7 +60,7 @@ describe('MultipleMinter', function () {
   let mockSacdInstance: MockSacd;
 
   let DIMO_REGISTRY_ADDRESS: string;
-
+  
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
@@ -171,6 +171,11 @@ describe('MultipleMinter', function () {
     await sdIdInstance
       .connect(admin)
       .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
+    
+      // Grant synthetic device minting permission to admin
+    await sharedInstance.connect(admin).setSacd(mockSacdInstance);
+    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_1, admin, 12, DEFAULT_EXPIRATION, '');
+    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_2, admin, 12, DEFAULT_EXPIRATION, '');
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -212,6 +217,9 @@ describe('MultipleMinter', function () {
     await sharedInstance
       .connect(admin)
       .setConnectionsManager(await mockConnectionsManagerInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setSacd(await mockSacdInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -344,16 +352,6 @@ describe('MultipleMinter', function () {
         incorrectMintInput = { ...correctMintInput };
       });
 
-      it('Should revert if caller does not have MINT_VEHICLE_SD_ROLE', async () => {
-        await expect(
-          multipleMinterInstance
-            .connect(nonAdmin)
-            .mintVehicleAndSdSign(correctMintInput)
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_SD_ROLE
-          }`
-        );
-      });
       it('Should revert if vehicle parent node is not a manufacturer node', async () => {
         incorrectMintInput.manufacturerNode = '99';
 
@@ -373,6 +371,18 @@ describe('MultipleMinter', function () {
             .mintVehicleAndSdSign(incorrectMintInput)
         ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
           .withArgs(99);
+      });
+      it('Should revert if caller is not the connection ID owner nor has permissions', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(nonAdmin)
+            .mintVehicleAndSdSign(correctMintInput)
+        )
+          .to.be.revertedWithCustomError(
+            multipleMinterInstance,
+            'Unauthorized',
+          )
+          .withArgs(nonAdmin.address);
       });
       it('Should revert if device address is already registered', async () => {
         await multipleMinterInstance
@@ -916,16 +926,6 @@ describe('MultipleMinter', function () {
         incorrectMintInput = { ...correctMintInput };
       });
 
-      it('Should revert if caller does not have MINT_VEHICLE_SD_ROLE', async () => {
-        await expect(
-          multipleMinterInstance
-            .connect(nonAdmin)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_SD_ROLE
-          }`
-        );
-      });
       it('Should revert if vehicle parent node is not a manufacturer node', async () => {
         incorrectMintInput.manufacturerNode = '99';
 
@@ -945,6 +945,18 @@ describe('MultipleMinter', function () {
             .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
         ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
           .withArgs(99);
+      });
+      it('Should revert if caller is not the connection ID owner nor has permissions', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(nonAdmin)
+            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+        )
+          .to.be.revertedWithCustomError(
+            multipleMinterInstance,
+            'Unauthorized',
+          )
+          .withArgs(nonAdmin.address);
       });
       it('Should revert if device address is already registered', async () => {
         await multipleMinterInstance
@@ -1545,16 +1557,6 @@ describe('MultipleMinter', function () {
         incorrectMintInput = { ...correctMintInput };
       });
 
-      it('Should revert if caller does not have MINT_VEHICLE_SD_ROLE', async () => {
-        await expect(
-          multipleMinterInstance
-            .connect(nonAdmin)
-            .mintVehicleAndSdWithDeviceDefinitionSignAndSacd(correctMintInput, sacdInput)
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_SD_ROLE
-          }`
-        );
-      });
       it('Should revert if vehicle parent node is not a manufacturer node', async () => {
         incorrectMintInput.manufacturerNode = '99';
 
@@ -1565,7 +1567,7 @@ describe('MultipleMinter', function () {
         ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
           .withArgs(99);
       });
-      it('Should revert if synthetic device parent node is not an connection ID', async () => {
+      it('Should revert if synthetic device parent node is not a connection ID', async () => {
         incorrectMintInput.connectionId = '99';
 
         await expect(
@@ -1574,6 +1576,18 @@ describe('MultipleMinter', function () {
             .mintVehicleAndSdWithDeviceDefinitionSignAndSacd(incorrectMintInput, sacdInput)
         ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
           .withArgs(99);
+      });
+      it('Should revert if caller is not the connection ID owner nor has permissions', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(nonAdmin)
+            .mintVehicleAndSdWithDeviceDefinitionSignAndSacd(correctMintInput, sacdInput)
+        )
+          .to.be.revertedWithCustomError(
+            multipleMinterInstance,
+            'Unauthorized',
+          )
+          .withArgs(nonAdmin.address);
       });
       it('Should revert if device address is already registered', async () => {
         await multipleMinterInstance
@@ -2230,16 +2244,6 @@ describe('MultipleMinter', function () {
         incorrectMintInput = JSON.parse(JSON.stringify(correctMintInput));
       });
 
-      it('Should revert if caller does not have MINT_VEHICLE_SD_ROLE', async () => {
-        await expect(
-          multipleMinterInstance
-            .connect(nonAdmin)
-            .mintVehicleAndSdWithDeviceDefinitionSignBatch(correctMintInput)
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_SD_ROLE
-          }`
-        );
-      });
       it('Should revert if vehicle parent node is not a manufacturer node', async () => {
         incorrectMintInput[0].manufacturerNode = '99';
 
@@ -2250,7 +2254,7 @@ describe('MultipleMinter', function () {
         ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
           .withArgs(99);
       });
-      it('Should revert if synthetic device parent node is not an connection ID', async () => {
+      it('Should revert if synthetic device parent node is not a connection ID', async () => {
         incorrectMintInput[0].connectionId = '99';
 
         await expect(
@@ -2259,6 +2263,18 @@ describe('MultipleMinter', function () {
             .mintVehicleAndSdWithDeviceDefinitionSignBatch(incorrectMintInput)
         ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
           .withArgs(99);
+      });
+      it('Should revert if caller is not the connection ID owner nor has permissions', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(nonAdmin)
+            .mintVehicleAndSdWithDeviceDefinitionSignBatch(correctMintInput)
+        )
+          .to.be.revertedWithCustomError(
+            multipleMinterInstance,
+            'Unauthorized',
+          )
+          .withArgs(nonAdmin.address);
       });
       it('Should revert if device address is already registered', async () => {
         await multipleMinterInstance

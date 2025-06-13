@@ -653,6 +653,20 @@ describe('SyntheticDevice', function () {
           )
           .withArgs(99);
       });
+      it('Should revert if caller is not the connection ID owner nor has permissions', async () => {
+        incorrectMintInput.connectionId = '99';
+
+        await expect(
+          syntheticDeviceInstance
+            .connect(nonAdmin)
+            .mintSyntheticDeviceSign(correctMintInput),
+        )
+          .to.be.revertedWithCustomError(
+            syntheticDeviceInstance,
+            'Unauthorized',
+          )
+          .withArgs(nonAdmin.address);
+      });
       it('Should revert if node is not a Vehicle', async () => {
         incorrectMintInput.vehicleNode = '99';
 

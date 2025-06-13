@@ -141,12 +141,11 @@ describe('SyntheticDeviceId', async function () {
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
 
-    // Grant synthetic device minting permission
-
+    // Grant synthetic device minting permission to admin
     expiresAtDefault = (await time.latest()) + 31556926; // + 1 year
     await sharedInstance.connect(admin).setSacd(mockSacdInstance);
 
-    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_1, admin, 3, expiresAtDefault, '');
+    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_1, admin, 12, expiresAtDefault, '');
 
     // Set NFT Proxies
     await manufacturerInstance

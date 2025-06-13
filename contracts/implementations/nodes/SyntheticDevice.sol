@@ -39,8 +39,6 @@ contract SyntheticDevice is
         keccak256(
             "BurnSyntheticDeviceSign(uint256 vehicleNode,uint256 syntheticDeviceNode)"
         );
-    // TODO(elffjs): Is it dangerous to use 0?
-    uint8 private constant CONNECTION_MINT_SD_PERMISSION = 0;
 
     event SyntheticDeviceIdProxySet(address proxy);
     event SyntheticDeviceAttributeAdded(string attribute);

@@ -43,8 +43,14 @@
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "UintUtils__InsufficientHexLength",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "Unauthorized",
     "type": "error"
   },
   {

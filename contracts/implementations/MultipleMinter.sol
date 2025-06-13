@@ -5,6 +5,7 @@ import "./nodes/VehicleInternal.sol";
 import "./nodes/SyntheticDeviceInternal.sol";
 import "./charging/ChargingInternal.sol";
 import "../interfaces/INFT.sol";
+import "../interfaces/ISacd.sol";
 import "../Eip712/Eip712CheckerInternal.sol";
 import "../libraries/NodesStorage.sol";
 import "../libraries/nodes/ManufacturerStorage.sol";
@@ -12,6 +13,7 @@ import "../libraries/nodes/VehicleStorage.sol";
 import "../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/SharedStorage.sol";
+import "../shared/Errors.sol" as Errors;
 
 import {MINT_VEHICLE_OPERATION} from "../shared/Operations.sol";
 import "../shared/Roles.sol";
@@ -45,10 +47,12 @@ contract MultipleMinter is
      */
     function mintVehicleAndSdSign(
         MintVehicleAndSdInput calldata data
-    ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
+    ) external {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        SharedStorage.Storage storage sharedStorage = SharedStorage
             .getStorage();
 
         address vehicleIdProxyAddress = VehicleStorage
@@ -66,6 +70,14 @@ contract MultipleMinter is
                 data.manufacturerNode
             )
         ) revert InvalidParentNode(data.manufacturerNode);
+        if (
+            !ISacd(sharedStorage.sacd).hasPermission(
+                sharedStorage.connectionsManager,
+                data.connectionId,
+                msg.sender,
+                CONNECTION_MINT_SD_PERMISSION
+            )
+        ) revert Errors.Unauthorized(msg.sender);
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
@@ -168,10 +180,12 @@ contract MultipleMinter is
      */
     function mintVehicleAndSdWithDeviceDefinitionSign(
         MintVehicleAndSdWithDdInput calldata data
-    ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
+    ) external {
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        SharedStorage.Storage storage sharedStorage = SharedStorage
             .getStorage();
 
         address vehicleIdProxyAddress = vs.idProxyAddress;
@@ -187,6 +201,14 @@ contract MultipleMinter is
                 data.manufacturerNode
             )
         ) revert InvalidParentNode(data.manufacturerNode);
+        if (
+            !ISacd(sharedStorage.sacd).hasPermission(
+                sharedStorage.connectionsManager,
+                data.connectionId,
+                msg.sender,
+                CONNECTION_MINT_SD_PERMISSION
+            )
+        ) revert Errors.Unauthorized(msg.sender);
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
@@ -303,9 +325,11 @@ contract MultipleMinter is
     function mintVehicleAndSdWithDeviceDefinitionSignAndSacd(
         MintVehicleAndSdWithDdInput calldata data,
         SacdInput calldata sacdInput
-    ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
+    ) external {
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        SharedStorage.Storage storage sharedStorage = SharedStorage
             .getStorage();
 
         address vehicleIdProxyAddress = vs.idProxyAddress;
@@ -321,6 +345,14 @@ contract MultipleMinter is
                 data.manufacturerNode
             )
         ) revert InvalidParentNode(data.manufacturerNode);
+        if (
+            !ISacd(sharedStorage.sacd).hasPermission(
+                sharedStorage.connectionsManager,
+                data.connectionId,
+                msg.sender,
+                CONNECTION_MINT_SD_PERMISSION
+            )
+        ) revert Errors.Unauthorized(msg.sender);
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
@@ -433,8 +465,10 @@ contract MultipleMinter is
      */
     function mintVehicleAndSdWithDeviceDefinitionSignBatch(
         MintVehicleAndSdWithDdInputBatch[] calldata data
-    ) external onlyRole(MINT_VEHICLE_SD_ROLE) {
+    ) external {
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        SharedStorage.Storage storage sharedStorage = SharedStorage
             .getStorage();
 
         address vehicleIdProxyAddress = VehicleStorage
@@ -453,6 +487,14 @@ contract MultipleMinter is
                     data[i].manufacturerNode
                 )
             ) revert InvalidParentNode(data[i].manufacturerNode);
+            if (
+                !ISacd(sharedStorage.sacd).hasPermission(
+                    sharedStorage.connectionsManager,
+                    data[i].connectionId,
+                    msg.sender,
+                    CONNECTION_MINT_SD_PERMISSION
+                )
+            ) revert Errors.Unauthorized(msg.sender);
             if (sds.deviceAddressToNodeId[data[i].syntheticDeviceAddr] != 0)
                 revert DeviceAlreadyRegistered(data[i].syntheticDeviceAddr);
 

@@ -453,7 +453,7 @@
 | 0x38a85a8d | InvalidOwnerSignature() |
 | 0x5299bab7 | InvalidParentNode(uint256) |
 | 0xf8e95d55 | InvalidSdSignature() |
-| 0xc9134785 | UintUtils__InsufficientHexLength() |
+| 0x8e4a23d6 | Unauthorized(address) |
 
 ## BaseDataURI
 #### Functions

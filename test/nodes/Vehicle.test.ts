@@ -1342,7 +1342,7 @@ describe('Vehicle', function () {
         };
 
         await syntheticDeviceInstance
-          .connect(connectionOwner1)
+          .connect(admin)
           .mintSyntheticDeviceSign(localMintSdInput);
 
         await expect(

@@ -153,9 +153,10 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x0e5B6D32a951CeA02b36FC211dc30dA9D860f5A8",
+                "address": "0x027FaE558d1Ce6291394B84dB235A6a455e7730C",
                 "selectors": [
                     "0xfb1a28e8",
+                    "0xd23965e3",
                     "0x58657dcc",
                     "0x7ae7fe4e"
                 ]

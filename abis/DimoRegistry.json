@@ -3635,19 +3635,6 @@
         "type": "event"
     },
     {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "sacd",
-                "type": "address"
-            }
-        ],
-        "name": "SacdSet",
-        "type": "event"
-    },
-    {
         "inputs": [],
         "name": "getConnectionsManager",
         "outputs": [
@@ -3706,19 +3693,6 @@
             {
                 "internalType": "address",
                 "name": "manufacturerLicense",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "getSacd",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "sacd",
                 "type": "address"
             }
         ],
@@ -3786,19 +3760,6 @@
             }
         ],
         "name": "setManufacturerLicense",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "sacd",
-                "type": "address"
-            }
-        ],
-        "name": "setSacd",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

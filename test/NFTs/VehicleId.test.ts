@@ -744,7 +744,7 @@ describe('VehicleId', async function () {
         };
 
         await syntheticDeviceInstance
-          .connect(connectionOwner1)
+          .connect(admin)
           .mintSyntheticDeviceSign(localMintSdInput);
 
         await expect(vehicleIdInstance.connect(user1).burn(1))

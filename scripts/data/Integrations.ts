@@ -1,1 +1,1 @@
-export const integrations = ['SmartCar', 'Tesla'];
+export const integrations = ['SmartCar', 'Tesla', 'Compass IoT', 'Motorq', 'Staex'];

@@ -62,6 +62,7 @@ describe('DevAdmin', function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockSacdInstance: MockSacd;
   let mockConnectionsManagerInstance: MockConnectionsManager;
   let devAdminInstance: DevAdmin;
   let manufacturerIdInstance: ManufacturerId;
@@ -1220,7 +1221,7 @@ describe('DevAdmin', function () {
         };
 
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(localMintSdInput);
 
         await expect(devAdminInstance.connect(admin).adminBurnVehicles([1, 2]))
@@ -1477,7 +1478,7 @@ describe('DevAdmin', function () {
         };
 
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(localMintSdInput);
       });
 
@@ -1807,7 +1808,7 @@ describe('DevAdmin', function () {
         };
 
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(localMintSdInput);
 
         await expect(
@@ -2393,10 +2394,10 @@ describe('DevAdmin', function () {
       ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
       await syntheticDeviceInstance
-        .connect(admin)
+        .connect(connectionOwner1)
         .mintSyntheticDeviceSign(localMintSdInput1);
       await syntheticDeviceInstance
-        .connect(admin)
+        .connect(connectionOwner1)
         .mintSyntheticDeviceSign(localMintSdInput2);
     });
 

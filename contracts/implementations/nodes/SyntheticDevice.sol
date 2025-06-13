@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "./VehicleInternal.sol";
 import "./SyntheticDeviceInternal.sol";
 import "../../interfaces/INFT.sol";
+import "../../interfaces/ISacd.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
@@ -11,6 +12,7 @@ import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 import "../../libraries/SharedStorage.sol";
+import "../../shared/Errors.sol" as Errors;
 
 import {ADMIN_ROLE, MINT_SD_ROLE, BURN_SD_ROLE, SET_SD_INFO_ROLE} from "../../shared/Roles.sol";
 
@@ -37,6 +39,8 @@ contract SyntheticDevice is
         keccak256(
             "BurnSyntheticDeviceSign(uint256 vehicleNode,uint256 syntheticDeviceNode)"
         );
+    // TODO(elffjs): Is it dangerous to use 0?
+    uint8 private constant CONNECTION_MINT_SD_PERMISSION = 0;
 
     event SyntheticDeviceIdProxySet(address proxy);
     event SyntheticDeviceAttributeAdded(string attribute);
@@ -173,10 +177,12 @@ contract SyntheticDevice is
      */
     function mintSyntheticDeviceSign(
         MintSyntheticDeviceInput calldata data
-    ) external onlyRole(MINT_SD_ROLE) {
+    ) external {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        SharedStorage.Storage storage sharedStorage = SharedStorage
             .getStorage();
 
         address vehicleIdProxyAddress = VehicleStorage
@@ -184,6 +190,8 @@ contract SyntheticDevice is
             .idProxyAddress;
         address sdIdProxyAddress = sds.idProxyAddress;
 
+        if (!INFT(sharedStorage.connectionsManager).exists(data.connectionId))
+            revert InvalidParentNode(data.connectionId);
         if (
             !ISacd(sharedStorage.sacd).hasPermission(
                 sharedStorage.connectionsManager,
@@ -191,7 +199,7 @@ contract SyntheticDevice is
                 msg.sender,
                 CONNECTION_MINT_SD_PERMISSION
             )
-        ) revert InvalidParentNode(data.connectionId);
+        ) revert Errors.Unauthorized(msg.sender);
         if (!INFT(vehicleIdProxyAddress).exists(data.vehicleNode))
             revert InvalidNode(vehicleIdProxyAddress, data.vehicleNode);
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)

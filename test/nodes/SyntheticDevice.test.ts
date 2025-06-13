@@ -639,22 +639,12 @@ describe('SyntheticDevice', function () {
         incorrectMintInput = { ...correctMintInput };
       });
 
-      it('Should revert if caller does not have MINT_SD_ROLE', async () => {
-        await expect(
-          syntheticDeviceInstance
-            .connect(nonAdmin)
-            .mintSyntheticDeviceSign(correctMintInput),
-        ).to.be.revertedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_SD_ROLE
-          }`,
-        );
-      });
       it('Should revert if parent node is not a connection ID', async () => {
         incorrectMintInput.connectionId = '99';
 
         await expect(
           syntheticDeviceInstance
-            .connect(admin)
+            .connect(connectionOwner1)
             .mintSyntheticDeviceSign(incorrectMintInput),
         )
           .to.be.revertedWithCustomError(
@@ -668,7 +658,7 @@ describe('SyntheticDevice', function () {
 
         await expect(
           syntheticDeviceInstance
-            .connect(admin)
+            .connect(connectionOwner1)
             .mintSyntheticDeviceSign(incorrectMintInput),
         )
           .to.be.revertedWithCustomError(syntheticDeviceInstance, 'InvalidNode')
@@ -681,12 +671,12 @@ describe('SyntheticDevice', function () {
           .connect(admin)
         ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(correctMintInput);
 
         await expect(
           syntheticDeviceInstance
-            .connect(admin)
+            .connect(connectionOwner1)
             .mintSyntheticDeviceSign(incorrectMintInput),
         )
           .to.be.revertedWithCustomError(
@@ -704,7 +694,7 @@ describe('SyntheticDevice', function () {
 
         await expect(
           syntheticDeviceInstance
-            .connect(admin)
+            .connect(connectionOwner1)
             .mintSyntheticDeviceSign(incorrectMintInput),
         ).to.be.revertedWithCustomError(
           syntheticDeviceInstance,
@@ -717,7 +707,7 @@ describe('SyntheticDevice', function () {
 
         await expect(
           syntheticDeviceInstance
-            .connect(admin)
+            .connect(connectionOwner1)
             .mintSyntheticDeviceSign(incorrectMintInput),
         )
           .to.be.revertedWithCustomError(
@@ -732,12 +722,12 @@ describe('SyntheticDevice', function () {
         incorrectMintInput.syntheticDeviceAddr = sdAddress2.address;
 
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(correctMintInput);
 
         await expect(
           syntheticDeviceInstance
-            .connect(admin)
+            .connect(connectionOwner1)
             .mintSyntheticDeviceSign(incorrectMintInput),
         )
           .to.be.revertedWithCustomError(
@@ -764,7 +754,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -786,7 +776,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -808,7 +798,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -830,7 +820,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -851,7 +841,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -872,7 +862,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -897,7 +887,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -919,7 +909,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -941,7 +931,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -963,7 +953,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -984,7 +974,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -1005,7 +995,7 @@ describe('SyntheticDevice', function () {
 
             await expect(
               syntheticDeviceInstance
-                .connect(admin)
+                .connect(connectionOwner1)
                 .mintSyntheticDeviceSign(incorrectMintInput),
             ).to.be.revertedWithCustomError(
               syntheticDeviceInstance,
@@ -1019,7 +1009,7 @@ describe('SyntheticDevice', function () {
     context('State', () => {
       it('Should correctly set parent node', async () => {
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(correctMintInput);
 
         const parentNode = await nodesInstance.getParentNode(
@@ -1031,14 +1021,14 @@ describe('SyntheticDevice', function () {
       });
       it('Should correctly set node owner', async () => {
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(correctMintInput);
 
         expect(await sdIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should correctly set device address', async () => {
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(correctMintInput);
 
         const id = await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
@@ -1049,7 +1039,7 @@ describe('SyntheticDevice', function () {
       });
       it('Should correctly set infos', async () => {
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(correctMintInput);
 
         expect(
@@ -1069,7 +1059,7 @@ describe('SyntheticDevice', function () {
       });
       it('Should correctly map the synthetic device to the vehicle', async () => {
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(correctMintInput);
 
         expect(
@@ -1082,7 +1072,7 @@ describe('SyntheticDevice', function () {
       });
       it('Should correctly map the vehicle to the synthetic device', async () => {
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(correctMintInput);
 
         expect(
@@ -1099,7 +1089,7 @@ describe('SyntheticDevice', function () {
       it('Should emit SyntheticDeviceNodeMinted event with correct params', async () => {
         await expect(
           syntheticDeviceInstance
-            .connect(admin)
+            .connect(connectionOwner1)
             .mintSyntheticDeviceSign(correctMintInput),
         )
           .to.emit(syntheticDeviceInstance, 'SyntheticDeviceNodeMinted')
@@ -1108,7 +1098,7 @@ describe('SyntheticDevice', function () {
       it('Should emit SyntheticDeviceAttributeSet events with correct params', async () => {
         await expect(
           syntheticDeviceInstance
-            .connect(admin)
+            .connect(connectionOwner1)
             .mintSyntheticDeviceSign(correctMintInput),
         )
           .to.emit(syntheticDeviceInstance, 'SyntheticDeviceAttributeSet')
@@ -1130,7 +1120,7 @@ describe('SyntheticDevice', function () {
 
         await expect(
           syntheticDeviceInstance
-            .connect(admin)
+            .connect(connectionOwner1)
             .mintSyntheticDeviceSign(correctMintInput),
         ).to.not.emit(syntheticDeviceInstance, 'SyntheticDeviceAttributeSet');
       });
@@ -1212,7 +1202,7 @@ describe('SyntheticDevice', function () {
 
     beforeEach(async () => {
       await syntheticDeviceInstance
-        .connect(admin)
+        .connect(connectionOwner1)
         .mintSyntheticDeviceSign(mintInput1);
     });
 
@@ -1260,7 +1250,7 @@ describe('SyntheticDevice', function () {
           .connect(admin)
         ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(mintInput2);
 
         await expect(
@@ -1289,7 +1279,7 @@ describe('SyntheticDevice', function () {
           .connect(admin)
         ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(mintInput2);
 
         await expect(
@@ -1574,7 +1564,7 @@ describe('SyntheticDevice', function () {
 
     beforeEach(async () => {
       await syntheticDeviceInstance
-        .connect(admin)
+        .connect(connectionOwner1)
         .mintSyntheticDeviceSign(mintInput);
     });
 
@@ -1721,7 +1711,7 @@ describe('SyntheticDevice', function () {
 
     beforeEach(async () => {
       await syntheticDeviceInstance
-        .connect(admin)
+        .connect(connectionOwner1)
         .mintSyntheticDeviceSign(mintInput);
     });
 
@@ -1777,7 +1767,7 @@ describe('SyntheticDevice', function () {
 
     beforeEach(async () => {
       await syntheticDeviceInstance
-        .connect(admin)
+        .connect(connectionOwner1)
         .mintSyntheticDeviceSign(mintInput);
     });
 

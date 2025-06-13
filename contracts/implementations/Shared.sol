@@ -79,16 +79,14 @@ contract Shared is AccessControlInternal {
     }
 
     /**
-     * @notice Sets the Connections Manager contract address
-     * @dev Only an admin can set the Connections Manager contract address
-     * @param connectionsManager The Connections Manager contract address
+     * @notice Sets the SACD contract address
+     * @dev Only an admin can set the SACD contract address
+     * @param sacd The SACD contract address
      */
-    function setConnectionsManager(
-        address connectionsManager
-    ) external onlyRole(ADMIN_ROLE) {
-        SharedStorage.getStorage().connectionsManager = connectionsManager;
+    function setSacd(address sacd) external onlyRole(ADMIN_ROLE) {
+        SharedStorage.getStorage().sacd = sacd;
 
-        emit ConnectionsManagerSet(connectionsManager);
+        emit SacdSet(sacd);
     }
 
     /**

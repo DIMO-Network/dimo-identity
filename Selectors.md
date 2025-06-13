@@ -302,6 +302,7 @@
 | 0xf8e95d55 | InvalidSdSignature() |
 | 0x87e6ac10 | OnlyNftProxy() |
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
+| 0x8e4a23d6 | Unauthorized(address) |
 | 0x2d91fcb5 | VehicleNotPaired(uint256) |
 | 0xc46a5168 | VehiclePaired(uint256) |
 | 0xd92e233d | ZeroAddress() |
@@ -403,6 +404,7 @@
 | 0x5b6c1979 | setDimoToken(address) |
 | 0xdb3543f5 | setFoundation(address) |
 | 0xea9ae2f5 | setManufacturerLicense(address) |
+| 0xc63f7dd2 | setSacd(address) |
 
 #### Events
 | Selector | Signature |
@@ -415,6 +417,7 @@
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0xc50082fb | SacdSet(address) |
 
 #### Errors
 | Selector | Signature |

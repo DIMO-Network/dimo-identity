@@ -553,8 +553,8 @@
             ],
             "StreamRegistry": "0x4F0779292bd0aB33B9EBC1DBE8e0868f3940E3F2",
             "DimoStreamrNode": "0x577f22f5369046B7eF09B6b01424fA860533d243",
-            "TablelandTables": "0x0000000000000000000000000000000000000000",
-            "Sacd": "0x0000000000000000000000000000000000000000"
+            "TablelandTables": "0x00000000000000000000000000000000000000003",
+            "Sacd": "0x0000000000000000000000000000000000000004"
         }
     },
     "amoy": {
@@ -929,8 +929,7 @@
                     "0xf0d1a557",
                     "0xd0b61156",
                     "0xb7bded95",
-                    "0x3da44e56",
-                    "0x1b1a82c8",
+                    "0x97c95b2a",
                     "0xd84baff1",
                     "0x8dca2b8e",
                     "0x9bfae6da",
@@ -942,12 +941,14 @@
                 "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
                 "selectors": [
                     "0x6111afa3",
-                    "0x60deec60",
+                    "0x08d2c2f5",
+                    "0xab2ae229",
                     "0x89a841bb",
                     "0x682a25e3",
                     "0x9796cf22",
                     "0xc6b36f2a",
                     "0x7ba79a39",
+                    "0x492ab283",
                     "0xb50df2f7",
                     "0xcfe642dd",
                     "0x9b3abd48",
@@ -968,7 +969,8 @@
                     "0x261d982a",
                     "0xc624e8a1",
                     "0xecf452d7",
-                    "0x80430e0d"
+                    "0x80430e0d",
+                    "0x53c2aa33"
                 ]
             },
             "Mapper": {
@@ -990,21 +992,27 @@
             "Shared": {
                 "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
                 "selectors": [
+                    "0xb0c1d1df",
                     "0xcfe55b7d",
                     "0x77898251",
                     "0xa2bc6cdf",
                     "0x170e4293",
+                    "0xc3d8478c",
+                    "0x2fee22f4",
                     "0x4fa9ff16",
                     "0x5b6c1979",
                     "0xdb3543f5",
-                    "0xea9ae2f5"
+                    "0xea9ae2f5",
+                    "0xc63f7dd2"
                 ]
             },
             "MultipleMinter": {
                 "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
                 "selectors": [
                     "0xfb1a28e8",
-                    "0xd23965e3"
+                    "0xd23965e3",
+                    "0x58657dcc",
+                    "0x7ae7fe4e"
                 ]
             },
             "StreamrConfigurator": {
@@ -1067,7 +1075,7 @@
                     "0x23536c5f",
                     "0x80d50451",
                     "0x088fafdb",
-                    "0x67c7f687"
+                    "0x182fef60"
                 ]
             },
             "ERC721Holder": {
@@ -1107,15 +1115,15 @@
         },
         "misc": {
             "DimoToken": {
-                "proxy": "0x922D6956C99E12DFeB3224DEA977D0939758A1Fe",
-                "implementation": ""
-            },
-            "DimoCredit": {
                 "proxy": "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
                 "implementation": ""
             },
-            "Stake": {
+            "DimoCredit": {
                 "proxy": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+                "implementation": ""
+            },
+            "Stake": {
+                "proxy": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
                 "implementation": ""
             },
             "DimoForwarder": {
@@ -1126,11 +1134,11 @@
             "Kms": [
                 "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
             ],
-            "StreamRegistry": "0x0000000000000000000000000000000000000000",
-            "DimoStreamrNode": "0x0000000000000000000000000000000000000000",
-            "TablelandTables": "0x0000000000000000000000000000000000000000",
-            "Sacd": "0x0000000000000000000000000000000000000000",
-            "ConnectionsManager": "0x0000000000000000000000000000000000000000"
+            "StreamRegistry": "0x0000000000000000000000000000000000000001",
+            "DimoStreamrNode": "0x0000000000000000000000000000000000000002",
+            "TablelandTables": "0x0000000000000000000000000000000000000003",
+            "Sacd": "0x0000000000000000000000000000000000000004",
+            "ConnectionsManager": "0x0000000000000000000000000000000000000005"
         }
     },
     "localhost": {
@@ -1393,11 +1401,11 @@
             "Kms": [
                 "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
             ],
-            "StreamRegistry": "0x0000000000000000000000000000000000000000",
-            "DimoStreamrNode": "0x0000000000000000000000000000000000000000",
-            "TablelandTables": "0x0000000000000000000000000000000000000000",
-            "Sacd": "0x0000000000000000000000000000000000000000",
-            "ConnectionsManager": "0x0000000000000000000000000000000000000000"
+            "StreamRegistry": "0x0000000000000000000000000000000000000001",
+            "DimoStreamrNode": "0x0000000000000000000000000000000000000002",
+            "TablelandTables": "0x0000000000000000000000000000000000000003",
+            "Sacd": "0x0000000000000000000000000000000000000004",
+            "ConnectionsManager": "0x0000000000000000000000000000000000000005"
         }
     }
 }

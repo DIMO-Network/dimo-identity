@@ -436,9 +436,6 @@
 #### Events
 | Selector | Signature |
 |-|-|
-| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
-| 0x2f878811 | RoleGranted(bytes32,address,address) |
-| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
 | 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |

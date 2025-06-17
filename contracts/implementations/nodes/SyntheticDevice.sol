@@ -163,15 +163,16 @@ contract SyntheticDevice is
     }
 
     /**
-     * @notice Mints a synthetic device and pair it with a vehicle
-     * @dev Caller must have the admin role
-     * @param data Input data with the following fields:
-     *  connectionId -> Parent connection id
-     *  vehicleNode -> Vehicle node id
-     *  syntheticDeviceSig -> Synthetic Device's signature hash
-     *  vehicleOwnerSig -> Vehicle owner signature hash
-     *  syntheticDeviceAddr -> Address associated with the synthetic device
-     *  attrInfoPairs -> List of attribute-info pairs to be added
+     * @notice Mints a synthetic device and pairs it with a vehicle using signatures for verification
+     * @dev Requires signatures from both the synthetic device and the vehicle owner
+     * @dev Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the Connection ID owner.
+     * @param data Input data containing:
+     *        - connectionId: Parent connection identifier
+     *        - vehicleNode: Vehicle node identifier to pair with
+     *        - syntheticDeviceSig: Signature from the synthetic device address
+     *        - vehicleOwnerSig: Signature from the vehicle owner
+     *        - syntheticDeviceAddr: Address associated with the synthetic device
+     *        - attrInfoPairs: Attribute-info pairs to initialize the device with
      */
     function mintSyntheticDeviceSign(
         MintSyntheticDeviceInput calldata data

@@ -10,6 +10,19 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "connectionsManager",
+        "type": "address"
+      }
+    ],
+    "name": "ConnectionsManagerSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "dimoCredit",
         "type": "address"
       }
@@ -133,6 +146,19 @@
   },
   {
     "inputs": [],
+    "name": "getConnectionsManager",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "connectionsManager",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getDimoCredit",
     "outputs": [
       {
@@ -181,6 +207,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "connectionsManager",
+        "type": "address"
+      }
+    ],
+    "name": "setConnectionsManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

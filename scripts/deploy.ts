@@ -456,6 +456,14 @@ async function setupRegistry(
   console.log(
     `${instances[networkName].misc.Stake.proxy} set as Manufacturer License contract address`,
   );
+  await (
+    await sharedInstance.setConnectionsManager(
+      instances[networkName].misc.ConnectionsManager,
+    )
+  ).wait();
+  console.log(
+    `${instances[networkName].misc.ConnectionsManager} set as Connections Manager contract address`,
+  );
   console.log('\n----- Shared setup -----');
 
   console.log('\n----- Setting NFT proxies -----\n');
@@ -780,16 +788,16 @@ async function buildMocks(
   const MockDimoCreditFactory = await ethers.getContractFactory('MockDimoCredit');
   const mockDimoCreditInstance = await MockDimoCreditFactory.connect(deployer).deploy();
 
-  // Deploy MockStake contract
-  const MockStakeFactory = await ethers.getContractFactory('MockStake');
-  const mockStakeInstance = await MockStakeFactory.connect(deployer).deploy();
+  // Deploy MockManufacturerLicense contract
+  const MockManufacturerLicenseFactory = await ethers.getContractFactory('MockManufacturerLicense');
+  const mockManufacturerLicenseInstance = await MockManufacturerLicenseFactory.connect(deployer).deploy();
 
   instances[networkName].misc.DimoToken.proxy =
     await mockDimoTokenInstance.getAddress();
   instances[networkName].misc.DimoCredit.proxy =
     await mockDimoCreditInstance.getAddress();
   instances[networkName].misc.Stake.proxy =
-    await mockStakeInstance.getAddress();
+    await mockManufacturerLicenseInstance.getAddress();
   instances[networkName].misc.Foundation = mockFoundation.address;
   instances[networkName].misc.Kms = [mockKms.address];
 

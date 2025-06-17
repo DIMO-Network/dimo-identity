@@ -2320,7 +2320,7 @@
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "integrationNode",
+                "name": "connectionId",
                 "type": "uint256"
             },
             {
@@ -2510,7 +2510,7 @@
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "integrationNode",
+                "name": "connectionId",
                 "type": "uint256"
             },
             {
@@ -2559,7 +2559,7 @@
                 "components": [
                     {
                         "internalType": "uint256",
-                        "name": "integrationNode",
+                        "name": "connectionId",
                         "type": "uint256"
                     },
                     {
@@ -3180,7 +3180,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "integrationNode",
+                        "name": "connectionId",
                         "type": "uint256"
                     },
                     {
@@ -3264,7 +3264,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "integrationNode",
+                        "name": "connectionId",
                         "type": "uint256"
                     },
                     {
@@ -3348,7 +3348,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "integrationNode",
+                        "name": "connectionId",
                         "type": "uint256"
                     },
                     {
@@ -3459,7 +3459,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "integrationNode",
+                        "name": "connectionId",
                         "type": "uint256"
                     },
                     {
@@ -3575,6 +3575,19 @@
             {
                 "indexed": true,
                 "internalType": "address",
+                "name": "connectionsManager",
+                "type": "address"
+            }
+        ],
+        "name": "ConnectionsManagerSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
                 "name": "dimoCredit",
                 "type": "address"
             }
@@ -3620,6 +3633,19 @@
         ],
         "name": "ManufacturerLicenseSet",
         "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "getConnectionsManager",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "connectionsManager",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     },
     {
         "inputs": [],
@@ -3671,6 +3697,19 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "connectionsManager",
+                "type": "address"
+            }
+        ],
+        "name": "setConnectionsManager",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {

@@ -38,7 +38,7 @@ import {
 
 const { expect } = chai;
 
-describe.only('MultipleMinter', function () {
+describe('MultipleMinter', function () {
   let snapshot: string;
   let dimoRegistryInstance: DIMORegistry;
   let eip712CheckerInstance: Eip712Checker;

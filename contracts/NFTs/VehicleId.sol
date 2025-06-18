@@ -123,17 +123,6 @@ contract VehicleId is Initializable, MultiPrivilege {
     }
 
     /**
-     * @notice Gets the data URI associated to a token
-     * @param tokenId Token Id to be checked
-     * @return dataURI Data URI
-     */
-    function getDataURI(
-        uint256 tokenId
-    ) external view returns (string memory dataURI) {
-        dataURI = _dimoRegistry.getDataURI(address(this), tokenId);
-    }
-
-    /**
      * @notice Gets the definition URI associated to a token
      * @param tokenId Token Id to be checked
      * @return definitionURI Definition URI

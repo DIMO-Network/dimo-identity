@@ -10,7 +10,6 @@ import {
   Eip712Checker,
   Charging,
   Shared,
-  BaseDataURI,
   Manufacturer,
   Integration,
   Vehicle,
@@ -104,7 +103,6 @@ async function deployModules(
     { name: 'Eip712Checker', args: [] },
     { name: 'DimoAccessControl', args: [] },
     { name: 'Nodes', args: [] },
-    { name: 'BaseDataURI', args: [] },
     { name: 'Manufacturer', args: [] },
     { name: 'Integration', args: [] },
     { name: 'Vehicle', args: [] },
@@ -401,10 +399,6 @@ async function setupRegistry(
     'SyntheticDevice',
     instances[networkName].modules.DIMORegistry.address,
   );
-  const baseDataUriInstance: BaseDataURI = await ethers.getContractAt(
-    'BaseDataURI',
-    instances[networkName].modules.DIMORegistry.address,
-  );
 
   console.log('\n----- Initializing EIP712 -----\n');
   await (
@@ -564,17 +558,6 @@ async function setupRegistry(
       )
   ).wait();
   console.log('----- Approval set -----');
-
-  console.log('\n----- Setting Base Data URI -----');
-  await (
-    await baseDataUriInstance
-      .connect(deployer)
-      .setBaseDataURI(
-        instances[networkName].nfts.VehicleId.proxy,
-        C.BASE_DATA_URI,
-      )
-  ).wait();
-  console.log('----- Base Data URI set -----');
 }
 
 async function grantNftRoles(

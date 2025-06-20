@@ -8,7 +8,6 @@ import {
   Charging,
   DimoAccessControl,
   Nodes,
-  BaseDataURI,
   Manufacturer,
   ManufacturerId,
   Vehicle,
@@ -43,7 +42,6 @@ describe('VehicleId', async function () {
   let chargingInstance: Charging;
   let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
-  let baseDataUriInstance: BaseDataURI;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
@@ -103,7 +101,6 @@ describe('VehicleId', async function () {
         'Charging',
         'DimoAccessControl',
         'Nodes',
-        'BaseDataURI',
         'Manufacturer',
         'Vehicle',
         'AftermarketDevice',
@@ -125,7 +122,6 @@ describe('VehicleId', async function () {
     chargingInstance = deployments.Charging;
     dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
-    baseDataUriInstance = deployments.BaseDataURI;
     manufacturerInstance = deployments.Manufacturer;
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
@@ -184,12 +180,6 @@ describe('VehicleId', async function () {
     await sdIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
-
-    // Set base data URI
-    await baseDataUriInstance.setBaseDataURI(
-      await vehicleIdInstance.getAddress(),
-      C.BASE_DATA_URI,
-    );
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -627,29 +617,6 @@ describe('VehicleId', async function () {
           previousVersion + 1n,
         );
       });
-    });
-  });
-
-  describe('getDataURI', () => {
-    it('Should return the default data URI if no data is set in the token', async () => {
-      const dataUriReturn = await vehicleIdInstance.getDataURI(1);
-
-      expect(dataUriReturn).to.eq(`${C.BASE_DATA_URI}1`);
-    });
-    it('Should correctly return the data URI set in the token', async () => {
-      const customDataUri = 'custom.data.uri';
-
-      await vehicleInstance.addVehicleAttribute('DataURI');
-      await vehicleInstance.connect(admin).setVehicleInfo(1, [
-        {
-          attribute: 'DataURI',
-          info: customDataUri,
-        },
-      ]);
-
-      const dataUriReturn = await vehicleIdInstance.getDataURI(1);
-
-      expect(dataUriReturn).to.equal(customDataUri);
     });
   });
 

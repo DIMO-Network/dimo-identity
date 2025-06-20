@@ -351,7 +351,6 @@
 #### Functions
 | Selector | Signature |
 |-|-|
-| 0xbc60a6ba | getDataURI(address,uint256) |
 | 0xdce2f860 | getInfo(address,uint256,string) |
 | 0x82087d24 | getParentNode(address,uint256) |
 
@@ -451,25 +450,6 @@
 | 0x5299bab7 | InvalidParentNode(uint256) |
 | 0xf8e95d55 | InvalidSdSignature() |
 | 0x8e4a23d6 | Unauthorized(address) |
-
-## BaseDataURI
-#### Functions
-| Selector | Signature |
-|-|-|
-| 0xe324093f | setBaseDataURI(address,string) |
-
-#### Events
-| Selector | Signature |
-|-|-|
-| 0x9f53d8a6 | BaseDataURISet(address,string) |
-| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
-| 0x2f878811 | RoleGranted(bytes32,address,address) |
-| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
-
-#### Errors
-| Selector | Signature |
-|-|-|
-| 0xc9134785 | UintUtils__InsufficientHexLength() |
 
 ## DeviceDefinitionTable
 #### Functions

@@ -3,7 +3,6 @@ export * from './AftermarketDevice';
 export * from './BaseNft';
 export * from './Charging';
 export * from './Connection';
-export * from './DataURI';
 export * from './DeviceDefinitionTable';
 export * from './eip712';
 export * from './Integration';

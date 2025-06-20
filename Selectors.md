@@ -314,8 +314,8 @@
 | 0xf0d1a557 | addVehicleAttribute(string) |
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
+| 0x8b04a18b | mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[]) |
 | 0x97c95b2a | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string)) |
-| 0xd84baff1 | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[]) |
 | 0x8dca2b8e | mintVehicleWithDeviceDefinitionSign(uint256,address,string,(string,string)[],bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
 | 0xd9c3ae61 | setVehicleInfo(uint256,(string,string)[]) |
@@ -342,6 +342,7 @@
 | 0xe3ca9639 | InvalidNode(address,uint256) |
 | 0x38a85a8d | InvalidOwnerSignature() |
 | 0x5299bab7 | InvalidParentNode(uint256) |
+| 0x65745f79 | InvalidStorageNode(uint256) |
 | 0x87e6ac10 | OnlyNftProxy() |
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 | 0xc46a5168 | VehiclePaired(uint256) |

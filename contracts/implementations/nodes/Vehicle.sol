@@ -4,9 +4,11 @@ pragma solidity ^0.8.13;
 import "./VehicleInternal.sol";
 import "../charging/ChargingInternal.sol";
 import "../../interfaces/INFT.sol";
+import "../../interfaces/IStorageNode.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/MapperStorage.sol";
+import "../../libraries/SharedStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
@@ -70,6 +72,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     // ***** Interaction with nodes *****//
 
+    // TODO Documentation
     /**
      * @notice Function to mint a vehicle with a Device Definition Id
      * @param manufacturerNode Parent manufacturer node id
@@ -80,6 +83,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
     function mintVehicleWithDeviceDefinition(
         uint256 manufacturerNode,
         address owner,
+        uint256 storageNodeId,
         string calldata deviceDefinitionId,
         AttributeInfoPair[] calldata attrInfo
     ) external {
@@ -91,6 +95,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
                 manufacturerNode
             )
         ) revert InvalidParentNode(manufacturerNode);
+
+        _validateStorageNodeId(storageNodeId);
 
         uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
@@ -109,6 +115,11 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+
+        IStorageNode(SharedStorage.getStorage().storageNode).setNodeForVehicle(
+            newTokenId,
+            storageNodeId
+        );
     }
 
     /**
@@ -386,6 +397,18 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             i++
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
+        }
+    }
+
+    // TODO Documentation
+    function _validateStorageNodeId(uint256 storageNodeId) private view {
+        // TODO Return default StorageNode
+        if (storageNodeId == 0) return;
+
+        SharedStorage.Storage storage ss = SharedStorage.getStorage();
+
+        if (!IStorageNode(ss.storageNode).exists(storageNodeId)) {
+            revert InvalidStorageNode(storageNodeId);
         }
     }
 }

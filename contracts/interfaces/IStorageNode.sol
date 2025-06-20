@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-// TODO Documentation
+/**
+ * @title IStorageNode Interface
+ * @dev Interface for the StorageNode contract
+ * Refers to https://github.com/DIMO-Network/storage-node
+ */
 interface IStorageNode {
     struct NodeInfo {
         address nodeAddress;
@@ -15,6 +19,10 @@ interface IStorageNode {
         string licenseLabel,
         string nodeUri
     );
+
+    function setNodeForVehicle(uint256 vehicleId, uint256 nodeId) external;
+
+    function exists(uint256 tokenId) external view returns (bool);
 
     function nodes(uint256 tokenId) external view returns (NodeInfo memory);
 

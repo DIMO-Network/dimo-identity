@@ -71,6 +71,7 @@ function buildNftArgs(
     ...C.vehicleIdArgs.args,
     instances[networkName].modules.DIMORegistry.address,
     ethers.ZeroAddress,
+    ethers.ZeroAddress,
     [instances[networkName].misc.DimoForwarder.proxy],
   ];
   currentAdIdArgs.args = [
@@ -270,6 +271,12 @@ async function setupVehicleId(
   console.log(
     `Synthetic Device ID ${instances[networkName].nfts.SyntheticDeviceId.proxy} set to Vehicle ID`,
   );
+  await vehicleIdInstance
+    .connect(deployer)
+    .setSacdAddress(instances[networkName].misc.Sacd);
+  console.log(
+    `SACD ${instances[networkName].misc.Sacd} set to Vehicle ID`,
+  );
   console.log('\n----- Vehicle ID setup -----\n');
 }
 
@@ -463,6 +470,14 @@ async function setupRegistry(
   ).wait();
   console.log(
     `${instances[networkName].misc.ConnectionsManager} set as Connections Manager contract address`,
+  );
+  await (
+    await sharedInstance.setSacd(
+      instances[networkName].misc.Sacd,
+    )
+  ).wait();
+  console.log(
+    `${instances[networkName].misc.Sacd} set as Sacd contract address`,
   );
   console.log('\n----- Shared setup -----');
 

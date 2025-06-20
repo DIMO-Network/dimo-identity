@@ -110,7 +110,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0x817F728D5B24f61fA3DaD9Fc2B37A497ba3b400b",
+                "address": "0xF60f3DC688646b734e9958a404b9ADA897472a21",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
@@ -140,22 +140,24 @@
                 ]
             },
             "Shared": {
-                "address": "0xcE543C1A2dd4959a8240123D868E94e1d57a879A",
+                "address": "0xDcfea3b862eBf24B79b7e5DC345b1117BE247943",
                 "selectors": [
                     "0xb0c1d1df",
                     "0xcfe55b7d",
                     "0x77898251",
                     "0xa2bc6cdf",
                     "0x170e4293",
+                    "0xc3d8478c",
                     "0x2fee22f4",
                     "0x4fa9ff16",
                     "0x5b6c1979",
                     "0xdb3543f5",
-                    "0xea9ae2f5"
+                    "0xea9ae2f5",
+                    "0xc63f7dd2"
                 ]
             },
             "MultipleMinter": {
-                "address": "0x330E251d8422391FE58023320A1C9D1e3c2b82E9",
+                "address": "0x5888a817e2A8fc2A611A91D225919C444B7d0834",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3",
@@ -287,7 +289,7 @@
             "StreamRegistry": "0x0D483E10612F327FC11965Fc82E90dC19b141641",
             "DimoStreamrNode": "0x3F3ab5A20F704D6e7299EdEE84200fDA5d849BE7",
             "TablelandTables": "0x5c4e6A9e5C1e1BF445A062006faF19EA6c49aFeA",
-            "Sacd": "0xEF919b3793deaae1637523d483e3434ae113004E",
+            "Sacd": "0x3c152B5d96769661008Ff404224d6530FCAC766d",
             "ConnectionsManager": "0x41799E9Dc893722844E771a1C1cAf3BBc2876132"
         }
     },
@@ -553,8 +555,8 @@
             ],
             "StreamRegistry": "0x4F0779292bd0aB33B9EBC1DBE8e0868f3940E3F2",
             "DimoStreamrNode": "0x577f22f5369046B7eF09B6b01424fA860533d243",
-            "TablelandTables": "0x0000000000000000000000000000000000000000",
-            "Sacd": "0x0000000000000000000000000000000000000000"
+            "TablelandTables": "0x00000000000000000000000000000000000000003",
+            "Sacd": "0x0000000000000000000000000000000000000004"
         }
     },
     "amoy": {
@@ -668,7 +670,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0xFAfd8541577afcF8b80928ACf71e3184503c19a3",
+                "address": "0xbe5ee111c5e22CA49811F08B08021044eC22f08D",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
@@ -698,22 +700,24 @@
                 ]
             },
             "Shared": {
-                "address": "0xcd1baf50604D6A3cF182645Ef894e4e1952Ff143",
+                "address": "0xe30dD89a8e83f816Aad29323e019408DE3158bd2",
                 "selectors": [
                     "0xb0c1d1df",
                     "0xcfe55b7d",
                     "0x77898251",
                     "0xa2bc6cdf",
                     "0x170e4293",
+                    "0xc3d8478c",
                     "0x2fee22f4",
                     "0x4fa9ff16",
                     "0x5b6c1979",
                     "0xdb3543f5",
-                    "0xea9ae2f5"
+                    "0xea9ae2f5",
+                    "0xc63f7dd2"
                 ]
             },
             "MultipleMinter": {
-                "address": "0xce12d0741ed57262e40eAdaA96944D78B514CF9A",
+                "address": "0x62FB5DfD3757AA2b0A2BA7d2FFC336708A0D3E67",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3",
@@ -929,8 +933,7 @@
                     "0xf0d1a557",
                     "0xd0b61156",
                     "0xb7bded95",
-                    "0x3da44e56",
-                    "0x1b1a82c8",
+                    "0x97c95b2a",
                     "0xd84baff1",
                     "0x8dca2b8e",
                     "0x9bfae6da",
@@ -942,12 +945,14 @@
                 "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
                 "selectors": [
                     "0x6111afa3",
-                    "0x60deec60",
+                    "0x08d2c2f5",
+                    "0xab2ae229",
                     "0x89a841bb",
                     "0x682a25e3",
                     "0x9796cf22",
                     "0xc6b36f2a",
                     "0x7ba79a39",
+                    "0x492ab283",
                     "0xb50df2f7",
                     "0xcfe642dd",
                     "0x9b3abd48",
@@ -968,7 +973,8 @@
                     "0x261d982a",
                     "0xc624e8a1",
                     "0xecf452d7",
-                    "0x80430e0d"
+                    "0x80430e0d",
+                    "0x53c2aa33"
                 ]
             },
             "Mapper": {
@@ -990,21 +996,27 @@
             "Shared": {
                 "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
                 "selectors": [
+                    "0xb0c1d1df",
                     "0xcfe55b7d",
                     "0x77898251",
                     "0xa2bc6cdf",
                     "0x170e4293",
+                    "0xc3d8478c",
+                    "0x2fee22f4",
                     "0x4fa9ff16",
                     "0x5b6c1979",
                     "0xdb3543f5",
-                    "0xea9ae2f5"
+                    "0xea9ae2f5",
+                    "0xc63f7dd2"
                 ]
             },
             "MultipleMinter": {
                 "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
                 "selectors": [
                     "0xfb1a28e8",
-                    "0xd23965e3"
+                    "0xd23965e3",
+                    "0x58657dcc",
+                    "0x7ae7fe4e"
                 ]
             },
             "StreamrConfigurator": {
@@ -1067,7 +1079,7 @@
                     "0x23536c5f",
                     "0x80d50451",
                     "0x088fafdb",
-                    "0x67c7f687"
+                    "0x182fef60"
                 ]
             },
             "ERC721Holder": {
@@ -1107,15 +1119,15 @@
         },
         "misc": {
             "DimoToken": {
-                "proxy": "0x922D6956C99E12DFeB3224DEA977D0939758A1Fe",
-                "implementation": ""
-            },
-            "DimoCredit": {
                 "proxy": "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
                 "implementation": ""
             },
-            "Stake": {
+            "DimoCredit": {
                 "proxy": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+                "implementation": ""
+            },
+            "Stake": {
+                "proxy": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
                 "implementation": ""
             },
             "DimoForwarder": {
@@ -1126,11 +1138,11 @@
             "Kms": [
                 "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
             ],
-            "StreamRegistry": "0x0000000000000000000000000000000000000000",
-            "DimoStreamrNode": "0x0000000000000000000000000000000000000000",
-            "TablelandTables": "0x0000000000000000000000000000000000000000",
-            "Sacd": "0x0000000000000000000000000000000000000000",
-            "ConnectionsManager": "0x0000000000000000000000000000000000000000"
+            "StreamRegistry": "0x0000000000000000000000000000000000000001",
+            "DimoStreamrNode": "0x0000000000000000000000000000000000000002",
+            "TablelandTables": "0x0000000000000000000000000000000000000003",
+            "Sacd": "0x0000000000000000000000000000000000000004",
+            "ConnectionsManager": "0x0000000000000000000000000000000000000005"
         }
     },
     "localhost": {
@@ -1393,11 +1405,11 @@
             "Kms": [
                 "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
             ],
-            "StreamRegistry": "0x0000000000000000000000000000000000000000",
-            "DimoStreamrNode": "0x0000000000000000000000000000000000000000",
-            "TablelandTables": "0x0000000000000000000000000000000000000000",
-            "Sacd": "0x0000000000000000000000000000000000000000",
-            "ConnectionsManager": "0x0000000000000000000000000000000000000000"
+            "StreamRegistry": "0x0000000000000000000000000000000000000001",
+            "DimoStreamrNode": "0x0000000000000000000000000000000000000002",
+            "TablelandTables": "0x0000000000000000000000000000000000000003",
+            "Sacd": "0x0000000000000000000000000000000000000004",
+            "ConnectionsManager": "0x0000000000000000000000000000000000000005"
         }
     }
 }

@@ -12,6 +12,8 @@ import "../../shared/Errors.sol";
  * @notice Contract with internal Synthetic Device related functions used in multiple contracts
  */
 contract SyntheticDeviceInternal {
+    uint8 internal constant CONNECTION_MINT_SD_PERMISSION = 1;
+
     event SyntheticDeviceAttributeSet(
         uint256 indexed tokenId,
         string attribute,

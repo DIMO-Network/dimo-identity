@@ -30,6 +30,7 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
+  MockSacd,
   MockConnectionsManager,
   DevAdmin,
 } from '../typechain-types';
@@ -61,6 +62,7 @@ describe('DevAdmin', function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockSacdInstance: MockSacd;
   let mockConnectionsManagerInstance: MockConnectionsManager;
   let devAdminInstance: DevAdmin;
   let manufacturerIdInstance: ManufacturerId;
@@ -189,6 +191,10 @@ describe('DevAdmin', function () {
     );
     mockDimoCreditInstance = await MockDimoCreditFactory.connect(admin).deploy();
 
+    // Deploy MockSacd contract
+    const MockSacdFactory = await ethers.getContractFactory('MockSacd');
+    mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
+
     // Deploy MockConnectionsManager contract
     const MockConnectionsManagerFactory = await ethers.getContractFactory(
       'MockConnectionsManager'
@@ -266,6 +272,9 @@ describe('DevAdmin', function () {
     await sharedInstance
       .connect(admin)
       .setConnectionsManager(await mockConnectionsManagerInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setSacd(await mockSacdInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -1212,7 +1221,7 @@ describe('DevAdmin', function () {
         };
 
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(localMintSdInput);
 
         await expect(devAdminInstance.connect(admin).adminBurnVehicles([1, 2]))
@@ -1469,7 +1478,7 @@ describe('DevAdmin', function () {
         };
 
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(localMintSdInput);
       });
 
@@ -1799,7 +1808,7 @@ describe('DevAdmin', function () {
         };
 
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(localMintSdInput);
 
         await expect(
@@ -2385,10 +2394,10 @@ describe('DevAdmin', function () {
       ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
       await syntheticDeviceInstance
-        .connect(admin)
+        .connect(connectionOwner1)
         .mintSyntheticDeviceSign(localMintSdInput1);
       await syntheticDeviceInstance
-        .connect(admin)
+        .connect(connectionOwner1)
         .mintSyntheticDeviceSign(localMintSdInput2);
     });
 

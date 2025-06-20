@@ -237,6 +237,9 @@ describe('VehicleId', async function () {
     await sharedInstance
       .connect(admin)
       .setConnectionsManager(await mockConnectionsManagerInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setSacd(await mockSacdInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -741,7 +744,7 @@ describe('VehicleId', async function () {
         };
 
         await syntheticDeviceInstance
-          .connect(admin)
+          .connect(connectionOwner1)
           .mintSyntheticDeviceSign(localMintSdInput);
 
         await expect(vehicleIdInstance.connect(user1).burn(1))

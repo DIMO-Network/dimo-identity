@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "./VehicleInternal.sol";
 import "./SyntheticDeviceInternal.sol";
 import "../../interfaces/INFT.sol";
+import "../../interfaces/ISacd.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
@@ -11,6 +12,7 @@ import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 import "../../libraries/MapperStorage.sol";
 import "../../libraries/SharedStorage.sol";
+import "../../shared/Errors.sol" as Errors;
 
 import {ADMIN_ROLE, MINT_SD_ROLE, BURN_SD_ROLE, SET_SD_INFO_ROLE} from "../../shared/Roles.sol";
 
@@ -161,22 +163,25 @@ contract SyntheticDevice is
     }
 
     /**
-     * @notice Mints a synthetic device and pair it with a vehicle
-     * @dev Caller must have the admin role
-     * @param data Input data with the following fields:
-     *  connectionId -> Parent connection id
-     *  vehicleNode -> Vehicle node id
-     *  syntheticDeviceSig -> Synthetic Device's signature hash
-     *  vehicleOwnerSig -> Vehicle owner signature hash
-     *  syntheticDeviceAddr -> Address associated with the synthetic device
-     *  attrInfoPairs -> List of attribute-info pairs to be added
+     * @notice Mints a synthetic device and pairs it with a vehicle using signatures for verification
+     * @dev Requires signatures from both the synthetic device and the vehicle owner
+     * @dev Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the Connection ID owner.
+     * @param data Input data containing:
+     *        - connectionId: Parent connection identifier
+     *        - vehicleNode: Vehicle node identifier to pair with
+     *        - syntheticDeviceSig: Signature from the synthetic device address
+     *        - vehicleOwnerSig: Signature from the vehicle owner
+     *        - syntheticDeviceAddr: Address associated with the synthetic device
+     *        - attrInfoPairs: Attribute-info pairs to initialize the device with
      */
     function mintSyntheticDeviceSign(
         MintSyntheticDeviceInput calldata data
-    ) external onlyRole(MINT_SD_ROLE) {
+    ) external {
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        SharedStorage.Storage storage sharedStorage = SharedStorage
             .getStorage();
 
         address vehicleIdProxyAddress = VehicleStorage
@@ -184,11 +189,16 @@ contract SyntheticDevice is
             .idProxyAddress;
         address sdIdProxyAddress = sds.idProxyAddress;
 
+        if (!INFT(sharedStorage.connectionsManager).exists(data.connectionId))
+            revert InvalidParentNode(data.connectionId);
         if (
-            !INFT(SharedStorage.getStorage().connectionsManager).exists(
-                data.connectionId
+            !ISacd(sharedStorage.sacd).hasPermission(
+                sharedStorage.connectionsManager,
+                data.connectionId,
+                msg.sender,
+                CONNECTION_MINT_SD_PERMISSION
             )
-        ) revert InvalidParentNode(data.connectionId);
+        ) revert Errors.Unauthorized(msg.sender);
         if (!INFT(vehicleIdProxyAddress).exists(data.vehicleNode))
             revert InvalidNode(vehicleIdProxyAddress, data.vehicleNode);
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)

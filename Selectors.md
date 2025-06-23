@@ -32,6 +32,7 @@
 | 0x11d679c9 | adminBurnVehiclesAndDeletePairings(uint256[]) |
 | 0xb17b974b | adminCacheDimoStreamrEns() |
 | 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
+| 0xec11d45a | adminMigrateSdParents(uint256[],uint256,uint256) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
 | 0x5f741f4d | adminRemoveVehicleAttribute(string) |
 | 0xdd60fd1a | adminSetVehicleDDs((uint256,string)[]) |
@@ -66,6 +67,7 @@
 | 0x15bdaac1 | AdNotClaimed(uint256) |
 | 0x762116ae | AdPaired(uint256) |
 | 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0x5299bab7 | InvalidParentNode(uint256) |
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 | 0xc46a5168 | VehiclePaired(uint256) |
 

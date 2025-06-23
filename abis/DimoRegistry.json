@@ -267,6 +267,17 @@
                 "type": "uint256"
             }
         ],
+        "name": "InvalidParentNode",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
         "name": "VehiclePaired",
         "type": "error"
     },
@@ -619,6 +630,29 @@
             }
         ],
         "name": "adminChangeParentNode",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "sdIds",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "integrationIdParent",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "connectionIdParent",
+                "type": "uint256"
+            }
+        ],
+        "name": "adminMigrateSdParents",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1011,17 +1045,6 @@
     {
         "inputs": [],
         "name": "InvalidOwnerSignature",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-            }
-        ],
-        "name": "InvalidParentNode",
         "type": "error"
     },
     {

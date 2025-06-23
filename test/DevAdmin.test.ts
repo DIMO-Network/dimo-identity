@@ -16,6 +16,7 @@ import {
   Charging,
   DimoAccessControl,
   Nodes,
+  IntegrationId,
   Manufacturer,
   ManufacturerId,
   Vehicle,
@@ -63,6 +64,7 @@ describe('DevAdmin', function () {
   let mockDimoCreditInstance: MockDimoCredit;
   let mockConnectionsManagerInstance: MockConnectionsManager;
   let devAdminInstance: DevAdmin;
+  let integrationIdInstance: IntegrationId;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
@@ -2924,6 +2926,20 @@ describe('DevAdmin', function () {
           .withArgs(1, C.mockDdId2)
           .to.emit(devAdminInstance, 'DeviceDefinitionIdSet')
           .withArgs(2, C.mockDdId2);
+      });
+    });
+  });
+
+  describe('adminMigrateSdParents', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_MIGRATE_SD_PARENTS role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .adminMigrateSdParents([1, 2], 1, C.CONNECTION_ID_1),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_MIGRATE_SD_PARENTS}`
+        );
       });
     });
   });

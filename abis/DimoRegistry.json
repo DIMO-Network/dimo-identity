@@ -1128,31 +1128,6 @@
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "attribute",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "info",
-                "type": "string"
-            }
-        ],
-        "name": "AftermarketDeviceAttributeSet",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "uint256",
                 "name": "aftermarketDeviceNode",
                 "type": "uint256"
             },
@@ -1185,25 +1160,6 @@
             {
                 "indexed": true,
                 "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            }
-        ],
-        "name": "AftermarketDeviceNodeBurned",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
                 "name": "manufacturerId",
                 "type": "uint256"
             },
@@ -1227,31 +1183,6 @@
             }
         ],
         "name": "AftermarketDeviceNodeMinted",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "aftermarketDeviceNode",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "vehicleNode",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            }
-        ],
-        "name": "AftermarketDeviceUnpaired",
         "type": "event"
     },
     {
@@ -1475,29 +1406,6 @@
             {
                 "internalType": "bytes",
                 "name": "vehicleOwnerSig",
-                "type": "bytes"
-            }
-        ],
-        "name": "pairAftermarketDeviceSign",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "aftermarketDeviceNode",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "vehicleNode",
-                "type": "uint256"
-            },
-            {
-                "internalType": "bytes",
-                "name": "signature",
                 "type": "bytes"
             }
         ],
@@ -2380,31 +2288,6 @@
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "attribute",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "info",
-                "type": "string"
-            }
-        ],
-        "name": "VehicleAttributeSet",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "uint256",
                 "name": "manufacturerNode",
                 "type": "uint256"
             },
@@ -2825,46 +2708,6 @@
                 "internalType": "struct SacdInput",
                 "name": "sacdInput",
                 "type": "tuple"
-            }
-        ],
-        "name": "mintVehicleWithDeviceDefinition",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "manufacturerNode",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
-            {
-                "internalType": "string",
-                "name": "deviceDefinitionId",
-                "type": "string"
-            },
-            {
-                "components": [
-                    {
-                        "internalType": "string",
-                        "name": "attribute",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "info",
-                        "type": "string"
-                    }
-                ],
-                "internalType": "struct AttributeInfoPair[]",
-                "name": "attrInfo",
-                "type": "tuple[]"
             }
         ],
         "name": "mintVehicleWithDeviceDefinition",
@@ -4182,17 +4025,6 @@
             }
         ],
         "name": "TableDoesNotExist",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "caller",
-                "type": "address"
-            }
-        ],
-        "name": "Unauthorized",
         "type": "error"
     },
     {

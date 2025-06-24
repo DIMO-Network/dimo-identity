@@ -5,8 +5,7 @@ import {
     ContractCallResults,
     ContractCallContext,
 } from 'ethereum-multicall';
-import { CallContext } from 'ethereum-multicall/dist/esm/models';
-import { network } from 'hardhat';
+import { CallContext, ContractCallReturnContext } from 'ethereum-multicall/dist/esm/models';
 import { ethers } from 'ethers-v5';
 
 import addressesJSON from './data/addresses.json';
@@ -36,7 +35,7 @@ function getDimoRegistryAbi() {
     return dimoRegistryAbi;
 }
 
-export async function multicallDimoRegistry(networkName: string, calls: CallContext[]) {
+export async function multicallDimoRegistry(networkName: string, calls: CallContext[]): Promise<ContractCallReturnContext> {
     const provider = new ethers.providers.JsonRpcProvider(providerMapping[networkName]);
     const multicall = new Multicall({ ethersProvider: provider, tryAggregate: true });
 
@@ -53,34 +52,11 @@ export async function multicallDimoRegistry(networkName: string, calls: CallCont
         console.log('\nExecuting multicall...');
         const results: ContractCallResults = await multicall.call(contractCallContext);
         console.log('Multicall executed!\n');
-        return results.results['DimoRegistry'].callsReturnContext.map(callReturn => callReturn.returnValues)
+        
+        return results.results['DimoRegistry']
     } catch (error) {
         console.error('Error executing multicall:');
         console.error(error);
         throw error;
     }
 }
-
-// async function main() {
-//     try {
-//         const callReturns = await multicallDimoRegistry(
-//             network.name,
-//             [
-//                 { reference: 'getParent1', methodName: 'getParentNode', methodParameters: ['0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D', 1] },
-//                 { reference: 'getParent2', methodName: 'getParentNode', methodParameters: ['0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D', 2] },
-//                 { reference: 'getParent3', methodName: 'getParentNode', methodParameters: ['0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D', 3] },
-//                 { reference: 'getParent424', methodName: 'getParentNode', methodParameters: ['0x4804e8D1661cd1a1e5dDdE1ff458A7f878c0aC6D', 153645] },
-//             ]
-//         );
-//         console.log(callReturns)
-//     } catch (error) {
-//         console.error('Error in main function:', error);
-//     }
-// }
-
-// main().catch((error) => {
-//     console.error('Unhandled error:', error);
-//     process.exitCode = 1;
-// }).finally(() => {
-//     process.exit();
-// })

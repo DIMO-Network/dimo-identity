@@ -679,7 +679,15 @@ contract DevAdmin is AccessControlInternal {
         }
     }
 
-    // TODO Documentation
+    /**
+     * @notice Admin function to migrate synthetic device parent nodes from integration to connection
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_MIGRATE_SD_PARENTS role
+     * @dev Migrates synthetic devices that currently have an integration parent to a connection parent
+     * @dev Reverts if any synthetic device doesn't exist or doesn't have the specified integration parent
+     * @param sdIds Array of synthetic device node ids to migrate
+     * @param integrationIdParent The current integration parent node id that all synthetic devices must have
+     * @param connectionIdParent The new connection parent node id to assign to all synthetic devices
+     */
     function adminMigrateSdParents(
         uint256[] calldata sdIds,
         uint256 integrationIdParent,
@@ -709,8 +717,8 @@ contract DevAdmin is AccessControlInternal {
             if (!INFT(sdIdProxyAddress).exists(sdId))
                 revert InvalidNode(sdIdProxyAddress, sdId);
             if (
-                !(ns.nodes[sdIdProxyAddress][sdId].parentNode !=
-                    integrationIdParent)
+                ns.nodes[sdIdProxyAddress][sdId].parentNode !=
+                integrationIdParent
             ) {
                 revert InvalidParentNode(
                     ns.nodes[sdIdProxyAddress][sdId].parentNode

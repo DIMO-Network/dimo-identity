@@ -2827,30 +2827,6 @@
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
-            }
-        ],
-        "name": "getDataURI",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "data",
-                "type": "string"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "idProxyAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
             },
             {
                 "internalType": "string",
@@ -3394,43 +3370,6 @@
             }
         ],
         "name": "mintVehicleAndSdWithDeviceDefinitionSignBatch",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "idProxyAddress",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "dataUri",
-                "type": "string"
-            }
-        ],
-        "name": "BaseDataURISet",
-        "type": "event"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "idProxyAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "string",
-                "name": "_baseDataURI",
-                "type": "string"
-            }
-        ],
-        "name": "setBaseDataURI",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

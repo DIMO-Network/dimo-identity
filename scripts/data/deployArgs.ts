@@ -78,7 +78,6 @@ export const vehicleAttributes = [
   'Make',
   'Model',
   'Year',
-  'DataURI',
   'DefinitionURI',
   'ImageURI'
 ];

@@ -80,7 +80,6 @@ main([
   'Charging',
   'Shared',
   'MultipleMinter',
-  'BaseDataURI',
   'DeviceDefinitionTable',
   'DeviceDefinitionController',
   'StreamrConfigurator',

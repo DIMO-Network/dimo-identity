@@ -5,10 +5,12 @@ import "../interfaces/INFT.sol";
 import "../interfaces/IStreamRegistry.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/NodesStorage.sol";
-import "../libraries/nodes/ManufacturerStorage.sol";
-import "../libraries/nodes/VehicleStorage.sol";
+import "../libraries/SharedStorage.sol";
 import "../libraries/nodes/AftermarketDeviceStorage.sol";
+import "../libraries/nodes/IntegrationStorage.sol";
+import "../libraries/nodes/ManufacturerStorage.sol";
 import "../libraries/nodes/SyntheticDeviceStorage.sol";
+import "../libraries/nodes/VehicleStorage.sol";
 import "../libraries/streamr/StreamrConfiguratorStorage.sol";
 
 import "../shared/Roles.sol";
@@ -674,6 +676,56 @@ contract DevAdmin is AccessControlInternal {
             vs.vehicleIdToDeviceDefinitionId[vehicleId] = ddId;
 
             emit DeviceDefinitionIdSet(vehicleId, ddId);
+        }
+    }
+
+    /**
+     * @notice Admin function to migrate synthetic device parent nodes from integration to connection
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_MIGRATE_SD_PARENTS role
+     * @dev Migrates synthetic devices that currently have an integration parent to a connection parent
+     * @dev Reverts if any synthetic device doesn't exist or doesn't have the specified integration parent
+     * @param sdIds Array of synthetic device node ids to migrate
+     * @param integrationIdParent The current integration parent node id that all synthetic devices must have
+     * @param connectionIdParent The new connection parent node id to assign to all synthetic devices
+     */
+    function adminMigrateSdParents(
+        uint256[] calldata sdIds,
+        uint256 integrationIdParent,
+        uint256 connectionIdParent
+    ) external authorized(DEV_MIGRATE_SD_PARENTS) {
+        IntegrationStorage.Storage
+            storage integrationStorage = IntegrationStorage.getStorage();
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+        SharedStorage.Storage storage sharedStorage = SharedStorage
+            .getStorage();
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+
+        address connectionsManagerAddress = sharedStorage.connectionsManager;
+        address integrationIdAddress = integrationStorage.idProxyAddress;
+        address sdIdProxyAddress = sds.idProxyAddress;
+
+        if (!INFT(integrationIdAddress).exists(integrationIdParent))
+            revert InvalidNode(integrationIdAddress, integrationIdParent);
+        if (!INFT(connectionsManagerAddress).exists(connectionIdParent))
+            revert InvalidNode(connectionsManagerAddress, connectionIdParent);
+
+        uint256 sdId;
+        for (uint256 i = 0; i < sdIds.length; i++) {
+            sdId = sdIds[i];
+
+            if (!INFT(sdIdProxyAddress).exists(sdId))
+                revert InvalidNode(sdIdProxyAddress, sdId);
+            if (
+                ns.nodes[sdIdProxyAddress][sdId].parentNode !=
+                integrationIdParent
+            ) {
+                revert InvalidParentNode(
+                    ns.nodes[sdIdProxyAddress][sdId].parentNode
+                );
+            }
+
+            ns.nodes[sdIdProxyAddress][sdId].parentNode = connectionIdParent;
         }
     }
 

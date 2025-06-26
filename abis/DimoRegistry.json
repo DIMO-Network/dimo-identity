@@ -2573,6 +2573,17 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "InvalidStorageNode",
+        "type": "error"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -2646,6 +2657,51 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "deviceDefinitionId",
+                "type": "string"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "attribute",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "info",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct AttributeInfoPair[]",
+                "name": "attrInfo",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "mintVehicleWithDeviceDefinition",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -3453,6 +3509,19 @@
         "type": "event"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "storageNode",
+                "type": "address"
+            }
+        ],
+        "name": "StorageNodeSet",
+        "type": "event"
+    },
+    {
         "inputs": [],
         "name": "getConnectionsManager",
         "outputs": [
@@ -3524,6 +3593,19 @@
             {
                 "internalType": "address",
                 "name": "sacd",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getStorageNode",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "storageNode",
                 "type": "address"
             }
         ],
@@ -3604,6 +3686,19 @@
             }
         ],
         "name": "setSacd",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "storageNode",
+                "type": "address"
+            }
+        ],
+        "name": "setStorageNode",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

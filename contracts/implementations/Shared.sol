@@ -18,6 +18,7 @@ contract Shared is AccessControlInternal {
     event ManufacturerLicenseSet(address indexed manufacturerLicense);
     event ConnectionsManagerSet(address indexed connectionsManager);
     event SacdSet(address indexed sacd);
+    event StorageNodeSet(address indexed storageNode);
 
     /**
      * @notice Sets the foundation address
@@ -90,6 +91,17 @@ contract Shared is AccessControlInternal {
     }
 
     /**
+     * @notice Sets the StorageNode contract address
+     * @dev Only an admin can set the StorageNode contract address
+     * @param storageNode The StorageNode contract address
+     */
+    function setStorageNode(address storageNode) external onlyRole(ADMIN_ROLE) {
+        SharedStorage.getStorage().storageNode = storageNode;
+
+        emit StorageNodeSet(storageNode);
+    }
+
+    /**
      * @notice Gets the Foundation address
      */
     function getFoundation() external view returns (address foundation) {
@@ -137,5 +149,12 @@ contract Shared is AccessControlInternal {
      */
     function getSacd() external view returns (address sacd) {
         sacd = SharedStorage.getStorage().sacd;
+    }
+
+    /**
+     * @notice Gets the StorageNode address
+     */
+    function getStorageNode() external view returns (address storageNode) {
+        storageNode = SharedStorage.getStorage().storageNode;
     }
 }

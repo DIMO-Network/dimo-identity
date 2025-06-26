@@ -8,7 +8,9 @@ import type {
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
-  MockConnectionsManager
+  MockConnectionsManager,
+  MockSacd,
+  MockStorageNode
 } from '../typechain-types';
 import { setup, createSnapshot, revertToSnapshot, C } from '../utils';
 
@@ -22,11 +24,15 @@ describe('Shared', function () {
   let mockDimoCreditInstance: MockDimoCredit;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockConnectionsManagerInstance: MockConnectionsManager;
+  let mockSacdInstance: MockSacd;
+  let mockStorageNodeInstance: MockStorageNode;
 
   let MOCK_DIMO_TOKEN_ADDRESS: string;
   let MOCK_DIMO_CREDIT_ADDRESS: string;
   let MOCK_MANUFACTURER_LICENSE_ADDRESS: string;
   let MOCK_CONNECTIONS_ADDRESS: string;
+  let MOCK_SACD_ADDRESS: string;
+  let MOCK_STORAGE_NODE_ADDRESS: string;
 
   let admin: HardhatEthersSigner
   let nonAdmin: HardhatEthersSigner;
@@ -53,6 +59,16 @@ describe('Shared', function () {
     const MockConnectionsManagerFactory = await ethers.getContractFactory('MockConnectionsManager');
     mockConnectionsManagerInstance = await MockConnectionsManagerFactory.connect(admin).deploy(C.CONNECTIONS_MANAGER_ERC721_NAME, C.CONNECTIONS_MANAGER_ERC721_SYMBOL);
     MOCK_CONNECTIONS_ADDRESS = await mockConnectionsManagerInstance.getAddress();
+
+    // Deploy MockSacd contract
+    const MockSacdFactory = await ethers.getContractFactory('MockSacd');
+    mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
+    MOCK_SACD_ADDRESS = await mockSacdInstance.getAddress();
+
+    // Deploy MockStorageNode contract
+    const MockStorageNodeFactory = await ethers.getContractFactory('MockSacd');
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
+    MOCK_STORAGE_NODE_ADDRESS = await mockStorageNodeInstance.getAddress();
 
     await dimoAccessControlInstance
       .connect(admin)
@@ -274,6 +290,84 @@ describe('Shared', function () {
         )
           .to.emit(sharedInstance, 'ConnectionsManagerSet')
           .withArgs(MOCK_CONNECTIONS_ADDRESS);
+      });
+    });
+  });
+
+  describe('setSacd', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          sharedInstance
+            .connect(nonAdmin)
+            .setSacd(MOCK_SACD_ADDRESS)
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
+          }`
+        );
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly return Sacd address', async () => {
+        await sharedInstance
+          .connect(admin)
+          .setSacd(MOCK_SACD_ADDRESS);
+
+        const sacdAddress = await sharedInstance.getSacd();
+
+        expect(sacdAddress).to.equal(MOCK_SACD_ADDRESS);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit SacdSet event with correct params', async () => {
+        await expect(
+          sharedInstance
+            .connect(admin)
+            .setSacd(MOCK_SACD_ADDRESS)
+        )
+          .to.emit(sharedInstance, 'SacdSet')
+          .withArgs(MOCK_SACD_ADDRESS);
+      });
+    });
+  });
+
+  describe('setStorageNode', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have admin role', async () => {
+        await expect(
+          sharedInstance
+            .connect(nonAdmin)
+            .setStorageNode(MOCK_STORAGE_NODE_ADDRESS)
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.ADMIN_ROLE
+          }`
+        );
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly return Sacd address', async () => {
+        await sharedInstance
+          .connect(admin)
+          .setStorageNode(MOCK_STORAGE_NODE_ADDRESS);
+
+        const storageNodeAddress = await sharedInstance.getStorageNode();
+
+        expect(storageNodeAddress).to.equal(MOCK_STORAGE_NODE_ADDRESS);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit StorageNodeSet event with correct params', async () => {
+        await expect(
+          sharedInstance
+            .connect(admin)
+            .setStorageNode(MOCK_STORAGE_NODE_ADDRESS)
+        )
+          .to.emit(sharedInstance, 'StorageNodeSet')
+          .withArgs(MOCK_STORAGE_NODE_ADDRESS);
       });
     });
   });

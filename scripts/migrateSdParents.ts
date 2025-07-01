@@ -76,18 +76,18 @@ async function getSdParents(sdIds: string[], networkName: string, batchSize: num
  * devices that have valid parent nodes (non-zero values), which are the ones that
  * require migration.
  * 
- * @param maxId - The maximum synthetic device ID to check (will process IDs from 1 to maxId)
+ * @param first - The first synthetic device IDs (will process IDs from first to last)
+ * @param last - The last synthetic device IDs (will process IDs from first to last)
  * @param networkName - The blockchain network name to connect to (e.g., 'polygon', 'amoy')
  * @param batchSize - Maximum number of IDs to process in a single batch when fetching parent nodes (default: 100)
  * @returns An array of objects containing synthetic device IDs and their parent nodes
  *          in the format: `{ id: string, parentNode: string }`, filtered to include only
  *          devices with non-zero parent nodes
  */
-async function getSdsToMigrate(maxId: number, networkName: string, batchSize: number = 100) {
-    console.log(`\nStarting migration process on network ${networkName} for ${maxId} synthetic devices`);
+async function getSdsToMigrate(first: number, last: number, networkName: string, batchSize: number = 100) {
+    console.log(`\nStarting migration process on network ${networkName} from ${Math.min(first, last)} to ${Math.max(first, last)} synthetic device IDs`);
 
-    const sdIds = Array.from({ length: maxId }, (_, i) => (i + 1).toString());
-    console.log(`Generated ${sdIds.length} IDs for processing`);
+    const sdIds = createIntArrayFromRange(first, last)
 
     console.log('Fetching parent nodes for all synthetic devices...');
     const results = await getSdParents(sdIds, networkName, batchSize);
@@ -103,6 +103,41 @@ async function getSdsToMigrate(maxId: number, networkName: string, batchSize: nu
 }
 
 /**
+ * Identifies synthetic devices that need to be burned by finding those with a specific parent node.
+ * 
+ * This function generates a sequence of synthetic device IDs up to the specified maximum,
+ * then fetches their parent node information. It filters the results to return only
+ * devices that have the specified parent node (matching the provided `parentId`), which are
+ * the ones that require burning.
+ *
+ * @param first - The first synthetic device IDs (will process IDs from first to last)
+ * @param last - The last synthetic device IDs (will process IDs from first to last)
+ * @param parentId - The specific parent node ID to filter synthetic devices by
+ * @param networkName - The blockchain network name to connect to (e.g., 'polygon', 'amoy')
+ * @param batchSize - Maximum number of IDs to process in a single batch when fetching parent nodes (default: 100)
+ * @returns A Promise that resolves to an array of objects containing synthetic device IDs and their parent nodes
+ *          in the format: `{ id: string, parentNode: string }`, filtered to include only
+ *          devices with the specified `parentId`
+ */
+async function getSdsToBurn(first: number, last: number, parentId: string, networkName: string, batchSize: number = 100) {
+    console.log(`\nStarting migration process on network ${networkName} from ${Math.min(first, last)} to ${Math.max(first, last)} synthetic device IDs`);
+
+    const sdIds = createIntArrayFromRange(first, last)
+
+    console.log('Fetching parent nodes for all synthetic devices...');
+    const results = await getSdParents(sdIds, networkName, batchSize);
+
+    // Get devices with parents
+    const devicesWithParents = results.filter(result =>
+        result && result.parentNode === parentId
+    );
+
+    console.log(`Found ${devicesWithParents.length} devices with parent ${parentId} out of ${results.length} total devices\n`);
+
+    return devicesWithParents;
+}
+
+/**
  * Migrates synthetic device parent nodes to the new connection-based structure.
  * 
  * This function identifies synthetic devices that need migration, groups them by
@@ -111,7 +146,8 @@ async function getSdsToMigrate(maxId: number, networkName: string, batchSize: nu
  * relationship from integration nodes to connection nodes.
  * 
  * @param signer - The Ethereum signer with admin permissions to execute the migration
- * @param maxId - The maximum synthetic device ID to check for migration (will process IDs from 1 to maxId)
+ * @param first - The first synthetic device IDs (will process IDs from first to last)
+ * @param last - The last synthetic device IDs (will process IDs from first to last)
  * @param networkName - The blockchain network name to connect to (e.g., 'polygon', 'amoy')
  * @param devAdminBatchSize - Maximum number of devices to include in a single contract call (default: 100)
  * @param multicallBatchSize - Maximum number of IDs to process in a single batch when fetching parent nodes (default: 500)
@@ -119,13 +155,14 @@ async function getSdsToMigrate(maxId: number, networkName: string, batchSize: nu
  */
 async function migrateSdParents(
     signer: HardhatEthersSigner,
-    maxId: number,
+    first: number,
+    last: number,
     networkName: string,
     devAdminBatchSize: number = 100,
     multicallBatchSize: number = 500
 ) {
     console.log(`\nStarting SD parent migration with batch size ${devAdminBatchSize}`);
-    const sdsToMigrate = await getSdsToMigrate(maxId, networkName, multicallBatchSize);
+    const sdsToMigrate = await getSdsToMigrate(first, last, networkName, multicallBatchSize);
 
     if (sdsToMigrate.length === 0) {
         console.log('No synthetic devices need migration. Exiting.');
@@ -177,6 +214,7 @@ async function migrateSdParents(
         // Process in batches
         for (let i = 0; i < sdIds.length; i += devAdminBatchSize) {
             const batchIds = sdIds.slice(i, i + devAdminBatchSize);
+            const _gasPrice = await getGasPrice(10n);
             console.log(`Processing batch ${Math.floor(i / devAdminBatchSize) + 1}/${Math.ceil(sdIds.length / devAdminBatchSize)}: ${batchIds.length} devices`);
 
             try {
@@ -184,7 +222,8 @@ async function migrateSdParents(
                 const tx = await devAdminInstance.adminMigrateSdParents(
                     batchIds,
                     integrationId,
-                    connectionId
+                    connectionId,
+                    { gasPrice: _gasPrice }
                 );
 
                 console.log(`Transaction submitted: ${tx.hash}`);
@@ -203,24 +242,42 @@ async function migrateSdParents(
     console.log('\nMigration completed!');
 }
 
+async function getGasPrice(bump: bigint = 20n): Promise<string> {
+    const price = (await ethers.provider.getFeeData()).gasPrice as bigint;
+
+    return (price * bump / 100n + price).toString();
+}
+
+function createIntArrayFromRange(a: number, b: number): string[] {
+  const min = Math.min(a, b);
+  const max = Math.max(a, b);
+  const length = max - min + 1;
+
+  return Array.from({ length: length }, (_, i) => (min + i).toString());
+}
+
 async function main() {
     console.log(`Starting migration script on network: ${network.name}`);
 
     try {
-        const forkNetworkName = 'polygon'
-        const [signer] = await getAccounts(network.name, forkNetworkName)
+        const sdsBurn = await getSdsToBurn(140000, 166853, '3', 'polygon', 5000);
+        console.log(sdsBurn)
+        console.log(sdsBurn.length);
+        // const forkNetworkName = 'polygon'
+        // const [signer] = await getAccounts(network.name)
 
-        console.log(`Using signer: ${signer.address}`);
+        // console.log(`Using signer: ${signer.address}`);
 
-        // 423 Amoy num
-        // 166780 Polygon num
-        const maxId = 500;
-        const devAdminBatchSize = 500;
-        const multicallBatchSize = 5000;
+        // // 423 Amoy num
+        // // 166853 Polygon num
+        // const first = 1;
+        // const last = 166853;
+        // const devAdminBatchSize = 1000;
+        // const multicallBatchSize = 5000;
 
-        await migrateSdParents(signer, maxId, forkNetworkName, devAdminBatchSize, multicallBatchSize);
+        // await migrateSdParents(signer, first, last, forkNetworkName, devAdminBatchSize, multicallBatchSize);
 
-        console.log('Migration completed successfully');
+        // console.log('Migration completed successfully');
     } catch (error) {
         console.error('Error during migration:', error);
     }

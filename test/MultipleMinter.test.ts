@@ -21,7 +21,8 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockSacd,
-  MockConnectionsManager
+  MockConnectionsManager,
+  MockStorageNode
 } from '../typechain-types';
 import {
   setup,
@@ -54,10 +55,11 @@ describe('MultipleMinter', function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockConnectionsManagerInstance: MockConnectionsManager;
+  let mockSacdInstance: MockSacd;
+  let mockStorageNodeInstance: MockStorageNode;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let sdIdInstance: SyntheticDeviceId;
-  let mockSacdInstance: MockSacd;
 
   let DIMO_REGISTRY_ADDRESS: string;
 
@@ -67,6 +69,7 @@ describe('MultipleMinter', function () {
   let manufacturer2: HardhatEthersSigner;
   let connectionOwner1: HardhatEthersSigner;
   let connectionOwner2: HardhatEthersSigner;
+  let storageNodeOwner1: HardhatEthersSigner;
   let minterWithPermission1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
@@ -84,6 +87,7 @@ describe('MultipleMinter', function () {
       manufacturer2,
       connectionOwner1,
       connectionOwner2,
+      storageNodeOwner1,
       minterWithPermission1,
       user1,
       user2,
@@ -157,6 +161,10 @@ describe('MultipleMinter', function () {
     mockConnectionsManagerInstance = await MockConnectionsManagerFactory
       .connect(admin)
       .deploy(C.CONNECTIONS_MANAGER_ERC721_NAME, C.CONNECTIONS_MANAGER_ERC721_SYMBOL);
+    
+    // Deploy MockStorageNode contract
+    const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy(DIMO_REGISTRY_ADDRESS);
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -173,11 +181,6 @@ describe('MultipleMinter', function () {
     await sdIdInstance
       .connect(admin)
       .grantRole(C.NFT_BURNER_ROLE, DIMO_REGISTRY_ADDRESS);
-
-    // Grant synthetic device minting permission to admin
-    await sharedInstance.connect(admin).setSacd(mockSacdInstance);
-    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_1, minterWithPermission1.address, 12, DEFAULT_EXPIRATION, '');
-    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_2, minterWithPermission1.address, 12, DEFAULT_EXPIRATION, '');
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -231,6 +234,9 @@ describe('MultipleMinter', function () {
     await sharedInstance
       .connect(admin)
       .setSacd(await mockSacdInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setStorageNode(await mockStorageNodeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -280,6 +286,10 @@ describe('MultipleMinter', function () {
         C.mockManufacturerAttributeInfoPairs
       );
 
+    // Grant synthetic device minting permission to admin
+    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_1, minterWithPermission1.address, 12, DEFAULT_EXPIRATION, '');
+    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_2, minterWithPermission1.address, 12, DEFAULT_EXPIRATION, '');
+
     // Mint Connection ID
     await mockConnectionsManagerInstance
       .mint(
@@ -290,6 +300,18 @@ describe('MultipleMinter', function () {
       .mint(
         connectionOwner2.address,
         C.CONNECTION_NAME_2,
+      );
+
+    // Mint Storage Node IDs
+    await mockStorageNodeInstance
+      .mint(
+        admin.address,
+        C.STORAGE_NODE_LABEL_DEFAULT
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_1
       );
 
     // Setting DimoRegistry address in the Proxy IDs
@@ -306,10 +328,10 @@ describe('MultipleMinter', function () {
 
     await vehicleInstance
       .connect(admin)
-    ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     await vehicleInstance
       .connect(admin)
-    ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
   });
 
   beforeEach(async () => {

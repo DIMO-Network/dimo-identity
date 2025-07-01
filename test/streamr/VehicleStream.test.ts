@@ -24,7 +24,8 @@ import {
   VehicleStream,
   Shared,
   MockDimoCredit,
-  MockSacd
+  MockSacd,
+  MockStorageNode
 } from '../../typechain-types';
 
 import {
@@ -56,6 +57,7 @@ describe('VehicleStream', async function () {
   let streamRegistry: StreamRegistry;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockSacdInstance: MockSacd;
+  let mockStorageNodeInstance: MockStorageNode;
 
   let DIMO_REGISTRY_ADDRESS: string;
   let VEHICLE_ID_ADDRESS: string;
@@ -64,6 +66,7 @@ describe('VehicleStream', async function () {
   let admin: HardhatEthersSigner;
   let streamrAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
+  let storageNodeOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
   let userPrivileged1: HardhatEthersSigner;
@@ -98,6 +101,7 @@ describe('VehicleStream', async function () {
       admin,
       streamrAdmin,
       manufacturer1,
+      storageNodeOwner1,
       user1,
       user2,
       userPrivileged1,
@@ -149,6 +153,10 @@ describe('VehicleStream', async function () {
     const MockSacdFactory = await ethers.getContractFactory('MockSacd');
     mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
 
+    // Deploy MockStorageNode contract
+    const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy(DIMO_REGISTRY_ADDRESS);
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
     // Grant NFT minter roles to DIMO Registry contract
@@ -190,6 +198,9 @@ describe('VehicleStream', async function () {
     await sharedInstance
       .connect(admin)
       .setDimoCredit(await mockDimoCreditInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setStorageNode(await mockStorageNodeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -224,6 +235,18 @@ describe('VehicleStream', async function () {
         C.mockManufacturerAttributeInfoPairs
       );
 
+    // Mint Storage Node IDs
+    await mockStorageNodeInstance
+      .mint(
+        admin.address,
+        C.STORAGE_NODE_LABEL_DEFAULT
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_1
+      );
+
     // Setting DIMORegistry address
     await manufacturerIdInstance
       .connect(admin)
@@ -246,7 +269,7 @@ describe('VehicleStream', async function () {
 
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
     await setupStreamr(DIMO_REGISTRY_ADDRESS);
 
@@ -583,7 +606,7 @@ describe('VehicleStream', async function () {
       it('Should revert if there is no stream ID associated to the vehicle ID', async () => {
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleStreamInstance
@@ -787,7 +810,7 @@ describe('VehicleStream', async function () {
       it('Should revert if there is no stream ID associated to the vehicle ID', async () => {
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleStreamInstance

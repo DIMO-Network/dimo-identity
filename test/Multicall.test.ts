@@ -19,6 +19,7 @@ import {
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
+  MockStorageNode,
   Multicall
 } from '../typechain-types';
 import {
@@ -47,6 +48,7 @@ describe('Multicall', function () {
   let mockDimoTokenInstance: MockDimoToken;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockStorageNodeInstance: MockStorageNode;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
@@ -56,6 +58,7 @@ describe('Multicall', function () {
 
   let admin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
+  let storageNodeOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let adAddress1: HardhatEthersSigner;
   let adAddress2: HardhatEthersSigner;
@@ -71,6 +74,7 @@ describe('Multicall', function () {
     [
       admin,
       manufacturer1,
+      storageNodeOwner1,
       user1,
       adAddress1,
       adAddress2
@@ -133,6 +137,10 @@ describe('Multicall', function () {
     const MockManufacturerLicenseFactory = await ethers.getContractFactory('MockManufacturerLicense');
     mockManufacturerLicenseInstance = await MockManufacturerLicenseFactory.connect(admin).deploy();
 
+    // Deploy MockStorageNode contract
+    const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy(DIMO_REGISTRY_ADDRESS);
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
     // Grant NFT minter roles to DIMO Registry contract
@@ -186,6 +194,9 @@ describe('Multicall', function () {
     await sharedInstance
       .connect(admin)
       .setManufacturerLicense(await mockManufacturerLicenseInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setStorageNode(await mockStorageNodeInstance.getAddress());
 
     // Setup Charging variables
     await chargingInstance
@@ -229,6 +240,18 @@ describe('Multicall', function () {
       );
 
     await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
+
+    // Mint Storage Node IDs
+    await mockStorageNodeInstance
+      .mint(
+        admin.address,
+        C.STORAGE_NODE_LABEL_DEFAULT
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_1
+      );
 
     // Grant Transferer role to DIMO Registry
     await adIdInstance
@@ -415,7 +438,7 @@ describe('Multicall', function () {
     it('Should return information about vehicle', async () => {
       await vehicleInstance
         .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
       const getInfoEncoded1 = nodesInstance.interface.encodeFunctionData('getInfo', [
         await vehicleIdInstance.getAddress(),

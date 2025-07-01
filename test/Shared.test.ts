@@ -67,7 +67,7 @@ describe('Shared', function () {
 
     // Deploy MockStorageNode contract
     const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
-    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy(await deployments.dimoRegistryInstance.getAddress());
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy(await deployments.DIMORegistry.getAddress());
     MOCK_STORAGE_NODE_ADDRESS = await mockStorageNodeInstance.getAddress();
 
     await dimoAccessControlInstance

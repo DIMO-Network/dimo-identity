@@ -54,12 +54,12 @@ describe('Vehicle', function () {
   let mockDimoCreditInstance: MockDimoCredit;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockConnectionsManagerInstance: MockConnectionsManager;
+  let mockSacdInstance: MockSacd;
+  let mockStorageNodeInstance: MockStorageNode;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
   let sdIdInstance: SyntheticDeviceId;
-  let mockSacdInstance: MockSacd;
-  let mockStorageNodeInstance: MockStorageNode;
 
   let DIMO_REGISTRY_ADDRESS: string;
 

@@ -110,7 +110,7 @@
                 ]
             },
             "SyntheticDevice": {
-                "address": "0x817F728D5B24f61fA3DaD9Fc2B37A497ba3b400b",
+                "address": "0xF60f3DC688646b734e9958a404b9ADA897472a21",
                 "selectors": [
                     "0xe1f371df",
                     "0x7c7c9978",
@@ -140,22 +140,24 @@
                 ]
             },
             "Shared": {
-                "address": "0xcE543C1A2dd4959a8240123D868E94e1d57a879A",
+                "address": "0xDcfea3b862eBf24B79b7e5DC345b1117BE247943",
                 "selectors": [
                     "0xb0c1d1df",
                     "0xcfe55b7d",
                     "0x77898251",
                     "0xa2bc6cdf",
                     "0x170e4293",
+                    "0xc3d8478c",
                     "0x2fee22f4",
                     "0x4fa9ff16",
                     "0x5b6c1979",
                     "0xdb3543f5",
-                    "0xea9ae2f5"
+                    "0xea9ae2f5",
+                    "0xc63f7dd2"
                 ]
             },
             "MultipleMinter": {
-                "address": "0x330E251d8422391FE58023320A1C9D1e3c2b82E9",
+                "address": "0x5888a817e2A8fc2A611A91D225919C444B7d0834",
                 "selectors": [
                     "0xfb1a28e8",
                     "0xd23965e3",
@@ -186,7 +188,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0xe81554bF0f8F2daD677fA0185D28f035605e1ED2",
+                "address": "0x4fb6ffE43Caefb1C528941FD970823364EF72fD4",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -195,6 +197,7 @@
                     "0x11d679c9",
                     "0xb17b974b",
                     "0x56936962",
+                    "0xec11d45a",
                     "0x3febacab",
                     "0x5f741f4d",
                     "0xdd60fd1a",
@@ -287,7 +290,7 @@
             "StreamRegistry": "0x0D483E10612F327FC11965Fc82E90dC19b141641",
             "DimoStreamrNode": "0x3F3ab5A20F704D6e7299EdEE84200fDA5d849BE7",
             "TablelandTables": "0x5c4e6A9e5C1e1BF445A062006faF19EA6c49aFeA",
-            "Sacd": "0xEF919b3793deaae1637523d483e3434ae113004E",
+            "Sacd": "0x3c152B5d96769661008Ff404224d6530FCAC766d",
             "ConnectionsManager": "0x41799E9Dc893722844E771a1C1cAf3BBc2876132"
         }
     },
@@ -746,7 +749,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0xdd97d4565EAE6925D03E8e55bc0ed96CE0443436",
+                "address": "0xF54fd67506E79da1Ea1E002116F83F28bdfc9163",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -755,6 +758,7 @@
                     "0x11d679c9",
                     "0xb17b974b",
                     "0x56936962",
+                    "0xec11d45a",
                     "0x3febacab",
                     "0x5f741f4d",
                     "0xdd60fd1a",

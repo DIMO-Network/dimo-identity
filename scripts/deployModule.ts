@@ -6,6 +6,7 @@ import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { DIMORegistry, DimoAccessControl } from '../typechain-types';
 import * as C from './data/deployArgs';
 import { getSelectors, AddressesByNetwork, NftArgs } from '../utils';
+import { getAccounts } from './helpers';
 
 function getAddresses(): AddressesByNetwork {
   return JSON.parse(
@@ -600,52 +601,22 @@ async function deployContract(
 }
 
 async function main(networkFlag?: string) {
-  // eslint-disable-next-line prefer-const
-  let [deployer, funder] = await ethers.getSigners();
-  let networkName = network.name;
+  const forkNetworkName = 'polygon'
+  const [signer] = await getAccounts(network.name, forkNetworkName)
+  
+  const instances1 = await updateModule(signer, 'DevAdmin', forkNetworkName);
+  writeAddresses(instances1, forkNetworkName);
 
-  if (
-    network.name === 'hardhat' ||
-    network.name === 'localhost' ||
-    network.name === 'tenderly'
-  ) {
-    networkName = networkFlag || 'amoy'; // Use the flag if provided, otherwise default to 'polygon'
-    // console.log(deployer.address);
-
-    // 0xCED3c922200559128930180d3f0bfFd4d9f4F123 -> polygon
-    // 0x1741eC2915Ab71Fc03492715b5640133dA69420B -> deployer
-    // 0xC008EF40B0b42AAD7e34879EB024385024f753ea -> amoy
-
-    await network.provider.request({
-      method: 'hardhat_impersonateAccount',
-      params: ['0xC008EF40B0b42AAD7e34879EB024385024f753ea'],
-    });
-
-    deployer = await ethers.getSigner(
-      '0xC008EF40B0b42AAD7e34879EB024385024f753ea',
-    );
-
-    await funder.sendTransaction({
-      to: deployer.address,
-      value: ethers.parseEther('100'),
-    });
-  }
-
-  // let instances = getAddresses();
-
-  const instances1 = await updateModule(deployer, 'DevAdmin', networkName);
-  writeAddresses(instances1, networkName);
-
-  const instances2 = await updateModule(deployer, 'Manufacturer', networkName);
-  writeAddresses(instances2, networkName);
+  const instances2 = await updateModule(signer, 'Manufacturer', forkNetworkName);
+  writeAddresses(instances2, forkNetworkName);
 
   const nftInstances = await upgradeNft(
-    deployer,
+    signer,
     'ManufacturerId',
-    networkName,
+    forkNetworkName,
     true
   );
-  writeAddresses(nftInstances, networkName);
+  writeAddresses(nftInstances, forkNetworkName);
 }
 
 main().catch((error) => {

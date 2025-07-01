@@ -37,7 +37,8 @@ export const roles = {
     DEV_CHANGE_PARENT_NODE: _hashRole('DEV_CHANGE_PARENT_NODE'),
     DEV_CACHE_ENS: _hashRole('DEV_CACHE_ENS'),
     DEV_REMOVE_ATTR: _hashRole('DEV_REMOVE_ATTR'),
-    DEV_SET_DD: _hashRole('DEV_SET_DD')
+    DEV_SET_DD: _hashRole('DEV_SET_DD'),
+    DEV_MIGRATE_SD_PARENTS: _hashRole('DEV_MIGRATE_SD_PARENTS')
   },
   nfts: {
     MINTER_ROLE: _hashRole('MINTER_ROLE'),

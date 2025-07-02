@@ -72,6 +72,48 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     // ***** Interaction with nodes *****//
 
+    /**
+     * @notice Function to mint a vehicle with a Device Definition Id
+     * @dev Kept for now for backwards compatibility, to be replaced by the next function
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param deviceDefinitionId The Device Definition Id
+     * @param attrInfo List of attribute-info pairs to be added
+     */
+    function mintVehicleWithDeviceDefinition(
+        uint256 manufacturerNode,
+        address owner,
+        string calldata deviceDefinitionId,
+        AttributeInfoPair[] calldata attrInfo
+    ) external {
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
+
+        emit VehicleNodeMintedWithDeviceDefinition(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
+
+        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+    }
+
     // TODO Documentation
     /**
      * @notice Function to mint a vehicle with a Device Definition Id
@@ -124,6 +166,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Function to mint a vehicle with a Device Definition Id and set permissions with SACD
+     * @dev Kept for now for backwards compatibility, to be replaced by the next function
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
@@ -169,6 +212,64 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
 
         INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
+    }
+
+    // TODO Documentation
+    /**
+     * @notice Function to mint a vehicle with a Device Definition Id and set permissions with SACD
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param deviceDefinitionId The Device Definition Id
+     * @param attrInfo List of attribute-info pairs to be added
+     * @param sacdInput SACD input args
+     *  grantee -> The address to receive the permissions
+     *  permissions -> The uint256 that represents the byte array of permissions
+     *  expiration -> Expiration of the permissions
+     *  source -> The URI source associated with the permissions
+     */
+    function mintVehicleWithDeviceDefinition(
+        uint256 manufacturerNode,
+        address owner,
+        uint256 storageNodeId,
+        string calldata deviceDefinitionId,
+        AttributeInfoPair[] calldata attrInfo,
+        SacdInput calldata sacdInput
+    ) external {
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        _validateStorageNodeId(storageNodeId);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
+
+        emit VehicleNodeMintedWithDeviceDefinition(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
+
+        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+
+        INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
+
+        IStorageNode(SharedStorage.getStorage().storageNode).setNodeForVehicle(
+            newTokenId,
+            storageNodeId
+        );
     }
 
     /**

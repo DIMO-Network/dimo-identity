@@ -464,7 +464,7 @@ describe('Vehicle', function () {
           'AttributeNotWhitelisted'
         ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
       });
-      it('Should revert Storage Node ID does not exist', async () => {
+      it('Should revert if Storage Node ID does not exist', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
@@ -586,7 +586,7 @@ describe('Vehicle', function () {
           C.mockVehicleAttributeInfoPairs
         )
 
-        const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(1);        
+        const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(1);
         expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
       });
       it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
@@ -649,7 +649,7 @@ describe('Vehicle', function () {
     });
   });
 
-  describe('mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))', () => {
+  describe('mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))', () => {
     let sacdInput: SacdInput;
     before(() => {
       sacdInput = {
@@ -664,9 +664,10 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
             99,
             user1.address,
+            C.STORAGE_NODE_ID_1,
             C.mockDdId1,
             C.mockVehicleAttributeInfoPairs,
             sacdInput
@@ -678,9 +679,10 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
             1,
             user1.address,
+            C.STORAGE_NODE_ID_1,
             C.mockDdId1,
             C.mockVehicleAttributeInfoPairsNotWhitelisted,
             sacdInput
@@ -690,15 +692,33 @@ describe('Vehicle', function () {
           'AttributeNotWhitelisted'
         ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
       });
+      it('Should revert if Storage Node ID does not exist', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
+            1,
+            user1.address,
+            99,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairsNotWhitelisted,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(
+          vehicleInstance,
+          'InvalidStorageNode'
+        ).withArgs(99);
+      });
     });
 
     context('State', () => {
       it('Should correctly set parent node', async () => {
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
           1,
           user1.address,
+          C.STORAGE_NODE_ID_1,
           C.mockDdId1,
           C.mockVehicleAttributeInfoPairs,
           sacdInput
@@ -713,9 +733,10 @@ describe('Vehicle', function () {
       it('Should correctly set node owner', async () => {
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
           1,
           user1.address,
+          C.STORAGE_NODE_ID_1,
           C.mockDdId1,
           C.mockVehicleAttributeInfoPairs,
           sacdInput
@@ -726,9 +747,10 @@ describe('Vehicle', function () {
       it('Should correctly set Device Definition Id', async () => {
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
           1,
           user1.address,
+          C.STORAGE_NODE_ID_1,
           C.mockDdId1,
           C.mockVehicleAttributeInfoPairs,
           sacdInput
@@ -742,9 +764,10 @@ describe('Vehicle', function () {
       it('Should correctly set infos', async () => {
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
           1,
           user1.address,
+          C.STORAGE_NODE_ID_1,
           C.mockDdId1,
           C.mockVehicleAttributeInfoPairs,
           sacdInput
@@ -769,9 +792,10 @@ describe('Vehicle', function () {
         await expect(() =>
           vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
             1,
             user1.address,
+            C.STORAGE_NODE_ID_1,
             C.mockDdId1,
             C.mockVehicleAttributeInfoPairs,
             sacdInput
@@ -789,9 +813,10 @@ describe('Vehicle', function () {
 
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
           1,
           user1.address,
+          C.STORAGE_NODE_ID_1,
           C.mockDdId1,
           C.mockVehicleAttributeInfoPairs,
           sacdInput
@@ -801,6 +826,25 @@ describe('Vehicle', function () {
           await mockSacdInstance.permissionRecords(await vehicleIdInstance.getAddress(), 1, 0, user2.address)
         ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source])
       });
+      it('Should correctly set Storage Node ID for vehicle ID', async () => {
+        const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(1);
+        expect(nodeIdForVehicleBefore).to.equal(0)
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
+          1,
+          user1.address,
+          C.STORAGE_NODE_ID_1,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs,
+          sacdInput
+        )
+
+        const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(1);
+        expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+      });
+      it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
     });
 
     context('Events', () => {
@@ -808,9 +852,10 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
             1,
             user1.address,
+            C.STORAGE_NODE_ID_1,
             C.mockDdId1,
             C.mockVehicleAttributeInfoPairs,
             sacdInput
@@ -823,9 +868,10 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
             1,
             user1.address,
+            C.STORAGE_NODE_ID_1,
             C.mockDdId1,
             C.mockVehicleAttributeInfoPairs,
             sacdInput
@@ -848,9 +894,10 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
             1,
             user1.address,
+            C.STORAGE_NODE_ID_1,
             C.mockDdId1,
             [],
             sacdInput

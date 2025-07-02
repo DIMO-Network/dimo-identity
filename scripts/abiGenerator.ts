@@ -61,7 +61,7 @@ function removeDuplicateDefinitions(abi: any[]): any[] {
     // Create a unique key based on the definition type and name
     const key = `${item.type}_${item.name}`;
     
-    if (!seenDefinitions.has(key)) {
+    if (!seenDefinitions.has(key) || item.type === 'function') {
       // First time seeing this definition, add it to the result
       seenDefinitions.set(key, result.length);
       result.push(item);

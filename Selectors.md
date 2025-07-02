@@ -317,7 +317,9 @@
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
 | 0x8b04a18b | mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[]) |
+| 0x8bf71ebc | mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string)) |
 | 0x97c95b2a | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string)) |
+| 0xd84baff1 | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[]) |
 | 0x8dca2b8e | mintVehicleWithDeviceDefinitionSign(uint256,address,string,(string,string)[],bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
 | 0xd9c3ae61 | setVehicleInfo(uint256,(string,string)[]) |

@@ -1417,6 +1417,29 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vehicleNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+            }
+        ],
+        "name": "pairAftermarketDeviceSign",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256[]",
                 "name": "aftermarketDeviceNodeList",
                 "type": "uint256[]"
@@ -2675,6 +2698,185 @@
                 "internalType": "uint256",
                 "name": "storageNodeId",
                 "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "deviceDefinitionId",
+                "type": "string"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "attribute",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "info",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct AttributeInfoPair[]",
+                "name": "attrInfo",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "mintVehicleWithDeviceDefinition",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "deviceDefinitionId",
+                "type": "string"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "attribute",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "info",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct AttributeInfoPair[]",
+                "name": "attrInfo",
+                "type": "tuple[]"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "grantee",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "permissions",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "expiration",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "source",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct SacdInput",
+                "name": "sacdInput",
+                "type": "tuple"
+            }
+        ],
+        "name": "mintVehicleWithDeviceDefinition",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "deviceDefinitionId",
+                "type": "string"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "attribute",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "info",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct AttributeInfoPair[]",
+                "name": "attrInfo",
+                "type": "tuple[]"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "grantee",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "permissions",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "expiration",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "source",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct SacdInput",
+                "name": "sacdInput",
+                "type": "tuple"
+            }
+        ],
+        "name": "mintVehicleWithDeviceDefinition",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
             },
             {
                 "internalType": "string",

@@ -57,6 +57,18 @@ export type MintVehicleAndSdInput = {
   attrInfoPairsDevice: AttributeInfoPair[]
 };
 
+export type MintVehicleAndSdInputWithSdId = {
+  manufacturerNode: string,
+  owner: string,
+  storageNodeId: string,
+  attrInfoPairsVehicle: AttributeInfoPair[],
+  connectionId: string,
+  vehicleOwnerSig: string,
+  syntheticDeviceSig: string,
+  syntheticDeviceAddr: string,
+  attrInfoPairsDevice: AttributeInfoPair[]
+};
+
 export type DeviceDefinitionInput = {
   id: string,
   model: string,

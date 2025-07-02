@@ -12,6 +12,7 @@ import "../../shared/Errors.sol";
  * @notice Contract with internal Vehicle related functions used in multiple contracts
  */
 contract VehicleInternal {
+    // TODO Should I change the signature to add Storage Node ID?
     bytes32 internal constant MINT_VEHICLE_TYPEHASH =
         keccak256(
             "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"

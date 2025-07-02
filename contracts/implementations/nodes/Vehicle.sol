@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./VehicleInternal.sol";
 import "../charging/ChargingInternal.sol";
+import "../storageNode/StorageNodeInternal.sol";
 import "../../interfaces/INFT.sol";
 import "../../interfaces/IStorageNode.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
@@ -138,7 +139,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             )
         ) revert InvalidParentNode(manufacturerNode);
 
-        _validateStorageNodeId(storageNodeId);
+        StorageNodeInternal._validateStorageNodeId(storageNodeId);
 
         uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
@@ -244,7 +245,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             )
         ) revert InvalidParentNode(manufacturerNode);
 
-        _validateStorageNodeId(storageNodeId);
+        StorageNodeInternal._validateStorageNodeId(storageNodeId);
 
         uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
@@ -365,7 +366,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             )
         ) revert InvalidParentNode(manufacturerNode);
 
-        _validateStorageNodeId(storageNodeId);
+        StorageNodeInternal._validateStorageNodeId(storageNodeId);
 
         uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
@@ -572,18 +573,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             i++
         ) {
             delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
-        }
-    }
-
-    // TODO Documentation
-    function _validateStorageNodeId(uint256 storageNodeId) private view {
-        // TODO Return default StorageNode
-        if (storageNodeId == 0) return;
-
-        SharedStorage.Storage storage ss = SharedStorage.getStorage();
-
-        if (!IStorageNode(ss.storageNode).exists(storageNodeId)) {
-            revert InvalidStorageNode(storageNodeId);
         }
     }
 }

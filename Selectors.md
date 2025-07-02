@@ -436,6 +436,7 @@
 #### Functions
 | Selector | Signature |
 |-|-|
+| 0x688ecea4 | mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
 | 0xfb1a28e8 | mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
 | 0xd23965e3 | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
 | 0x58657dcc | mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
@@ -458,6 +459,7 @@
 | 0x38a85a8d | InvalidOwnerSignature() |
 | 0x5299bab7 | InvalidParentNode(uint256) |
 | 0xf8e95d55 | InvalidSdSignature() |
+| 0x65745f79 | InvalidStorageNode(uint256) |
 | 0x8e4a23d6 | Unauthorized(address) |
 
 ## DeviceDefinitionTable

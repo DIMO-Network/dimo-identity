@@ -907,7 +907,7 @@ describe('Vehicle', function () {
     });
   });
 
-  describe('mintVehicleWithDeviceDefinitionSign', () => {
+  describe('mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)', () => {
     let signature: string;
     before(async () => {
       signature = await signMessage({
@@ -929,13 +929,14 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(nonAdmin)
-            .mintVehicleWithDeviceDefinitionSign(
-              99,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
+          ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+            99,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
         ).to.be.revertedWith(
           `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_ROLE
           }`
@@ -945,13 +946,14 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinitionSign(
-              99,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
+          ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+            99,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
         ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
           .withArgs(99);
       });
@@ -959,17 +961,35 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinitionSign(
-              1,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairsNotWhitelisted,
-              signature
-            )
+          ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairsNotWhitelisted,
+            signature
+          )
         ).to.be.revertedWithCustomError(
           vehicleInstance,
           'AttributeNotWhitelisted'
         ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+      it('Should revert if Storage Node ID does not exist', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            99,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
+        ).to.be.revertedWithCustomError(
+          vehicleInstance,
+          'InvalidStorageNode'
+        ).withArgs(99);
       });
 
       context('Wrong signature', () => {
@@ -991,13 +1011,14 @@ describe('Vehicle', function () {
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleWithDeviceDefinitionSign(
-                1,
-                user1.address,
-                C.mockDdId1,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+            ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+              1,
+              user1.address,
+              C.STORAGE_NODE_ID_1,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              invalidSignature
+            )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if domain version is incorrect', async () => {
@@ -1018,13 +1039,14 @@ describe('Vehicle', function () {
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleWithDeviceDefinitionSign(
-                1,
-                user1.address,
-                C.mockDdId1,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+            ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+              1,
+              user1.address,
+              C.STORAGE_NODE_ID_1,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              invalidSignature
+            )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if domain chain ID is incorrect', async () => {
@@ -1045,13 +1067,14 @@ describe('Vehicle', function () {
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleWithDeviceDefinitionSign(
-                1,
-                user1.address,
-                C.mockDdId1,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+            ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+              1,
+              user1.address,
+              C.STORAGE_NODE_ID_1,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              invalidSignature
+            )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if manufactuer node is incorrect', async () => {
@@ -1071,13 +1094,14 @@ describe('Vehicle', function () {
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleWithDeviceDefinitionSign(
-                1,
-                user1.address,
-                C.mockDdId1,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+            ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+              1,
+              user1.address,
+              C.STORAGE_NODE_ID_1,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              invalidSignature
+            )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if deviceDefinitionId is incorrect', async () => {
@@ -1097,13 +1121,14 @@ describe('Vehicle', function () {
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleWithDeviceDefinitionSign(
-                1,
-                user1.address,
-                C.mockDdId1,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+            ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+              1,
+              user1.address,
+              C.STORAGE_NODE_ID_1,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              invalidSignature
+            )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if attributes are incorrect', async () => {
@@ -1123,13 +1148,14 @@ describe('Vehicle', function () {
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleWithDeviceDefinitionSign(
-                1,
-                user1.address,
-                C.mockDdId1,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+            ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+              1,
+              user1.address,
+              C.STORAGE_NODE_ID_1,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              invalidSignature
+            )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if infos are incorrect', async () => {
@@ -1149,13 +1175,14 @@ describe('Vehicle', function () {
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleWithDeviceDefinitionSign(
-                1,
-                user1.address,
-                C.mockDdId1,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+            ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+              1,
+              user1.address,
+              C.STORAGE_NODE_ID_1,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              invalidSignature
+            )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
         it('Should revert if owner does not match signer', async () => {
@@ -1175,13 +1202,14 @@ describe('Vehicle', function () {
           await expect(
             vehicleInstance
               .connect(admin)
-              .mintVehicleWithDeviceDefinitionSign(
-                1,
-                user1.address,
-                C.mockDdId1,
-                C.mockVehicleAttributeInfoPairs,
-                invalidSignature
-              )
+            ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+              1,
+              user1.address,
+              C.STORAGE_NODE_ID_1,
+              C.mockDdId1,
+              C.mockVehicleAttributeInfoPairs,
+              invalidSignature
+            )
           ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
         });
       });
@@ -1191,13 +1219,14 @@ describe('Vehicle', function () {
       it('Should correctly set parent node', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicleWithDeviceDefinitionSign(
-            1,
-            user1.address,
-            C.mockDdId1,
-            C.mockVehicleAttributeInfoPairs,
-            signature
-          );
+        ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.STORAGE_NODE_ID_1,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        );
 
         const parentNode = await nodesInstance.getParentNode(
           await vehicleIdInstance.getAddress(),
@@ -1208,26 +1237,28 @@ describe('Vehicle', function () {
       it('Should correctly set node owner', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicleWithDeviceDefinitionSign(
-            1,
-            user1.address,
-            C.mockDdId1,
-            C.mockVehicleAttributeInfoPairs,
-            signature
-          );
+        ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.STORAGE_NODE_ID_1,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        );
 
         expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should correctly set Device Definition Id', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicleWithDeviceDefinitionSign(
-            1,
-            user1.address,
-            C.mockDdId1,
-            C.mockVehicleAttributeInfoPairs,
-            signature
-          );
+        ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.STORAGE_NODE_ID_1,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        );
 
         expect(
           await vehicleInstance
@@ -1237,13 +1268,14 @@ describe('Vehicle', function () {
       it('Should correctly set infos', async () => {
         await vehicleInstance
           .connect(admin)
-          .mintVehicleWithDeviceDefinitionSign(
-            1,
-            user1.address,
-            C.mockDdId1,
-            C.mockVehicleAttributeInfoPairs,
-            signature
-          );
+        ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.STORAGE_NODE_ID_1,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        );
 
         expect(
           await nodesInstance.getInfo(
@@ -1264,19 +1296,39 @@ describe('Vehicle', function () {
         await expect(() =>
           vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinitionSign(
-              1,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
+          ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
         ).changeTokenBalance(
           mockDimoCreditInstance,
           admin.address,
           -C.MINT_VEHICLE_OPERATION_COST
         );
       });
+      it('Should correctly set Storage Node ID for vehicle ID', async () => {
+        const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(1);
+        expect(nodeIdForVehicleBefore).to.equal(0)
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.STORAGE_NODE_ID_1,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        )
+
+        const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(1);
+        expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+      });
+      it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
     });
 
     context('Events', () => {
@@ -1284,13 +1336,14 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinitionSign(
-              1,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
+          ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
         )
           .to.emit(vehicleInstance, 'VehicleNodeMintedWithDeviceDefinition')
           .withArgs(1, 1, user1.address, C.mockDdId1);
@@ -1299,13 +1352,14 @@ describe('Vehicle', function () {
         await expect(
           vehicleInstance
             .connect(admin)
-            .mintVehicleWithDeviceDefinitionSign(
-              1,
-              user1.address,
-              C.mockDdId1,
-              C.mockVehicleAttributeInfoPairs,
-              signature
-            )
+          ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
         )
           .to.emit(vehicleInstance, 'VehicleAttributeSet')
           .withArgs(

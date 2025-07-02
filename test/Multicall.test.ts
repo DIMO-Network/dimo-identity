@@ -332,8 +332,8 @@ describe('Multicall', function () {
     context('State', () => {
       it('Should mint vehicle and claim aftermarket device in the same transaction', async () => {
         const mintVehicleWithDdSignEncoded = vehicleInstance.interface.encodeFunctionData(
-          'mintVehicleWithDeviceDefinitionSign',
-          [1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
+          'mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)',
+          [1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
           aftermarketDeviceInstance.interface.encodeFunctionData(
@@ -356,8 +356,8 @@ describe('Multicall', function () {
       });
       it('Should mint vehicle, claim aftermarket device and pair them in the same transaction', async () => {
         const mintVehicleWithDdSignEncoded = vehicleInstance.interface.encodeFunctionData(
-          'mintVehicleWithDeviceDefinitionSign',
-          [1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
+          'mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)',
+          [1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
           aftermarketDeviceInstance.interface.encodeFunctionData(

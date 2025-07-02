@@ -274,6 +274,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Mint a vehicle with a Device Definition Id through a metatransaction
+     * @dev Kept for now for backwards compatibility, to be replaced by the next function
      * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
@@ -334,6 +335,79 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             revert InvalidOwnerSignature();
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+    }
+
+    // TODO Documentation
+    /**
+     * @notice Mint a vehicle with a Device Definition Id through a metatransaction
+     * @dev Caller must have the mint vehicle role
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param deviceDefinitionId The Device Definition Id
+     * @param attrInfo attrInfo
+     * @param signature User's signature hash
+     */
+    function mintVehicleWithDeviceDefinitionSign(
+        uint256 manufacturerNode,
+        address owner,
+        uint256 storageNodeId,
+        string calldata deviceDefinitionId,
+        AttributeInfoPair[] calldata attrInfo,
+        bytes calldata signature
+    ) external onlyRole(MINT_VEHICLE_ROLE) {
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        _validateStorageNodeId(storageNodeId);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+        VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
+            newTokenId
+        ] = deviceDefinitionId;
+
+        emit VehicleNodeMintedWithDeviceDefinition(
+            manufacturerNode,
+            newTokenId,
+            owner,
+            deviceDefinitionId
+        );
+
+        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
+            newTokenId,
+            attrInfo
+        );
+
+        bytes32 message = keccak256(
+            abi.encode(
+                MINT_VEHICLE_WITH_DD_TYPEHASH,
+                manufacturerNode,
+                owner,
+                keccak256(bytes(deviceDefinitionId)),
+                attributesHash,
+                infosHash
+            )
+        );
+
+        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
+            revert InvalidOwnerSignature();
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+
+        IStorageNode(SharedStorage.getStorage().storageNode).setNodeForVehicle(
+            newTokenId,
+            storageNodeId
+        );
     }
 
     /**

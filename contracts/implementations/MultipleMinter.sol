@@ -27,7 +27,8 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
 
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
-     * @dev Kept for now for backwards compatibility, to be replaced by the next function
+     * @dev DEPRECATED: This function will be removed in a future release
+     *      Please use the version with storageNodeId parameter instead
      * @dev The vehicle owner signs a typed structured (EIP-712) message in advance which is verified during execution.
      * Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the connection ID owner
      * @param data A MintVehicleAndSdInput struct containing:
@@ -161,23 +162,22 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
-    // TODO Documentation
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
      * @dev The vehicle owner signs a typed structured (EIP-712) message in advance which is verified during execution.
      * Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the connection ID owner
-     * @param data A MintVehicleAndSdInput struct containing:
+     * @param data A MintVehicleAndSdInputWithSnId struct containing:
      *        - manufacturerNode: Parent manufacturer node ID of the vehicle
      *        - owner: The new nodes owner address
+     *        - storageNodeId: ID of the storage node to associate with the vehicle
      *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
      *        - connectionId: Parent connection ID of the synthetic device
      *        - vehicleOwnerSig: Vehicle owner's EIP-712 signature
      *        - syntheticDeviceSig: Synthetic device's EIP-712 signature
      *        - syntheticDeviceAddr: Address associated with the synthetic device
      *        - attrInfoPairsDevice: List of attribute-info pairs to be added to the synthetic device
-     * Emits VehicleNodeMinted and SyntheticDeviceNodeMinted events on success.
      * Reverts if connection or manufacturer node doesn't exist, caller lacks permission,
-     * device is already registered, or signatures are invalid.
+     * device is already registered, storage node is invalid, or signatures are invalid.
      */
     function mintVehicleAndSdSign(
         MintVehicleAndSdInputWithSnId calldata data
@@ -306,7 +306,8 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
 
     /**
      * @notice Mints and pairs a vehicle with a Device Definition ID and a synthetic device through a metatransaction
-     * @dev Kept for now for backwards compatibility, to be replaced by the next function
+     * @dev DEPRECATED: This function will be removed in a future release
+     *      Please use the version with storageNodeId parameter instead
      * @dev The vehicle owner signs a typed structured (EIP-712) message in advance which is verified during execution.
      * Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the connection ID owner.
      * @param data A MintVehicleAndSdWithDdInput struct containing:
@@ -447,14 +448,14 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
-    // TODO Documentation
     /**
      * @notice Mints and pairs a vehicle with a Device Definition ID and a synthetic device through a metatransaction
      * @dev The vehicle owner signs a typed structured (EIP-712) message in advance which is verified during execution.
      * Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the connection ID owner.
-     * @param data A MintVehicleAndSdWithDdInput struct containing:
+     * @param data A MintVehicleAndSdWithDdInputWithSnId struct containing:
      *        - manufacturerNode: Parent manufacturer node ID of the vehicle
      *        - owner: The new nodes owner address
+     *        - storageNodeId: ID of the storage node to associate with the vehicle
      *        - deviceDefinitionId: The Device Definition ID to associate with the vehicle
      *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
      *        - connectionId: Parent connection ID of the synthetic device
@@ -464,7 +465,7 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
      *        - attrInfoPairsDevice: List of attribute-info pairs to be added to the synthetic device
      * Emits VehicleNodeMintedWithDeviceDefinition and SyntheticDeviceNodeMinted events on success.
      * Reverts if connection or manufacturer node doesn't exist, caller lacks permission,
-     * device is already registered, or signatures are invalid.
+     * device is already registered, storage node is invalid, or signatures are invalid.
      */
     function mintVehicleAndSdWithDeviceDefinitionSign(
         MintVehicleAndSdWithDdInputWithSnId calldata data
@@ -599,7 +600,8 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
 
     /**
      * @notice Mints and pairs a vehicle (with a Device Definition Id) and a synthetic device, and sets permissions with SACD through a metatransaction
-     * @dev Kept for now for backwards compatibility, to be replaced by the next function
+     * @dev DEPRECATED: This function will be removed in a future release
+     *      Please use the version with storageNodeId parameter instead
      * @dev The vehicle owner signs a typed structured (EIP-712) message in advance which is verified during execution.
      * Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the connection ID owner.
      * @param data A MintVehicleAndSdWithDdInput struct containing:
@@ -747,14 +749,14 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         INFT(vehicleIdProxyAddress).setSacd(newTokenIdVehicle, sacdInput);
     }
 
-    // TODO Documentation
     /**
      * @notice Mints and pairs a vehicle (with a Device Definition Id) and a synthetic device, and sets permissions with SACD through a metatransaction
      * @dev The vehicle owner signs a typed structured (EIP-712) message in advance which is verified during execution.
      * Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the connection ID owner.
-     * @param data A MintVehicleAndSdWithDdInput struct containing:
+     * @param data A MintVehicleAndSdWithDdInputWithSnId struct containing:
      *        - manufacturerNode: Parent manufacturer node ID of the vehicle
      *        - owner: The new nodes owner address
+     *        - storageNodeId: ID of the storage node to associate with the vehicle
      *        - deviceDefinitionId: The Device Definition ID to associate with the vehicle
      *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
      *        - connectionId: Parent connection ID of the synthetic device
@@ -769,7 +771,7 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
      *        - source: The URI source associated with the permissions
      * Emits VehicleNodeMintedWithDeviceDefinition and SyntheticDeviceNodeMinted events on success.
      * Reverts if connection or manufacturer node doesn't exist, caller lacks permission,
-     * device is already registered, or signatures are invalid.
+     * device is already registered, storage node is invalid, or signatures are invalid.
      */
     function mintVehicleAndSdWithDeviceDefinitionSignAndSacd(
         MintVehicleAndSdWithDdInputWithSnId calldata data,
@@ -906,7 +908,8 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
 
     /**
      * @notice Mints and pairs multiple vehicles (with Device Definition Ids) and synthetic devices in batch
-     * @dev Kept for now for backwards compatibility, to be replaced by the next function
+     * @dev DEPRECATED: This function will be removed in a future release
+     *      Please use the version with storageNodeId parameter instead
      * @dev Processes multiple vehicle and synthetic device pairs in a single transaction.
      * For each pair, verifies signatures, mints tokens, sets attributes, and establishes relationships.
      * Caller must have the CONNECTION_MINT_SD_PERMISSION for each specified connection or be the connection ID owner.
@@ -1063,15 +1066,15 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         }
     }
 
-    // TODO Documentation
     /**
      * @notice Mints and pairs multiple vehicles (with Device Definition Ids) and synthetic devices in batch
      * @dev Processes multiple vehicle and synthetic device pairs in a single transaction.
-     * For each pair, verifies signatures, mints tokens, sets attributes, and establishes relationships.
-     * Caller must have the CONNECTION_MINT_SD_PERMISSION for each specified connection or be the connection ID owner.
-     * @param data An array of MintVehicleAndSdWithDdInputBatch structs, each containing:
+     *      For each pair, verifies signatures, mints tokens, sets attributes, and establishes relationships.
+     *      Caller must have the CONNECTION_MINT_SD_PERMISSION for each specified connection or be the connection ID owner.
+     * @param data An array of MintVehicleAndSdWithDdInputWithSnIdBatch structs, each containing:
      *        - manufacturerNode: Parent manufacturer node ID of the vehicle
      *        - owner: The new nodes owner address
+     *        - storageNodeId: ID of the storage node to associate with the vehicle
      *        - deviceDefinitionId: The Device Definition ID to associate with the vehicle
      *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
      *        - connectionId: Parent connection ID of the synthetic device
@@ -1080,9 +1083,9 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
      *        - syntheticDeviceAddr: Address associated with the synthetic device
      *        - attrInfoPairsDevice: List of attribute-info pairs to be added to the synthetic device
      *        - sacdInput: SACD input args for setting permissions on the vehicle
-     * Emits VehicleNodeMintedWithDeviceDefinition and SyntheticDeviceNodeMinted events for each pair.
-     * Reverts if any connection or manufacturer node doesn't exist, caller lacks permission,
-     * any device is already registered, or any signature is invalid.
+     * @dev Emits VehicleNodeMintedWithDeviceDefinition and SyntheticDeviceNodeMinted events for each pair.
+     *      Reverts if any connection or manufacturer node doesn't exist, caller lacks permission,
+     *      any device is already registered, any storage node is invalid, or any signature is invalid.
      */
     function mintVehicleAndSdWithDeviceDefinitionSignBatch(
         MintVehicleAndSdWithDdInputWithSnIdBatch[] calldata data

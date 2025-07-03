@@ -75,7 +75,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Function to mint a vehicle with a Device Definition Id
-     * @dev Kept for now for backwards compatibility, to be replaced by the next function
+     * @dev DEPRECATED: This function will be removed in a future release
+     *      Please use the version with storageNodeId parameter instead
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
@@ -115,13 +116,15 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
-    // TODO Documentation
     /**
-     * @notice Function to mint a vehicle with a Device Definition Id
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param deviceDefinitionId The Device Definition Id
-     * @param attrInfo List of attribute-info pairs to be added
+     * @notice Function to mint a vehicle with a Device Definition Id and associate it with a Storage Node Id
+     * @dev This function creates a new vehicle node, associates it with a manufacturer,
+     *      assigns a device definition ID, and links it to a Storage Node Id
+     * @param manufacturerNode The ID of the parent manufacturer node
+     * @param owner The address that will own the newly minted vehicle
+     * @param storageNodeId The ID of the storage node to associate with this vehicle
+     * @param deviceDefinitionId The unique identifier for the device definition
+     * @param attrInfo Array of attribute-info pairs to be added to the vehicle
      */
     function mintVehicleWithDeviceDefinition(
         uint256 manufacturerNode,
@@ -167,7 +170,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Function to mint a vehicle with a Device Definition Id and set permissions with SACD
-     * @dev Kept for now for backwards compatibility, to be replaced by the next function
+     * @dev DEPRECATED: This function will be removed in a future release
+     *      Please use the version with storageNodeId parameter instead
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
      * @param deviceDefinitionId The Device Definition Id
@@ -215,18 +219,20 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
     }
 
-    // TODO Documentation
     /**
-     * @notice Function to mint a vehicle with a Device Definition Id and set permissions with SACD
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param deviceDefinitionId The Device Definition Id
-     * @param attrInfo List of attribute-info pairs to be added
-     * @param sacdInput SACD input args
-     *  grantee -> The address to receive the permissions
-     *  permissions -> The uint256 that represents the byte array of permissions
-     *  expiration -> Expiration of the permissions
-     *  source -> The URI source associated with the permissions
+     * @notice Function to mint a vehicle with a Device Definition Id, associate it with a Storage Node Id, and set permissions with SACD
+     * @dev This function creates a new vehicle node, associates it with a manufacturer,
+     *      assigns a device definition ID, links it to a Storage Node Id, and sets SACD permissions
+     * @param manufacturerNode The ID of the parent manufacturer node
+     * @param owner The address that will own the newly minted vehicle
+     * @param storageNodeId The ID of the storage node to associate with this vehicle
+     * @param deviceDefinitionId The unique identifier for the device definition
+     * @param attrInfo Array of attribute-info pairs to be added to the vehicle
+     * @param sacdInput SACD input args containing:
+     *        - grantee: The address to receive the permissions
+     *        - permissions: The uint256 that represents the byte array of permissions
+     *        - expiration: Expiration of the permissions
+     *        - source: The URI source associated with the permissions
      */
     function mintVehicleWithDeviceDefinition(
         uint256 manufacturerNode,
@@ -275,7 +281,8 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
 
     /**
      * @notice Mint a vehicle with a Device Definition Id through a metatransaction
-     * @dev Kept for now for backwards compatibility, to be replaced by the next function
+     * @dev DEPRECATED: This function will be removed in a future release
+     *      Please use the version with storageNodeId parameter instead
      * @dev Caller must have the mint vehicle role
      * @param manufacturerNode Parent manufacturer node id
      * @param owner The address of the new owner
@@ -338,15 +345,16 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
-    // TODO Documentation
     /**
-     * @notice Mint a vehicle with a Device Definition Id through a metatransaction
-     * @dev Caller must have the mint vehicle role
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param deviceDefinitionId The Device Definition Id
-     * @param attrInfo attrInfo
-     * @param signature User's signature hash
+     * @notice Mints a vehicle with a Device Definition Id through a metatransaction and associates it with a Storage Node Id
+     * @dev This function creates a new vehicle node via a signed transaction, associates it with a manufacturer,
+     *      assigns a device definition ID, and links it to a Storage Node. Caller must have the MINT_VEHICLE_ROLE
+     * @param manufacturerNode The ID of the parent manufacturer node
+     * @param owner The address that will own the newly minted vehicle
+     * @param storageNodeId The ID of the storage node to associate with this vehicle
+     * @param deviceDefinitionId The unique identifier for the device definition
+     * @param attrInfo Array of attribute-info pairs to be added to the vehicle
+     * @param signature The owner's EIP-712 signature authorizing the mint operation
      */
     function mintVehicleWithDeviceDefinitionSign(
         uint256 manufacturerNode,

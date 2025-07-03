@@ -116,6 +116,10 @@ export type MintVehicleAndSdWithDdInputBatch = MintVehicleAndSdWithDdInput & {
   sacdInput: SacdInput
 }
 
+export type MintVehicleAndSdWithDdInputWithSnIdBatch = MintVehicleAndSdWithDdInputWithSnId & {
+  sacdInput: SacdInput
+}
+
 export type IdManufacturerName = {
   tokenId: string,
   name: string

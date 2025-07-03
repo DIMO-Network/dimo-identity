@@ -101,6 +101,21 @@ struct MintVehicleAndSdWithDdInputBatch {
     SacdInput sacdInput;
 }
 
+// TODO Documentation
+struct MintVehicleAndSdWithDdInputWithSnIdBatch {
+    uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
+    address owner; // The new nodes owner
+    string deviceDefinitionId; // The Device Definition Id
+    uint256 storageNodeId;
+    AttributeInfoPair[] attrInfoPairsVehicle; // List of attribute-info pairs to be added of the vehicle
+    uint256 connectionId; // Parent connection id of the synthetic device
+    bytes vehicleOwnerSig; // Vehicle owner signature hash
+    bytes syntheticDeviceSig; // Synthetic Device's signature hash
+    address syntheticDeviceAddr; // Address associated with the synthetic device
+    AttributeInfoPair[] attrInfoPairsDevice; // List of attribute-info pairs to be added of the synthetic device
+    SacdInput sacdInput;
+}
+
 struct DeviceDefinitionInput {
     string id; // The alphanumeric ID of the Device Definition
     string model; // The model of the Device Definition

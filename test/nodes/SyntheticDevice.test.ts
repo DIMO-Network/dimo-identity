@@ -17,6 +17,7 @@ import {
   SyntheticDeviceId,
   Mapper,
   Shared,
+  StorageNodeRegistry,
   MockDimoToken,
   MockDimoCredit,
   MockSacd,
@@ -49,6 +50,7 @@ describe('SyntheticDevice', function () {
   let syntheticDeviceInstance: SyntheticDevice;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
+  let storageNodeRegistryInstance: StorageNodeRegistry;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockSacdInstance: MockSacd;
@@ -103,7 +105,8 @@ describe('SyntheticDevice', function () {
         'Vehicle',
         'SyntheticDevice',
         'Mapper',
-        'Shared'
+        'Shared',
+        'StorageNodeRegistry'
       ],
       nfts: [
         'ManufacturerId',
@@ -123,6 +126,7 @@ describe('SyntheticDevice', function () {
     syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
+    storageNodeRegistryInstance = deployments.StorageNodeRegistry;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
     sdIdInstance = deployments.SyntheticDeviceId;
@@ -157,7 +161,7 @@ describe('SyntheticDevice', function () {
     
     // Deploy MockStorageNode contract
     const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
-    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy(DIMO_REGISTRY_ADDRESS);
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -218,9 +222,14 @@ describe('SyntheticDevice', function () {
     await sharedInstance
       .connect(admin)
       .setSacd(await mockSacdInstance.getAddress());
-    await sharedInstance
+    
+    // Setup Storage Node Registry
+    await storageNodeRegistryInstance
       .connect(admin)
       .setStorageNode(await mockStorageNodeInstance.getAddress());
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setDefaultStorageNodeId(C.STORAGE_NODE_ID_DEFAULT)
 
     // Setup Charging variables
     await chargingInstance

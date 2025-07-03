@@ -16,7 +16,6 @@ import {
   Charging,
   DimoAccessControl,
   Nodes,
-  IntegrationId,
   Manufacturer,
   ManufacturerId,
   Vehicle,
@@ -27,6 +26,7 @@ import {
   SyntheticDeviceId,
   Mapper,
   Shared,
+  StorageNodeRegistry,
   StreamrConfigurator,
   MockDimoToken,
   MockDimoCredit,
@@ -61,6 +61,7 @@ describe('DevAdmin', function () {
   let syntheticDeviceInstance: SyntheticDevice;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
+  let storageNodeRegistryInstance: StorageNodeRegistry;
   let mockDimoTokenInstance: MockDimoToken;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
@@ -152,6 +153,7 @@ describe('DevAdmin', function () {
         'SyntheticDevice',
         'Mapper',
         'Shared',
+        'StorageNodeRegistry',
         'StreamrConfigurator',
         'DevAdmin'
       ],
@@ -175,6 +177,7 @@ describe('DevAdmin', function () {
     syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
+    storageNodeRegistryInstance = deployments.StorageNodeRegistry;
     devAdminInstance = deployments.DevAdmin;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
@@ -203,7 +206,7 @@ describe('DevAdmin', function () {
 
     // Deploy MockStorageNode contract
     const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
-    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy(DIMO_REGISTRY_ADDRESS);
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
 
     // Deploy MockConnectionsManager contract
     const MockConnectionsManagerFactory = await ethers.getContractFactory(
@@ -285,9 +288,14 @@ describe('DevAdmin', function () {
     await sharedInstance
       .connect(admin)
       .setSacd(await mockSacdInstance.getAddress());
-    await sharedInstance
+    
+    // Setup Storage Node Registry
+    await storageNodeRegistryInstance
       .connect(admin)
       .setStorageNode(await mockStorageNodeInstance.getAddress());
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setDefaultStorageNodeId(C.STORAGE_NODE_ID_DEFAULT)
 
     // Setup Charging variables
     await chargingInstance

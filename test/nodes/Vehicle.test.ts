@@ -1370,7 +1370,24 @@ describe('Vehicle', function () {
         const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
         expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
       });
-      it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+      it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+        const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          0,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        )
+
+        const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT);
+      })
     });
 
     context('Events', () => {

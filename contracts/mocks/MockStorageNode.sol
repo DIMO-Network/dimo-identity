@@ -11,12 +11,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 contract MockStorageNode is ERC721 {
     error LabelInvalidLength(string label);
 
-    address dimoRegistry;
-    mapping(uint256 => uint256) public vehicleIdToNodeId;
-
-    constructor(address _dimoRegistry) ERC721("DIMO Storage Node", "DSN") {
-        dimoRegistry = _dimoRegistry;
-    }
+    constructor() ERC721("DIMO Storage Node", "DSN") {}
 
     function mint(address to, string calldata label) external {
         bytes memory labelBytes = bytes(label);
@@ -27,10 +22,6 @@ contract MockStorageNode is ERC721 {
         uint256 newNodeId = uint256(keccak256(labelBytes));
 
         _safeMint(to, newNodeId);
-    }
-
-    function setNodeForVehicle(uint256 vehicleId, uint256 nodeId) external {
-        vehicleIdToNodeId[vehicleId] = nodeId;
     }
 
     function exists(uint256 tokenId) external view returns (bool) {

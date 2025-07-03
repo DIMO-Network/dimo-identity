@@ -3,13 +3,12 @@ pragma solidity ^0.8.13;
 
 import "./VehicleInternal.sol";
 import "../charging/ChargingInternal.sol";
-import "../storageNode/StorageNodeInternal.sol";
+import "../storageNode/StorageNodeRegistryInternal.sol";
 import "../../interfaces/INFT.sol";
 import "../../interfaces/IStorageNode.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/MapperStorage.sol";
-import "../../libraries/SharedStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
@@ -142,8 +141,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             )
         ) revert InvalidParentNode(manufacturerNode);
 
-        StorageNodeInternal._validateStorageNodeId(storageNodeId);
-
         uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
         NodesStorage
@@ -161,8 +158,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-
-        IStorageNode(SharedStorage.getStorage().storageNode).setNodeForVehicle(
+        StorageNodeRegistryInternal._setNodeIdForVehicleId(
             newTokenId,
             storageNodeId
         );
@@ -251,8 +247,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             )
         ) revert InvalidParentNode(manufacturerNode);
 
-        StorageNodeInternal._validateStorageNodeId(storageNodeId);
-
         uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
         NodesStorage
@@ -272,8 +266,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
 
         INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
-
-        IStorageNode(SharedStorage.getStorage().storageNode).setNodeForVehicle(
+        StorageNodeRegistryInternal._setNodeIdForVehicleId(
             newTokenId,
             storageNodeId
         );
@@ -374,8 +367,6 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             )
         ) revert InvalidParentNode(manufacturerNode);
 
-        StorageNodeInternal._validateStorageNodeId(storageNodeId);
-
         uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
 
         NodesStorage
@@ -412,8 +403,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             revert InvalidOwnerSignature();
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-
-        IStorageNode(SharedStorage.getStorage().storageNode).setNodeForVehicle(
+        StorageNodeRegistryInternal._setNodeIdForVehicleId(
             newTokenId,
             storageNodeId
         );

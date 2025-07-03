@@ -20,8 +20,6 @@ interface IStorageNode {
         string nodeUri
     );
 
-    function setNodeForVehicle(uint256 vehicleId, uint256 nodeId) external;
-
     function exists(uint256 tokenId) external view returns (bool);
 
     function nodes(uint256 tokenId) external view returns (NodeInfo memory);

@@ -4099,19 +4099,6 @@
         "type": "event"
     },
     {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "storageNode",
-                "type": "address"
-            }
-        ],
-        "name": "StorageNodeSet",
-        "type": "event"
-    },
-    {
         "inputs": [],
         "name": "getConnectionsManager",
         "outputs": [
@@ -4183,19 +4170,6 @@
             {
                 "internalType": "address",
                 "name": "sacd",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "getStorageNode",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "storageNode",
                 "type": "address"
             }
         ],
@@ -4276,19 +4250,6 @@
             }
         ],
         "name": "setSacd",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "storageNode",
-                "type": "address"
-            }
-        ],
-        "name": "setStorageNode",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -5178,6 +5139,77 @@
         "name": "setDcxOperationCost",
         "outputs": [],
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "storageNode",
+                "type": "address"
+            }
+        ],
+        "name": "StorageNodeSet",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "getStorageNode",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "storageNode",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "setDefaultStorageNodeId",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "storageNode",
+                "type": "address"
+            }
+        ],
+        "name": "setStorageNode",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
+            }
+        ],
+        "name": "vehicleIdToStorageNodeId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     }
 ]

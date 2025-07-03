@@ -97,6 +97,7 @@ main([
   'contracts/implementations/tableland/DeviceDefinitionTable.sol:DeviceDefinitionTable',
   'contracts/implementations/tableland/DeviceDefinitionController.sol:DeviceDefinitionController',
   'contracts/implementations/charging/Charging.sol:Charging',
+  'contracts/implementations/storageNode/StorageNodeRegistry.sol:StorageNodeRegistry',
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

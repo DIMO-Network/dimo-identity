@@ -18,6 +18,7 @@ import {
   AftermarketDevice,
   AftermarketDeviceId,
   Shared,
+  StorageNodeRegistry,
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
@@ -50,6 +51,7 @@ describe('Vehicle', function () {
   let aftermarketDeviceInstance: AftermarketDevice;
   let syntheticDeviceInstance: SyntheticDevice;
   let sharedInstance: Shared;
+  let storageNodeRegistryInstance: StorageNodeRegistry;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
@@ -115,7 +117,8 @@ describe('Vehicle', function () {
         'AftermarketDevice',
         'SyntheticDevice',
         'Mapper',
-        'Shared'
+        'Shared',
+        'StorageNodeRegistry'
       ],
       nfts: [
         'ManufacturerId',
@@ -136,6 +139,7 @@ describe('Vehicle', function () {
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     syntheticDeviceInstance = deployments.SyntheticDevice;
     sharedInstance = deployments.Shared;
+    storageNodeRegistryInstance = deployments.StorageNodeRegistry;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
     adIdInstance = deployments.AftermarketDeviceId;
@@ -167,7 +171,7 @@ describe('Vehicle', function () {
 
     // Deploy MockStorageNode contract
     const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
-    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy(DIMO_REGISTRY_ADDRESS);
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
 
     // Deploy MockConnectionsManager contract
     const MockConnectionsManagerFactory = await ethers.getContractFactory(
@@ -244,9 +248,14 @@ describe('Vehicle', function () {
     await sharedInstance
       .connect(admin)
       .setSacd(await mockSacdInstance.getAddress());
-    await sharedInstance
+
+    // Setup Storage Node Registry
+    await storageNodeRegistryInstance
       .connect(admin)
       .setStorageNode(await mockStorageNodeInstance.getAddress());
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setDefaultStorageNodeId(C.STORAGE_NODE_ID_DEFAULT)
 
     // Setup Charging variables
     await chargingInstance
@@ -473,7 +482,7 @@ describe('Vehicle', function () {
             user1.address,
             99,
             C.mockDdId1,
-            C.mockVehicleAttributeInfoPairsNotWhitelisted
+            C.mockVehicleAttributeInfoPairs
           )
         ).to.be.revertedWithCustomError(
           vehicleInstance,
@@ -573,8 +582,8 @@ describe('Vehicle', function () {
         );
       });
       it('Should correctly set Storage Node ID for vehicle ID', async () => {
-        const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(1);
-        expect(nodeIdForVehicleBefore).to.equal(0)
+        const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleBefore).to.equal(0)
 
         await vehicleInstance
           .connect(admin)
@@ -586,10 +595,26 @@ describe('Vehicle', function () {
           C.mockVehicleAttributeInfoPairs
         )
 
-        const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(1);
-        expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+        const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
       });
-      it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+      it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+        const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
+          1,
+          user1.address,
+          0,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs
+        )
+
+        const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+      })
     });
 
     context('Events', () => {
@@ -701,7 +726,7 @@ describe('Vehicle', function () {
             user1.address,
             99,
             C.mockDdId1,
-            C.mockVehicleAttributeInfoPairsNotWhitelisted,
+            C.mockVehicleAttributeInfoPairs,
             sacdInput
           )
         ).to.be.revertedWithCustomError(
@@ -827,8 +852,8 @@ describe('Vehicle', function () {
         ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source])
       });
       it('Should correctly set Storage Node ID for vehicle ID', async () => {
-        const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(1);
-        expect(nodeIdForVehicleBefore).to.equal(0)
+        const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleBefore).to.equal(0)
 
         await vehicleInstance
           .connect(admin)
@@ -841,10 +866,27 @@ describe('Vehicle', function () {
           sacdInput
         )
 
-        const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(1);
-        expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+        const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
       });
-      it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+      it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+        const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
+          1,
+          user1.address,
+          0,
+          C.mockDdId1,
+          C.mockVehicleAttributeInfoPairs,
+          sacdInput
+        )
+
+        const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT);
+      })
     });
 
     context('Events', () => {
@@ -1311,8 +1353,8 @@ describe('Vehicle', function () {
         );
       });
       it('Should correctly set Storage Node ID for vehicle ID', async () => {
-        const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(1);
-        expect(nodeIdForVehicleBefore).to.equal(0)
+        const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleBefore).to.equal(0)
 
         await vehicleInstance
           .connect(admin)
@@ -1325,8 +1367,8 @@ describe('Vehicle', function () {
           signature
         )
 
-        const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(1);
-        expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+        const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1);
+        expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
       });
       it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
     });

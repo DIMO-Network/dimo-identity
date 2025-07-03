@@ -17,7 +17,6 @@ library SharedStorage {
         address connectionsManager;
         // Address of the SACD contract, governing permissions for many NFTs.
         address sacd;
-        address storageNode;
     }
 
     /* solhint-disable no-inline-assembly */

@@ -18,6 +18,7 @@ import {
   Mapper,
   MultipleMinter,
   Shared,
+  StorageNodeRegistry,
   MockDimoToken,
   MockDimoCredit,
   MockSacd,
@@ -52,6 +53,7 @@ describe('MultipleMinter', function () {
   let mapperInstance: Mapper;
   let multipleMinterInstance: MultipleMinter;
   let sharedInstance: Shared;
+  let storageNodeRegistryInstance: StorageNodeRegistry;
   let mockDimoTokenInstance: MockDimoToken;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockConnectionsManagerInstance: MockConnectionsManager;
@@ -109,7 +111,8 @@ describe('MultipleMinter', function () {
         'SyntheticDevice',
         'Mapper',
         'MultipleMinter',
-        'Shared'
+        'Shared',
+        'StorageNodeRegistry'
       ],
       nfts: [
         'ManufacturerId',
@@ -130,6 +133,7 @@ describe('MultipleMinter', function () {
     mapperInstance = deployments.Mapper;
     multipleMinterInstance = deployments.MultipleMinter;
     sharedInstance = deployments.Shared;
+    storageNodeRegistryInstance = deployments.StorageNodeRegistry;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
     sdIdInstance = deployments.SyntheticDeviceId;
@@ -164,7 +168,7 @@ describe('MultipleMinter', function () {
 
     // Deploy MockStorageNode contract
     const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
-    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy(DIMO_REGISTRY_ADDRESS);
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -234,9 +238,14 @@ describe('MultipleMinter', function () {
     await sharedInstance
       .connect(admin)
       .setSacd(await mockSacdInstance.getAddress());
-    await sharedInstance
+
+    // Setup Storage Node Registry
+    await storageNodeRegistryInstance
       .connect(admin)
       .setStorageNode(await mockStorageNodeInstance.getAddress());
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setDefaultStorageNodeId(C.STORAGE_NODE_ID_DEFAULT)
 
     // Setup Charging variables
     await chargingInstance
@@ -916,8 +925,8 @@ describe('MultipleMinter', function () {
           ).to.be.equal(3);
         });
         it('Should correctly set Storage Node ID for vehicle ID', async () => {
-          const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleBefore).to.equal(0)
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
 
           await multipleMinterInstance
             .connect(connectionOwner1)
@@ -925,10 +934,25 @@ describe('MultipleMinter', function () {
             correctMintInput
           );
 
-          const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
-        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+        it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+          const localCorrectInput = { ...correctMintInput }
+          localCorrectInput.storageNodeId = '0'
+
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            localCorrectInput
+          );
+
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+        })
       });
 
       context('Events', () => {
@@ -1496,8 +1520,8 @@ describe('MultipleMinter', function () {
           ).to.be.equal(3);
         });
         it('Should correctly set Storage Node ID for vehicle ID', async () => {
-          const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleBefore).to.equal(0)
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
 
           await multipleMinterInstance
             .connect(minterWithPermission1)
@@ -1505,10 +1529,25 @@ describe('MultipleMinter', function () {
             correctMintInput
           );
 
-          const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
-        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+        it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+          const localCorrectInput = { ...correctMintInput }
+          localCorrectInput.storageNodeId = '0'
+
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(minterWithPermission1)
+          ['mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            localCorrectInput
+          );
+
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+        })
       });
 
       context('Events', () => {
@@ -2233,8 +2272,8 @@ describe('MultipleMinter', function () {
           );
         });
         it('Should correctly set Storage Node ID for vehicle ID', async () => {
-          const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleBefore).to.equal(0)
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
 
           await multipleMinterInstance
             .connect(connectionOwner1)
@@ -2242,10 +2281,25 @@ describe('MultipleMinter', function () {
             correctMintInput
           );
 
-          const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
-        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+        it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+          const localCorrectInput = { ...correctMintInput }
+          localCorrectInput.storageNodeId = '0'
+
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            localCorrectInput
+          );
+
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+        })
       });
 
       context('Events', () => {
@@ -2870,8 +2924,8 @@ describe('MultipleMinter', function () {
           );
         });
         it('Should correctly set Storage Node ID for vehicle ID', async () => {
-          const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleBefore).to.equal(0)
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
 
           await multipleMinterInstance
             .connect(minterWithPermission1)
@@ -2879,10 +2933,25 @@ describe('MultipleMinter', function () {
             correctMintInput
           );
 
-          const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
-        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+        it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+          const localCorrectInput = { ...correctMintInput }
+          localCorrectInput.storageNodeId = '0'
+
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(minterWithPermission1)
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            localCorrectInput
+          );
+
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+        })
       });
 
       context('Events', () => {
@@ -3663,8 +3732,8 @@ describe('MultipleMinter', function () {
           ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source])
         });
         it('Should correctly set Storage Node ID for vehicle ID', async () => {
-          const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleBefore).to.equal(0)
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
 
           await multipleMinterInstance
             .connect(connectionOwner1)
@@ -3673,10 +3742,26 @@ describe('MultipleMinter', function () {
             sacdInput
           );
 
-          const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
-        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+        it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+          const localCorrectInput = { ...correctMintInput }
+          localCorrectInput.storageNodeId = '0'
+
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            localCorrectInput,
+            sacdInput
+          );
+
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+        })
       });
 
       context('Events', () => {
@@ -4351,8 +4436,8 @@ describe('MultipleMinter', function () {
           ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source])
         });
         it('Should correctly set Storage Node ID for vehicle ID', async () => {
-          const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleBefore).to.equal(0)
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
 
           await multipleMinterInstance
             .connect(minterWithPermission1)
@@ -4361,10 +4446,26 @@ describe('MultipleMinter', function () {
             sacdInput
           );
 
-          const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
-        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+        it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+          const localCorrectInput = { ...correctMintInput }
+          localCorrectInput.storageNodeId = '0'
+
+          const storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(minterWithPermission1)
+          ['mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            localCorrectInput,
+            sacdInput
+          );
+
+          const storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+        })
       });
 
       context('Events', () => {
@@ -5241,10 +5342,10 @@ describe('MultipleMinter', function () {
           ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source])
         });
         it('Should correctly set Storage Node ID for vehicle ID', async () => {
-          let nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleBefore).to.equal(0)
-          nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(4);
-          expect(nodeIdForVehicleBefore).to.equal(0)
+          let storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+          storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(4);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
 
           await multipleMinterInstance
             .connect(connectionOwner1)
@@ -5252,12 +5353,32 @@ describe('MultipleMinter', function () {
             correctMintInputWithOneConnection
           );
 
-          let nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
-          nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(4);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          let storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(4);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
-        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+        it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+          const localCorrectInput = [...correctMintInputWithOneConnection ]
+          localCorrectInput[0].storageNodeId = '0'
+          localCorrectInput[1].storageNodeId = '0'
+
+          let storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+          storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(4);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            localCorrectInput
+          );
+
+          let storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+          storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(4);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+        })
       });
 
       context('Events', () => {
@@ -5984,10 +6105,10 @@ describe('MultipleMinter', function () {
           ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source])
         });
         it('Should correctly set Storage Node ID for vehicle ID', async () => {
-          let nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleBefore).to.equal(0)
-          nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(4);
-          expect(nodeIdForVehicleBefore).to.equal(0)
+          let storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+          storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(4);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
 
           await multipleMinterInstance
             .connect(minterWithPermission1)
@@ -5995,12 +6116,32 @@ describe('MultipleMinter', function () {
             correctMintInputWithDiffConnections
           );
 
-          let nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
-          nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(4);
-          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          let storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+          storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(4);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
-        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
+        it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
+          const localCorrectInput = [...correctMintInputWithDiffConnections ]
+          localCorrectInput[0].storageNodeId = '0'
+          localCorrectInput[1].storageNodeId = '0'
+
+          let storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+          storageNodeIdForVehicleBefore = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(4);
+          expect(storageNodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(minterWithPermission1)
+          ['mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            localCorrectInput
+          );
+
+          let storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+          storageNodeIdForVehicleAfter = await storageNodeRegistryInstance.vehicleIdToStorageNodeId(4);
+          expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_DEFAULT)
+        })
       });
 
       context('Events', () => {

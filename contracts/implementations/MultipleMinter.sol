@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "./nodes/VehicleInternal.sol";
 import "./nodes/SyntheticDeviceInternal.sol";
 import "./charging/ChargingInternal.sol";
-import "./storageNode/StorageNodeInternal.sol";
+import "./storageNode/StorageNodeRegistryInternal.sol";
 import "../interfaces/INFT.sol";
 import "../interfaces/ISacd.sol";
 import "../Eip712/Eip712CheckerInternal.sol";
@@ -215,8 +215,6 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
-        StorageNodeInternal._validateStorageNodeId(data.storageNodeId);
-
         bytes32 message = keccak256(
             abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.connectionId)
         );
@@ -297,8 +295,7 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-
-        IStorageNode(SharedStorage.getStorage().storageNode).setNodeForVehicle(
+        StorageNodeRegistryInternal._setNodeIdForVehicleId(
             newTokenIdVehicle,
             data.storageNodeId
         );
@@ -501,8 +498,6 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
-        StorageNodeInternal._validateStorageNodeId(data.storageNodeId);
-
         bytes32 message = keccak256(
             abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.connectionId)
         );
@@ -591,8 +586,7 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-
-        IStorageNode(SharedStorage.getStorage().storageNode).setNodeForVehicle(
+        StorageNodeRegistryInternal._setNodeIdForVehicleId(
             newTokenIdVehicle,
             data.storageNodeId
         );
@@ -807,8 +801,6 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
             revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
 
-        StorageNodeInternal._validateStorageNodeId(data.storageNodeId);
-
         bytes32 message = keccak256(
             abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.connectionId)
         );
@@ -899,8 +891,7 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
 
         INFT(vehicleIdProxyAddress).setSacd(newTokenIdVehicle, sacdInput);
-
-        IStorageNode(SharedStorage.getStorage().storageNode).setNodeForVehicle(
+        StorageNodeRegistryInternal._setNodeIdForVehicleId(
             newTokenIdVehicle,
             data.storageNodeId
         );
@@ -1122,8 +1113,6 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
             if (sds.deviceAddressToNodeId[data[i].syntheticDeviceAddr] != 0)
                 revert DeviceAlreadyRegistered(data[i].syntheticDeviceAddr);
 
-            StorageNodeInternal._validateStorageNodeId(data[i].storageNodeId);
-
             bytes32 message = keccak256(
                 abi.encode(MINT_VEHICLE_SD_TYPEHASH, data[i].connectionId)
             );
@@ -1224,9 +1213,10 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
                 newTokenIdVehicle,
                 data[i].sacdInput
             );
-
-            IStorageNode(SharedStorage.getStorage().storageNode)
-                .setNodeForVehicle(newTokenIdVehicle, data[i].storageNodeId);
+            StorageNodeRegistryInternal._setNodeIdForVehicleId(
+                newTokenIdVehicle,
+                data[i].storageNodeId
+            );
         }
     }
 }

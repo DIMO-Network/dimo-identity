@@ -32,6 +32,7 @@ import {
   signMessage,
   MintVehicleAndSdInputWithSdId,
   MintVehicleAndSdWithDdInput,
+  MintVehicleAndSdWithDdInputWithSnId,
   MintVehicleAndSdWithDdInputBatch,
   SacdInput,
   C
@@ -434,7 +435,7 @@ describe('MultipleMinter', function () {
             incorrectMintInput
           )
         ).to.be.revertedWithCustomError(
-          vehicleInstance,
+          multipleMinterInstance,
           'InvalidStorageNode'
         ).withArgs(99);
       });
@@ -1601,11 +1602,11 @@ describe('MultipleMinter', function () {
     });
   });
 
-  describe('mintVehicleAndSdWithDeviceDefinitionSign', () => {
+  describe.only('mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))', () => {
     let mintSyntheticDeviceSig1: string;
     let mintVehicleOwnerSig1: string;
-    let correctMintInput: MintVehicleAndSdWithDdInput;
-    let incorrectMintInput: MintVehicleAndSdWithDdInput;
+    let correctMintInput: MintVehicleAndSdWithDdInputWithSnId;
+    let incorrectMintInput: MintVehicleAndSdWithDdInputWithSnId;
 
     before(async () => {
       mintSyntheticDeviceSig1 = await signMessage({
@@ -1632,6 +1633,7 @@ describe('MultipleMinter', function () {
         manufacturerNode: '1',
         owner: user1.address,
         deviceDefinitionId: C.mockDdId1,
+        storageNodeId: C.STORAGE_NODE_ID_1,
         attrInfoPairsVehicle: C.mockVehicleAttributeInfoPairs,
         connectionId: C.CONNECTION_ID_1,
         vehicleOwnerSig: mintVehicleOwnerSig1,
@@ -1652,7 +1654,9 @@ describe('MultipleMinter', function () {
         await expect(
           multipleMinterInstance
             .connect(nonAdmin)
-            .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            incorrectMintInput
+          )
         ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
           .withArgs(99);
       });
@@ -1662,7 +1666,9 @@ describe('MultipleMinter', function () {
         await expect(
           multipleMinterInstance
             .connect(nonAdmin)
-            .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            incorrectMintInput
+          )
         ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
           .withArgs(99);
       });
@@ -1670,13 +1676,29 @@ describe('MultipleMinter', function () {
         await expect(
           multipleMinterInstance
             .connect(nonAdmin)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          )
         )
           .to.be.revertedWithCustomError(
             multipleMinterInstance,
             'Unauthorized',
           )
           .withArgs(nonAdmin.address);
+      });
+      it('Should revert if Storage Node ID does not exist', async () => {
+        incorrectMintInput.storageNodeId = '99';
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(
+          multipleMinterInstance,
+          'InvalidStorageNode'
+        ).withArgs(99);
       });
     });
 
@@ -1689,12 +1711,16 @@ describe('MultipleMinter', function () {
         it('Should revert if device address is already registered', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           ).to.be.revertedWithCustomError(
             multipleMinterInstance,
             'DeviceAlreadyRegistered'
@@ -1707,7 +1733,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              incorrectMintInput
+            )
           ).to.be.revertedWithCustomError(
             multipleMinterInstance,
             'AttributeNotWhitelisted'
@@ -1720,7 +1748,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              incorrectMintInput
+            )
           ).to.be.revertedWithCustomError(
             multipleMinterInstance,
             'AttributeNotWhitelisted'
@@ -1747,7 +1777,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if domain name is incorrect', async () => {
@@ -1769,7 +1801,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if domain version is incorrect', async () => {
@@ -1791,7 +1825,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if domain chain ID is incorrect', async () => {
@@ -1813,7 +1849,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if manufacturer node is incorrect', async () => {
@@ -1834,7 +1872,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if deviceDefinitionId is incorrect', async () => {
@@ -1855,7 +1895,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if vehicle attributes are incorrect', async () => {
@@ -1876,7 +1918,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if vehicle infos are incorrect', async () => {
@@ -1897,7 +1941,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if owner does not match signer', async () => {
@@ -1918,7 +1964,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
           });
@@ -1938,7 +1986,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
             it('Should revert if domain name is incorrect', async () => {
@@ -1956,7 +2006,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
             it('Should revert if domain version is incorrect', async () => {
@@ -1974,7 +2026,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
             it('Should revert if domain chain ID is incorrect', async () => {
@@ -1992,7 +2046,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
             it('Should revert if connection ID is incorrect', async () => {
@@ -2009,7 +2065,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(connectionOwner1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
           });
@@ -2020,7 +2078,9 @@ describe('MultipleMinter', function () {
         it('Should correctly set vehicle parent node', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           const parentNode = await nodesInstance.getParentNode(
             await vehicleIdInstance.getAddress(),
@@ -2032,14 +2092,18 @@ describe('MultipleMinter', function () {
         it('Should correctly set vehicle node owner', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(await vehicleIdInstance.ownerOf(3)).to.be.equal(user1.address);
         });
         it('Should correctly set synthetic device parent node', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           const parentNode = await nodesInstance.getParentNode(
             await sdIdInstance.getAddress(),
@@ -2051,14 +2115,18 @@ describe('MultipleMinter', function () {
         it('Should correctly set synthetic device node owner', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(await sdIdInstance.ownerOf(1)).to.be.equal(user1.address);
         });
         it('Should correctly set Device Definition Id', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await vehicleInstance
@@ -2068,7 +2136,9 @@ describe('MultipleMinter', function () {
         it('Should correctly set synthetic device address', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           const id = await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
             sdAddress1.address
@@ -2079,7 +2149,9 @@ describe('MultipleMinter', function () {
         it('Should correctly set vehicle infos', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await nodesInstance.getInfo(
@@ -2099,7 +2171,9 @@ describe('MultipleMinter', function () {
         it('Should correctly set synthetic device infos', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await nodesInstance.getInfo(
@@ -2119,7 +2193,9 @@ describe('MultipleMinter', function () {
         it('Should correctly map the synthetic device to the vehicle', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await mapperInstance.getNodeLink(
@@ -2132,7 +2208,9 @@ describe('MultipleMinter', function () {
         it('Should correctly map the vehicle to the synthetic device', async () => {
           await multipleMinterInstance
             .connect(connectionOwner1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await mapperInstance.getNodeLink(
@@ -2146,13 +2224,29 @@ describe('MultipleMinter', function () {
           await expect(() =>
             multipleMinterInstance
               .connect(connectionOwner1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           ).changeTokenBalance(
             mockDimoCreditInstance,
             connectionOwner1.address,
             -C.MINT_VEHICLE_OPERATION_COST
           );
         });
+        it('Should correctly set Storage Node ID for vehicle ID', async () => {
+          const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
+          expect(nodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
+
+          const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
+          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+        });
+        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
       });
 
       context('Events', () => {
@@ -2160,7 +2254,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           )
             .to.emit(multipleMinterInstance, 'VehicleNodeMintedWithDeviceDefinition')
             .withArgs(1, 3, user1.address, C.mockDdId1);
@@ -2169,7 +2265,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           )
             .to.emit(vehicleInstance, 'VehicleAttributeSet')
             .withArgs(
@@ -2188,7 +2286,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           )
             .to.emit(multipleMinterInstance, 'SyntheticDeviceNodeMinted')
             .withArgs(C.CONNECTION_ID_1, 1, 3, sdAddress1.address, user1.address);
@@ -2197,7 +2297,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           )
             .to.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet')
             .withArgs(
@@ -2217,6 +2319,7 @@ describe('MultipleMinter', function () {
             manufacturerNode: '1',
             owner: user1.address,
             deviceDefinitionId: C.mockDdId1,
+            storageNodeId: C.STORAGE_NODE_ID_1,
             attrInfoPairsVehicle: C.mockVehicleAttributeInfoPairs,
             connectionId: C.CONNECTION_ID_1,
             vehicleOwnerSig: mintVehicleOwnerSig1,
@@ -2228,7 +2331,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(localCorrectMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              localCorrectMintInput
+            )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
       });
@@ -2243,12 +2348,16 @@ describe('MultipleMinter', function () {
         it('Should revert if device address is already registered', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           ).to.be.revertedWithCustomError(
             multipleMinterInstance,
             'DeviceAlreadyRegistered'
@@ -2261,7 +2370,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              incorrectMintInput
+            )
           ).to.be.revertedWithCustomError(
             multipleMinterInstance,
             'AttributeNotWhitelisted'
@@ -2274,7 +2385,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              incorrectMintInput
+            )
           ).to.be.revertedWithCustomError(
             multipleMinterInstance,
             'AttributeNotWhitelisted'
@@ -2301,7 +2414,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if domain name is incorrect', async () => {
@@ -2323,7 +2438,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if domain version is incorrect', async () => {
@@ -2345,7 +2462,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if domain chain ID is incorrect', async () => {
@@ -2367,7 +2486,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if manufacturer node is incorrect', async () => {
@@ -2388,7 +2509,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if deviceDefinitionId is incorrect', async () => {
@@ -2409,7 +2532,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if vehicle attributes are incorrect', async () => {
@@ -2430,7 +2555,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if vehicle infos are incorrect', async () => {
@@ -2451,7 +2578,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
             it('Should revert if owner does not match signer', async () => {
@@ -2472,7 +2601,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
             });
           });
@@ -2492,7 +2623,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
             it('Should revert if domain name is incorrect', async () => {
@@ -2510,7 +2643,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
             it('Should revert if domain version is incorrect', async () => {
@@ -2528,7 +2663,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
             it('Should revert if domain chain ID is incorrect', async () => {
@@ -2546,7 +2683,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
             it('Should revert if connection ID is incorrect', async () => {
@@ -2563,7 +2702,9 @@ describe('MultipleMinter', function () {
               await expect(
                 multipleMinterInstance
                   .connect(minterWithPermission1)
-                  .mintVehicleAndSdWithDeviceDefinitionSign(incorrectMintInput)
+                ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+                  incorrectMintInput
+                )
               ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
             });
           });
@@ -2574,7 +2715,9 @@ describe('MultipleMinter', function () {
         it('Should correctly set vehicle parent node', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           const parentNode = await nodesInstance.getParentNode(
             await vehicleIdInstance.getAddress(),
@@ -2586,14 +2729,18 @@ describe('MultipleMinter', function () {
         it('Should correctly set vehicle node owner', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(await vehicleIdInstance.ownerOf(3)).to.be.equal(user1.address);
         });
         it('Should correctly set synthetic device parent node', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           const parentNode = await nodesInstance.getParentNode(
             await sdIdInstance.getAddress(),
@@ -2605,14 +2752,18 @@ describe('MultipleMinter', function () {
         it('Should correctly set synthetic device node owner', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(await sdIdInstance.ownerOf(1)).to.be.equal(user1.address);
         });
         it('Should correctly set Device Definition Id', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await vehicleInstance
@@ -2622,7 +2773,9 @@ describe('MultipleMinter', function () {
         it('Should correctly set synthetic device address', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           const id = await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
             sdAddress1.address
@@ -2633,7 +2786,9 @@ describe('MultipleMinter', function () {
         it('Should correctly set vehicle infos', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await nodesInstance.getInfo(
@@ -2653,7 +2808,9 @@ describe('MultipleMinter', function () {
         it('Should correctly set synthetic device infos', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await nodesInstance.getInfo(
@@ -2673,7 +2830,9 @@ describe('MultipleMinter', function () {
         it('Should correctly map the synthetic device to the vehicle', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await mapperInstance.getNodeLink(
@@ -2686,7 +2845,9 @@ describe('MultipleMinter', function () {
         it('Should correctly map the vehicle to the synthetic device', async () => {
           await multipleMinterInstance
             .connect(minterWithPermission1)
-            .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput);
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
 
           expect(
             await mapperInstance.getNodeLink(
@@ -2700,13 +2861,29 @@ describe('MultipleMinter', function () {
           await expect(() =>
             multipleMinterInstance
               .connect(minterWithPermission1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           ).changeTokenBalance(
             mockDimoCreditInstance,
             minterWithPermission1.address,
             -C.MINT_VEHICLE_OPERATION_COST
           );
         });
+        it('Should correctly set Storage Node ID for vehicle ID', async () => {
+          const nodeIdForVehicleBefore = await mockStorageNodeInstance.vehicleIdToNodeId(3);
+          expect(nodeIdForVehicleBefore).to.equal(0)
+
+          await multipleMinterInstance
+            .connect(minterWithPermission1)
+          ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          );
+
+          const nodeIdForVehicleAfter = await mockStorageNodeInstance.vehicleIdToNodeId(3);
+          expect(nodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
+        });
+        it.skip('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified')
       });
 
       context('Events', () => {
@@ -2714,7 +2891,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           )
             .to.emit(multipleMinterInstance, 'VehicleNodeMintedWithDeviceDefinition')
             .withArgs(1, 3, user1.address, C.mockDdId1);
@@ -2723,7 +2902,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           )
             .to.emit(vehicleInstance, 'VehicleAttributeSet')
             .withArgs(
@@ -2742,7 +2923,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           )
             .to.emit(multipleMinterInstance, 'SyntheticDeviceNodeMinted')
             .withArgs(C.CONNECTION_ID_1, 1, 3, sdAddress1.address, user1.address);
@@ -2751,7 +2934,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(correctMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
           )
             .to.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet')
             .withArgs(
@@ -2771,6 +2956,7 @@ describe('MultipleMinter', function () {
             manufacturerNode: '1',
             owner: user1.address,
             deviceDefinitionId: C.mockDdId1,
+            storageNodeId: C.STORAGE_NODE_ID_1,
             attrInfoPairsVehicle: C.mockVehicleAttributeInfoPairs,
             connectionId: C.CONNECTION_ID_1,
             vehicleOwnerSig: mintVehicleOwnerSig1,
@@ -2782,7 +2968,9 @@ describe('MultipleMinter', function () {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
-              .mintVehicleAndSdWithDeviceDefinitionSign(localCorrectMintInput)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              localCorrectMintInput
+            )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
       });

@@ -316,8 +316,11 @@
 | 0xf0d1a557 | addVehicleAttribute(string) |
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
+| 0x8b04a18b | mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[]) |
+| 0x8bf71ebc | mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string)) |
 | 0x97c95b2a | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string)) |
 | 0xd84baff1 | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[]) |
+| 0x592c0889 | mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes) |
 | 0x8dca2b8e | mintVehicleWithDeviceDefinitionSign(uint256,address,string,(string,string)[],bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
 | 0xd9c3ae61 | setVehicleInfo(uint256,(string,string)[]) |
@@ -344,6 +347,7 @@
 | 0xe3ca9639 | InvalidNode(address,uint256) |
 | 0x38a85a8d | InvalidOwnerSignature() |
 | 0x5299bab7 | InvalidParentNode(uint256) |
+| 0x65745f79 | InvalidStorageNode(uint256) |
 | 0x87e6ac10 | OnlyNftProxy() |
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 | 0xc46a5168 | VehiclePaired(uint256) |
@@ -425,13 +429,39 @@
 |-|-|
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 
+## StorageNodeRegistry
+#### Functions
+| Selector | Signature |
+|-|-|
+| 0x5cc867dc | getStorageNode() |
+| 0x856f3849 | setDefaultStorageNodeId(uint256) |
+| 0x6ee4a611 | setStorageNode(address) |
+| 0x7a26a1ed | vehicleIdToStorageNodeId(uint256) |
+
+#### Events
+| Selector | Signature |
+|-|-|
+| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
+| 0x2f878811 | RoleGranted(bytes32,address,address) |
+| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
+| 0x541fe968 | StorageNodeSet(address) |
+
+#### Errors
+| Selector | Signature |
+|-|-|
+| 0xc9134785 | UintUtils__InsufficientHexLength() |
+
 ## MultipleMinter
 #### Functions
 | Selector | Signature |
 |-|-|
+| 0x688ecea4 | mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
 | 0xfb1a28e8 | mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
+| 0x484db0b3 | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
 | 0xd23965e3 | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
 | 0x58657dcc | mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
+| 0x788a2f48 | mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
+| 0x1a5d15a1 | mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[]) |
 | 0x7ae7fe4e | mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[]) |
 
 #### Events
@@ -451,6 +481,7 @@
 | 0x38a85a8d | InvalidOwnerSignature() |
 | 0x5299bab7 | InvalidParentNode(uint256) |
 | 0xf8e95d55 | InvalidSdSignature() |
+| 0x65745f79 | InvalidStorageNode(uint256) |
 | 0x8e4a23d6 | Unauthorized(address) |
 
 ## DeviceDefinitionTable

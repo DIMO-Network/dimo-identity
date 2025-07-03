@@ -61,7 +61,7 @@ function removeDuplicateDefinitions(abi: any[]): any[] {
     // Create a unique key based on the definition type and name
     const key = `${item.type}_${item.name}`;
     
-    if (!seenDefinitions.has(key)) {
+    if (!seenDefinitions.has(key) || item.type === 'function') {
       // First time seeing this definition, add it to the result
       seenDefinitions.set(key, result.length);
       result.push(item);
@@ -97,6 +97,7 @@ main([
   'contracts/implementations/tableland/DeviceDefinitionTable.sol:DeviceDefinitionTable',
   'contracts/implementations/tableland/DeviceDefinitionController.sol:DeviceDefinitionController',
   'contracts/implementations/charging/Charging.sol:Charging',
+  'contracts/implementations/storageNode/StorageNodeRegistry.sol:StorageNodeRegistry',
 ]).catch((error) => {
   console.error(error);
   process.exitCode = 1;

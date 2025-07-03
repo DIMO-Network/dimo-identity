@@ -16,11 +16,13 @@ import {
   AftermarketDeviceId,
   Mapper,
   Shared,
+  StorageNodeRegistry,
   DimoForwarder,
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
-  MockSacd
+  MockSacd,
+  MockStorageNode
 } from '../typechain-types';
 import {
   setup,
@@ -45,10 +47,12 @@ describe('DimoForwarder', async function () {
   let aftermarketDeviceInstance: AftermarketDevice;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
+  let storageNodeRegistryInstance: StorageNodeRegistry;
   let mockDimoTokenInstance: MockDimoToken;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockSacdInstance: MockSacd;
+  let mockStorageNodeInstance: MockStorageNode;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
@@ -59,6 +63,7 @@ describe('DimoForwarder', async function () {
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
+  let storageNodeOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
   let adAddress1: HardhatEthersSigner;
@@ -76,6 +81,7 @@ describe('DimoForwarder', async function () {
       admin,
       nonAdmin,
       manufacturer1,
+      storageNodeOwner1,
       user1,
       user2,
       adAddress1,
@@ -97,7 +103,8 @@ describe('DimoForwarder', async function () {
         'Vehicle',
         'AftermarketDevice',
         'Mapper',
-        'Shared'
+        'Shared',
+        'StorageNodeRegistry'
       ],
       nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
       upgradeableContracts: ['DimoForwarder'],
@@ -113,6 +120,7 @@ describe('DimoForwarder', async function () {
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
+    storageNodeRegistryInstance = deployments.StorageNodeRegistry;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
     adIdInstance = deployments.AftermarketDeviceId;
@@ -141,6 +149,10 @@ describe('DimoForwarder', async function () {
     // Deploy MockSacd contract
     const MockSacdFactory = await ethers.getContractFactory('MockSacd');
     mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
+
+    // Deploy MockStorageNode contract
+    const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -195,6 +207,14 @@ describe('DimoForwarder', async function () {
     await sharedInstance
       .connect(admin)
       .setManufacturerLicense(await mockManufacturerLicenseInstance.getAddress());
+    
+    // Setup Storage Node Registry
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setStorageNode(await mockStorageNodeInstance.getAddress());
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setDefaultStorageNodeId(C.STORAGE_NODE_ID_DEFAULT)
 
     // Setup Charging variables
     await chargingInstance
@@ -238,6 +258,18 @@ describe('DimoForwarder', async function () {
       );
 
     await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
+
+    // Mint Storage Node IDs
+    await mockStorageNodeInstance
+      .mint(
+        admin.address,
+        C.STORAGE_NODE_LABEL_DEFAULT
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_1
+      );
 
     // Grant Transferer role to DIMO Registry
     await adIdInstance
@@ -351,10 +383,10 @@ describe('DimoForwarder', async function () {
 
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
     await aftermarketDeviceInstance
       .connect(admin)
       .claimAftermarketDeviceSign(

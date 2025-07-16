@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { ethers, network } from 'hardhat';
 
 import {
@@ -7,6 +9,7 @@ import {
   AftermarketDevice,
   DimoAccessControl,
   Mapper,
+  StorageNodeRegistry,
   ManufacturerId,
   IntegrationId,
   VehicleId,
@@ -18,60 +21,20 @@ import {
   DevAdmin,
   DeviceDefinitionTable,
   Nodes,
-  MockDimoToken
+  MockDimoToken,
+  MockSacd
 } from '../typechain-types';
 import { AddressesByNetwork } from '../utils';
 import * as C from './data/deployArgs';
 import addressesJSON from './data/addresses.json';
+import { getAccounts } from './helpers'
 
 const contractAddresses: AddressesByNetwork = addressesJSON;
 
 async function main() {
-  // eslint-disable-next-line prefer-const
-  let [deployer, shaolin, user1, user, shared] = await ethers.getSigners();
-  let currentNetwork = network.name;
-
-  if (
-    network.name === 'hardhat' ||
-    network.name === 'localhost' ||
-    network.name === 'tenderly'
-  ) {
-    currentNetwork = 'amoy';
-
-    // 0xCED3c922200559128930180d3f0bfFd4d9f4F123 gnosis
-    // 0x1741eC2915Ab71Fc03492715b5640133dA69420B DIMO deployer
-    // 0x8E58b98d569B0679713273c5105499C249e9bC84 Shared
-    // 0xC0F28DA7Ae009711026C648913eB17962fd96dD7 Malte's gnosis
-    deployer = await ethers.getImpersonatedSigner(
-      '0x8E58b98d569B0679713273c5105499C249e9bC84'
-    );
-    shaolin = await ethers.getImpersonatedSigner(
-      '0xa9395ebb1fd55825023934e683cefd6f3f279137'
-    );
-    user = await ethers.getImpersonatedSigner(
-      '0x49291691f96c54220bf1de8efbbf00106d64cb8c'
-    );
-    shared = await ethers.getImpersonatedSigner(
-      '0x8E58b98d569B0679713273c5105499C249e9bC84'
-    );
-
-    await user1.sendTransaction({
-      to: deployer.address,
-      value: ethers.parseEther('10')
-    });
-    await user1.sendTransaction({
-      to: shaolin.address,
-      value: ethers.parseEther('10')
-    });
-    await user1.sendTransaction({
-      to: user.address,
-      value: ethers.parseEther('10')
-    });
-    await user1.sendTransaction({
-      to: shared.address,
-      value: ethers.parseEther('10')
-    });
-  }
+  const forkNetworkName = 'amoy'
+  const currentNetwork = forkNetworkName || network.name
+  const [signer] = await getAccounts(network.name, forkNetworkName)
 
   const dimoRegistryInstance: DIMORegistry = await ethers.getContractAt(
     'DIMORegistry',
@@ -146,6 +109,14 @@ async function main() {
   const mockDimoToken: MockDimoToken = await ethers.getContractAt(
     'MockDimoToken',
     contractAddresses[currentNetwork].misc.DimoToken.proxy
+  );
+  const mockSacdInstance: MockSacd = await ethers.getContractAt(
+    'MockSacd',
+    contractAddresses[currentNetwork].misc.Sacd
+  );
+  const storageNodeRegistry: StorageNodeRegistry = await ethers.getContractAt(
+    'StorageNodeRegistry',
+    contractAddresses[currentNetwork].modules.DIMORegistry.address
   );
 }
 

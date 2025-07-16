@@ -640,13 +640,16 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x9fc1bb806018686971cAa0C43e4eE5084b1dF3C3",
+                "address": "0x2eaa7456bD06124FF833ae0105f52A4Cd6320803",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
                     "0xb7bded95",
+                    "0x8b04a18b",
+                    "0x8bf71ebc",
                     "0x97c95b2a",
                     "0xd84baff1",
+                    "0x592c0889",
                     "0x8dca2b8e",
                     "0x9bfae6da",
                     "0xd9c3ae61",
@@ -723,11 +726,15 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0x62FB5DfD3757AA2b0A2BA7d2FFC336708A0D3E67",
+                "address": "0xE71476392922Aaa90401e795fB038518f5059F47",
                 "selectors": [
+                    "0x688ecea4",
                     "0xfb1a28e8",
+                    "0x484db0b3",
                     "0xd23965e3",
                     "0x58657dcc",
+                    "0x788a2f48",
+                    "0x1a5d15a1",
                     "0x7ae7fe4e"
                 ]
             },
@@ -808,8 +815,14 @@
                 ]
             },
             "StorageNodeRegistry": {
-                "address": "",
-                "selectors": []
+                "address": "0x5233caABe649E14C0efF7023407fe6Ae764204b1",
+                "selectors": [
+                    "0xe75745e9",
+                    "0x5cc867dc",
+                    "0x856f3849",
+                    "0x6ee4a611",
+                    "0x7a26a1ed"
+                ]
             }
         },
         "nfts": {

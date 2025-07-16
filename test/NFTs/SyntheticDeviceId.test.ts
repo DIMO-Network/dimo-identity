@@ -17,9 +17,11 @@ import {
   SyntheticDeviceId,
   Mapper,
   Shared,
+  StorageNodeRegistry,
   MockDimoCredit,
   MockSacd,
-  MockConnectionsManager
+  MockConnectionsManager,
+  MockStorageNode
 } from '../../typechain-types';
 import {
   setup,
@@ -44,12 +46,14 @@ describe('SyntheticDeviceId', async function () {
   let syntheticDeviceInstance: SyntheticDevice;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
+  let storageNodeRegistryInstance: StorageNodeRegistry;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let sdIdInstance: SyntheticDeviceId;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockSacdInstance: MockSacd;
   let mockConnectionsManagerInstance: MockConnectionsManager;
+  let mockStorageNodeInstance: MockStorageNode;
 
   let DIMO_REGISTRY_ADDRESS: string;
   let expiresAtDefault: number;
@@ -58,6 +62,7 @@ describe('SyntheticDeviceId', async function () {
   let nonAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let connectionOwner1: HardhatEthersSigner;
+  let storageNodeOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
   let sdAddress1: HardhatEthersSigner;
@@ -68,6 +73,7 @@ describe('SyntheticDeviceId', async function () {
       nonAdmin,
       manufacturer1,
       connectionOwner1,
+      storageNodeOwner1,
       user1,
       user2,
       sdAddress1
@@ -83,7 +89,8 @@ describe('SyntheticDeviceId', async function () {
         'Vehicle',
         'SyntheticDevice',
         'Mapper',
-        'Shared'
+        'Shared',
+        'StorageNodeRegistry'
       ],
       nfts: [
         'ManufacturerId',
@@ -104,6 +111,7 @@ describe('SyntheticDeviceId', async function () {
     syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
+    storageNodeRegistryInstance = deployments.StorageNodeRegistry;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
     sdIdInstance = deployments.SyntheticDeviceId;
@@ -128,6 +136,10 @@ describe('SyntheticDeviceId', async function () {
       .connect(admin)
       .deploy(C.CONNECTIONS_MANAGER_ERC721_NAME, C.CONNECTIONS_MANAGER_ERC721_SYMBOL);
 
+    // Deploy MockStorageNode contract
+    const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
     // Grant NFT minter roles to DIMO Registry contract
@@ -140,12 +152,6 @@ describe('SyntheticDeviceId', async function () {
     await sdIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
-
-    // Grant synthetic device minting permission to admin
-    expiresAtDefault = (await time.latest()) + 31556926; // + 1 year
-    await sharedInstance.connect(admin).setSacd(mockSacdInstance);
-
-    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_1, admin, 12, expiresAtDefault, '');
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -184,6 +190,17 @@ describe('SyntheticDeviceId', async function () {
     await sharedInstance
       .connect(admin)
       .setConnectionsManager(await mockConnectionsManagerInstance.getAddress());
+    await sharedInstance
+      .connect(admin)
+      .setSacd(await mockSacdInstance.getAddress());
+    
+    // Setup Storage Node Registry
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setStorageNode(await mockStorageNodeInstance.getAddress());
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setDefaultStorageNodeId(C.STORAGE_NODE_ID_DEFAULT)
 
     // Setup Charging variables
     await chargingInstance
@@ -232,6 +249,18 @@ describe('SyntheticDeviceId', async function () {
         connectionOwner1.address,
         C.CONNECTION_NAME_1
       );
+    
+      // Mint Storage Node IDs
+    await mockStorageNodeInstance
+      .mint(
+        admin.address,
+        C.STORAGE_NODE_LABEL_DEFAULT
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_1
+      );
 
     // Set Dimo Registry in the NFTs
     await manufacturerIdInstance
@@ -256,6 +285,11 @@ describe('SyntheticDeviceId', async function () {
     await vehicleIdInstance
       .connect(admin)
       .setSyntheticDeviceIdAddress(await sdIdInstance.getAddress());
+
+    // Grant synthetic device minting permission to admin
+    expiresAtDefault = (await time.latest()) + 31556926; // + 1 year
+    await sharedInstance.connect(admin).setSacd(mockSacdInstance);
+    await mockSacdInstance.setPermissions(mockConnectionsManagerInstance, C.CONNECTION_ID_1, admin, 12, expiresAtDefault, '');
 
     // Minting and linking a vehicle to a synthetic device
     const mintSyntheticDeviceSig1 = await signMessage({
@@ -287,7 +321,7 @@ describe('SyntheticDeviceId', async function () {
 
     await vehicleInstance
       .connect(admin)
-    ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     await syntheticDeviceInstance
       .connect(connectionOwner1)
       .mintSyntheticDeviceSign(correctMintInput1);

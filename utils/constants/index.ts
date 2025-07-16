@@ -13,6 +13,7 @@ export * from './NftArgs';
 export * from './Sacd';
 export * from './Streamr';
 export * from './Vehicle';
+export * from './StorageNode';
 export * from './SyntheticDevice';
 export * from './UpgradeableContractsArgs';
 export * from './Vehicle';

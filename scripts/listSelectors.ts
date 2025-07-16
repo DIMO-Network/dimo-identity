@@ -79,6 +79,7 @@ main([
   'Mapper',
   'Charging',
   'Shared',
+  'StorageNodeRegistry',
   'MultipleMinter',
   'DeviceDefinitionTable',
   'DeviceDefinitionController',

@@ -16,6 +16,7 @@ error InvalidParentNodeOwner(uint256 id, address addr);
 error InvalidNode(address proxy, uint256 id);
 error VehiclePaired(uint256 id);
 error VehicleNotPaired(uint256 id);
+error InvalidStorageNode(uint256 storageNodeId);
 
 // Signature
 error InvalidSigner();

@@ -2,6 +2,29 @@ import { ethers } from 'hardhat';
 
 import { GenericKeyAny } from '../../utils';
 
+export const contractNames = [
+  'Eip712Checker',
+  'DimoAccessControl',
+  'Nodes',
+  'Manufacturer',
+  'Integration',
+  'Vehicle',
+  'AftermarketDevice',
+  'SyntheticDevice',
+  'Mapper',
+  'MultipleMinter',
+  'StreamrConfigurator',
+  'VehicleStream',
+  'DevAdmin',
+  'Multicall',
+  'DeviceDefinitionTable',
+  'ERC721Holder',
+  'DeviceDefinitionController',
+  'Charging',
+  'Shared',
+  'StorageNodeRegistry'
+];
+
 const _hashRole = (role: string) =>
   ethers.keccak256(ethers.toUtf8Bytes(role));
 
@@ -81,7 +104,7 @@ export const vehicleAttributes = [
   'DefinitionURI',
   'ImageURI'
 ];
-export const adAttributes = ['Serial', 'IMEI', 'DefinitionURI','HardwareRevision','DevEUI'];
+export const adAttributes = ['Serial', 'IMEI', 'DefinitionURI', 'HardwareRevision', 'DevEUI'];
 export const sdAttributes = [];
 
 export const manufacturerIdArgs = {
@@ -130,3 +153,5 @@ export const MINT_AD_OPERATION_COST: GenericKeyAny = {
   hardhat: ethers.parseEther('1'),
   localhost: ethers.parseEther('1')
 }
+// uint256(keccak256(bytes("DIMO-Storage-Node-Default")))
+export const DEFAULT_STORAGE_NODE_ID = '97077788752129128008203392238079160986969880871961310481918723204306174661833';

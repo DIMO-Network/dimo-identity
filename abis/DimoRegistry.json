@@ -5156,6 +5156,19 @@
     },
     {
         "inputs": [],
+        "name": "getDefaultStorageNodeId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "defaultStorageNodeId",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "getStorageNode",
         "outputs": [
             {

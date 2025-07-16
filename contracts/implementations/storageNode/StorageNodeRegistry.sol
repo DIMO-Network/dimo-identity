@@ -49,6 +49,20 @@ contract StorageNodeRegistry is AccessControlInternal {
     }
 
     /**
+     * @notice Gets the Default Storage Node ID address
+     * @return defaultStorageNodeId The token ID of the default storage node
+     */
+    function getDefaultStorageNodeId()
+        external
+        view
+        returns (uint256 defaultStorageNodeId)
+    {
+        defaultStorageNodeId = StorageNodeRegistryStorage
+            .getStorage()
+            .defaultStorageNodeId;
+    }
+
+    /**
      * @notice Retrieves the storage node ID associated with a specific vehicle ID
      * @dev Verifies the vehicle ID exists before returning the associated node ID
      * @param vehicleId The ID of the vehicle to query

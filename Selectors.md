@@ -433,6 +433,7 @@
 #### Functions
 | Selector | Signature |
 |-|-|
+| 0xe75745e9 | getDefaultStorageNodeId() |
 | 0x5cc867dc | getStorageNode() |
 | 0x856f3849 | setDefaultStorageNodeId(uint256) |
 | 0x6ee4a611 | setStorageNode(address) |

@@ -9,7 +9,12 @@ import "../../shared/Errors.sol";
  * @title StorageNodeRegistryInternal
  * @notice Internal library for managing storage node associations with vehicles
  */
-library StorageNodeRegistryInternal {
+contract StorageNodeRegistryInternal {
+    event NodeIdSetForVehicleId(
+        uint256 indexed vehicleId,
+        uint256 indexed storageNodeId
+    );
+
     /**
      * @notice Associates a storage node with a vehicle
      * @dev If storageNodeId is 0, the default storage node will be assigned.
@@ -18,7 +23,7 @@ library StorageNodeRegistryInternal {
      * @param storageNodeId The ID of the storage node to be associated with the vehicle.
      *                      If 0, the default storage node will be used.
      */
-    function _setNodeIdForVehicleId(
+    function _setStorageNodeIdForVehicleId(
         uint256 vehicleId,
         uint256 storageNodeId
     ) internal {
@@ -32,5 +37,7 @@ library StorageNodeRegistryInternal {
         }
 
         snr.vehicleIdToStorageNodeId[vehicleId] = storageNodeId;
+
+        emit NodeIdSetForVehicleId(vehicleId, storageNodeId);
     }
 }

@@ -329,6 +329,7 @@
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
@@ -437,11 +438,13 @@
 | 0x5cc867dc | getStorageNode() |
 | 0x856f3849 | setDefaultStorageNodeId(uint256) |
 | 0x6ee4a611 | setStorageNode(address) |
+| 0xae3ed8dd | setStorageNodeIdForVehicle(uint256,uint256) |
 | 0x7a26a1ed | vehicleIdToStorageNodeId(uint256) |
 
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
@@ -450,7 +453,10 @@
 #### Errors
 | Selector | Signature |
 |-|-|
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0x65745f79 | InvalidStorageNode(uint256) |
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
+| 0x8e4a23d6 | Unauthorized(address) |
 
 ## MultipleMinter
 #### Functions
@@ -468,6 +474,7 @@
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |

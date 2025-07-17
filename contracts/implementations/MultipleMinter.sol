@@ -21,7 +21,11 @@ import {MINT_VEHICLE_OPERATION} from "../shared/Operations.sol";
 error DeviceAlreadyRegistered(address addr);
 error InvalidSdSignature();
 
-contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
+contract MultipleMinter is
+    VehicleInternal,
+    SyntheticDeviceInternal,
+    StorageNodeRegistryInternal
+{
     bytes32 private constant MINT_VEHICLE_SD_TYPEHASH =
         keccak256("MintVehicleAndSdSign(uint256 connectionId)");
 
@@ -295,10 +299,7 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-        StorageNodeRegistryInternal._setNodeIdForVehicleId(
-            newTokenIdVehicle,
-            data.storageNodeId
-        );
+        _setStorageNodeIdForVehicleId(newTokenIdVehicle, data.storageNodeId);
     }
 
     /**
@@ -586,10 +587,7 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-        StorageNodeRegistryInternal._setNodeIdForVehicleId(
-            newTokenIdVehicle,
-            data.storageNodeId
-        );
+        _setStorageNodeIdForVehicleId(newTokenIdVehicle, data.storageNodeId);
     }
 
     /**
@@ -891,10 +889,7 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
 
         INFT(vehicleIdProxyAddress).setSacd(newTokenIdVehicle, sacdInput);
-        StorageNodeRegistryInternal._setNodeIdForVehicleId(
-            newTokenIdVehicle,
-            data.storageNodeId
-        );
+        _setStorageNodeIdForVehicleId(newTokenIdVehicle, data.storageNodeId);
     }
 
     /**
@@ -1213,7 +1208,7 @@ contract MultipleMinter is VehicleInternal, SyntheticDeviceInternal {
                 newTokenIdVehicle,
                 data[i].sacdInput
             );
-            StorageNodeRegistryInternal._setNodeIdForVehicleId(
+            _setStorageNodeIdForVehicleId(
                 newTokenIdVehicle,
                 data[i].storageNodeId
             );

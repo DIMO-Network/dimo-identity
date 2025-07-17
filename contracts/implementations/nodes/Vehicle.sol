@@ -22,7 +22,11 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
  * @title Vehicle
  * @notice Contract that represents the Vehicle node
  */
-contract Vehicle is AccessControlInternal, VehicleInternal {
+contract Vehicle is
+    AccessControlInternal,
+    VehicleInternal,
+    StorageNodeRegistryInternal
+{
     bytes32 private constant BURN_TYPEHASH =
         keccak256("BurnVehicleSign(uint256 vehicleNode)");
 
@@ -158,10 +162,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-        StorageNodeRegistryInternal._setNodeIdForVehicleId(
-            newTokenId,
-            storageNodeId
-        );
+        _setStorageNodeIdForVehicleId(newTokenId, storageNodeId);
     }
 
     /**
@@ -266,10 +267,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
 
         INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
-        StorageNodeRegistryInternal._setNodeIdForVehicleId(
-            newTokenId,
-            storageNodeId
-        );
+        _setStorageNodeIdForVehicleId(newTokenId, storageNodeId);
     }
 
     /**
@@ -403,10 +401,7 @@ contract Vehicle is AccessControlInternal, VehicleInternal {
             revert InvalidOwnerSignature();
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-        StorageNodeRegistryInternal._setNodeIdForVehicleId(
-            newTokenId,
-            storageNodeId
-        );
+        _setStorageNodeIdForVehicleId(newTokenId, storageNodeId);
     }
 
     /**

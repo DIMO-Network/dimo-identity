@@ -2610,6 +2610,25 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "NodeIdSetForVehicleId",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": false,
                 "internalType": "string",
                 "name": "attribute",
@@ -5202,6 +5221,24 @@
             }
         ],
         "name": "setStorageNode",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "setStorageNodeIdForVehicle",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

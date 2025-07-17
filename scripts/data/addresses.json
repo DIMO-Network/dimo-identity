@@ -761,7 +761,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0xF54fd67506E79da1Ea1E002116F83F28bdfc9163",
+                "address": "0x74A28F0904Ac640F40A08C47Fc849D36FC48EEd7",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -773,6 +773,7 @@
                     "0xec11d45a",
                     "0x3febacab",
                     "0x5f741f4d",
+                    "0x3d9cf004",
                     "0xdd60fd1a",
                     "0xf73a8f04",
                     "0xff96b761",

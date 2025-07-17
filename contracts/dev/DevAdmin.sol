@@ -6,6 +6,7 @@ import "../interfaces/IStreamRegistry.sol";
 import "../libraries/MapperStorage.sol";
 import "../libraries/NodesStorage.sol";
 import "../libraries/SharedStorage.sol";
+import "../libraries/StorageNodeRegistryStorage.sol";
 import "../libraries/nodes/AftermarketDeviceStorage.sol";
 import "../libraries/nodes/IntegrationStorage.sol";
 import "../libraries/nodes/ManufacturerStorage.sol";
@@ -75,6 +76,10 @@ contract DevAdmin is AccessControlInternal {
     );
     event VehicleAttributeRemoved(string attribute);
     event DeviceDefinitionIdSet(uint256 indexed vehicleId, string ddId);
+    event NodeIdSetForVehicleId(
+        uint256 indexed vehicleId,
+        uint256 indexed storageNodeId
+    );
 
     error AdNotClaimed(uint256 id);
     error AdPaired(uint256 id);
@@ -726,6 +731,41 @@ contract DevAdmin is AccessControlInternal {
             }
 
             ns.nodes[sdIdProxyAddress][sdId].parentNode = connectionIdParent;
+        }
+    }
+
+    /**
+     * @notice Admin function to set the storage node ID for multiple vehicle IDs
+     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_SET_STORAGE_NODE_ID role
+     * @dev Reverts if storage node ID doesn't exist
+     * @dev Reverts if any vehicle ID doesn't exist
+     * @param vehicleIds Array of vehicle IDs for which the storage node ID will be set
+     * @param storageNodeId The storage node ID to be associated with the vehicle IDs
+     */
+    function adminSetStorageNodeIdForVehicleIds(
+        uint256[] calldata vehicleIds,
+        uint256 storageNodeId
+    ) external authorized(DEV_SET_STORAGE_NODE_ID) {
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        StorageNodeRegistryStorage.Storage
+            storage snr = StorageNodeRegistryStorage.getStorage();
+
+        address storageNodeAddress = snr.storageNode;
+        address vehicleIdIdProxyAddress = vs.idProxyAddress;
+
+        if (!INFT(storageNodeAddress).exists(storageNodeId))
+            revert InvalidStorageNode(storageNodeId);
+
+        uint256 vehicleId;
+        for (uint256 i = 0; i < vehicleIds.length; i++) {
+            vehicleId = vehicleIds[i];
+
+            if (!INFT(vehicleIdIdProxyAddress).exists(vehicleId))
+                revert InvalidNode(vehicleIdIdProxyAddress, vehicleId);
+
+            snr.vehicleIdToStorageNodeId[vehicleId] = storageNodeId;
+
+            emit NodeIdSetForVehicleId(vehicleId, storageNodeId);
         }
     }
 

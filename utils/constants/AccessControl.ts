@@ -109,3 +109,6 @@ export const DEV_SET_DD = ethers.keccak256(
 export const DEV_MIGRATE_SD_PARENTS = ethers.keccak256(
   ethers.toUtf8Bytes('DEV_MIGRATE_SD_PARENTS')
 );
+export const DEV_SET_STORAGE_NODE_ID = ethers.keccak256(
+  ethers.toUtf8Bytes('DEV_SET_STORAGE_NODE_ID')
+);

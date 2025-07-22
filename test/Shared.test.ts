@@ -30,7 +30,6 @@ describe('Shared', function () {
   let MOCK_MANUFACTURER_LICENSE_ADDRESS: string;
   let MOCK_CONNECTIONS_ADDRESS: string;
   let MOCK_SACD_ADDRESS: string;
-  let MOCK_STORAGE_NODE_ADDRESS: string;
 
   let admin: HardhatEthersSigner
   let nonAdmin: HardhatEthersSigner;

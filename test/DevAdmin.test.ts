@@ -288,7 +288,7 @@ describe('DevAdmin', function () {
     await sharedInstance
       .connect(admin)
       .setSacd(await mockSacdInstance.getAddress());
-    
+
     // Setup Storage Node Registry
     await storageNodeRegistryInstance
       .connect(admin)
@@ -376,6 +376,11 @@ describe('DevAdmin', function () {
       .mint(
         storageNodeOwner1.address,
         C.STORAGE_NODE_LABEL_1
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_2
       );
 
     await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
@@ -2986,5 +2991,80 @@ describe('DevAdmin', function () {
         );
       });
     });
+  });
+
+  describe('adminSetStorageNodeIdForVehicleIds', () => {
+    beforeEach(async () => {
+      await vehicleInstance
+        .connect(admin)
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      await vehicleInstance
+        .connect(admin)
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    })
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_SET_STORAGE_NODE_ID role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .adminSetStorageNodeIdForVehicleIds([1, 2], C.STORAGE_NODE_ID_1),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_SET_STORAGE_NODE_ID}`
+        );
+      });
+      it('Should revert if storage node ID does not exist', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetStorageNodeIdForVehicleIds([1, 2], 99),
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, 'InvalidStorageNode')
+          .withArgs(99);
+      });
+      it('Should revert if vehicle ID does not exist', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetStorageNodeIdForVehicleIds([1, 99], C.STORAGE_NODE_ID_1),
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, 'InvalidNode')
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set the storage node ID for the vehicle IDs', async () => {
+        const storageNodeId1Before = storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        const storageNodeId2Before = storageNodeRegistryInstance.vehicleIdToStorageNodeId(2)
+
+        await devAdminInstance
+          .connect(admin)
+          .adminSetStorageNodeIdForVehicleIds([1, 2], C.STORAGE_NODE_ID_2)
+
+        const storageNodeId1After = storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        const storageNodeId2After = storageNodeRegistryInstance.vehicleIdToStorageNodeId(2)
+
+        expect(storageNodeId1Before).to.not.equal(storageNodeId1After)
+        expect(storageNodeId2Before).to.not.equal(storageNodeId2After)
+
+        expect(storageNodeId1After).to.not.equal(C.STORAGE_NODE_ID_2)
+        expect(storageNodeId2After).to.not.equal(C.STORAGE_NODE_ID_2)
+      })
+    })
+
+    context('Events', () => {
+      it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetStorageNodeIdForVehicleIds([1, 2], C.STORAGE_NODE_ID_2)
+        )
+          .to.emit(devAdminInstance, 'NodeIdSetForVehicleId')
+          .withArgs(1, C.STORAGE_NODE_ID_2)
+          .to.emit(devAdminInstance, 'NodeIdSetForVehicleId')
+          .withArgs(2, C.STORAGE_NODE_ID_2);
+      });
+    })
   });
 });

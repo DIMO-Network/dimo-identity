@@ -640,7 +640,7 @@
                 ]
             },
             "Vehicle": {
-                "address": "0x2eaa7456bD06124FF833ae0105f52A4Cd6320803",
+                "address": "0x83677fB486e62CCbA46832C461f73536CEAbe0eb",
                 "selectors": [
                     "0xf0d1a557",
                     "0xd0b61156",
@@ -726,7 +726,7 @@
                 ]
             },
             "MultipleMinter": {
-                "address": "0xE71476392922Aaa90401e795fB038518f5059F47",
+                "address": "0x7Eb3b8Dcacd8Fc575401131e10E28FC540397309",
                 "selectors": [
                     "0x688ecea4",
                     "0xfb1a28e8",
@@ -761,7 +761,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0xF54fd67506E79da1Ea1E002116F83F28bdfc9163",
+                "address": "0x74A28F0904Ac640F40A08C47Fc849D36FC48EEd7",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -773,6 +773,7 @@
                     "0xec11d45a",
                     "0x3febacab",
                     "0x5f741f4d",
+                    "0x3d9cf004",
                     "0xdd60fd1a",
                     "0xf73a8f04",
                     "0xff96b761",
@@ -815,12 +816,13 @@
                 ]
             },
             "StorageNodeRegistry": {
-                "address": "0x5233caABe649E14C0efF7023407fe6Ae764204b1",
+                "address": "0xE8B811A926a808Cf05853Ad5aacfBBf72a414C46",
                 "selectors": [
                     "0xe75745e9",
                     "0x5cc867dc",
                     "0x856f3849",
                     "0x6ee4a611",
+                    "0xae3ed8dd",
                     "0x7a26a1ed"
                 ]
             }

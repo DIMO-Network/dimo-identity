@@ -671,6 +671,21 @@ describe('Vehicle', function () {
           )
         ).to.not.emit(vehicleInstance, 'VehicleAttributeSet');
       });
+      it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
+            1,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs
+          )
+        )
+          .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+          .withArgs(1, C.STORAGE_NODE_ID_1);
+      });
     });
   });
 
@@ -945,6 +960,22 @@ describe('Vehicle', function () {
             sacdInput
           )
         ).to.not.emit(vehicleInstance, 'VehicleAttributeSet');
+      });
+      it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string))'](
+            1,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs,
+            sacdInput
+          )
+        )
+          .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+          .withArgs(1, C.STORAGE_NODE_ID_1);
       });
     });
   });
@@ -1432,6 +1463,22 @@ describe('Vehicle', function () {
             C.mockVehicleAttributeInfoPairs[1].attribute,
             C.mockVehicleAttributeInfoPairs[1].info
           );
+      });
+      it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId1,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
+        )
+          .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+          .withArgs(1, C.STORAGE_NODE_ID_1);
       });
     });
   });

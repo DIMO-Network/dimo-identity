@@ -274,6 +274,17 @@
         "inputs": [
             {
                 "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "InvalidStorageNode",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
                 "name": "id",
                 "type": "uint256"
             }
@@ -430,6 +441,25 @@
             }
         ],
         "name": "DeviceDefinitionIdSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "NodeIdSetForVehicleId",
         "type": "event"
     },
     {
@@ -684,6 +714,24 @@
             }
         ],
         "name": "adminRemoveVehicleAttribute",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "vehicleIds",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "adminSetStorageNodeIdForVehicleIds",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -2594,17 +2642,6 @@
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "storageNodeId",
-                "type": "uint256"
-            }
-        ],
-        "name": "InvalidStorageNode",
-        "type": "error"
     },
     {
         "anonymous": false,
@@ -5202,6 +5239,24 @@
             }
         ],
         "name": "setStorageNode",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "vehicleId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
+            }
+        ],
+        "name": "setStorageNodeIdForVehicle",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

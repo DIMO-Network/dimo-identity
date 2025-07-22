@@ -35,6 +35,7 @@
 | 0xec11d45a | adminMigrateSdParents(uint256[],uint256,uint256) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
 | 0x5f741f4d | adminRemoveVehicleAttribute(string) |
+| 0x3d9cf004 | adminSetStorageNodeIdForVehicleIds(uint256[],uint256) |
 | 0xdd60fd1a | adminSetVehicleDDs((uint256,string)[]) |
 | 0xf73a8f04 | renameManufacturers((uint256,string)[]) |
 | 0xff96b761 | transferAftermarketDeviceOwnership(uint256,address) |
@@ -52,6 +53,7 @@
 | 0x9811dbce | AftermarketDeviceUnclaimed(uint256) |
 | 0xd9135724 | AftermarketDeviceUnpaired(uint256,uint256,address) |
 | 0x11880ae6 | DeviceDefinitionIdSet(uint256,string) |
+| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
@@ -68,6 +70,7 @@
 | 0x762116ae | AdPaired(uint256) |
 | 0xe3ca9639 | InvalidNode(address,uint256) |
 | 0x5299bab7 | InvalidParentNode(uint256) |
+| 0x65745f79 | InvalidStorageNode(uint256) |
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 | 0xc46a5168 | VehiclePaired(uint256) |
 
@@ -329,6 +332,7 @@
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
@@ -437,11 +441,13 @@
 | 0x5cc867dc | getStorageNode() |
 | 0x856f3849 | setDefaultStorageNodeId(uint256) |
 | 0x6ee4a611 | setStorageNode(address) |
+| 0xae3ed8dd | setStorageNodeIdForVehicle(uint256,uint256) |
 | 0x7a26a1ed | vehicleIdToStorageNodeId(uint256) |
 
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
@@ -450,7 +456,10 @@
 #### Errors
 | Selector | Signature |
 |-|-|
+| 0xe3ca9639 | InvalidNode(address,uint256) |
+| 0x65745f79 | InvalidStorageNode(uint256) |
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
+| 0x8e4a23d6 | Unauthorized(address) |
 
 ## MultipleMinter
 #### Functions
@@ -468,6 +477,7 @@
 #### Events
 | Selector | Signature |
 |-|-|
+| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |

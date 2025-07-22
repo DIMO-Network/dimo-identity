@@ -1041,6 +1041,17 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
+        it('Should emit NodeIdSetForVehicleId events with correct params', async () => {
+          await expect(
+            multipleMinterInstance
+              .connect(connectionOwner1)
+            ['mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
+          )
+            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .withArgs(3, C.STORAGE_NODE_ID_1);
+        });
       });
     });
 
@@ -1635,6 +1646,17 @@ describe('MultipleMinter', function () {
               localCorrectMintInput
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
+        });
+        it('Should emit NodeIdSetForVehicleId events with correct params', async () => {
+          await expect(
+            multipleMinterInstance
+              .connect(minterWithPermission1)
+            ['mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
+          )
+            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .withArgs(3, C.STORAGE_NODE_ID_1);
         });
       });
     });
@@ -2389,6 +2411,17 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
+        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+          await expect(
+            multipleMinterInstance
+              .connect(connectionOwner1)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
+          )
+            .to.emit(multipleMinterInstance, 'NodeIdSetForVehicleId')
+            .withArgs(3, C.STORAGE_NODE_ID_1);
+        });
       });
     });
 
@@ -3040,6 +3073,17 @@ describe('MultipleMinter', function () {
               localCorrectMintInput
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
+        });
+        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+          await expect(
+            multipleMinterInstance
+              .connect(minterWithPermission1)
+            ['mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+              correctMintInput
+            )
+          )
+            .to.emit(multipleMinterInstance, 'NodeIdSetForVehicleId')
+            .withArgs(3, C.STORAGE_NODE_ID_1);
         });
       });
     });
@@ -3856,6 +3900,18 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
+        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+          await expect(
+            multipleMinterInstance
+              .connect(connectionOwner1)
+            ['mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+              correctMintInput,
+              sacdInput
+            )
+          )
+            .to.emit(multipleMinterInstance, 'NodeIdSetForVehicleId')
+            .withArgs(3, C.STORAGE_NODE_ID_1);
+        });
       });
     });
 
@@ -4559,6 +4615,18 @@ describe('MultipleMinter', function () {
               sacdInput
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
+        });
+        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+          await expect(
+            multipleMinterInstance
+              .connect(minterWithPermission1)
+            ['mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+              correctMintInput,
+              sacdInput
+            )
+          )
+            .to.emit(multipleMinterInstance, 'NodeIdSetForVehicleId')
+            .withArgs(3, C.STORAGE_NODE_ID_1);
         });
       });
     });
@@ -5359,7 +5427,7 @@ describe('MultipleMinter', function () {
           expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
         it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
-          const localCorrectInput = [...correctMintInputWithOneConnection ]
+          const localCorrectInput = JSON.parse(JSON.stringify(correctMintInputWithOneConnection))
           localCorrectInput[0].storageNodeId = '0'
           localCorrectInput[1].storageNodeId = '0'
 
@@ -5486,6 +5554,19 @@ describe('MultipleMinter', function () {
               newCorrectMintInput
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
+        });
+        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+          await expect(
+            multipleMinterInstance
+              .connect(connectionOwner1)
+            ['mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+              correctMintInputWithOneConnection
+            )
+          )
+            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .withArgs(3, C.STORAGE_NODE_ID_1)
+            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .withArgs(4, C.STORAGE_NODE_ID_1)
         });
       });
     });
@@ -6122,7 +6203,7 @@ describe('MultipleMinter', function () {
           expect(storageNodeIdForVehicleAfter).to.equal(C.STORAGE_NODE_ID_1)
         });
         it('Should correctly set Storage Node ID Default for vehicle ID if no Storage Node ID is specified', async () => {
-          const localCorrectInput = [...correctMintInputWithDiffConnections ]
+          const localCorrectInput = JSON.parse(JSON.stringify(correctMintInputWithDiffConnections))
           localCorrectInput[0].storageNodeId = '0'
           localCorrectInput[1].storageNodeId = '0'
 
@@ -6249,6 +6330,19 @@ describe('MultipleMinter', function () {
               newCorrectMintInput
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
+        });
+        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+          await expect(
+            multipleMinterInstance
+              .connect(minterWithPermission1)
+            ['mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+              correctMintInputWithOneConnection
+            )
+          )
+            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .withArgs(3, C.STORAGE_NODE_ID_1)
+            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .withArgs(4, C.STORAGE_NODE_ID_1);
         });
       });
     });

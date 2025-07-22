@@ -2,9 +2,12 @@
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFT.sol";
+import "../../interfaces/IStorageNode.sol";
 import "../../libraries/StorageNodeRegistryStorage.sol";
 import "../../libraries/nodes/VehicleStorage.sol";
+import "./StorageNodeRegistryInternal.sol";
 
+import "../../shared/Errors.sol" as Errors;
 import {ADMIN_ROLE} from "../../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
@@ -13,7 +16,10 @@ import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
  * @title Storage Node Registry Contract
  * @notice Manages the registration and assignment of storage nodes for vehicles
  */
-contract StorageNodeRegistry is AccessControlInternal {
+contract StorageNodeRegistry is
+    AccessControlInternal,
+    StorageNodeRegistryInternal
+{
     event StorageNodeSet(address indexed storageNode);
 
     /**
@@ -38,6 +44,38 @@ contract StorageNodeRegistry is AccessControlInternal {
         StorageNodeRegistryStorage
             .getStorage()
             .defaultStorageNodeId = storageNodeId;
+    }
+
+    /**
+     * @notice Associates a storage node with a specific vehicle ID
+     * @dev Only the vehicle ID owner can call this function
+     * @dev If storageNodeId is 0, the default storage node will be assigned
+     * @dev Emits a NodeIdSetForVehicleId event upon successful association
+     * @param vehicleId The ID of the vehicle to be associated with a storage node
+     * @param storageNodeId The ID of the storage node to be associated with the vehicle
+     * @custom:throws SetNodeUnauthorized if the caller is not the vehicle ID owner
+     * @custom:throws InvalidVehicleId if the provided vehicle ID does not exist
+     * @custom:throws InvalidStorageNode if the provided storage node ID does not exist
+     */
+    function setStorageNodeIdForVehicle(
+        uint256 vehicleId,
+        uint256 storageNodeId
+    ) external {
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+
+        try INFT(vehicleIdProxyAddress).ownerOf(vehicleId) returns (
+            address vehicleIdOwner
+        ) {
+            if (msg.sender != vehicleIdOwner) {
+                revert Errors.Unauthorized(msg.sender);
+            }
+        } catch {
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleId);
+        }
+
+        _setStorageNodeIdForVehicleId(vehicleId, storageNodeId);
     }
 
     /**

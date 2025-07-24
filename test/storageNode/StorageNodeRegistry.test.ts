@@ -405,13 +405,13 @@ describe('StorageNode', function () {
     });
 
     context('Events', () => {
-      it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+      it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
         await expect(
           storageNodeRegistryInstance
             .connect(user1)
             .setStorageNodeIdForVehicle(1, C.STORAGE_NODE_ID_1)
         )
-          .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+          .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
           .withArgs(1, C.STORAGE_NODE_ID_1);
       });
     });

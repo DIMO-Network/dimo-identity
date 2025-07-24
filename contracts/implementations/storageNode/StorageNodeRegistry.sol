@@ -50,7 +50,7 @@ contract StorageNodeRegistry is
      * @notice Associates a storage node with a specific vehicle ID
      * @dev Only the vehicle ID owner can call this function
      * @dev If storageNodeId is 0, the default storage node will be assigned
-     * @dev Emits a NodeIdSetForVehicleId event upon successful association
+     * @dev Emits a VehicleStorageNodeIdSet event upon successful association
      * @param vehicleId The ID of the vehicle to be associated with a storage node
      * @param storageNodeId The ID of the storage node to be associated with the vehicle
      * @custom:throws SetNodeUnauthorized if the caller is not the vehicle ID owner

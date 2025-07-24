@@ -53,7 +53,6 @@
 | 0x9811dbce | AftermarketDeviceUnclaimed(uint256) |
 | 0xd9135724 | AftermarketDeviceUnpaired(uint256,uint256,address) |
 | 0x11880ae6 | DeviceDefinitionIdSet(uint256,string) |
-| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
@@ -62,6 +61,7 @@
 | 0x9b4bf377 | VehicleAttributeRemoved(string) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0x7b36384f | VehicleNodeBurned(uint256,address) |
+| 0x9197060b | VehicleStorageNodeIdSet(uint256,uint256) |
 
 #### Errors
 | Selector | Signature |
@@ -332,7 +332,6 @@
 #### Events
 | Selector | Signature |
 |-|-|
-| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
@@ -342,6 +341,7 @@
 | 0x7b36384f | VehicleNodeBurned(uint256,address) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
 | 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
+| 0x9197060b | VehicleStorageNodeIdSet(uint256,uint256) |
 
 #### Errors
 | Selector | Signature |
@@ -447,11 +447,11 @@
 #### Events
 | Selector | Signature |
 |-|-|
-| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
 | 0x541fe968 | StorageNodeSet(address) |
+| 0x9197060b | VehicleStorageNodeIdSet(uint256,uint256) |
 
 #### Errors
 | Selector | Signature |
@@ -477,12 +477,12 @@
 #### Events
 | Selector | Signature |
 |-|-|
-| 0x69d86284 | NodeIdSetForVehicleId(uint256,uint256) |
 | 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
 | 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
 | 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
+| 0x9197060b | VehicleStorageNodeIdSet(uint256,uint256) |
 
 #### Errors
 | Selector | Signature |

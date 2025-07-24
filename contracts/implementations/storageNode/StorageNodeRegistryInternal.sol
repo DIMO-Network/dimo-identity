@@ -10,7 +10,7 @@ import "../../shared/Errors.sol";
  * @notice Internal library for managing storage node associations with vehicles
  */
 contract StorageNodeRegistryInternal {
-    event NodeIdSetForVehicleId(
+    event VehicleStorageNodeIdSet(
         uint256 indexed vehicleId,
         uint256 indexed storageNodeId
     );
@@ -38,6 +38,6 @@ contract StorageNodeRegistryInternal {
 
         snr.vehicleIdToStorageNodeId[vehicleId] = storageNodeId;
 
-        emit NodeIdSetForVehicleId(vehicleId, storageNodeId);
+        emit VehicleStorageNodeIdSet(vehicleId, storageNodeId);
     }
 }

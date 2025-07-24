@@ -76,7 +76,7 @@ contract DevAdmin is AccessControlInternal {
     );
     event VehicleAttributeRemoved(string attribute);
     event DeviceDefinitionIdSet(uint256 indexed vehicleId, string ddId);
-    event NodeIdSetForVehicleId(
+    event VehicleStorageNodeIdSet(
         uint256 indexed vehicleId,
         uint256 indexed storageNodeId
     );
@@ -765,7 +765,7 @@ contract DevAdmin is AccessControlInternal {
 
             snr.vehicleIdToStorageNodeId[vehicleId] = storageNodeId;
 
-            emit NodeIdSetForVehicleId(vehicleId, storageNodeId);
+            emit VehicleStorageNodeIdSet(vehicleId, storageNodeId);
         }
     }
 

@@ -231,25 +231,6 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
-        "name": "vehicleId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "storageNodeId",
-        "type": "uint256"
-      }
-    ],
-    "name": "NodeIdSetForVehicleId",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
         "internalType": "bytes32",
         "name": "role",
         "type": "bytes32"
@@ -425,6 +406,25 @@
       }
     ],
     "name": "VehicleNodeBurned",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "vehicleId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "storageNodeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "VehicleStorageNodeIdSet",
     "type": "event"
   },
   {

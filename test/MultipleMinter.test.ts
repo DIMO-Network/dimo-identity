@@ -1041,7 +1041,7 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
-        it('Should emit NodeIdSetForVehicleId events with correct params', async () => {
+        it('Should emit VehicleStorageNodeIdSet events with correct params', async () => {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
@@ -1049,7 +1049,7 @@ describe('MultipleMinter', function () {
               correctMintInput
             )
           )
-            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
             .withArgs(3, C.STORAGE_NODE_ID_1);
         });
       });
@@ -1647,7 +1647,7 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
-        it('Should emit NodeIdSetForVehicleId events with correct params', async () => {
+        it('Should emit VehicleStorageNodeIdSet events with correct params', async () => {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
@@ -1655,7 +1655,7 @@ describe('MultipleMinter', function () {
               correctMintInput
             )
           )
-            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
             .withArgs(3, C.STORAGE_NODE_ID_1);
         });
       });
@@ -2411,7 +2411,7 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
-        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
@@ -2419,7 +2419,7 @@ describe('MultipleMinter', function () {
               correctMintInput
             )
           )
-            .to.emit(multipleMinterInstance, 'NodeIdSetForVehicleId')
+            .to.emit(multipleMinterInstance, 'VehicleStorageNodeIdSet')
             .withArgs(3, C.STORAGE_NODE_ID_1);
         });
       });
@@ -3074,7 +3074,7 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
-        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
@@ -3082,7 +3082,7 @@ describe('MultipleMinter', function () {
               correctMintInput
             )
           )
-            .to.emit(multipleMinterInstance, 'NodeIdSetForVehicleId')
+            .to.emit(multipleMinterInstance, 'VehicleStorageNodeIdSet')
             .withArgs(3, C.STORAGE_NODE_ID_1);
         });
       });
@@ -3900,7 +3900,7 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
-        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
@@ -3909,7 +3909,7 @@ describe('MultipleMinter', function () {
               sacdInput
             )
           )
-            .to.emit(multipleMinterInstance, 'NodeIdSetForVehicleId')
+            .to.emit(multipleMinterInstance, 'VehicleStorageNodeIdSet')
             .withArgs(3, C.STORAGE_NODE_ID_1);
         });
       });
@@ -4616,7 +4616,7 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
-        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
@@ -4625,7 +4625,7 @@ describe('MultipleMinter', function () {
               sacdInput
             )
           )
-            .to.emit(multipleMinterInstance, 'NodeIdSetForVehicleId')
+            .to.emit(multipleMinterInstance, 'VehicleStorageNodeIdSet')
             .withArgs(3, C.STORAGE_NODE_ID_1);
         });
       });
@@ -5555,7 +5555,7 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
-        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
           await expect(
             multipleMinterInstance
               .connect(connectionOwner1)
@@ -5563,9 +5563,9 @@ describe('MultipleMinter', function () {
               correctMintInputWithOneConnection
             )
           )
-            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
             .withArgs(3, C.STORAGE_NODE_ID_1)
-            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
             .withArgs(4, C.STORAGE_NODE_ID_1)
         });
       });
@@ -6331,7 +6331,7 @@ describe('MultipleMinter', function () {
             )
           ).to.not.emit(multipleMinterInstance, 'SyntheticDeviceAttributeSet');
         });
-        it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+        it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
           await expect(
             multipleMinterInstance
               .connect(minterWithPermission1)
@@ -6339,9 +6339,9 @@ describe('MultipleMinter', function () {
               correctMintInputWithOneConnection
             )
           )
-            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
             .withArgs(3, C.STORAGE_NODE_ID_1)
-            .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+            .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
             .withArgs(4, C.STORAGE_NODE_ID_1);
         });
       });

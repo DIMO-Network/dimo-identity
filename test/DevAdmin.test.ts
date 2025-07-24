@@ -3054,15 +3054,15 @@ describe('DevAdmin', function () {
     })
 
     context('Events', () => {
-      it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+      it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
         await expect(
           devAdminInstance
             .connect(admin)
             .adminSetStorageNodeIdForVehicleIds([1, 2], C.STORAGE_NODE_ID_2)
         )
-          .to.emit(devAdminInstance, 'NodeIdSetForVehicleId')
+          .to.emit(devAdminInstance, 'VehicleStorageNodeIdSet')
           .withArgs(1, C.STORAGE_NODE_ID_2)
-          .to.emit(devAdminInstance, 'NodeIdSetForVehicleId')
+          .to.emit(devAdminInstance, 'VehicleStorageNodeIdSet')
           .withArgs(2, C.STORAGE_NODE_ID_2);
       });
     })

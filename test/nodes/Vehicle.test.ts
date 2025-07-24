@@ -671,7 +671,7 @@ describe('Vehicle', function () {
           )
         ).to.not.emit(vehicleInstance, 'VehicleAttributeSet');
       });
-      it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+      it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
@@ -683,7 +683,7 @@ describe('Vehicle', function () {
             C.mockVehicleAttributeInfoPairs
           )
         )
-          .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+          .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
           .withArgs(1, C.STORAGE_NODE_ID_1);
       });
     });
@@ -961,7 +961,7 @@ describe('Vehicle', function () {
           )
         ).to.not.emit(vehicleInstance, 'VehicleAttributeSet');
       });
-      it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+      it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
@@ -974,7 +974,7 @@ describe('Vehicle', function () {
             sacdInput
           )
         )
-          .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+          .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
           .withArgs(1, C.STORAGE_NODE_ID_1);
       });
     });
@@ -1464,7 +1464,7 @@ describe('Vehicle', function () {
             C.mockVehicleAttributeInfoPairs[1].info
           );
       });
-      it('Should emit NodeIdSetForVehicleId event with correct params', async () => {
+      it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
         await expect(
           vehicleInstance
             .connect(admin)
@@ -1477,7 +1477,7 @@ describe('Vehicle', function () {
             signature
           )
         )
-          .to.emit(storageNodeRegistryInstance, 'NodeIdSetForVehicleId')
+          .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
           .withArgs(1, C.STORAGE_NODE_ID_1);
       });
     });

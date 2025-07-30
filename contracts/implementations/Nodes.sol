@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 
 import "../libraries/NodesStorage.sol";
-import "../libraries/BaseDataURIStorage.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
@@ -44,31 +43,5 @@ contract Nodes {
         info = NodesStorage.getStorage().nodes[idProxyAddress][tokenId].info[
             attribute
         ];
-    }
-
-    /**
-     * @notice Return the data URI associated to the given node
-     * @dev If no info is specified in the data attribute, the default data URI is returned
-     * @param idProxyAddress The address of the proxy associated with the token Id
-     * @param tokenId Node id from which info will be obtained
-     * @return data Data obtained
-     */
-    function getDataURI(
-        address idProxyAddress,
-        uint256 tokenId
-    ) external view returns (string memory data) {
-        data = NodesStorage.getStorage().nodes[idProxyAddress][tokenId].info[
-            "DataURI"
-        ];
-
-        if (bytes(data).length == 0)
-            data = string(
-                abi.encodePacked(
-                    BaseDataURIStorage.getStorage().baseDataURIs[
-                        idProxyAddress
-                    ],
-                    tokenId.toString()
-                )
-            );
     }
 }

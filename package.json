@@ -62,6 +62,8 @@
     "@openzeppelin/contracts-upgradeable": "^4.7.3",
     "@solidstate/contracts": "^0.0.48",
     "@tableland/evm": "^6.0.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "ethereum-multicall": "^2.26.0",
+    "ethers-v5": "npm:ethers@^5.0.15"
   }
 }

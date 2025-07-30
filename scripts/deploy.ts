@@ -10,7 +10,7 @@ import {
   Eip712Checker,
   Charging,
   Shared,
-  BaseDataURI,
+  StorageNodeRegistry,
   Manufacturer,
   Integration,
   Vehicle,
@@ -100,29 +100,6 @@ async function deployModules(
 ): Promise<AddressesByNetwork> {
   console.log('\n----- Deploying contracts -----\n');
 
-  const contractNameArgs = [
-    { name: 'Eip712Checker', args: [] },
-    { name: 'DimoAccessControl', args: [] },
-    { name: 'Nodes', args: [] },
-    { name: 'BaseDataURI', args: [] },
-    { name: 'Manufacturer', args: [] },
-    { name: 'Integration', args: [] },
-    { name: 'Vehicle', args: [] },
-    { name: 'AftermarketDevice', args: [] },
-    { name: 'SyntheticDevice', args: [] },
-    { name: 'Mapper', args: [] },
-    { name: 'MultipleMinter', args: [] },
-    { name: 'StreamrConfigurator', args: [] },
-    { name: 'VehicleStream', args: [] },
-    { name: 'DevAdmin', args: [] },
-    { name: 'Multicall', args: [] },
-    { name: 'DeviceDefinitionTable', args: [] },
-    { name: 'ERC721Holder', args: [] },
-    { name: 'DeviceDefinitionController', args: [] },
-    { name: 'Charging', args: [] },
-    { name: 'Shared', args: [] },
-  ];
-
   const instances = getAddresses();
 
   // Deploy DIMORegistry Implementation
@@ -138,20 +115,15 @@ async function deployModules(
   instances[networkName].modules[C.dimoRegistryName].address =
     await dimoRegistryImplementation.getAddress();
 
-  for (const contractNameArg of contractNameArgs) {
-    const ContractFactory = await ethers.getContractFactory(
-      contractNameArg.name,
-    );
-    const contractImplementation = await ContractFactory.connect(
-      deployer,
-    ).deploy(...contractNameArg.args);
+  for (const contractName of C.contractNames) {
+    const ContractFactory = await ethers.getContractFactory(contractName);
+    const contractImplementation = await ContractFactory.connect(deployer).deploy();
 
     console.log(
-      `Contract ${contractNameArg.name
-      } deployed to ${await contractImplementation.getAddress()}`,
+      `Contract ${contractName} deployed to ${await contractImplementation.getAddress()}`,
     );
 
-    instances[networkName].modules[contractNameArg.name].address =
+    instances[networkName].modules[contractName].address =
       await contractImplementation.getAddress();
   }
 
@@ -323,7 +295,9 @@ async function addModules(
     instances[networkName].modules.DIMORegistry.address,
   );
 
-  const contractsNameImpl = Object.keys(instances[networkName].modules).map(
+  const contractsNameImpl = Object.keys(instances[networkName].modules)
+  .filter(contractName => C.contractNames.includes(contractName))
+  .map(
     (contractName) => {
       return {
         name: contractName,
@@ -401,8 +375,8 @@ async function setupRegistry(
     'SyntheticDevice',
     instances[networkName].modules.DIMORegistry.address,
   );
-  const baseDataUriInstance: BaseDataURI = await ethers.getContractAt(
-    'BaseDataURI',
+  const storageNodeRegistryInstance: StorageNodeRegistry = await ethers.getContractAt(
+    'StorageNodeRegistry',
     instances[networkName].modules.DIMORegistry.address,
   );
 
@@ -480,6 +454,23 @@ async function setupRegistry(
     `${instances[networkName].misc.Sacd} set as Sacd contract address`,
   );
   console.log('\n----- Shared setup -----');
+
+  console.log('\n----- Setting up StorageNodeRegistry -----');
+  await (
+    await storageNodeRegistryInstance
+      .connect(deployer)
+      .setStorageNode(instances[networkName].misc.StorageNode)
+  ).wait();
+  console.log(
+    `${instances[networkName].misc.StorageNode} set as StorageNode address`,
+  );
+  await (
+    await storageNodeRegistryInstance
+      .connect(deployer)
+      .setDefaultStorageNodeId(C.DEFAULT_STORAGE_NODE_ID)
+  ).wait();
+  console.log(`${C.DEFAULT_STORAGE_NODE_ID} set as Default Storage Node ID`);
+  console.log('----- StorageNodeRegistry setup -----');
 
   console.log('\n----- Setting NFT proxies -----\n');
   await (
@@ -564,17 +555,6 @@ async function setupRegistry(
       )
   ).wait();
   console.log('----- Approval set -----');
-
-  console.log('\n----- Setting Base Data URI -----');
-  await (
-    await baseDataUriInstance
-      .connect(deployer)
-      .setBaseDataURI(
-        instances[networkName].nfts.VehicleId.proxy,
-        C.BASE_DATA_URI,
-      )
-  ).wait();
-  console.log('----- Base Data URI set -----');
 }
 
 async function grantNftRoles(

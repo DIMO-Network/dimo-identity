@@ -7,24 +7,42 @@ const contractAddresses: AddressesByNetwork = addressesJSON;
 
 async function main() {
   const dimoRegistryInstance = await ethers.getContractAt(
-    'DIMORegistry',
+    'AftermarketDevice',
     contractAddresses[network.name].modules.DIMORegistry.address,
   );
-  const eventFilter = dimoRegistryInstance.filters.ModuleUpdated();
+  const eventFilter = dimoRegistryInstance.filters['AftermarketDeviceAttributeSet(uint256,string,string)']();
 
-  const events = await dimoRegistryInstance.queryFilter(
-    eventFilter,
-    25389115,
-    35489115,
-  );
+  const startBlock = 60303484;
+  const endBlock = 71713484;
+  const chunkSize = 100000; // Adjust this value based on your RPC provider's limitations
 
-  // const filtered = events.map((e) => {
-  //   return { role: e.args.role, account: e.args.account };
-  // });
+  let allEvents: any[] = [];
 
-  // console.log(events[2].args.oldSelectors);
-  // console.log(events[2].args.newSelectors);
-  console.log(events);  
+  console.log(`Querying events from block ${startBlock} to ${endBlock} in chunks of ${chunkSize}...`);
+
+  for (let fromBlock = startBlock; fromBlock <= endBlock; fromBlock += chunkSize) {
+    const toBlock = Math.min(fromBlock + chunkSize - 1, endBlock);
+    console.log(`Querying chunk: ${fromBlock} to ${toBlock}`);
+
+    try {
+      const eventsChunk = await dimoRegistryInstance.queryFilter(
+        eventFilter,
+        fromBlock,
+        toBlock
+      );
+
+      console.log(`Found ${eventsChunk.length} events in this chunk`);
+      allEvents = allEvents.concat(eventsChunk);
+    } catch (error) {
+      console.error(`Error querying blocks ${fromBlock} to ${toBlock}:`, error);
+    }
+  }
+
+  console.log(`Total events found: ${allEvents.length}`);
+    
+  for (const event of allEvents) {
+    console.log(event.args);
+  }
 }
 
 main().catch((error) => {

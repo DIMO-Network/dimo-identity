@@ -26,12 +26,14 @@ import {
   SyntheticDeviceId,
   Mapper,
   Shared,
+  StorageNodeRegistry,
   StreamrConfigurator,
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
   MockSacd,
   MockConnectionsManager,
+  MockStorageNode,
   DevAdmin,
 } from '../typechain-types';
 import {
@@ -59,11 +61,14 @@ describe('DevAdmin', function () {
   let syntheticDeviceInstance: SyntheticDevice;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
+  let storageNodeRegistryInstance: StorageNodeRegistry;
   let mockDimoTokenInstance: MockDimoToken;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockSacdInstance: MockSacd;
   let mockConnectionsManagerInstance: MockConnectionsManager;
+  let mockStorageNodeInstance: MockStorageNode;
+
   let devAdminInstance: DevAdmin;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
@@ -82,6 +87,7 @@ describe('DevAdmin', function () {
   let manufacturer2: HardhatEthersSigner;
   let manufacturer3: HardhatEthersSigner;
   let connectionOwner1: HardhatEthersSigner;
+  let storageNodeOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
   let adAddress1: HardhatEthersSigner;
@@ -122,6 +128,7 @@ describe('DevAdmin', function () {
       manufacturer2,
       manufacturer3,
       connectionOwner1,
+      storageNodeOwner1,
       user1,
       user2,
       adAddress1,
@@ -146,6 +153,7 @@ describe('DevAdmin', function () {
         'SyntheticDevice',
         'Mapper',
         'Shared',
+        'StorageNodeRegistry',
         'StreamrConfigurator',
         'DevAdmin'
       ],
@@ -169,6 +177,7 @@ describe('DevAdmin', function () {
     syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
+    storageNodeRegistryInstance = deployments.StorageNodeRegistry;
     devAdminInstance = deployments.DevAdmin;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
@@ -194,6 +203,10 @@ describe('DevAdmin', function () {
     // Deploy MockSacd contract
     const MockSacdFactory = await ethers.getContractFactory('MockSacd');
     mockSacdInstance = await MockSacdFactory.connect(admin).deploy();
+
+    // Deploy MockStorageNode contract
+    const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
 
     // Deploy MockConnectionsManager contract
     const MockConnectionsManagerFactory = await ethers.getContractFactory(
@@ -276,6 +289,14 @@ describe('DevAdmin', function () {
       .connect(admin)
       .setSacd(await mockSacdInstance.getAddress());
 
+    // Setup Storage Node Registry
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setStorageNode(await mockStorageNodeInstance.getAddress());
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setDefaultStorageNodeId(C.STORAGE_NODE_ID_DEFAULT)
+
     // Setup Charging variables
     await chargingInstance
       .connect(admin)
@@ -343,6 +364,23 @@ describe('DevAdmin', function () {
       .mint(
         connectionOwner1.address,
         C.CONNECTION_NAME_1
+      );
+
+    // Mint Storage Node IDs
+    await mockStorageNodeInstance
+      .mint(
+        admin.address,
+        C.STORAGE_NODE_LABEL_DEFAULT
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_1
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_2
       );
 
     await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
@@ -543,10 +581,10 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -737,10 +775,10 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -922,10 +960,10 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -1110,10 +1148,10 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
@@ -1259,17 +1297,19 @@ describe('DevAdmin', function () {
       it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
           1,
           user1.address,
+          C.STORAGE_NODE_ID_1,
           C.mockDdId1,
           C.mockVehicleAttributeInfoPairs
         );
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
           1,
           user1.address,
+          C.STORAGE_NODE_ID_1,
           C.mockDdId2,
           C.mockVehicleAttributeInfoPairs
         );
@@ -1363,10 +1403,10 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
@@ -1515,17 +1555,19 @@ describe('DevAdmin', function () {
         it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
           await vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
             1,
             user1.address,
+            C.STORAGE_NODE_ID_1,
             C.mockDdId1,
             C.mockVehicleAttributeInfoPairs
           );
           await vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
             1,
             user1.address,
+            C.STORAGE_NODE_ID_1,
             C.mockDdId2,
             C.mockVehicleAttributeInfoPairs
           );
@@ -1887,7 +1929,7 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await aftermarketDeviceInstance
           .connect(admin)
           .claimAftermarketDeviceBatch([{ aftermarketDeviceNodeId: '1', owner: await user1.address }]);
@@ -2087,10 +2129,10 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](2, user2.address, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](2, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
 
         await aftermarketDeviceInstance
           .connect(admin)
@@ -2278,10 +2320,10 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](2, user2.address, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](2, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId2, C.mockVehicleAttributeInfoPairs);
 
         await aftermarketDeviceInstance
           .connect(admin)
@@ -2388,10 +2430,10 @@ describe('DevAdmin', function () {
 
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
       await syntheticDeviceInstance
         .connect(connectionOwner1)
@@ -2620,7 +2662,7 @@ describe('DevAdmin', function () {
         );
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await aftermarketDeviceInstance
         .connect(admin)
         .claimAftermarketDeviceSign(
@@ -2675,7 +2717,7 @@ describe('DevAdmin', function () {
 
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           devAdminInstance.connect(admin).adminPairAftermarketDevice(1, 2),
@@ -2865,10 +2907,10 @@ describe('DevAdmin', function () {
     beforeEach(async () => {
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](2, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](2, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     });
 
     context('Error handling', () => {
@@ -2935,5 +2977,94 @@ describe('DevAdmin', function () {
           .withArgs(2, C.mockDdId2);
       });
     });
+  });
+
+  describe('adminMigrateSdParents', () => {
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_MIGRATE_SD_PARENTS role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .adminMigrateSdParents([1, 2], 1, C.CONNECTION_ID_1),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_MIGRATE_SD_PARENTS}`
+        );
+      });
+    });
+  });
+
+  describe('adminSetStorageNodeIdForVehicleIds', () => {
+    beforeEach(async () => {
+      await vehicleInstance
+        .connect(admin)
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      await vehicleInstance
+        .connect(admin)
+      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    })
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_SET_STORAGE_NODE_ID role', async () => {
+        await expect(
+          devAdminInstance
+            .connect(nonAdmin)
+            .adminSetStorageNodeIdForVehicleIds([1, 2], C.STORAGE_NODE_ID_1),
+        ).to.be.rejectedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_SET_STORAGE_NODE_ID}`
+        );
+      });
+      it('Should revert if storage node ID does not exist', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetStorageNodeIdForVehicleIds([1, 2], 99),
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, 'InvalidStorageNode')
+          .withArgs(99);
+      });
+      it('Should revert if vehicle ID does not exist', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetStorageNodeIdForVehicleIds([1, 99], C.STORAGE_NODE_ID_1),
+        )
+          .to.be.revertedWithCustomError(devAdminInstance, 'InvalidNode')
+          .withArgs(await vehicleIdInstance.getAddress(), 99);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set the storage node ID for the vehicle IDs', async () => {
+        const storageNodeId1Before = storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        const storageNodeId2Before = storageNodeRegistryInstance.vehicleIdToStorageNodeId(2)
+
+        await devAdminInstance
+          .connect(admin)
+          .adminSetStorageNodeIdForVehicleIds([1, 2], C.STORAGE_NODE_ID_2)
+
+        const storageNodeId1After = storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        const storageNodeId2After = storageNodeRegistryInstance.vehicleIdToStorageNodeId(2)
+
+        expect(storageNodeId1Before).to.not.equal(storageNodeId1After)
+        expect(storageNodeId2Before).to.not.equal(storageNodeId2After)
+
+        expect(storageNodeId1After).to.not.equal(C.STORAGE_NODE_ID_2)
+        expect(storageNodeId2After).to.not.equal(C.STORAGE_NODE_ID_2)
+      })
+    })
+
+    context('Events', () => {
+      it('Should emit VehicleStorageNodeIdSet event with correct params', async () => {
+        await expect(
+          devAdminInstance
+            .connect(admin)
+            .adminSetStorageNodeIdForVehicleIds([1, 2], C.STORAGE_NODE_ID_2)
+        )
+          .to.emit(devAdminInstance, 'VehicleStorageNodeIdSet')
+          .withArgs(1, C.STORAGE_NODE_ID_2)
+          .to.emit(devAdminInstance, 'VehicleStorageNodeIdSet')
+          .withArgs(2, C.STORAGE_NODE_ID_2);
+      });
+    })
   });
 });

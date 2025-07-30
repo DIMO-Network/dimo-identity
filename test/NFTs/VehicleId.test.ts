@@ -8,7 +8,6 @@ import {
   Charging,
   DimoAccessControl,
   Nodes,
-  BaseDataURI,
   Manufacturer,
   ManufacturerId,
   Vehicle,
@@ -19,11 +18,13 @@ import {
   AftermarketDeviceId,
   Mapper,
   Shared,
+  StorageNodeRegistry,
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
   MockSacd,
-  MockConnectionsManager
+  MockConnectionsManager,
+  MockStorageNode
 } from '../../typechain-types';
 import {
   setup,
@@ -43,18 +44,19 @@ describe('VehicleId', async function () {
   let chargingInstance: Charging;
   let dimoAccessControlInstance: DimoAccessControl;
   let nodesInstance: Nodes;
-  let baseDataUriInstance: BaseDataURI;
   let manufacturerInstance: Manufacturer;
   let vehicleInstance: Vehicle;
   let aftermarketDeviceInstance: AftermarketDevice;
   let syntheticDeviceInstance: SyntheticDevice;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
+  let storageNodeRegistryInstance: StorageNodeRegistry;
   let mockDimoTokenInstance: MockDimoToken;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
   let mockSacdInstance: MockSacd;
   let mockConnectionsManagerInstance: MockConnectionsManager;
+  let mockStorageNodeInstance: MockStorageNode;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
@@ -66,6 +68,7 @@ describe('VehicleId', async function () {
   let nonAdmin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
   let connectionOwner1: HardhatEthersSigner;
+  let storageNodeOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
   let adAddress1: HardhatEthersSigner;
@@ -85,6 +88,7 @@ describe('VehicleId', async function () {
       nonAdmin,
       manufacturer1,
       connectionOwner1,
+      storageNodeOwner1,
       user1,
       user2,
       adAddress1,
@@ -103,13 +107,13 @@ describe('VehicleId', async function () {
         'Charging',
         'DimoAccessControl',
         'Nodes',
-        'BaseDataURI',
         'Manufacturer',
         'Vehicle',
         'AftermarketDevice',
         'SyntheticDevice',
         'Mapper',
-        'Shared'
+        'Shared',
+        'StorageNodeRegistry'
       ],
       nfts: [
         'ManufacturerId',
@@ -125,13 +129,13 @@ describe('VehicleId', async function () {
     chargingInstance = deployments.Charging;
     dimoAccessControlInstance = deployments.DimoAccessControl;
     nodesInstance = deployments.Nodes;
-    baseDataUriInstance = deployments.BaseDataURI;
     manufacturerInstance = deployments.Manufacturer;
     vehicleInstance = deployments.Vehicle;
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     syntheticDeviceInstance = deployments.SyntheticDevice;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
+    storageNodeRegistryInstance = deployments.StorageNodeRegistry;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
     adIdInstance = deployments.AftermarketDeviceId;
@@ -169,6 +173,10 @@ describe('VehicleId', async function () {
       .connect(admin)
       .deploy(C.CONNECTIONS_MANAGER_ERC721_NAME, C.CONNECTIONS_MANAGER_ERC721_SYMBOL);
 
+    // Deploy MockStorageNode contract
+    const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
+
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
     // Grant NFT minter roles to DIMO Registry contract
@@ -184,12 +192,6 @@ describe('VehicleId', async function () {
     await sdIdInstance
       .connect(admin)
       .grantRole(C.NFT_MINTER_ROLE, DIMO_REGISTRY_ADDRESS);
-
-    // Set base data URI
-    await baseDataUriInstance.setBaseDataURI(
-      await vehicleIdInstance.getAddress(),
-      C.BASE_DATA_URI,
-    );
 
     // Set NFT Proxies
     await manufacturerInstance
@@ -240,6 +242,14 @@ describe('VehicleId', async function () {
     await sharedInstance
       .connect(admin)
       .setSacd(await mockSacdInstance.getAddress());
+    
+    // Setup Storage Node Registry
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setStorageNode(await mockStorageNodeInstance.getAddress());
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setDefaultStorageNodeId(C.STORAGE_NODE_ID_DEFAULT)
 
     // Setup Charging variables
     await chargingInstance
@@ -295,6 +305,18 @@ describe('VehicleId', async function () {
       .mint(
         connectionOwner1.address,
         C.CONNECTION_NAME_1
+      );
+    
+    // Mint Storage Node IDs
+    await mockStorageNodeInstance
+      .mint(
+        admin.address,
+        C.STORAGE_NODE_LABEL_DEFAULT
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_1
       );
 
     await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
@@ -355,7 +377,7 @@ describe('VehicleId', async function () {
 
     await vehicleInstance
       .connect(admin)
-    ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     await aftermarketDeviceInstance
       .connect(admin)
       .claimAftermarketDeviceSign(
@@ -630,29 +652,6 @@ describe('VehicleId', async function () {
     });
   });
 
-  describe('getDataURI', () => {
-    it('Should return the default data URI if no data is set in the token', async () => {
-      const dataUriReturn = await vehicleIdInstance.getDataURI(1);
-
-      expect(dataUriReturn).to.eq(`${C.BASE_DATA_URI}1`);
-    });
-    it('Should correctly return the data URI set in the token', async () => {
-      const customDataUri = 'custom.data.uri';
-
-      await vehicleInstance.addVehicleAttribute('DataURI');
-      await vehicleInstance.connect(admin).setVehicleInfo(1, [
-        {
-          attribute: 'DataURI',
-          info: customDataUri,
-        },
-      ]);
-
-      const dataUriReturn = await vehicleIdInstance.getDataURI(1);
-
-      expect(dataUriReturn).to.equal(customDataUri);
-    });
-  });
-
   describe('getDefinitionURI', () => {
     it('Should return the empty if no definition is set in the token', async () => {
       const definitionUriReturn = await vehicleIdInstance.getDefinitionURI(1);
@@ -686,7 +685,7 @@ describe('VehicleId', async function () {
       it('Should revert if caller is not the token owner', async () => {
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user2.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleIdInstance.connect(user1).burn(2),
@@ -773,9 +772,10 @@ describe('VehicleId', async function () {
         it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
           await vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
             1,
             user1.address,
+            C.STORAGE_NODE_ID_1,
             C.mockDdId2,
             C.mockVehicleAttributeInfoPairs
           );

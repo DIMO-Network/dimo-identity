@@ -10,11 +10,13 @@ error AlreadyController(address addr);
 error OnlyNftProxy();
 
 // Nodes
+// TODO replace it by error InvalidParentNode(uint256 tokenId, uint256 parentId);
 error InvalidParentNode(uint256 id);
 error InvalidParentNodeOwner(uint256 id, address addr);
 error InvalidNode(address proxy, uint256 id);
 error VehiclePaired(uint256 id);
 error VehicleNotPaired(uint256 id);
+error InvalidStorageNode(uint256 storageNodeId);
 
 // Signature
 error InvalidSigner();

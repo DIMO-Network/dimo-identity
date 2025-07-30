@@ -16,9 +16,11 @@ import {
   AftermarketDeviceId,
   Mapper,
   Shared,
+  StorageNodeRegistry,
   MockDimoToken,
   MockDimoCredit,
   MockManufacturerLicense,
+  MockStorageNode,
   Multicall
 } from '../typechain-types';
 import {
@@ -44,9 +46,11 @@ describe('Multicall', function () {
   let aftermarketDeviceInstance: AftermarketDevice;
   let mapperInstance: Mapper;
   let sharedInstance: Shared;
+  let storageNodeRegistryInstance: StorageNodeRegistry;
   let mockDimoTokenInstance: MockDimoToken;
   let mockManufacturerLicenseInstance: MockManufacturerLicense;
   let mockDimoCreditInstance: MockDimoCredit;
+  let mockStorageNodeInstance: MockStorageNode;
   let manufacturerIdInstance: ManufacturerId;
   let vehicleIdInstance: VehicleId;
   let adIdInstance: AftermarketDeviceId;
@@ -56,6 +60,7 @@ describe('Multicall', function () {
 
   let admin: HardhatEthersSigner;
   let manufacturer1: HardhatEthersSigner;
+  let storageNodeOwner1: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let adAddress1: HardhatEthersSigner;
   let adAddress2: HardhatEthersSigner;
@@ -71,6 +76,7 @@ describe('Multicall', function () {
     [
       admin,
       manufacturer1,
+      storageNodeOwner1,
       user1,
       adAddress1,
       adAddress2
@@ -92,7 +98,8 @@ describe('Multicall', function () {
         'AftermarketDevice',
         'Mapper',
         'Multicall',
-        'Shared'
+        'Shared',
+        'StorageNodeRegistry'
       ],
       nfts: ['ManufacturerId', 'VehicleId', 'AftermarketDeviceId'],
       upgradeableContracts: []
@@ -108,6 +115,7 @@ describe('Multicall', function () {
     aftermarketDeviceInstance = deployments.AftermarketDevice;
     mapperInstance = deployments.Mapper;
     sharedInstance = deployments.Shared;
+    storageNodeRegistryInstance = deployments.StorageNodeRegistry;
     multicallInstance = deployments.Multicall;
     manufacturerIdInstance = deployments.ManufacturerId;
     vehicleIdInstance = deployments.VehicleId;
@@ -132,6 +140,10 @@ describe('Multicall', function () {
     // Deploy MockManufacturerLicense contract
     const MockManufacturerLicenseFactory = await ethers.getContractFactory('MockManufacturerLicense');
     mockManufacturerLicenseInstance = await MockManufacturerLicenseFactory.connect(admin).deploy();
+
+    // Deploy MockStorageNode contract
+    const MockStorageNodeFactory = await ethers.getContractFactory('MockStorageNode');
+    mockStorageNodeInstance = await MockStorageNodeFactory.connect(admin).deploy();
 
     await grantAdminRoles(admin, dimoAccessControlInstance);
 
@@ -186,6 +198,14 @@ describe('Multicall', function () {
     await sharedInstance
       .connect(admin)
       .setManufacturerLicense(await mockManufacturerLicenseInstance.getAddress());
+    
+    // Setup Storage Node Registry
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setStorageNode(await mockStorageNodeInstance.getAddress());
+    await storageNodeRegistryInstance
+      .connect(admin)
+      .setDefaultStorageNodeId(C.STORAGE_NODE_ID_DEFAULT)
 
     // Setup Charging variables
     await chargingInstance
@@ -229,6 +249,18 @@ describe('Multicall', function () {
       );
 
     await mockManufacturerLicenseInstance.setLicenseBalance(manufacturer1.address, 1);
+
+    // Mint Storage Node IDs
+    await mockStorageNodeInstance
+      .mint(
+        admin.address,
+        C.STORAGE_NODE_LABEL_DEFAULT
+      );
+    await mockStorageNodeInstance
+      .mint(
+        storageNodeOwner1.address,
+        C.STORAGE_NODE_LABEL_1
+      );
 
     // Grant Transferer role to DIMO Registry
     await adIdInstance
@@ -309,8 +341,8 @@ describe('Multicall', function () {
     context('State', () => {
       it('Should mint vehicle and claim aftermarket device in the same transaction', async () => {
         const mintVehicleWithDdSignEncoded = vehicleInstance.interface.encodeFunctionData(
-          'mintVehicleWithDeviceDefinitionSign',
-          [1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
+          'mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)',
+          [1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
           aftermarketDeviceInstance.interface.encodeFunctionData(
@@ -333,8 +365,8 @@ describe('Multicall', function () {
       });
       it('Should mint vehicle, claim aftermarket device and pair them in the same transaction', async () => {
         const mintVehicleWithDdSignEncoded = vehicleInstance.interface.encodeFunctionData(
-          'mintVehicleWithDeviceDefinitionSign',
-          [1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
+          'mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)',
+          [1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
           aftermarketDeviceInstance.interface.encodeFunctionData(
@@ -415,7 +447,7 @@ describe('Multicall', function () {
     it('Should return information about vehicle', async () => {
       await vehicleInstance
         .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[])'](1, user1.address, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
 
       const getInfoEncoded1 = nodesInstance.interface.encodeFunctionData('getInfo', [
         await vehicleIdInstance.getAddress(),

@@ -79,7 +79,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
@@ -106,7 +106,7 @@
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "adNode",
+        "name": "tokenId",
         "type": "uint256"
       },
       {
@@ -186,13 +186,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "aftermarketDeviceNode",
         "type": "uint256"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "vehicleNode",
         "type": "uint256"
@@ -368,7 +368,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"

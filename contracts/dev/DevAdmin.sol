@@ -40,13 +40,13 @@ contract DevAdmin is AccessControlInternal {
         address indexed newOwner
     );
     event AftermarketDeviceUnpaired(
-        uint256 indexed aftermarketDeviceNode,
-        uint256 indexed vehicleNode,
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
         address indexed owner
     );
     event VehicleNodeBurned(uint256 indexed vehicleNode, address indexed owner);
     event AftermarketDeviceNodeBurned(
-        uint256 indexed adNode,
+        uint256 indexed tokenId,
         address indexed owner
     );
     event SyntheticDeviceNodeBurned(
@@ -54,13 +54,9 @@ contract DevAdmin is AccessControlInternal {
         uint256 indexed vehicleNode,
         address indexed owner
     );
-    event VehicleAttributeSet(
-        uint256 indexed tokenId,
-        string attribute,
-        string info
-    );
+    event VehicleAttributeSet(uint256 tokenId, string attribute, string info);
     event AftermarketDeviceAttributeSet(
-        uint256 indexed tokenId,
+        uint256 tokenId,
         string attribute,
         string info
     );

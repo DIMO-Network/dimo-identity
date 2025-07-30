@@ -29,11 +29,11 @@ async function main(paths: string[]) {
   const set: Set<string> = new Set(merged);
   const setParsed = Array.from(set).map((a) => JSON.parse(a));
 
-  const processedAbi = removeDuplicateDefinitions(setParsed);
+  // const processedAbi = removeDuplicateDefinitions(setParsed);
 
   fs.writeFileSync(
     path.resolve(__dirname, '..', 'abis', 'DimoRegistry.json'),
-    `${JSON.stringify(processedAbi, null, 4)}\n`,
+    `${JSON.stringify(setParsed, null, 4)}\n`,
     {
       flag: 'w',
     },

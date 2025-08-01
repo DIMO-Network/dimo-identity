@@ -1,0 +1,110 @@
+{
+    "polygon": {
+        "modules": {
+            "Integration": {
+                "address": "0x25f58785A56bEC607a5932ad4B0e910d39B84d3e",
+                "selectors": [
+                    "0x044d2498",
+                    "0x714b7cfb",
+                    "0x123141bd",
+                    "0xbc8002f0",
+                    "0xe21f68b7",
+                    "0x603dd1db",
+                    "0xd6739004",
+                    "0x653af271",
+                    "0x106129aa",
+                    "0x636c1d1b",
+                    "0x8d7e6001",
+                    "0x440707b5"
+                ]
+            }
+        },
+        "nfts": {
+            "IntegrationId": {
+                "proxy": "0xf41cE833C1A35C80eB5Feb69e23F1Ed2ECBE20e0",
+                "implementation": "0x0F98fDf1E3166aB99859c7A040ba09daF95c8c84"
+            }
+        }
+    },
+    "amoy": {
+        "modules": {
+            "Integration": {
+                "address": "0xedFD19B9347ac3d38a66Fc3ee26de27D1D0d7154",
+                "selectors": [
+                    "0x044d2498",
+                    "0x714b7cfb",
+                    "0x123141bd",
+                    "0xbc8002f0",
+                    "0xe21f68b7",
+                    "0x603dd1db",
+                    "0xd6739004",
+                    "0x653af271",
+                    "0x106129aa",
+                    "0x636c1d1b",
+                    "0x8d7e6001",
+                    "0x440707b5"
+                ]
+            }
+        },
+        "nfts": {
+            "IntegrationId": {
+                "proxy": "0x80Ee7ec4493A1d7975ab900F94dB25ba7C688201",
+                "implementation": "0xbA450e606860C24a9f1Ed711F642ae27b4Ad5684"
+            }
+        }
+    },
+    "hardhat": {
+        "modules": {
+            "Integration": {
+                "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+                "selectors": [
+                    "0x044d2498",
+                    "0x714b7cfb",
+                    "0x123141bd",
+                    "0xbc8002f0",
+                    "0xe21f68b7",
+                    "0x603dd1db",
+                    "0xd6739004",
+                    "0x653af271",
+                    "0x106129aa",
+                    "0x636c1d1b",
+                    "0x8d7e6001",
+                    "0x440707b5"
+                ]
+            }
+        },
+        "nfts": {
+            "IntegrationId": {
+                "proxy": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
+                "implementation": "0x9d4454B023096f34B160D6B654540c56A1F81688"
+            }
+        }
+    },
+    "localhost": {
+        "modules": {
+            "Integration": {
+                "address": "0x18E317A7D70d8fBf8e6E893616b52390EbBdb629",
+                "selectors": [
+                    "0x044d2498",
+                    "0x714b7cfb",
+                    "0x123141bd",
+                    "0xbc8002f0",
+                    "0xe21f68b7",
+                    "0x603dd1db",
+                    "0xd6739004",
+                    "0x653af271",
+                    "0x106129aa",
+                    "0x636c1d1b",
+                    "0x8d7e6001",
+                    "0x440707b5"
+                ]
+            }
+        },
+        "nfts": {
+            "IntegrationId": {
+                "proxy": "0xab16A69A5a8c12C732e0DEFF4BE56A70bb64c926",
+                "implementation": "0x3aAde2dCD2Df6a8cAc689EE797591b2913658659"
+            }
+        }
+    }
+}

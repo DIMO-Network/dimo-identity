@@ -72,7 +72,6 @@ main([
   'ERC721Holder',
   'AftermarketDevice',
   'Manufacturer',
-  'Integration',
   'SyntheticDevice',
   'Vehicle',
   'Nodes',

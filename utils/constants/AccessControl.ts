@@ -23,14 +23,6 @@ export const SET_AD_INFO_ROLE = ethers.keccak256(
   ethers.toUtf8Bytes('SET_AD_INFO_ROLE')
 );
 
-// Integration roles
-export const MINT_INTEGRATION_ROLE = ethers.keccak256(
-  ethers.toUtf8Bytes('MINT_INTEGRATION_ROLE')
-);
-export const SET_INTEGRATION_INFO_ROLE = ethers.keccak256(
-  ethers.toUtf8Bytes('SET_INTEGRATION_INFO_ROLE')
-);
-
 // Manufacturer roles
 export const MINT_MANUFACTURER_ROLE = ethers.keccak256(
   ethers.toUtf8Bytes('MINT_MANUFACTURER_ROLE')

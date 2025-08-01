@@ -7,7 +7,6 @@ export const contractNames = [
   'DimoAccessControl',
   'Nodes',
   'Manufacturer',
-  'Integration',
   'Vehicle',
   'AftermarketDevice',
   'SyntheticDevice',
@@ -37,8 +36,6 @@ export const roles = {
     PAIR_AD_ROLE: _hashRole('PAIR_AD_ROLE'),
     UNPAIR_AD_ROLE: _hashRole('UNPAIR_AD_ROLE'),
     SET_AD_INFO_ROLE: _hashRole('SET_AD_INFO_ROLE'),
-    MINT_INTEGRATION_ROLE: _hashRole('MINT_INTEGRATION_ROLE'),
-    SET_INTEGRATION_INFO_ROLE: _hashRole('SET_INTEGRATION_INFO_ROLE'),
     MINT_MANUFACTURER_ROLE: _hashRole('MINT_MANUFACTURER_ROLE'),
     SET_MANUFACTURER_INFO_ROLE: _hashRole('SET_MANUFACTURER_INFO_ROLE'),
     MINT_SD_ROLE: _hashRole('MINT_SD_ROLE'),
@@ -80,10 +77,6 @@ export const MANUFACTURER_NFT_NAME = 'DIMO Manufacturer ID';
 export const MANUFACTURER_NFT_SYMBOL = 'DIMO/MANUFACTURER';
 export const MANUFACTURER_NFT_URI =
   'https://devices-api.dimo.zone/v1/manufacturer/';
-export const INTEGRATION_NFT_NAME = 'DIMO Integration ID';
-export const INTEGRATION_NFT_SYMBOL = 'DIMO/INTEGRATION';
-export const INTEGRATION_NFT_URI =
-  'https://devices-api.dimo.zone/v1/integration/';
 export const VEHICLE_NFT_NAME = 'DIMO Vehicle ID';
 export const VEHICLE_NFT_SYMBOL = 'DIMO/VEHICLE';
 export const VEHICLE_NFT_URI = 'https://devices-api.dimo.zone/v1/vehicles/';
@@ -110,10 +103,6 @@ export const sdAttributes = [];
 export const manufacturerIdArgs = {
   name: 'ManufacturerId',
   args: [MANUFACTURER_NFT_NAME, MANUFACTURER_NFT_SYMBOL, MANUFACTURER_NFT_URI]
-};
-export const integrationIdArgs = {
-  name: 'IntegrationId',
-  args: [INTEGRATION_NFT_NAME, INTEGRATION_NFT_SYMBOL, INTEGRATION_NFT_URI]
 };
 export const vehicleIdArgs = {
   name: 'VehicleId',

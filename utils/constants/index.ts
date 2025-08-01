@@ -5,7 +5,6 @@ export * from './Charging';
 export * from './Connection';
 export * from './DeviceDefinitionTable';
 export * from './eip712';
-export * from './Integration';
 export * from './Manufacturer';
 export * from './Misc';
 export * from './MultiPrivilege';

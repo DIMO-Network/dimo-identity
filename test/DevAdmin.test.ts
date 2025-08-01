@@ -2979,20 +2979,6 @@ describe('DevAdmin', function () {
     });
   });
 
-  describe('adminMigrateSdParents', () => {
-    context('Error handling', () => {
-      it('Should revert if caller does not have DEV_SUPER_ADMIN_ROLE or DEV_MIGRATE_SD_PARENTS role', async () => {
-        await expect(
-          devAdminInstance
-            .connect(nonAdmin)
-            .adminMigrateSdParents([1, 2], 1, C.CONNECTION_ID_1),
-        ).to.be.rejectedWith(
-          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.DEV_MIGRATE_SD_PARENTS}`
-        );
-      });
-    });
-  });
-
   describe('adminSetStorageNodeIdForVehicleIds', () => {
     beforeEach(async () => {
       await vehicleInstance

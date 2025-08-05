@@ -56,23 +56,6 @@
                     "0x20d60248"
                 ]
             },
-            "Integration": {
-                "address": "0x25f58785A56bEC607a5932ad4B0e910d39B84d3e",
-                "selectors": [
-                    "0x044d2498",
-                    "0x714b7cfb",
-                    "0x123141bd",
-                    "0xbc8002f0",
-                    "0xe21f68b7",
-                    "0x603dd1db",
-                    "0xd6739004",
-                    "0x653af271",
-                    "0x106129aa",
-                    "0x636c1d1b",
-                    "0x8d7e6001",
-                    "0x440707b5"
-                ]
-            },
             "Vehicle": {
                 "address": "0x90bcdec5Ce48b1Cae99Ef0D95daAce634e78773e",
                 "selectors": [
@@ -195,7 +178,7 @@
                 ]
             },
             "DevAdmin": {
-                "address": "0x63AC0D75CaD5f9951A2F557E07aa0582f804a6DA",
+                "address": "0x933d2f5ecf126D8a40e05e2dDeAA28fa3DA859EE",
                 "selectors": [
                     "0xd7376bae",
                     "0x63dec203",
@@ -204,7 +187,6 @@
                     "0x11d679c9",
                     "0xb17b974b",
                     "0x56936962",
-                    "0xec11d45a",
                     "0x3febacab",
                     "0x5f741f4d",
                     "0x3d9cf004",
@@ -265,10 +247,6 @@
             "ManufacturerId": {
                 "proxy": "0x3b07e2A2ABdd0A9B8F7878bdE6487c502164B9dd",
                 "implementation": "0x9dAbfAB72049809C2b702892edbe8eF6Ad59d1f9"
-            },
-            "IntegrationId": {
-                "proxy": "0xf41cE833C1A35C80eB5Feb69e23F1Ed2ECBE20e0",
-                "implementation": "0x0F98fDf1E3166aB99859c7A040ba09daF95c8c84"
             },
             "VehicleId": {
                 "proxy": "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",
@@ -563,10 +541,6 @@
                 "proxy": "0xA4ad0F9c722588910791A9BAC63ADbB365614Bc7",
                 "implementation": "0x9493E8A35cc5566581FD6335BcB34e7cD99f2654"
             },
-            "IntegrationId": {
-                "proxy": "0x80Ee7ec4493A1d7975ab900F94dB25ba7C688201",
-                "implementation": "0xbA450e606860C24a9f1Ed711F642ae27b4Ad5684"
-            },
             "VehicleId": {
                 "proxy": "0x45fbCD3ef7361d156e8b16F5538AE36DEdf61Da8",
                 "implementation": "0xbde35f209febdf8fe16fdab674d630bd1a19b5db"
@@ -665,23 +639,6 @@
                     "0xd159f49a",
                     "0x63545ffa",
                     "0x20d60248"
-                ]
-            },
-            "Integration": {
-                "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-                "selectors": [
-                    "0x044d2498",
-                    "0x714b7cfb",
-                    "0x123141bd",
-                    "0xbc8002f0",
-                    "0xe21f68b7",
-                    "0x603dd1db",
-                    "0xd6739004",
-                    "0x653af271",
-                    "0x106129aa",
-                    "0x636c1d1b",
-                    "0x8d7e6001",
-                    "0x440707b5"
                 ]
             },
             "Vehicle": {
@@ -874,10 +831,6 @@
                 "proxy": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf",
                 "implementation": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF"
             },
-            "IntegrationId": {
-                "proxy": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
-                "implementation": "0x9d4454B023096f34B160D6B654540c56A1F81688"
-            },
             "VehicleId": {
                 "proxy": "0x809d550fca64d94Bd9F66E60752A544199cfAC3D",
                 "implementation": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570"
@@ -975,23 +928,6 @@
                     "0xd159f49a",
                     "0x63545ffa",
                     "0x20d60248"
-                ]
-            },
-            "Integration": {
-                "address": "0x18E317A7D70d8fBf8e6E893616b52390EbBdb629",
-                "selectors": [
-                    "0x044d2498",
-                    "0x714b7cfb",
-                    "0x123141bd",
-                    "0xbc8002f0",
-                    "0xe21f68b7",
-                    "0x603dd1db",
-                    "0xd6739004",
-                    "0x653af271",
-                    "0x106129aa",
-                    "0x636c1d1b",
-                    "0x8d7e6001",
-                    "0x440707b5"
                 ]
             },
             "Vehicle": {
@@ -1145,10 +1081,6 @@
             "ManufacturerId": {
                 "proxy": "0xffa7CA1AEEEbBc30C874d32C7e22F052BbEa0429",
                 "implementation": "0x5bf5b11053e734690269C6B9D438F8C9d48F528A"
-            },
-            "IntegrationId": {
-                "proxy": "0xab16A69A5a8c12C732e0DEFF4BE56A70bb64c926",
-                "implementation": "0x3aAde2dCD2Df6a8cAc689EE797591b2913658659"
             },
             "VehicleId": {
                 "proxy": "0x1f10F3Ba7ACB61b2F50B9d6DdCf91a6f787C0E82",

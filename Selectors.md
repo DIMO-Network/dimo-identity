@@ -144,6 +144,7 @@
 | 0xcfe642dd | pairAftermarketDeviceSign(uint256,uint256,bytes) |
 | 0x9b3abd48 | reprovisionAftermarketDeviceByManufacturerBatch(uint256[]) |
 | 0x9d0b139b | resetAftermarketDeviceAddressByManufacturerBatch((uint256,address)[]) |
+| 0x4c92773c | resetAftermarketDeviceForClaiming(address,uint256) |
 | 0x4d49d82a | setAftermarketDeviceIdProxyAddress(address) |
 | 0x4d13b709 | setAftermarketDeviceInfo(uint256,(string,string)[]) |
 | 0xee4d9596 | unpairAftermarketDevice(uint256,uint256) |
@@ -160,6 +161,7 @@
 | 0xc4d38c0a | AftermarketDeviceNodeBurned(uint256,address) |
 | 0xd624fd4c | AftermarketDeviceNodeMinted(uint256,uint256,address,address) |
 | 0x89ec1328 | AftermarketDevicePaired(uint256,uint256,address) |
+| 0x3c800215 | AftermarketDeviceUnclaimed(uint256,address) |
 | 0xd9135724 | AftermarketDeviceUnpaired(uint256,uint256,address) |
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |

@@ -1234,6 +1234,25 @@
         "type": "event"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "AftermarketDeviceUnclaimed",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "internalType": "string",
@@ -1520,6 +1539,30 @@
         ],
         "name": "resetAftermarketDeviceAddressByManufacturerBatch",
         "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "aftermarketDeviceNode",
+                "type": "uint256"
+            }
+        ],
+        "name": "resetAftermarketDeviceForClaiming",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
         "stateMutability": "nonpayable",
         "type": "function"
     },

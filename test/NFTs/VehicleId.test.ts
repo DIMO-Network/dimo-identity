@@ -786,6 +786,23 @@ describe('VehicleId', async function () {
 
           expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.empty;
         });
+        it('Should correctly reset storage node ID to 0', async () => {
+          await vehicleInstance
+            .connect(admin)
+          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
+            1,
+            user1.address,
+            C.STORAGE_NODE_ID_1,
+            C.mockDdId2,
+            C.mockVehicleAttributeInfoPairs
+          );
+
+          expect(await storageNodeRegistryInstance.vehicleIdToStorageNodeId(2)).to.be.equal(C.STORAGE_NODE_ID_1);
+
+          await vehicleIdInstance.connect(user1).burn(2);
+
+          expect(await storageNodeRegistryInstance.vehicleIdToStorageNodeId(2)).to.be.equal(0);
+        });
         it('Should correctly reset infos to blank', async () => {
           await vehicleIdInstance.connect(user1).burn(1);
 

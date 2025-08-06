@@ -475,6 +475,8 @@ contract Vehicle is
         NodesStorage.Storage storage ns = NodesStorage.getStorage();
         MapperStorage.Storage storage ms = MapperStorage.getStorage();
         VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        StorageNodeRegistryStorage.Storage
+            storage sn = StorageNodeRegistryStorage.getStorage();
 
         address vehicleIdProxyAddress = vs.idProxyAddress;
         address sdIdProxyAddress = SyntheticDeviceStorage
@@ -492,6 +494,7 @@ contract Vehicle is
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
         delete vs.vehicleIdToDeviceDefinitionId[tokenId];
+        delete sn.vehicleIdToStorageNodeId[tokenId];
 
         _resetInfos(tokenId);
 

@@ -12,7 +12,6 @@ import {
   Shared,
   StorageNodeRegistry,
   Manufacturer,
-  Integration,
   Vehicle,
   VehicleId,
   AftermarketDevice,
@@ -26,7 +25,6 @@ import {
 import { getSelectors, AddressesByNetwork, NftArgs } from '../utils';
 import * as C from './data/deployArgs';
 import { makes } from './data/Makes';
-import { integrations } from './data/Integrations';
 
 function getAddresses(): AddressesByNetwork {
   return JSON.parse(
@@ -53,7 +51,6 @@ function buildNftArgs(
   networkName: string,
 ): NftArgs[] {
   const currentManufacturerIdArgs: NftArgs = C.manufacturerIdArgs;
-  const currentIntegrationIdArgs: NftArgs = C.integrationIdArgs;
   const currentVehicleIdArgs: NftArgs = C.vehicleIdArgs;
   const currentAdIdArgs: NftArgs = C.adIdArgs;
   const currentSdIdArgs: NftArgs = C.sdIdArgs;
@@ -61,11 +58,6 @@ function buildNftArgs(
   currentManufacturerIdArgs.args = [
     ...C.manufacturerIdArgs.args,
     instances[networkName].modules.DIMORegistry.address,
-  ];
-  currentIntegrationIdArgs.args = [
-    ...C.integrationIdArgs.args,
-    instances[networkName].modules.DIMORegistry.address,
-    [instances[networkName].misc.DimoForwarder.proxy],
   ];
   currentVehicleIdArgs.args = [
     ...C.vehicleIdArgs.args,
@@ -87,7 +79,6 @@ function buildNftArgs(
 
   return [
     currentManufacturerIdArgs,
-    currentIntegrationIdArgs,
     currentVehicleIdArgs,
     currentAdIdArgs,
     currentSdIdArgs,
@@ -353,10 +344,6 @@ async function setupRegistry(
     'Manufacturer',
     instances[networkName].modules.DIMORegistry.address,
   );
-  const integrationInstance: Integration = await ethers.getContractAt(
-    'Integration',
-    instances[networkName].modules.DIMORegistry.address,
-  );
   const vehicleInstance: Vehicle = await ethers.getContractAt(
     'Vehicle',
     instances[networkName].modules.DIMORegistry.address,
@@ -484,16 +471,6 @@ async function setupRegistry(
     `${instances[networkName].nfts.ManufacturerId.proxy} proxy address set to Manufacturer`,
   );
   await (
-    await integrationInstance
-      .connect(deployer)
-      .setIntegrationIdProxyAddress(
-        instances[networkName].nfts.IntegrationId.proxy,
-      )
-  ).wait();
-  console.log(
-    `${instances[networkName].nfts.IntegrationId.proxy} proxy address set to Integration`,
-  );
-  await (
     await vehicleInstance
       .connect(deployer)
       .setVehicleIdProxyAddress(instances[networkName].nfts.VehicleId.proxy)
@@ -568,7 +545,6 @@ async function grantNftRoles(
 
   for (const contractName of [
     'ManufacturerId',
-    'IntegrationId',
     'VehicleId',
     'AftermarketDeviceId',
     'SyntheticDeviceId',
@@ -695,42 +671,6 @@ async function mintBatchManufacturers(
   }
 
   console.log('\n----- Manufacturers minted -----\n');
-}
-
-async function mintBatchIntegrations(
-  deployer: HardhatEthersSigner,
-  owner: string,
-  networkName: string,
-) {
-  const instances = getAddresses();
-
-  const batchSize = 50;
-  const integrationInstance: Integration = await ethers.getContractAt(
-    'Integration',
-    instances[networkName].modules.DIMORegistry.address,
-  );
-
-  console.log('\n----- Minting integrations -----\n');
-
-  for (let i = 0; i < integrations.length; i += batchSize) {
-    const batch = integrations.slice(i, i + batchSize);
-
-    const receipt = (await (
-      await integrationInstance
-        .connect(deployer)
-        .mintIntegrationBatch(owner, batch)
-    ).wait()) as ContractTransactionReceipt;
-
-    const ids = receipt?.logs
-      ?.filter((log: EventLog | Log) => log instanceof EventLog)
-      .map((eventLog: EventLog | Log) =>
-        (eventLog as EventLog).args[0].toString(),
-      );
-
-    console.log(`Minted ids: ${ids?.join(',')}`);
-  }
-
-  console.log('\n----- Integrations minted -----\n');
 }
 
 async function setupStreamr(
@@ -881,11 +821,6 @@ async function main() {
 
   await setupRegistry(deployer, networkName);
   await mintBatchManufacturers(
-    deployer,
-    instances[networkName].misc.Foundation,
-    networkName,
-  );
-  await mintBatchIntegrations(
     deployer,
     instances[networkName].misc.Foundation,
     networkName,

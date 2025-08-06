@@ -32,7 +32,6 @@
 | 0x11d679c9 | adminBurnVehiclesAndDeletePairings(uint256[]) |
 | 0xb17b974b | adminCacheDimoStreamrEns() |
 | 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
-| 0xec11d45a | adminMigrateSdParents(uint256[],uint256,uint256) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
 | 0x5f741f4d | adminRemoveVehicleAttribute(string) |
 | 0x3d9cf004 | adminSetStorageNodeIdForVehicleIds(uint256[],uint256) |
@@ -69,7 +68,6 @@
 | 0x15bdaac1 | AdNotClaimed(uint256) |
 | 0x762116ae | AdPaired(uint256) |
 | 0xe3ca9639 | InvalidNode(address,uint256) |
-| 0x5299bab7 | InvalidParentNode(uint256) |
 | 0x65745f79 | InvalidStorageNode(uint256) |
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
 | 0xc46a5168 | VehiclePaired(uint256) |
@@ -221,50 +219,6 @@
 | Selector | Signature |
 |-|-|
 | 0xc9134785 | UintUtils__InsufficientHexLength() |
-
-## Integration
-#### Functions
-| Selector | Signature |
-|-|-|
-| 0x044d2498 | addIntegrationAttribute(string) |
-| 0x714b7cfb | getIntegrationIdByName(string) |
-| 0x123141bd | getIntegrationNameById(uint256) |
-| 0xbc8002f0 | isAllowedToOwnIntegrationNode(address) |
-| 0xe21f68b7 | isIntegrationController(address) |
-| 0x603dd1db | isIntegrationMinted(address) |
-| 0xd6739004 | mintIntegration(address,string,(string,string)[]) |
-| 0x653af271 | mintIntegrationBatch(address,string[]) |
-| 0x106129aa | setIntegrationController(address) |
-| 0x636c1d1b | setIntegrationIdProxyAddress(address) |
-| 0x8d7e6001 | setIntegrationInfo(uint256,(string,string)[]) |
-| 0x440707b5 | updateIntegrationMinted(address,address) |
-
-#### Events
-| Selector | Signature |
-|-|-|
-| 0x79f74fd5 | ControllerSet(address) |
-| 0x8a60d58f | IntegrationAttributeAdded(string) |
-| 0x7ad258fa | IntegrationAttributeSet(uint256,string,string) |
-| 0x25dd5f73 | IntegrationIdProxySet(address) |
-| 0x98490372 | IntegrationNodeMinted(uint256,address) |
-| 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
-| 0x2f878811 | RoleGranted(bytes32,address,address) |
-| 0xf6391f5c | RoleRevoked(bytes32,address,address) |
-
-#### Errors
-| Selector | Signature |
-|-|-|
-| 0xb9f36dab | AlreadyController(address) |
-| 0x130e2668 | AttributeExists(string) |
-| 0x1c48d49e | AttributeNotWhitelisted(string) |
-| 0xb9cb244b | IntegrationNameRegisterd(string) |
-| 0xe3ca9639 | InvalidNode(address,uint256) |
-| 0x33c5677b | MustBeAdmin(address) |
-| 0xfa5cd00f | NotAllowed(address) |
-| 0x87e6ac10 | OnlyNftProxy() |
-| 0xc9134785 | UintUtils__InsufficientHexLength() |
-| 0x8e4a23d6 | Unauthorized(address) |
-| 0xd92e233d | ZeroAddress() |
 
 ## SyntheticDevice
 #### Functions

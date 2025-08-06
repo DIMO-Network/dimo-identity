@@ -108,7 +108,6 @@ const config: HardhatUserConfig = {
       ':ManufacturerId$',
       ':AftermarketDeviceId$',
       ':VehicleId$',
-      ':IntegrationId$',
       ':SyntheticDeviceId$',
       ':DimoForwarder$',
     ],

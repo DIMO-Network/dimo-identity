@@ -5,13 +5,11 @@ import { ethers, network } from 'hardhat';
 import {
   DIMORegistry,
   Manufacturer,
-  Integration,
   AftermarketDevice,
   DimoAccessControl,
   Mapper,
   StorageNodeRegistry,
   ManufacturerId,
-  IntegrationId,
   VehicleId,
   AftermarketDeviceId,
   SyntheticDeviceId,
@@ -56,14 +54,6 @@ async function main() {
   const manufacturerIdInstance: ManufacturerId = await ethers.getContractAt(
     'ManufacturerId',
     contractAddresses[currentNetwork].nfts.ManufacturerId.proxy
-  );
-  const integrationInstance: Integration = await ethers.getContractAt(
-    'Integration',
-    contractAddresses[currentNetwork].modules.DIMORegistry.address
-  );
-  const integrationIdInstance: IntegrationId = await ethers.getContractAt(
-    'IntegrationId',
-    contractAddresses[currentNetwork].nfts.IntegrationId.proxy
   );
   const aftermarketDevice: AftermarketDevice = await ethers.getContractAt(
     'AftermarketDevice',

@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "../AttributeSet.sol";
 
 /**
+ * @dev DEPRECATED
  * @title IntegrationStorage
  * @notice Storage of the Integration contract
  */

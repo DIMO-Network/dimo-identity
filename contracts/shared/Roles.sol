@@ -11,12 +11,6 @@ bytes32 constant PAIR_AD_ROLE = keccak256("PAIR_AD_ROLE");
 bytes32 constant UNPAIR_AD_ROLE = keccak256("UNPAIR_AD_ROLE");
 bytes32 constant SET_AD_INFO_ROLE = keccak256("SET_AD_INFO_ROLE");
 
-// Integration roles
-bytes32 constant MINT_INTEGRATION_ROLE = keccak256("MINT_INTEGRATION_ROLE");
-bytes32 constant SET_INTEGRATION_INFO_ROLE = keccak256(
-    "SET_INTEGRATION_INFO_ROLE"
-);
-
 // Manufacturer roles
 bytes32 constant MINT_MANUFACTURER_ROLE = keccak256("MINT_MANUFACTURER_ROLE");
 bytes32 constant SET_MANUFACTURER_INFO_ROLE = keccak256(

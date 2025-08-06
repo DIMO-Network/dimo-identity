@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-import "../../interfaces/INFT.sol";
-import "../../libraries/NodesStorage.sol";
-import "../../libraries/nodes/IntegrationStorage.sol";
+import "../interfaces/INFT.sol";
+import "../libraries/NodesStorage.sol";
+import "../libraries/deprecated/IntegrationStorage.sol";
 
-import "../../shared/Roles.sol" as Roles;
-import "../../shared/Types.sol" as Types;
-import "../../shared/Errors.sol" as Errors;
+import "../shared/Roles.sol" as Roles;
+import "../shared/Types.sol" as Types;
+import "../shared/Errors.sol" as Errors;
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
@@ -17,10 +17,16 @@ error IntegrationNameRegisterd(string name);
 error NotAllowed(address addr);
 
 /**
+ * @dev DEPRECATED
  * @title Integration
  * @notice Contract that represents the Integration node
  */
 contract Integration is AccessControlInternal {
+    // Integration roles
+    bytes32 constant MINT_INTEGRATION_ROLE = keccak256("MINT_INTEGRATION_ROLE");
+    bytes32 constant SET_INTEGRATION_INFO_ROLE =
+        keccak256("SET_INTEGRATION_INFO_ROLE");
+
     event IntegrationIdProxySet(address proxy);
     event IntegrationAttributeAdded(string attribute);
     event IntegrationAttributeSet(
@@ -101,7 +107,7 @@ contract Integration is AccessControlInternal {
     function mintIntegrationBatch(
         address owner,
         string[] calldata names
-    ) external onlyRole(Roles.MINT_INTEGRATION_ROLE) {
+    ) external onlyRole(MINT_INTEGRATION_ROLE) {
         if (!_hasRole(Roles.ADMIN_ROLE, owner)) revert MustBeAdmin(owner);
 
         IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
@@ -134,7 +140,7 @@ contract Integration is AccessControlInternal {
         address owner,
         string calldata name,
         Types.AttributeInfoPair[] calldata attrInfoPairList
-    ) external onlyRole(Roles.MINT_INTEGRATION_ROLE) {
+    ) external onlyRole(MINT_INTEGRATION_ROLE) {
         IntegrationStorage.Storage storage s = IntegrationStorage.getStorage();
         if (s.controllers[owner].integrationMinted)
             revert Errors.Unauthorized(owner);
@@ -166,7 +172,7 @@ contract Integration is AccessControlInternal {
     function setIntegrationInfo(
         uint256 tokenId,
         Types.AttributeInfoPair[] calldata attrInfoList
-    ) external onlyRole(Roles.SET_INTEGRATION_INFO_ROLE) {
+    ) external onlyRole(SET_INTEGRATION_INFO_ROLE) {
         address integrationIdProxy = IntegrationStorage
             .getStorage()
             .idProxyAddress;

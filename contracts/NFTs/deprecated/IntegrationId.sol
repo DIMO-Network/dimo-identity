@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
-import "../interfaces/IDimoRegistry.sol";
-import "./Base/MultiPrivilege/MultiPrivilege.sol";
-import "./Base/ERC2771ContextUpgradeable.sol";
+import "../../interfaces/IDimoRegistry.sol";
+import "../Base/MultiPrivilege/MultiPrivilege.sol";
+import "../Base/ERC2771ContextUpgradeable.sol";
 
 error ZeroAddress();
 

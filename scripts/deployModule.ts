@@ -62,25 +62,18 @@ async function deployNfts(
 ): Promise<AddressesByNetwork> {
   console.log('\n----- Deploying NFT contracts -----\n');
 
-  const currentIntegrationIdArgs: NftArgs = C.integrationIdArgs;
   const currentSdIdArgs: NftArgs = C.sdIdArgs;
 
   const instances = getAddresses();
 
-  currentIntegrationIdArgs.args = [
-    ...C.integrationIdArgs.args,
-    instances[networkName].modules.DIMORegistry.address,
-    [instances[networkName].misc.DimoForwarder.proxy],
-  ];
   currentSdIdArgs.args = [
     ...C.sdIdArgs.args,
     instances[networkName].modules.DIMORegistry.address,
     [instances[networkName].misc.DimoForwarder.proxy],
   ];
-  console.log(currentIntegrationIdArgs);
   console.log(currentSdIdArgs);
 
-  for (const contractNameArg of [currentIntegrationIdArgs, currentSdIdArgs]) {
+  for (const contractNameArg of [currentSdIdArgs]) {
     const ContractFactory = await ethers.getContractFactory(
       contractNameArg.name,
       deployer,
@@ -380,7 +373,7 @@ async function grantNewRoles(
   );
 
   console.log(
-    `----- Granting ADMIN_ROLE, MINT_MANUFACTURER_ROLE, SET_MANUFACTURER_INFO_ROLE, SET_AD_INFO_ROLE, MINT_INTEGRATION_ROLE, SET_INTEGRATION_INFO_ROLE, MINT_SD_ROLE, SET_SD_INFO_ROLE, MINT_VEHICLE_ROLE, SET_VEHICLE_INFO_ROLE to Foundation ${instances[networkName].misc.Foundation} -----\n`,
+    `----- Granting ADMIN_ROLE, MINT_MANUFACTURER_ROLE, SET_MANUFACTURER_INFO_ROLE, SET_AD_INFO_ROLE, MINT_SD_ROLE, SET_SD_INFO_ROLE, MINT_VEHICLE_ROLE, SET_VEHICLE_INFO_ROLE to Foundation ${instances[networkName].misc.Foundation} -----\n`,
   );
   await dimoAccessControl
     .connect(deployer)
@@ -405,24 +398,6 @@ async function grantNewRoles(
     );
   console.log(
     `SET_MANUFACTURER_INFO_ROLE -> ${C.roles.modules.SET_MANUFACTURER_INFO_ROLE} : ${instances[networkName].misc.Foundation}`,
-  );
-  await dimoAccessControl
-    .connect(deployer)
-    .grantRole(
-      C.roles.modules.MINT_INTEGRATION_ROLE,
-      instances[networkName].misc.Foundation,
-    );
-  console.log(
-    `MINT_INTEGRATION_ROLE -> ${C.roles.modules.MINT_INTEGRATION_ROLE} : ${instances[networkName].misc.Foundation}`,
-  );
-  await dimoAccessControl
-    .connect(deployer)
-    .grantRole(
-      C.roles.modules.SET_INTEGRATION_INFO_ROLE,
-      instances[networkName].misc.Foundation,
-    );
-  console.log(
-    `SET_INTEGRATION_INFO_ROLE -> ${C.roles.modules.SET_INTEGRATION_INFO_ROLE} : ${instances[networkName].misc.Foundation}`,
   );
   await dimoAccessControl
     .connect(deployer)
@@ -604,19 +579,30 @@ async function main(networkFlag?: string) {
   const forkNetworkName = 'polygon'
   const [signer] = await getAccounts(network.name, forkNetworkName)
   
-  const instances1 = await updateModule(signer, 'DevAdmin', forkNetworkName);
-  writeAddresses(instances1, forkNetworkName);
+  // const instances1 = await updateModule(signer, 'Vehicle', forkNetworkName);
+  // writeAddresses(instances1, forkNetworkName);
 
-  const instances2 = await updateModule(signer, 'Manufacturer', forkNetworkName);
-  writeAddresses(instances2, forkNetworkName);
+  // const instances2 = await updateModule(signer, 'MultipleMinter', forkNetworkName);
+  // writeAddresses(instances2, forkNetworkName);
 
-  const nftInstances = await upgradeNft(
-    signer,
-    'ManufacturerId',
-    forkNetworkName,
-    true
-  );
-  writeAddresses(nftInstances, forkNetworkName);
+  const instance3 = await deployModules(signer, ['Vehicle','MultipleMinter','DevAdmin','StorageNodeRegistry'], forkNetworkName);
+  writeAddresses(instance3, forkNetworkName);
+  // instance3 = await addModules(signer, ['StorageNodeRegistry'], forkNetworkName);
+  // writeAddresses(instance3, forkNetworkName);
+
+  // const instances4 = await updateModule(signer, 'DevAdmin', forkNetworkName);
+  // writeAddresses(instances4, forkNetworkName);
+
+  // const instances2 = await updateModule(signer, 'Manufacturer', forkNetworkName);
+  // writeAddresses(instances2, forkNetworkName);
+
+  // const nftInstances = await upgradeNft(
+  //   signer,
+  //   'ManufacturerId',
+  //   forkNetworkName,
+  //   true
+  // );
+  // writeAddresses(nftInstances, forkNetworkName);
 }
 
 main().catch((error) => {

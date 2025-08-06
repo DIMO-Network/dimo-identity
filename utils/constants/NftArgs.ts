@@ -12,10 +12,6 @@ export const MANUFACTURER_FACTORY_RESET_PRIVILEGE = '3';
 export const MANUFACTURER_REPROVISION_PRIVILEGE = '4';
 export const MANUFACTURER_INSERT_DD_PRIVILEGE = '5';
 
-export const INTEGRATION_NFT_NAME = 'Integration NFT';
-export const INTEGRATION_NFT_SYMBOL = 'INFT';
-export const INTEGRATION_NFT_BASE_URI = 'https://dimo.zone/integration/';
-
 export const VEHICLE_NFT_NAME = 'Vehicle NFT';
 export const VEHICLE_NFT_SYMBOL = 'VNFT';
 export const VEHICLE_NFT_BASE_URI = 'https://dimo.zone/vehicles/';
@@ -45,20 +41,6 @@ export const nftArgs: ContractNameArgsByNetwork = {
       MANUFACTURER_NFT_SYMBOL,
       MANUFACTURER_NFT_BASE_URI,
       ZERO_ADDRESS,
-    ],
-    opts: {
-      initializer: 'initialize',
-      kind: 'uups' as const,
-    },
-  },
-  IntegrationId: {
-    name: 'IntegrationId',
-    args: [
-      INTEGRATION_NFT_NAME,
-      INTEGRATION_NFT_SYMBOL,
-      INTEGRATION_NFT_BASE_URI,
-      ZERO_ADDRESS,
-      [],
     ],
     opts: {
       initializer: 'initialize',

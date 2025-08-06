@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFTMultiPrivilege.sol";
+import "../../interfaces/ISacd.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
@@ -49,6 +50,7 @@ contract AftermarketDevice is AccessControlInternal {
     uint256 private constant MANUFACTURER_CLAIMER_PRIVILEGE = 2;
     uint256 private constant MANUFACTURER_FACTORY_RESET_PRIVILEGE = 3;
     uint256 private constant MANUFACTURER_REPROVISION_PRIVILEGE = 4;
+    uint8 private constant MANUFACTURER_REPROVISION_PERMISSION = 1;
 
     event AftermarketDeviceIdProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
@@ -694,6 +696,12 @@ contract AftermarketDevice is AccessControlInternal {
                     manufacturerParentNode,
                     MANUFACTURER_REPROVISION_PRIVILEGE,
                     msg.sender
+                ) &&
+                !ISacd(SharedStorage.getStorage().sacd).hasPermission(
+                    address(manufacturerIdProxy),
+                    manufacturerParentNode,
+                    msg.sender,
+                    MANUFACTURER_REPROVISION_PERMISSION
                 )
             ) revert Errors.Unauthorized(msg.sender);
 
@@ -935,12 +943,22 @@ contract AftermarketDevice is AccessControlInternal {
         ) {
             info = ns.nodes[idProxyAddress][oldTokenId].info[attributes[i]];
 
-            ns.nodes[idProxyAddress][newTokenId].info[attributes[i]] = info;
+            if (bytes(info).length != 0) {
+                ns.nodes[idProxyAddress][newTokenId].info[attributes[i]] = info;
 
-            delete ns.nodes[idProxyAddress][oldTokenId].info[attributes[i]];
+                delete ns.nodes[idProxyAddress][oldTokenId].info[attributes[i]];
 
-            emit AftermarketDeviceAttributeSet(oldTokenId, attributes[i], "");
-            emit AftermarketDeviceAttributeSet(newTokenId, attributes[i], info);
+                emit AftermarketDeviceAttributeSet(
+                    oldTokenId,
+                    attributes[i],
+                    ""
+                );
+                emit AftermarketDeviceAttributeSet(
+                    newTokenId,
+                    attributes[i],
+                    info
+                );
+            }
         }
     }
 }

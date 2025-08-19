@@ -5543,6 +5543,23 @@ describe('AftermarketDevice', function () {
     });
   });
 
+  describe('resetAftermarketDeviceForClaiming', () => {
+    context('Error handling', () => {
+      it('Should revert caller is not the Aftermarket Device ID proxy', async () => {
+        await expect(
+          aftermarketDeviceInstance
+            .connect(nonAdmin)
+            .resetAftermarketDeviceForClaiming(user1.address, 1)
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'Unauthorized'
+          )
+          .withArgs(nonAdmin.address);
+      });
+    })
+  })
+
   describe('getAftermarketDeviceIdByAddress', () => {
     beforeEach(async () => {
       await adIdInstance

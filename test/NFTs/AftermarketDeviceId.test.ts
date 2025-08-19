@@ -55,6 +55,7 @@ describe('AftermarketDeviceId', async function () {
   let adIdInstance: AftermarketDeviceId;
 
   let DIMO_REGISTRY_ADDRESS: string;
+  let AD_ID_ADDRESS: string;
 
   let admin: HardhatEthersSigner;
   let nonAdmin: HardhatEthersSigner;
@@ -124,6 +125,7 @@ describe('AftermarketDeviceId', async function () {
     adIdInstance = deployments.AftermarketDeviceId;
 
     DIMO_REGISTRY_ADDRESS = await dimoRegistryInstance.getAddress();
+    AD_ID_ADDRESS = await adIdInstance.getAddress();
 
     // Deploy MockDimoToken contract
     const MockDimoTokenFactory = await ethers.getContractFactory(
@@ -169,7 +171,7 @@ describe('AftermarketDeviceId', async function () {
       .setVehicleIdProxyAddress(await vehicleIdInstance.getAddress());
     await aftermarketDeviceInstance
       .connect(admin)
-      .setAftermarketDeviceIdProxyAddress(await adIdInstance.getAddress());
+      .setAftermarketDeviceIdProxyAddress(AD_ID_ADDRESS);
 
     // Initialize EIP-712
     await eip712CheckerInstance.initialize(
@@ -200,7 +202,7 @@ describe('AftermarketDeviceId', async function () {
     await sharedInstance
       .connect(admin)
       .setManufacturerLicense(await mockManufacturerLicenseInstance.getAddress());
-    
+
     // Setup Storage Node Registry
     await storageNodeRegistryInstance
       .connect(admin)
@@ -333,7 +335,7 @@ describe('AftermarketDeviceId', async function () {
 
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
     await aftermarketDeviceInstance
       .connect(admin)
       .claimAftermarketDeviceSign(
@@ -423,6 +425,58 @@ describe('AftermarketDeviceId', async function () {
     });
   });
 
+  describe('returnToManufacturer', () => {
+    context('Error handling', () => {
+      it('Should revert if aftermarket device ID does not have a parent', async () => {
+        await expect(
+          adIdInstance.connect(nonAdmin).returnToManufacturer(99)
+        )
+          .to.be.revertedWithCustomError(
+            aftermarketDeviceInstance,
+            'InvalidNode'
+          )
+          .withArgs(AD_ID_ADDRESS, 99);
+      });
+    });
+
+    context('State', () => {
+      it('Should transfer the token back to the manufacturer', async () => {
+        expect(await adIdInstance.ownerOf(1)).to.equal(user1.address);
+
+        await adIdInstance.connect(user1).returnToManufacturer(1);
+
+        expect(await adIdInstance.ownerOf(1)).to.equal(manufacturer1.address);
+      });
+      it('Should unpair the device from the vehicle', async () => {
+        expect(await mapperInstance.getLink(AD_ID_ADDRESS, 1)).to.equal(1);
+
+        await adIdInstance.connect(user1).returnToManufacturer(1);
+
+        expect(await mapperInstance.getLink(AD_ID_ADDRESS, 1)).to.equal(0);
+      });
+      it('Should reset the device to unclaimed state', async () => {
+        expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.true;
+
+        await adIdInstance.connect(user1).returnToManufacturer(1);
+
+        expect(await aftermarketDeviceInstance.isAftermarketDeviceClaimed(1)).to.be.false;
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit AftermarketDeviceUnpaired event', async () => {
+        await expect(adIdInstance.connect(user1).returnToManufacturer(1))
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceUnpaired')
+          .withArgs(1, 1, user1.address);
+      });
+      it('Should emit AftermarketDeviceUnclaimed event', async () => {
+        await expect(adIdInstance.connect(user1).returnToManufacturer(1))
+          .to.emit(aftermarketDeviceInstance, 'AftermarketDeviceUnclaimed')
+          .withArgs(1, manufacturer1.address);
+      });
+    });
+  });
+
   describe('getDefinitionURI', () => {
     it('Should return the empty if no definition is set in the token', async () => {
       const definitionUriReturn = await adIdInstance.getDefinitionURI(1);
@@ -482,7 +536,7 @@ describe('AftermarketDeviceId', async function () {
       });
       it('Should keep the same parent node', async () => {
         const parentNode = await nodesInstance.getParentNode(
-          await adIdInstance.getAddress(),
+          AD_ID_ADDRESS,
           2
         );
 
@@ -495,7 +549,7 @@ describe('AftermarketDeviceId', async function () {
         );
 
         expect(
-          await nodesInstance.getParentNode(await adIdInstance.getAddress(), 2)
+          await nodesInstance.getParentNode(AD_ID_ADDRESS, 2)
         ).to.equal(parentNode);
       });
       it('Should keep the same infos', async () => {
@@ -508,7 +562,7 @@ describe('AftermarketDeviceId', async function () {
           .attrInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              await adIdInstance.getAddress(),
+              AD_ID_ADDRESS,
               2,
               attrInfoPair.attribute
             )
@@ -532,7 +586,7 @@ describe('AftermarketDeviceId', async function () {
           .attrInfoPairs) {
           expect(
             await nodesInstance.getInfo(
-              await adIdInstance.getAddress(),
+              AD_ID_ADDRESS,
               2,
               attrInfoPair.attribute
             )
@@ -560,7 +614,7 @@ describe('AftermarketDeviceId', async function () {
           .setAftermarketDeviceBeneficiary(2, beneficiary1.address);
 
         expect(
-          await mapperInstance.getBeneficiary(await adIdInstance.getAddress(), 2)
+          await mapperInstance.getBeneficiary(AD_ID_ADDRESS, 2)
         ).to.equal(beneficiary1.address);
 
         await adIdInstance
@@ -572,7 +626,7 @@ describe('AftermarketDeviceId', async function () {
         );
 
         expect(
-          await mapperInstance.getBeneficiary(await adIdInstance.getAddress(), 2)
+          await mapperInstance.getBeneficiary(AD_ID_ADDRESS, 2)
         ).to.equal(user2.address);
       });
     });

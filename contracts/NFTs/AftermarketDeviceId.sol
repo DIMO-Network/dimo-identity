@@ -59,6 +59,18 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
     }
 
     /**
+     * @notice Returns an aftermarket device to its manufacturer
+     * @dev Resets the device for claiming and transfers the token back to the manufacturer
+     * @param tokenId The ID of the aftermarket device token to be returned
+     */
+    function returnToManufacturer(uint256 tokenId) external {
+        address manufacturerAddress = _dimoRegistry
+            .resetAftermarketDeviceForClaiming(_msgSender(), tokenId);
+
+        transferFrom(_msgSender(), manufacturerAddress, tokenId);
+    }
+
+    /**
      * @notice Gets the definition URI associated to a token
      * @param tokenId Token Id to be checked
      * @return definitionURI Definition URI

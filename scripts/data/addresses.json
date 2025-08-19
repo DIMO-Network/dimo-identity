@@ -367,7 +367,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0x185EbF7D5C9229B810A218781FdCf8B9c99b995D",
+                "address": "0x4b9750FbF37Fa9b617110Dbba24277E340afC712",
                 "selectors": [
                     "0x6111afa3",
                     "0x08d2c2f5",
@@ -382,6 +382,7 @@
                     "0xcfe642dd",
                     "0x9b3abd48",
                     "0x9d0b139b",
+                    "0x4c92773c",
                     "0x4d49d82a",
                     "0x4d13b709",
                     "0xee4d9596",
@@ -547,7 +548,7 @@
             },
             "AftermarketDeviceId": {
                 "proxy": "0x325b45949C833986bC98e98a49F3CA5C5c4643B5",
-                "implementation": "0xE03D589cA38587eaaEC146AE2609fF2B8F69ca2C"
+                "implementation": "0x76CCb7Fa2aD069F3CD79ee483A26EfFcb8BFe156"
             },
             "SyntheticDeviceId": {
                 "proxy": "0x78513c8CB4D6B6079f813850376bc9c7fc8aE67f",

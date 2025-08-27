@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../../interfaces/INFTMultiPrivilege.sol";
+import "../../interfaces/ISacd.sol";
 import "../../Eip712/Eip712CheckerInternal.sol";
 import "../../libraries/NodesStorage.sol";
 import "../../libraries/nodes/ManufacturerStorage.sol";
@@ -49,6 +50,7 @@ contract AftermarketDevice is AccessControlInternal {
     uint256 private constant MANUFACTURER_CLAIMER_PRIVILEGE = 2;
     uint256 private constant MANUFACTURER_FACTORY_RESET_PRIVILEGE = 3;
     uint256 private constant MANUFACTURER_REPROVISION_PRIVILEGE = 4;
+    uint8 private constant MANUFACTURER_REPROVISION_PERMISSION = 1;
 
     event AftermarketDeviceIdProxySet(address indexed proxy);
     event AftermarketDeviceAttributeAdded(string attribute);
@@ -65,6 +67,10 @@ contract AftermarketDevice is AccessControlInternal {
     );
     event AftermarketDeviceClaimed(
         uint256 aftermarketDeviceNode,
+        address indexed owner
+    );
+    event AftermarketDeviceUnclaimed(
+        uint256 indexed aftermarketDeviceNode,
         address indexed owner
     );
     event AftermarketDevicePaired(
@@ -694,6 +700,12 @@ contract AftermarketDevice is AccessControlInternal {
                     manufacturerParentNode,
                     MANUFACTURER_REPROVISION_PRIVILEGE,
                     msg.sender
+                ) &&
+                !ISacd(SharedStorage.getStorage().sacd).hasPermission(
+                    address(manufacturerIdProxy),
+                    manufacturerParentNode,
+                    msg.sender,
+                    MANUFACTURER_REPROVISION_PERMISSION
                 )
             ) revert Errors.Unauthorized(msg.sender);
 
@@ -742,6 +754,78 @@ contract AftermarketDevice is AccessControlInternal {
 
             _resetAdInfos(oldTokenId, newTokenId);
         }
+    }
+
+    /**
+     * @notice Resets an aftermarket device to make it available for claiming again
+     * @dev This function can only be called by the aftermarket device ID proxy contract
+     * @dev It unpairs the device if it's paired with a vehicle and marks it as unclaimed
+     * @param from The current owner of the aftermarket device
+     * @param aftermarketDeviceNode The ID of the aftermarket device to be reset
+     * @return The address of the manufacturer parent that owns the device after reset
+     */
+    function resetAftermarketDeviceForClaiming(
+        address from,
+        uint256 aftermarketDeviceNode
+    ) external returns (address) {
+        AftermarketDeviceStorage.Storage storage ads = AftermarketDeviceStorage
+            .getStorage();
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        NodesStorage.Storage storage ns = NodesStorage.getStorage();
+
+        address adIdProxyAddress = ads.idProxyAddress;
+
+        if (msg.sender != adIdProxyAddress)
+            revert Errors.Unauthorized(msg.sender);
+
+        uint256 manufacturerParentId = ns
+        .nodes[adIdProxyAddress][aftermarketDeviceNode].parentNode;
+        if (manufacturerParentId == 0) {
+            revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        }
+
+        address manufacturerIdProxyAddress = ManufacturerStorage
+            .getStorage()
+            .idProxyAddress;
+        INFTMultiPrivilege manufacturerIdProxy = INFTMultiPrivilege(
+            manufacturerIdProxyAddress
+        );
+        address manufacturerParentAddress = manufacturerIdProxy.ownerOf(
+            manufacturerParentId
+        );
+        if (manufacturerParentAddress == address(0)) {
+            revert Errors.InvalidNode(
+                manufacturerIdProxyAddress,
+                manufacturerParentId
+            );
+        }
+
+        // Reset any pairings
+        uint256 pairedVehicle = ms.links[adIdProxyAddress][
+            aftermarketDeviceNode
+        ];
+        if (pairedVehicle != 0) {
+            delete ms.links[adIdProxyAddress][aftermarketDeviceNode];
+            delete ms.links[VehicleStorage.getStorage().idProxyAddress][
+                pairedVehicle
+            ];
+
+            emit AftermarketDeviceUnpaired(
+                aftermarketDeviceNode,
+                pairedVehicle,
+                from
+            );
+        }
+
+        // Mark as available for claiming
+        ads.deviceClaimed[aftermarketDeviceNode] = false;
+
+        emit AftermarketDeviceUnclaimed(
+            aftermarketDeviceNode,
+            manufacturerParentAddress
+        );
+
+        return manufacturerParentAddress;
     }
 
     /**
@@ -935,12 +1019,22 @@ contract AftermarketDevice is AccessControlInternal {
         ) {
             info = ns.nodes[idProxyAddress][oldTokenId].info[attributes[i]];
 
-            ns.nodes[idProxyAddress][newTokenId].info[attributes[i]] = info;
+            if (bytes(info).length != 0) {
+                ns.nodes[idProxyAddress][newTokenId].info[attributes[i]] = info;
 
-            delete ns.nodes[idProxyAddress][oldTokenId].info[attributes[i]];
+                delete ns.nodes[idProxyAddress][oldTokenId].info[attributes[i]];
 
-            emit AftermarketDeviceAttributeSet(oldTokenId, attributes[i], "");
-            emit AftermarketDeviceAttributeSet(newTokenId, attributes[i], info);
+                emit AftermarketDeviceAttributeSet(
+                    oldTokenId,
+                    attributes[i],
+                    ""
+                );
+                emit AftermarketDeviceAttributeSet(
+                    newTokenId,
+                    attributes[i],
+                    info
+                );
+            }
         }
     }
 }

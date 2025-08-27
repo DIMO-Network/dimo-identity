@@ -14,6 +14,11 @@ interface IDimoRegistry {
 
     function validateSdBurnAndResetNode(uint256 tokenId) external;
 
+    function resetAftermarketDeviceForClaiming(
+        address from,
+        uint256 aftermarketDeviceNode
+    ) external returns (address);
+
     function setAftermarketDeviceBeneficiary(
         uint256 nodeId,
         address beneficiary

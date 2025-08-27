@@ -40,6 +40,7 @@ export async function grantAdminRoles(
 ) {
   const roles = [
     C.ADMIN_ROLE,
+    C.ADMIN_CLAIM_AD_ROLE,
     C.CLAIM_AD_ROLE,
     C.PAIR_AD_ROLE,
     C.UNPAIR_AD_ROLE,

@@ -5,6 +5,9 @@ export const DEFAULT_ADMIN_ROLE =
 export const ADMIN_ROLE = ethers.keccak256(
   ethers.toUtf8Bytes('ADMIN_ROLE')
 );
+export const ADMIN_CLAIM_AD_ROLE = ethers.keccak256(
+  ethers.toUtf8Bytes('ADMIN_CLAIM_AD_ROLE')
+);
 export const MOCK_ROLE = ethers.keccak256(
   ethers.toUtf8Bytes('MOCK')
 );

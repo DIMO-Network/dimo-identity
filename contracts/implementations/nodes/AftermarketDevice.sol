@@ -204,6 +204,8 @@ contract AftermarketDevice is AccessControlInternal {
     /**
      * @notice Claims the ownership of a list of aftermarket devices to a list of owners
      * Caller must have the admin role or the manufacturer node owner must grant the claimer privilege to the caller
+     * ADMIN_ROLE -> super admin role
+     * ADMIN_CLAIM_AD_ROLE -> specific admin role for this function
      * @dev This contract must be approved to spend the tokens in advance
      * @param adOwnerPair List of pairs AD-owner
      *  aftermarketDeviceNodeId -> Token ID of the AD
@@ -212,7 +214,10 @@ contract AftermarketDevice is AccessControlInternal {
     function claimAftermarketDeviceBatch(
         Types.AftermarketDeviceOwnerPair[] calldata adOwnerPair
     ) external {
-        if (_hasRole(Roles.ADMIN_ROLE, msg.sender)) {
+        if (
+            _hasRole(Roles.ADMIN_ROLE, msg.sender) ||
+            _hasRole(Roles.ADMIN_CLAIM_AD_ROLE, msg.sender)
+        ) {
             _claimAftermarketDeviceBatchByAdmin(adOwnerPair);
         } else {
             _claimAftermarketDeviceBatch(adOwnerPair);

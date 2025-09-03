@@ -60,6 +60,7 @@ contract AftermarketDeviceId is Initializable, MultiPrivilege {
 
     /**
      * @notice Returns an aftermarket device to its manufacturer
+     * Only the tokenId owner can call it
      * @dev Resets the device for claiming and transfers the token back to the manufacturer
      * @param tokenId The ID of the aftermarket device token to be returned
      */

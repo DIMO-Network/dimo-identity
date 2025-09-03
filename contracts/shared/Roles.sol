@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 // Admin roles
 bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
 bytes32 constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+bytes32 constant ADMIN_CLAIM_AD_ROLE = keccak256("ADMIN_CLAIM_AD_ROLE");
 
 // Aftermarket Device roles
 bytes32 constant CLAIM_AD_ROLE = keccak256("CLAIM_AD_ROLE");

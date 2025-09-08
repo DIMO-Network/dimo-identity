@@ -140,6 +140,7 @@
 | 0x492ab283 | pairAftermarketDevice(uint256,uint256) |
 | 0xb50df2f7 | pairAftermarketDeviceSign(uint256,uint256,bytes,bytes) |
 | 0xcfe642dd | pairAftermarketDeviceSign(uint256,uint256,bytes) |
+| 0x7ca22c7b | pairAftermarketDeviceWithAdSig(uint256,uint256,bytes) |
 | 0x9b3abd48 | reprovisionAftermarketDeviceByManufacturerBatch(uint256[]) |
 | 0x9d0b139b | resetAftermarketDeviceAddressByManufacturerBatch((uint256,address)[]) |
 | 0x4c92773c | resetAftermarketDeviceForClaiming(address,uint256) |

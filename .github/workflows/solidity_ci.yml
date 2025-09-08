@@ -28,5 +28,5 @@ jobs:
           node-version-file: '.nvmrc'
           cache: "npm"
       - run: npm i
-      - run: npm run build
+      - run: npx hardhat compile
       - run: npm run test-tableland

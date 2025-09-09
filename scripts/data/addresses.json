@@ -368,7 +368,7 @@
                 ]
             },
             "AftermarketDevice": {
-                "address": "0xe5D4e37fd51253b8205628971aC7587c0b1C3FcD",
+                "address": "0x0413d655a7AB53e0c6291459Ab74A8917BaE63De",
                 "selectors": [
                     "0x6111afa3",
                     "0x08d2c2f5",
@@ -381,6 +381,7 @@
                     "0x492ab283",
                     "0xb50df2f7",
                     "0xcfe642dd",
+                    "0x7ca22c7b",
                     "0x9b3abd48",
                     "0x9d0b139b",
                     "0x4c92773c",

@@ -437,6 +437,68 @@ contract AftermarketDevice is AccessControlInternal {
 
     /**
      * @notice Pairs an aftermarket device with a vehicle
+     * The aftermarket device signs a typed structured (EIP-712) message in advance and submits to be verified
+     * The caller must be the vehicle owner
+     * @param aftermarketDeviceNode Aftermarket device node id
+     * @param vehicleNode Vehicle node id
+     * @param aftermarketDeviceSig Aftermarket Device's signature hash
+     */
+    function pairAftermarketDeviceWithAdSig(
+        uint256 aftermarketDeviceNode,
+        uint256 vehicleNode,
+        bytes calldata aftermarketDeviceSig
+    ) external {
+        MapperStorage.Storage storage ms = MapperStorage.getStorage();
+        bytes32 message = keccak256(
+            abi.encode(PAIR_TYPEHASH, aftermarketDeviceNode, vehicleNode)
+        );
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address adIdProxyAddress = AftermarketDeviceStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (!INFT(vehicleIdProxyAddress).exists(vehicleNode))
+            revert Errors.InvalidNode(vehicleIdProxyAddress, vehicleNode);
+
+        if (msg.sender != INFT(vehicleIdProxyAddress).ownerOf(vehicleNode))
+            revert Errors.Unauthorized(msg.sender);
+
+        if (!INFT(adIdProxyAddress).exists(aftermarketDeviceNode))
+            revert Errors.InvalidNode(adIdProxyAddress, aftermarketDeviceNode);
+        if (
+            !AftermarketDeviceStorage.getStorage().deviceClaimed[
+                aftermarketDeviceNode
+            ]
+        ) revert AdNotClaimed(aftermarketDeviceNode);
+        if (ms.links[vehicleIdProxyAddress][vehicleNode] != 0)
+            revert Errors.VehiclePaired(vehicleNode);
+        if (ms.links[adIdProxyAddress][aftermarketDeviceNode] != 0)
+            revert AdPaired(aftermarketDeviceNode);
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                AftermarketDeviceStorage.getStorage().nodeIdToDeviceAddress[
+                    aftermarketDeviceNode
+                ],
+                message,
+                aftermarketDeviceSig
+            )
+        ) revert InvalidAdSignature();
+
+        ms.links[vehicleIdProxyAddress][vehicleNode] = aftermarketDeviceNode;
+        ms.links[adIdProxyAddress][aftermarketDeviceNode] = vehicleNode;
+
+        emit AftermarketDevicePaired(
+            aftermarketDeviceNode,
+            vehicleNode,
+            msg.sender
+        );
+    }
+
+    /**
+     * @notice Pairs an aftermarket device with a vehicle
+     * The vehicle and AD owner must be the caller
      * @param aftermarketDeviceNode Aftermarket device node id
      * @param vehicleNode Vehicle node id
      */

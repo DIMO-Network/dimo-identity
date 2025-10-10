@@ -5,7 +5,7 @@
   "main": "hardhat.config.ts",
   "scripts": {
     "build": "npx hardhat clean && npx hardhat compile && npx hardhat run scripts/abiGenerator.ts && npx hardhat run scripts/listSelectors.ts && npm run abigen",
-    "abigen": "abigen --abi abis/DimoRegistry.json --out registry.go --pkg contracts --type Registry",
+    "abigen": "bash scripts/generate-bindings.sh",
     "test": "npx hardhat test --network localhost",
     "test-parallel": "npx hardhat test --parallel ./test/NFTs/* ./test/nodes/* ./test/streamr/* ./test/*.test.ts",
     "test-tableland": "npx hardhat test ./test/tableland/* --network localhost  ",

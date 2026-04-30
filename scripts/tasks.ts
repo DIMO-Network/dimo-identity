@@ -40,10 +40,10 @@ task('mint-vehicle', 'Mints a new Vehicle')
 
         const tx = await vehicleInstance
             .connect(signer)
-        ['mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string))'](
+        ['mintVehicle(uint256,address,uint256,(string,string)[],(address,uint256,uint256,string))'](
             131,
             owner,
-            'toyota_4runner_2024',
+            0,
             [
                 {
                     attribute: 'Make',

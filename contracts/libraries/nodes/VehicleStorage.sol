@@ -17,8 +17,11 @@ library VehicleStorage {
         address idProxyAddress;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
-        // Vehicle Id to Device Definition Id
-        mapping(uint256 => string) vehicleIdToDeviceDefinitionId;
+        // DEPRECATED: device definitions moved off-chain. Do not read, write, or
+        // reuse this slot for any new field — old entries still live at
+        // keccak256(tokenId, baseSlot) and would alias any replacement
+        // mapping(uint256 => *) declared in the same position.
+        mapping(uint256 => string) _deprecated_vehicleIdToDeviceDefinitionId;
     }
 
     /* solhint-disable no-inline-assembly */

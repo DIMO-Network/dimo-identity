@@ -77,67 +77,22 @@ contract Vehicle is
     // ***** Interaction with nodes *****//
 
     /**
-     * @notice Function to mint a vehicle with a Device Definition Id
-     * @dev DEPRECATED: This function will be removed in a future release
-     *      Please use the version with storageNodeId parameter instead
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param deviceDefinitionId The Device Definition Id
-     * @param attrInfo List of attribute-info pairs to be added
-     */
-    function mintVehicleWithDeviceDefinition(
-        uint256 manufacturerNode,
-        address owner,
-        string calldata deviceDefinitionId,
-        AttributeInfoPair[] calldata attrInfo
-    ) external {
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
-        address vehicleIdProxyAddress = vs.idProxyAddress;
-
-        if (
-            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
-                manufacturerNode
-            )
-        ) revert InvalidParentNode(manufacturerNode);
-
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
-
-        NodesStorage
-        .getStorage()
-        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
-
-        emit VehicleNodeMintedWithDeviceDefinition(
-            manufacturerNode,
-            newTokenId,
-            owner,
-            deviceDefinitionId
-        );
-
-        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
-
-        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-    }
-
-    /**
-     * @notice Function to mint a vehicle with a Device Definition Id and associate it with a Storage Node Id
-     * @dev This function creates a new vehicle node, associates it with a manufacturer,
-     *      assigns a device definition ID, and links it to a Storage Node Id
+     * @notice Mints a vehicle and associates it with a Storage Node Id
+     * @dev Device definitions are tracked off-chain via per-vehicle documents
      * @param manufacturerNode The ID of the parent manufacturer node
      * @param owner The address that will own the newly minted vehicle
      * @param storageNodeId The ID of the storage node to associate with this vehicle
-     * @param deviceDefinitionId The unique identifier for the device definition
      * @param attrInfo Array of attribute-info pairs to be added to the vehicle
      */
-    function mintVehicleWithDeviceDefinition(
+    function mintVehicle(
         uint256 manufacturerNode,
         address owner,
         uint256 storageNodeId,
-        string calldata deviceDefinitionId,
         AttributeInfoPair[] calldata attrInfo
     ) external {
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
-        address vehicleIdProxyAddress = vs.idProxyAddress;
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
 
         if (
             !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
@@ -150,14 +105,8 @@ contract Vehicle is
         NodesStorage
         .getStorage()
         .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
 
-        emit VehicleNodeMintedWithDeviceDefinition(
-            manufacturerNode,
-            newTokenId,
-            owner,
-            deviceDefinitionId
-        );
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
 
@@ -166,64 +115,11 @@ contract Vehicle is
     }
 
     /**
-     * @notice Function to mint a vehicle with a Device Definition Id and set permissions with SACD
-     * @dev DEPRECATED: This function will be removed in a future release
-     *      Please use the version with storageNodeId parameter instead
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param deviceDefinitionId The Device Definition Id
-     * @param attrInfo List of attribute-info pairs to be added
-     * @param sacdInput SACD input args
-     *  grantee -> The address to receive the permissions
-     *  permissions -> The uint256 that represents the byte array of permissions
-     *  expiration -> Expiration of the permissions
-     *  source -> The URI source associated with the permissions
-     */
-    function mintVehicleWithDeviceDefinition(
-        uint256 manufacturerNode,
-        address owner,
-        string calldata deviceDefinitionId,
-        AttributeInfoPair[] calldata attrInfo,
-        SacdInput calldata sacdInput
-    ) external {
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
-        address vehicleIdProxyAddress = vs.idProxyAddress;
-
-        if (
-            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
-                manufacturerNode
-            )
-        ) revert InvalidParentNode(manufacturerNode);
-
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
-
-        NodesStorage
-        .getStorage()
-        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
-
-        emit VehicleNodeMintedWithDeviceDefinition(
-            manufacturerNode,
-            newTokenId,
-            owner,
-            deviceDefinitionId
-        );
-
-        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
-
-        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-
-        INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
-    }
-
-    /**
-     * @notice Function to mint a vehicle with a Device Definition Id, associate it with a Storage Node Id, and set permissions with SACD
-     * @dev This function creates a new vehicle node, associates it with a manufacturer,
-     *      assigns a device definition ID, links it to a Storage Node Id, and sets SACD permissions
+     * @notice Mints a vehicle, associates it with a Storage Node Id, and sets permissions with SACD
+     * @dev Device definitions are tracked off-chain via per-vehicle documents
      * @param manufacturerNode The ID of the parent manufacturer node
      * @param owner The address that will own the newly minted vehicle
      * @param storageNodeId The ID of the storage node to associate with this vehicle
-     * @param deviceDefinitionId The unique identifier for the device definition
      * @param attrInfo Array of attribute-info pairs to be added to the vehicle
      * @param sacdInput SACD input args containing:
      *        - grantee: The address to receive the permissions
@@ -231,16 +127,16 @@ contract Vehicle is
      *        - expiration: Expiration of the permissions
      *        - source: The URI source associated with the permissions
      */
-    function mintVehicleWithDeviceDefinition(
+    function mintVehicle(
         uint256 manufacturerNode,
         address owner,
         uint256 storageNodeId,
-        string calldata deviceDefinitionId,
         AttributeInfoPair[] calldata attrInfo,
         SacdInput calldata sacdInput
     ) external {
-        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
-        address vehicleIdProxyAddress = vs.idProxyAddress;
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
 
         if (
             !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
@@ -253,14 +149,8 @@ contract Vehicle is
         NodesStorage
         .getStorage()
         .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-        vs.vehicleIdToDeviceDefinitionId[newTokenId] = deviceDefinitionId;
 
-        emit VehicleNodeMintedWithDeviceDefinition(
-            manufacturerNode,
-            newTokenId,
-            owner,
-            deviceDefinitionId
-        );
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
         if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
 
@@ -271,87 +161,19 @@ contract Vehicle is
     }
 
     /**
-     * @notice Mint a vehicle with a Device Definition Id through a metatransaction
-     * @dev DEPRECATED: This function will be removed in a future release
-     *      Please use the version with storageNodeId parameter instead
-     * @dev Caller must have the mint vehicle role
-     * @param manufacturerNode Parent manufacturer node id
-     * @param owner The address of the new owner
-     * @param deviceDefinitionId The Device Definition Id
-     * @param attrInfo attrInfo
-     * @param signature User's signature hash
-     */
-    function mintVehicleWithDeviceDefinitionSign(
-        uint256 manufacturerNode,
-        address owner,
-        string calldata deviceDefinitionId,
-        AttributeInfoPair[] calldata attrInfo,
-        bytes calldata signature
-    ) external onlyRole(MINT_VEHICLE_ROLE) {
-        address vehicleIdProxyAddress = VehicleStorage
-            .getStorage()
-            .idProxyAddress;
-
-        if (
-            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
-                manufacturerNode
-            )
-        ) revert InvalidParentNode(manufacturerNode);
-
-        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
-
-        NodesStorage
-        .getStorage()
-        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-        VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
-            newTokenId
-        ] = deviceDefinitionId;
-
-        emit VehicleNodeMintedWithDeviceDefinition(
-            manufacturerNode,
-            newTokenId,
-            owner,
-            deviceDefinitionId
-        );
-
-        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
-            newTokenId,
-            attrInfo
-        );
-
-        bytes32 message = keccak256(
-            abi.encode(
-                MINT_VEHICLE_WITH_DD_TYPEHASH,
-                manufacturerNode,
-                owner,
-                keccak256(bytes(deviceDefinitionId)),
-                attributesHash,
-                infosHash
-            )
-        );
-
-        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
-            revert InvalidOwnerSignature();
-
-        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
-    }
-
-    /**
-     * @notice Mints a vehicle with a Device Definition Id through a metatransaction and associates it with a Storage Node Id
-     * @dev This function creates a new vehicle node via a signed transaction, associates it with a manufacturer,
-     *      assigns a device definition ID, and links it to a Storage Node. Caller must have the MINT_VEHICLE_ROLE
+     * @notice Mints a vehicle through a metatransaction and associates it with a Storage Node Id
+     * @dev Device definitions are tracked off-chain via per-vehicle documents
+     * @dev Caller must have the MINT_VEHICLE_ROLE
      * @param manufacturerNode The ID of the parent manufacturer node
      * @param owner The address that will own the newly minted vehicle
      * @param storageNodeId The ID of the storage node to associate with this vehicle
-     * @param deviceDefinitionId The unique identifier for the device definition
      * @param attrInfo Array of attribute-info pairs to be added to the vehicle
      * @param signature The owner's EIP-712 signature authorizing the mint operation
      */
-    function mintVehicleWithDeviceDefinitionSign(
+    function mintVehicleSign(
         uint256 manufacturerNode,
         address owner,
         uint256 storageNodeId,
-        string calldata deviceDefinitionId,
         AttributeInfoPair[] calldata attrInfo,
         bytes calldata signature
     ) external onlyRole(MINT_VEHICLE_ROLE) {
@@ -370,16 +192,8 @@ contract Vehicle is
         NodesStorage
         .getStorage()
         .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
-        VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
-            newTokenId
-        ] = deviceDefinitionId;
 
-        emit VehicleNodeMintedWithDeviceDefinition(
-            manufacturerNode,
-            newTokenId,
-            owner,
-            deviceDefinitionId
-        );
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
         (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
             newTokenId,
@@ -388,10 +202,9 @@ contract Vehicle is
 
         bytes32 message = keccak256(
             abi.encode(
-                MINT_VEHICLE_WITH_DD_TYPEHASH,
+                MINT_VEHICLE_TYPEHASH,
                 manufacturerNode,
                 owner,
-                keccak256(bytes(deviceDefinitionId)),
                 attributesHash,
                 infosHash
             )
@@ -456,7 +269,7 @@ contract Vehicle is
             revert InvalidOwnerSignature();
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
-        delete vs.vehicleIdToDeviceDefinitionId[tokenId];
+        delete vs._deprecated_vehicleIdToDeviceDefinitionId[tokenId];
 
         _resetInfos(tokenId);
 
@@ -493,7 +306,7 @@ contract Vehicle is
         address owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
 
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
-        delete vs.vehicleIdToDeviceDefinitionId[tokenId];
+        delete vs._deprecated_vehicleIdToDeviceDefinitionId[tokenId];
         delete sn.vehicleIdToStorageNodeId[tokenId];
 
         _resetInfos(tokenId);
@@ -502,16 +315,18 @@ contract Vehicle is
     }
 
     /**
-     * @notice Gets the Device Definition Id associated to a Vehicle Id
-     * @dev If there is no ddId associated, it returns an empty string
+     * @notice Gets the legacy on-chain Device Definition Id associated with a Vehicle Id
+     * @dev Device definitions are tracked off-chain for vehicles minted through `mintVehicle*`.
+     *      This getter only returns data for vehicles minted before the off-chain migration;
+     *      it returns an empty string for vehicles minted after.
      * @param vehicleId Vehicle Id
      */
     function getDeviceDefinitionIdByVehicleId(
         uint256 vehicleId
     ) external view returns (string memory ddId) {
-        ddId = VehicleStorage.getStorage().vehicleIdToDeviceDefinitionId[
-            vehicleId
-        ];
+        ddId = VehicleStorage
+            .getStorage()
+            ._deprecated_vehicleIdToDeviceDefinitionId[vehicleId];
     }
 
     // ***** PRIVATE FUNCTIONS ***** //

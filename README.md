@@ -84,7 +84,7 @@ The output file will be saved in `./Selectors.md`.
 To regenerate the Go bindings for, e.g., [the devices API](https://github.com/DIMO-Network/devices-api/blob/main/internal/contracts/registry.go), you would run
 
 ```sh
-abigen --abi abis/DimoRegistry.json --out registry.go --pkg contracts --type Registry
+npm run abigen
 ```
 
-and copy over that file.
+and copy over the generated files from [bindings](/bindings) folder.

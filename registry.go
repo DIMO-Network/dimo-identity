@@ -104,83 +104,38 @@ type MintSyntheticDeviceInput struct {
 
 // MintVehicleAndSdInput is an auto generated low-level Go binding around an user-defined struct.
 type MintVehicleAndSdInput struct {
-	ManufacturerNode     *big.Int
-	Owner                common.Address
-	AttrInfoPairsVehicle []AttributeInfoPair
-	ConnectionId         *big.Int
-	VehicleOwnerSig      []byte
-	SyntheticDeviceSig   []byte
-	SyntheticDeviceAddr  common.Address
-	AttrInfoPairsDevice  []AttributeInfoPair
+	ManufacturerNode    *big.Int
+	Owner               common.Address
+	ConnectionId        *big.Int
+	VehicleOwnerSig     []byte
+	SyntheticDeviceSig  []byte
+	SyntheticDeviceAddr common.Address
+	AttrInfoPairsDevice []AttributeInfoPair
 }
 
 // MintVehicleAndSdInputWithSnId is an auto generated low-level Go binding around an user-defined struct.
 type MintVehicleAndSdInputWithSnId struct {
-	ManufacturerNode     *big.Int
-	Owner                common.Address
-	StorageNodeId        *big.Int
-	AttrInfoPairsVehicle []AttributeInfoPair
-	ConnectionId         *big.Int
-	VehicleOwnerSig      []byte
-	SyntheticDeviceSig   []byte
-	SyntheticDeviceAddr  common.Address
-	AttrInfoPairsDevice  []AttributeInfoPair
+	ManufacturerNode    *big.Int
+	Owner               common.Address
+	StorageNodeId       *big.Int
+	ConnectionId        *big.Int
+	VehicleOwnerSig     []byte
+	SyntheticDeviceSig  []byte
+	SyntheticDeviceAddr common.Address
+	AttrInfoPairsDevice []AttributeInfoPair
 }
 
-// MintVehicleAndSdWithDdInput is an auto generated low-level Go binding around an user-defined struct.
-type MintVehicleAndSdWithDdInput struct {
-	ManufacturerNode     *big.Int
-	Owner                common.Address
-	DeviceDefinitionId   string
-	AttrInfoPairsVehicle []AttributeInfoPair
-	ConnectionId         *big.Int
-	VehicleOwnerSig      []byte
-	SyntheticDeviceSig   []byte
-	SyntheticDeviceAddr  common.Address
-	AttrInfoPairsDevice  []AttributeInfoPair
-}
-
-// MintVehicleAndSdWithDdInputBatch is an auto generated low-level Go binding around an user-defined struct.
-type MintVehicleAndSdWithDdInputBatch struct {
-	ManufacturerNode     *big.Int
-	Owner                common.Address
-	DeviceDefinitionId   string
-	AttrInfoPairsVehicle []AttributeInfoPair
-	ConnectionId         *big.Int
-	VehicleOwnerSig      []byte
-	SyntheticDeviceSig   []byte
-	SyntheticDeviceAddr  common.Address
-	AttrInfoPairsDevice  []AttributeInfoPair
-	SacdInput            SacdInput
-}
-
-// MintVehicleAndSdWithDdInputWithSnId is an auto generated low-level Go binding around an user-defined struct.
-type MintVehicleAndSdWithDdInputWithSnId struct {
-	ManufacturerNode     *big.Int
-	Owner                common.Address
-	DeviceDefinitionId   string
-	StorageNodeId        *big.Int
-	AttrInfoPairsVehicle []AttributeInfoPair
-	ConnectionId         *big.Int
-	VehicleOwnerSig      []byte
-	SyntheticDeviceSig   []byte
-	SyntheticDeviceAddr  common.Address
-	AttrInfoPairsDevice  []AttributeInfoPair
-}
-
-// MintVehicleAndSdWithDdInputWithSnIdBatch is an auto generated low-level Go binding around an user-defined struct.
-type MintVehicleAndSdWithDdInputWithSnIdBatch struct {
-	ManufacturerNode     *big.Int
-	Owner                common.Address
-	DeviceDefinitionId   string
-	StorageNodeId        *big.Int
-	AttrInfoPairsVehicle []AttributeInfoPair
-	ConnectionId         *big.Int
-	VehicleOwnerSig      []byte
-	SyntheticDeviceSig   []byte
-	SyntheticDeviceAddr  common.Address
-	AttrInfoPairsDevice  []AttributeInfoPair
-	SacdInput            SacdInput
+// MintVehicleAndSdInputWithSnIdBatch is an auto generated low-level Go binding around an user-defined struct.
+type MintVehicleAndSdInputWithSnIdBatch struct {
+	ManufacturerNode    *big.Int
+	Owner               common.Address
+	StorageNodeId       *big.Int
+	ConnectionId        *big.Int
+	VehicleOwnerSig     []byte
+	SyntheticDeviceSig  []byte
+	SyntheticDeviceAddr common.Address
+	AttrInfoPairsDevice []AttributeInfoPair
+	SacdInput           SacdInput
 }
 
 // SacdInput is an auto generated low-level Go binding around an user-defined struct.
@@ -203,7 +158,7 @@ type TablelandPolicy struct {
 
 // RegistryMetaData contains all meta data concerning the Registry contract.
 var RegistryMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"UintUtils__InsufficientHexLength\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"moduleAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes4[]\",\"name\":\"selectors\",\"type\":\"bytes4[]\"}],\"name\":\"ModuleAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"moduleAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes4[]\",\"name\":\"selectors\",\"type\":\"bytes4[]\"}],\"name\":\"ModuleRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldImplementation\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes4[]\",\"name\":\"oldSelectors\",\"type\":\"bytes4[]\"},{\"indexed\":false,\"internalType\":\"bytes4[]\",\"name\":\"newSelectors\",\"type\":\"bytes4[]\"}],\"name\":\"ModuleUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"stateMutability\":\"nonpayable\",\"type\":\"fallback\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"},{\"internalType\":\"bytes4[]\",\"name\":\"selectors\",\"type\":\"bytes4[]\"}],\"name\":\"addModule\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"},{\"internalType\":\"bytes4[]\",\"name\":\"selectors\",\"type\":\"bytes4[]\"}],\"name\":\"removeModule\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"oldImplementation\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes4[]\",\"name\":\"oldSelectors\",\"type\":\"bytes4[]\"},{\"internalType\":\"bytes4[]\",\"name\":\"newSelectors\",\"type\":\"bytes4[]\"}],\"name\":\"updateModule\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"AdNotClaimed\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"AdPaired\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"InvalidNode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"InvalidStorageNode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"VehiclePaired\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"name\":\"AftermarketDeviceAttributeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceNodeBurned\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDevicePaired\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"}],\"name\":\"AftermarketDeviceUnclaimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceUnpaired\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"ddId\",\"type\":\"string\"}],\"name\":\"DeviceDefinitionIdSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"name\":\"SyntheticDeviceAttributeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"syntheticDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"SyntheticDeviceNodeBurned\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"VehicleAttributeRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"name\":\"VehicleAttributeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"VehicleNodeBurned\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"VehicleStorageNodeIdSet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnAftermarketDevices\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnAftermarketDevicesAndDeletePairings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnSyntheticDevicesAndDeletePairings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnVehicles\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnVehiclesAndDeletePairings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"adminCacheDimoStreamrEns\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newParentNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"nodeIdList\",\"type\":\"uint256[]\"}],\"name\":\"adminChangeParentNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"}],\"name\":\"adminPairAftermarketDevice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"adminRemoveVehicleAttribute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"vehicleIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"adminSetStorageNodeIdForVehicleIds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"}],\"internalType\":\"structDevAdmin.VehicleIdDeviceDefinitionId[]\",\"name\":\"vehicleIdDdId\",\"type\":\"tuple[]\"}],\"name\":\"adminSetVehicleDDs\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"internalType\":\"structDevAdmin.IdManufacturerName[]\",\"name\":\"idManufacturerNames\",\"type\":\"tuple[]\"}],\"name\":\"renameManufacturers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferAftermarketDeviceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"aftermarketDeviceNodes\",\"type\":\"uint256[]\"}],\"name\":\"unclaimAftermarketDeviceNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"aftermarketDeviceNodes\",\"type\":\"uint256[]\"}],\"name\":\"unpairAftermarketDeviceByDeviceNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"vehicleNodes\",\"type\":\"uint256[]\"}],\"name\":\"unpairAftermarketDeviceByVehicleNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"version\",\"type\":\"string\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"multiDelegateCall\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"results\",\"type\":\"bytes[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"multiStaticCall\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"results\",\"type\":\"bytes[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC721Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"AdNotPaired\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attr\",\"type\":\"string\"}],\"name\":\"AttributeExists\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attr\",\"type\":\"string\"}],\"name\":\"AttributeNotWhitelisted\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"DeviceAlreadyClaimed\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"DeviceAlreadyRegistered\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidAdSignature\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidLicense\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidOwnerSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"InvalidParentNode\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidSigner\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OwnersDoNotMatch\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"Unauthorized\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"VehicleNotPaired\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"aftermarketDeviceAddress\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceAddressReset\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"AftermarketDeviceAttributeAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceClaimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceIdProxySet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"aftermarketDeviceAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceNodeMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceUnclaimed\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"addAftermarketDeviceAttribute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"aftermarketDeviceSig\",\"type\":\"bytes\"}],\"name\":\"claimAftermarketDevice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"internalType\":\"structAftermarketDeviceOwnerPair[]\",\"name\":\"adOwnerPair\",\"type\":\"tuple[]\"}],\"name\":\"claimAftermarketDeviceBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"ownerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"aftermarketDeviceSig\",\"type\":\"bytes\"}],\"name\":\"claimAftermarketDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"name\":\"getAftermarketDeviceAddressById\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"getAftermarketDeviceIdByAddress\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"name\":\"isAftermarketDeviceClaimed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isClaimed\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairs\",\"type\":\"tuple[]\"}],\"internalType\":\"structAftermarketDeviceInfos[]\",\"name\":\"adInfos\",\"type\":\"tuple[]\"}],\"name\":\"mintAftermarketDeviceByManufacturerBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"}],\"name\":\"pairAftermarketDevice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"aftermarketDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"}],\"name\":\"pairAftermarketDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"pairAftermarketDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"aftermarketDeviceSig\",\"type\":\"bytes\"}],\"name\":\"pairAftermarketDeviceWithAdSig\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"aftermarketDeviceNodeList\",\"type\":\"uint256[]\"}],\"name\":\"reprovisionAftermarketDeviceByManufacturerBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"deviceAddress\",\"type\":\"address\"}],\"internalType\":\"structAftermarketDeviceIdAddressPair[]\",\"name\":\"adIdAddrs\",\"type\":\"tuple[]\"}],\"name\":\"resetAftermarketDeviceAddressByManufacturerBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"}],\"name\":\"resetAftermarketDeviceForClaiming\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"setAftermarketDeviceIdProxyAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"}],\"name\":\"setAftermarketDeviceInfo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"}],\"name\":\"unpairAftermarketDevice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"unpairAftermarketDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"controller\",\"type\":\"address\"}],\"name\":\"ControllerSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"ManufacturerAttributeAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"name\":\"ManufacturerAttributeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"ManufacturerIdProxySet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ManufacturerNodeMinted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"addManufacturerAttribute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"name\":\"getManufacturerIdByName\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getManufacturerNameById\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isAllowedToOwnManufacturerNode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"_isAllowed\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isController\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"_isController\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isManufacturerMinted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"_isManufacturerMinted\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairList\",\"type\":\"tuple[]\"}],\"name\":\"mintManufacturer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string[]\",\"name\":\"names\",\"type\":\"string[]\"}],\"name\":\"mintManufacturerBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_controller\",\"type\":\"address\"}],\"name\":\"setController\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"setManufacturerIdProxyAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoList\",\"type\":\"tuple[]\"}],\"name\":\"setManufacturerInfo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"}],\"name\":\"updateManufacturerMinted\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"InvalidSdSignature\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OnlyNftProxy\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"SyntheticDeviceAttributeAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"SyntheticDeviceIdProxySet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"syntheticDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"syntheticDeviceAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"SyntheticDeviceNodeMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"VehicleNodeMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"}],\"name\":\"VehicleNodeMintedWithDeviceDefinition\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"addSyntheticDeviceAttribute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"syntheticDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"ownerSig\",\"type\":\"bytes\"}],\"name\":\"burnSyntheticDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"name\":\"getSyntheticDeviceAddressById\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"getSyntheticDeviceIdByAddress\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairs\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintSyntheticDeviceBatchInput[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"mintSyntheticDeviceBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairs\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintSyntheticDeviceInput\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"mintSyntheticDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"setSyntheticDeviceIdProxyAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"}],\"name\":\"setSyntheticDeviceInfo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"validateSdBurnAndResetNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"VehicleAttributeAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"VehicleIdProxySet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"addVehicleAttribute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"ownerSig\",\"type\":\"bytes\"}],\"name\":\"burnVehicleSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"getDeviceDefinitionIdByVehicleId\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"ddId\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"}],\"name\":\"mintVehicleWithDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"grantee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"permissions\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"source\",\"type\":\"string\"}],\"internalType\":\"structSacdInput\",\"name\":\"sacdInput\",\"type\":\"tuple\"}],\"name\":\"mintVehicleWithDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"grantee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"permissions\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"source\",\"type\":\"string\"}],\"internalType\":\"structSacdInput\",\"name\":\"sacdInput\",\"type\":\"tuple\"}],\"name\":\"mintVehicleWithDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"}],\"name\":\"mintVehicleWithDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"mintVehicleWithDeviceDefinitionSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"mintVehicleWithDeviceDefinitionSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"setVehicleIdProxyAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"}],\"name\":\"setVehicleInfo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"validateBurnAndResetNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"getInfo\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getParentNode\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"parentNode\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"beneficiary\",\"type\":\"address\"}],\"name\":\"BeneficiarySet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"name\":\"getBeneficiary\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"beneficiary\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"sourceNode\",\"type\":\"uint256\"}],\"name\":\"getLink\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"targetNode\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddressSource\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"idProxyAddressTarget\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"sourceNode\",\"type\":\"uint256\"}],\"name\":\"getNodeLink\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"targetNode\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"beneficiary\",\"type\":\"address\"}],\"name\":\"setAftermarketDeviceBeneficiary\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsVehicle\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintVehicleAndSdInputWithSnId\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"mintVehicleAndSdSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsVehicle\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintVehicleAndSdInput\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"mintVehicleAndSdSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsVehicle\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintVehicleAndSdWithDdInputWithSnId\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"mintVehicleAndSdWithDeviceDefinitionSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsVehicle\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintVehicleAndSdWithDdInput\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"mintVehicleAndSdWithDeviceDefinitionSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsVehicle\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintVehicleAndSdWithDdInput\",\"name\":\"data\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"grantee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"permissions\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"source\",\"type\":\"string\"}],\"internalType\":\"structSacdInput\",\"name\":\"sacdInput\",\"type\":\"tuple\"}],\"name\":\"mintVehicleAndSdWithDeviceDefinitionSignAndSacd\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsVehicle\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintVehicleAndSdWithDdInputWithSnId\",\"name\":\"data\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"grantee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"permissions\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"source\",\"type\":\"string\"}],\"internalType\":\"structSacdInput\",\"name\":\"sacdInput\",\"type\":\"tuple\"}],\"name\":\"mintVehicleAndSdWithDeviceDefinitionSignAndSacd\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsVehicle\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"grantee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"permissions\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"source\",\"type\":\"string\"}],\"internalType\":\"structSacdInput\",\"name\":\"sacdInput\",\"type\":\"tuple\"}],\"internalType\":\"structMintVehicleAndSdWithDdInputWithSnIdBatch[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"mintVehicleAndSdWithDeviceDefinitionSignBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsVehicle\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"grantee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"permissions\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"source\",\"type\":\"string\"}],\"internalType\":\"structSacdInput\",\"name\":\"sacdInput\",\"type\":\"tuple\"}],\"internalType\":\"structMintVehicleAndSdWithDdInputBatch[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"mintVehicleAndSdWithDeviceDefinitionSignBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"connectionsManager\",\"type\":\"address\"}],\"name\":\"ConnectionsManagerSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"dimoCredit\",\"type\":\"address\"}],\"name\":\"DimoCreditSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"dimoToken\",\"type\":\"address\"}],\"name\":\"DimoTokenSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"foundation\",\"type\":\"address\"}],\"name\":\"FoundationSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"manufacturerLicense\",\"type\":\"address\"}],\"name\":\"ManufacturerLicenseSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sacd\",\"type\":\"address\"}],\"name\":\"SacdSet\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"getConnectionsManager\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"connectionsManager\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDimoCredit\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"dimoCredit\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDimoToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"dimoToken\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getFoundation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"foundation\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getManufacturerLicense\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"manufacturerLicense\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getSacd\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"sacd\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"connectionsManager\",\"type\":\"address\"}],\"name\":\"setConnectionsManager\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"dimoCredit\",\"type\":\"address\"}],\"name\":\"setDimoCredit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"dimoToken\",\"type\":\"address\"}],\"name\":\"setDimoToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"foundation\",\"type\":\"address\"}],\"name\":\"setFoundation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"manufacturerLicense\",\"type\":\"address\"}],\"name\":\"setManufacturerLicense\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sacd\",\"type\":\"address\"}],\"name\":\"setSacd\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"dimoStreamrEns\",\"type\":\"string\"}],\"name\":\"DimoStreamrEnsSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"dimoStreamrNode\",\"type\":\"address\"}],\"name\":\"DimoStreamrNodeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"streamRegistry\",\"type\":\"address\"}],\"name\":\"StreamRegistrySet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"dimoStreamrEns\",\"type\":\"string\"}],\"name\":\"setDimoBaseStreamId\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"dimoStreamrNode\",\"type\":\"address\"}],\"name\":\"setDimoStreamrNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"streamRegistry\",\"type\":\"address\"}],\"name\":\"setStreamRegistry\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"enumIStreamRegistry.PermissionType\",\"name\":\"permissionType\",\"type\":\"uint8\"}],\"name\":\"NoStreamrPermission\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"StreamDoesNotExist\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"VehicleStreamAlreadySet\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"VehicleStreamNotSet\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"subscriber\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"SubscribedToVehicleStream\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"VehicleStreamSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"VehicleStreamUnset\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"createVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"getVehicleStream\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"onBurnVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"subscriber\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"onSetSubscribePrivilege\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"onTransferVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"subscriber\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"setSubscriptionToVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"setVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"subscribeToVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"unsetVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainid\",\"type\":\"uint256\"}],\"name\":\"ChainNotSupported\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"InvalidManufacturerId\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"}],\"name\":\"TableAlreadyExists\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"name\":\"TableDoesNotExist\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"caller\",\"type\":\"address\"}],\"name\":\"Unauthorized\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"}],\"name\":\"DeviceDefinitionDeleted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"model\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"year\",\"type\":\"uint256\"}],\"name\":\"DeviceDefinitionInserted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tableOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"name\":\"DeviceDefinitionTableCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"}],\"name\":\"DeviceDefinitionUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"name\":\"ManufacturerTableSet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tableOwner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"}],\"name\":\"createDeviceDefinitionTable\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tableOwner\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"manufacturerIds\",\"type\":\"uint256[]\"}],\"name\":\"createDeviceDefinitionTableBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"}],\"name\":\"deleteDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"}],\"name\":\"getDeviceDefinitionTableId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"}],\"name\":\"getDeviceDefinitionTableName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"tableName\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"model\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"year\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"ksuid\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"deviceType\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"imageURI\",\"type\":\"string\"}],\"internalType\":\"structDeviceDefinitionInput\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"insertDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"model\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"year\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"ksuid\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"deviceType\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"imageURI\",\"type\":\"string\"}],\"internalType\":\"structDeviceDefinitionInput[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"insertDeviceDefinitionBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"name\":\"setDeviceDefinitionTable\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"ksuid\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"deviceType\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"imageURI\",\"type\":\"string\"}],\"internalType\":\"structDeviceDefinitionUpdateInput\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"updateDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"caller\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"getPolicy\",\"outputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"allowInsert\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"allowUpdate\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"allowDelete\",\"type\":\"bool\"},{\"internalType\":\"string\",\"name\":\"whereClause\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"withCheck\",\"type\":\"string\"},{\"internalType\":\"string[]\",\"name\":\"updatableColumns\",\"type\":\"string[]\"}],\"internalType\":\"structTablelandPolicy\",\"name\":\"policy\",\"type\":\"tuple\"}],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"operation\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"cost\",\"type\":\"uint256\"}],\"name\":\"OperationCostSet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"operation\",\"type\":\"bytes32\"}],\"name\":\"getDcxOperationCost\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"cost\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"operation\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"cost\",\"type\":\"uint256\"}],\"name\":\"setDcxOperationCost\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"storageNode\",\"type\":\"address\"}],\"name\":\"StorageNodeSet\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"getDefaultStorageNodeId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"defaultStorageNodeId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getStorageNode\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"storageNode\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"setDefaultStorageNodeId\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"storageNode\",\"type\":\"address\"}],\"name\":\"setStorageNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"setStorageNodeIdForVehicle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"vehicleIdToStorageNodeId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"UintUtils__InsufficientHexLength\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"moduleAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes4[]\",\"name\":\"selectors\",\"type\":\"bytes4[]\"}],\"name\":\"ModuleAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"moduleAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes4[]\",\"name\":\"selectors\",\"type\":\"bytes4[]\"}],\"name\":\"ModuleRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldImplementation\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes4[]\",\"name\":\"oldSelectors\",\"type\":\"bytes4[]\"},{\"indexed\":false,\"internalType\":\"bytes4[]\",\"name\":\"newSelectors\",\"type\":\"bytes4[]\"}],\"name\":\"ModuleUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"stateMutability\":\"nonpayable\",\"type\":\"fallback\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"},{\"internalType\":\"bytes4[]\",\"name\":\"selectors\",\"type\":\"bytes4[]\"}],\"name\":\"addModule\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"},{\"internalType\":\"bytes4[]\",\"name\":\"selectors\",\"type\":\"bytes4[]\"}],\"name\":\"removeModule\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"oldImplementation\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes4[]\",\"name\":\"oldSelectors\",\"type\":\"bytes4[]\"},{\"internalType\":\"bytes4[]\",\"name\":\"newSelectors\",\"type\":\"bytes4[]\"}],\"name\":\"updateModule\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"AdNotClaimed\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"AdPaired\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"InvalidNode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"InvalidStorageNode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"VehiclePaired\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"name\":\"AftermarketDeviceAttributeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceNodeBurned\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDevicePaired\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"}],\"name\":\"AftermarketDeviceUnclaimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceUnpaired\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"ddId\",\"type\":\"string\"}],\"name\":\"DeviceDefinitionIdSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"name\":\"SyntheticDeviceAttributeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"syntheticDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"SyntheticDeviceNodeBurned\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"VehicleNodeBurned\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"VehicleStorageNodeIdSet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnAftermarketDevices\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnAftermarketDevicesAndDeletePairings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnSyntheticDevicesAndDeletePairings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnVehicles\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"adminBurnVehiclesAndDeletePairings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"adminCacheDimoStreamrEns\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newParentNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"nodeIdList\",\"type\":\"uint256[]\"}],\"name\":\"adminChangeParentNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"}],\"name\":\"adminPairAftermarketDevice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"vehicleIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"adminSetStorageNodeIdForVehicleIds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"deviceDefinitionId\",\"type\":\"string\"}],\"internalType\":\"structDevAdmin.VehicleIdDeviceDefinitionId[]\",\"name\":\"vehicleIdDdId\",\"type\":\"tuple[]\"}],\"name\":\"adminSetVehicleDDs\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"internalType\":\"structDevAdmin.IdManufacturerName[]\",\"name\":\"idManufacturerNames\",\"type\":\"tuple[]\"}],\"name\":\"renameManufacturers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferAftermarketDeviceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"aftermarketDeviceNodes\",\"type\":\"uint256[]\"}],\"name\":\"unclaimAftermarketDeviceNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"aftermarketDeviceNodes\",\"type\":\"uint256[]\"}],\"name\":\"unpairAftermarketDeviceByDeviceNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"vehicleNodes\",\"type\":\"uint256[]\"}],\"name\":\"unpairAftermarketDeviceByVehicleNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"version\",\"type\":\"string\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"multiDelegateCall\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"results\",\"type\":\"bytes[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"multiStaticCall\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"results\",\"type\":\"bytes[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC721Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"AdNotPaired\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attr\",\"type\":\"string\"}],\"name\":\"AttributeExists\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attr\",\"type\":\"string\"}],\"name\":\"AttributeNotWhitelisted\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"DeviceAlreadyClaimed\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"DeviceAlreadyRegistered\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidAdSignature\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidLicense\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidOwnerSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"InvalidParentNode\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidSigner\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OwnersDoNotMatch\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"Unauthorized\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"VehicleNotPaired\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"aftermarketDeviceAddress\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceAddressReset\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"AftermarketDeviceAttributeAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceClaimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceIdProxySet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"aftermarketDeviceAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceNodeMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AftermarketDeviceUnclaimed\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"addAftermarketDeviceAttribute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"aftermarketDeviceSig\",\"type\":\"bytes\"}],\"name\":\"claimAftermarketDevice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"internalType\":\"structAftermarketDeviceOwnerPair[]\",\"name\":\"adOwnerPair\",\"type\":\"tuple[]\"}],\"name\":\"claimAftermarketDeviceBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"ownerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"aftermarketDeviceSig\",\"type\":\"bytes\"}],\"name\":\"claimAftermarketDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"name\":\"getAftermarketDeviceAddressById\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"getAftermarketDeviceIdByAddress\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"name\":\"isAftermarketDeviceClaimed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isClaimed\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairs\",\"type\":\"tuple[]\"}],\"internalType\":\"structAftermarketDeviceInfos[]\",\"name\":\"adInfos\",\"type\":\"tuple[]\"}],\"name\":\"mintAftermarketDeviceByManufacturerBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"}],\"name\":\"pairAftermarketDevice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"aftermarketDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"}],\"name\":\"pairAftermarketDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"pairAftermarketDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"aftermarketDeviceSig\",\"type\":\"bytes\"}],\"name\":\"pairAftermarketDeviceWithAdSig\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"aftermarketDeviceNodeList\",\"type\":\"uint256[]\"}],\"name\":\"reprovisionAftermarketDeviceByManufacturerBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"deviceAddress\",\"type\":\"address\"}],\"internalType\":\"structAftermarketDeviceIdAddressPair[]\",\"name\":\"adIdAddrs\",\"type\":\"tuple[]\"}],\"name\":\"resetAftermarketDeviceAddressByManufacturerBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"}],\"name\":\"resetAftermarketDeviceForClaiming\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"setAftermarketDeviceIdProxyAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"}],\"name\":\"setAftermarketDeviceInfo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"}],\"name\":\"unpairAftermarketDevice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"aftermarketDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"unpairAftermarketDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"controller\",\"type\":\"address\"}],\"name\":\"ControllerSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"ManufacturerAttributeAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"name\":\"ManufacturerAttributeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"ManufacturerIdProxySet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ManufacturerNodeMinted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"addManufacturerAttribute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"name\":\"getManufacturerIdByName\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getManufacturerNameById\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isAllowedToOwnManufacturerNode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"_isAllowed\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isController\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"_isController\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isManufacturerMinted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"_isManufacturerMinted\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairList\",\"type\":\"tuple[]\"}],\"name\":\"mintManufacturer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string[]\",\"name\":\"names\",\"type\":\"string[]\"}],\"name\":\"mintManufacturerBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_controller\",\"type\":\"address\"}],\"name\":\"setController\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"setManufacturerIdProxyAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoList\",\"type\":\"tuple[]\"}],\"name\":\"setManufacturerInfo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"}],\"name\":\"updateManufacturerMinted\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"InvalidSdSignature\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OnlyNftProxy\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"SyntheticDeviceAttributeAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"SyntheticDeviceIdProxySet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"syntheticDeviceNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"syntheticDeviceAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"SyntheticDeviceNodeMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"VehicleNodeMinted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"addSyntheticDeviceAttribute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"syntheticDeviceNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"ownerSig\",\"type\":\"bytes\"}],\"name\":\"burnSyntheticDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"name\":\"getSyntheticDeviceAddressById\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"getSyntheticDeviceIdByAddress\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairs\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintSyntheticDeviceBatchInput[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"mintSyntheticDeviceBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"vehicleNode\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairs\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintSyntheticDeviceInput\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"mintSyntheticDeviceSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"setSyntheticDeviceIdProxyAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfo\",\"type\":\"tuple[]\"}],\"name\":\"setSyntheticDeviceInfo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"validateSdBurnAndResetNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"VehicleIdProxySet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"ownerSig\",\"type\":\"bytes\"}],\"name\":\"burnVehicleSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"getDeviceDefinitionIdByVehicleId\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"ddId\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"grantee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"permissions\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"source\",\"type\":\"string\"}],\"internalType\":\"structSacdInput\",\"name\":\"sacdInput\",\"type\":\"tuple\"}],\"name\":\"mintVehicle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"mintVehicle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"mintVehicleSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"setVehicleIdProxyAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"validateBurnAndResetNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"}],\"name\":\"getInfo\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getParentNode\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"parentNode\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"beneficiary\",\"type\":\"address\"}],\"name\":\"BeneficiarySet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"}],\"name\":\"getBeneficiary\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"beneficiary\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"sourceNode\",\"type\":\"uint256\"}],\"name\":\"getLink\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"targetNode\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"idProxyAddressSource\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"idProxyAddressTarget\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"sourceNode\",\"type\":\"uint256\"}],\"name\":\"getNodeLink\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"targetNode\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"beneficiary\",\"type\":\"address\"}],\"name\":\"setAftermarketDeviceBeneficiary\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintVehicleAndSdInputWithSnId\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"mintVehicleAndSdSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintVehicleAndSdInput\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"mintVehicleAndSdSign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"}],\"internalType\":\"structMintVehicleAndSdInputWithSnId\",\"name\":\"data\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"grantee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"permissions\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"source\",\"type\":\"string\"}],\"internalType\":\"structSacdInput\",\"name\":\"sacdInput\",\"type\":\"tuple\"}],\"name\":\"mintVehicleAndSdSignAndSacd\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerNode\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"connectionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"vehicleOwnerSig\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"syntheticDeviceSig\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"syntheticDeviceAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"attribute\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"info\",\"type\":\"string\"}],\"internalType\":\"structAttributeInfoPair[]\",\"name\":\"attrInfoPairsDevice\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"grantee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"permissions\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"source\",\"type\":\"string\"}],\"internalType\":\"structSacdInput\",\"name\":\"sacdInput\",\"type\":\"tuple\"}],\"internalType\":\"structMintVehicleAndSdInputWithSnIdBatch[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"mintVehicleAndSdSignBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"connectionsManager\",\"type\":\"address\"}],\"name\":\"ConnectionsManagerSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"dimoCredit\",\"type\":\"address\"}],\"name\":\"DimoCreditSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"dimoToken\",\"type\":\"address\"}],\"name\":\"DimoTokenSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"foundation\",\"type\":\"address\"}],\"name\":\"FoundationSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"manufacturerLicense\",\"type\":\"address\"}],\"name\":\"ManufacturerLicenseSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sacd\",\"type\":\"address\"}],\"name\":\"SacdSet\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"getConnectionsManager\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"connectionsManager\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDimoCredit\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"dimoCredit\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDimoToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"dimoToken\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getFoundation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"foundation\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getManufacturerLicense\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"manufacturerLicense\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getSacd\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"sacd\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"connectionsManager\",\"type\":\"address\"}],\"name\":\"setConnectionsManager\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"dimoCredit\",\"type\":\"address\"}],\"name\":\"setDimoCredit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"dimoToken\",\"type\":\"address\"}],\"name\":\"setDimoToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"foundation\",\"type\":\"address\"}],\"name\":\"setFoundation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"manufacturerLicense\",\"type\":\"address\"}],\"name\":\"setManufacturerLicense\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sacd\",\"type\":\"address\"}],\"name\":\"setSacd\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"dimoStreamrEns\",\"type\":\"string\"}],\"name\":\"DimoStreamrEnsSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"dimoStreamrNode\",\"type\":\"address\"}],\"name\":\"DimoStreamrNodeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"streamRegistry\",\"type\":\"address\"}],\"name\":\"StreamRegistrySet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"dimoStreamrEns\",\"type\":\"string\"}],\"name\":\"setDimoBaseStreamId\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"dimoStreamrNode\",\"type\":\"address\"}],\"name\":\"setDimoStreamrNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"streamRegistry\",\"type\":\"address\"}],\"name\":\"setStreamRegistry\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"enumIStreamRegistry.PermissionType\",\"name\":\"permissionType\",\"type\":\"uint8\"}],\"name\":\"NoStreamrPermission\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"StreamDoesNotExist\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"VehicleStreamAlreadySet\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"VehicleStreamNotSet\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"subscriber\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"SubscribedToVehicleStream\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"VehicleStreamSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"VehicleStreamUnset\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"createVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"getVehicleStream\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"onBurnVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"subscriber\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"onSetSubscribePrivilege\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"onTransferVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"subscriber\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"setSubscriptionToVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"streamId\",\"type\":\"string\"}],\"name\":\"setVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"subscribeToVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"unsetVehicleStream\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainid\",\"type\":\"uint256\"}],\"name\":\"ChainNotSupported\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"InvalidManufacturerId\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"}],\"name\":\"TableAlreadyExists\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"name\":\"TableDoesNotExist\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"caller\",\"type\":\"address\"}],\"name\":\"Unauthorized\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"}],\"name\":\"DeviceDefinitionDeleted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"model\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"year\",\"type\":\"uint256\"}],\"name\":\"DeviceDefinitionInserted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tableOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"name\":\"DeviceDefinitionTableCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"}],\"name\":\"DeviceDefinitionUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"name\":\"ManufacturerTableSet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tableOwner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"}],\"name\":\"createDeviceDefinitionTable\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tableOwner\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"manufacturerIds\",\"type\":\"uint256[]\"}],\"name\":\"createDeviceDefinitionTableBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"}],\"name\":\"deleteDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"}],\"name\":\"getDeviceDefinitionTableId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"}],\"name\":\"getDeviceDefinitionTableName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"tableName\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"model\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"year\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"ksuid\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"deviceType\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"imageURI\",\"type\":\"string\"}],\"internalType\":\"structDeviceDefinitionInput\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"insertDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"model\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"year\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"ksuid\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"deviceType\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"imageURI\",\"type\":\"string\"}],\"internalType\":\"structDeviceDefinitionInput[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"insertDeviceDefinitionBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"tableId\",\"type\":\"uint256\"}],\"name\":\"setDeviceDefinitionTable\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"manufacturerId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"ksuid\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"deviceType\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"imageURI\",\"type\":\"string\"}],\"internalType\":\"structDeviceDefinitionUpdateInput\",\"name\":\"data\",\"type\":\"tuple\"}],\"name\":\"updateDeviceDefinition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"caller\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"getPolicy\",\"outputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"allowInsert\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"allowUpdate\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"allowDelete\",\"type\":\"bool\"},{\"internalType\":\"string\",\"name\":\"whereClause\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"withCheck\",\"type\":\"string\"},{\"internalType\":\"string[]\",\"name\":\"updatableColumns\",\"type\":\"string[]\"}],\"internalType\":\"structTablelandPolicy\",\"name\":\"policy\",\"type\":\"tuple\"}],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"operation\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"cost\",\"type\":\"uint256\"}],\"name\":\"OperationCostSet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"operation\",\"type\":\"bytes32\"}],\"name\":\"getDcxOperationCost\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"cost\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"operation\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"cost\",\"type\":\"uint256\"}],\"name\":\"setDcxOperationCost\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"storageNode\",\"type\":\"address\"}],\"name\":\"StorageNodeSet\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"getDefaultStorageNodeId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"defaultStorageNodeId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getStorageNode\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"storageNode\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"setDefaultStorageNodeId\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"storageNode\",\"type\":\"address\"}],\"name\":\"setStorageNode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"storageNodeId\",\"type\":\"uint256\"}],\"name\":\"setStorageNodeIdForVehicle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"vehicleId\",\"type\":\"uint256\"}],\"name\":\"vehicleIdToStorageNodeId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // RegistryABI is the input ABI used to generate the binding from.
@@ -1459,27 +1414,6 @@ func (_Registry *RegistryTransactorSession) AddSyntheticDeviceAttribute(attribut
 	return _Registry.Contract.AddSyntheticDeviceAttribute(&_Registry.TransactOpts, attribute)
 }
 
-// AddVehicleAttribute is a paid mutator transaction binding the contract method 0xf0d1a557.
-//
-// Solidity: function addVehicleAttribute(string attribute) returns()
-func (_Registry *RegistryTransactor) AddVehicleAttribute(opts *bind.TransactOpts, attribute string) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "addVehicleAttribute", attribute)
-}
-
-// AddVehicleAttribute is a paid mutator transaction binding the contract method 0xf0d1a557.
-//
-// Solidity: function addVehicleAttribute(string attribute) returns()
-func (_Registry *RegistrySession) AddVehicleAttribute(attribute string) (*types.Transaction, error) {
-	return _Registry.Contract.AddVehicleAttribute(&_Registry.TransactOpts, attribute)
-}
-
-// AddVehicleAttribute is a paid mutator transaction binding the contract method 0xf0d1a557.
-//
-// Solidity: function addVehicleAttribute(string attribute) returns()
-func (_Registry *RegistryTransactorSession) AddVehicleAttribute(attribute string) (*types.Transaction, error) {
-	return _Registry.Contract.AddVehicleAttribute(&_Registry.TransactOpts, attribute)
-}
-
 // AdminBurnAftermarketDevices is a paid mutator transaction binding the contract method 0xd7376bae.
 //
 // Solidity: function adminBurnAftermarketDevices(uint256[] tokenIds) returns()
@@ -1646,27 +1580,6 @@ func (_Registry *RegistrySession) AdminPairAftermarketDevice(aftermarketDeviceNo
 // Solidity: function adminPairAftermarketDevice(uint256 aftermarketDeviceNode, uint256 vehicleNode) returns()
 func (_Registry *RegistryTransactorSession) AdminPairAftermarketDevice(aftermarketDeviceNode *big.Int, vehicleNode *big.Int) (*types.Transaction, error) {
 	return _Registry.Contract.AdminPairAftermarketDevice(&_Registry.TransactOpts, aftermarketDeviceNode, vehicleNode)
-}
-
-// AdminRemoveVehicleAttribute is a paid mutator transaction binding the contract method 0x5f741f4d.
-//
-// Solidity: function adminRemoveVehicleAttribute(string attribute) returns()
-func (_Registry *RegistryTransactor) AdminRemoveVehicleAttribute(opts *bind.TransactOpts, attribute string) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "adminRemoveVehicleAttribute", attribute)
-}
-
-// AdminRemoveVehicleAttribute is a paid mutator transaction binding the contract method 0x5f741f4d.
-//
-// Solidity: function adminRemoveVehicleAttribute(string attribute) returns()
-func (_Registry *RegistrySession) AdminRemoveVehicleAttribute(attribute string) (*types.Transaction, error) {
-	return _Registry.Contract.AdminRemoveVehicleAttribute(&_Registry.TransactOpts, attribute)
-}
-
-// AdminRemoveVehicleAttribute is a paid mutator transaction binding the contract method 0x5f741f4d.
-//
-// Solidity: function adminRemoveVehicleAttribute(string attribute) returns()
-func (_Registry *RegistryTransactorSession) AdminRemoveVehicleAttribute(attribute string) (*types.Transaction, error) {
-	return _Registry.Contract.AdminRemoveVehicleAttribute(&_Registry.TransactOpts, attribute)
 }
 
 // AdminSetStorageNodeIdForVehicleIds is a paid mutator transaction binding the contract method 0x3d9cf004.
@@ -2110,298 +2023,151 @@ func (_Registry *RegistryTransactorSession) MintSyntheticDeviceSign(data MintSyn
 	return _Registry.Contract.MintSyntheticDeviceSign(&_Registry.TransactOpts, data)
 }
 
-// MintVehicleAndSdSign is a paid mutator transaction binding the contract method 0x688ecea4.
+// MintVehicle is a paid mutator transaction binding the contract method 0x65f43d21.
 //
-// Solidity: function mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
+// Solidity: function mintVehicle(uint256 manufacturerNode, address owner, uint256 storageNodeId, (address,uint256,uint256,string) sacdInput) returns()
+func (_Registry *RegistryTransactor) MintVehicle(opts *bind.TransactOpts, manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, sacdInput SacdInput) (*types.Transaction, error) {
+	return _Registry.contract.Transact(opts, "mintVehicle", manufacturerNode, owner, storageNodeId, sacdInput)
+}
+
+// MintVehicle is a paid mutator transaction binding the contract method 0x65f43d21.
+//
+// Solidity: function mintVehicle(uint256 manufacturerNode, address owner, uint256 storageNodeId, (address,uint256,uint256,string) sacdInput) returns()
+func (_Registry *RegistrySession) MintVehicle(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, sacdInput SacdInput) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicle(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, sacdInput)
+}
+
+// MintVehicle is a paid mutator transaction binding the contract method 0x65f43d21.
+//
+// Solidity: function mintVehicle(uint256 manufacturerNode, address owner, uint256 storageNodeId, (address,uint256,uint256,string) sacdInput) returns()
+func (_Registry *RegistryTransactorSession) MintVehicle(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, sacdInput SacdInput) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicle(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, sacdInput)
+}
+
+// MintVehicle0 is a paid mutator transaction binding the contract method 0x7163864b.
+//
+// Solidity: function mintVehicle(uint256 manufacturerNode, address owner, uint256 storageNodeId) returns()
+func (_Registry *RegistryTransactor) MintVehicle0(opts *bind.TransactOpts, manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int) (*types.Transaction, error) {
+	return _Registry.contract.Transact(opts, "mintVehicle0", manufacturerNode, owner, storageNodeId)
+}
+
+// MintVehicle0 is a paid mutator transaction binding the contract method 0x7163864b.
+//
+// Solidity: function mintVehicle(uint256 manufacturerNode, address owner, uint256 storageNodeId) returns()
+func (_Registry *RegistrySession) MintVehicle0(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicle0(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId)
+}
+
+// MintVehicle0 is a paid mutator transaction binding the contract method 0x7163864b.
+//
+// Solidity: function mintVehicle(uint256 manufacturerNode, address owner, uint256 storageNodeId) returns()
+func (_Registry *RegistryTransactorSession) MintVehicle0(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicle0(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId)
+}
+
+// MintVehicleAndSdSign is a paid mutator transaction binding the contract method 0x6a27b02f.
+//
+// Solidity: function mintVehicleAndSdSign((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[]) data) returns()
 func (_Registry *RegistryTransactor) MintVehicleAndSdSign(opts *bind.TransactOpts, data MintVehicleAndSdInputWithSnId) (*types.Transaction, error) {
 	return _Registry.contract.Transact(opts, "mintVehicleAndSdSign", data)
 }
 
-// MintVehicleAndSdSign is a paid mutator transaction binding the contract method 0x688ecea4.
+// MintVehicleAndSdSign is a paid mutator transaction binding the contract method 0x6a27b02f.
 //
-// Solidity: function mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
+// Solidity: function mintVehicleAndSdSign((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[]) data) returns()
 func (_Registry *RegistrySession) MintVehicleAndSdSign(data MintVehicleAndSdInputWithSnId) (*types.Transaction, error) {
 	return _Registry.Contract.MintVehicleAndSdSign(&_Registry.TransactOpts, data)
 }
 
-// MintVehicleAndSdSign is a paid mutator transaction binding the contract method 0x688ecea4.
+// MintVehicleAndSdSign is a paid mutator transaction binding the contract method 0x6a27b02f.
 //
-// Solidity: function mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
+// Solidity: function mintVehicleAndSdSign((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[]) data) returns()
 func (_Registry *RegistryTransactorSession) MintVehicleAndSdSign(data MintVehicleAndSdInputWithSnId) (*types.Transaction, error) {
 	return _Registry.Contract.MintVehicleAndSdSign(&_Registry.TransactOpts, data)
 }
 
-// MintVehicleAndSdSign0 is a paid mutator transaction binding the contract method 0xfb1a28e8.
+// MintVehicleAndSdSign0 is a paid mutator transaction binding the contract method 0xec681b0f.
 //
-// Solidity: function mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
+// Solidity: function mintVehicleAndSdSign((uint256,address,uint256,bytes,bytes,address,(string,string)[]) data) returns()
 func (_Registry *RegistryTransactor) MintVehicleAndSdSign0(opts *bind.TransactOpts, data MintVehicleAndSdInput) (*types.Transaction, error) {
 	return _Registry.contract.Transact(opts, "mintVehicleAndSdSign0", data)
 }
 
-// MintVehicleAndSdSign0 is a paid mutator transaction binding the contract method 0xfb1a28e8.
+// MintVehicleAndSdSign0 is a paid mutator transaction binding the contract method 0xec681b0f.
 //
-// Solidity: function mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
+// Solidity: function mintVehicleAndSdSign((uint256,address,uint256,bytes,bytes,address,(string,string)[]) data) returns()
 func (_Registry *RegistrySession) MintVehicleAndSdSign0(data MintVehicleAndSdInput) (*types.Transaction, error) {
 	return _Registry.Contract.MintVehicleAndSdSign0(&_Registry.TransactOpts, data)
 }
 
-// MintVehicleAndSdSign0 is a paid mutator transaction binding the contract method 0xfb1a28e8.
+// MintVehicleAndSdSign0 is a paid mutator transaction binding the contract method 0xec681b0f.
 //
-// Solidity: function mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
+// Solidity: function mintVehicleAndSdSign((uint256,address,uint256,bytes,bytes,address,(string,string)[]) data) returns()
 func (_Registry *RegistryTransactorSession) MintVehicleAndSdSign0(data MintVehicleAndSdInput) (*types.Transaction, error) {
 	return _Registry.Contract.MintVehicleAndSdSign0(&_Registry.TransactOpts, data)
 }
 
-// MintVehicleAndSdWithDeviceDefinitionSign is a paid mutator transaction binding the contract method 0x484db0b3.
+// MintVehicleAndSdSignAndSacd is a paid mutator transaction binding the contract method 0x8e8230b6.
 //
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
-func (_Registry *RegistryTransactor) MintVehicleAndSdWithDeviceDefinitionSign(opts *bind.TransactOpts, data MintVehicleAndSdWithDdInputWithSnId) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleAndSdWithDeviceDefinitionSign", data)
+// Solidity: function mintVehicleAndSdSignAndSacd((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[]) data, (address,uint256,uint256,string) sacdInput) returns()
+func (_Registry *RegistryTransactor) MintVehicleAndSdSignAndSacd(opts *bind.TransactOpts, data MintVehicleAndSdInputWithSnId, sacdInput SacdInput) (*types.Transaction, error) {
+	return _Registry.contract.Transact(opts, "mintVehicleAndSdSignAndSacd", data, sacdInput)
 }
 
-// MintVehicleAndSdWithDeviceDefinitionSign is a paid mutator transaction binding the contract method 0x484db0b3.
+// MintVehicleAndSdSignAndSacd is a paid mutator transaction binding the contract method 0x8e8230b6.
 //
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
-func (_Registry *RegistrySession) MintVehicleAndSdWithDeviceDefinitionSign(data MintVehicleAndSdWithDdInputWithSnId) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSign(&_Registry.TransactOpts, data)
+// Solidity: function mintVehicleAndSdSignAndSacd((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[]) data, (address,uint256,uint256,string) sacdInput) returns()
+func (_Registry *RegistrySession) MintVehicleAndSdSignAndSacd(data MintVehicleAndSdInputWithSnId, sacdInput SacdInput) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicleAndSdSignAndSacd(&_Registry.TransactOpts, data, sacdInput)
 }
 
-// MintVehicleAndSdWithDeviceDefinitionSign is a paid mutator transaction binding the contract method 0x484db0b3.
+// MintVehicleAndSdSignAndSacd is a paid mutator transaction binding the contract method 0x8e8230b6.
 //
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleAndSdWithDeviceDefinitionSign(data MintVehicleAndSdWithDdInputWithSnId) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSign(&_Registry.TransactOpts, data)
+// Solidity: function mintVehicleAndSdSignAndSacd((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[]) data, (address,uint256,uint256,string) sacdInput) returns()
+func (_Registry *RegistryTransactorSession) MintVehicleAndSdSignAndSacd(data MintVehicleAndSdInputWithSnId, sacdInput SacdInput) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicleAndSdSignAndSacd(&_Registry.TransactOpts, data, sacdInput)
 }
 
-// MintVehicleAndSdWithDeviceDefinitionSign0 is a paid mutator transaction binding the contract method 0xd23965e3.
+// MintVehicleAndSdSignBatch is a paid mutator transaction binding the contract method 0x54d80641.
 //
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
-func (_Registry *RegistryTransactor) MintVehicleAndSdWithDeviceDefinitionSign0(opts *bind.TransactOpts, data MintVehicleAndSdWithDdInput) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleAndSdWithDeviceDefinitionSign0", data)
+// Solidity: function mintVehicleAndSdSignBatch((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[] data) returns()
+func (_Registry *RegistryTransactor) MintVehicleAndSdSignBatch(opts *bind.TransactOpts, data []MintVehicleAndSdInputWithSnIdBatch) (*types.Transaction, error) {
+	return _Registry.contract.Transact(opts, "mintVehicleAndSdSignBatch", data)
 }
 
-// MintVehicleAndSdWithDeviceDefinitionSign0 is a paid mutator transaction binding the contract method 0xd23965e3.
+// MintVehicleAndSdSignBatch is a paid mutator transaction binding the contract method 0x54d80641.
 //
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
-func (_Registry *RegistrySession) MintVehicleAndSdWithDeviceDefinitionSign0(data MintVehicleAndSdWithDdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSign0(&_Registry.TransactOpts, data)
+// Solidity: function mintVehicleAndSdSignBatch((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[] data) returns()
+func (_Registry *RegistrySession) MintVehicleAndSdSignBatch(data []MintVehicleAndSdInputWithSnIdBatch) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicleAndSdSignBatch(&_Registry.TransactOpts, data)
 }
 
-// MintVehicleAndSdWithDeviceDefinitionSign0 is a paid mutator transaction binding the contract method 0xd23965e3.
+// MintVehicleAndSdSignBatch is a paid mutator transaction binding the contract method 0x54d80641.
 //
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleAndSdWithDeviceDefinitionSign0(data MintVehicleAndSdWithDdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSign0(&_Registry.TransactOpts, data)
+// Solidity: function mintVehicleAndSdSignBatch((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[] data) returns()
+func (_Registry *RegistryTransactorSession) MintVehicleAndSdSignBatch(data []MintVehicleAndSdInputWithSnIdBatch) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicleAndSdSignBatch(&_Registry.TransactOpts, data)
 }
 
-// MintVehicleAndSdWithDeviceDefinitionSignAndSacd is a paid mutator transaction binding the contract method 0x58657dcc.
+// MintVehicleSign is a paid mutator transaction binding the contract method 0x0410a326.
 //
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistryTransactor) MintVehicleAndSdWithDeviceDefinitionSignAndSacd(opts *bind.TransactOpts, data MintVehicleAndSdWithDdInput, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleAndSdWithDeviceDefinitionSignAndSacd", data, sacdInput)
+// Solidity: function mintVehicleSign(uint256 manufacturerNode, address owner, uint256 storageNodeId, bytes signature) returns()
+func (_Registry *RegistryTransactor) MintVehicleSign(opts *bind.TransactOpts, manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, signature []byte) (*types.Transaction, error) {
+	return _Registry.contract.Transact(opts, "mintVehicleSign", manufacturerNode, owner, storageNodeId, signature)
 }
 
-// MintVehicleAndSdWithDeviceDefinitionSignAndSacd is a paid mutator transaction binding the contract method 0x58657dcc.
+// MintVehicleSign is a paid mutator transaction binding the contract method 0x0410a326.
 //
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistrySession) MintVehicleAndSdWithDeviceDefinitionSignAndSacd(data MintVehicleAndSdWithDdInput, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSignAndSacd(&_Registry.TransactOpts, data, sacdInput)
+// Solidity: function mintVehicleSign(uint256 manufacturerNode, address owner, uint256 storageNodeId, bytes signature) returns()
+func (_Registry *RegistrySession) MintVehicleSign(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, signature []byte) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicleSign(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, signature)
 }
 
-// MintVehicleAndSdWithDeviceDefinitionSignAndSacd is a paid mutator transaction binding the contract method 0x58657dcc.
+// MintVehicleSign is a paid mutator transaction binding the contract method 0x0410a326.
 //
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleAndSdWithDeviceDefinitionSignAndSacd(data MintVehicleAndSdWithDdInput, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSignAndSacd(&_Registry.TransactOpts, data, sacdInput)
-}
-
-// MintVehicleAndSdWithDeviceDefinitionSignAndSacd0 is a paid mutator transaction binding the contract method 0x788a2f48.
-//
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistryTransactor) MintVehicleAndSdWithDeviceDefinitionSignAndSacd0(opts *bind.TransactOpts, data MintVehicleAndSdWithDdInputWithSnId, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleAndSdWithDeviceDefinitionSignAndSacd0", data, sacdInput)
-}
-
-// MintVehicleAndSdWithDeviceDefinitionSignAndSacd0 is a paid mutator transaction binding the contract method 0x788a2f48.
-//
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistrySession) MintVehicleAndSdWithDeviceDefinitionSignAndSacd0(data MintVehicleAndSdWithDdInputWithSnId, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSignAndSacd0(&_Registry.TransactOpts, data, sacdInput)
-}
-
-// MintVehicleAndSdWithDeviceDefinitionSignAndSacd0 is a paid mutator transaction binding the contract method 0x788a2f48.
-//
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]) data, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleAndSdWithDeviceDefinitionSignAndSacd0(data MintVehicleAndSdWithDdInputWithSnId, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSignAndSacd0(&_Registry.TransactOpts, data, sacdInput)
-}
-
-// MintVehicleAndSdWithDeviceDefinitionSignBatch is a paid mutator transaction binding the contract method 0x1a5d15a1.
-//
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[] data) returns()
-func (_Registry *RegistryTransactor) MintVehicleAndSdWithDeviceDefinitionSignBatch(opts *bind.TransactOpts, data []MintVehicleAndSdWithDdInputWithSnIdBatch) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleAndSdWithDeviceDefinitionSignBatch", data)
-}
-
-// MintVehicleAndSdWithDeviceDefinitionSignBatch is a paid mutator transaction binding the contract method 0x1a5d15a1.
-//
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[] data) returns()
-func (_Registry *RegistrySession) MintVehicleAndSdWithDeviceDefinitionSignBatch(data []MintVehicleAndSdWithDdInputWithSnIdBatch) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSignBatch(&_Registry.TransactOpts, data)
-}
-
-// MintVehicleAndSdWithDeviceDefinitionSignBatch is a paid mutator transaction binding the contract method 0x1a5d15a1.
-//
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[] data) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleAndSdWithDeviceDefinitionSignBatch(data []MintVehicleAndSdWithDdInputWithSnIdBatch) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSignBatch(&_Registry.TransactOpts, data)
-}
-
-// MintVehicleAndSdWithDeviceDefinitionSignBatch0 is a paid mutator transaction binding the contract method 0x7ae7fe4e.
-//
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[] data) returns()
-func (_Registry *RegistryTransactor) MintVehicleAndSdWithDeviceDefinitionSignBatch0(opts *bind.TransactOpts, data []MintVehicleAndSdWithDdInputBatch) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleAndSdWithDeviceDefinitionSignBatch0", data)
-}
-
-// MintVehicleAndSdWithDeviceDefinitionSignBatch0 is a paid mutator transaction binding the contract method 0x7ae7fe4e.
-//
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[] data) returns()
-func (_Registry *RegistrySession) MintVehicleAndSdWithDeviceDefinitionSignBatch0(data []MintVehicleAndSdWithDdInputBatch) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSignBatch0(&_Registry.TransactOpts, data)
-}
-
-// MintVehicleAndSdWithDeviceDefinitionSignBatch0 is a paid mutator transaction binding the contract method 0x7ae7fe4e.
-//
-// Solidity: function mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[] data) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleAndSdWithDeviceDefinitionSignBatch0(data []MintVehicleAndSdWithDdInputBatch) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleAndSdWithDeviceDefinitionSignBatch0(&_Registry.TransactOpts, data)
-}
-
-// MintVehicleWithDeviceDefinition is a paid mutator transaction binding the contract method 0x8b04a18b.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, uint256 storageNodeId, string deviceDefinitionId, (string,string)[] attrInfo) returns()
-func (_Registry *RegistryTransactor) MintVehicleWithDeviceDefinition(opts *bind.TransactOpts, manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, deviceDefinitionId string, attrInfo []AttributeInfoPair) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleWithDeviceDefinition", manufacturerNode, owner, storageNodeId, deviceDefinitionId, attrInfo)
-}
-
-// MintVehicleWithDeviceDefinition is a paid mutator transaction binding the contract method 0x8b04a18b.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, uint256 storageNodeId, string deviceDefinitionId, (string,string)[] attrInfo) returns()
-func (_Registry *RegistrySession) MintVehicleWithDeviceDefinition(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, deviceDefinitionId string, attrInfo []AttributeInfoPair) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinition(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, deviceDefinitionId, attrInfo)
-}
-
-// MintVehicleWithDeviceDefinition is a paid mutator transaction binding the contract method 0x8b04a18b.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, uint256 storageNodeId, string deviceDefinitionId, (string,string)[] attrInfo) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleWithDeviceDefinition(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, deviceDefinitionId string, attrInfo []AttributeInfoPair) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinition(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, deviceDefinitionId, attrInfo)
-}
-
-// MintVehicleWithDeviceDefinition0 is a paid mutator transaction binding the contract method 0x8bf71ebc.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, uint256 storageNodeId, string deviceDefinitionId, (string,string)[] attrInfo, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistryTransactor) MintVehicleWithDeviceDefinition0(opts *bind.TransactOpts, manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, deviceDefinitionId string, attrInfo []AttributeInfoPair, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleWithDeviceDefinition0", manufacturerNode, owner, storageNodeId, deviceDefinitionId, attrInfo, sacdInput)
-}
-
-// MintVehicleWithDeviceDefinition0 is a paid mutator transaction binding the contract method 0x8bf71ebc.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, uint256 storageNodeId, string deviceDefinitionId, (string,string)[] attrInfo, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistrySession) MintVehicleWithDeviceDefinition0(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, deviceDefinitionId string, attrInfo []AttributeInfoPair, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinition0(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, deviceDefinitionId, attrInfo, sacdInput)
-}
-
-// MintVehicleWithDeviceDefinition0 is a paid mutator transaction binding the contract method 0x8bf71ebc.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, uint256 storageNodeId, string deviceDefinitionId, (string,string)[] attrInfo, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleWithDeviceDefinition0(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, deviceDefinitionId string, attrInfo []AttributeInfoPair, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinition0(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, deviceDefinitionId, attrInfo, sacdInput)
-}
-
-// MintVehicleWithDeviceDefinition1 is a paid mutator transaction binding the contract method 0x97c95b2a.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, string deviceDefinitionId, (string,string)[] attrInfo, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistryTransactor) MintVehicleWithDeviceDefinition1(opts *bind.TransactOpts, manufacturerNode *big.Int, owner common.Address, deviceDefinitionId string, attrInfo []AttributeInfoPair, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleWithDeviceDefinition1", manufacturerNode, owner, deviceDefinitionId, attrInfo, sacdInput)
-}
-
-// MintVehicleWithDeviceDefinition1 is a paid mutator transaction binding the contract method 0x97c95b2a.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, string deviceDefinitionId, (string,string)[] attrInfo, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistrySession) MintVehicleWithDeviceDefinition1(manufacturerNode *big.Int, owner common.Address, deviceDefinitionId string, attrInfo []AttributeInfoPair, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinition1(&_Registry.TransactOpts, manufacturerNode, owner, deviceDefinitionId, attrInfo, sacdInput)
-}
-
-// MintVehicleWithDeviceDefinition1 is a paid mutator transaction binding the contract method 0x97c95b2a.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, string deviceDefinitionId, (string,string)[] attrInfo, (address,uint256,uint256,string) sacdInput) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleWithDeviceDefinition1(manufacturerNode *big.Int, owner common.Address, deviceDefinitionId string, attrInfo []AttributeInfoPair, sacdInput SacdInput) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinition1(&_Registry.TransactOpts, manufacturerNode, owner, deviceDefinitionId, attrInfo, sacdInput)
-}
-
-// MintVehicleWithDeviceDefinition2 is a paid mutator transaction binding the contract method 0xd84baff1.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, string deviceDefinitionId, (string,string)[] attrInfo) returns()
-func (_Registry *RegistryTransactor) MintVehicleWithDeviceDefinition2(opts *bind.TransactOpts, manufacturerNode *big.Int, owner common.Address, deviceDefinitionId string, attrInfo []AttributeInfoPair) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleWithDeviceDefinition2", manufacturerNode, owner, deviceDefinitionId, attrInfo)
-}
-
-// MintVehicleWithDeviceDefinition2 is a paid mutator transaction binding the contract method 0xd84baff1.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, string deviceDefinitionId, (string,string)[] attrInfo) returns()
-func (_Registry *RegistrySession) MintVehicleWithDeviceDefinition2(manufacturerNode *big.Int, owner common.Address, deviceDefinitionId string, attrInfo []AttributeInfoPair) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinition2(&_Registry.TransactOpts, manufacturerNode, owner, deviceDefinitionId, attrInfo)
-}
-
-// MintVehicleWithDeviceDefinition2 is a paid mutator transaction binding the contract method 0xd84baff1.
-//
-// Solidity: function mintVehicleWithDeviceDefinition(uint256 manufacturerNode, address owner, string deviceDefinitionId, (string,string)[] attrInfo) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleWithDeviceDefinition2(manufacturerNode *big.Int, owner common.Address, deviceDefinitionId string, attrInfo []AttributeInfoPair) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinition2(&_Registry.TransactOpts, manufacturerNode, owner, deviceDefinitionId, attrInfo)
-}
-
-// MintVehicleWithDeviceDefinitionSign is a paid mutator transaction binding the contract method 0x592c0889.
-//
-// Solidity: function mintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode, address owner, uint256 storageNodeId, string deviceDefinitionId, (string,string)[] attrInfo, bytes signature) returns()
-func (_Registry *RegistryTransactor) MintVehicleWithDeviceDefinitionSign(opts *bind.TransactOpts, manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, deviceDefinitionId string, attrInfo []AttributeInfoPair, signature []byte) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleWithDeviceDefinitionSign", manufacturerNode, owner, storageNodeId, deviceDefinitionId, attrInfo, signature)
-}
-
-// MintVehicleWithDeviceDefinitionSign is a paid mutator transaction binding the contract method 0x592c0889.
-//
-// Solidity: function mintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode, address owner, uint256 storageNodeId, string deviceDefinitionId, (string,string)[] attrInfo, bytes signature) returns()
-func (_Registry *RegistrySession) MintVehicleWithDeviceDefinitionSign(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, deviceDefinitionId string, attrInfo []AttributeInfoPair, signature []byte) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinitionSign(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, deviceDefinitionId, attrInfo, signature)
-}
-
-// MintVehicleWithDeviceDefinitionSign is a paid mutator transaction binding the contract method 0x592c0889.
-//
-// Solidity: function mintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode, address owner, uint256 storageNodeId, string deviceDefinitionId, (string,string)[] attrInfo, bytes signature) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleWithDeviceDefinitionSign(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, deviceDefinitionId string, attrInfo []AttributeInfoPair, signature []byte) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinitionSign(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, deviceDefinitionId, attrInfo, signature)
-}
-
-// MintVehicleWithDeviceDefinitionSign0 is a paid mutator transaction binding the contract method 0x8dca2b8e.
-//
-// Solidity: function mintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode, address owner, string deviceDefinitionId, (string,string)[] attrInfo, bytes signature) returns()
-func (_Registry *RegistryTransactor) MintVehicleWithDeviceDefinitionSign0(opts *bind.TransactOpts, manufacturerNode *big.Int, owner common.Address, deviceDefinitionId string, attrInfo []AttributeInfoPair, signature []byte) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "mintVehicleWithDeviceDefinitionSign0", manufacturerNode, owner, deviceDefinitionId, attrInfo, signature)
-}
-
-// MintVehicleWithDeviceDefinitionSign0 is a paid mutator transaction binding the contract method 0x8dca2b8e.
-//
-// Solidity: function mintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode, address owner, string deviceDefinitionId, (string,string)[] attrInfo, bytes signature) returns()
-func (_Registry *RegistrySession) MintVehicleWithDeviceDefinitionSign0(manufacturerNode *big.Int, owner common.Address, deviceDefinitionId string, attrInfo []AttributeInfoPair, signature []byte) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinitionSign0(&_Registry.TransactOpts, manufacturerNode, owner, deviceDefinitionId, attrInfo, signature)
-}
-
-// MintVehicleWithDeviceDefinitionSign0 is a paid mutator transaction binding the contract method 0x8dca2b8e.
-//
-// Solidity: function mintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode, address owner, string deviceDefinitionId, (string,string)[] attrInfo, bytes signature) returns()
-func (_Registry *RegistryTransactorSession) MintVehicleWithDeviceDefinitionSign0(manufacturerNode *big.Int, owner common.Address, deviceDefinitionId string, attrInfo []AttributeInfoPair, signature []byte) (*types.Transaction, error) {
-	return _Registry.Contract.MintVehicleWithDeviceDefinitionSign0(&_Registry.TransactOpts, manufacturerNode, owner, deviceDefinitionId, attrInfo, signature)
+// Solidity: function mintVehicleSign(uint256 manufacturerNode, address owner, uint256 storageNodeId, bytes signature) returns()
+func (_Registry *RegistryTransactorSession) MintVehicleSign(manufacturerNode *big.Int, owner common.Address, storageNodeId *big.Int, signature []byte) (*types.Transaction, error) {
+	return _Registry.Contract.MintVehicleSign(&_Registry.TransactOpts, manufacturerNode, owner, storageNodeId, signature)
 }
 
 // MultiDelegateCall is a paid mutator transaction binding the contract method 0x415c2d96.
@@ -3221,27 +2987,6 @@ func (_Registry *RegistrySession) SetVehicleIdProxyAddress(addr common.Address) 
 // Solidity: function setVehicleIdProxyAddress(address addr) returns()
 func (_Registry *RegistryTransactorSession) SetVehicleIdProxyAddress(addr common.Address) (*types.Transaction, error) {
 	return _Registry.Contract.SetVehicleIdProxyAddress(&_Registry.TransactOpts, addr)
-}
-
-// SetVehicleInfo is a paid mutator transaction binding the contract method 0xd9c3ae61.
-//
-// Solidity: function setVehicleInfo(uint256 tokenId, (string,string)[] attrInfo) returns()
-func (_Registry *RegistryTransactor) SetVehicleInfo(opts *bind.TransactOpts, tokenId *big.Int, attrInfo []AttributeInfoPair) (*types.Transaction, error) {
-	return _Registry.contract.Transact(opts, "setVehicleInfo", tokenId, attrInfo)
-}
-
-// SetVehicleInfo is a paid mutator transaction binding the contract method 0xd9c3ae61.
-//
-// Solidity: function setVehicleInfo(uint256 tokenId, (string,string)[] attrInfo) returns()
-func (_Registry *RegistrySession) SetVehicleInfo(tokenId *big.Int, attrInfo []AttributeInfoPair) (*types.Transaction, error) {
-	return _Registry.Contract.SetVehicleInfo(&_Registry.TransactOpts, tokenId, attrInfo)
-}
-
-// SetVehicleInfo is a paid mutator transaction binding the contract method 0xd9c3ae61.
-//
-// Solidity: function setVehicleInfo(uint256 tokenId, (string,string)[] attrInfo) returns()
-func (_Registry *RegistryTransactorSession) SetVehicleInfo(tokenId *big.Int, attrInfo []AttributeInfoPair) (*types.Transaction, error) {
-	return _Registry.Contract.SetVehicleInfo(&_Registry.TransactOpts, tokenId, attrInfo)
 }
 
 // SetVehicleStream is a paid mutator transaction binding the contract method 0x6f58f093.
@@ -10474,410 +10219,6 @@ func (_Registry *RegistryFilterer) ParseSyntheticDeviceNodeMinted(log types.Log)
 	return event, nil
 }
 
-// RegistryVehicleAttributeAddedIterator is returned from FilterVehicleAttributeAdded and is used to iterate over the raw logs and unpacked data for VehicleAttributeAdded events raised by the Registry contract.
-type RegistryVehicleAttributeAddedIterator struct {
-	Event *RegistryVehicleAttributeAdded // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *RegistryVehicleAttributeAddedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(RegistryVehicleAttributeAdded)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(RegistryVehicleAttributeAdded)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *RegistryVehicleAttributeAddedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *RegistryVehicleAttributeAddedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// RegistryVehicleAttributeAdded represents a VehicleAttributeAdded event raised by the Registry contract.
-type RegistryVehicleAttributeAdded struct {
-	Attribute string
-	Raw       types.Log // Blockchain specific contextual infos
-}
-
-// FilterVehicleAttributeAdded is a free log retrieval operation binding the contract event 0x2b7d41dc33ffd58029f53ebfc3232e4f343480b078458bc17c527583e0172c1a.
-//
-// Solidity: event VehicleAttributeAdded(string attribute)
-func (_Registry *RegistryFilterer) FilterVehicleAttributeAdded(opts *bind.FilterOpts) (*RegistryVehicleAttributeAddedIterator, error) {
-
-	logs, sub, err := _Registry.contract.FilterLogs(opts, "VehicleAttributeAdded")
-	if err != nil {
-		return nil, err
-	}
-	return &RegistryVehicleAttributeAddedIterator{contract: _Registry.contract, event: "VehicleAttributeAdded", logs: logs, sub: sub}, nil
-}
-
-// WatchVehicleAttributeAdded is a free log subscription operation binding the contract event 0x2b7d41dc33ffd58029f53ebfc3232e4f343480b078458bc17c527583e0172c1a.
-//
-// Solidity: event VehicleAttributeAdded(string attribute)
-func (_Registry *RegistryFilterer) WatchVehicleAttributeAdded(opts *bind.WatchOpts, sink chan<- *RegistryVehicleAttributeAdded) (event.Subscription, error) {
-
-	logs, sub, err := _Registry.contract.WatchLogs(opts, "VehicleAttributeAdded")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(RegistryVehicleAttributeAdded)
-				if err := _Registry.contract.UnpackLog(event, "VehicleAttributeAdded", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseVehicleAttributeAdded is a log parse operation binding the contract event 0x2b7d41dc33ffd58029f53ebfc3232e4f343480b078458bc17c527583e0172c1a.
-//
-// Solidity: event VehicleAttributeAdded(string attribute)
-func (_Registry *RegistryFilterer) ParseVehicleAttributeAdded(log types.Log) (*RegistryVehicleAttributeAdded, error) {
-	event := new(RegistryVehicleAttributeAdded)
-	if err := _Registry.contract.UnpackLog(event, "VehicleAttributeAdded", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// RegistryVehicleAttributeRemovedIterator is returned from FilterVehicleAttributeRemoved and is used to iterate over the raw logs and unpacked data for VehicleAttributeRemoved events raised by the Registry contract.
-type RegistryVehicleAttributeRemovedIterator struct {
-	Event *RegistryVehicleAttributeRemoved // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *RegistryVehicleAttributeRemovedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(RegistryVehicleAttributeRemoved)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(RegistryVehicleAttributeRemoved)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *RegistryVehicleAttributeRemovedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *RegistryVehicleAttributeRemovedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// RegistryVehicleAttributeRemoved represents a VehicleAttributeRemoved event raised by the Registry contract.
-type RegistryVehicleAttributeRemoved struct {
-	Attribute string
-	Raw       types.Log // Blockchain specific contextual infos
-}
-
-// FilterVehicleAttributeRemoved is a free log retrieval operation binding the contract event 0x9b4bf3774d4e97d237196fc2a2d3f0764f4a7987c5a5db94f029cc8357f72b45.
-//
-// Solidity: event VehicleAttributeRemoved(string attribute)
-func (_Registry *RegistryFilterer) FilterVehicleAttributeRemoved(opts *bind.FilterOpts) (*RegistryVehicleAttributeRemovedIterator, error) {
-
-	logs, sub, err := _Registry.contract.FilterLogs(opts, "VehicleAttributeRemoved")
-	if err != nil {
-		return nil, err
-	}
-	return &RegistryVehicleAttributeRemovedIterator{contract: _Registry.contract, event: "VehicleAttributeRemoved", logs: logs, sub: sub}, nil
-}
-
-// WatchVehicleAttributeRemoved is a free log subscription operation binding the contract event 0x9b4bf3774d4e97d237196fc2a2d3f0764f4a7987c5a5db94f029cc8357f72b45.
-//
-// Solidity: event VehicleAttributeRemoved(string attribute)
-func (_Registry *RegistryFilterer) WatchVehicleAttributeRemoved(opts *bind.WatchOpts, sink chan<- *RegistryVehicleAttributeRemoved) (event.Subscription, error) {
-
-	logs, sub, err := _Registry.contract.WatchLogs(opts, "VehicleAttributeRemoved")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(RegistryVehicleAttributeRemoved)
-				if err := _Registry.contract.UnpackLog(event, "VehicleAttributeRemoved", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseVehicleAttributeRemoved is a log parse operation binding the contract event 0x9b4bf3774d4e97d237196fc2a2d3f0764f4a7987c5a5db94f029cc8357f72b45.
-//
-// Solidity: event VehicleAttributeRemoved(string attribute)
-func (_Registry *RegistryFilterer) ParseVehicleAttributeRemoved(log types.Log) (*RegistryVehicleAttributeRemoved, error) {
-	event := new(RegistryVehicleAttributeRemoved)
-	if err := _Registry.contract.UnpackLog(event, "VehicleAttributeRemoved", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// RegistryVehicleAttributeSetIterator is returned from FilterVehicleAttributeSet and is used to iterate over the raw logs and unpacked data for VehicleAttributeSet events raised by the Registry contract.
-type RegistryVehicleAttributeSetIterator struct {
-	Event *RegistryVehicleAttributeSet // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *RegistryVehicleAttributeSetIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(RegistryVehicleAttributeSet)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(RegistryVehicleAttributeSet)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *RegistryVehicleAttributeSetIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *RegistryVehicleAttributeSetIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// RegistryVehicleAttributeSet represents a VehicleAttributeSet event raised by the Registry contract.
-type RegistryVehicleAttributeSet struct {
-	TokenId   *big.Int
-	Attribute string
-	Info      string
-	Raw       types.Log // Blockchain specific contextual infos
-}
-
-// FilterVehicleAttributeSet is a free log retrieval operation binding the contract event 0x3a259e5d4c53f11c343582a8291a82a8cc0b36ec211d5ab48c2f29ebb068e5fb.
-//
-// Solidity: event VehicleAttributeSet(uint256 tokenId, string attribute, string info)
-func (_Registry *RegistryFilterer) FilterVehicleAttributeSet(opts *bind.FilterOpts) (*RegistryVehicleAttributeSetIterator, error) {
-
-	logs, sub, err := _Registry.contract.FilterLogs(opts, "VehicleAttributeSet")
-	if err != nil {
-		return nil, err
-	}
-	return &RegistryVehicleAttributeSetIterator{contract: _Registry.contract, event: "VehicleAttributeSet", logs: logs, sub: sub}, nil
-}
-
-// WatchVehicleAttributeSet is a free log subscription operation binding the contract event 0x3a259e5d4c53f11c343582a8291a82a8cc0b36ec211d5ab48c2f29ebb068e5fb.
-//
-// Solidity: event VehicleAttributeSet(uint256 tokenId, string attribute, string info)
-func (_Registry *RegistryFilterer) WatchVehicleAttributeSet(opts *bind.WatchOpts, sink chan<- *RegistryVehicleAttributeSet) (event.Subscription, error) {
-
-	logs, sub, err := _Registry.contract.WatchLogs(opts, "VehicleAttributeSet")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(RegistryVehicleAttributeSet)
-				if err := _Registry.contract.UnpackLog(event, "VehicleAttributeSet", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseVehicleAttributeSet is a log parse operation binding the contract event 0x3a259e5d4c53f11c343582a8291a82a8cc0b36ec211d5ab48c2f29ebb068e5fb.
-//
-// Solidity: event VehicleAttributeSet(uint256 tokenId, string attribute, string info)
-func (_Registry *RegistryFilterer) ParseVehicleAttributeSet(log types.Log) (*RegistryVehicleAttributeSet, error) {
-	event := new(RegistryVehicleAttributeSet)
-	if err := _Registry.contract.UnpackLog(event, "VehicleAttributeSet", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
 // RegistryVehicleIdProxySetIterator is returned from FilterVehicleIdProxySet and is used to iterate over the raw logs and unpacked data for VehicleIdProxySet events raised by the Registry contract.
 type RegistryVehicleIdProxySetIterator struct {
 	Event *RegistryVehicleIdProxySet // Event containing the contract specifics and raw log
@@ -11305,169 +10646,6 @@ func (_Registry *RegistryFilterer) WatchVehicleNodeMinted(opts *bind.WatchOpts, 
 func (_Registry *RegistryFilterer) ParseVehicleNodeMinted(log types.Log) (*RegistryVehicleNodeMinted, error) {
 	event := new(RegistryVehicleNodeMinted)
 	if err := _Registry.contract.UnpackLog(event, "VehicleNodeMinted", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// RegistryVehicleNodeMintedWithDeviceDefinitionIterator is returned from FilterVehicleNodeMintedWithDeviceDefinition and is used to iterate over the raw logs and unpacked data for VehicleNodeMintedWithDeviceDefinition events raised by the Registry contract.
-type RegistryVehicleNodeMintedWithDeviceDefinitionIterator struct {
-	Event *RegistryVehicleNodeMintedWithDeviceDefinition // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *RegistryVehicleNodeMintedWithDeviceDefinitionIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(RegistryVehicleNodeMintedWithDeviceDefinition)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(RegistryVehicleNodeMintedWithDeviceDefinition)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *RegistryVehicleNodeMintedWithDeviceDefinitionIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *RegistryVehicleNodeMintedWithDeviceDefinitionIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// RegistryVehicleNodeMintedWithDeviceDefinition represents a VehicleNodeMintedWithDeviceDefinition event raised by the Registry contract.
-type RegistryVehicleNodeMintedWithDeviceDefinition struct {
-	ManufacturerId     *big.Int
-	VehicleId          *big.Int
-	Owner              common.Address
-	DeviceDefinitionId string
-	Raw                types.Log // Blockchain specific contextual infos
-}
-
-// FilterVehicleNodeMintedWithDeviceDefinition is a free log retrieval operation binding the contract event 0xc7c7d9ac150ee7eff1ae17be6e6c250d9f574d019d47cd741f693feb1929496c.
-//
-// Solidity: event VehicleNodeMintedWithDeviceDefinition(uint256 indexed manufacturerId, uint256 indexed vehicleId, address indexed owner, string deviceDefinitionId)
-func (_Registry *RegistryFilterer) FilterVehicleNodeMintedWithDeviceDefinition(opts *bind.FilterOpts, manufacturerId []*big.Int, vehicleId []*big.Int, owner []common.Address) (*RegistryVehicleNodeMintedWithDeviceDefinitionIterator, error) {
-
-	var manufacturerIdRule []interface{}
-	for _, manufacturerIdItem := range manufacturerId {
-		manufacturerIdRule = append(manufacturerIdRule, manufacturerIdItem)
-	}
-	var vehicleIdRule []interface{}
-	for _, vehicleIdItem := range vehicleId {
-		vehicleIdRule = append(vehicleIdRule, vehicleIdItem)
-	}
-	var ownerRule []interface{}
-	for _, ownerItem := range owner {
-		ownerRule = append(ownerRule, ownerItem)
-	}
-
-	logs, sub, err := _Registry.contract.FilterLogs(opts, "VehicleNodeMintedWithDeviceDefinition", manufacturerIdRule, vehicleIdRule, ownerRule)
-	if err != nil {
-		return nil, err
-	}
-	return &RegistryVehicleNodeMintedWithDeviceDefinitionIterator{contract: _Registry.contract, event: "VehicleNodeMintedWithDeviceDefinition", logs: logs, sub: sub}, nil
-}
-
-// WatchVehicleNodeMintedWithDeviceDefinition is a free log subscription operation binding the contract event 0xc7c7d9ac150ee7eff1ae17be6e6c250d9f574d019d47cd741f693feb1929496c.
-//
-// Solidity: event VehicleNodeMintedWithDeviceDefinition(uint256 indexed manufacturerId, uint256 indexed vehicleId, address indexed owner, string deviceDefinitionId)
-func (_Registry *RegistryFilterer) WatchVehicleNodeMintedWithDeviceDefinition(opts *bind.WatchOpts, sink chan<- *RegistryVehicleNodeMintedWithDeviceDefinition, manufacturerId []*big.Int, vehicleId []*big.Int, owner []common.Address) (event.Subscription, error) {
-
-	var manufacturerIdRule []interface{}
-	for _, manufacturerIdItem := range manufacturerId {
-		manufacturerIdRule = append(manufacturerIdRule, manufacturerIdItem)
-	}
-	var vehicleIdRule []interface{}
-	for _, vehicleIdItem := range vehicleId {
-		vehicleIdRule = append(vehicleIdRule, vehicleIdItem)
-	}
-	var ownerRule []interface{}
-	for _, ownerItem := range owner {
-		ownerRule = append(ownerRule, ownerItem)
-	}
-
-	logs, sub, err := _Registry.contract.WatchLogs(opts, "VehicleNodeMintedWithDeviceDefinition", manufacturerIdRule, vehicleIdRule, ownerRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(RegistryVehicleNodeMintedWithDeviceDefinition)
-				if err := _Registry.contract.UnpackLog(event, "VehicleNodeMintedWithDeviceDefinition", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseVehicleNodeMintedWithDeviceDefinition is a log parse operation binding the contract event 0xc7c7d9ac150ee7eff1ae17be6e6c250d9f574d019d47cd741f693feb1929496c.
-//
-// Solidity: event VehicleNodeMintedWithDeviceDefinition(uint256 indexed manufacturerId, uint256 indexed vehicleId, address indexed owner, string deviceDefinitionId)
-func (_Registry *RegistryFilterer) ParseVehicleNodeMintedWithDeviceDefinition(log types.Log) (*RegistryVehicleNodeMintedWithDeviceDefinition, error) {
-	event := new(RegistryVehicleNodeMintedWithDeviceDefinition)
-	if err := _Registry.contract.UnpackLog(event, "VehicleNodeMintedWithDeviceDefinition", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

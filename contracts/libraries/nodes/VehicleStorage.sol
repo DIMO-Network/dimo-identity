@@ -15,8 +15,11 @@ library VehicleStorage {
 
     struct Storage {
         address idProxyAddress;
-        // Allowed node attribute
-        AttributeSet.Set whitelistedAttributes;
+        // DEPRECATED: vehicle attributes (Make/Model/Year) moved off-chain alongside
+        // device definitions. Do not read, write, or reuse this slot — the inner
+        // AttributeSet mappings still hold legacy whitelist data at slots derived
+        // from this base position.
+        AttributeSet.Set _deprecated_whitelistedAttributes;
         // DEPRECATED: device definitions moved off-chain. Do not read, write, or
         // reuse this slot for any new field — old entries still live at
         // keccak256(tokenId, baseSlot) and would alias any replacement

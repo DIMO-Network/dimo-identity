@@ -53,7 +53,6 @@ contract DevAdmin is AccessControlInternal {
         uint256 indexed vehicleNode,
         address indexed owner
     );
-    event VehicleAttributeSet(uint256 tokenId, string attribute, string info);
     event AftermarketDeviceAttributeSet(
         uint256 tokenId,
         string attribute,
@@ -69,7 +68,6 @@ contract DevAdmin is AccessControlInternal {
         uint256 vehicleNode,
         address indexed owner
     );
-    event VehicleAttributeRemoved(string attribute);
     event DeviceDefinitionIdSet(uint256 indexed vehicleId, string ddId);
     event VehicleStorageNodeIdSet(
         uint256 indexed vehicleId,
@@ -292,8 +290,6 @@ contract DevAdmin is AccessControlInternal {
             emit VehicleNodeBurned(tokenId, owner);
 
             INFT(vehicleIdProxyAddress).burn(tokenId);
-
-            _resetVehicleInfos(tokenId);
         }
     }
 
@@ -380,8 +376,6 @@ contract DevAdmin is AccessControlInternal {
             emit VehicleNodeBurned(tokenId, owner);
 
             INFT(vehicleIdProxyAddress).burn(tokenId);
-
-            _resetVehicleInfos(tokenId);
         }
     }
 
@@ -639,21 +633,6 @@ contract DevAdmin is AccessControlInternal {
     }
 
     /**
-     * @notice Admin function remove a vehicle node attribute
-     * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_REMOVE_ATTR roles
-     */
-    function adminRemoveVehicleAttribute(
-        string calldata attribute
-    ) external authorized(DEV_REMOVE_ATTR) {
-        if (
-            AttributeSet.remove(
-                VehicleStorage.getStorage().whitelistedAttributes,
-                attribute
-            )
-        ) emit VehicleAttributeRemoved(attribute);
-    }
-
-    /**
      * @notice Admin function add device definition to existing vehicles
      * @dev Caller must have the DEV_SUPER_ADMIN_ROLE or DEV_SET_DD roles
      */
@@ -711,30 +690,6 @@ contract DevAdmin is AccessControlInternal {
             snr.vehicleIdToStorageNodeId[vehicleId] = storageNodeId;
 
             emit VehicleStorageNodeIdSet(vehicleId, storageNodeId);
-        }
-    }
-
-    /**
-     * @dev Internal function to reset vehicle node infos
-     * It iterates over all whitelisted attributes to reset each info
-     * @param tokenId Node which will have the infos reset
-     */
-    function _resetVehicleInfos(uint256 tokenId) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VehicleStorage.Storage storage vds = VehicleStorage.getStorage();
-        address idProxyAddress = vds.idProxyAddress;
-        string[] memory attributes = AttributeSet.values(
-            vds.whitelistedAttributes
-        );
-
-        for (
-            uint256 i = 0;
-            i < AttributeSet.count(vds.whitelistedAttributes);
-            i++
-        ) {
-            delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
-
-            emit VehicleAttributeSet(tokenId, attributes[i], "");
         }
     }
 

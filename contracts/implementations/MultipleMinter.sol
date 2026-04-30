@@ -38,7 +38,6 @@ contract MultipleMinter is
      * @param data A MintVehicleAndSdInput struct containing:
      *        - manufacturerNode: Parent manufacturer node ID of the vehicle
      *        - owner: The new nodes owner address
-     *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
      *        - connectionId: Parent connection ID of the synthetic device
      *        - vehicleOwnerSig: Vehicle owner's EIP-712 signature
      *        - syntheticDeviceSig: Synthetic device's EIP-712 signature
@@ -107,19 +106,8 @@ contract MultipleMinter is
             data.owner
         );
 
-        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
-            newTokenIdVehicle,
-            data.attrInfoPairsVehicle
-        );
-
         message = keccak256(
-            abi.encode(
-                MINT_VEHICLE_TYPEHASH,
-                data.manufacturerNode,
-                data.owner,
-                attributesHash,
-                infosHash
-            )
+            abi.encode(MINT_VEHICLE_TYPEHASH, data.manufacturerNode, data.owner)
         );
 
         if (
@@ -174,7 +162,6 @@ contract MultipleMinter is
      *        - manufacturerNode: Parent manufacturer node ID of the vehicle
      *        - owner: The new nodes owner address
      *        - storageNodeId: ID of the storage node to associate with the vehicle
-     *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
      *        - connectionId: Parent connection ID of the synthetic device
      *        - vehicleOwnerSig: Vehicle owner's EIP-712 signature
      *        - syntheticDeviceSig: Synthetic device's EIP-712 signature
@@ -242,19 +229,8 @@ contract MultipleMinter is
             data.owner
         );
 
-        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
-            newTokenIdVehicle,
-            data.attrInfoPairsVehicle
-        );
-
         message = keccak256(
-            abi.encode(
-                MINT_VEHICLE_TYPEHASH,
-                data.manufacturerNode,
-                data.owner,
-                attributesHash,
-                infosHash
-            )
+            abi.encode(MINT_VEHICLE_TYPEHASH, data.manufacturerNode, data.owner)
         );
 
         if (
@@ -311,7 +287,6 @@ contract MultipleMinter is
      *        - manufacturerNode: Parent manufacturer node ID of the vehicle
      *        - owner: The new nodes owner address
      *        - storageNodeId: ID of the storage node to associate with the vehicle
-     *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
      *        - connectionId: Parent connection ID of the synthetic device
      *        - vehicleOwnerSig: Vehicle owner's EIP-712 signature
      *        - syntheticDeviceSig: Synthetic device's EIP-712 signature
@@ -383,19 +358,8 @@ contract MultipleMinter is
             data.owner
         );
 
-        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
-            newTokenIdVehicle,
-            data.attrInfoPairsVehicle
-        );
-
         message = keccak256(
-            abi.encode(
-                MINT_VEHICLE_TYPEHASH,
-                data.manufacturerNode,
-                data.owner,
-                attributesHash,
-                infosHash
-            )
+            abi.encode(MINT_VEHICLE_TYPEHASH, data.manufacturerNode, data.owner)
         );
 
         if (
@@ -459,7 +423,6 @@ contract MultipleMinter is
      *        - manufacturerNode: Parent manufacturer node ID of the vehicle
      *        - owner: The new nodes owner address
      *        - storageNodeId: ID of the storage node to associate with the vehicle
-     *        - attrInfoPairsVehicle: List of attribute-info pairs to be added to the vehicle
      *        - connectionId: Parent connection ID of the synthetic device
      *        - vehicleOwnerSig: Vehicle owner's EIP-712 signature
      *        - syntheticDeviceSig: Synthetic device's EIP-712 signature
@@ -528,18 +491,11 @@ contract MultipleMinter is
                 data[i].owner
             );
 
-            (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
-                newTokenIdVehicle,
-                data[i].attrInfoPairsVehicle
-            );
-
             message = keccak256(
                 abi.encode(
                     MINT_VEHICLE_TYPEHASH,
                     data[i].manufacturerNode,
-                    data[i].owner,
-                    attributesHash,
-                    infosHash
+                    data[i].owner
                 )
             );
 

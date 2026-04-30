@@ -33,7 +33,6 @@
 | 0xb17b974b | adminCacheDimoStreamrEns() |
 | 0x56936962 | adminChangeParentNode(uint256,address,uint256[]) |
 | 0x3febacab | adminPairAftermarketDevice(uint256,uint256) |
-| 0x5f741f4d | adminRemoveVehicleAttribute(string) |
 | 0x3d9cf004 | adminSetStorageNodeIdForVehicleIds(uint256[],uint256) |
 | 0xdd60fd1a | adminSetVehicleDDs((uint256,string)[]) |
 | 0xf73a8f04 | renameManufacturers((uint256,string)[]) |
@@ -57,8 +56,6 @@
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
 | 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
 | 0xe4edc3c1 | SyntheticDeviceNodeBurned(uint256,uint256,address) |
-| 0x9b4bf377 | VehicleAttributeRemoved(string) |
-| 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0x7b36384f | VehicleNodeBurned(uint256,address) |
 | 0x9197060b | VehicleStorageNodeIdSet(uint256,uint256) |
 
@@ -248,9 +245,7 @@
 | 0x03f4b74a | SyntheticDeviceIdProxySet(address) |
 | 0xe4edc3c1 | SyntheticDeviceNodeBurned(uint256,uint256,address) |
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
-| 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
-| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 
 #### Errors
 | Selector | Signature |
@@ -273,17 +268,12 @@
 #### Functions
 | Selector | Signature |
 |-|-|
-| 0xf0d1a557 | addVehicleAttribute(string) |
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
-| 0x8b04a18b | mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[]) |
-| 0x8bf71ebc | mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[],(address,uint256,uint256,string)) |
-| 0x97c95b2a | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[],(address,uint256,uint256,string)) |
-| 0xd84baff1 | mintVehicleWithDeviceDefinition(uint256,address,string,(string,string)[]) |
-| 0x592c0889 | mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes) |
-| 0x8dca2b8e | mintVehicleWithDeviceDefinitionSign(uint256,address,string,(string,string)[],bytes) |
+| 0x65f43d21 | mintVehicle(uint256,address,uint256,(address,uint256,uint256,string)) |
+| 0x7163864b | mintVehicle(uint256,address,uint256) |
+| 0x0410a326 | mintVehicleSign(uint256,address,uint256,bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
-| 0xd9c3ae61 | setVehicleInfo(uint256,(string,string)[]) |
 | 0xea0e7d3a | validateBurnAndResetNode(uint256) |
 
 #### Events
@@ -292,19 +282,14 @@
 | 0xbd79b86f | RoleAdminChanged(bytes32,bytes32,bytes32) |
 | 0x2f878811 | RoleGranted(bytes32,address,address) |
 | 0xf6391f5c | RoleRevoked(bytes32,address,address) |
-| 0x2b7d41dc | VehicleAttributeAdded(string) |
-| 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0x3e7484c4 | VehicleIdProxySet(address) |
 | 0x7b36384f | VehicleNodeBurned(uint256,address) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
-| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 | 0x9197060b | VehicleStorageNodeIdSet(uint256,uint256) |
 
 #### Errors
 | Selector | Signature |
 |-|-|
-| 0x130e2668 | AttributeExists(string) |
-| 0x1c48d49e | AttributeNotWhitelisted(string) |
 | 0xe3ca9639 | InvalidNode(address,uint256) |
 | 0x38a85a8d | InvalidOwnerSignature() |
 | 0x5299bab7 | InvalidParentNode(uint256) |
@@ -422,23 +407,17 @@
 #### Functions
 | Selector | Signature |
 |-|-|
-| 0x688ecea4 | mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
-| 0xfb1a28e8 | mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
-| 0x484db0b3 | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
-| 0xd23965e3 | mintVehicleAndSdWithDeviceDefinitionSign((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[])) |
-| 0x58657dcc | mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
-| 0x788a2f48 | mintVehicleAndSdWithDeviceDefinitionSignAndSacd((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
-| 0x1a5d15a1 | mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[]) |
-| 0x7ae7fe4e | mintVehicleAndSdWithDeviceDefinitionSignBatch((uint256,address,string,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[]) |
+| 0x6a27b02f | mintVehicleAndSdSign((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[])) |
+| 0xec681b0f | mintVehicleAndSdSign((uint256,address,uint256,bytes,bytes,address,(string,string)[])) |
+| 0x8e8230b6 | mintVehicleAndSdSignAndSacd((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
+| 0x54d80641 | mintVehicleAndSdSignBatch((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[]) |
 
 #### Events
 | Selector | Signature |
 |-|-|
 | 0xe89d3dc7 | SyntheticDeviceAttributeSet(uint256,string,string) |
 | 0x5a560c1a | SyntheticDeviceNodeMinted(uint256,uint256,uint256,address,address) |
-| 0x3a259e5d | VehicleAttributeSet(uint256,string,string) |
 | 0xd471ae8a | VehicleNodeMinted(uint256,uint256,address) |
-| 0xc7c7d9ac | VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string) |
 | 0x9197060b | VehicleStorageNodeIdSet(uint256,uint256) |
 
 #### Errors

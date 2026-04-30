@@ -344,44 +344,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "string",
-        "name": "attribute",
-        "type": "string"
-      }
-    ],
-    "name": "VehicleAttributeRemoved",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "attribute",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "info",
-        "type": "string"
-      }
-    ],
-    "name": "VehicleAttributeSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "uint256",
         "name": "vehicleNode",
@@ -525,19 +487,6 @@
       }
     ],
     "name": "adminPairAftermarketDevice",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "attribute",
-        "type": "string"
-      }
-    ],
-    "name": "adminRemoveVehicleAttribute",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

@@ -14,7 +14,7 @@ import "../../libraries/nodes/VehicleStorage.sol";
 import "../../libraries/nodes/SyntheticDeviceStorage.sol";
 
 import {MINT_VEHICLE_OPERATION} from "../../shared/Operations.sol";
-import {ADMIN_ROLE, MINT_VEHICLE_ROLE, BURN_VEHICLE_ROLE, SET_VEHICLE_INFO_ROLE} from "../../shared/Roles.sol";
+import {ADMIN_ROLE, MINT_VEHICLE_ROLE, BURN_VEHICLE_ROLE} from "../../shared/Roles.sol";
 
 import "@solidstate/contracts/access/access_control/AccessControlInternal.sol";
 
@@ -31,7 +31,6 @@ contract Vehicle is
         keccak256("BurnVehicleSign(uint256 vehicleNode)");
 
     event VehicleIdProxySet(address indexed proxy);
-    event VehicleAttributeAdded(string attribute);
     event VehicleNodeBurned(uint256 indexed vehicleNode, address indexed owner);
 
     modifier onlyNftProxy() {
@@ -56,39 +55,19 @@ contract Vehicle is
         emit VehicleIdProxySet(addr);
     }
 
-    /**
-     * @notice Adds an attribute to the whielist
-     * @dev Only an admin can add a new attribute
-     * @param attribute The attribute to be added
-     */
-    function addVehicleAttribute(
-        string calldata attribute
-    ) external onlyRole(ADMIN_ROLE) {
-        if (
-            !AttributeSet.add(
-                VehicleStorage.getStorage().whitelistedAttributes,
-                attribute
-            )
-        ) revert AttributeExists(attribute);
-
-        emit VehicleAttributeAdded(attribute);
-    }
-
     // ***** Interaction with nodes *****//
 
     /**
      * @notice Mints a vehicle and associates it with a Storage Node Id
-     * @dev Device definitions are tracked off-chain via per-vehicle documents
+     * @dev Device definitions and vehicle attributes are tracked off-chain via per-vehicle documents
      * @param manufacturerNode The ID of the parent manufacturer node
      * @param owner The address that will own the newly minted vehicle
      * @param storageNodeId The ID of the storage node to associate with this vehicle
-     * @param attrInfo Array of attribute-info pairs to be added to the vehicle
      */
     function mintVehicle(
         uint256 manufacturerNode,
         address owner,
-        uint256 storageNodeId,
-        AttributeInfoPair[] calldata attrInfo
+        uint256 storageNodeId
     ) external {
         address vehicleIdProxyAddress = VehicleStorage
             .getStorage()
@@ -108,19 +87,16 @@ contract Vehicle is
 
         emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
-        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
-
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
         _setStorageNodeIdForVehicleId(newTokenId, storageNodeId);
     }
 
     /**
      * @notice Mints a vehicle, associates it with a Storage Node Id, and sets permissions with SACD
-     * @dev Device definitions are tracked off-chain via per-vehicle documents
+     * @dev Device definitions and vehicle attributes are tracked off-chain via per-vehicle documents
      * @param manufacturerNode The ID of the parent manufacturer node
      * @param owner The address that will own the newly minted vehicle
      * @param storageNodeId The ID of the storage node to associate with this vehicle
-     * @param attrInfo Array of attribute-info pairs to be added to the vehicle
      * @param sacdInput SACD input args containing:
      *        - grantee: The address to receive the permissions
      *        - permissions: The uint256 that represents the byte array of permissions
@@ -131,7 +107,6 @@ contract Vehicle is
         uint256 manufacturerNode,
         address owner,
         uint256 storageNodeId,
-        AttributeInfoPair[] calldata attrInfo,
         SacdInput calldata sacdInput
     ) external {
         address vehicleIdProxyAddress = VehicleStorage
@@ -152,8 +127,6 @@ contract Vehicle is
 
         emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
-        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
-
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
 
         INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
@@ -162,19 +135,17 @@ contract Vehicle is
 
     /**
      * @notice Mints a vehicle through a metatransaction and associates it with a Storage Node Id
-     * @dev Device definitions are tracked off-chain via per-vehicle documents
+     * @dev Device definitions and vehicle attributes are tracked off-chain via per-vehicle documents
      * @dev Caller must have the MINT_VEHICLE_ROLE
      * @param manufacturerNode The ID of the parent manufacturer node
      * @param owner The address that will own the newly minted vehicle
      * @param storageNodeId The ID of the storage node to associate with this vehicle
-     * @param attrInfo Array of attribute-info pairs to be added to the vehicle
      * @param signature The owner's EIP-712 signature authorizing the mint operation
      */
     function mintVehicleSign(
         uint256 manufacturerNode,
         address owner,
         uint256 storageNodeId,
-        AttributeInfoPair[] calldata attrInfo,
         bytes calldata signature
     ) external onlyRole(MINT_VEHICLE_ROLE) {
         address vehicleIdProxyAddress = VehicleStorage
@@ -195,19 +166,8 @@ contract Vehicle is
 
         emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
 
-        (bytes32 attributesHash, bytes32 infosHash) = _setInfosHash(
-            newTokenId,
-            attrInfo
-        );
-
         bytes32 message = keccak256(
-            abi.encode(
-                MINT_VEHICLE_TYPEHASH,
-                manufacturerNode,
-                owner,
-                attributesHash,
-                infosHash
-            )
+            abi.encode(MINT_VEHICLE_TYPEHASH, manufacturerNode, owner)
         );
 
         if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
@@ -218,25 +178,7 @@ contract Vehicle is
     }
 
     /**
-     * @notice Add infos to node
-     * @dev attributes must be whitelisted
-     * @dev Caller must have the set vehicle info role
-     * @param tokenId Node where the info will be added
-     * @param attrInfo List of attribute-info pairs to be added
-     */
-    function setVehicleInfo(
-        uint256 tokenId,
-        AttributeInfoPair[] calldata attrInfo
-    ) external onlyRole(SET_VEHICLE_INFO_ROLE) {
-        address vehicleIdProxy = VehicleStorage.getStorage().idProxyAddress;
-        if (!INFT(vehicleIdProxy).exists(tokenId))
-            revert InvalidNode(vehicleIdProxy, tokenId);
-
-        _setInfos(tokenId, attrInfo);
-    }
-
-    /**
-     * @notice Burns a vehicle and reset all its attributes
+     * @notice Burns a vehicle
      * @dev Caller must have the burn vehicle role
      * @dev This contract has the BURNER_ROLE in the VehicleId
      * @param tokenId Vehicle node id
@@ -271,15 +213,13 @@ contract Vehicle is
         delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
         delete vs._deprecated_vehicleIdToDeviceDefinitionId[tokenId];
 
-        _resetInfos(tokenId);
-
         emit VehicleNodeBurned(tokenId, owner);
 
         INFT(vehicleIdProxyAddress).burn(tokenId);
     }
 
     /**
-     * @notice Validates burning of a vehicle and reset all its attributes
+     * @notice Validates burning of a vehicle
      * @dev Can only be called by the VehicleId Proxy when a token owner calls the `burn` function
      * @dev The actual burn takes place on the VehicleId contract
      * @param tokenId Vehicle node id
@@ -309,8 +249,6 @@ contract Vehicle is
         delete vs._deprecated_vehicleIdToDeviceDefinitionId[tokenId];
         delete sn.vehicleIdToStorageNodeId[tokenId];
 
-        _resetInfos(tokenId);
-
         emit VehicleNodeBurned(tokenId, owner);
     }
 
@@ -327,63 +265,5 @@ contract Vehicle is
         ddId = VehicleStorage
             .getStorage()
             ._deprecated_vehicleIdToDeviceDefinitionId[vehicleId];
-    }
-
-    // ***** PRIVATE FUNCTIONS ***** //
-
-    /**
-     * @dev Internal function to add infos to node
-     * @dev attributes must be whitelisted
-     * @param tokenId Node where the info will be added
-     * @param attrInfo List of attribute-info pairs to be added
-     */
-    function _setInfos(
-        uint256 tokenId,
-        AttributeInfoPair[] calldata attrInfo
-    ) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VehicleStorage.Storage storage s = VehicleStorage.getStorage();
-        address idProxyAddress = s.idProxyAddress;
-
-        for (uint256 i = 0; i < attrInfo.length; i++) {
-            if (
-                !AttributeSet.exists(
-                    s.whitelistedAttributes,
-                    attrInfo[i].attribute
-                )
-            ) revert AttributeNotWhitelisted(attrInfo[i].attribute);
-
-            ns.nodes[idProxyAddress][tokenId].info[
-                attrInfo[i].attribute
-            ] = attrInfo[i].info;
-
-            emit VehicleAttributeSet(
-                tokenId,
-                attrInfo[i].attribute,
-                attrInfo[i].info
-            );
-        }
-    }
-
-    /**
-     * @dev Internal function to reset node infos
-     * It iterates over all whitelisted attributes to reset each info
-     * @param tokenId Node which will have the infos reset
-     */
-    function _resetInfos(uint256 tokenId) private {
-        NodesStorage.Storage storage ns = NodesStorage.getStorage();
-        VehicleStorage.Storage storage sds = VehicleStorage.getStorage();
-        address idProxyAddress = sds.idProxyAddress;
-        string[] memory attributes = AttributeSet.values(
-            sds.whitelistedAttributes
-        );
-
-        for (
-            uint256 i = 0;
-            i < AttributeSet.count(sds.whitelistedAttributes);
-            i++
-        ) {
-            delete ns.nodes[idProxyAddress][tokenId].info[attributes[i]];
-        }
     }
 }

@@ -26,7 +26,6 @@ bytes32 constant SET_SD_INFO_ROLE = keccak256("SET_SD_INFO_ROLE");
 // Vehicle roles
 bytes32 constant MINT_VEHICLE_ROLE = keccak256("MINT_VEHICLE_ROLE");
 bytes32 constant BURN_VEHICLE_ROLE = keccak256("BURN_VEHICLE_ROLE");
-bytes32 constant SET_VEHICLE_INFO_ROLE = keccak256("SET_VEHICLE_INFO_ROLE");
 
 // Multiple Minter roles
 bytes32 constant MINT_VEHICLE_SD_ROLE = keccak256("MINT_VEHICLE_SD_ROLE");
@@ -45,7 +44,6 @@ bytes32 constant DEV_AD_BURN_ROLE = keccak256("DEV_AD_BURN_ROLE");
 bytes32 constant DEV_SD_BURN_ROLE = keccak256("DEV_SD_BURN_ROLE");
 bytes32 constant DEV_CHANGE_PARENT_NODE = keccak256("DEV_CHANGE_PARENT_NODE");
 bytes32 constant DEV_CACHE_ENS = keccak256("DEV_CACHE_ENS");
-bytes32 constant DEV_REMOVE_ATTR = keccak256("DEV_REMOVE_ATTR");
 bytes32 constant DEV_SET_DD = keccak256("DEV_SET_DD");
 bytes32 constant DEV_MIGRATE_SD_PARENTS = keccak256("DEV_MIGRATE_SD_PARENTS");
 bytes32 constant DEV_SET_STORAGE_NODE_ID = keccak256("DEV_SET_STORAGE_NODE_ID");

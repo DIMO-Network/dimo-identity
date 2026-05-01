@@ -61,35 +61,9 @@ struct MintVehicleAndSdInputWithSnId {
     AttributeInfoPair[] attrInfoPairsDevice; // List of attribute-info pairs to be added of the synthetic device
 }
 
-struct MintVehicleAndSdWithDdInput {
+struct MintVehicleAndSdInputBatch {
     uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
     address owner; // The new nodes owner
-    string deviceDefinitionId; // The Device Definition Id
-    AttributeInfoPair[] attrInfoPairsVehicle; // List of attribute-info pairs to be added of the vehicle
-    uint256 connectionId; // Parent connection id of the synthetic device
-    bytes vehicleOwnerSig; // Vehicle owner signature hash
-    bytes syntheticDeviceSig; // Synthetic Device's signature hash
-    address syntheticDeviceAddr; // Address associated with the synthetic device
-    AttributeInfoPair[] attrInfoPairsDevice; // List of attribute-info pairs to be added of the synthetic device
-}
-
-struct MintVehicleAndSdWithDdInputWithSnId {
-    uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
-    address owner; // The new nodes owner
-    string deviceDefinitionId; // The Device Definition Id
-    uint256 storageNodeId; // ID of the storage node to associate with the vehicle
-    AttributeInfoPair[] attrInfoPairsVehicle; // List of attribute-info pairs to be added of the vehicle
-    uint256 connectionId; // Parent connection id of the synthetic device
-    bytes vehicleOwnerSig; // Vehicle owner signature hash
-    bytes syntheticDeviceSig; // Synthetic Device's signature hash
-    address syntheticDeviceAddr; // Address associated with the synthetic device
-    AttributeInfoPair[] attrInfoPairsDevice; // List of attribute-info pairs to be added of the synthetic device
-}
-
-struct MintVehicleAndSdWithDdInputBatch {
-    uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
-    address owner; // The new nodes owner
-    string deviceDefinitionId; // The Device Definition Id
     AttributeInfoPair[] attrInfoPairsVehicle; // List of attribute-info pairs to be added of the vehicle
     uint256 connectionId; // Parent connection id of the synthetic device
     bytes vehicleOwnerSig; // Vehicle owner signature hash
@@ -99,10 +73,9 @@ struct MintVehicleAndSdWithDdInputBatch {
     SacdInput sacdInput;
 }
 
-struct MintVehicleAndSdWithDdInputWithSnIdBatch {
+struct MintVehicleAndSdInputWithSnIdBatch {
     uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
     address owner; // The new nodes owner
-    string deviceDefinitionId; // The Device Definition Id
     uint256 storageNodeId; // ID of the storage node to associate with the vehicle
     AttributeInfoPair[] attrInfoPairsVehicle; // List of attribute-info pairs to be added of the vehicle
     uint256 connectionId; // Parent connection id of the synthetic device

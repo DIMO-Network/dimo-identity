@@ -278,7 +278,7 @@ describe('VehicleStream', async function () {
 
     await vehicleInstance
       .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+      ['mintVehicle(uint256,address,uint256,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockVehicleAttributeInfoPairs);
 
     await setupStreamr(DIMO_REGISTRY_ADDRESS);
 
@@ -615,7 +615,7 @@ describe('VehicleStream', async function () {
       it('Should revert if there is no stream ID associated to the vehicle ID', async () => {
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,uint256,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleStreamInstance
@@ -819,7 +819,7 @@ describe('VehicleStream', async function () {
       it('Should revert if there is no stream ID associated to the vehicle ID', async () => {
         await vehicleInstance
           .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+          ['mintVehicle(uint256,address,uint256,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleStreamInstance

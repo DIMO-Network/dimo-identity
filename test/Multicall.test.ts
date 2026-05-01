@@ -299,12 +299,11 @@ describe('Multicall', function () {
     before(async () => {
       mintSig = await signMessage({
         _signer: user1,
-        _primaryType: 'MintVehicleWithDeviceDefinitionSign',
+        _primaryType: 'MintVehicleSign',
         _verifyingContract: await vehicleInstance.getAddress(),
         message: {
           manufacturerNode: '1',
           owner: user1.address,
-          deviceDefinitionId: C.mockDdId1,
           attributes: C.mockVehicleAttributes,
           infos: C.mockVehicleInfos
         }
@@ -340,9 +339,9 @@ describe('Multicall', function () {
 
     context('State', () => {
       it('Should mint vehicle and claim aftermarket device in the same transaction', async () => {
-        const mintVehicleWithDdSignEncoded = vehicleInstance.interface.encodeFunctionData(
-          'mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)',
-          [1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
+        const mintVehicleSignEncoded = vehicleInstance.interface.encodeFunctionData(
+          'mintVehicleSign(uint256,address,uint256,(string,string)[],bytes)',
+          [1, user1.address, C.STORAGE_NODE_ID_1, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
           aftermarketDeviceInstance.interface.encodeFunctionData(
@@ -356,7 +355,7 @@ describe('Multicall', function () {
         );
 
         await multicallInstance.multiDelegateCall([
-          mintVehicleWithDdSignEncoded,
+          mintVehicleSignEncoded,
           claimAftermarketDeviceSignEncoded
         ]);
 
@@ -364,9 +363,9 @@ describe('Multicall', function () {
         expect(await adIdInstance.ownerOf(1)).to.be.equal(user1.address);
       });
       it('Should mint vehicle, claim aftermarket device and pair them in the same transaction', async () => {
-        const mintVehicleWithDdSignEncoded = vehicleInstance.interface.encodeFunctionData(
-          'mintVehicleWithDeviceDefinitionSign(uint256,address,uint256,string,(string,string)[],bytes)',
-          [1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs, mintSig]
+        const mintVehicleSignEncoded = vehicleInstance.interface.encodeFunctionData(
+          'mintVehicleSign(uint256,address,uint256,(string,string)[],bytes)',
+          [1, user1.address, C.STORAGE_NODE_ID_1, C.mockVehicleAttributeInfoPairs, mintSig]
         );
         const claimAftermarketDeviceSignEncoded =
           aftermarketDeviceInstance.interface.encodeFunctionData(
@@ -387,7 +386,7 @@ describe('Multicall', function () {
         ).to.be.equal(0);
 
         await multicallInstance.multiDelegateCall([
-          mintVehicleWithDdSignEncoded,
+          mintVehicleSignEncoded,
           claimAftermarketDeviceSignEncoded,
           pairAftermarketDeviceSignEncoded
         ]);
@@ -447,7 +446,7 @@ describe('Multicall', function () {
     it('Should return information about vehicle', async () => {
       await vehicleInstance
         .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,uint256,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockVehicleAttributeInfoPairs);
 
       const getInfoEncoded1 = nodesInstance.interface.encodeFunctionData('getInfo', [
         await vehicleIdInstance.getAddress(),

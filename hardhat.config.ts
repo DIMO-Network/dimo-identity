@@ -58,9 +58,6 @@ const config: HardhatUserConfig = {
     silent: false,
     verbose: false,
   },
-  mocha: {
-    timeout: 180000,
-  },
   tenderly: {
     username: process.env.TENDERLY_USERNAME || '', // tenderly username (or organization name)
     project: process.env.TENDERLY_PROJECT_NAME || '', // project name

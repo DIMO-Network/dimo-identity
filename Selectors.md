@@ -270,9 +270,12 @@
 |-|-|
 | 0xd0b61156 | burnVehicleSign(uint256,bytes) |
 | 0xb7bded95 | getDeviceDefinitionIdByVehicleId(uint256) |
+| 0x6241c3b6 | mintVehicle(uint256,address) |
 | 0x65f43d21 | mintVehicle(uint256,address,uint256,(address,uint256,uint256,string)) |
 | 0x7163864b | mintVehicle(uint256,address,uint256) |
+| 0xf6dfeac5 | mintVehicle(uint256,address,(address,uint256,uint256,string)) |
 | 0x0410a326 | mintVehicleSign(uint256,address,uint256,bytes) |
+| 0xae10486b | mintVehicleSign(uint256,address,bytes) |
 | 0x9bfae6da | setVehicleIdProxyAddress(address) |
 | 0xea0e7d3a | validateBurnAndResetNode(uint256) |
 
@@ -409,8 +412,10 @@
 |-|-|
 | 0x6a27b02f | mintVehicleAndSdSign((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[])) |
 | 0xec681b0f | mintVehicleAndSdSign((uint256,address,uint256,bytes,bytes,address,(string,string)[])) |
+| 0x77c1d454 | mintVehicleAndSdSignAndSacd((uint256,address,uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
 | 0x8e8230b6 | mintVehicleAndSdSignAndSacd((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string)) |
 | 0x54d80641 | mintVehicleAndSdSignBatch((uint256,address,uint256,uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[]) |
+| 0x5f462306 | mintVehicleAndSdSignBatch((uint256,address,uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[]) |
 
 #### Events
 | Selector | Signature |

@@ -85,6 +85,10 @@ export type DeviceDefinitionUpdateInput = {
   imageURI: string;
 };
 
+export type MintVehicleAndSdInputBatch = MintVehicleAndSdInput & {
+  sacdInput: SacdInput
+}
+
 export type MintVehicleAndSdInputWithSnIdBatch = MintVehicleAndSdInputWithSdId & {
   sacdInput: SacdInput
 }

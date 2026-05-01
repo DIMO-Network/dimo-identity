@@ -31,8 +31,7 @@ contract MultipleMinter is
 
     /**
      * @notice Mints and pairs a vehicle and a synthetic device through a metatransaction
-     * @dev DEPRECATED: This function will be removed in a future release
-     *      Please use the version with storageNodeId parameter instead
+     * @dev Device definitions are tracked off-chain via per-vehicle documents
      * @dev The vehicle owner signs a typed structured (EIP-712) message in advance which is verified during execution.
      * Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the connection ID owner
      * @param data A MintVehicleAndSdInput struct containing:
@@ -283,6 +282,139 @@ contract MultipleMinter is
      * @dev Device definitions are tracked off-chain via per-vehicle documents
      * @dev The vehicle owner signs a typed structured (EIP-712) message in advance which is verified during execution.
      * Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the connection ID owner.
+     * @param data A MintVehicleAndSdInput struct containing:
+     *        - manufacturerNode: Parent manufacturer node ID of the vehicle
+     *        - owner: The new nodes owner address
+     *        - connectionId: Parent connection ID of the synthetic device
+     *        - vehicleOwnerSig: Vehicle owner's EIP-712 signature
+     *        - syntheticDeviceSig: Synthetic device's EIP-712 signature
+     *        - syntheticDeviceAddr: Address associated with the synthetic device
+     *        - attrInfoPairsDevice: List of attribute-info pairs to be added to the synthetic device
+     * @param sacdInput SACD input args for setting permissions:
+     *        - grantee: The address to receive the permissions
+     *        - permissions: The uint256 that represents the byte array of permissions
+     *        - expiration: Expiration timestamp of the permissions
+     *        - source: The URI source associated with the permissions
+     * Reverts if connection or manufacturer node doesn't exist, caller lacks permission,
+     * device is already registered, or signatures are invalid.
+     */
+    function mintVehicleAndSdSignAndSacd(
+        MintVehicleAndSdInput calldata data,
+        SacdInput calldata sacdInput
+    ) external {
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        SharedStorage.Storage storage sharedStorage = SharedStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = sds.idProxyAddress;
+
+        if (
+            !INFT(SharedStorage.getStorage().connectionsManager).exists(
+                data.connectionId
+            )
+        ) revert InvalidParentNode(data.connectionId);
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                data.manufacturerNode
+            )
+        ) revert InvalidParentNode(data.manufacturerNode);
+        if (
+            !ISacd(sharedStorage.sacd).hasPermission(
+                sharedStorage.connectionsManager,
+                data.connectionId,
+                msg.sender,
+                CONNECTION_MINT_SD_PERMISSION
+            )
+        ) revert Errors.Unauthorized(msg.sender);
+        if (sds.deviceAddressToNodeId[data.syntheticDeviceAddr] != 0)
+            revert DeviceAlreadyRegistered(data.syntheticDeviceAddr);
+
+        bytes32 message = keccak256(
+            abi.encode(MINT_VEHICLE_SD_TYPEHASH, data.connectionId)
+        );
+
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                data.syntheticDeviceAddr,
+                message,
+                data.syntheticDeviceSig
+            )
+        ) revert InvalidSdSignature();
+
+        // ----- START Vehicle mint -----
+        uint256 newTokenIdVehicle = INFT(vehicleIdProxyAddress).safeMint(
+            data.owner
+        );
+
+        emit VehicleNodeMinted(
+            data.manufacturerNode,
+            newTokenIdVehicle,
+            data.owner
+        );
+
+        message = keccak256(
+            abi.encode(MINT_VEHICLE_TYPEHASH, data.manufacturerNode, data.owner)
+        );
+
+        if (
+            !Eip712CheckerInternal._verifySignature(
+                data.owner,
+                message,
+                data.vehicleOwnerSig
+            )
+        ) revert InvalidOwnerSignature();
+        // ----- END Vehicle mint -----
+
+        // ----- START Synthetic Device mint and attributes -----
+        uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(data.owner);
+
+        emit SyntheticDeviceNodeMinted(
+            data.connectionId,
+            newTokenIdDevice,
+            newTokenIdVehicle,
+            data.syntheticDeviceAddr,
+            data.owner
+        );
+
+        if (data.attrInfoPairsDevice.length > 0)
+            _setInfos(newTokenIdDevice, data.attrInfoPairsDevice);
+        // ----- END Synthetic Device mint and attributes -----
+
+        // ----- Internal contract state change -----
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data
+            .manufacturerNode;
+
+        NodesStorage
+        .getStorage()
+        .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data
+            .connectionId;
+
+        MapperStorage.getStorage().nodeLinks[vehicleIdProxyAddress][
+            sdIdProxyAddress
+        ][newTokenIdVehicle] = newTokenIdDevice;
+        MapperStorage.getStorage().nodeLinks[sdIdProxyAddress][
+            vehicleIdProxyAddress
+        ][newTokenIdDevice] = newTokenIdVehicle;
+
+        sds.deviceAddressToNodeId[data.syntheticDeviceAddr] = newTokenIdDevice;
+        sds.nodeIdToDeviceAddress[newTokenIdDevice] = data.syntheticDeviceAddr;
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+
+        INFT(vehicleIdProxyAddress).setSacd(newTokenIdVehicle, sacdInput);
+    }
+
+    /**
+     * @notice Mints and pairs a vehicle and a synthetic device, and sets permissions with SACD through a metatransaction
+     * @dev Device definitions are tracked off-chain via per-vehicle documents
+     * @dev The vehicle owner signs a typed structured (EIP-712) message in advance which is verified during execution.
+     * Caller must have the CONNECTION_MINT_SD_PERMISSION for the specified connection or be the connection ID owner.
      * @param data A MintVehicleAndSdInputWithSnId struct containing:
      *        - manufacturerNode: Parent manufacturer node ID of the vehicle
      *        - owner: The new nodes owner address
@@ -411,6 +543,151 @@ contract MultipleMinter is
 
         INFT(vehicleIdProxyAddress).setSacd(newTokenIdVehicle, sacdInput);
         _setStorageNodeIdForVehicleId(newTokenIdVehicle, data.storageNodeId);
+    }
+
+    /**
+     * @notice Mints and pairs multiple vehicles and synthetic devices in batch
+     * @dev Device definitions are tracked off-chain via per-vehicle documents
+     * @dev Processes multiple vehicle and synthetic device pairs in a single transaction.
+     *      For each pair, verifies signatures, mints tokens, sets attributes, and establishes relationships.
+     *      Caller must have the CONNECTION_MINT_SD_PERMISSION for each specified connection or be the connection ID owner.
+     * @param data An array of MintVehicleAndSdInputBatch structs, each containing:
+     *        - manufacturerNode: Parent manufacturer node ID of the vehicle
+     *        - owner: The new nodes owner address
+     *        - connectionId: Parent connection ID of the synthetic device
+     *        - vehicleOwnerSig: Vehicle owner's EIP-712 signature
+     *        - syntheticDeviceSig: Synthetic device's EIP-712 signature
+     *        - syntheticDeviceAddr: Address associated with the synthetic device
+     *        - attrInfoPairsDevice: List of attribute-info pairs to be added to the synthetic device
+     *        - sacdInput: SACD input args for setting permissions on the vehicle
+     * @dev Emits VehicleNodeMinted and SyntheticDeviceNodeMinted events for each pair.
+     *      Reverts if any connection or manufacturer node doesn't exist, caller lacks permission,
+     *      any device is already registered, or any signature is invalid.
+     */
+    function mintVehicleAndSdSignBatch(
+        MintVehicleAndSdInputBatch[] calldata data
+    ) external {
+        SyntheticDeviceStorage.Storage storage sds = SyntheticDeviceStorage
+            .getStorage();
+        SharedStorage.Storage storage sharedStorage = SharedStorage
+            .getStorage();
+
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+        address sdIdProxyAddress = sds.idProxyAddress;
+
+        for (uint256 i = 0; i < data.length; i++) {
+            if (
+                !INFT(SharedStorage.getStorage().connectionsManager).exists(
+                    data[i].connectionId
+                )
+            ) revert InvalidParentNode(data[i].connectionId);
+            if (
+                !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                    data[i].manufacturerNode
+                )
+            ) revert InvalidParentNode(data[i].manufacturerNode);
+            if (
+                !ISacd(sharedStorage.sacd).hasPermission(
+                    sharedStorage.connectionsManager,
+                    data[i].connectionId,
+                    msg.sender,
+                    CONNECTION_MINT_SD_PERMISSION
+                )
+            ) revert Errors.Unauthorized(msg.sender);
+            if (sds.deviceAddressToNodeId[data[i].syntheticDeviceAddr] != 0)
+                revert DeviceAlreadyRegistered(data[i].syntheticDeviceAddr);
+
+            bytes32 message = keccak256(
+                abi.encode(MINT_VEHICLE_SD_TYPEHASH, data[i].connectionId)
+            );
+
+            if (
+                !Eip712CheckerInternal._verifySignature(
+                    data[i].syntheticDeviceAddr,
+                    message,
+                    data[i].syntheticDeviceSig
+                )
+            ) revert InvalidSdSignature();
+
+            // ----- START Vehicle mint -----
+            uint256 newTokenIdVehicle = INFT(vehicleIdProxyAddress).safeMint(
+                data[i].owner
+            );
+
+            emit VehicleNodeMinted(
+                data[i].manufacturerNode,
+                newTokenIdVehicle,
+                data[i].owner
+            );
+
+            message = keccak256(
+                abi.encode(
+                    MINT_VEHICLE_TYPEHASH,
+                    data[i].manufacturerNode,
+                    data[i].owner
+                )
+            );
+
+            if (
+                !Eip712CheckerInternal._verifySignature(
+                    data[i].owner,
+                    message,
+                    data[i].vehicleOwnerSig
+                )
+            ) revert InvalidOwnerSignature();
+            // ----- END Vehicle mint -----
+
+            // ----- START Synthetic Device mint and attributes -----
+            uint256 newTokenIdDevice = INFT(sdIdProxyAddress).safeMint(
+                data[i].owner
+            );
+
+            emit SyntheticDeviceNodeMinted(
+                data[i].connectionId,
+                newTokenIdDevice,
+                newTokenIdVehicle,
+                data[i].syntheticDeviceAddr,
+                data[i].owner
+            );
+
+            if (data[i].attrInfoPairsDevice.length > 0)
+                _setInfos(newTokenIdDevice, data[i].attrInfoPairsDevice);
+            // ----- END Synthetic Device mint and attributes -----
+
+            // ----- Internal contract state change -----
+            NodesStorage
+            .getStorage()
+            .nodes[vehicleIdProxyAddress][newTokenIdVehicle].parentNode = data[
+                i
+            ].manufacturerNode;
+
+            NodesStorage
+            .getStorage()
+            .nodes[sdIdProxyAddress][newTokenIdDevice].parentNode = data[i]
+                .connectionId;
+
+            MapperStorage.getStorage().nodeLinks[vehicleIdProxyAddress][
+                sdIdProxyAddress
+            ][newTokenIdVehicle] = newTokenIdDevice;
+            MapperStorage.getStorage().nodeLinks[sdIdProxyAddress][
+                vehicleIdProxyAddress
+            ][newTokenIdDevice] = newTokenIdVehicle;
+
+            sds.deviceAddressToNodeId[
+                data[i].syntheticDeviceAddr
+            ] = newTokenIdDevice;
+            sds.nodeIdToDeviceAddress[newTokenIdDevice] = data[i]
+                .syntheticDeviceAddr;
+
+            ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+
+            INFT(vehicleIdProxyAddress).setSacd(
+                newTokenIdVehicle,
+                data[i].sacdInput
+            );
+        }
     }
 
     /**

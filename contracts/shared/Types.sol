@@ -59,6 +59,17 @@ struct MintVehicleAndSdInputWithSnId {
     AttributeInfoPair[] attrInfoPairsDevice; // List of attribute-info pairs to be added of the synthetic device
 }
 
+struct MintVehicleAndSdInputBatch {
+    uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
+    address owner; // The new nodes owner
+    uint256 connectionId; // Parent connection id of the synthetic device
+    bytes vehicleOwnerSig; // Vehicle owner signature hash
+    bytes syntheticDeviceSig; // Synthetic Device's signature hash
+    address syntheticDeviceAddr; // Address associated with the synthetic device
+    AttributeInfoPair[] attrInfoPairsDevice; // List of attribute-info pairs to be added of the synthetic device
+    SacdInput sacdInput;
+}
+
 struct MintVehicleAndSdInputWithSnIdBatch {
     uint256 manufacturerNode; // Parent manufacturer node id of the vehicle
     address owner; // The new nodes owner

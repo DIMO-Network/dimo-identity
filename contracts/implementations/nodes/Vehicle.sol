@@ -58,6 +58,34 @@ contract Vehicle is
     // ***** Interaction with nodes *****//
 
     /**
+     * @notice Mints a vehicle
+     * @dev Device definitions and vehicle attributes are tracked off-chain via per-vehicle documents
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     */
+    function mintVehicle(uint256 manufacturerNode, address owner) external {
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+    }
+
+    /**
      * @notice Mints a vehicle and associates it with a Storage Node Id
      * @dev Device definitions and vehicle attributes are tracked off-chain via per-vehicle documents
      * @param manufacturerNode The ID of the parent manufacturer node
@@ -89,6 +117,45 @@ contract Vehicle is
 
         ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
         _setStorageNodeIdForVehicleId(newTokenId, storageNodeId);
+    }
+
+    /**
+     * @notice Mints a vehicle and sets permissions with SACD
+     * @dev Device definitions and vehicle attributes are tracked off-chain via per-vehicle documents
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param sacdInput SACD input args
+     *  grantee -> The address to receive the permissions
+     *  permissions -> The uint256 that represents the byte array of permissions
+     *  expiration -> Expiration of the permissions
+     *  source -> The URI source associated with the permissions
+     */
+    function mintVehicle(
+        uint256 manufacturerNode,
+        address owner,
+        SacdInput calldata sacdInput
+    ) external {
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+
+        INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
     }
 
     /**
@@ -131,6 +198,47 @@ contract Vehicle is
 
         INFT(vehicleIdProxyAddress).setSacd(newTokenId, sacdInput);
         _setStorageNodeIdForVehicleId(newTokenId, storageNodeId);
+    }
+
+    /**
+     * @notice Mint a vehicle through a metatransaction
+     * @dev Device definitions and vehicle attributes are tracked off-chain via per-vehicle documents
+     * @dev Caller must have the mint vehicle role
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param signature User's signature hash
+     */
+    function mintVehicleSign(
+        uint256 manufacturerNode,
+        address owner,
+        bytes calldata signature
+    ) external onlyRole(MINT_VEHICLE_ROLE) {
+        address vehicleIdProxyAddress = VehicleStorage
+            .getStorage()
+            .idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
+
+        bytes32 message = keccak256(
+            abi.encode(MINT_VEHICLE_TYPEHASH, manufacturerNode, owner)
+        );
+
+        if (!Eip712CheckerInternal._verifySignature(owner, message, signature))
+            revert InvalidOwnerSignature();
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
     }
 
     /**

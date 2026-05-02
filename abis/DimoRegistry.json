@@ -2073,37 +2073,6 @@
         "type": "event"
     },
     {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "manufacturerId",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "vehicleId",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "deviceDefinitionId",
-                "type": "string"
-            }
-        ],
-        "name": "VehicleNodeMintedWithDeviceDefinition",
-        "type": "event"
-    },
-    {
         "inputs": [
             {
                 "internalType": "string",
@@ -2426,16 +2395,6 @@
                 "type": "address"
             },
             {
-                "internalType": "uint256",
-                "name": "storageNodeId",
-                "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "deviceDefinitionId",
-                "type": "string"
-            },
-            {
                 "components": [
                     {
                         "internalType": "string",
@@ -2453,7 +2412,7 @@
                 "type": "tuple[]"
             }
         ],
-        "name": "mintVehicleWithDeviceDefinition",
+        "name": "mintVehicle",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -2469,16 +2428,6 @@
                 "internalType": "address",
                 "name": "owner",
                 "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "storageNodeId",
-                "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "deviceDefinitionId",
-                "type": "string"
             },
             {
                 "components": [
@@ -2525,7 +2474,7 @@
                 "type": "tuple"
             }
         ],
-        "name": "mintVehicleWithDeviceDefinition",
+        "name": "mintVehicle",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -2543,9 +2492,9 @@
                 "type": "address"
             },
             {
-                "internalType": "string",
-                "name": "deviceDefinitionId",
-                "type": "string"
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
             },
             {
                 "components": [
@@ -2592,47 +2541,7 @@
                 "type": "tuple"
             }
         ],
-        "name": "mintVehicleWithDeviceDefinition",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "manufacturerNode",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
-            {
-                "internalType": "string",
-                "name": "deviceDefinitionId",
-                "type": "string"
-            },
-            {
-                "components": [
-                    {
-                        "internalType": "string",
-                        "name": "attribute",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "info",
-                        "type": "string"
-                    }
-                ],
-                "internalType": "struct AttributeInfoPair[]",
-                "name": "attrInfo",
-                "type": "tuple[]"
-            }
-        ],
-        "name": "mintVehicleWithDeviceDefinition",
+        "name": "mintVehicle",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -2655,11 +2564,6 @@
                 "type": "uint256"
             },
             {
-                "internalType": "string",
-                "name": "deviceDefinitionId",
-                "type": "string"
-            },
-            {
                 "components": [
                     {
                         "internalType": "string",
@@ -2675,14 +2579,9 @@
                 "internalType": "struct AttributeInfoPair[]",
                 "name": "attrInfo",
                 "type": "tuple[]"
-            },
-            {
-                "internalType": "bytes",
-                "name": "signature",
-                "type": "bytes"
             }
         ],
-        "name": "mintVehicleWithDeviceDefinitionSign",
+        "name": "mintVehicle",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -2700,9 +2599,49 @@
                 "type": "address"
             },
             {
-                "internalType": "string",
-                "name": "deviceDefinitionId",
-                "type": "string"
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "attribute",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "info",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct AttributeInfoPair[]",
+                "name": "attrInfo",
+                "type": "tuple[]"
+            },
+            {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+            }
+        ],
+        "name": "mintVehicleSign",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "manufacturerNode",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "storageNodeId",
+                "type": "uint256"
             },
             {
                 "components": [
@@ -2727,7 +2666,7 @@
                 "type": "bytes"
             }
         ],
-        "name": "mintVehicleWithDeviceDefinitionSign",
+        "name": "mintVehicleSign",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -3139,11 +3078,6 @@
                         "type": "address"
                     },
                     {
-                        "internalType": "string",
-                        "name": "deviceDefinitionId",
-                        "type": "string"
-                    },
-                    {
                         "internalType": "uint256",
                         "name": "storageNodeId",
                         "type": "uint256"
@@ -3203,175 +3137,7 @@
                         "type": "tuple[]"
                     }
                 ],
-                "internalType": "struct MintVehicleAndSdWithDdInputWithSnId",
-                "name": "data",
-                "type": "tuple"
-            }
-        ],
-        "name": "mintVehicleAndSdWithDeviceDefinitionSign",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "components": [
-                    {
-                        "internalType": "uint256",
-                        "name": "manufacturerNode",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "owner",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "deviceDefinitionId",
-                        "type": "string"
-                    },
-                    {
-                        "components": [
-                            {
-                                "internalType": "string",
-                                "name": "attribute",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "info",
-                                "type": "string"
-                            }
-                        ],
-                        "internalType": "struct AttributeInfoPair[]",
-                        "name": "attrInfoPairsVehicle",
-                        "type": "tuple[]"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "connectionId",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "vehicleOwnerSig",
-                        "type": "bytes"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "syntheticDeviceSig",
-                        "type": "bytes"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "syntheticDeviceAddr",
-                        "type": "address"
-                    },
-                    {
-                        "components": [
-                            {
-                                "internalType": "string",
-                                "name": "attribute",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "info",
-                                "type": "string"
-                            }
-                        ],
-                        "internalType": "struct AttributeInfoPair[]",
-                        "name": "attrInfoPairsDevice",
-                        "type": "tuple[]"
-                    }
-                ],
-                "internalType": "struct MintVehicleAndSdWithDdInput",
-                "name": "data",
-                "type": "tuple"
-            }
-        ],
-        "name": "mintVehicleAndSdWithDeviceDefinitionSign",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "components": [
-                    {
-                        "internalType": "uint256",
-                        "name": "manufacturerNode",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "owner",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "deviceDefinitionId",
-                        "type": "string"
-                    },
-                    {
-                        "components": [
-                            {
-                                "internalType": "string",
-                                "name": "attribute",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "info",
-                                "type": "string"
-                            }
-                        ],
-                        "internalType": "struct AttributeInfoPair[]",
-                        "name": "attrInfoPairsVehicle",
-                        "type": "tuple[]"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "connectionId",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "vehicleOwnerSig",
-                        "type": "bytes"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "syntheticDeviceSig",
-                        "type": "bytes"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "syntheticDeviceAddr",
-                        "type": "address"
-                    },
-                    {
-                        "components": [
-                            {
-                                "internalType": "string",
-                                "name": "attribute",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "info",
-                                "type": "string"
-                            }
-                        ],
-                        "internalType": "struct AttributeInfoPair[]",
-                        "name": "attrInfoPairsDevice",
-                        "type": "tuple[]"
-                    }
-                ],
-                "internalType": "struct MintVehicleAndSdWithDdInput",
+                "internalType": "struct MintVehicleAndSdInputWithSnId",
                 "name": "data",
                 "type": "tuple"
             },
@@ -3403,7 +3169,7 @@
                 "type": "tuple"
             }
         ],
-        "name": "mintVehicleAndSdWithDeviceDefinitionSignAndSacd",
+        "name": "mintVehicleAndSdSignAndSacd",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -3421,16 +3187,6 @@
                         "internalType": "address",
                         "name": "owner",
                         "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "deviceDefinitionId",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "storageNodeId",
-                        "type": "uint256"
                     },
                     {
                         "components": [
@@ -3487,7 +3243,7 @@
                         "type": "tuple[]"
                     }
                 ],
-                "internalType": "struct MintVehicleAndSdWithDdInputWithSnId",
+                "internalType": "struct MintVehicleAndSdInput",
                 "name": "data",
                 "type": "tuple"
             },
@@ -3519,7 +3275,7 @@
                 "type": "tuple"
             }
         ],
-        "name": "mintVehicleAndSdWithDeviceDefinitionSignAndSacd",
+        "name": "mintVehicleAndSdSignAndSacd",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -3537,11 +3293,6 @@
                         "internalType": "address",
                         "name": "owner",
                         "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "deviceDefinitionId",
-                        "type": "string"
                     },
                     {
                         "internalType": "uint256",
@@ -3630,12 +3381,12 @@
                         "type": "tuple"
                     }
                 ],
-                "internalType": "struct MintVehicleAndSdWithDdInputWithSnIdBatch[]",
+                "internalType": "struct MintVehicleAndSdInputWithSnIdBatch[]",
                 "name": "data",
                 "type": "tuple[]"
             }
         ],
-        "name": "mintVehicleAndSdWithDeviceDefinitionSignBatch",
+        "name": "mintVehicleAndSdSignBatch",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -3653,11 +3404,6 @@
                         "internalType": "address",
                         "name": "owner",
                         "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "deviceDefinitionId",
-                        "type": "string"
                     },
                     {
                         "components": [
@@ -3741,12 +3487,12 @@
                         "type": "tuple"
                     }
                 ],
-                "internalType": "struct MintVehicleAndSdWithDdInputBatch[]",
+                "internalType": "struct MintVehicleAndSdInputBatch[]",
                 "name": "data",
                 "type": "tuple[]"
             }
         ],
-        "name": "mintVehicleAndSdWithDeviceDefinitionSignBatch",
+        "name": "mintVehicleAndSdSignBatch",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

@@ -17,23 +17,12 @@ contract VehicleInternal {
         keccak256(
             "MintVehicleSign(uint256 manufacturerNode,address owner,string[] attributes,string[] infos)"
         );
-    // TODO Should we change the signature to add Storage Node ID?
-    bytes32 internal constant MINT_VEHICLE_WITH_DD_TYPEHASH =
-        keccak256(
-            "MintVehicleWithDeviceDefinitionSign(uint256 manufacturerNode,address owner,string deviceDefinitionId,string[] attributes,string[] infos)"
-        );
 
     event VehicleAttributeSet(uint256 tokenId, string attribute, string info);
     event VehicleNodeMinted(
         uint256 manufacturerNode,
         uint256 tokenId,
         address owner
-    );
-    event VehicleNodeMintedWithDeviceDefinition(
-        uint256 indexed manufacturerId,
-        uint256 indexed vehicleId,
-        address indexed owner,
-        string deviceDefinitionId
     );
 
     /**

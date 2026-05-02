@@ -17,8 +17,10 @@ library VehicleStorage {
         address idProxyAddress;
         // Allowed node attribute
         AttributeSet.Set whitelistedAttributes;
-        // Vehicle Id to Device Definition Id
-        mapping(uint256 => string) vehicleIdToDeviceDefinitionId;
+        // Deprecated: device definitions are now off-chain. Slot retained so
+        // that legacy on-chain DDs remain readable via getDeviceDefinitionIdByVehicleId
+        // and so a future trailing field doesn't alias the orphaned data.
+        mapping(uint256 => string) _deprecated_vehicleIdToDeviceDefinitionId;
     }
 
     /* solhint-disable no-inline-assembly */

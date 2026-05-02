@@ -4,7 +4,7 @@ import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 
 import { LocalTableland, getAccounts, getDatabase, getValidator, getRegistry } from '@tableland/local';
-import { Database, Validator, Registry } from '@tableland/sdk';
+import { Database, Validator, Registry, helpers } from '@tableland/sdk';
 
 import {
   DimoAccessControl,
@@ -15,6 +15,10 @@ import {
 import { setup, createSnapshot, revertToSnapshot, grantAdminRoles, C } from '../../utils';
 
 const { expect } = chai;
+
+// Local validator restarts between tests can leave the first poll racing the
+// 5s default timeout; bump it.
+const longPoll = () => helpers.createPollingController(60_000, 1_500);
 
 const lt = new LocalTableland({
   silent: true,
@@ -518,7 +522,7 @@ describe('DeviceDefinitionTable', async function () {
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
         transactionHash: (await tx.wait())?.hash as string,
-      });
+      }, longPoll());
     });
 
     context('Error handling', () => {
@@ -560,9 +564,9 @@ describe('DeviceDefinitionTable', async function () {
           .connect(admin)
           .createDeviceDefinitionTable(manufacturer2.address, 2);
         await tablelandValidator.pollForReceiptByTransactionHash({
-          chainId: CURRENT_CHAIN_ID,
-          transactionHash: (await tx.wait())?.hash as string,
-        });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
         expect(await ddTableInstance.getDeviceDefinitionTableId(1)).to.be.equal(2);
 
@@ -580,9 +584,9 @@ describe('DeviceDefinitionTable', async function () {
           .connect(admin)
           .createDeviceDefinitionTable(manufacturer2.address, 2);
         await tablelandValidator.pollForReceiptByTransactionHash({
-          chainId: CURRENT_CHAIN_ID,
-          transactionHash: (await tx.wait())?.hash as string,
-        });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
         await expect(
           await ddTableInstance
@@ -604,7 +608,7 @@ describe('DeviceDefinitionTable', async function () {
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
         transactionHash: (await tx.wait())?.hash as string,
-      });
+      }, longPoll());
     });
 
     context('Error handling', () => {
@@ -634,18 +638,18 @@ describe('DeviceDefinitionTable', async function () {
           .insertDeviceDefinition(1, C.mockDdInput1);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
-          chainId: CURRENT_CHAIN_ID,
-          transactionHash: (await tx.wait())?.hash as string,
-        });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
         tx = await ddTableInstance
           .connect(manufacturer1)
           .insertDeviceDefinition(1, C.mockDdInput1);
 
         const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
-          chainId: CURRENT_CHAIN_ID,
-          transactionHash: (await tx.wait())?.hash as string,
-        });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
@@ -663,9 +667,9 @@ describe('DeviceDefinitionTable', async function () {
             .insertDeviceDefinition(1, C.mockDdInput1);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
-            chainId: CURRENT_CHAIN_ID,
-            transactionHash: (await tx.wait())?.hash as string,
-          });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
@@ -710,9 +714,9 @@ describe('DeviceDefinitionTable', async function () {
             .insertDeviceDefinition(1, C.mockDdInput1);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
-            chainId: CURRENT_CHAIN_ID,
-            transactionHash: (await tx.wait())?.hash as string,
-          });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
@@ -759,7 +763,7 @@ describe('DeviceDefinitionTable', async function () {
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
         transactionHash: (await tx.wait())?.hash as string,
-      });
+      }, longPoll());
     });
 
     context('Error handling', () => {
@@ -789,18 +793,18 @@ describe('DeviceDefinitionTable', async function () {
           .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
 
         await tablelandValidator.pollForReceiptByTransactionHash({
-          chainId: CURRENT_CHAIN_ID,
-          transactionHash: (await tx.wait())?.hash as string,
-        });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
         tx = await ddTableInstance
           .connect(manufacturer1)
           .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
 
         const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
-          chainId: CURRENT_CHAIN_ID,
-          transactionHash: (await tx.wait())?.hash as string,
-        });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
@@ -814,9 +818,9 @@ describe('DeviceDefinitionTable', async function () {
           .insertDeviceDefinitionBatch(1, C.mockDdInvalidInputBatch);
 
         const validatorResponse = await tablelandValidator.pollForReceiptByTransactionHash({
-          chainId: CURRENT_CHAIN_ID,
-          transactionHash: (await tx.wait())?.hash as string,
-        });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
         const tableId = await ddTableInstance.getDeviceDefinitionTableId(1);
 
@@ -834,9 +838,9 @@ describe('DeviceDefinitionTable', async function () {
             .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
-            chainId: CURRENT_CHAIN_ID,
-            transactionHash: (await tx.wait())?.hash as string,
-          });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
@@ -909,9 +913,9 @@ describe('DeviceDefinitionTable', async function () {
             .insertDeviceDefinitionBatch(1, C.mockDdInputBatch);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
-            chainId: CURRENT_CHAIN_ID,
-            transactionHash: (await tx.wait())?.hash as string,
-          });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
@@ -1002,7 +1006,7 @@ describe('DeviceDefinitionTable', async function () {
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
         transactionHash: (await tx.wait())?.hash as string,
-      });
+      }, longPoll());
 
       const txInsert = await ddTableInstance
         .connect(manufacturer1)
@@ -1011,7 +1015,7 @@ describe('DeviceDefinitionTable', async function () {
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
         transactionHash: (await txInsert.wait())?.hash as string,
-      });
+      }, longPoll());
 
 
     });
@@ -1047,9 +1051,9 @@ describe('DeviceDefinitionTable', async function () {
             .updateDeviceDefinition(1, C.mockDdUpdate1);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
-            chainId: CURRENT_CHAIN_ID,
-            transactionHash: (await tx.wait())?.hash as string,
-          });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
@@ -1094,9 +1098,9 @@ describe('DeviceDefinitionTable', async function () {
             .updateDeviceDefinition(1, C.mockDdUpdate1);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
-            chainId: CURRENT_CHAIN_ID,
-            transactionHash: (await tx.wait())?.hash as string,
-          });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
@@ -1143,7 +1147,7 @@ describe('DeviceDefinitionTable', async function () {
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
         transactionHash: (await tx.wait())?.hash as string,
-      });
+      }, longPoll());
 
       const txInsert = await ddTableInstance
         .connect(manufacturer1)
@@ -1152,7 +1156,7 @@ describe('DeviceDefinitionTable', async function () {
       await tablelandValidator.pollForReceiptByTransactionHash({
         chainId: CURRENT_CHAIN_ID,
         transactionHash: (await txInsert.wait())?.hash as string,
-      });
+      }, longPoll());
 
 
     });
@@ -1188,9 +1192,9 @@ describe('DeviceDefinitionTable', async function () {
             .deleteDeviceDefinition(1, C.mockDdInput1.id);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
-            chainId: CURRENT_CHAIN_ID,
-            transactionHash: (await tx.wait())?.hash as string,
-          });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`
@@ -1221,9 +1225,9 @@ describe('DeviceDefinitionTable', async function () {
             .deleteDeviceDefinition(1, C.mockDdInput1.id);
 
           await tablelandValidator.pollForReceiptByTransactionHash({
-            chainId: CURRENT_CHAIN_ID,
-            transactionHash: (await tx.wait())?.hash as string,
-          });
+        chainId: CURRENT_CHAIN_ID,
+        transactionHash: (await tx.wait())?.hash as string,
+      }, longPoll());
 
           const count = await tablelandDb.prepare(
             `SELECT COUNT(*) AS total FROM ${await ddTableInstance.getDeviceDefinitionTableName(1)}`

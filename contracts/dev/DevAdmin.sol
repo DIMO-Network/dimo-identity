@@ -287,7 +287,7 @@ contract DevAdmin is AccessControlInternal {
             owner = INFT(vehicleIdProxyAddress).ownerOf(tokenId);
 
             delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
-            delete vs.vehicleIdToDeviceDefinitionId[tokenId];
+            delete vs._deprecated_vehicleIdToDeviceDefinitionId[tokenId];
 
             emit VehicleNodeBurned(tokenId, owner);
 
@@ -375,7 +375,7 @@ contract DevAdmin is AccessControlInternal {
             }
 
             delete ns.nodes[vehicleIdProxyAddress][tokenId].parentNode;
-            delete vs.vehicleIdToDeviceDefinitionId[tokenId];
+            delete vs._deprecated_vehicleIdToDeviceDefinitionId[tokenId];
 
             emit VehicleNodeBurned(tokenId, owner);
 
@@ -673,7 +673,7 @@ contract DevAdmin is AccessControlInternal {
             if (!INFT(vehicleIdProxyAddress).exists(vehicleId))
                 revert InvalidNode(vehicleIdProxyAddress, vehicleId);
 
-            vs.vehicleIdToDeviceDefinitionId[vehicleId] = ddId;
+            vs._deprecated_vehicleIdToDeviceDefinitionId[vehicleId] = ddId;
 
             emit DeviceDefinitionIdSet(vehicleId, ddId);
         }

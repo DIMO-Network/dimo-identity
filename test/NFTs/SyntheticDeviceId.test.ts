@@ -321,7 +321,7 @@ describe('SyntheticDeviceId', async function () {
 
     await vehicleInstance
       .connect(admin)
-    ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicle(uint256,address,uint256,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockVehicleAttributeInfoPairs);
     await syntheticDeviceInstance
       .connect(connectionOwner1)
       .mintSyntheticDeviceSign(correctMintInput1);

@@ -350,11 +350,10 @@ describe('StorageNode', function () {
     before(async () => {
       await vehicleInstance
         .connect(admin)
-      ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
+      ['mintVehicle(uint256,address,uint256,(string,string)[])'](
         1,
         user1.address,
         0,
-        C.mockDdId1,
         C.mockVehicleAttributeInfoPairs,
       )
     })

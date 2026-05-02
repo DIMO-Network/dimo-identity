@@ -377,7 +377,7 @@ describe('VehicleId', async function () {
 
     await vehicleInstance
       .connect(admin)
-    ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+    ['mintVehicle(uint256,address,uint256,(string,string)[])'](1, user1.address, C.STORAGE_NODE_ID_1, C.mockVehicleAttributeInfoPairs);
     await aftermarketDeviceInstance
       .connect(admin)
       .claimAftermarketDeviceSign(
@@ -685,7 +685,7 @@ describe('VehicleId', async function () {
       it('Should revert if caller is not the token owner', async () => {
         await vehicleInstance
           .connect(admin)
-        ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockDdId1, C.mockVehicleAttributeInfoPairs);
+        ['mintVehicle(uint256,address,uint256,(string,string)[])'](1, user2.address, C.STORAGE_NODE_ID_1, C.mockVehicleAttributeInfoPairs);
 
         await expect(
           vehicleIdInstance.connect(user1).burn(2),
@@ -769,31 +769,13 @@ describe('VehicleId', async function () {
             'ERC721: invalid token ID',
           );
         });
-        it('Should correctly reset device definition Id to empty if it was minted with DD', async () => {
-          await vehicleInstance
-            .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
-            1,
-            user1.address,
-            C.STORAGE_NODE_ID_1,
-            C.mockDdId2,
-            C.mockVehicleAttributeInfoPairs
-          );
-
-          expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.equal(C.mockDdId2);
-
-          await vehicleIdInstance.connect(user1).burn(2);
-
-          expect(await vehicleInstance.getDeviceDefinitionIdByVehicleId(2)).to.be.empty;
-        });
         it('Should correctly reset storage node ID to 0', async () => {
           await vehicleInstance
             .connect(admin)
-          ['mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])'](
+          ['mintVehicle(uint256,address,uint256,(string,string)[])'](
             1,
             user1.address,
             C.STORAGE_NODE_ID_1,
-            C.mockDdId2,
             C.mockVehicleAttributeInfoPairs
           );
 

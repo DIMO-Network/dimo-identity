@@ -57,7 +57,7 @@ export type MintVehicleAndSdInput = {
   attrInfoPairsDevice: AttributeInfoPair[]
 };
 
-export type MintVehicleAndSdInputWithSdId = {
+export type MintVehicleAndSdInputWithSnId = {
   manufacturerNode: string,
   owner: string,
   storageNodeId: string,
@@ -87,36 +87,11 @@ export type DeviceDefinitionUpdateInput = {
   imageURI: string;
 };
 
-export type MintVehicleAndSdWithDdInput = {
-  manufacturerNode: string,
-  owner: string,
-  deviceDefinitionId: string,
-  attrInfoPairsVehicle: AttributeInfoPair[],
-  connectionId: string,
-  vehicleOwnerSig: string,
-  syntheticDeviceSig: string,
-  syntheticDeviceAddr: string,
-  attrInfoPairsDevice: AttributeInfoPair[]
-};
-
-export type MintVehicleAndSdWithDdInputWithSnId = {
-  manufacturerNode: string,
-  owner: string,
-  deviceDefinitionId: string,
-  storageNodeId: string,
-  attrInfoPairsVehicle: AttributeInfoPair[],
-  connectionId: string,
-  vehicleOwnerSig: string,
-  syntheticDeviceSig: string,
-  syntheticDeviceAddr: string,
-  attrInfoPairsDevice: AttributeInfoPair[]
-};
-
-export type MintVehicleAndSdWithDdInputBatch = MintVehicleAndSdWithDdInput & {
+export type MintVehicleAndSdInputBatch = MintVehicleAndSdInput & {
   sacdInput: SacdInput
 }
 
-export type MintVehicleAndSdWithDdInputWithSnIdBatch = MintVehicleAndSdWithDdInputWithSnId & {
+export type MintVehicleAndSdInputWithSnIdBatch = MintVehicleAndSdInputWithSnId & {
   sacdInput: SacdInput
 }
 

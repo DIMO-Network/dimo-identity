@@ -31,7 +31,7 @@ import {
   createSnapshot,
   revertToSnapshot,
   signMessage,
-  MintVehicleAndSdInputWithSdId,
+  MintVehicleAndSdInputWithSnId,
   MintVehicleAndSdInputWithSnIdBatch,
   SacdInput,
   C
@@ -353,8 +353,8 @@ describe('MultipleMinter', function () {
   describe('mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))', () => {
     let mintSyntheticDeviceSig1: string;
     let mintVehicleOwnerSig1: string;
-    let correctMintInput: MintVehicleAndSdInputWithSdId;
-    let incorrectMintInput: MintVehicleAndSdInputWithSdId;
+    let correctMintInput: MintVehicleAndSdInputWithSnId;
+    let incorrectMintInput: MintVehicleAndSdInputWithSnId;
 
     before(async () => {
       mintSyntheticDeviceSig1 = await signMessage({
@@ -1665,8 +1665,8 @@ describe('MultipleMinter', function () {
   describe('mintVehicleAndSdSignAndSacd((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))', () => {
     let mintSyntheticDeviceSig1: string;
     let mintVehicleOwnerSig1: string;
-    let correctMintInput: MintVehicleAndSdInputWithSdId;
-    let incorrectMintInput: MintVehicleAndSdInputWithSdId;
+    let correctMintInput: MintVehicleAndSdInputWithSnId;
+    let incorrectMintInput: MintVehicleAndSdInputWithSnId;
     let sacdInput: SacdInput;
 
     before(async () => {

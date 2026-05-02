@@ -57,7 +57,7 @@ export type MintVehicleAndSdInput = {
   attrInfoPairsDevice: AttributeInfoPair[]
 };
 
-export type MintVehicleAndSdInputWithSdId = {
+export type MintVehicleAndSdInputWithSnId = {
   manufacturerNode: string,
   owner: string,
   storageNodeId: string,
@@ -91,7 +91,7 @@ export type MintVehicleAndSdInputBatch = MintVehicleAndSdInput & {
   sacdInput: SacdInput
 }
 
-export type MintVehicleAndSdInputWithSnIdBatch = MintVehicleAndSdInputWithSdId & {
+export type MintVehicleAndSdInputWithSnIdBatch = MintVehicleAndSdInputWithSnId & {
   sacdInput: SacdInput
 }
 

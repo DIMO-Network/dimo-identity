@@ -31,6 +31,8 @@ import {
   createSnapshot,
   revertToSnapshot,
   signMessage,
+  MintVehicleAndSdInput,
+  MintVehicleAndSdInputBatch,
   MintVehicleAndSdInputWithSnId,
   MintVehicleAndSdInputWithSnIdBatch,
   SacdInput,
@@ -348,6 +350,320 @@ describe('MultipleMinter', function () {
 
   afterEach(async () => {
     await revertToSnapshot(snapshot);
+  });
+
+  describe('mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))', () => {
+    let mintSyntheticDeviceSig1: string;
+    let mintVehicleOwnerSig1: string;
+    let correctMintInput: MintVehicleAndSdInput;
+    let incorrectMintInput: MintVehicleAndSdInput;
+
+    before(async () => {
+      mintSyntheticDeviceSig1 = await signMessage({
+        _signer: sdAddress1,
+        _primaryType: 'MintVehicleAndSdSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          connectionId: C.CONNECTION_ID_1
+        }
+      });
+      mintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVehicleSign',
+        _verifyingContract: await vehicleInstance.getAddress(),
+        message: {
+          manufacturerNode: '1',
+          owner: user1.address,
+          attributes: C.mockVehicleAttributes,
+          infos: C.mockVehicleInfos
+        }
+      });
+      correctMintInput = {
+        manufacturerNode: '1',
+        owner: user1.address,
+        attrInfoPairsVehicle: C.mockVehicleAttributeInfoPairs,
+        connectionId: C.CONNECTION_ID_1,
+        vehicleOwnerSig: mintVehicleOwnerSig1,
+        syntheticDeviceSig: mintSyntheticDeviceSig1,
+        syntheticDeviceAddr: sdAddress1.address,
+        attrInfoPairsDevice: C.mockSyntheticDeviceAttributeInfoPairs
+      };
+    });
+
+    context('Error handling', () => {
+      beforeEach(() => {
+        incorrectMintInput = { ...correctMintInput };
+      });
+
+      it('Should revert if vehicle parent node is not a manufacturer node', async () => {
+        incorrectMintInput.manufacturerNode = '99';
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if synthetic device parent node is not a connection ID', async () => {
+        incorrectMintInput.connectionId = '99';
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if caller is not the connection ID owner nor has permissions', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(nonAdmin)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          )
+        )
+          .to.be.revertedWithCustomError(
+            multipleMinterInstance,
+            'Unauthorized',
+          )
+          .withArgs(nonAdmin.address);
+      });
+      it('Should revert if vehicle attribute is not whitelisted', async () => {
+        incorrectMintInput.attrInfoPairsVehicle =
+          C.mockVehicleAttributeInfoPairsNotWhitelisted;
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(
+          multipleMinterInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+      it('Should revert if synthetic device attribute is not whitelisted', async () => {
+        incorrectMintInput.attrInfoPairsDevice =
+          C.mockSyntheticDeviceAttributeInfoPairsNotWhitelisted;
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(
+          multipleMinterInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockSyntheticDeviceAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+      it('Should revert if vehicle owner signer does not match owner', async () => {
+        const invalidSignature = await signMessage({
+          _signer: user2,
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: await vehicleInstance.getAddress(),
+          message: {
+            manufacturerNode: '1',
+            owner: user1.address,
+            attributes: C.mockVehicleAttributes,
+            infos: C.mockVehicleInfos
+          }
+        });
+        incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
+      });
+      it('Should revert if synthetic device signer does not match device address', async () => {
+        const invalidSignature = await signMessage({
+          _signer: sdAddress2,
+          _primaryType: 'MintVehicleAndSdSign',
+          _verifyingContract: await multipleMinterInstance.getAddress(),
+          message: {
+            connectionId: C.CONNECTION_ID_1
+          }
+        });
+        incorrectMintInput.syntheticDeviceSig = invalidSignature;
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
+      });
+      it('Should revert if device address is already registered', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+          correctMintInput
+        );
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          )
+        ).to.be.revertedWithCustomError(
+          multipleMinterInstance,
+          'DeviceAlreadyRegistered'
+        ).withArgs(sdAddress1.address);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set vehicle parent node', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+          correctMintInput
+        );
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          3
+        );
+
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set vehicle node owner', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+          correctMintInput
+        );
+
+        expect(await vehicleIdInstance.ownerOf(3)).to.be.equal(user1.address);
+      });
+      it('Should correctly set synthetic device parent node', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+          correctMintInput
+        );
+
+        const parentNode = await nodesInstance.getParentNode(
+          await sdIdInstance.getAddress(),
+          1
+        );
+
+        expect(parentNode).to.be.equal(C.CONNECTION_ID_1);
+      });
+      it('Should correctly set synthetic device node owner', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+          correctMintInput
+        );
+
+        expect(await sdIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should correctly set synthetic device address', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+          correctMintInput
+        );
+
+        const id = await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(
+          sdAddress1.address
+        );
+
+        expect(id).to.equal(1);
+      });
+      it('Should correctly map the synthetic device to the vehicle', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+          correctMintInput
+        );
+
+        expect(
+          await mapperInstance.getNodeLink(
+            await vehicleIdInstance.getAddress(),
+            await sdIdInstance.getAddress(),
+            3
+          )
+        ).to.be.equal(1);
+      });
+      it('Should correctly map the vehicle to the synthetic device', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+          correctMintInput
+        );
+
+        expect(
+          await mapperInstance.getNodeLink(
+            await sdIdInstance.getAddress(),
+            await vehicleIdInstance.getAddress(),
+            1
+          )
+        ).to.be.equal(3);
+      });
+      it('Should not assign any Storage Node ID to the vehicle', async () => {
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3)
+        ).to.equal(0);
+
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+          correctMintInput
+        );
+
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3)
+        ).to.equal(0);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMinted event with correct params', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          )
+        )
+          .to.emit(multipleMinterInstance, 'VehicleNodeMinted')
+          .withArgs(1, 3, user1.address);
+      });
+      it('Should emit SyntheticDeviceNodeMinted event with correct params', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          )
+        )
+          .to.emit(multipleMinterInstance, 'SyntheticDeviceNodeMinted')
+          .withArgs(C.CONNECTION_ID_1, 1, 3, sdAddress1.address, user1.address);
+      });
+      it('Should not emit VehicleStorageNodeIdSet event', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSign((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))'](
+            correctMintInput
+          )
+        ).to.not.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet');
+      });
+    });
   });
 
   describe('mintVehicleAndSdSign((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]))', () => {
@@ -1661,6 +1977,338 @@ describe('MultipleMinter', function () {
     });
   });
 
+
+  describe('mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))', () => {
+    let mintSyntheticDeviceSig1: string;
+    let mintVehicleOwnerSig1: string;
+    let correctMintInput: MintVehicleAndSdInput;
+    let incorrectMintInput: MintVehicleAndSdInput;
+    let sacdInput: SacdInput;
+
+    before(async () => {
+      mintSyntheticDeviceSig1 = await signMessage({
+        _signer: sdAddress1,
+        _primaryType: 'MintVehicleAndSdSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          connectionId: C.CONNECTION_ID_1
+        }
+      });
+      mintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVehicleSign',
+        _verifyingContract: await vehicleInstance.getAddress(),
+        message: {
+          manufacturerNode: '1',
+          owner: user1.address,
+          attributes: C.mockVehicleAttributes,
+          infos: C.mockVehicleInfos
+        }
+      });
+      correctMintInput = {
+        manufacturerNode: '1',
+        owner: user1.address,
+        attrInfoPairsVehicle: C.mockVehicleAttributeInfoPairs,
+        connectionId: C.CONNECTION_ID_1,
+        vehicleOwnerSig: mintVehicleOwnerSig1,
+        syntheticDeviceSig: mintSyntheticDeviceSig1,
+        syntheticDeviceAddr: sdAddress1.address,
+        attrInfoPairsDevice: C.mockSyntheticDeviceAttributeInfoPairs
+      };
+      sacdInput = {
+        ...C.mockSacdInput,
+        grantee: user2.address,
+        expiration: DEFAULT_EXPIRATION
+      };
+    });
+
+    context('Error handling', () => {
+      beforeEach(() => {
+        incorrectMintInput = { ...correctMintInput };
+      });
+
+      it('Should revert if vehicle parent node is not a manufacturer node', async () => {
+        incorrectMintInput.manufacturerNode = '99';
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            incorrectMintInput,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if synthetic device parent node is not a connection ID', async () => {
+        incorrectMintInput.connectionId = '99';
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            incorrectMintInput,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if caller is not the connection ID owner nor has permissions', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(nonAdmin)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            correctMintInput,
+            sacdInput
+          )
+        )
+          .to.be.revertedWithCustomError(
+            multipleMinterInstance,
+            'Unauthorized',
+          )
+          .withArgs(nonAdmin.address);
+      });
+      it('Should revert if vehicle attribute is not whitelisted', async () => {
+        incorrectMintInput.attrInfoPairsVehicle =
+          C.mockVehicleAttributeInfoPairsNotWhitelisted;
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            incorrectMintInput,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(
+          multipleMinterInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+      it('Should revert if synthetic device attribute is not whitelisted', async () => {
+        incorrectMintInput.attrInfoPairsDevice =
+          C.mockSyntheticDeviceAttributeInfoPairsNotWhitelisted;
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            incorrectMintInput,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(
+          multipleMinterInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockSyntheticDeviceAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+      it('Should revert if vehicle owner signer does not match owner', async () => {
+        const invalidSignature = await signMessage({
+          _signer: user2,
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: await vehicleInstance.getAddress(),
+          message: {
+            manufacturerNode: '1',
+            owner: user1.address,
+            attributes: C.mockVehicleAttributes,
+            infos: C.mockVehicleInfos
+          }
+        });
+        incorrectMintInput.vehicleOwnerSig = invalidSignature;
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            incorrectMintInput,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidOwnerSignature');
+      });
+      it('Should revert if synthetic device signer does not match device address', async () => {
+        const invalidSignature = await signMessage({
+          _signer: sdAddress2,
+          _primaryType: 'MintVehicleAndSdSign',
+          _verifyingContract: await multipleMinterInstance.getAddress(),
+          message: {
+            connectionId: C.CONNECTION_ID_1
+          }
+        });
+        incorrectMintInput.syntheticDeviceSig = invalidSignature;
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            incorrectMintInput,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidSdSignature');
+      });
+      it('Should revert if device address is already registered', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+          correctMintInput,
+          sacdInput
+        );
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            correctMintInput,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(
+          multipleMinterInstance,
+          'DeviceAlreadyRegistered'
+        ).withArgs(sdAddress1.address);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set vehicle parent node and owner', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+          correctMintInput,
+          sacdInput
+        );
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          3
+        );
+
+        expect(parentNode).to.be.equal(1);
+        expect(await vehicleIdInstance.ownerOf(3)).to.be.equal(user1.address);
+      });
+      it('Should correctly set synthetic device parent node, owner, and address', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+          correctMintInput,
+          sacdInput
+        );
+
+        const parentNode = await nodesInstance.getParentNode(
+          await sdIdInstance.getAddress(),
+          1
+        );
+
+        expect(parentNode).to.be.equal(C.CONNECTION_ID_1);
+        expect(await sdIdInstance.ownerOf(1)).to.be.equal(user1.address);
+        expect(
+          await syntheticDeviceInstance.getSyntheticDeviceIdByAddress(sdAddress1.address)
+        ).to.equal(1);
+      });
+      it('Should correctly map vehicle and synthetic device', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+          correctMintInput,
+          sacdInput
+        );
+
+        expect(
+          await mapperInstance.getNodeLink(
+            await vehicleIdInstance.getAddress(),
+            await sdIdInstance.getAddress(),
+            3
+          )
+        ).to.be.equal(1);
+        expect(
+          await mapperInstance.getNodeLink(
+            await sdIdInstance.getAddress(),
+            await vehicleIdInstance.getAddress(),
+            1
+          )
+        ).to.be.equal(3);
+      });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            correctMintInput,
+            sacdInput
+          )
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          connectionOwner1.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
+      });
+      it('Should correctly set SACD permissions', async () => {
+        expect(
+          await mockSacdInstance.permissionRecords(await vehicleIdInstance.getAddress(), 3, 0, user2.address)
+        ).to.eql([0n, 0n, '']);
+
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+          correctMintInput,
+          sacdInput
+        );
+
+        expect(
+          await mockSacdInstance.permissionRecords(await vehicleIdInstance.getAddress(), 3, 0, user2.address)
+        ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source]);
+      });
+      it('Should not assign any Storage Node ID to the vehicle', async () => {
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3)
+        ).to.equal(0);
+
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+          correctMintInput,
+          sacdInput
+        );
+
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3)
+        ).to.equal(0);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMinted event with correct params', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            correctMintInput,
+            sacdInput
+          )
+        )
+          .to.emit(multipleMinterInstance, 'VehicleNodeMinted')
+          .withArgs(1, 3, user1.address);
+      });
+      it('Should emit SyntheticDeviceNodeMinted event with correct params', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            correctMintInput,
+            sacdInput
+          )
+        )
+          .to.emit(multipleMinterInstance, 'SyntheticDeviceNodeMinted')
+          .withArgs(C.CONNECTION_ID_1, 1, 3, sdAddress1.address, user1.address);
+      });
+      it('Should not emit VehicleStorageNodeIdSet event', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignAndSacd((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))'](
+            correctMintInput,
+            sacdInput
+          )
+        ).to.not.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet');
+      });
+    });
+  });
 
   describe('mintVehicleAndSdSignAndSacd((uint256,address,uint256,(string,string)[],uint256,bytes,bytes,address,(string,string)[]),(address,uint256,uint256,string))', () => {
     let mintSyntheticDeviceSig1: string;
@@ -3107,6 +3755,262 @@ describe('MultipleMinter', function () {
             .to.emit(multipleMinterInstance, 'VehicleStorageNodeIdSet')
             .withArgs(3, C.STORAGE_NODE_ID_1);
         });
+      });
+    });
+  });
+
+  describe('mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])', () => {
+    let mintSyntheticDeviceSig1: string;
+    let mintSyntheticDeviceSig2WithConnection1: string;
+    let mintVehicleOwnerSig1: string;
+    let mintVehicleOwnerSig2: string;
+    let correctMintInput: MintVehicleAndSdInputBatch[];
+    let incorrectMintInput: MintVehicleAndSdInputBatch[];
+    let sacdInput1: SacdInput;
+    let sacdInput2: SacdInput;
+
+    before(async () => {
+      mintSyntheticDeviceSig1 = await signMessage({
+        _signer: sdAddress1,
+        _primaryType: 'MintVehicleAndSdSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          connectionId: C.CONNECTION_ID_1
+        }
+      });
+      mintSyntheticDeviceSig2WithConnection1 = await signMessage({
+        _signer: sdAddress2,
+        _primaryType: 'MintVehicleAndSdSign',
+        _verifyingContract: await syntheticDeviceInstance.getAddress(),
+        message: {
+          connectionId: C.CONNECTION_ID_1
+        }
+      });
+      mintVehicleOwnerSig1 = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVehicleSign',
+        _verifyingContract: await vehicleInstance.getAddress(),
+        message: {
+          manufacturerNode: '1',
+          owner: user1.address,
+          attributes: C.mockVehicleAttributes,
+          infos: C.mockVehicleInfos
+        }
+      });
+      mintVehicleOwnerSig2 = await signMessage({
+        _signer: user2,
+        _primaryType: 'MintVehicleSign',
+        _verifyingContract: await vehicleInstance.getAddress(),
+        message: {
+          manufacturerNode: '2',
+          owner: user2.address,
+          attributes: C.mockVehicleAttributes,
+          infos: C.mockVehicleInfos
+        }
+      });
+      sacdInput1 = {
+        ...C.mockSacdInput,
+        grantee: user3.address,
+        expiration: DEFAULT_EXPIRATION
+      };
+      sacdInput2 = {
+        ...C.mockSacdInput,
+        grantee: user3.address,
+        expiration: DEFAULT_EXPIRATION
+      };
+      correctMintInput = [
+        {
+          manufacturerNode: '1',
+          owner: user1.address,
+          attrInfoPairsVehicle: C.mockVehicleAttributeInfoPairs,
+          connectionId: C.CONNECTION_ID_1,
+          vehicleOwnerSig: mintVehicleOwnerSig1,
+          syntheticDeviceSig: mintSyntheticDeviceSig1,
+          syntheticDeviceAddr: sdAddress1.address,
+          attrInfoPairsDevice: C.mockSyntheticDeviceAttributeInfoPairs,
+          sacdInput: sacdInput1
+        },
+        {
+          manufacturerNode: '2',
+          owner: user2.address,
+          attrInfoPairsVehicle: C.mockVehicleAttributeInfoPairs,
+          connectionId: C.CONNECTION_ID_1,
+          vehicleOwnerSig: mintVehicleOwnerSig2,
+          syntheticDeviceSig: mintSyntheticDeviceSig2WithConnection1,
+          syntheticDeviceAddr: sdAddress2.address,
+          attrInfoPairsDevice: C.mockSyntheticDeviceAttributeInfoPairs,
+          sacdInput: sacdInput2
+        },
+      ];
+    });
+
+    context('Error handling', () => {
+      beforeEach(() => {
+        incorrectMintInput = JSON.parse(JSON.stringify(correctMintInput));
+      });
+
+      it('Should revert if vehicle parent node is not a manufacturer node', async () => {
+        incorrectMintInput[0].manufacturerNode = '99';
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if synthetic device parent node is not a connection ID', async () => {
+        incorrectMintInput[0].connectionId = '99';
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(multipleMinterInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if caller is not the connection ID owner nor has permissions', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(nonAdmin)
+          ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            correctMintInput
+          )
+        )
+          .to.be.revertedWithCustomError(
+            multipleMinterInstance,
+            'Unauthorized',
+          )
+          .withArgs(nonAdmin.address);
+      });
+      it('Should revert if a vehicle attribute is not whitelisted', async () => {
+        incorrectMintInput[1].attrInfoPairsVehicle =
+          C.mockVehicleAttributeInfoPairsNotWhitelisted;
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            incorrectMintInput
+          )
+        ).to.be.revertedWithCustomError(
+          multipleMinterInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+      it('Should revert if device address is already registered', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+          correctMintInput
+        );
+
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            correctMintInput
+          )
+        ).to.be.revertedWithCustomError(
+          multipleMinterInstance,
+          'DeviceAlreadyRegistered'
+        ).withArgs(sdAddress1.address);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly mint and pair both vehicles in the batch', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+          correctMintInput
+        );
+
+        expect(await vehicleIdInstance.ownerOf(3)).to.equal(user1.address);
+        expect(await vehicleIdInstance.ownerOf(4)).to.equal(user2.address);
+        expect(await sdIdInstance.ownerOf(1)).to.equal(user1.address);
+        expect(await sdIdInstance.ownerOf(2)).to.equal(user2.address);
+
+        expect(
+          await mapperInstance.getNodeLink(
+            await vehicleIdInstance.getAddress(),
+            await sdIdInstance.getAddress(),
+            3
+          )
+        ).to.equal(1);
+        expect(
+          await mapperInstance.getNodeLink(
+            await vehicleIdInstance.getAddress(),
+            await sdIdInstance.getAddress(),
+            4
+          )
+        ).to.equal(2);
+      });
+      it('Should correctly set SACD permissions for both vehicles', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+          correctMintInput
+        );
+
+        expect(
+          await mockSacdInstance.permissionRecords(await vehicleIdInstance.getAddress(), 3, 0, user3.address)
+        ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source]);
+        expect(
+          await mockSacdInstance.permissionRecords(await vehicleIdInstance.getAddress(), 4, 0, user3.address)
+        ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source]);
+      });
+      it('Should not assign any Storage Node ID to either vehicle in the batch', async () => {
+        await multipleMinterInstance
+          .connect(connectionOwner1)
+        ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+          correctMintInput
+        );
+
+        expect(await storageNodeRegistryInstance.vehicleIdToStorageNodeId(3)).to.equal(0);
+        expect(await storageNodeRegistryInstance.vehicleIdToStorageNodeId(4)).to.equal(0);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMinted events for both vehicles', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            correctMintInput
+          )
+        )
+          .to.emit(multipleMinterInstance, 'VehicleNodeMinted')
+          .withArgs(1, 3, user1.address)
+          .to.emit(multipleMinterInstance, 'VehicleNodeMinted')
+          .withArgs(2, 4, user2.address);
+      });
+      it('Should emit SyntheticDeviceNodeMinted events for both devices', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            correctMintInput
+          )
+        )
+          .to.emit(multipleMinterInstance, 'SyntheticDeviceNodeMinted')
+          .withArgs(C.CONNECTION_ID_1, 1, 3, sdAddress1.address, user1.address)
+          .to.emit(multipleMinterInstance, 'SyntheticDeviceNodeMinted')
+          .withArgs(C.CONNECTION_ID_1, 2, 4, sdAddress2.address, user2.address);
+      });
+      it('Should not emit VehicleStorageNodeIdSet event for any vehicle in the batch', async () => {
+        await expect(
+          multipleMinterInstance
+            .connect(connectionOwner1)
+          ['mintVehicleAndSdSignBatch((uint256,address,(string,string)[],uint256,bytes,bytes,address,(string,string)[],(address,uint256,uint256,string))[])'](
+            correctMintInput
+          )
+        ).to.not.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet');
       });
     });
   });

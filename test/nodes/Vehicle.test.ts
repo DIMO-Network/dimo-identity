@@ -441,6 +441,196 @@ describe('Vehicle', function () {
     });
   });
 
+  describe('mintVehicle(uint256,address,(string,string)[])', () => {
+    context('Error handling', () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[])'](
+            99,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs
+          )
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if attribute is not whitelisted', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[])'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairsNotWhitelisted
+          )
+        ).to.be.revertedWithCustomError(
+          vehicleInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[])'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs
+        );
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[])'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs
+        );
+
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should not write to the deprecated Device Definition Id slot on mint', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[])'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs
+        );
+
+        expect(
+          await vehicleInstance.getDeviceDefinitionIdByVehicleId(1)
+        ).to.be.empty;
+      });
+      it('Should correctly set infos', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[])'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs
+        );
+
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute1
+          )
+        ).to.be.equal(C.mockVehicleInfo1);
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute2
+          )
+        ).to.be.equal(C.mockVehicleInfo2);
+      });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[])'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs
+          )
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
+      });
+      it('Should not assign any Storage Node ID to the vehicle', async () => {
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        ).to.equal(0);
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[])'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs
+        );
+
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        ).to.equal(0);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMinted event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[])'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs
+          )
+        )
+          .to.emit(vehicleInstance, 'VehicleNodeMinted')
+          .withArgs(1, 1, user1.address);
+      });
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[])'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs
+          )
+        )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[0].attribute,
+            C.mockVehicleAttributeInfoPairs[0].info
+          )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[1].attribute,
+            C.mockVehicleAttributeInfoPairs[1].info
+          );
+      });
+      it('Should not emit VehicleAttributeSet event if attrInfo is empty', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[])'](
+            1,
+            user1.address,
+            []
+          )
+        ).to.not.emit(vehicleInstance, 'VehicleAttributeSet');
+      });
+      it('Should not emit VehicleStorageNodeIdSet event', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[])'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs
+          )
+        ).to.not.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet');
+      });
+    });
+  });
+
   describe('mintVehicle(uint256,address,uint256,(string,string)[])', () => {
     context('Error handling', () => {
       it('Should revert if parent node is not a manufacturer node', async () => {
@@ -671,6 +861,235 @@ describe('Vehicle', function () {
         )
           .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
           .withArgs(1, C.STORAGE_NODE_ID_1);
+      });
+    });
+  });
+
+  describe('mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))', () => {
+    let sacdInput: SacdInput;
+    before(() => {
+      sacdInput = {
+        ...C.mockSacdInput,
+        grantee: user2.address,
+        expiration: DEFAULT_EXPIRATION
+      };
+    })
+
+    context('Error handling', () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+            99,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if attribute is not whitelisted', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairsNotWhitelisted,
+            sacdInput
+          )
+        ).to.be.revertedWithCustomError(
+          vehicleInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          sacdInput
+        );
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          sacdInput
+        );
+
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should not write to the deprecated Device Definition Id slot on mint', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          sacdInput
+        );
+
+        expect(
+          await vehicleInstance.getDeviceDefinitionIdByVehicleId(1)
+        ).to.be.empty;
+      });
+      it('Should correctly set infos', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          sacdInput
+        );
+
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute1
+          )
+        ).to.be.equal(C.mockVehicleInfo1);
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute2
+          )
+        ).to.be.equal(C.mockVehicleInfo2);
+      });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            sacdInput
+          )
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
+      });
+      it('Should correctly set SACD permissions', async () => {
+        expect(
+          await mockSacdInstance.permissionRecords(await vehicleIdInstance.getAddress(), 1, 0, user2.address)
+        ).to.eql([0n, 0n, '']);
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          sacdInput
+        );
+
+        expect(
+          await mockSacdInstance.permissionRecords(await vehicleIdInstance.getAddress(), 1, 0, user2.address)
+        ).to.eql([BigInt(C.mockSacdInput.permissions), BigInt(DEFAULT_EXPIRATION), C.mockSacdInput.source]);
+      });
+      it('Should not assign any Storage Node ID to the vehicle', async () => {
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        ).to.equal(0);
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          sacdInput
+        );
+
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        ).to.equal(0);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMinted event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            sacdInput
+          )
+        )
+          .to.emit(vehicleInstance, 'VehicleNodeMinted')
+          .withArgs(1, 1, user1.address);
+      });
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            sacdInput
+          )
+        )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[0].attribute,
+            C.mockVehicleAttributeInfoPairs[0].info
+          )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[1].attribute,
+            C.mockVehicleAttributeInfoPairs[1].info
+          );
+      });
+      it('Should not emit VehicleAttributeSet event if attrInfo is empty', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+            1,
+            user1.address,
+            [],
+            sacdInput
+          )
+        ).to.not.emit(vehicleInstance, 'VehicleAttributeSet');
+      });
+      it('Should not emit VehicleStorageNodeIdSet event', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicle(uint256,address,(string,string)[],(address,uint256,uint256,string))'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            sacdInput
+          )
+        ).to.not.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet');
       });
     });
   });
@@ -947,6 +1366,250 @@ describe('Vehicle', function () {
         )
           .to.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet')
           .withArgs(1, C.STORAGE_NODE_ID_1);
+      });
+    });
+  });
+
+  describe('mintVehicleSign(uint256,address,(string,string)[],bytes)', () => {
+    let signature: string;
+    before(async () => {
+      signature = await signMessage({
+        _signer: user1,
+        _primaryType: 'MintVehicleSign',
+        _verifyingContract: await vehicleInstance.getAddress(),
+        message: {
+          manufacturerNode: '1',
+          owner: user1.address,
+          attributes: C.mockVehicleAttributes,
+          infos: C.mockVehicleInfos
+        }
+      });
+    });
+
+    context('Error handling', () => {
+      it('Should revert if caller does not have MINT_VEHICLE_ROLE', async () => {
+        await expect(
+          vehicleInstance
+            .connect(nonAdmin)
+          ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
+        ).to.be.revertedWith(
+          `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${C.MINT_VEHICLE_ROLE
+          }`
+        );
+      });
+      it('Should revert if parent node is not a manufacturer node', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+            99,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if attribute is not whitelisted', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairsNotWhitelisted,
+            signature
+          )
+        ).to.be.revertedWithCustomError(
+          vehicleInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+      it('Should revert if owner does not match signer', async () => {
+        const invalidSignature = await signMessage({
+          _signer: user1,
+          _primaryType: 'MintVehicleSign',
+          _verifyingContract: await vehicleInstance.getAddress(),
+          message: {
+            manufacturerNode: '1',
+            owner: user2.address,
+            attributes: C.mockVehicleAttributes,
+            infos: C.mockVehicleInfos
+          }
+        });
+
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            invalidSignature
+          )
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidOwnerSignature');
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        );
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        );
+
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should not write to the deprecated Device Definition Id slot on mint', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        );
+
+        expect(
+          await vehicleInstance.getDeviceDefinitionIdByVehicleId(1)
+        ).to.be.empty;
+      });
+      it('Should correctly set infos', async () => {
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        );
+
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute1
+          )
+        ).to.be.equal(C.mockVehicleInfo1);
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute2
+          )
+        ).to.be.equal(C.mockVehicleInfo2);
+      });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
+      });
+      it('Should not assign any Storage Node ID to the vehicle', async () => {
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        ).to.equal(0);
+
+        await vehicleInstance
+          .connect(admin)
+        ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+          1,
+          user1.address,
+          C.mockVehicleAttributeInfoPairs,
+          signature
+        );
+
+        expect(
+          await storageNodeRegistryInstance.vehicleIdToStorageNodeId(1)
+        ).to.equal(0);
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMinted event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
+        )
+          .to.emit(vehicleInstance, 'VehicleNodeMinted')
+          .withArgs(1, 1, user1.address);
+      });
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
+        )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[0].attribute,
+            C.mockVehicleAttributeInfoPairs[0].info
+          )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[1].attribute,
+            C.mockVehicleAttributeInfoPairs[1].info
+          );
+      });
+      it('Should not emit VehicleStorageNodeIdSet event', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+          ['mintVehicleSign(uint256,address,(string,string)[],bytes)'](
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs,
+            signature
+          )
+        ).to.not.emit(storageNodeRegistryInstance, 'VehicleStorageNodeIdSet');
       });
     });
   });

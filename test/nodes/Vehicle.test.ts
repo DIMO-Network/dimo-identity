@@ -441,6 +441,179 @@ describe('Vehicle', function () {
     });
   });
 
+  describe('mintVehicle(uint256,address,(string,string)[])', () => {
+    context('Error handling', () => {
+      it('Should revert if parent node is not a manufacturer node', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicle(
+              99,
+              user1.address,
+              C.mockVehicleAttributeInfoPairs,
+            )
+        ).to.be.revertedWithCustomError(vehicleInstance, 'InvalidParentNode')
+          .withArgs(99);
+      });
+      it('Should revert if attribute is not whitelisted', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicle(
+              1,
+              user1.address,
+              C.mockVehicleAttributeInfoPairsNotWhitelisted
+            )
+        ).to.be.revertedWithCustomError(
+          vehicleInstance,
+          'AttributeNotWhitelisted'
+        ).withArgs(C.mockVehicleAttributeInfoPairsNotWhitelisted[1].attribute);
+      });
+    });
+
+    context('State', () => {
+      it('Should correctly set parent node', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs
+          );
+
+        const parentNode = await nodesInstance.getParentNode(
+          await vehicleIdInstance.getAddress(),
+          1
+        );
+        expect(parentNode).to.be.equal(1);
+      });
+      it('Should correctly set node owner', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs
+          );
+
+        expect(await vehicleIdInstance.ownerOf(1)).to.be.equal(user1.address);
+      });
+      it('Should not set a Device Definition Id', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs
+          );
+
+        expect(
+          await vehicleInstance.getDeviceDefinitionIdByVehicleId(1)
+        ).to.be.equal('');
+      });
+      it('Should correctly set infos', async () => {
+        await vehicleInstance
+          .connect(admin)
+          .mintVehicle(
+            1,
+            user1.address,
+            C.mockVehicleAttributeInfoPairs
+          );
+
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute1
+          )
+        ).to.be.equal(C.mockVehicleInfo1);
+        expect(
+          await nodesInstance.getInfo(
+            await vehicleIdInstance.getAddress(),
+            1,
+            C.mockVehicleAttribute2
+          )
+        ).to.be.equal(C.mockVehicleInfo2);
+      });
+      it('Should correctly burn DIMO Credit tokens from the sender', async () => {
+        await expect(() =>
+          vehicleInstance
+            .connect(admin)
+            .mintVehicle(
+              1,
+              user1.address,
+              C.mockVehicleAttributeInfoPairs
+            )
+        ).changeTokenBalance(
+          mockDimoCreditInstance,
+          admin.address,
+          -C.MINT_VEHICLE_OPERATION_COST
+        );
+      });
+    });
+
+    context('Events', () => {
+      it('Should emit VehicleNodeMinted event with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicle(
+              1,
+              user1.address,
+              C.mockVehicleAttributeInfoPairs
+            )
+        )
+          .to.emit(vehicleInstance, 'VehicleNodeMinted')
+          .withArgs(1, 1, user1.address);
+      });
+      it('Should not emit VehicleNodeMintedWithDeviceDefinition event', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicle(
+              1,
+              user1.address,
+              C.mockVehicleAttributeInfoPairs
+            )
+        ).to.not.emit(vehicleInstance, 'VehicleNodeMintedWithDeviceDefinition');
+      });
+      it('Should emit VehicleAttributeSet events with correct params', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicle(
+              1,
+              user1.address,
+              C.mockVehicleAttributeInfoPairs
+            )
+        )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[0].attribute,
+            C.mockVehicleAttributeInfoPairs[0].info
+          )
+          .to.emit(vehicleInstance, 'VehicleAttributeSet')
+          .withArgs(
+            1,
+            C.mockVehicleAttributeInfoPairs[1].attribute,
+            C.mockVehicleAttributeInfoPairs[1].info
+          );
+      });
+      it('Should not emit VehicleAttributeSet event if attrInfo is empty', async () => {
+        await expect(
+          vehicleInstance
+            .connect(admin)
+            .mintVehicle(
+              1,
+              user1.address,
+              []
+            )
+        ).to.not.emit(vehicleInstance, 'VehicleAttributeSet');
+      });
+    });
+  });
+
   describe('mintVehicleWithDeviceDefinition(uint256,address,uint256,string,(string,string)[])', () => {
     context('Error handling', () => {
       it('Should revert if parent node is not a manufacturer node', async () => {

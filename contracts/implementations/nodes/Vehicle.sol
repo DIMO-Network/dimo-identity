@@ -120,6 +120,40 @@ contract Vehicle is
     }
 
     /**
+     * @notice Function to mint a vehicle without a Device Definition Id
+     * @dev Device Definitions are tracked off-chain; on-chain mints no longer carry them
+     * @param manufacturerNode Parent manufacturer node id
+     * @param owner The address of the new owner
+     * @param attrInfo List of attribute-info pairs to be added
+     */
+    function mintVehicle(
+        uint256 manufacturerNode,
+        address owner,
+        AttributeInfoPair[] calldata attrInfo
+    ) external {
+        VehicleStorage.Storage storage vs = VehicleStorage.getStorage();
+        address vehicleIdProxyAddress = vs.idProxyAddress;
+
+        if (
+            !INFT(ManufacturerStorage.getStorage().idProxyAddress).exists(
+                manufacturerNode
+            )
+        ) revert InvalidParentNode(manufacturerNode);
+
+        uint256 newTokenId = INFT(vehicleIdProxyAddress).safeMint(owner);
+
+        NodesStorage
+        .getStorage()
+        .nodes[vehicleIdProxyAddress][newTokenId].parentNode = manufacturerNode;
+
+        emit VehicleNodeMinted(manufacturerNode, newTokenId, owner);
+
+        if (attrInfo.length > 0) _setInfos(newTokenId, attrInfo);
+
+        ChargingInternal._chargeDcx(msg.sender, MINT_VEHICLE_OPERATION);
+    }
+
+    /**
      * @notice Function to mint a vehicle with a Device Definition Id and associate it with a Storage Node Id
      * @dev This function creates a new vehicle node, associates it with a manufacturer,
      *      assigns a device definition ID, and links it to a Storage Node Id
